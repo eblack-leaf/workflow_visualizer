@@ -10,7 +10,6 @@ pub struct WakeMessage {}
 pub enum ExecutionState {
     Active,
     Suspended,
-    Uninitialized,
 }
 pub struct App {
     pub execution_state: ExecutionState,
@@ -19,12 +18,12 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         Self {
-            execution_state: ExecutionState::Uninitialized,
+            execution_state: ExecutionState::Active,
             components: (),
         }
     }
-    pub fn activate_execution_state(&mut self) {
-        self.execution_state = ExecutionState::Active
+    pub fn suspend_execution_state(&mut self) {
+        self.execution_state = ExecutionState::Suspended
     }
     pub async fn run<T>(&mut self, event_loop: EventLoop<T>) {
 
