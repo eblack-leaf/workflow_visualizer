@@ -23,6 +23,6 @@ async fn web_run() {
         .expect("couldn't append canvas to document body");
     app.attach_canvas(app::canvas::canvas(&window, app::canvas::Options::web_defaults()).await);
     app.attach_window(window);
-    // app startup schedule for render world or move to app.run(...)
+    // add and run startup schedule for render world or move to app.run(...)
     app.run(event_loop).await;
 }
