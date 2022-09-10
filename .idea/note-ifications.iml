@@ -11,6 +11,7 @@
       <sourceFolder url="file://$MODULE_DIR$/web_server/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/wasm_rebuild_avoidance_target" />
+      <excludeFolder url="file://$MODULE_DIR$/android_rebuild_avoidance_target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

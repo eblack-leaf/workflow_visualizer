@@ -1,5 +1,6 @@
 pub mod canvas;
 pub mod job;
+pub mod viewport;
 
 use crate::canvas::Canvas;
 use crate::job::Job;
@@ -19,6 +20,13 @@ impl App {
     }
     pub fn attach_window(&mut self, window: Window) {
         self.render.container.insert_non_send_resource(window);
+    }
+    pub fn detach_window(&mut self) -> Window {
+        return self
+            .render
+            .container
+            .remove_non_send_resource::<Window>()
+            .expect("no window to detach");
     }
     pub fn attach_canvas(&mut self, canvas: Canvas) {
         self.render.container.insert_resource(canvas.0);
