@@ -1,8 +1,8 @@
 use winit::event_loop::EventLoop;
 use winit::window::Window;
 
-#[cfg(target_arch = "wasm32")]
 fn main() {
+    #[cfg(target_arch = "wasm32")]
     wasm_bindgen_futures::spawn_local(web_run());
 }
 #[cfg(target_arch = "wasm32")]
@@ -10,7 +10,7 @@ async fn web_run() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
     console_log::init().expect("could not initialize logger");
     let event_loop = EventLoop::new();
-    let app = app::App::new();
+    let mut app = app::App::new();
     let window = Window::new(&event_loop).expect("could not create window");
     use winit::platform::web::WindowExtWebSys;
     web_sys::window()

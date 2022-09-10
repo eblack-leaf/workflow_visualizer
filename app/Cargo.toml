@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy_ecs = "0.8.1"
 winit = "0.27.2"
+wgpu = {version = "0.13.1", features = ["webgl"]}

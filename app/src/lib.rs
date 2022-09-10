@@ -1,31 +1,50 @@
-mod canvas;
+pub mod canvas;
+pub mod job;
 
-use bevy_ecs::prelude::{Schedule, World};
+use crate::canvas::Canvas;
+use crate::job::Job;
 use winit::event_loop::EventLoop;
-
-pub type Workload = Schedule;
-pub type Container = World;
-pub type AppComponents = ();
+use winit::window::Window;
 pub struct WakeMessage {}
-pub enum ExecutionState {
-    Active,
-    Suspended,
-}
 pub struct App {
-    pub execution_state: ExecutionState,
-    pub components: AppComponents,
+    pub compute: Job,
+    pub render: Job,
 }
 impl App {
     pub fn new() -> Self {
         Self {
-            execution_state: ExecutionState::Active,
-            components: (),
+            compute: Job::new(),
+            render: Job::new(),
         }
     }
-    pub fn suspend_execution_state(&mut self) {
-        self.execution_state = ExecutionState::Suspended
+    pub fn attach_window(&mut self, window: Window) {
+        self.render.container.insert_non_send_resource(window);
     }
-    pub async fn run<T>(&mut self, event_loop: EventLoop<T>) {
-
+    pub fn attach_canvas(&mut self, canvas: Canvas) {
+        self.render.container.insert_resource(canvas.0);
+        self.render.container.insert_resource(canvas.1);
+        self.render.container.insert_resource(canvas.2);
+        self.render.container.insert_resource(canvas.3);
     }
+    pub fn detach_canvas(&mut self) -> Canvas {
+        return (
+            self.render
+                .container
+                .remove_resource::<wgpu::Surface>()
+                .expect("error detaching"),
+            self.render
+                .container
+                .remove_resource::<wgpu::Device>()
+                .expect("error detaching"),
+            self.render
+                .container
+                .remove_resource::<wgpu::Queue>()
+                .expect("error detaching"),
+            self.render
+                .container
+                .remove_resource::<wgpu::SurfaceConfiguration>()
+                .expect("error detaching"),
+        );
+    }
+    pub async fn run<T>(&mut self, event_loop: EventLoop<T>) {}
 }

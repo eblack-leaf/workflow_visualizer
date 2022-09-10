@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = ["app", "android_app", "web_app", "web_server", "web_builder", "desktop_app"]
 [profile.dev]
 opt-level = 1
