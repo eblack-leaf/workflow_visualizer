@@ -11,9 +11,7 @@ impl Position {
 }
 impl From<(f32, f32)> for Position {
     fn from(xy: (f32, f32)) -> Self {
-        Self {
-            x: xy.0, y: xy.1
-        }
+        Self { x: xy.0, y: xy.1 }
     }
 }
 #[derive(Component, Copy, Clone)]
@@ -29,7 +27,8 @@ impl Area {
 impl From<(f32, f32)> for Area {
     fn from(wh: (f32, f32)) -> Self {
         Self {
-            width: wh.0, height: wh.1
+            width: wh.0,
+            height: wh.1,
         }
     }
 }
@@ -44,9 +43,7 @@ impl Depth {
 }
 impl From<f32> for Depth {
     fn from(layer: f32) -> Self {
-        Self {
-            layer
-        }
+        Self { layer }
     }
 }
 #[derive(Bundle, Clone)]
@@ -58,8 +55,12 @@ impl Section {
     pub fn new(position: Position, area: Area) -> Self {
         Self { position, area }
     }
-    pub fn width(&self) -> f32 { return self.area.width; }
-    pub fn height(&self) -> f32 { return self.area.height; }
+    pub fn width(&self) -> f32 {
+        return self.area.width;
+    }
+    pub fn height(&self) -> f32 {
+        return self.area.height;
+    }
 }
 impl From<((f32, f32), (f32, f32))> for Section {
     fn from(data: ((f32, f32), (f32, f32))) -> Self {
@@ -93,7 +94,7 @@ impl From<((f32, f32), (f32, f32), f32)> for Panel {
     fn from(data: ((f32, f32), (f32, f32), f32)) -> Self {
         Self {
             section: (data.0, data.1).into(),
-            depth: data.2.into()
+            depth: data.2.into(),
         }
     }
 }

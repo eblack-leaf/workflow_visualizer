@@ -1,15 +1,32 @@
 pub mod canvas;
-pub mod job;
-pub mod viewport;
-pub mod coord;
 pub mod color;
-mod uniform;
+pub mod coord;
 pub mod depth_texture;
+mod gpu_bindings;
+pub mod job;
+mod renderer;
+mod uniform;
+pub mod viewport;
+pub mod window;
 
 use crate::canvas::Canvas;
 use crate::job::Job;
 use winit::event_loop::EventLoop;
 use winit::window::Window;
+pub struct Signal<T> {
+    pub signal: Option<T>,
+}
+impl<T> Signal<T> {
+    pub fn new(signal: Option<T>) -> Self {
+        Self { signal }
+    }
+    pub fn receive(&mut self) -> Option<T> {
+        return self.signal.take();
+    }
+    pub fn emit(&mut self, signal: T) {
+        self.signal = Some(signal);
+    }
+}
 pub struct WakeMessage {}
 pub struct App {
     pub compute: Job,

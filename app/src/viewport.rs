@@ -1,9 +1,10 @@
-use nalgebra::{Matrix, Matrix4, Translation2};
 use crate::coord::{Area, Panel};
+use crate::uniform::Uniform;
+use nalgebra::Matrix4;
 
 pub struct Viewport {
     pub projection: nalgebra::Orthographic3<f32>,
-    pub translation: nalgebra::Translation2<f32>
+    pub translation: nalgebra::Translation2<f32>,
 }
 impl Viewport {
     pub fn new(panel: Panel) -> Self {
@@ -28,7 +29,9 @@ impl Viewport {
     pub fn far_layer(&self) -> f32 {
         return self.projection.zfar();
     }
-    pub fn near_layer(&self) -> f32 { return self.projection.znear(); }
+    pub fn near_layer(&self) -> f32 {
+        return self.projection.znear();
+    }
     pub fn area(&self) -> Area {
         return Area::new(self.width(), self.height());
     }
@@ -42,12 +45,12 @@ impl Viewport {
         self.translation.vector += translation.vector;
     }
     pub fn matrix(&self) -> Matrix4<f32> {
-        return self.projection.as_matrix().append_translation(&nalgebra::Translation3::new(
-            self.translation.x, self.translation.y, 0.0
-        ).vector);
+        return self.projection.as_matrix().append_translation(
+            &nalgebra::Translation3::new(self.translation.x, self.translation.y, 0.0).vector,
+        );
     }
     pub fn gpu_viewport(&self) -> GpuViewport {
-        return self.matrix().data.0.into()
+        return self.matrix().data.0.into();
     }
 }
 #[repr(C)]
@@ -55,10 +58,44 @@ impl Viewport {
 pub struct GpuViewport {
     pub matrix: [[f32; 4]; 4],
 }
-impl From<[[f32; 4];4]> for GpuViewport {
+impl From<[[f32; 4]; 4]> for GpuViewport {
     fn from(matrix: [[f32; 4]; 4]) -> Self {
+        Self { matrix }
+    }
+}
+pub struct ViewportBinding {
+    pub uniform: Uniform<GpuViewport>,
+    pub bind_group_layout: wgpu::BindGroupLayout,
+    pub bind_group: wgpu::BindGroup,
+}
+impl ViewportBinding {
+    pub fn new(device: &wgpu::Device, gpu_viewport: GpuViewport, binding: u32) -> Self {
+        let uniform = Uniform::new(device, gpu_viewport);
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("view bind group layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("view bind group"),
+            layout: &bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding,
+                resource: uniform.buffer.as_entire_binding(),
+            }],
+        });
         Self {
-            matrix
+            uniform,
+            bind_group_layout,
+            bind_group,
         }
     }
 }
