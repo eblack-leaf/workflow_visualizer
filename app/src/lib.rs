@@ -1,6 +1,10 @@
 pub mod canvas;
 pub mod job;
 pub mod viewport;
+pub mod coord;
+pub mod color;
+mod uniform;
+pub mod depth_texture;
 
 use crate::canvas::Canvas;
 use crate::job::Job;

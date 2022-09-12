@@ -9,7 +9,7 @@ pub struct Job {
     pub execution_state: ExecutionState,
     pub container: Container,
     pub startup: Workload,
-    pub main: Workload,
+    pub exec: Workload,
     pub teardown: Workload,
 }
 impl Job {
@@ -18,7 +18,7 @@ impl Job {
             execution_state: ExecutionState::Active,
             container: Container::new(),
             startup: Workload::default(),
-            main: Workload::default(),
+            exec: Workload::default(),
             teardown: Workload::default(),
         }
     }
@@ -26,7 +26,7 @@ impl Job {
         self.startup.run_once(&mut self.container);
     }
     pub fn exec(&mut self) {
-        self.main.run_once(&mut self.container);
+        self.exec.run_once(&mut self.container);
     }
     pub fn teardown(&mut self) {
         self.teardown.run_once(&mut self.container);
