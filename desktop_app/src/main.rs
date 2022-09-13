@@ -5,5 +5,5 @@ fn main() {
     let event_loop = event_loop_builder.build();
     let mut app = app::App::new();
     // create proxies and add to compute and render world
-    futures::executor::block_on(app.run(event_loop));
+    futures::executor::block_on(app::run(app, event_loop));
 }

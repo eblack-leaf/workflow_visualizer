@@ -3,6 +3,7 @@ use bevy_ecs::prelude::{Schedule, World};
 
 pub type Workload = Schedule;
 pub type Container = World;
+#[derive(PartialEq)]
 pub enum ExecutionState {
     Active,
     Suspended,
@@ -24,22 +25,27 @@ impl Job {
             teardown: Workload::default(),
         }
     }
-    pub fn emit<T>(&mut self, signal: T) {
+    pub fn emit<T: Send + Sync + 'static>(&mut self, signal: T) {
         self.container
             .insert_resource::<Signal<T>>(Signal::new(Some(signal)));
     }
-    pub fn receive<T>(&mut self) -> Option<T> {
+    pub fn receive<T: Send + Sync + 'static>(&mut self) -> Option<T> {
         return self
             .container
             .get_resource_mut::<Signal<T>>()
             .expect("no signal to receive")
             .receive();
     }
+    pub fn set_execution_state(&mut self, execution_state: ExecutionState) {
+        self.execution_state = execution_state;
+    }
     pub fn startup(&mut self) {
         self.startup.run_once(&mut self.container);
     }
     pub fn exec(&mut self) {
-        self.exec.run_once(&mut self.container);
+        if self.execution_state == ExecutionState::Active {
+            self.exec.run_once(&mut self.container);
+        }
     }
     pub fn teardown(&mut self) {
         self.teardown.run_once(&mut self.container);

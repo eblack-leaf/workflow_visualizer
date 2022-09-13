@@ -1,5 +1,5 @@
 use winit::window::Window;
-
+#[derive(Clone)]
 pub struct Options {
     pub backends: wgpu::Backends,
     pub power_preferences: wgpu::PowerPreference,

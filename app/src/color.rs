@@ -24,7 +24,24 @@ impl Color {
             alpha,
         }
     }
-    pub fn flatten(&self) -> [f32; 4] {
-        return [self.red, self.green, self.blue, self.alpha];
+}
+impl From<Color> for wgpu::Color {
+    fn from(color: Color) -> Self {
+        Self {
+            r: color.red as f64,
+            g: color.green as f64,
+            b: color.blue as f64,
+            a: color.alpha as f64,
+        }
+    }
+}
+impl From<(f32, f32, f32)> for Color {
+    fn from(rgb: (f32, f32, f32)) -> Self {
+        Self::rgb(rgb.0, rgb.1, rgb.2)
+    }
+}
+impl From<(f32, f32, f32, f32)> for Color {
+    fn from(rgba: (f32, f32, f32, f32)) -> Self {
+        Self::rgba(rgba.0, rgba.1, rgba.2, rgba.3)
     }
 }

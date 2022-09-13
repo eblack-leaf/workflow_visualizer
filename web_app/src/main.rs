@@ -21,7 +21,9 @@ async fn web_run() {
                 .ok()
         })
         .expect("couldn't append canvas to document body");
-    app.attach_canvas(app::canvas::canvas(&window, app::canvas::Options::web_defaults()).await);
+    let options = app::canvas::Options::web_defaults();
+    app.set_canvas_options(options.clone());
+    app.attach_canvas(app::canvas::canvas(&window, options).await);
     app.attach_window(window);
-    app.run(event_loop).await;
+    app::run(app, event_loop).await;
 }
