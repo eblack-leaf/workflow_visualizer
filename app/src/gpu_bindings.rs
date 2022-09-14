@@ -3,4 +3,4 @@
 pub struct BindingInfo {
     pub binding: u32,
 }
-pub const GPU_VIEWPORT: BindingInfo = BindingInfo { binding: 0 };
+pub const VIEWPORT: BindingInfo = BindingInfo { binding: 0 };

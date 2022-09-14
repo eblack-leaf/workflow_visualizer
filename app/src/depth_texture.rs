@@ -1,3 +1,5 @@
+use bevy_ecs::prelude::{Commands, Res};
+
 pub struct DepthTexture {
     pub texture: wgpu::Texture,
     pub view: wgpu::TextureView,
@@ -6,14 +8,14 @@ pub struct DepthTexture {
 impl DepthTexture {
     pub fn new(
         device: &wgpu::Device,
-        config: &wgpu::SurfaceConfiguration,
+        surface_configuration: &wgpu::SurfaceConfiguration,
         format: wgpu::TextureFormat,
     ) -> Self {
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("depth texture"),
             size: wgpu::Extent3d {
-                width: config.width,
-                height: config.height,
+                width: surface_configuration.width,
+                height: surface_configuration.height,
                 depth_or_array_layers: 1,
             },
             mip_level_count: 1,
@@ -29,4 +31,16 @@ impl DepthTexture {
             format,
         };
     }
+}
+pub fn setup(
+    device: Res<wgpu::Device>,
+    surface_configuration: Res<wgpu::SurfaceConfiguration>,
+    mut cmd: Commands,
+) {
+    let depth_texture = DepthTexture::new(
+        &device,
+        &surface_configuration,
+        wgpu::TextureFormat::Depth32Float,
+    );
+    cmd.insert_resource(depth_texture);
 }

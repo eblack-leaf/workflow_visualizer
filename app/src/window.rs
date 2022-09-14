@@ -26,8 +26,8 @@ pub fn resize(
         config.width = resize.area.width as u32;
         config.height = resize.area.height as u32;
         surface.configure(&device, &config);
-        viewport.set_width(resize.area.width);
-        viewport.set_height(resize.area.height);
+        viewport.set_right(resize.area.width);
+        viewport.set_bottom(resize.area.height);
         viewport_binding
             .uniform
             .update(&queue, viewport.gpu_viewport());

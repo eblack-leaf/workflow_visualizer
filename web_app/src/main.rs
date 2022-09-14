@@ -25,5 +25,5 @@ async fn web_run() {
     app.set_canvas_options(options.clone());
     app.attach_canvas(app::canvas::canvas(&window, options).await);
     app.attach_window(window);
-    app::run(app, event_loop).await;
+    app::run(app, event_loop);
 }

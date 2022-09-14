@@ -9,7 +9,10 @@ pub mod android {
             winit::event_loop::EventLoopBuilder::<app::WakeMessage>::with_user_event();
         let event_loop = event_loop_builder.build();
         let mut app = app::App::new();
+        app.render
+            .container
+            .insert_resource(app::canvas::Options::defaults());
         // create proxies and add to compute and render jobs
-        futures::executor::block_on(app::run(app, event_loop));
+        app::run(app, event_loop);
     }
 }

@@ -1,5 +1,8 @@
 use crate::coord::{Area, Panel};
+use crate::gpu_bindings::VIEWPORT;
 use crate::uniform::Uniform;
+use crate::Canvas;
+use bevy_ecs::prelude::{Commands, Res};
 use nalgebra::Matrix4;
 
 pub struct Viewport {
@@ -7,23 +10,16 @@ pub struct Viewport {
     pub translation: nalgebra::Translation2<f32>,
 }
 impl Viewport {
-    pub fn new(panel: Panel) -> Self {
+    pub fn new(right: f32, bottom: f32, depth: f32) -> Self {
         Self {
-            projection: nalgebra::Orthographic3::<f32>::new(
-                0.0,
-                panel.width(),
-                panel.height(),
-                0.0,
-                0.0,
-                panel.layer(),
-            ),
+            projection: nalgebra::Orthographic3::<f32>::new(0.0, right, bottom, 0.0, 0.0, depth),
             translation: nalgebra::Translation2::default(),
         }
     }
-    pub fn width(&self) -> f32 {
+    pub fn right(&self) -> f32 {
         return self.projection.right();
     }
-    pub fn height(&self) -> f32 {
+    pub fn bottom(&self) -> f32 {
         return self.projection.bottom();
     }
     pub fn far_layer(&self) -> f32 {
@@ -33,12 +29,12 @@ impl Viewport {
         return self.projection.znear();
     }
     pub fn area(&self) -> Area {
-        return Area::new(self.width(), self.height());
+        return Area::new(self.right(), self.bottom());
     }
-    pub fn set_width(&mut self, width: f32) {
+    pub fn set_right(&mut self, width: f32) {
         self.projection.set_right(width.into());
     }
-    pub fn set_height(&mut self, height: f32) {
+    pub fn set_bottom(&mut self, height: f32) {
         self.projection.set_bottom(height.into());
     }
     pub fn translate(&mut self, translation: nalgebra::Translation2<f32>) {
@@ -98,4 +94,18 @@ impl ViewportBinding {
             bind_group,
         }
     }
+}
+pub fn setup(
+    device: Res<wgpu::Device>,
+    surface_configuration: Res<wgpu::SurfaceConfiguration>,
+    mut cmd: Commands,
+) {
+    let viewport = Viewport::new(
+        surface_configuration.width as f32,
+        surface_configuration.height as f32,
+        100f32,
+    );
+    let viewport_binding = ViewportBinding::new(&device, viewport.gpu_viewport(), VIEWPORT.binding);
+    cmd.insert_resource(viewport);
+    cmd.insert_resource(viewport_binding);
 }

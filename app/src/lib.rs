@@ -13,10 +13,12 @@ pub mod window;
 use crate::canvas::Canvas;
 use crate::job::{ExecutionState, Job};
 use crate::window::Resize;
+use bevy_ecs::prelude::SystemStage;
 use bevy_ecs::system::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
+use crate::theme::Theme;
 
 #[derive(Clone)]
 pub struct Signal<T: Send + Sync + 'static> {
@@ -42,7 +44,22 @@ impl App {
     pub fn new() -> Self {
         Self {
             compute: Job::new(),
-            render: Job::new(),
+            render: {
+                let mut job = Job::new();
+                job.container.insert_resource(Theme::default());
+                job.container.insert_resource(Signal::<Resize>::new(None));
+                job.startup.add_stage(
+                    "setup",
+                    SystemStage::parallel()
+                        .with_system(viewport::setup)
+                        .with_system(depth_texture::setup),
+                );
+                job.exec
+                    .add_stage("window_resize", SystemStage::single(window::resize));
+                job.exec
+                    .add_stage("render", SystemStage::single(renderer::render));
+                job
+            },
         }
     }
     pub fn attach_window(&mut self, window: Window) {
@@ -105,128 +122,126 @@ impl App {
     pub fn extract_render_packets(&mut self) {}
     pub fn render_post_processing(&mut self) {}
 }
-pub async fn run<T>(mut app: App, event_loop: EventLoop<T>) {
-    event_loop.run(
-        move |event, _event_loop_window_target, control_flow| {
-            control_flow.set_poll();
-            match event {
-                Event::NewEvents(start_cause) => match start_cause {
-                    StartCause::ResumeTimeReached { .. } => {}
-                    StartCause::WaitCancelled { .. } => {}
-                    StartCause::Poll => {}
-                    StartCause::Init => {
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            let window = Window::new(_event_loop_window_target)
-                                .expect("could not create window");
-                            let options = app.get_canvas_options();
-                            app.attach_canvas(futures::executor::block_on(canvas::canvas(
-                                &window, options,
-                            )));
-                            app.attach_window(window);
-                        }
-                        app.compute.startup();
-                        app.render.startup();
-                    }
-                },
-                Event::WindowEvent { window_id, event } => match event {
-                    WindowEvent::Resized(physical_size) => {
-                        app.render.emit(Resize::new((
-                            physical_size.width as f32,
-                            physical_size.height as f32,
-                        )));
-                    }
-                    WindowEvent::Moved(_) => {}
-                    WindowEvent::CloseRequested => {
-                        control_flow.set_exit();
-                    }
-                    WindowEvent::Destroyed => {}
-                    WindowEvent::DroppedFile(_) => {}
-                    WindowEvent::HoveredFile(_) => {}
-                    WindowEvent::HoveredFileCancelled => {}
-                    WindowEvent::ReceivedCharacter(_) => {}
-                    WindowEvent::Focused(_) => {}
-                    WindowEvent::KeyboardInput { .. } => {}
-                    WindowEvent::ModifiersChanged(_) => {}
-                    WindowEvent::Ime(_) => {}
-                    WindowEvent::CursorMoved { .. } => {}
-                    WindowEvent::CursorEntered { .. } => {}
-                    WindowEvent::CursorLeft { .. } => {}
-                    WindowEvent::MouseWheel { .. } => {}
-                    WindowEvent::MouseInput { .. } => {}
-                    WindowEvent::TouchpadPressure { .. } => {}
-                    WindowEvent::AxisMotion { .. } => {}
-                    WindowEvent::Touch(_) => {}
-                    WindowEvent::ScaleFactorChanged {
-                        scale_factor,
-                        new_inner_size,
-                    } => {
-                        app.render.emit(Resize::new((
-                            new_inner_size.width as f32,
-                            new_inner_size.height as f32,
-                        )));
-                    }
-                    WindowEvent::ThemeChanged(_) => {}
-                    WindowEvent::Occluded(_) => {}
-                },
-                Event::DeviceEvent { .. } => {}
-                Event::UserEvent(_) => {}
-                Event::Suspended => {
-                    #[cfg(target_os = "android")]
+pub fn run<T>(mut app: App, event_loop: EventLoop<T>) {
+    event_loop.run(move |event, _event_loop_window_target, control_flow| {
+        control_flow.set_poll();
+        match event {
+            Event::NewEvents(start_cause) => match start_cause {
+                StartCause::ResumeTimeReached { .. } => {}
+                StartCause::WaitCancelled { .. } => {}
+                StartCause::Poll => {}
+                StartCause::Init => {
+                    #[cfg(not(target_arch = "wasm32"))]
                     {
-                        if app.render.active() {
-                            let _ = app.detach_canvas();
-                        }
+                        let window = Window::new(_event_loop_window_target)
+                            .expect("could not create window");
+                        let options = app.get_canvas_options();
+                        app.attach_canvas(futures::executor::block_on(canvas::canvas(
+                            &window, options,
+                        )));
+                        app.attach_window(window);
                     }
-                    app.compute.suspend();
-                    app.render.suspend();
+                    app.compute.startup();
+                    app.render.startup();
                 }
-                Event::Resumed => {
-                    #[cfg(target_os = "android")]
-                    {
-                        if app.render.suspended() {
-                            let window = app.detach_window();
-                            let options = app.get_canvas_options();
-                            app.attach_canvas(futures::executor::block_on(canvas::canvas(
-                                &window, options,
-                            )));
-                            app.attach_window(window);
-                        }
-                    }
-                    app.compute.activate();
-                    app.render.activate();
+            },
+            Event::WindowEvent { window_id, event } => match event {
+                WindowEvent::Resized(physical_size) => {
+                    app.render.emit(Resize::new((
+                        physical_size.width as f32,
+                        physical_size.height as f32,
+                    )));
                 }
-                Event::MainEventsCleared => {
-                    if app.compute.active() {
-                        app.compute.exec();
-                    }
-                    if app.compute.should_exit() {
-                        control_flow.set_exit();
-                    }
-                    app.request_redraw();
+                WindowEvent::Moved(_) => {}
+                WindowEvent::CloseRequested => {
+                    control_flow.set_exit();
                 }
-                Event::RedrawRequested(_window_id) => {
+                WindowEvent::Destroyed => {}
+                WindowEvent::DroppedFile(_) => {}
+                WindowEvent::HoveredFile(_) => {}
+                WindowEvent::HoveredFileCancelled => {}
+                WindowEvent::ReceivedCharacter(_) => {}
+                WindowEvent::Focused(_) => {}
+                WindowEvent::KeyboardInput { .. } => {}
+                WindowEvent::ModifiersChanged(_) => {}
+                WindowEvent::Ime(_) => {}
+                WindowEvent::CursorMoved { .. } => {}
+                WindowEvent::CursorEntered { .. } => {}
+                WindowEvent::CursorLeft { .. } => {}
+                WindowEvent::MouseWheel { .. } => {}
+                WindowEvent::MouseInput { .. } => {}
+                WindowEvent::TouchpadPressure { .. } => {}
+                WindowEvent::AxisMotion { .. } => {}
+                WindowEvent::Touch(_) => {}
+                WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    new_inner_size,
+                } => {
+                    app.render.emit(Resize::new((
+                        new_inner_size.width as f32,
+                        new_inner_size.height as f32,
+                    )));
+                }
+                WindowEvent::ThemeChanged(_) => {}
+                WindowEvent::Occluded(_) => {}
+            },
+            Event::DeviceEvent { .. } => {}
+            Event::UserEvent(_) => {}
+            Event::Suspended => {
+                #[cfg(target_os = "android")]
+                {
                     if app.render.active() {
-                        app.extract_render_packets();
-                        app.render.exec();
-                    }
-                    if app.render.should_exit() {
-                        control_flow.set_exit();
+                        let _ = app.detach_canvas();
                     }
                 }
-                Event::RedrawEventsCleared => {
-                    if app.render.active() {
-                        app.render_post_processing();
-                    }
-                    if app.can_idle() {
-                        control_flow.set_wait();
+                app.compute.suspend();
+                app.render.suspend();
+            }
+            Event::Resumed => {
+                #[cfg(target_os = "android")]
+                {
+                    if app.render.suspended() {
+                        let window = app.detach_window();
+                        let options = app.get_canvas_options();
+                        app.attach_canvas(futures::executor::block_on(canvas::canvas(
+                            &window, options,
+                        )));
+                        app.attach_window(window);
                     }
                 }
-                Event::LoopDestroyed => {
-                    app.compute.teardown();
-                    app.render.teardown();
+                app.compute.activate();
+                app.render.activate();
+            }
+            Event::MainEventsCleared => {
+                if app.compute.active() {
+                    app.compute.exec();
+                }
+                if app.compute.should_exit() {
+                    control_flow.set_exit();
+                }
+                app.request_redraw();
+            }
+            Event::RedrawRequested(_window_id) => {
+                if app.render.active() {
+                    app.extract_render_packets();
+                    app.render.exec();
+                }
+                if app.render.should_exit() {
+                    control_flow.set_exit();
                 }
             }
+            Event::RedrawEventsCleared => {
+                if app.render.active() {
+                    app.render_post_processing();
+                }
+                if app.can_idle() {
+                    control_flow.set_wait();
+                }
+            }
+            Event::LoopDestroyed => {
+                app.compute.teardown();
+                app.render.teardown();
+            }
         }
-    );
+    });
 }

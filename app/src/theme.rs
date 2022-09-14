@@ -14,3 +14,8 @@ impl Theme {
         }
     }
 }
+impl Default for Theme {
+    fn default() -> Self {
+        Self::new((0f32, 0f32, 0f32), (1f32, 1f32, 1f32), (0.5, 0.5, 0.5))
+    }
+}
