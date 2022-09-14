@@ -5,6 +5,7 @@ pub mod depth_texture;
 mod gpu_bindings;
 pub mod job;
 mod renderer;
+pub mod text;
 pub mod theme;
 mod uniform;
 pub mod viewport;
@@ -12,13 +13,13 @@ pub mod window;
 
 use crate::canvas::Canvas;
 use crate::job::{ExecutionState, Job};
+use crate::theme::Theme;
 use crate::window::Resize;
 use bevy_ecs::prelude::SystemStage;
 use bevy_ecs::system::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-use crate::theme::Theme;
 
 #[derive(Clone)]
 pub struct Signal<T: Send + Sync + 'static> {
