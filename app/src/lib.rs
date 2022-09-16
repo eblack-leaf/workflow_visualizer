@@ -3,6 +3,7 @@ pub mod color;
 pub mod coord;
 pub mod depth_texture;
 mod gpu_bindings;
+pub mod input;
 pub mod job;
 mod renderer;
 pub mod text;
