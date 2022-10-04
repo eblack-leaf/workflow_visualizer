@@ -1,6 +1,8 @@
 use crate::depth_texture::DepthTexture;
+use crate::final_text;
+use crate::final_text::TextRenderer;
 use crate::theme::Theme;
-use crate::viewport::Viewport;
+use crate::viewport::{Viewport, ViewportBinding};
 use bevy_ecs::prelude::Res;
 use wgpu::{SurfaceError, SurfaceTexture};
 
@@ -42,8 +44,10 @@ pub fn render(
     device: Res<wgpu::Device>,
     queue: Res<wgpu::Queue>,
     viewport: Res<Viewport>,
+    viewport_binding: Res<ViewportBinding>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
+    text_renderer: Res<TextRenderer>,
     theme: Res<Theme>,
 ) {
     if let Some(surface_texture) = get_surface_texture(&surface, &device, &surface_configuration) {
@@ -54,7 +58,7 @@ pub fn render(
             label: Some("command encoder"),
         });
         {
-            command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("render pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &surface_texture_view,
@@ -73,7 +77,7 @@ pub fn render(
                     stencil_ops: None,
                 }),
             });
-            // do work
+            text_renderer.render(&mut render_pass, &viewport_binding);
         }
         queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();

@@ -105,7 +105,7 @@ pub fn setup(
         surface_configuration.height as f32,
         100f32,
     );
-    let viewport_binding = ViewportBinding::new(&device, viewport.gpu_viewport(), VIEWPORT.binding);
+    let viewport_binding = ViewportBinding::new(&device, viewport.gpu_viewport(), VIEWPORT);
     cmd.insert_resource(viewport);
     cmd.insert_resource(viewport_binding);
 }
