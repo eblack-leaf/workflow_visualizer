@@ -6,7 +6,7 @@ pub struct Position {
     pub y: f32,
 }
 impl Position {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
 }
@@ -22,7 +22,7 @@ pub struct Area {
     pub height: f32,
 }
 impl Area {
-    pub fn new(width: f32, height: f32) -> Self {
+    pub const fn new(width: f32, height: f32) -> Self {
         Self { width, height }
     }
 }
@@ -40,7 +40,7 @@ pub struct Depth {
     pub layer: f32,
 }
 impl Depth {
-    pub fn new(layer: f32) -> Self {
+    pub const fn new(layer: f32) -> Self {
         Self { layer }
     }
 }

@@ -1,6 +1,5 @@
 use crate::depth_texture::DepthTexture;
-use crate::final_text;
-use crate::final_text::TextRenderer;
+use crate::text::TextRenderer;
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
 use bevy_ecs::prelude::Res;
@@ -45,9 +44,9 @@ pub fn render(
     queue: Res<wgpu::Queue>,
     viewport: Res<Viewport>,
     viewport_binding: Res<ViewportBinding>,
+    text_renderer: Res<TextRenderer>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
-    text_renderer: Res<TextRenderer>,
     theme: Res<Theme>,
 ) {
     if let Some(surface_texture) = get_surface_texture(&surface, &device, &surface_configuration) {
@@ -77,6 +76,8 @@ pub fn render(
                     stencil_ops: None,
                 }),
             });
+            // all other render work
+            // last cause alpha values
             text_renderer.render(&mut render_pass, &viewport_binding);
         }
         queue.submit(std::iter::once(command_encoder.finish()));

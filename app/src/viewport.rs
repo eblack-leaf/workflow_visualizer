@@ -1,5 +1,5 @@
 use crate::coord::{Area, Panel};
-use crate::gpu_bindings::VIEWPORT;
+use crate::gpu_bindings::bindings::VIEWPORT;
 use crate::uniform::Uniform;
 use crate::Canvas;
 use bevy_ecs::prelude::{Commands, Res};
