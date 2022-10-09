@@ -8,7 +8,6 @@ use std::collections::HashMap;
 use std::path::Path;
 use wgpu::util::DeviceExt;
 use wgpu::{include_wgsl, VertexAttribute};
-
 #[derive(Copy, Clone)]
 pub struct MaxCharacters(pub u32);
 #[derive(Copy, Clone, PartialEq, Hash)]
@@ -267,14 +266,58 @@ impl Instance {
 }
 pub type GlyphHash = fontdue::layout::GlyphRasterConfig;
 pub type Glyph = (Metrics, Vec<u8>);
-pub type RasterizationBufferIndex = usize;
-pub struct RasterizationGpuBuffer {
+pub struct RasterizationBufferIndex {
+    pub start: usize,
+    pub size: usize,
+}
+pub struct RasterizationBinding {
     pub buffer: wgpu::Buffer,
+    pub bind_group: wgpu::BindGroup,
+    pub bind_group_layout: wgpu::BindGroupLayout,
+}
+impl RasterizationBinding {
+    pub fn new(device: &wgpu::Device, cpu_buffer: &Vec<u8>) -> Self {
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("rasterization bind group layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: bindings::RASTERIZATION,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Storage { read_only: true },
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("rasterization buffer"),
+            contents: cpu_buffer.as_slice(),
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        });
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("rasterization bind group"),
+            layout: &bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: bindings::RASTERIZATION,
+                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                    buffer: &buffer,
+                    offset: 0,
+                    size: None,
+                }),
+            }],
+        });
+        Self {
+            buffer,
+            bind_group,
+            bind_group_layout,
+        }
+    }
 }
 pub struct Rasterization {
     pub rasterized_glyphs: HashMap<GlyphHash, Glyph>,
     pub glyph_indices: HashMap<GlyphHash, RasterizationBufferIndex>,
-    pub buffer: Vec<Vec<u8>>,
+    pub buffer: Vec<u8>,
 }
 impl Rasterization {
     pub fn new() -> Self {
@@ -309,7 +352,14 @@ pub struct TextRenderer {
     pub instance_buffer: GlyphInstanceBuffer,
 }
 impl TextRenderer {
-    pub fn new(device: &wgpu::Device, viewport_binding: &ViewportBinding) -> Self {
+    pub fn new(
+        device: &wgpu::Device,
+        surface_format: wgpu::TextureFormat,
+        depth_format: wgpu::TextureFormat,
+        viewport_binding: &ViewportBinding,
+        rasterization_binding: &RasterizationBinding,
+    ) -> Self {
+        let shader = device.create_shader_module(include_wgsl!("../shaders/generated/text.wgsl"));
         Self {
             pipeline: device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("text pipeline"),
@@ -318,13 +368,13 @@ impl TextRenderer {
                         label: Some("text pipeline descriptor"),
                         bind_group_layouts: &[
                             &viewport_binding.bind_group_layout,
-                            /* bind group for storage buffer */
+                            &rasterization_binding.bind_group_layout,
                         ],
                         push_constant_ranges: &[],
                     }),
                 ),
                 vertex: wgpu::VertexState {
-                    module: &device.create_shader_module(include_wgsl!("../shaders/text.wgsl")),
+                    module: &shader,
                     entry_point: "vertex_entry",
                     buffers: &[
                         wgpu::VertexBufferLayout {
@@ -339,10 +389,32 @@ impl TextRenderer {
                         },
                     ],
                 },
-                primitive: Default::default(),
-                depth_stencil: None,
+                primitive: wgpu::PrimitiveState {
+                    topology: wgpu::PrimitiveTopology::TriangleList,
+                    strip_index_format: None,
+                    front_face: wgpu::FrontFace::Ccw,
+                    cull_mode: Some(wgpu::Face::Back),
+                    unclipped_depth: false,
+                    polygon_mode: wgpu::PolygonMode::Fill,
+                    conservative: false,
+                },
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: depth_format,
+                    depth_write_enabled: true,
+                    depth_compare: wgpu::CompareFunction::Less,
+                    stencil: wgpu::StencilState::default(),
+                    bias: wgpu::DepthBiasState::default(),
+                }),
                 multisample: Default::default(),
-                fragment: None,
+                fragment: Option::from(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: "fragment_entry",
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: surface_format,
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: Default::default(),
+                    })],
+                }),
                 multiview: None,
             }),
             vertex_buffer: device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -356,11 +428,16 @@ impl TextRenderer {
     pub fn render<'a>(
         &'a self,
         mut render_pass: &mut wgpu::RenderPass<'a>,
+        rasterization_binding: &'a RasterizationBinding,
         viewport_binding: &'a ViewportBinding,
     ) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(bindings::VIEWPORT, &viewport_binding.bind_group, &[]);
-        // bind storage buffer
+        render_pass.set_bind_group(
+            bindings::RASTERIZATION,
+            &rasterization_binding.bind_group,
+            &[],
+        );
         render_pass.set_vertex_buffer(buffers::TEXT_VERTEX, self.vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(
             buffers::TEXT_INSTANCE,

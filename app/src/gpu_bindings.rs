@@ -2,6 +2,7 @@
 // application level layout for bindings
 pub mod bindings {
     pub const VIEWPORT: u32 = 0;
+    pub const RASTERIZATION: u32 = 1;
 }
 pub mod shader_locations {}
 pub mod buffers {
