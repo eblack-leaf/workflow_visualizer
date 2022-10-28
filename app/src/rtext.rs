@@ -1,35 +1,44 @@
+use std::collections::HashMap;
+use std::path::Path;
+
+use fontdue::{Font, FontSettings, Metrics};
+use fontdue::layout::{CoordinateSystem, Layout, LayoutSettings, TextStyle};
+use wgpu::{include_wgsl, VertexAttribute};
+use wgpu::util::DeviceExt;
+
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::gpu_bindings::{attributes, bindings, buffers};
 use crate::viewport::ViewportBinding;
-use fontdue::layout::{CoordinateSystem, Layout, LayoutSettings, TextStyle};
-use fontdue::{Font, FontSettings, Metrics};
-use std::collections::HashMap;
-use std::path::Path;
-use wgpu::util::DeviceExt;
-use wgpu::{include_wgsl, VertexAttribute};
+
 #[derive(Copy, Clone)]
 pub struct MaxCharacters(pub u32);
+
 #[derive(Copy, Clone, PartialEq, Hash)]
 pub struct TextScale {
     pub px: u32,
 }
+
 impl TextScale {
     pub fn px(&self) -> f32 {
         self.px as f32
     }
 }
+
 impl From<u32> for TextScale {
     fn from(px: u32) -> Self {
         Self { px }
     }
 }
+
 #[derive(Clone, Copy)]
 pub struct GlyphWidth(pub f32);
+
 pub struct TextFont {
     pub font_storage: [Font; 1],
     pub glyph_widths: HashMap<TextScale, GlyphWidth>,
 }
+
 impl TextFont {
     pub fn new<T: AsRef<Path>>(font_path: T, opt_scale: TextScale) -> Self {
         Self {
@@ -40,7 +49,7 @@ impl TextFont {
                     ..FontSettings::default()
                 },
             )
-            .expect("invalid font path")],
+                .expect("invalid font path")],
             glyph_widths: HashMap::new(),
         }
     }
@@ -77,11 +86,13 @@ impl TextFont {
         return TextLineMetrics::new(scale, max_characters, (line_width, line_height));
     }
 }
+
 pub struct TextLineMetrics {
     pub scale: TextScale,
     pub max_characters: MaxCharacters,
     pub area: Area,
 }
+
 impl TextLineMetrics {
     pub fn new<T: Into<Area>>(scale: TextScale, max_characters: MaxCharacters, area: T) -> Self {
         Self {
@@ -91,9 +102,11 @@ impl TextLineMetrics {
         }
     }
 }
+
 pub struct Text {
     string: String,
 }
+
 impl Text {
     pub fn new(string: String) -> Self {
         Self {
@@ -109,16 +122,20 @@ impl Text {
         &self.string
     }
 }
+
 pub struct GlyphColorAdjustment {
     pub color: Color,
 }
+
 pub type GlyphOffset = usize;
+
 pub struct TextLine {
     pub text: Text,
     pub base_color: Color,
     pub glyph_color_adjustments: HashMap<GlyphOffset, GlyphColorAdjustment>,
     pub text_line_metrics: TextLineMetrics,
 }
+
 impl TextLine {
     pub const ELLIPSIS: &'static str = "...";
     pub fn create_view<'a>(&self) -> TextLineView {
@@ -140,10 +157,12 @@ impl TextLine {
         self.text_line_metrics.max_characters.0 as usize
     }
 }
+
 pub struct TextLineView {
     pub viewable_text: Text,
     pub ellipsis_text: Option<Text>,
 }
+
 pub struct TextLineStack {
     pub position: Position,
     pub depth: Depth,
@@ -151,6 +170,7 @@ pub struct TextLineStack {
     pub line_stack: Vec<TextLine>,
     pub line_stack_views: Vec<TextLineView>,
 }
+
 impl TextLineStack {
     pub fn glyph_metadata(&self, raw_byte_offset: usize) -> (usize, usize) {
         let mut line_index = 0;
@@ -165,7 +185,7 @@ impl TextLineStack {
         }
         return (line_index, glyph_offset);
     }
-    pub fn instances(&self) -> Vec<Instance> {
+    pub fn instances(&self, font: &TextFont) -> Vec<Instance> {
         let mut instances = Vec::new();
         self.layout.glyphs().iter().for_each(|glyph| {
             let (line_index, glyph_offset) = self.glyph_metadata(glyph.byte_offset);
@@ -179,6 +199,7 @@ impl TextLineStack {
                 (glyph.width as f32, glyph.height as f32).into(),
                 self.depth,
                 color,
+                font.rasterized_glyph_index(glyph.parent),
             ));
         });
         return instances;
@@ -221,11 +242,13 @@ impl TextLineStack {
         }
     }
 }
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 pub struct Vertex {
     pub position: Position,
 }
+
 impl Vertex {
     pub fn attributes<'a>() -> [VertexAttribute; 1] {
         wgpu::vertex_attr_array![attributes::TEXT_VERTEX => Float32x2]
@@ -234,6 +257,7 @@ impl Vertex {
         Self { position }
     }
 }
+
 const GLYPH_AABB: [Vertex; 6] = [
     Vertex::new(Position::new(0.0, 0.0)),
     Vertex::new(Position::new(0.0, 1.0)),
@@ -242,6 +266,7 @@ const GLYPH_AABB: [Vertex; 6] = [
     Vertex::new(Position::new(0.0, 1.0)),
     Vertex::new(Position::new(1.0, 1.0)),
 ];
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 pub struct Instance {
@@ -249,36 +274,54 @@ pub struct Instance {
     pub position: Position,
     pub area: Area,
     pub depth: Depth,
+    pub rasterization_buffer_index: RasterizationBufferIndex,
 }
+
 impl Instance {
-    pub fn new(position: Position, area: Area, depth: Depth, color: Color) -> Self {
+    pub fn new(position: Position, area: Area, depth: Depth, color: Color, rasterization_buffer_index: RasterizationBufferIndex) -> Self {
         Self {
             position,
             area,
             depth,
             color,
+            rasterization_buffer_index,
         }
     }
-    pub fn attributes() -> [VertexAttribute; 4] {
+    pub fn attributes() -> [VertexAttribute; 5] {
         wgpu::vertex_attr_array![attributes::TEXT_COLOR => Float32x4, attributes::TEXT_POSITION => Float32x2,
-            attributes::TEXT_AREA => Float32x2, attributes::TEXT_DEPTH => Float32]
+            attributes::TEXT_AREA => Float32x2, attributes::TEXT_DEPTH => Float32, attributes::TEXT_RASTERIZATION_INDEX => Uint32x2]
     }
 }
+
 pub type GlyphHash = fontdue::layout::GlyphRasterConfig;
 pub type Glyph = (Metrics, Vec<u8>);
+
+#[repr(C)]
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct RasterizationBufferIndex {
-    pub start: usize,
-    pub size: usize,
+    pub parts: [u32; 3],
 }
+
+impl RasterizationBufferIndex {
+    pub fn start(&self) -> u32 {
+        self.parts[0]
+    }
+    pub fn size(&self) -> u32 {
+        self.parts[1]
+    }
+    pub fn rows(&self) -> u32 { self.parts[2] }
+}
+
 pub struct RasterizationBinding {
     pub buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
 }
+
 impl RasterizationBinding {
     pub fn new(device: &wgpu::Device, cpu_buffer: &Vec<u8>) -> Self {
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("rasterization bind group layout"),
+            label: Some("rasterizer bind group layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: bindings::RASTERIZATION,
                 visibility: wgpu::ShaderStages::FRAGMENT,
@@ -291,12 +334,12 @@ impl RasterizationBinding {
             }],
         });
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("rasterization buffer"),
+            label: Some("rasterizer buffer"),
             contents: cpu_buffer.as_slice(),
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("rasterization bind group"),
+            label: Some("rasterizer bind group"),
             layout: &bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: bindings::RASTERIZATION,
@@ -314,11 +357,13 @@ impl RasterizationBinding {
         }
     }
 }
+
 pub struct Rasterization {
     pub rasterized_glyphs: HashMap<GlyphHash, Glyph>,
     pub glyph_indices: HashMap<GlyphHash, RasterizationBufferIndex>,
     pub buffer: Vec<u8>,
 }
+
 impl Rasterization {
     pub fn new() -> Self {
         Self {
@@ -328,11 +373,13 @@ impl Rasterization {
         }
     }
 }
+
 pub struct GlyphInstanceBuffer {
     pub instance_buffer: wgpu::Buffer,
     pub instance_count: u32,
     pub instances: Vec<Instance>,
 }
+
 impl GlyphInstanceBuffer {
     pub fn new(device: &wgpu::Device, instances: Vec<Instance>) -> Self {
         Self {
@@ -346,11 +393,13 @@ impl GlyphInstanceBuffer {
         }
     }
 }
+
 pub struct TextRenderer {
     pub pipeline: wgpu::RenderPipeline,
     pub vertex_buffer: wgpu::Buffer,
     pub instance_buffer: GlyphInstanceBuffer,
 }
+
 impl TextRenderer {
     pub fn new(
         device: &wgpu::Device,

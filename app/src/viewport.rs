@@ -1,52 +1,30 @@
-use crate::coord::{Area, Panel};
+use crate::coord::{Area, Depth};
 use crate::gpu_bindings::bindings::VIEWPORT;
 use crate::uniform::Uniform;
-use crate::Canvas;
 use bevy_ecs::prelude::{Commands, Res};
-use nalgebra::Matrix4;
+use nalgebra::matrix;
 
 pub struct Viewport {
-    pub projection: nalgebra::Orthographic3<f32>,
-    pub translation: nalgebra::Translation2<f32>,
+    pub area: Area,
+    pub depth: Depth,
+    pub orthographic: nalgebra::Matrix4<f32>,
 }
 impl Viewport {
-    pub fn new(right: f32, bottom: f32, depth: f32) -> Self {
+    pub fn new(area: Area, depth: Depth) -> Self {
         Self {
-            projection: nalgebra::Orthographic3::<f32>::new(0.0, right, bottom, 0.0, 0.0, depth),
-            translation: nalgebra::Translation2::default(),
+            area,
+            depth,
+            orthographic: matrix![2f32/area.width, 0.0, 0.0, -1.0;
+                                    0.0, 2f32/-area.height, 0.0, 1.0;
+                                    0.0, 0.0, 1.0/depth.layer, 0.0;
+                                    0.0, 0.0, 0.0, 1.0],
         }
     }
-    pub fn right(&self) -> f32 {
-        return self.projection.right();
-    }
-    pub fn bottom(&self) -> f32 {
-        return self.projection.bottom();
+    pub fn gpu_viewport(&self) -> GpuViewport {
+        return self.orthographic.data.0.into();
     }
     pub fn far_layer(&self) -> f32 {
-        return self.projection.zfar();
-    }
-    pub fn near_layer(&self) -> f32 {
-        return self.projection.znear();
-    }
-    pub fn area(&self) -> Area {
-        return Area::new(self.right(), self.bottom());
-    }
-    pub fn set_right(&mut self, width: f32) {
-        self.projection.set_right(width.into());
-    }
-    pub fn set_bottom(&mut self, height: f32) {
-        self.projection.set_bottom(height.into());
-    }
-    pub fn translate(&mut self, translation: nalgebra::Translation2<f32>) {
-        self.translation.vector += translation.vector;
-    }
-    pub fn matrix(&self) -> Matrix4<f32> {
-        return self.projection.as_matrix().append_translation(
-            &nalgebra::Translation3::new(self.translation.x, self.translation.y, 0.0).vector,
-        );
-    }
-    pub fn gpu_viewport(&self) -> GpuViewport {
-        return self.matrix().data.0.into();
+        self.depth.layer
     }
 }
 #[repr(C)]
@@ -101,9 +79,12 @@ pub fn setup(
     mut cmd: Commands,
 ) {
     let viewport = Viewport::new(
-        surface_configuration.width as f32,
-        surface_configuration.height as f32,
-        100f32,
+        (
+            surface_configuration.width as f32,
+            surface_configuration.height as f32,
+        )
+            .into(),
+        100f32.into(),
     );
     let viewport_binding = ViewportBinding::new(&device, viewport.gpu_viewport(), VIEWPORT);
     cmd.insert_resource(viewport);

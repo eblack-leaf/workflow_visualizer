@@ -12,6 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/wasm_rebuild_avoidance_target" />
       <excludeFolder url="file://$MODULE_DIR$/android_rebuild_avoidance_target" />
+      <excludeFolder url="file://$MODULE_DIR$/wgpu_traces" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

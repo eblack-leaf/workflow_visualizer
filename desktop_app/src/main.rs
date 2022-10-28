@@ -1,6 +1,7 @@
 use winit::event_loop::EventLoopBuilder;
 
 fn main() {
+    env_logger::init();
     let mut event_loop_builder = EventLoopBuilder::<app::WakeMessage>::with_user_event();
     let event_loop = event_loop_builder.build();
     let mut app = app::App::new();

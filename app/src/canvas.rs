@@ -1,3 +1,4 @@
+use std::path::Path;
 use winit::window::Window;
 #[derive(Clone)]
 pub struct Options {
@@ -49,7 +50,7 @@ pub async fn canvas(window: &Window, options: Options) -> Canvas {
                 features: options.features,
                 limits: options.limits.clone(),
             },
-            None,
+            Some(Path::new("/home/omi-voshuli/note-ifications/wgpu_traces")),
         )
         .await
         .expect("device/queue request failed");
