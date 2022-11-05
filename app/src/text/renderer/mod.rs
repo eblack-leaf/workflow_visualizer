@@ -32,9 +32,9 @@ impl TextRenderer {
         surface_format: wgpu::TextureFormat,
         depth_format: wgpu::TextureFormat,
         viewport_binding: &ViewportBinding,
-        rasterization_binding: &RasterizerBinding,
+        rasterizer_binding: &RasterizerBinding,
     ) -> Self {
-        let shader = device.create_shader_module(include_wgsl!("/home/omi-voshuli/note-ifications/app/shaders/generated/text.wgsl"));
+        let shader = device.create_shader_module(include_wgsl!("../text.wgsl"));
         Self {
             pipeline: device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("text pipeline"),
@@ -43,7 +43,7 @@ impl TextRenderer {
                         label: Some("text pipeline descriptor"),
                         bind_group_layouts: &[
                             &viewport_binding.bind_group_layout,
-                            &rasterization_binding.bind_group_layout,
+                            &rasterizer_binding.bind_group_layout,
                         ],
                         push_constant_ranges: &[],
                     }),
@@ -103,16 +103,12 @@ impl TextRenderer {
     pub fn render<'a>(
         &'a self,
         mut render_pass: &mut wgpu::RenderPass<'a>,
-        rasterization_binding: &'a RasterizerBinding,
+        rasterizer_binding: &'a RasterizerBinding,
         viewport_binding: &'a ViewportBinding,
     ) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(bindings::VIEWPORT, &viewport_binding.bind_group, &[]);
-        render_pass.set_bind_group(
-            bindings::RASTERIZATION,
-            &rasterization_binding.bind_group,
-            &[],
-        );
+        render_pass.set_bind_group(bindings::RASTERIZATION, &rasterizer_binding.bind_group, &[]);
         render_pass.set_vertex_buffer(buffers::TEXT_VERTEX, self.vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(
             buffers::TEXT_INSTANCE,

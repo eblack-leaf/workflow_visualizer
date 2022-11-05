@@ -1,3 +1,14 @@
+use bevy_ecs::prelude::{ParallelSystemDescriptorCoercion, SystemStage};
+use bevy_ecs::system::Resource;
+use winit::event::{Event, StartCause, WindowEvent};
+use winit::event_loop::EventLoop;
+use winit::window::Window;
+
+use crate::canvas::Canvas;
+use crate::job::{ExecutionState, Job};
+use crate::theme::Theme;
+use crate::window::Resize;
+
 pub mod canvas;
 pub mod color;
 pub mod coord;
@@ -12,20 +23,11 @@ mod uniform;
 pub mod viewport;
 pub mod window;
 
-use crate::canvas::Canvas;
-use crate::job::{ExecutionState, Job};
-use crate::theme::Theme;
-use crate::window::Resize;
-use bevy_ecs::prelude::SystemStage;
-use bevy_ecs::system::Resource;
-use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::EventLoop;
-use winit::window::Window;
-
 #[derive(Clone)]
 pub struct Signal<T: Send + Sync + 'static> {
     pub signal: Option<T>,
 }
+
 impl<T: Send + Sync + 'static> Signal<T> {
     pub fn new(signal: Option<T>) -> Self {
         Self { signal }
@@ -37,11 +39,14 @@ impl<T: Send + Sync + 'static> Signal<T> {
         self.signal = Some(signal);
     }
 }
+
 pub struct WakeMessage {}
+
 pub struct App {
     pub compute: Job,
     pub render: Job,
 }
+
 impl App {
     pub fn new() -> Self {
         Self {
@@ -56,6 +61,8 @@ impl App {
                         .with_system(viewport::setup)
                         .with_system(depth_texture::setup),
                 );
+                job.startup
+                    .add_stage("text_setup", SystemStage::single(text::setup));
                 job.exec
                     .add_stage("window_resize", SystemStage::single(window::resize));
                 job.exec
@@ -124,6 +131,7 @@ impl App {
     pub fn extract_render_packets(&mut self) {}
     pub fn render_post_processing(&mut self) {}
 }
+
 pub fn run<T>(mut app: App, event_loop: EventLoop<T>) {
     event_loop.run(move |event, _event_loop_window_target, control_flow| {
         control_flow.set_poll();

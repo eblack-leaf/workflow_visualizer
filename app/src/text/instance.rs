@@ -16,7 +16,13 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn new(position: Position, area: Area, depth: Depth, color: Color, rasterization_key: RasterizationKey) -> Self {
+    pub fn new(
+        position: Position,
+        area: Area,
+        depth: Depth,
+        color: Color,
+        rasterization_key: RasterizationKey,
+    ) -> Self {
         Self {
             position,
             area,
@@ -27,6 +33,6 @@ impl Instance {
     }
     pub fn attributes() -> [VertexAttribute; 5] {
         wgpu::vertex_attr_array![attributes::TEXT_COLOR => Float32x4, attributes::TEXT_POSITION => Float32x2,
-            attributes::TEXT_AREA => Float32x2, attributes::TEXT_DEPTH => Float32, attributes::TEXT_RASTERIZATION_KEY => Uint32x2]
+            attributes::TEXT_AREA => Float32x2, attributes::TEXT_DEPTH => Float32, attributes::TEXT_RASTERIZATION_KEY => Uint32x3]
     }
 }

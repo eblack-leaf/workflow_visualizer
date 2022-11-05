@@ -1,8 +1,10 @@
-use crate::depth_texture::DepthTexture;
-use crate::theme::Theme;
-use crate::viewport::{Viewport, ViewportBinding};
 use bevy_ecs::prelude::Res;
 use wgpu::{SurfaceError, SurfaceTexture};
+
+use crate::depth_texture::DepthTexture;
+use crate::text::{RasterizerBinding, TextRenderer};
+use crate::theme::Theme;
+use crate::viewport::{Viewport, ViewportBinding};
 
 pub fn get_surface_texture(
     surface: &wgpu::Surface,
@@ -37,14 +39,15 @@ pub fn get_surface_texture(
         },
     }
 }
+
 pub fn render(
     surface: Res<wgpu::Surface>,
     device: Res<wgpu::Device>,
     queue: Res<wgpu::Queue>,
     viewport: Res<Viewport>,
     viewport_binding: Res<ViewportBinding>,
-    // text_renderer: Res<TextRenderer>,
-    // rasterization_binding: Res<RasterizationBinding>,
+    text_renderer: Res<TextRenderer>,
+    rasterizer_binding: Res<RasterizerBinding>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
     theme: Res<Theme>,
@@ -76,10 +79,7 @@ pub fn render(
                     stencil_ops: None,
                 }),
             });
-            // render_pass.set_viewport()
-            // all other render work
-            // last cause alpha values
-            // text_renderer.render(&mut render_pass, &rasterization_binding, &viewport_binding);
+            text_renderer.render(&mut render_pass, &rasterizer_binding, &viewport_binding);
         }
         queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();

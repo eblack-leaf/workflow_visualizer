@@ -27,7 +27,7 @@ impl TextFont {
                     ..FontSettings::default()
                 },
             )
-                .expect("text font creation"),
+            .expect("text font creation"),
         }
     }
 }
