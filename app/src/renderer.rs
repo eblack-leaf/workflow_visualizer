@@ -2,7 +2,8 @@ use bevy_ecs::prelude::Res;
 use wgpu::{SurfaceError, SurfaceTexture};
 
 use crate::depth_texture::DepthTexture;
-use crate::text::{RasterizerBinding, TextRenderer};
+use crate::text_refactor;
+use crate::text_refactor::{Rasterization, TextRenderer};
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
 
@@ -47,8 +48,9 @@ pub fn render(
     viewport: Res<Viewport>,
     viewport_binding: Res<ViewportBinding>,
     text_renderer: Res<TextRenderer>,
-    rasterizer_binding: Res<RasterizerBinding>,
+    rasterization: Res<Rasterization>,
     depth_texture: Res<DepthTexture>,
+    instances: Res<text_refactor::Instances>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
     theme: Res<Theme>,
 ) {
@@ -79,7 +81,12 @@ pub fn render(
                     stencil_ops: None,
                 }),
             });
-            text_renderer.render(&mut render_pass, &rasterizer_binding, &viewport_binding);
+            text_renderer.render(
+                &mut render_pass,
+                &rasterization,
+                &viewport_binding,
+                &instances,
+            );
         }
         queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();

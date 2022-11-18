@@ -1,15 +1,16 @@
 use wgpu::util::DeviceExt;
+use wgpu::BufferAddress;
 
 use crate::gpu_bindings::bindings;
 
-pub struct RasterizerBinding {
+pub struct Rasterization {
     pub buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
 }
 
-impl RasterizerBinding {
-    pub fn new(device: &wgpu::Device, cpu_buffer: &Vec<u8>) -> Self {
+impl Rasterization {
+    pub fn new(device: &wgpu::Device, size: usize) -> Self {
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("rasterizer bind group layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
@@ -23,10 +24,11 @@ impl RasterizerBinding {
                 count: None,
             }],
         });
-        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("rasterizer buffer"),
-            contents: cpu_buffer.as_slice(),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        let buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("rasterization"),
+            size: size as BufferAddress,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
         });
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("rasterizer bind group"),

@@ -1,4 +1,5 @@
 use std::path::Path;
+
 use warp::hyper::header::HeaderName;
 use warp::Filter;
 
@@ -9,6 +10,7 @@ fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
         "require-corp",
     )
 }
+
 fn cross_origin_opener_policy(reply: impl warp::Reply) -> impl warp::Reply {
     warp::reply::with_header(
         reply,
@@ -16,6 +18,7 @@ fn cross_origin_opener_policy(reply: impl warp::Reply) -> impl warp::Reply {
         "same-origin",
     )
 }
+
 #[tokio::main]
 async fn main() {
     let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
@@ -23,7 +26,7 @@ async fn main() {
         .nth(1)
         .unwrap()
         .to_path_buf();
-    let profile = "debug";
+    let _profile = "debug";
     let build_dir = project_root.join("web_app_build");
     let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET"]);
     let routes = warp::fs::dir(build_dir)

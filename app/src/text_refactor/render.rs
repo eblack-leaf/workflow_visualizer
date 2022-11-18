@@ -3,13 +3,11 @@ use wgpu::util::DeviceExt;
 
 use crate::coord::Position;
 use crate::gpu_bindings::{bindings, buffers};
-use crate::text::instance::Instance;
-use crate::text::rasterizer::RasterizerBinding;
-use crate::text::renderer::instance_buffer::GlyphInstanceBuffer;
-use crate::text::vertex::Vertex;
+use crate::text_refactor::instance::Instance;
+use crate::text_refactor::instances::Instances;
+use crate::text_refactor::rasterization::Rasterization;
+use crate::text_refactor::vertex::Vertex;
 use crate::viewport::ViewportBinding;
-
-mod instance_buffer;
 
 const GLYPH_AABB: [Vertex; 6] = [
     Vertex::new(Position::new(0.0, 0.0)),
@@ -23,7 +21,6 @@ const GLYPH_AABB: [Vertex; 6] = [
 pub struct TextRenderer {
     pub pipeline: wgpu::RenderPipeline,
     pub vertex_buffer: wgpu::Buffer,
-    pub instance_buffer: GlyphInstanceBuffer,
 }
 
 impl TextRenderer {
@@ -32,9 +29,9 @@ impl TextRenderer {
         surface_format: wgpu::TextureFormat,
         depth_format: wgpu::TextureFormat,
         viewport_binding: &ViewportBinding,
-        rasterizer_binding: &RasterizerBinding,
+        rasterization: &Rasterization,
     ) -> Self {
-        let shader = device.create_shader_module(include_wgsl!("../text.wgsl"));
+        let shader = device.create_shader_module(include_wgsl!("text.wgsl"));
         Self {
             pipeline: device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("text pipeline"),
@@ -43,7 +40,7 @@ impl TextRenderer {
                         label: Some("text pipeline descriptor"),
                         bind_group_layouts: &[
                             &viewport_binding.bind_group_layout,
-                            &rasterizer_binding.bind_group_layout,
+                            &rasterization.bind_group_layout,
                         ],
                         push_constant_ranges: &[],
                     }),
@@ -97,26 +94,22 @@ impl TextRenderer {
                 contents: bytemuck::cast_slice(&GLYPH_AABB),
                 usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             }),
-            instance_buffer: GlyphInstanceBuffer::new(device, vec![]),
         }
     }
     pub fn render<'a>(
         &'a self,
         mut render_pass: &mut wgpu::RenderPass<'a>,
-        rasterizer_binding: &'a RasterizerBinding,
+        rasterization: &'a Rasterization,
         viewport_binding: &'a ViewportBinding,
+        instances: &'a Instances,
     ) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(bindings::VIEWPORT, &viewport_binding.bind_group, &[]);
-        render_pass.set_bind_group(bindings::RASTERIZATION, &rasterizer_binding.bind_group, &[]);
+        render_pass.set_bind_group(bindings::RASTERIZATION, &rasterization.bind_group, &[]);
         render_pass.set_vertex_buffer(buffers::TEXT_VERTEX, self.vertex_buffer.slice(..));
-        render_pass.set_vertex_buffer(
-            buffers::TEXT_INSTANCE,
-            self.instance_buffer.instance_buffer.slice(..),
-        );
-        render_pass.draw(
-            0..GLYPH_AABB.len() as u32,
-            0..self.instance_buffer.instance_count,
-        );
+        render_pass.set_vertex_buffer(buffers::TEXT_INSTANCE, instances.instance_buffer.slice(..));
+        if instances.instance_count > 0 {
+            render_pass.draw(0..GLYPH_AABB.len() as u32, 0..instances.instance_count);
+        }
     }
 }

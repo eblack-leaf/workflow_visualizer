@@ -17,5 +17,5 @@ pub mod attributes {
     pub const TEXT_POSITION: u32 = 1;
     pub const TEXT_AREA: u32 = 2;
     pub const TEXT_DEPTH: u32 = 3;
-    pub const TEXT_RASTERIZATION_KEY: u32 = 4;
+    pub const TEXT_RASTERIZATION_DESCRIPTOR: u32 = 4;
 }

@@ -1,3 +1,5 @@
+#![allow(dead_code, unused)]
+
 use winit::event_loop::EventLoop;
 use winit::window::Window;
 
@@ -5,6 +7,7 @@ fn main() {
     #[cfg(target_arch = "wasm32")]
     wasm_bindgen_futures::spawn_local(web_run());
 }
+
 #[cfg(target_arch = "wasm32")]
 async fn web_run() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));

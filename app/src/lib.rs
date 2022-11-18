@@ -1,3 +1,5 @@
+#![allow(dead_code, unused)]
+
 use bevy_ecs::prelude::{ParallelSystemDescriptorCoercion, SystemStage};
 use bevy_ecs::system::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
@@ -17,10 +19,11 @@ mod gpu_bindings;
 pub mod input;
 pub mod job;
 mod renderer;
-pub mod text;
+pub mod text_refactor;
 pub mod theme;
 mod uniform;
 pub mod viewport;
+mod visibility;
 pub mod window;
 
 #[derive(Clone)]
@@ -62,7 +65,7 @@ impl App {
                         .with_system(depth_texture::setup),
                 );
                 job.startup
-                    .add_stage("text_setup", SystemStage::single(text::setup));
+                    .add_stage("text_setup", SystemStage::single(text_refactor::setup));
                 job.exec
                     .add_stage("window_resize", SystemStage::single(window::resize));
                 job.exec
@@ -128,8 +131,12 @@ impl App {
     pub fn can_idle(&self) -> bool {
         return self.compute.can_idle() && self.render.can_idle();
     }
-    pub fn extract_render_packets(&mut self) {}
-    pub fn render_post_processing(&mut self) {}
+    pub fn extract_render_packets(&mut self) {
+        // render glyphs with add/update/remove
+    }
+    pub fn render_post_processing(&mut self) {
+        // write swaps back to glyph cache and index to text_instance_infos
+    }
 }
 
 pub fn run<T>(mut app: App, event_loop: EventLoop<T>) {
