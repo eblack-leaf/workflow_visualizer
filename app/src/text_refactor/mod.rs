@@ -2,8 +2,11 @@ use bevy_ecs::prelude::{Commands, Res};
 
 use crate::depth_texture::DepthTexture;
 use crate::text_refactor::font::Font;
+use crate::text_refactor::glyph_cache::GlyphCache;
+pub use crate::text_refactor::glyph_cache::RemovedRasterizations;
 pub use crate::text_refactor::instances::Instances;
-pub use crate::text_refactor::rasterization::Rasterization;
+pub use crate::text_refactor::rasterization::Rasterizations;
+pub use crate::text_refactor::rasterizer::RasterizationReferences;
 use crate::text_refactor::rasterizer::Rasterizer;
 pub use crate::text_refactor::render::TextRenderer;
 use crate::viewport::ViewportBinding;
@@ -25,7 +28,7 @@ pub struct Text {
     pub text: String,
 }
 
-pub fn setup(
+pub fn render_setup(
     viewport_binding: Res<ViewportBinding>,
     device: Res<wgpu::Device>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
@@ -37,7 +40,7 @@ pub fn setup(
         13u32,
     );
     let rasterizer = Rasterizer::new();
-    let rasterization = Rasterization::new(&device, 1024);
+    let rasterization = Rasterizations::new(&device, 1024);
     let text_renderer = TextRenderer::new(
         &device,
         surface_configuration.format,
@@ -51,4 +54,8 @@ pub fn setup(
     cmd.insert_resource(text_renderer);
     cmd.insert_resource(rasterizer);
     cmd.insert_resource(font);
+}
+pub fn compute_setup(mut cmd: Commands) {
+    let glyph_cache = GlyphCache::new();
+    cmd.insert_resource(glyph_cache);
 }

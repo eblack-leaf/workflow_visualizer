@@ -1,6 +1,6 @@
 #![allow(dead_code, unused)]
 
-use bevy_ecs::prelude::{ParallelSystemDescriptorCoercion, SystemStage};
+use bevy_ecs::prelude::{ParallelSystemDescriptorCoercion, ResMut, SystemStage};
 use bevy_ecs::system::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
@@ -8,6 +8,7 @@ use winit::window::Window;
 
 use crate::canvas::Canvas;
 use crate::job::{ExecutionState, Job};
+use crate::text_refactor::{RasterizationReferences, RemovedRasterizations};
 use crate::theme::Theme;
 use crate::window::Resize;
 
@@ -64,8 +65,10 @@ impl App {
                         .with_system(viewport::setup)
                         .with_system(depth_texture::setup),
                 );
-                job.startup
-                    .add_stage("text_setup", SystemStage::single(text_refactor::setup));
+                job.startup.add_stage(
+                    "text_setup",
+                    SystemStage::single(text_refactor::render_setup),
+                );
                 job.exec
                     .add_stage("window_resize", SystemStage::single(window::resize));
                 job.exec
@@ -132,7 +135,19 @@ impl App {
         return self.compute.can_idle() && self.render.can_idle();
     }
     pub fn extract_render_packets(&mut self) {
-        // render glyphs with add/update/remove
+        let mut removed_rasterizations = self
+            .compute
+            .container
+            .get_resource_mut::<ResMut<RemovedRasterizations>>()
+            .unwrap();
+        let mut rasterization_references = self
+            .render
+            .container
+            .get_resource_mut::<RasterizationReferences>()
+            .unwrap();
+        for rast in removed_rasterizations.removed.drain(..) {
+            rasterization_references.remove(rast);
+        }
     }
     pub fn render_post_processing(&mut self) {
         // write swaps back to glyph cache and index to text_instance_infos

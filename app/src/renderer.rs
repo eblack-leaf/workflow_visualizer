@@ -3,7 +3,7 @@ use wgpu::{SurfaceError, SurfaceTexture};
 
 use crate::depth_texture::DepthTexture;
 use crate::text_refactor;
-use crate::text_refactor::{Rasterization, TextRenderer};
+use crate::text_refactor::{Rasterizations, TextRenderer};
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
 
@@ -48,7 +48,7 @@ pub fn render(
     viewport: Res<Viewport>,
     viewport_binding: Res<ViewportBinding>,
     text_renderer: Res<TextRenderer>,
-    rasterization: Res<Rasterization>,
+    rasterization: Res<Rasterizations>,
     depth_texture: Res<DepthTexture>,
     instances: Res<text_refactor::Instances>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
@@ -81,6 +81,7 @@ pub fn render(
                     stencil_ops: None,
                 }),
             });
+            // contains alpha values
             text_renderer.render(
                 &mut render_pass,
                 &rasterization,
@@ -88,6 +89,7 @@ pub fn render(
                 &instances,
             );
         }
+        // post-processing
         queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
     }

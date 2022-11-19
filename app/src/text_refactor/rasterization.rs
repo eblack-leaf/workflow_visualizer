@@ -3,13 +3,13 @@ use wgpu::BufferAddress;
 
 use crate::gpu_bindings::bindings;
 
-pub struct Rasterization {
+pub struct Rasterizations {
     pub buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
 }
 
-impl Rasterization {
+impl Rasterizations {
     pub fn new(device: &wgpu::Device, size: usize) -> Self {
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("rasterizer bind group layout"),

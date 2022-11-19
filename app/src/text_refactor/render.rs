@@ -5,7 +5,7 @@ use crate::coord::Position;
 use crate::gpu_bindings::{bindings, buffers};
 use crate::text_refactor::instance::Instance;
 use crate::text_refactor::instances::Instances;
-use crate::text_refactor::rasterization::Rasterization;
+use crate::text_refactor::rasterization::Rasterizations;
 use crate::text_refactor::vertex::Vertex;
 use crate::viewport::ViewportBinding;
 
@@ -29,7 +29,7 @@ impl TextRenderer {
         surface_format: wgpu::TextureFormat,
         depth_format: wgpu::TextureFormat,
         viewport_binding: &ViewportBinding,
-        rasterization: &Rasterization,
+        rasterization: &Rasterizations,
     ) -> Self {
         let shader = device.create_shader_module(include_wgsl!("text.wgsl"));
         Self {
@@ -99,7 +99,7 @@ impl TextRenderer {
     pub fn render<'a>(
         &'a self,
         mut render_pass: &mut wgpu::RenderPass<'a>,
-        rasterization: &'a Rasterization,
+        rasterization: &'a Rasterizations,
         viewport_binding: &'a ViewportBinding,
         instances: &'a Instances,
     ) {
