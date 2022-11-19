@@ -21,6 +21,7 @@ pub mod input;
 pub mod job;
 mod renderer;
 pub mod text_refactor;
+mod text_step_out;
 pub mod theme;
 mod uniform;
 pub mod viewport;
@@ -135,19 +136,19 @@ impl App {
         return self.compute.can_idle() && self.render.can_idle();
     }
     pub fn extract_render_packets(&mut self) {
-        let mut removed_rasterizations = self
-            .compute
-            .container
-            .get_resource_mut::<ResMut<RemovedRasterizations>>()
-            .unwrap();
-        let mut rasterization_references = self
-            .render
-            .container
-            .get_resource_mut::<RasterizationReferences>()
-            .unwrap();
-        for rast in removed_rasterizations.removed.drain(..) {
-            rasterization_references.remove(rast);
-        }
+        // let mut removed_rasterizations = self
+        //     .compute
+        //     .container
+        //     .get_resource_mut::<ResMut<RemovedRasterizations>>()
+        //     .unwrap();
+        // let mut rasterization_references = self
+        //     .render
+        //     .container
+        //     .get_resource_mut::<RasterizationReferences>()
+        //     .unwrap();
+        // for rast in removed_rasterizations.removed.drain(..) {
+        //     rasterization_references.remove(rast);
+        // }
     }
     pub fn render_post_processing(&mut self) {
         // write swaps back to glyph cache and index to text_instance_infos

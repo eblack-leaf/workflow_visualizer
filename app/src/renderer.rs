@@ -49,8 +49,8 @@ pub fn render(
     viewport_binding: Res<ViewportBinding>,
     text_renderer: Res<TextRenderer>,
     rasterization: Res<Rasterizations>,
-    depth_texture: Res<DepthTexture>,
     instances: Res<text_refactor::Instances>,
+    depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
     theme: Res<Theme>,
 ) {
