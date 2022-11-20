@@ -1,5 +1,9 @@
-use bevy_ecs::prelude::{Commands, Res};
+use std::collections::HashMap;
 
+use bevy_ecs::prelude::{Bundle, Commands, Component, Res};
+
+use crate::color::Color;
+use crate::coord::Panel;
 use crate::depth_texture::DepthTexture;
 use crate::text_refactor::font::Font;
 use crate::text_refactor::glyph_cache::GlyphCache;
@@ -24,8 +28,21 @@ pub mod render;
 mod scale;
 mod vertex;
 
+#[derive(Component)]
 pub struct Text {
     pub text: String,
+}
+
+pub struct ColorAdjustment {
+    pub adjustments: HashMap<usize, Color>,
+}
+
+#[derive(Bundle)]
+pub struct TextBundle {
+    pub text: Text,
+    #[bundle]
+    pub panel: Panel,
+    pub base_color: Color,
 }
 
 pub fn render_setup(
@@ -55,6 +72,7 @@ pub fn render_setup(
     cmd.insert_resource(rasterizer);
     cmd.insert_resource(font);
 }
+
 pub fn compute_setup(mut cmd: Commands) {
     let glyph_cache = GlyphCache::new();
     cmd.insert_resource(glyph_cache);

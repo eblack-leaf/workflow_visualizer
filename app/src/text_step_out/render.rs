@@ -1,12 +1,15 @@
+use wgpu::util::DeviceExt;
+use wgpu::{include_wgsl, VertexAttribute};
+
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::gpu_bindings::bindings;
 use crate::text_step_out::attributes::{AttributeBuffer, Coordinator};
 use crate::text_step_out::rasterization::placement::RasterizationPlacement;
+use crate::text_step_out::rasterization::Rasterizations;
 use crate::text_step_out::vertex::Vertex;
 use crate::viewport::ViewportBinding;
-use wgpu::util::DeviceExt;
-use wgpu::{include_wgsl, VertexAttribute};
+
 const GLYPH_AABB: [Vertex; 6] = [
     Vertex::new(Position::new(0.0, 0.0)),
     Vertex::new(Position::new(0.0, 1.0)),
