@@ -5,3 +5,5 @@ mod render;
 mod scale;
 mod vertex;
 mod rasterization;
+mod glyph;
+mod layout;
