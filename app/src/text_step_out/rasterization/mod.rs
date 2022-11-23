@@ -2,9 +2,8 @@ pub use crate::text_step_out::rasterization::rasterizations::Rasterizations;
 
 pub mod placement;
 mod rasterizations;
-mod rasterize;
 mod references;
-
+pub use crate::text_step_out::rasterization::rasterizations::{AddRasterizationRequest, WriteRasterizationRequest, RasterizedGlyphHash, rasterize_writes, rasterize_adds};
 // rasterize writes - hook into writes and raster them
 // integrate appended rasterizations + shrink removes
 // so rewrite from cpu_buffer + appended rasterizations

@@ -7,22 +7,37 @@ pub fn setup_attribute_buffers<Attribute: bytemuck::Pod + bytemuck::Zeroable + C
     device: Res<wgpu::Device>,
     mut cmd: Commands,
 ) {
-    cmd.insert_resource(AttributeBuffer::<Attribute>::new(&device, coordinator.max))
+    cmd.insert_resource(CpuAttributes::<Attribute>::new(coordinator.max));
+    cmd.insert_resource(GpuAttributes::<Attribute>::new(&device, coordinator.max))
 }
 pub fn attribute_size<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
-    num: usize,
+    num: u32,
 ) -> wgpu::BufferAddress {
     (std::mem::size_of::<Attribute>() * num) as BufferAddress
 }
-pub struct AttributeBuffer<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
-    pub attributes: wgpu::Buffer,
+pub struct CpuAttributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
+    pub attributes: Vec<Attribute>,
+}
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> CpuAttributes<Attribute> {
+    pub fn new(max: u32) -> Self {
+        Self {
+            attributes: {
+                let mut attrs = Vec::new();
+                attrs.reserve(max as usize);
+                attrs
+            },
+        }
+    }
+}
+pub struct GpuAttributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
+    pub buffer: wgpu::Buffer,
     pub size: wgpu::BufferAddress,
 }
-impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> AttributeBuffer<Attribute> {
-    pub fn new(device: &wgpu::Device, max: usize) -> Self {
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> GpuAttributes<Attribute> {
+    pub fn new(device: &wgpu::Device, max: u32) -> Self {
         let attr_size = (attribute_size::<Attribute>(max)) as BufferAddress;
         Self {
-            attributes: device.create_buffer(&wgpu::BufferDescriptor {
+            buffer: device.create_buffer(&wgpu::BufferDescriptor {
                 label: Some("instances"),
                 size: attr_size,
                 usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,

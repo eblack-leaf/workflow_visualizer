@@ -7,8 +7,11 @@ use winit::event_loop::EventLoop;
 use winit::window::Window;
 
 use crate::canvas::Canvas;
+use crate::color::Color;
+use crate::coord::{Area, Depth, Position};
 use crate::job::{ExecutionState, Job};
 use crate::text_refactor::{RasterizationReferences, RemovedRasterizations};
+use crate::text_step_out::RasterizationPlacement;
 use crate::theme::Theme;
 use crate::window::Resize;
 
@@ -67,11 +70,52 @@ impl App {
                         .with_system(depth_texture::setup),
                 );
                 job.startup.add_stage(
-                    "text_setup",
-                    SystemStage::single(text_refactor::render_setup),
+                    "writes/adds/removes",
+                    SystemStage::parallel().with_system(text_step_out::setup_attributes::<Position>)
+                        .with_system(text_step_out::setup_attributes::<Area>)
+                        .with_system(text_step_out::setup_attributes::<Depth>)
+                        .with_system(text_step_out::setup_attributes::<Color>)
+                        .with_system(text_step_out::setup_attributes::<RasterizationPlacement>)
+                        .with_system(text_step_out::setup_added_instances)
+                );
+                job.startup.add_stage(
+                    "attribute buffers",
+                    SystemStage::parallel()
+                        .with_system(text_step_out::setup_attribute_buffers::<Position>)
+                        .with_system(text_step_out::setup_attribute_buffers::<Area>)
+                        .with_system(text_step_out::setup_attribute_buffers::<Depth>)
+                        .with_system(text_step_out::setup_attribute_buffers::<Color>)
+                        .with_system(
+                            text_step_out::setup_attribute_buffers::<RasterizationPlacement>,
+                        ),
                 );
                 job.exec
                     .add_stage("window_resize", SystemStage::single(window::resize));
+                job.exec.add_stage(
+                    "remove instances",
+                    SystemStage::parallel().with_system(text_step_out::remove_instances),
+                );
+                job.exec.add_stage("rasterize writes", SystemStage::single(text_step_out::rasterize_writes));
+                job.exec.add_stage("growth", SystemStage::single(text_step_out::growth));
+                job.exec.add_stage(
+                    "add instances",
+                    SystemStage::parallel().with_system(text_step_out::add_instances),
+                );
+                job.exec.add_stage("rasterize adds", SystemStage::single(text_step_out::rasterize_adds));
+                job.exec.add_stage("add attributes", SystemStage::parallel().with_system(text_step_out::add_attributes::<Position>)
+                    .with_system(text_step_out::add_attributes::<Area>)
+                    .with_system(text_step_out::add_attributes::<Depth>)
+                    .with_system(text_step_out::add_attributes::<Color>)
+                    .with_system(text_step_out::add_attributes::<RasterizationPlacement>));
+                job.exec.add_stage(
+                    "write attributes",
+                    SystemStage::parallel()
+                        .with_system(text_step_out::write_attribute::<Position>)
+                        .with_system(text_step_out::write_attribute::<Area>)
+                        .with_system(text_step_out::write_attribute::<Depth>)
+                        .with_system(text_step_out::write_attribute::<Color>)
+                        .with_system(text_step_out::write_attribute::<RasterizationPlacement>),
+                );
                 job.exec
                     .add_stage("render", SystemStage::single(renderer::render));
                 job

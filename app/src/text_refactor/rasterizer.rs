@@ -48,7 +48,7 @@ impl Rasterizer {
 }
 pub struct RasterizationReferences {
     pub refs: HashMap<RasterizedGlyphHash, u32>,
-    pub orphaned: Vec<RasterizedGlyphHash>,// no need just check 0 or no entry made
+    pub orphaned: Vec<RasterizedGlyphHash>, // no need just check 0 or no entry made
 }
 impl RasterizationReferences {
     pub fn new() -> Self {

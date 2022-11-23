@@ -4,7 +4,7 @@ use wgpu::{include_wgsl, VertexAttribute};
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::gpu_bindings::bindings;
-use crate::text_step_out::attributes::{AttributeBuffer, Coordinator};
+use crate::text_step_out::attributes::{Coordinator, GpuAttributes};
 use crate::text_step_out::rasterization::placement::RasterizationPlacement;
 use crate::text_step_out::rasterization::Rasterizations;
 use crate::text_step_out::vertex::Vertex;
@@ -124,21 +124,21 @@ impl TextRenderer {
         rasterization: &'a Rasterizations,
         viewport_binding: &'a ViewportBinding,
         coordinator: &'a Coordinator,
-        positions: &'a AttributeBuffer<Position>,
-        areas: &'a AttributeBuffer<Area>,
-        depths: &'a AttributeBuffer<Depth>,
-        colors: &'a AttributeBuffer<Color>,
-        rasterization_placements: &'a AttributeBuffer<RasterizationPlacement>,
+        positions: &'a GpuAttributes<Position>,
+        areas: &'a GpuAttributes<Area>,
+        depths: &'a GpuAttributes<Depth>,
+        colors: &'a GpuAttributes<Color>,
+        rasterization_placements: &'a GpuAttributes<RasterizationPlacement>,
     ) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(bindings::VIEWPORT, &viewport_binding.bind_group, &[]);
         render_pass.set_bind_group(bindings::RASTERIZATION, &rasterization.bind_group, &[]);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.set_vertex_buffer(1, positions.attributes.slice(..));
-        render_pass.set_vertex_buffer(2, areas.attributes.slice(..));
-        render_pass.set_vertex_buffer(3, depths.attributes.slice(..));
-        render_pass.set_vertex_buffer(4, colors.attributes.slice(..));
-        render_pass.set_vertex_buffer(5, rasterization_placements.attributes.slice(..));
+        render_pass.set_vertex_buffer(1, positions.buffer.slice(..));
+        render_pass.set_vertex_buffer(2, areas.buffer.slice(..));
+        render_pass.set_vertex_buffer(3, depths.buffer.slice(..));
+        render_pass.set_vertex_buffer(4, colors.buffer.slice(..));
+        render_pass.set_vertex_buffer(5, rasterization_placements.buffer.slice(..));
         if coordinator.current > 0 {
             render_pass.draw(0..GLYPH_AABB.len() as u32, 0..&coordinator.current as u32);
         }
