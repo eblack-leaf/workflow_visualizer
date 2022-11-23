@@ -2,11 +2,13 @@ use bevy_ecs::prelude::{Commands, Entity, Res, ResMut};
 
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
+use crate::text_step_out::attributes::buffers::{attribute_size, CpuAttributes};
 use crate::text_step_out::attributes::write::{Write, Writes};
 use crate::text_step_out::attributes::{Coordinator, GpuAttributes, Index};
-use crate::text_step_out::attributes::buffers::{attribute_size, CpuAttributes};
 use crate::text_step_out::rasterization::placement::RasterizationPlacement;
-use crate::text_step_out::rasterization::{WriteRasterizationRequest, Rasterizations, RasterizedGlyphHash, AddRasterizationRequest};
+use crate::text_step_out::rasterization::{
+    AddRasterizationRequest, Rasterizations, RasterizedGlyphHash, WriteRasterizationRequest,
+};
 use crate::text_step_out::scale::Scale;
 pub struct IndexResponse {
     pub entity: Entity,
@@ -14,10 +16,7 @@ pub struct IndexResponse {
 }
 impl IndexResponse {
     pub fn new(entity: Entity, index: Index) -> Self {
-        Self {
-            entity,
-            index,
-        }
+        Self { entity, index }
     }
 }
 pub struct AddData {
@@ -38,9 +37,7 @@ pub struct AddedInstances {
 }
 impl AddedInstances {
     pub fn new() -> Self {
-        Self {
-            to_add: Vec::new()
-        }
+        Self { to_add: Vec::new() }
     }
 }
 pub fn setup_added_instances(mut cmd: Commands) {
@@ -60,9 +57,7 @@ pub struct Adds<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
 }
 impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> Adds<Attribute> {
     pub fn new() -> Self {
-        Self {
-            adds: Vec::new(),
-        }
+        Self { adds: Vec::new() }
     }
 }
 pub fn add_instances(
@@ -74,29 +69,49 @@ pub fn add_instances(
     mut colors: ResMut<Adds<Color>>,
     mut cmd: Commands,
 ) {
-    added_instances.to_add.drain(..).for_each(|added_instance: AddedInstance| {
-        let index = coordinator.generate_index();
-        positions
-            .adds
-            .push(Add::new(index, added_instance.add_data.position));
-        areas.adds.push(Add::new(index, added_instance.add_data.area));
-        depths.adds.push(Add::new(index, added_instance.add_data.depth));
-        colors.adds.push(Add::new(index, added_instance.add_data.color));
-        cmd.spawn().insert(AddRasterizationRequest::new(
-            added_instance.entity,
-            added_instance.add_data.hash,
-            added_instance.add_data.character,
-            added_instance.add_data.scale,
-            index,
-        )).insert(IndexResponse::new(added_instance.entity, index));
-    });
+    coordinator.growth = Option::from(added_instances.to_add.len() as u32);
+    added_instances
+        .to_add
+        .drain(..)
+        .for_each(|added_instance: AddedInstance| {
+            let index = coordinator.generate_index();
+            positions
+                .adds
+                .push(Add::new(index, added_instance.add_data.position));
+            areas
+                .adds
+                .push(Add::new(index, added_instance.add_data.area));
+            depths
+                .adds
+                .push(Add::new(index, added_instance.add_data.depth));
+            colors
+                .adds
+                .push(Add::new(index, added_instance.add_data.color));
+            cmd.spawn()
+                .insert(AddRasterizationRequest::new(
+                    added_instance.entity,
+                    added_instance.add_data.hash,
+                    added_instance.add_data.character,
+                    added_instance.add_data.scale,
+                    index,
+                ))
+                .insert(IndexResponse::new(added_instance.entity, index));
+        });
 }
-pub fn add_attributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(adds: ResMut<Adds<Attribute>>,
-                      attributes: Res<GpuAttributes<Attribute>>,
-                      queue: Res<wgpu::Queue>,
-                      mut cpu_attributes: ResMut<CpuAttributes<Attribute>>,) {
-    for add in adds.adds.drain(..) {
+pub fn add_cpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
+    adds: ResMut<Adds<Attribute>>,
+    mut cpu_attributes: ResMut<CpuAttributes<Attribute>>,
+) {
+    for add in adds.adds.iter() {
         *cpu_attributes.attributes.get_mut(add.index.0 as usize) = add.attribute;
+    }
+}
+pub fn add_gpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
+    queue: Res<wgpu::Queue>,
+    attributes: Res<GpuAttributes<Attribute>>,
+    adds: ResMut<Adds<Attribute>>,
+) {
+    for add in adds.adds.drain(..) {
         queue.write_buffer(
             &attributes.buffer,
             attribute_size::<Attribute>(add.index.0 as u32),
@@ -106,7 +121,6 @@ pub fn add_attributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clo
 }
 pub fn growth(
     mut coordinator: ResMut<Coordinator>,
-    mut adds: ResMut<AddedInstances>,
     mut position_attributes: ResMut<CpuAttributes<Position>>,
     mut area_attributes: ResMut<CpuAttributes<Position>>,
     mut depth_attributes: ResMut<CpuAttributes<Position>>,
@@ -117,23 +131,59 @@ pub fn growth(
     mut depths: ResMut<GpuAttributes<Depth>>,
     mut colors: ResMut<GpuAttributes<Color>>,
     mut rasterization_placements: ResMut<GpuAttributes<RasterizationPlacement>>,
-    mut positions_writes: ResMut<Writes<Position>>,
-    mut areas_writes: ResMut<Writes<Area>>,
-    mut depths_writes: ResMut<Writes<Depth>>,
-    mut colors_writes: ResMut<Writes<Color>>,
-    mut rasterization_placement_writes: ResMut<Writes<Color>>,
     queue: Res<wgpu::Queue>,
     device: Res<wgpu::Device>,
 ) {
-    let growth = adds.to_add.len();
-    let buffer_growth = 0;
-    if coordinator.current + growth > coordinator.max {
-        position_attributes.attributes.reserve(buffer_growth as usize);
-        area_attributes.attributes.reserve(buffer_growth as usize);
-        depth_attributes.attributes.reserve(buffer_growth as usize);
-        color_attributes.attributes.reserve(buffer_growth as usize);
-        // grow gpu buffers
-        // drain writes into cpu buffers
-        // write current state to gpu buffers so adds can write normally on top of it
+    if let Some(growth) = coordinator.growth {
+        if coordinator.current + growth > coordinator.max {
+            let buffer_growth = coordinator.max.abs_diff(coordinator.current + growth);
+            position_attributes
+                .attributes
+                .reserve(buffer_growth as usize);
+            area_attributes.attributes.reserve(buffer_growth as usize);
+            depth_attributes.attributes.reserve(buffer_growth as usize);
+            color_attributes.attributes.reserve(buffer_growth as usize);
+            // grow gpu buffers
+            positions.size += attribute_size::<Position>(buffer_growth);
+            areas.size += attribute_size::<Area>(buffer_growth);
+            depths.size += attribute_size::<Depth>(buffer_growth);
+            colors.size += attribute_size::<Color>(buffer_growth);
+            rasterization_placements.size +=
+                attribute_size::<RasterizationPlacement>(buffer_growth);
+            *positions.buffer = GpuAttributes::<Position>::new(&device, positions.size as u32);
+            *areas.buffer = GpuAttributes::<Area>::new(&device, areas.size as u32);
+            *depths.buffer = GpuAttributes::<Depth>::new(&device, depths.size as u32);
+            *colors.buffer = GpuAttributes::<Color>::new(&device, colors.size as u32);
+            *rasterization_placements.buffer = GpuAttributes::<RasterizationPlacement>::new(
+                &device,
+                rasterization_placements.size as u32,
+            );
+            // write current state to gpu buffers so adds can write normally on top of it
+            queue.write_buffer(
+                &positions.buffer,
+                0,
+                bytemuck::cast_slice(&position_attributes.attributes),
+            );
+            queue.write_buffer(
+                &areas.buffer,
+                0,
+                bytemuck::cast_slice(&area_attributes.attributes),
+            );
+            queue.write_buffer(
+                &depths.buffer,
+                0,
+                bytemuck::cast_slice(&depth_attributes.attributes),
+            );
+            queue.write_buffer(
+                &colors.buffer,
+                0,
+                bytemuck::cast_slice(&color_attributes.attributes),
+            );
+            queue.write_buffer(
+                &rasterization_placements.buffer,
+                0,
+                bytemuck::cast_slice(&rasterization_placement_attributes.attributes),
+            );
+        }
     }
 }

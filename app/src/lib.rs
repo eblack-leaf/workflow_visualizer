@@ -71,12 +71,13 @@ impl App {
                 );
                 job.startup.add_stage(
                     "writes/adds/removes",
-                    SystemStage::parallel().with_system(text_step_out::setup_attributes::<Position>)
+                    SystemStage::parallel()
+                        .with_system(text_step_out::setup_attributes::<Position>)
                         .with_system(text_step_out::setup_attributes::<Area>)
                         .with_system(text_step_out::setup_attributes::<Depth>)
                         .with_system(text_step_out::setup_attributes::<Color>)
                         .with_system(text_step_out::setup_attributes::<RasterizationPlacement>)
-                        .with_system(text_step_out::setup_added_instances)
+                        .with_system(text_step_out::setup_added_instances),
                 );
                 job.startup.add_stage(
                     "attribute buffers",
@@ -95,26 +96,55 @@ impl App {
                     "remove instances",
                     SystemStage::parallel().with_system(text_step_out::remove_instances),
                 );
-                job.exec.add_stage("rasterize writes", SystemStage::single(text_step_out::rasterize_writes));
-                job.exec.add_stage("growth", SystemStage::single(text_step_out::growth));
                 job.exec.add_stage(
                     "add instances",
                     SystemStage::parallel().with_system(text_step_out::add_instances),
                 );
-                job.exec.add_stage("rasterize adds", SystemStage::single(text_step_out::rasterize_adds));
-                job.exec.add_stage("add attributes", SystemStage::parallel().with_system(text_step_out::add_attributes::<Position>)
-                    .with_system(text_step_out::add_attributes::<Area>)
-                    .with_system(text_step_out::add_attributes::<Depth>)
-                    .with_system(text_step_out::add_attributes::<Color>)
-                    .with_system(text_step_out::add_attributes::<RasterizationPlacement>));
                 job.exec.add_stage(
-                    "write attributes",
+                    "rasterize writes",
+                    SystemStage::single(text_step_out::rasterize_writes),
+                );
+                job.exec.add_stage(
+                    "rasterize adds",
+                    SystemStage::single(text_step_out::rasterize_adds),
+                );
+                job.exec.add_stage(
+                    "write cpu attributes",
                     SystemStage::parallel()
-                        .with_system(text_step_out::write_attribute::<Position>)
-                        .with_system(text_step_out::write_attribute::<Area>)
-                        .with_system(text_step_out::write_attribute::<Depth>)
-                        .with_system(text_step_out::write_attribute::<Color>)
-                        .with_system(text_step_out::write_attribute::<RasterizationPlacement>),
+                        .with_system(text_step_out::write_cpu_attrs::<Position>)
+                        .with_system(text_step_out::write_cpu_attrs::<Area>)
+                        .with_system(text_step_out::write_cpu_attrs::<Depth>)
+                        .with_system(text_step_out::write_cpu_attrs::<Color>)
+                        .with_system(text_step_out::write_cpu_attrs::<RasterizationPlacement>),
+                );
+                job.exec
+                    .add_stage("growth", SystemStage::single(text_step_out::growth));
+                job.exec.add_stage(
+                    "add cpu attributes",
+                    SystemStage::parallel()
+                        .with_system(text_step_out::add_cpu_attrs::<Position>)
+                        .with_system(text_step_out::add_cpu_attrs::<Area>)
+                        .with_system(text_step_out::add_cpu_attrs::<Depth>)
+                        .with_system(text_step_out::add_cpu_attrs::<Color>)
+                        .with_system(text_step_out::add_cpu_attrs::<RasterizationPlacement>),
+                );
+                job.exec.add_stage(
+                    "add gpu attrs",
+                    SystemStage::parallel()
+                        .with_system(text_step_out::add_gpu_attrs::<Position>)
+                        .with_system(text_step_out::add_gpu_attrs::<Area>)
+                        .with_system(text_step_out::add_gpu_attrs::<Depth>)
+                        .with_system(text_step_out::add_gpu_attrs::<Color>)
+                        .with_system(text_step_out::add_gpu_attrs::<RasterizationPlacement>),
+                );
+                job.exec.add_stage(
+                    "write gpu attrs",
+                    SystemStage::parallel()
+                        .with_system(text_step_out::write_gpu_attrs::<Position>)
+                        .with_system(text_step_out::write_gpu_attrs::<Area>)
+                        .with_system(text_step_out::write_gpu_attrs::<Depth>)
+                        .with_system(text_step_out::write_gpu_attrs::<Color>)
+                        .with_system(text_step_out::write_gpu_attrs::<RasterizationPlacement>),
                 );
                 job.exec
                     .add_stage("render", SystemStage::single(renderer::render));
