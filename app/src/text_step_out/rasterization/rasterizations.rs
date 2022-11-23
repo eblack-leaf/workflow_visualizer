@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut};
 use fontdue::Metrics;
-use std::collections::HashMap;
 use wgpu::util::DeviceExt;
 use wgpu::BufferAddress;
 
@@ -16,15 +17,18 @@ use crate::text_step_out::scale::Scale;
 
 pub type RasterizedGlyphHash = fontdue::layout::GlyphRasterConfig;
 pub type RasterizedGlyph = (Metrics, Vec<u8>);
+
 pub struct Rasterization {
     pub glyph: RasterizedGlyph,
     pub placement: RasterizationPlacement,
 }
+
 impl Rasterization {
     pub fn new(glyph: RasterizedGlyph, placement: RasterizationPlacement) -> Self {
         Self { glyph, placement }
     }
 }
+
 pub struct Rasterizations {
     pub cpu: Vec<u8>,
     pub gpu: wgpu::Buffer,
@@ -78,15 +82,24 @@ impl Rasterizations {
     }
     // need to separate cause cant decide placement here
 }
-pub struct WriteRasterizationRequest {
+
+pub enum RasterizationRequestCallPoint {
+    Add,
+    Write,
+}
+
+pub struct RasterizationRequest {
+    pub call_point: RasterizationRequestCallPoint,
     pub entity: Entity,
     pub hash: RasterizedGlyphHash,
     pub character: char,
     pub scale: Scale,
     pub index: Index,
 }
-impl WriteRasterizationRequest {
+
+impl RasterizationRequest {
     pub fn new(
+        call_point: RasterizationRequestCallPoint,
         entity: Entity,
         hash: RasterizedGlyphHash,
         character: char,
@@ -94,6 +107,7 @@ impl WriteRasterizationRequest {
         index: Index,
     ) -> Self {
         Self {
+            call_point,
             entity,
             hash,
             character,
@@ -102,34 +116,12 @@ impl WriteRasterizationRequest {
         }
     }
 }
-pub struct AddRasterizationRequest {
-    pub entity: Entity,
-    pub hash: RasterizedGlyphHash,
-    pub character: char,
-    pub scale: Scale,
-    pub index: Index,
-}
-impl AddRasterizationRequest {
-    pub fn new(
-        entity: Entity,
-        hash: RasterizedGlyphHash,
-        character: char,
-        scale: Scale,
-        index: Index,
-    ) -> Self {
-        Self {
-            entity,
-            hash,
-            character,
-            scale,
-            index,
-        }
-    }
-}
+
 pub struct RasterizationResponse {
     pub entity: Entity,
     pub rasterization_placement: RasterizationPlacement,
 }
+
 impl RasterizationResponse {
     pub fn new(entity: Entity, rasterization_placement: RasterizationPlacement) -> Self {
         Self {
@@ -138,56 +130,19 @@ impl RasterizationResponse {
         }
     }
 }
-pub fn rasterize_adds(
+
+pub fn rasterize(
     mut rasterizations: ResMut<Rasterizations>,
     references: ResMut<RasterizationReferences>,
     font: Res<Font>,
-    requests: Query<(Entity, &AddRasterizationRequest)>,
+    requests: Query<(Entity, &RasterizationRequest)>,
     adds: ResMut<Adds<RasterizationPlacement>>,
-    mut cmd: Commands,
-) {
-    requests
-        .iter()
-        .for_each(|(entity, request): (Entity, &AddRasterizationRequest)| {
-            let rasterization_placement = match rasterizations.rasterized_glyphs.get(&request.hash)
-            {
-                None => {
-                    let rasterized_glyph =
-                        font.font().rasterize(request.character, request.scale.px());
-                    let start: u32 = (rasterizations.cpu.len() - 1) as u32;
-                    let row_size: u32 = rasterized_glyph.0.width as u32;
-                    let rows: u32 = (rasterized_glyph.1.len() / row_size as usize) as u32;
-                    let rasterization_placement =
-                        RasterizationPlacement::new(start, row_size, rows);
-                    let rasterization =
-                        Rasterization::new(rasterized_glyph, rasterization_placement);
-                    rasterizations.cpu.extend(&rasterization.glyph.1);
-                    rasterizations
-                        .rasterized_glyphs
-                        .insert(request.hash, rasterization);
-                    rasterization_placement
-                }
-                Some(rasterization) => rasterization.placement,
-            };
-            cmd.entity(entity).insert(RasterizationResponse::new(
-                request.entity,
-                rasterization_placement,
-            ));
-            adds.adds
-                .push(Add::new(request.index, rasterization_placement));
-        });
-}
-pub fn rasterize_writes(
-    mut rasterizations: ResMut<Rasterizations>,
-    references: ResMut<RasterizationReferences>,
-    font: Res<Font>,
-    requests: Query<(Entity, &WriteRasterizationRequest)>,
     writes: ResMut<Writes<RasterizationPlacement>>,
     mut cmd: Commands,
 ) {
     requests
         .iter()
-        .for_each(|(entity, request): (Entity, &WriteRasterizationRequest)| {
+        .for_each(|(entity, request): (Entity, &RasterizationRequest)| {
             let rasterization_placement = match rasterizations.rasterized_glyphs.get(&request.hash)
             {
                 None => {
@@ -212,8 +167,16 @@ pub fn rasterize_writes(
                 request.entity,
                 rasterization_placement,
             ));
-            writes
-                .writes
-                .push(Write::new(request.index, rasterization_placement));
+            match request.call_point {
+                RasterizationRequestCallPoint::Add => {
+                    adds.adds
+                        .push(Add::new(request.index, rasterization_placement));
+                }
+                RasterizationRequestCallPoint::Write => {
+                    writes
+                        .writes
+                        .push(Write::new(request.index, rasterization_placement));
+                }
+            }
         });
 }

@@ -7,18 +7,22 @@ use crate::text_step_out::attributes::write::{Write, Writes};
 use crate::text_step_out::attributes::{Coordinator, GpuAttributes, Index};
 use crate::text_step_out::rasterization::placement::RasterizationPlacement;
 use crate::text_step_out::rasterization::{
-    AddRasterizationRequest, Rasterizations, RasterizedGlyphHash, WriteRasterizationRequest,
+    RasterizationRequest, RasterizationRequestCallPoint, Rasterizations, RasterizedGlyphHash,
+    WriteRasterizationRequest,
 };
 use crate::text_step_out::scale::Scale;
+
 pub struct IndexResponse {
     pub entity: Entity,
     pub index: Index,
 }
+
 impl IndexResponse {
     pub fn new(entity: Entity, index: Index) -> Self {
         Self { entity, index }
     }
 }
+
 pub struct AddData {
     pub character: char,
     pub hash: RasterizedGlyphHash,
@@ -28,38 +32,47 @@ pub struct AddData {
     pub depth: Depth,
     pub color: Color,
 }
+
 pub struct AddedInstance {
     pub entity: Entity,
     pub add_data: AddData,
 }
+
 pub struct AddedInstances {
     pub to_add: Vec<AddedInstance>,
 }
+
 impl AddedInstances {
     pub fn new() -> Self {
         Self { to_add: Vec::new() }
     }
 }
+
 pub fn setup_added_instances(mut cmd: Commands) {
     cmd.insert_resource(AddedInstances::new());
 }
+
 pub struct Add<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
     pub index: Index,
     pub attribute: Attribute,
 }
+
 impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> Add<Attribute> {
     pub fn new(index: Index, attribute: Attribute) -> Self {
         Self { index, attribute }
     }
 }
+
 pub struct Adds<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
     pub adds: Vec<Add<Attribute>>,
 }
+
 impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> Adds<Attribute> {
     pub fn new() -> Self {
         Self { adds: Vec::new() }
     }
 }
+
 pub fn add_instances(
     mut coordinator: ResMut<Coordinator>,
     mut added_instances: ResMut<AddedInstances>,
@@ -88,7 +101,8 @@ pub fn add_instances(
                 .adds
                 .push(Add::new(index, added_instance.add_data.color));
             cmd.spawn()
-                .insert(AddRasterizationRequest::new(
+                .insert(RasterizationRequest::new(
+                    RasterizationRequestCallPoint::Add,
                     added_instance.entity,
                     added_instance.add_data.hash,
                     added_instance.add_data.character,
@@ -98,6 +112,7 @@ pub fn add_instances(
                 .insert(IndexResponse::new(added_instance.entity, index));
         });
 }
+
 pub fn add_cpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
     adds: ResMut<Adds<Attribute>>,
     mut cpu_attributes: ResMut<CpuAttributes<Attribute>>,
@@ -106,6 +121,7 @@ pub fn add_cpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clon
         *cpu_attributes.attributes.get_mut(add.index.0 as usize) = add.attribute;
     }
 }
+
 pub fn add_gpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
     queue: Res<wgpu::Queue>,
     attributes: Res<GpuAttributes<Attribute>>,
@@ -119,6 +135,7 @@ pub fn add_gpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clon
         );
     }
 }
+
 pub fn growth(
     mut coordinator: ResMut<Coordinator>,
     mut position_attributes: ResMut<CpuAttributes<Position>>,

@@ -101,12 +101,8 @@ impl App {
                     SystemStage::parallel().with_system(text_step_out::add_instances),
                 );
                 job.exec.add_stage(
-                    "rasterize writes",
-                    SystemStage::single(text_step_out::rasterize_writes),
-                );
-                job.exec.add_stage(
                     "rasterize adds",
-                    SystemStage::single(text_step_out::rasterize_adds),
+                    SystemStage::single(text_step_out::rasterize),
                 );
                 job.exec.add_stage(
                     "write cpu attributes",
