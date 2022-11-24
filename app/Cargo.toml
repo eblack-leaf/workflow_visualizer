@@ -9,7 +9,7 @@ edition = "2021"
 bevy_ecs = "0.8.1"
 winit = "0.27.2"
 bytemuck = { version = "1.12.1", features = ["derive"] }
-wgpu = { version = "0.13.1", features = ["webgl", "trace"] }
+wgpu = { version = "0.13.1", features = ["webgl"] }
 regex = "1.6.0"
 nalgebra = "0.31.1"
 fontdue = "0.7.2"

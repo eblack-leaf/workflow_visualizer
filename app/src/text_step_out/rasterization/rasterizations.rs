@@ -55,7 +55,9 @@ impl Rasterizations {
         let gpu = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("rasterization"),
             size: max as BufferAddress,
-            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            usage: wgpu::BufferUsages::VERTEX
+                | wgpu::BufferUsages::COPY_DST
+                | wgpu::BufferUsages::STORAGE,
             mapped_at_creation: false,
         });
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -129,7 +131,10 @@ impl RasterizationResponse {
         }
     }
 }
-
+pub fn setup_rasterization(mut cmd: Commands, device: Res<wgpu::Device>) {
+    cmd.insert_resource(RasterizationReferences::new());
+    cmd.insert_resource(Rasterizations::new(&device, 100));
+}
 pub fn rasterize(
     mut rasterizations: ResMut<Rasterizations>,
     mut references: ResMut<RasterizationReferences>,

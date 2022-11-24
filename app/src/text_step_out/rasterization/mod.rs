@@ -1,6 +1,7 @@
 pub use crate::text_step_out::rasterization::rasterizations::Rasterizations;
 pub use crate::text_step_out::rasterization::rasterizations::{
-    rasterize, RasterizationRequest, RasterizationRequestCallPoint, RasterizedGlyphHash,
+    rasterize, setup_rasterization, RasterizationRequest, RasterizationRequestCallPoint,
+    RasterizedGlyphHash,
 };
 
 pub mod placement;

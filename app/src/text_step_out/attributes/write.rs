@@ -32,7 +32,10 @@ pub fn write_cpu_attrs<
 ) {
     // aggregate first to save writes if needed
     for write in writes.writes.iter() {
-        *cpu_attributes.attributes.get_mut(write.index.0 as usize).unwrap() = write.attribute;
+        *cpu_attributes
+            .attributes
+            .get_mut(write.index.0 as usize)
+            .unwrap() = write.attribute;
     }
 }
 

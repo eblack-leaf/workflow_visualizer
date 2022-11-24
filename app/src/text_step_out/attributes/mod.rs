@@ -48,6 +48,7 @@ pub fn setup_attribute_queues<
 >(
     mut cmd: Commands,
 ) {
+    cmd.insert_resource(Coordinator::new(100));
     cmd.insert_resource(Adds::<Attribute>::new());
     cmd.insert_resource(Writes::<Attribute>::new());
     cmd.insert_resource(Removes::new());

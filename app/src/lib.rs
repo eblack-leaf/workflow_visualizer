@@ -80,6 +80,13 @@ impl App {
                         .with_system(text_step_out::setup_added_instances),
                 );
                 job.startup.add_stage(
+                    "rasterization",
+                    SystemStage::single(text_step_out::setup_rasterization),
+                );
+                job.startup
+                    .add_stage("font", SystemStage::single(text_step_out::font));
+                job.startup.add_stage("text renderer", SystemStage::single(text_step_out::setup_text_renderer));
+                job.startup.add_stage(
                     "attribute buffers",
                     SystemStage::parallel()
                         .with_system(text_step_out::setup_attribute_buffers::<Position>)

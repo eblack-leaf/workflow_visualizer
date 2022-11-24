@@ -1,8 +1,10 @@
+use bevy_ecs::prelude::{Commands, Res};
 use wgpu::util::DeviceExt;
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
 
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
+use crate::depth_texture::DepthTexture;
 use crate::gpu_bindings::bindings;
 use crate::text_step_out::attributes::{Coordinator, GpuAttributes};
 use crate::text_step_out::rasterization::placement::RasterizationPlacement;
@@ -23,7 +25,22 @@ pub struct TextRenderer {
     pub pipeline: wgpu::RenderPipeline,
     pub vertex_buffer: wgpu::Buffer,
 }
-
+pub fn setup_text_renderer(
+    device: Res<wgpu::Device>,
+    surface_configuration: Res<wgpu::SurfaceConfiguration>,
+    depth_texture: Res<DepthTexture>,
+    viewport_binding: Res<ViewportBinding>,
+    rasterizations: Res<Rasterizations>,
+    mut cmd: Commands,
+) {
+    cmd.insert_resource(TextRenderer::new(
+        &device,
+        surface_configuration.format,
+        depth_texture.format,
+        &viewport_binding,
+        &rasterizations,
+    ));
+}
 impl TextRenderer {
     pub fn new(
         device: &wgpu::Device,
@@ -58,47 +75,47 @@ impl TextRenderer {
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Position>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &[VertexAttribute{
+                            attributes: &[VertexAttribute {
                                 format: VertexFormat::Float32x2,
                                 offset: 0,
-                                shader_location: 0
+                                shader_location: 1,
                             }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Area>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &[VertexAttribute{
+                            attributes: &[VertexAttribute {
                                 format: VertexFormat::Float32x2,
                                 offset: 0,
-                                shader_location: 1
+                                shader_location: 2,
                             }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Depth>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &[VertexAttribute{
+                            attributes: &[VertexAttribute {
                                 format: VertexFormat::Float32,
                                 offset: 0,
-                                shader_location: 2
+                                shader_location: 3,
                             }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &[VertexAttribute{
+                            attributes: &[VertexAttribute {
                                 format: VertexFormat::Float32x4,
                                 offset: 0,
-                                shader_location: 3
+                                shader_location: 4,
                             }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<RasterizationPlacement>()
                                 as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &[VertexAttribute{
+                            attributes: &[VertexAttribute {
                                 format: VertexFormat::Uint32x3,
                                 offset: 0,
-                                shader_location: 0
+                                shader_location: 5,
                             }],
                         },
                     ],

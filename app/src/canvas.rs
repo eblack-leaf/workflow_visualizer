@@ -12,7 +12,7 @@ pub struct Options {
 impl Options {
     pub fn defaults() -> Self {
         Self {
-            backends: wgpu::Backends::all(),
+            backends: wgpu::Backends::PRIMARY,
             power_preferences: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             features: wgpu::Features::default(),
@@ -22,6 +22,7 @@ impl Options {
     }
     pub fn web_defaults() -> Self {
         let mut options = Self::defaults();
+        options.backends = wgpu::Backends::all();
         options.limits = wgpu::Limits::downlevel_webgl2_defaults();
         return options;
     }
@@ -50,7 +51,8 @@ pub async fn canvas(window: &Window, options: Options) -> Canvas {
                 features: options.features,
                 limits: options.limits.clone(),
             },
-            Some(Path::new("/home/omi-voshuli/note-ifications/wgpu_traces")),
+            // Some(Path::new("/home/omi-voshuli/note-ifications/wgpu_traces")),
+            None,
         )
         .await
         .expect("device/queue request failed");

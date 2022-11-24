@@ -1,14 +1,14 @@
 use crate::text_step_out::scale::Scale;
+use bevy_ecs::prelude::Commands;
 use fontdue::{Font as fdFont, FontSettings};
 use std::path::Path;
 
-#[cfg(test)]
-#[test]
-pub fn font() {
+pub fn font(mut cmd: Commands) {
     let font = Font::new(
-        "/home/omi-voshuli/note-ifications/app/fonts/JetBrainsMono-Medium.ttf",
+        "/home/omi-voshuli/Desktop/note-ifications/app/fonts/JetBrainsMono-Medium.ttf",
         13u32,
     );
+    cmd.insert_resource(font);
 }
 
 pub struct Font {

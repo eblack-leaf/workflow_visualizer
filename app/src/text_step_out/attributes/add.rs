@@ -117,7 +117,10 @@ pub fn add_cpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clon
     mut cpu_attributes: ResMut<CpuAttributes<Attribute>>,
 ) {
     for add in adds.adds.iter() {
-        *cpu_attributes.attributes.get_mut(add.index.0 as usize).unwrap() = add.attribute;
+        *cpu_attributes
+            .attributes
+            .get_mut(add.index.0 as usize)
+            .unwrap() = add.attribute;
     }
 }
 
@@ -138,10 +141,10 @@ pub fn add_gpu_attrs<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clon
 pub fn growth(
     mut coordinator: ResMut<Coordinator>,
     mut position_attributes: ResMut<CpuAttributes<Position>>,
-    mut area_attributes: ResMut<CpuAttributes<Position>>,
-    mut depth_attributes: ResMut<CpuAttributes<Position>>,
-    mut color_attributes: ResMut<CpuAttributes<Position>>,
-    mut rasterization_placement_attributes: ResMut<CpuAttributes<Position>>,
+    mut area_attributes: ResMut<CpuAttributes<Area>>,
+    mut depth_attributes: ResMut<CpuAttributes<Depth>>,
+    mut color_attributes: ResMut<CpuAttributes<Color>>,
+    mut rasterization_placement_attributes: ResMut<CpuAttributes<RasterizationPlacement>>,
     mut positions: ResMut<GpuAttributes<Position>>,
     mut areas: ResMut<GpuAttributes<Area>>,
     mut depths: ResMut<GpuAttributes<Depth>>,
