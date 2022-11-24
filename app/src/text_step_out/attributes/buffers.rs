@@ -31,6 +31,7 @@ impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync>
         Self {
             attributes: {
                 let mut attrs = Vec::new();
+                // reserve does not make value there (Default or blank() with resize(len, value))
                 attrs.reserve(max as usize);
                 attrs
             },

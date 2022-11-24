@@ -135,6 +135,7 @@ pub fn setup_rasterization(mut cmd: Commands, device: Res<wgpu::Device>) {
     cmd.insert_resource(RasterizationReferences::new());
     cmd.insert_resource(Rasterizations::new(&device, 100));
 }
+// TODO does nothing to write to gpu
 pub fn rasterize(
     mut rasterizations: ResMut<Rasterizations>,
     mut references: ResMut<RasterizationReferences>,

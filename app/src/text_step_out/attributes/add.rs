@@ -156,12 +156,14 @@ pub fn growth(
     if let Some(growth) = coordinator.growth {
         if coordinator.current + growth > coordinator.max {
             let buffer_growth = coordinator.max.abs_diff(coordinator.current + growth);
+            // TODO change to .resize(len, value)
             position_attributes
                 .attributes
                 .reserve(buffer_growth as usize);
             area_attributes.attributes.reserve(buffer_growth as usize);
             depth_attributes.attributes.reserve(buffer_growth as usize);
             color_attributes.attributes.reserve(buffer_growth as usize);
+            rasterization_placement_attributes.attributes.reserve(buffer_growth as usize);
             // grow gpu buffers
             positions.size += attribute_size::<Position>(buffer_growth);
             areas.size += attribute_size::<Area>(buffer_growth);
