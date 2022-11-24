@@ -2,10 +2,10 @@ use bevy_ecs::prelude::Res;
 use wgpu::{SurfaceError, SurfaceTexture};
 
 use crate::depth_texture::DepthTexture;
-use crate::text_refactor;
-use crate::text_refactor::{Rasterizations, TextRenderer};
+use crate::text_step_out::{Coordinator, GpuAttributes, Rasterizations, TextRenderer};
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
+use crate::{Area, Color, Depth, Position, RasterizationPlacement};
 
 pub fn get_surface_texture(
     surface: &wgpu::Surface,
@@ -49,7 +49,12 @@ pub fn render(
     viewport_binding: Res<ViewportBinding>,
     text_renderer: Res<TextRenderer>,
     rasterization: Res<Rasterizations>,
-    instances: Res<text_refactor::Instances>,
+    coordinator: Res<Coordinator>,
+    position_attrs: Res<GpuAttributes<Position>>,
+    area_attrs: Res<GpuAttributes<Area>>,
+    depth_attrs: Res<GpuAttributes<Depth>>,
+    color_attrs: Res<GpuAttributes<Color>>,
+    rasterization_placement_attrs: Res<GpuAttributes<RasterizationPlacement>>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
     theme: Res<Theme>,
@@ -86,7 +91,12 @@ pub fn render(
                 &mut render_pass,
                 &rasterization,
                 &viewport_binding,
-                &instances,
+                &coordinator,
+                &position_attrs,
+                &area_attrs,
+                &depth_attrs,
+                &color_attrs,
+                &rasterization_placement_attrs,
             );
         }
         // post-processing

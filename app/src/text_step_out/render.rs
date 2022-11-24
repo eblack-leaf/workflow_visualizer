@@ -1,5 +1,5 @@
 use wgpu::util::DeviceExt;
-use wgpu::{include_wgsl, VertexAttribute};
+use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
 
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
@@ -58,28 +58,48 @@ impl TextRenderer {
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Position>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &*wgpu::vertex_attr_array![0 => Float32x2],
+                            attributes: &[VertexAttribute{
+                                format: VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0
+                            }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Area>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &*wgpu::vertex_attr_array![1 => Float32x2],
+                            attributes: &[VertexAttribute{
+                                format: VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 1
+                            }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Depth>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &*wgpu::vertex_attr_array![2 => Float32],
+                            attributes: &[VertexAttribute{
+                                format: VertexFormat::Float32,
+                                offset: 0,
+                                shader_location: 2
+                            }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &*wgpu::vertex_attr_array![3 => Float32x4],
+                            attributes: &[VertexAttribute{
+                                format: VertexFormat::Float32x4,
+                                offset: 0,
+                                shader_location: 3
+                            }],
                         },
                         wgpu::VertexBufferLayout {
                             array_stride: std::mem::size_of::<RasterizationPlacement>()
                                 as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
-                            attributes: &*wgpu::vertex_attr_array![4 => Uint32x3],
+                            attributes: &[VertexAttribute{
+                                format: VertexFormat::Uint32x3,
+                                offset: 0,
+                                shader_location: 0
+                            }],
                         },
                     ],
                 },
@@ -140,7 +160,7 @@ impl TextRenderer {
         render_pass.set_vertex_buffer(4, colors.buffer.slice(..));
         render_pass.set_vertex_buffer(5, rasterization_placements.buffer.slice(..));
         if coordinator.current > 0 {
-            render_pass.draw(0..GLYPH_AABB.len() as u32, 0..&coordinator.current as u32);
+            render_pass.draw(0..GLYPH_AABB.len() as u32, 0..coordinator.current as u32);
         }
     }
 }

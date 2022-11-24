@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut};
+use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut};
 use fontdue::Metrics;
 use wgpu::util::DeviceExt;
 use wgpu::BufferAddress;
@@ -10,7 +10,6 @@ use crate::text_step_out::attributes::add::{Add, Adds};
 use crate::text_step_out::attributes::write::{Write, Writes};
 use crate::text_step_out::attributes::Index;
 use crate::text_step_out::font::Font;
-use crate::text_step_out::glyph::{Glyph, Glyphs};
 use crate::text_step_out::rasterization::placement::RasterizationPlacement;
 use crate::text_step_out::rasterization::references::RasterizationReferences;
 use crate::text_step_out::scale::Scale;
@@ -87,7 +86,7 @@ pub enum RasterizationRequestCallPoint {
     Add,
     Write,
 }
-
+#[derive(Component)]
 pub struct RasterizationRequest {
     pub call_point: RasterizationRequestCallPoint,
     pub entity: Entity,
@@ -116,7 +115,7 @@ impl RasterizationRequest {
         }
     }
 }
-
+#[derive(Component)]
 pub struct RasterizationResponse {
     pub entity: Entity,
     pub rasterization_placement: RasterizationPlacement,
@@ -133,16 +132,17 @@ impl RasterizationResponse {
 
 pub fn rasterize(
     mut rasterizations: ResMut<Rasterizations>,
-    references: ResMut<RasterizationReferences>,
+    mut references: ResMut<RasterizationReferences>,
     font: Res<Font>,
     requests: Query<(Entity, &RasterizationRequest)>,
-    adds: ResMut<Adds<RasterizationPlacement>>,
-    writes: ResMut<Writes<RasterizationPlacement>>,
+    mut adds: ResMut<Adds<RasterizationPlacement>>,
+    mut writes: ResMut<Writes<RasterizationPlacement>>,
     mut cmd: Commands,
 ) {
     requests
         .iter()
         .for_each(|(entity, request): (Entity, &RasterizationRequest)| {
+            references.add_ref(request.hash);
             let rasterization_placement = match rasterizations.rasterized_glyphs.get(&request.hash)
             {
                 None => {

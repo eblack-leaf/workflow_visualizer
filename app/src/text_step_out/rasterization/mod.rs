@@ -5,7 +5,7 @@ pub use crate::text_step_out::rasterization::rasterizations::{
 
 pub mod placement;
 mod rasterizations;
-mod references;
+pub(crate) mod references;
 
 // rasterize writes - hook into writes and raster them
 // integrate appended rasterizations + shrink removes

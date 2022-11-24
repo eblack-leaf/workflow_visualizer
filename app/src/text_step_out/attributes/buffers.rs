@@ -1,8 +1,11 @@
 use crate::text_step_out::attributes::Coordinator;
 use bevy_ecs::prelude::{Commands, Res};
+use std::marker::PhantomData;
 use wgpu::BufferAddress;
 
-pub fn setup_attribute_buffers<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
+pub fn setup_attribute_buffers<
+    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync,
+>(
     coordinator: Res<Coordinator>,
     device: Res<wgpu::Device>,
     mut cmd: Commands,
@@ -10,15 +13,20 @@ pub fn setup_attribute_buffers<Attribute: bytemuck::Pod + bytemuck::Zeroable + C
     cmd.insert_resource(CpuAttributes::<Attribute>::new(coordinator.max));
     cmd.insert_resource(GpuAttributes::<Attribute>::new(&device, coordinator.max))
 }
-pub fn attribute_size<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone>(
+pub fn attribute_size<
+    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync,
+>(
     num: u32,
 ) -> wgpu::BufferAddress {
-    (std::mem::size_of::<Attribute>() * num) as BufferAddress
+    (std::mem::size_of::<Attribute>() * num as usize) as BufferAddress
 }
-pub struct CpuAttributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
+pub struct CpuAttributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync>
+{
     pub attributes: Vec<Attribute>,
 }
-impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> CpuAttributes<Attribute> {
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync>
+    CpuAttributes<Attribute>
+{
     pub fn new(max: u32) -> Self {
         Self {
             attributes: {
@@ -29,11 +37,15 @@ impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> CpuAttributes
         }
     }
 }
-pub struct GpuAttributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> {
+pub struct GpuAttributes<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync>
+{
     pub buffer: wgpu::Buffer,
     pub size: wgpu::BufferAddress,
+    _phantom_data: PhantomData<Attribute>,
 }
-impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> GpuAttributes<Attribute> {
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync>
+    GpuAttributes<Attribute>
+{
     pub fn new(device: &wgpu::Device, max: u32) -> Self {
         let attr_size = (attribute_size::<Attribute>(max)) as BufferAddress;
         Self {
@@ -44,6 +56,7 @@ impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone> GpuAttributes
                 mapped_at_creation: false,
             }),
             size: attr_size,
+            _phantom_data: PhantomData,
         }
     }
 }

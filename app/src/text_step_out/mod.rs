@@ -3,9 +3,11 @@ pub use crate::text_step_out::attributes::add::{
 };
 pub use crate::text_step_out::attributes::remove::remove_instances;
 pub use crate::text_step_out::attributes::write::{write_cpu_attrs, write_gpu_attrs};
-pub use crate::text_step_out::attributes::{setup_attribute_buffers, setup_attributes};
+pub use crate::text_step_out::attributes::{
+    setup_attribute_buffers, setup_attribute_queues, Coordinator, CpuAttributes, GpuAttributes,
+};
 pub use crate::text_step_out::rasterization::placement::RasterizationPlacement;
-pub use crate::text_step_out::rasterization::rasterize;
+pub use crate::text_step_out::rasterization::{rasterize, Rasterizations};
 pub use crate::text_step_out::render::TextRenderer;
 
 mod attributes;

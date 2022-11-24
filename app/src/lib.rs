@@ -10,7 +10,6 @@ use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::job::{ExecutionState, Job};
-use crate::text_refactor::{RasterizationReferences, RemovedRasterizations};
 use crate::text_step_out::RasterizationPlacement;
 use crate::theme::Theme;
 use crate::window::Resize;
@@ -23,7 +22,6 @@ mod gpu_bindings;
 pub mod input;
 pub mod job;
 mod renderer;
-pub mod text_refactor;
 mod text_step_out;
 pub mod theme;
 mod uniform;
@@ -72,11 +70,13 @@ impl App {
                 job.startup.add_stage(
                     "writes/adds/removes",
                     SystemStage::parallel()
-                        .with_system(text_step_out::setup_attributes::<Position>)
-                        .with_system(text_step_out::setup_attributes::<Area>)
-                        .with_system(text_step_out::setup_attributes::<Depth>)
-                        .with_system(text_step_out::setup_attributes::<Color>)
-                        .with_system(text_step_out::setup_attributes::<RasterizationPlacement>)
+                        .with_system(text_step_out::setup_attribute_queues::<Position>)
+                        .with_system(text_step_out::setup_attribute_queues::<Area>)
+                        .with_system(text_step_out::setup_attribute_queues::<Depth>)
+                        .with_system(text_step_out::setup_attribute_queues::<Color>)
+                        .with_system(
+                            text_step_out::setup_attribute_queues::<RasterizationPlacement>,
+                        )
                         .with_system(text_step_out::setup_added_instances),
                 );
                 job.startup.add_stage(
