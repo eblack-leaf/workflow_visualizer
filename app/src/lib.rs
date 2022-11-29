@@ -85,7 +85,10 @@ impl App {
                 );
                 job.startup
                     .add_stage("font", SystemStage::single(text_step_out::font));
-                job.startup.add_stage("text renderer", SystemStage::single(text_step_out::setup_text_renderer));
+                job.startup.add_stage(
+                    "text renderer",
+                    SystemStage::single(text_step_out::setup_text_renderer),
+                );
                 job.startup.add_stage(
                     "attribute buffers",
                     SystemStage::parallel()

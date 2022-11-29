@@ -15,7 +15,7 @@ use crate::text_step_out::rasterization::references::RasterizationReferences;
 use crate::text_step_out::scale::Scale;
 
 pub type RasterizedGlyphHash = fontdue::layout::GlyphRasterConfig;
-pub type RasterizedGlyph = (Metrics, Vec<u8>);
+pub type RasterizedGlyph = (Metrics, Vec<u32>);
 
 pub struct Rasterization {
     pub glyph: RasterizedGlyph,
@@ -29,12 +29,13 @@ impl Rasterization {
 }
 
 pub struct Rasterizations {
-    pub cpu: Vec<u8>,
+    pub cpu: Vec<u32>,
     pub gpu: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
     pub max: u32,
     pub rasterized_glyphs: HashMap<RasterizedGlyphHash, Rasterization>,
+    pub new_rasterizations: Vec<u32>,
 }
 
 impl Rasterizations {
@@ -79,15 +80,16 @@ impl Rasterizations {
             bind_group_layout,
             max,
             rasterized_glyphs: HashMap::new(),
+            new_rasterizations: Vec::new(),
         }
     }
-    // need to separate cause cant decide placement here
 }
 
 pub enum RasterizationRequestCallPoint {
     Add,
     Write,
 }
+
 #[derive(Component)]
 pub struct RasterizationRequest {
     pub call_point: RasterizationRequestCallPoint,
@@ -117,6 +119,7 @@ impl RasterizationRequest {
         }
     }
 }
+
 #[derive(Component)]
 pub struct RasterizationResponse {
     pub entity: Entity,
@@ -131,10 +134,34 @@ impl RasterizationResponse {
         }
     }
 }
+
 pub fn setup_rasterization(mut cmd: Commands, device: Res<wgpu::Device>) {
     cmd.insert_resource(RasterizationReferences::new());
     cmd.insert_resource(Rasterizations::new(&device, 100));
 }
+
+#[derive(Component)]
+pub struct RasterizationRemoval {
+    pub hash: RasterizedGlyphHash,
+}
+
+#[derive(Component)]
+pub struct RasterizationPlacementUpdate {
+    pub hash: RasterizedGlyphHash,
+    pub placement: RasterizationPlacement,
+}
+
+pub fn resolve(
+    mut rasterizations: ResMut<Rasterizations>,
+    mut cmd: Commands,
+    references: Res<RasterizationReferences>,
+) {
+    references
+        .references
+        .iter()
+        .for_each(|reference| if reference.1 == 0 {});
+}
+
 // TODO does nothing to write to gpu
 pub fn rasterize(
     mut rasterizations: ResMut<Rasterizations>,
@@ -159,9 +186,21 @@ pub fn rasterize(
                     let rows: u32 = (rasterized_glyph.1.len() / row_size as usize) as u32;
                     let rasterization_placement =
                         RasterizationPlacement::new(start, row_size, rows);
-                    let rasterization =
-                        Rasterization::new(rasterized_glyph, rasterization_placement);
+                    let rasterization = Rasterization::new(
+                        (
+                            rasterized_glyph.0,
+                            rasterized_glyph
+                                .1
+                                .iter()
+                                .map(|g| *g as u32)
+                                .collect::<Vec<u32>>(),
+                        ),
+                        rasterization_placement,
+                    );
                     rasterizations.cpu.extend(&rasterization.glyph.1);
+                    rasterizations
+                        .new_rasterizations
+                        .extend(&rasterization.glyph.1);
                     rasterizations
                         .rasterized_glyphs
                         .insert(request.hash, rasterization);

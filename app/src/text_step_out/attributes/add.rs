@@ -163,7 +163,9 @@ pub fn growth(
             area_attributes.attributes.reserve(buffer_growth as usize);
             depth_attributes.attributes.reserve(buffer_growth as usize);
             color_attributes.attributes.reserve(buffer_growth as usize);
-            rasterization_placement_attributes.attributes.reserve(buffer_growth as usize);
+            rasterization_placement_attributes
+                .attributes
+                .reserve(buffer_growth as usize);
             // grow gpu buffers
             positions.size += attribute_size::<Position>(buffer_growth);
             areas.size += attribute_size::<Area>(buffer_growth);

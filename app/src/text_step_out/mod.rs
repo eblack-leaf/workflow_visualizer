@@ -9,7 +9,7 @@ pub use crate::text_step_out::attributes::{
 pub use crate::text_step_out::font::font;
 pub use crate::text_step_out::rasterization::placement::RasterizationPlacement;
 pub use crate::text_step_out::rasterization::{rasterize, setup_rasterization, Rasterizations};
-pub use crate::text_step_out::render::{TextRenderer, setup_text_renderer};
+pub use crate::text_step_out::render::{setup_text_renderer, TextRenderer};
 mod attributes;
 mod cache;
 mod font;
