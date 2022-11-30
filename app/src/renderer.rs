@@ -5,7 +5,7 @@ use crate::depth_texture::DepthTexture;
 use crate::text_step_out::{Coordinator, GpuAttributes, Rasterizations, TextRenderer};
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
-use crate::{Area, Color, Depth, Position, RasterizationPlacement};
+use crate::{text, Area, Color, Depth, Position, RasterizationPlacement};
 
 pub fn get_surface_texture(
     surface: &wgpu::Surface,
@@ -47,14 +47,7 @@ pub fn render(
     queue: Res<wgpu::Queue>,
     viewport: Res<Viewport>,
     viewport_binding: Res<ViewportBinding>,
-    text_renderer: Res<TextRenderer>,
-    rasterization: Res<Rasterizations>,
-    coordinator: Res<Coordinator>,
-    position_attrs: Res<GpuAttributes<Position>>,
-    area_attrs: Res<GpuAttributes<Area>>,
-    depth_attrs: Res<GpuAttributes<Depth>>,
-    color_attrs: Res<GpuAttributes<Color>>,
-    rasterization_placement_attrs: Res<GpuAttributes<RasterizationPlacement>>,
+    text_pipeline: Res<text::Pipeline>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
     theme: Res<Theme>,
@@ -87,17 +80,7 @@ pub fn render(
                 }),
             });
             // contains alpha values
-            text_renderer.render(
-                &mut render_pass,
-                &rasterization,
-                &viewport_binding,
-                &coordinator,
-                &position_attrs,
-                &area_attrs,
-                &depth_attrs,
-                &color_attrs,
-                &rasterization_placement_attrs,
-            );
+            text::render(&mut render_pass, &text_pipeline);
         }
         // post-processing
         queue.submit(std::iter::once(command_encoder.finish()));

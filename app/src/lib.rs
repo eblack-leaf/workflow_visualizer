@@ -22,7 +22,7 @@ mod gpu_bindings;
 pub mod input;
 pub mod job;
 mod renderer;
-mod text_step_out;
+mod text;
 pub mod theme;
 mod uniform;
 pub mod viewport;
@@ -67,91 +67,91 @@ impl App {
                         .with_system(viewport::setup)
                         .with_system(depth_texture::setup),
                 );
-                job.startup.add_stage(
-                    "writes/adds/removes",
-                    SystemStage::parallel()
-                        .with_system(text_step_out::setup_attribute_queues::<Position>)
-                        .with_system(text_step_out::setup_attribute_queues::<Area>)
-                        .with_system(text_step_out::setup_attribute_queues::<Depth>)
-                        .with_system(text_step_out::setup_attribute_queues::<Color>)
-                        .with_system(
-                            text_step_out::setup_attribute_queues::<RasterizationPlacement>,
-                        )
-                        .with_system(text_step_out::setup_added_instances),
-                );
-                job.startup.add_stage(
-                    "rasterization",
-                    SystemStage::single(text_step_out::setup_rasterization),
-                );
-                job.startup
-                    .add_stage("font", SystemStage::single(text_step_out::font));
-                job.startup.add_stage(
-                    "text renderer",
-                    SystemStage::single(text_step_out::setup_text_renderer),
-                );
-                job.startup.add_stage(
-                    "attribute buffers",
-                    SystemStage::parallel()
-                        .with_system(text_step_out::setup_attribute_buffers::<Position>)
-                        .with_system(text_step_out::setup_attribute_buffers::<Area>)
-                        .with_system(text_step_out::setup_attribute_buffers::<Depth>)
-                        .with_system(text_step_out::setup_attribute_buffers::<Color>)
-                        .with_system(
-                            text_step_out::setup_attribute_buffers::<RasterizationPlacement>,
-                        ),
-                );
+                // job.startup.add_stage(
+                //     "writes/adds/removes",
+                //     SystemStage::parallel()
+                //         .with_system(text_step_out::setup_attribute_queues::<Position>)
+                //         .with_system(text_step_out::setup_attribute_queues::<Area>)
+                //         .with_system(text_step_out::setup_attribute_queues::<Depth>)
+                //         .with_system(text_step_out::setup_attribute_queues::<Color>)
+                //         .with_system(
+                //             text_step_out::setup_attribute_queues::<RasterizationPlacement>,
+                //         )
+                //         .with_system(text_step_out::setup_added_instances),
+                // );
+                // job.startup.add_stage(
+                //     "rasterization",
+                //     SystemStage::single(text_step_out::setup_rasterization),
+                // );
+                // job.startup
+                //     .add_stage("font", SystemStage::single(text_step_out::font));
+                // job.startup.add_stage(
+                //     "text renderer",
+                //     SystemStage::single(text_step_out::setup_text_renderer),
+                // );
+                // job.startup.add_stage(
+                //     "attribute buffers",
+                //     SystemStage::parallel()
+                //         .with_system(text_step_out::setup_attribute_buffers::<Position>)
+                //         .with_system(text_step_out::setup_attribute_buffers::<Area>)
+                //         .with_system(text_step_out::setup_attribute_buffers::<Depth>)
+                //         .with_system(text_step_out::setup_attribute_buffers::<Color>)
+                //         .with_system(
+                //             text_step_out::setup_attribute_buffers::<RasterizationPlacement>,
+                //         ),
+                // );
                 job.exec
                     .add_stage("window_resize", SystemStage::single(window::resize));
-                job.exec.add_stage(
-                    "remove instances",
-                    SystemStage::parallel().with_system(text_step_out::remove_instances),
-                );
-                job.exec.add_stage(
-                    "add instances",
-                    SystemStage::parallel().with_system(text_step_out::add_instances),
-                );
-                job.exec.add_stage(
-                    "rasterize adds",
-                    SystemStage::single(text_step_out::rasterize),
-                );
-                job.exec.add_stage(
-                    "write cpu attributes",
-                    SystemStage::parallel()
-                        .with_system(text_step_out::write_cpu_attrs::<Position>)
-                        .with_system(text_step_out::write_cpu_attrs::<Area>)
-                        .with_system(text_step_out::write_cpu_attrs::<Depth>)
-                        .with_system(text_step_out::write_cpu_attrs::<Color>)
-                        .with_system(text_step_out::write_cpu_attrs::<RasterizationPlacement>),
-                );
-                job.exec
-                    .add_stage("growth", SystemStage::single(text_step_out::growth));
-                job.exec.add_stage(
-                    "add cpu attributes",
-                    SystemStage::parallel()
-                        .with_system(text_step_out::add_cpu_attrs::<Position>)
-                        .with_system(text_step_out::add_cpu_attrs::<Area>)
-                        .with_system(text_step_out::add_cpu_attrs::<Depth>)
-                        .with_system(text_step_out::add_cpu_attrs::<Color>)
-                        .with_system(text_step_out::add_cpu_attrs::<RasterizationPlacement>),
-                );
-                job.exec.add_stage(
-                    "add gpu attrs",
-                    SystemStage::parallel()
-                        .with_system(text_step_out::add_gpu_attrs::<Position>)
-                        .with_system(text_step_out::add_gpu_attrs::<Area>)
-                        .with_system(text_step_out::add_gpu_attrs::<Depth>)
-                        .with_system(text_step_out::add_gpu_attrs::<Color>)
-                        .with_system(text_step_out::add_gpu_attrs::<RasterizationPlacement>),
-                );
-                job.exec.add_stage(
-                    "write gpu attrs",
-                    SystemStage::parallel()
-                        .with_system(text_step_out::write_gpu_attrs::<Position>)
-                        .with_system(text_step_out::write_gpu_attrs::<Area>)
-                        .with_system(text_step_out::write_gpu_attrs::<Depth>)
-                        .with_system(text_step_out::write_gpu_attrs::<Color>)
-                        .with_system(text_step_out::write_gpu_attrs::<RasterizationPlacement>),
-                );
+                // job.exec.add_stage(
+                //     "remove instances",
+                //     SystemStage::parallel().with_system(text_step_out::remove_instances),
+                // );
+                // job.exec.add_stage(
+                //     "add instances",
+                //     SystemStage::parallel().with_system(text_step_out::add_instances),
+                // );
+                // job.exec.add_stage(
+                //     "rasterize adds",
+                //     SystemStage::single(text_step_out::rasterize),
+                // );
+                // job.exec.add_stage(
+                //     "write cpu attributes",
+                //     SystemStage::parallel()
+                //         .with_system(text_step_out::write_cpu_attrs::<Position>)
+                //         .with_system(text_step_out::write_cpu_attrs::<Area>)
+                //         .with_system(text_step_out::write_cpu_attrs::<Depth>)
+                //         .with_system(text_step_out::write_cpu_attrs::<Color>)
+                //         .with_system(text_step_out::write_cpu_attrs::<RasterizationPlacement>),
+                // );
+                // job.exec
+                //     .add_stage("growth", SystemStage::single(text_step_out::growth));
+                // job.exec.add_stage(
+                //     "add cpu attributes",
+                //     SystemStage::parallel()
+                //         .with_system(text_step_out::add_cpu_attrs::<Position>)
+                //         .with_system(text_step_out::add_cpu_attrs::<Area>)
+                //         .with_system(text_step_out::add_cpu_attrs::<Depth>)
+                //         .with_system(text_step_out::add_cpu_attrs::<Color>)
+                //         .with_system(text_step_out::add_cpu_attrs::<RasterizationPlacement>),
+                // );
+                // job.exec.add_stage(
+                //     "add gpu attrs",
+                //     SystemStage::parallel()
+                //         .with_system(text_step_out::add_gpu_attrs::<Position>)
+                //         .with_system(text_step_out::add_gpu_attrs::<Area>)
+                //         .with_system(text_step_out::add_gpu_attrs::<Depth>)
+                //         .with_system(text_step_out::add_gpu_attrs::<Color>)
+                //         .with_system(text_step_out::add_gpu_attrs::<RasterizationPlacement>),
+                // );
+                // job.exec.add_stage(
+                //     "write gpu attrs",
+                //     SystemStage::parallel()
+                //         .with_system(text_step_out::write_gpu_attrs::<Position>)
+                //         .with_system(text_step_out::write_gpu_attrs::<Area>)
+                //         .with_system(text_step_out::write_gpu_attrs::<Depth>)
+                //         .with_system(text_step_out::write_gpu_attrs::<Color>)
+                //         .with_system(text_step_out::write_gpu_attrs::<RasterizationPlacement>),
+                // );
                 job.exec
                     .add_stage("render", SystemStage::single(renderer::render));
                 job
