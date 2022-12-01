@@ -13,6 +13,8 @@ pub use pipeline::Pipeline;
 pub use rasterize::placement::RasterizationPlacement;
 pub use render::render;
 pub use rasterize::RasterizationBinding;
+pub use attribute::{Coordinator, CpuAttributes, GpuAttributes};
+pub use vertex_buffer::VertexBuffer;
 #[derive(Component)]
 pub struct Text {
     pub line: String,

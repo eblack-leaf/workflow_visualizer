@@ -6,7 +6,7 @@ use crate::text_step_out::{Coordinator, GpuAttributes, Rasterizations, TextRende
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
 use crate::{text, Area, Color, Depth, Position, RasterizationPlacement};
-use crate::text::RasterizationPlacement;
+use crate::text::{Coordinator, GpuAttributes, RasterizationBinding, RasterizationPlacement, VertexBuffer};
 
 pub fn get_surface_texture(
     surface: &wgpu::Surface,
@@ -89,7 +89,9 @@ pub fn render(
                 }),
             });
             // contains alpha values
-            text::render(&mut render_pass, &text_pipeline);
+            text::render(&mut render_pass, &text_pipeline, &viewport_binding,
+            &rasterization_binding, &coordinator, &positions, &areas, &depths,
+            &colors, &rasterization_placements, &vertex_buffer);
         }
         // post-processing
         queue.submit(std::iter::once(command_encoder.finish()));
