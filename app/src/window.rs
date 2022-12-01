@@ -1,6 +1,6 @@
 use crate::coord::Area;
 use crate::depth_texture::DepthTexture;
-use crate::viewport::{Viewport, ViewportBinding};
+use crate::viewport;
 use crate::Signal;
 use bevy_ecs::prelude::{Res, ResMut};
 
@@ -19,14 +19,14 @@ pub fn resize(
     queue: Res<wgpu::Queue>,
     mut config: ResMut<wgpu::SurfaceConfiguration>,
     mut depth_texture: ResMut<DepthTexture>,
-    mut viewport: ResMut<Viewport>,
-    mut viewport_binding: ResMut<ViewportBinding>,
+    mut viewport: ResMut<viewport::Viewport>,
+    mut viewport_binding: ResMut<viewport::Binding>,
 ) {
     if let Some(resize) = &resize_signal.receive() {
         config.width = resize.area.width as u32;
         config.height = resize.area.height as u32;
         surface.configure(&device, &config);
-        *viewport = Viewport::new(
+        *viewport = viewport::Viewport::new(
             (resize.area.width, resize.area.height).into(),
             viewport.depth,
         );

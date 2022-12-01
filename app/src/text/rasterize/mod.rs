@@ -1,6 +1,4 @@
-mod binding;
+pub(crate) mod binding;
 pub(crate) mod placement;
-mod rasterization;
-pub use binding::RasterizationBinding;
-pub use placement::RasterizationPlacement;
+pub(crate) mod rasterization;
 pub fn rasterize() {}

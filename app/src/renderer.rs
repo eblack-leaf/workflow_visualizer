@@ -2,11 +2,10 @@ use bevy_ecs::prelude::Res;
 use wgpu::{SurfaceError, SurfaceTexture};
 
 use crate::depth_texture::DepthTexture;
-use crate::text_step_out::{Coordinator, GpuAttributes, Rasterizations, TextRenderer};
+use crate::text::vertex_buffer::VertexBuffer;
 use crate::theme::Theme;
-use crate::viewport::{Viewport, ViewportBinding};
-use crate::{text, Area, Color, Depth, Position, RasterizationPlacement};
-use crate::text::{Coordinator, GpuAttributes, RasterizationBinding, RasterizationPlacement, VertexBuffer};
+use crate::viewport;
+use crate::{text, Area, Color, Depth, Position};
 
 pub fn get_surface_texture(
     surface: &wgpu::Surface,
@@ -46,16 +45,18 @@ pub fn render(
     surface: Res<wgpu::Surface>,
     device: Res<wgpu::Device>,
     queue: Res<wgpu::Queue>,
-    viewport: Res<Viewport>,
-    viewport_binding: Res<ViewportBinding>,
-    text_pipeline: Res<text::Pipeline>,
-    rasterization_binding: Res<RasterizationBinding>,
-    coordinator: Res<Coordinator>,
-    positions: Res<GpuAttributes<Position>>,
-    areas: Res<GpuAttributes<Area>>,
-    depths: Res<GpuAttributes<Depth>>,
-    colors: Res<GpuAttributes<Color>>,
-    rasterization_placements: Res<GpuAttributes<RasterizationPlacement>>,
+    viewport: Res<viewport::Viewport>,
+    viewport_binding: Res<viewport::Binding>,
+    text_pipeline: Res<text::pipeline::Pipeline>,
+    rasterization_binding: Res<text::rasterize::binding::Binding>,
+    coordinator: Res<text::attribute::coordinator::Coordinator>,
+    positions: Res<text::attribute::gpu::Attributes<Position>>,
+    areas: Res<text::attribute::gpu::Attributes<Area>>,
+    depths: Res<text::attribute::gpu::Attributes<Depth>>,
+    colors: Res<text::attribute::gpu::Attributes<Color>>,
+    rasterization_placements: Res<
+        text::attribute::gpu::Attributes<text::rasterize::placement::Placement>,
+    >,
     vertex_buffer: Res<VertexBuffer>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
@@ -89,9 +90,19 @@ pub fn render(
                 }),
             });
             // contains alpha values
-            text::render(&mut render_pass, &text_pipeline, &viewport_binding,
-            &rasterization_binding, &coordinator, &positions, &areas, &depths,
-            &colors, &rasterization_placements, &vertex_buffer);
+            text::render::render(
+                &mut render_pass,
+                &text_pipeline,
+                &viewport_binding,
+                &rasterization_binding,
+                &coordinator,
+                &positions,
+                &areas,
+                &depths,
+                &colors,
+                &rasterization_placements,
+                &vertex_buffer,
+            );
         }
         // post-processing
         queue.submit(std::iter::once(command_encoder.finish()));

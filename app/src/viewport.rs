@@ -37,12 +37,12 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
         Self { matrix }
     }
 }
-pub struct ViewportBinding {
+pub struct Binding {
     pub uniform: Uniform<GpuViewport>,
     pub bind_group_layout: wgpu::BindGroupLayout,
     pub bind_group: wgpu::BindGroup,
 }
-impl ViewportBinding {
+impl Binding {
     pub fn new(device: &wgpu::Device, gpu_viewport: GpuViewport, binding: u32) -> Self {
         let uniform = Uniform::new(device, gpu_viewport);
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -86,7 +86,7 @@ pub fn setup(
             .into(),
         100f32.into(),
     );
-    let viewport_binding = ViewportBinding::new(&device, viewport.gpu_viewport(), VIEWPORT);
+    let viewport_binding = Binding::new(&device, viewport.gpu_viewport(), VIEWPORT);
     cmd.insert_resource(viewport);
     cmd.insert_resource(viewport_binding);
 }

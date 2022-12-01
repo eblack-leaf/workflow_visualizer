@@ -2,25 +2,30 @@
 
 use bevy_ecs::prelude::{ParallelSystemDescriptorCoercion, ResMut, SystemStage};
 use bevy_ecs::system::Resource;
+use text::rasterize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
 
 use crate::canvas::Canvas;
 use crate::color::Color;
+use crate::compute_job::compute_job;
 use crate::coord::{Area, Depth, Position};
 use crate::job::{ExecutionState, Job};
-use crate::text_step_out::RasterizationPlacement;
+use crate::render_job::render_job;
 use crate::theme::Theme;
 use crate::window::Resize;
 
 pub mod canvas;
 pub mod color;
+mod compute_job;
 pub mod coord;
 pub mod depth_texture;
 mod gpu_bindings;
 pub mod input;
 pub mod job;
+mod render_extraction;
+mod render_job;
 mod renderer;
 mod text;
 pub mod theme;
@@ -56,106 +61,8 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         Self {
-            compute: Job::new(),
-            render: {
-                let mut job = Job::new();
-                job.container.insert_resource(Theme::default());
-                job.container.insert_resource(Signal::<Resize>::new(None));
-                job.startup.add_stage(
-                    "setup",
-                    SystemStage::parallel()
-                        .with_system(viewport::setup)
-                        .with_system(depth_texture::setup),
-                );
-                // job.startup.add_stage(
-                //     "writes/adds/removes",
-                //     SystemStage::parallel()
-                //         .with_system(text_step_out::setup_attribute_queues::<Position>)
-                //         .with_system(text_step_out::setup_attribute_queues::<Area>)
-                //         .with_system(text_step_out::setup_attribute_queues::<Depth>)
-                //         .with_system(text_step_out::setup_attribute_queues::<Color>)
-                //         .with_system(
-                //             text_step_out::setup_attribute_queues::<RasterizationPlacement>,
-                //         )
-                //         .with_system(text_step_out::setup_added_instances),
-                // );
-                // job.startup.add_stage(
-                //     "rasterization",
-                //     SystemStage::single(text_step_out::setup_rasterization),
-                // );
-                // job.startup
-                //     .add_stage("font", SystemStage::single(text_step_out::font));
-                // job.startup.add_stage(
-                //     "text renderer",
-                //     SystemStage::single(text_step_out::setup_text_renderer),
-                // );
-                // job.startup.add_stage(
-                //     "attribute buffers",
-                //     SystemStage::parallel()
-                //         .with_system(text_step_out::setup_attribute_buffers::<Position>)
-                //         .with_system(text_step_out::setup_attribute_buffers::<Area>)
-                //         .with_system(text_step_out::setup_attribute_buffers::<Depth>)
-                //         .with_system(text_step_out::setup_attribute_buffers::<Color>)
-                //         .with_system(
-                //             text_step_out::setup_attribute_buffers::<RasterizationPlacement>,
-                //         ),
-                // );
-                job.exec
-                    .add_stage("window_resize", SystemStage::single(window::resize));
-                // job.exec.add_stage(
-                //     "remove instances",
-                //     SystemStage::parallel().with_system(text_step_out::remove_instances),
-                // );
-                // job.exec.add_stage(
-                //     "add instances",
-                //     SystemStage::parallel().with_system(text_step_out::add_instances),
-                // );
-                // job.exec.add_stage(
-                //     "rasterize adds",
-                //     SystemStage::single(text_step_out::rasterize),
-                // );
-                // job.exec.add_stage(
-                //     "write cpu attributes",
-                //     SystemStage::parallel()
-                //         .with_system(text_step_out::write_cpu_attrs::<Position>)
-                //         .with_system(text_step_out::write_cpu_attrs::<Area>)
-                //         .with_system(text_step_out::write_cpu_attrs::<Depth>)
-                //         .with_system(text_step_out::write_cpu_attrs::<Color>)
-                //         .with_system(text_step_out::write_cpu_attrs::<RasterizationPlacement>),
-                // );
-                // job.exec
-                //     .add_stage("growth", SystemStage::single(text_step_out::growth));
-                // job.exec.add_stage(
-                //     "add cpu attributes",
-                //     SystemStage::parallel()
-                //         .with_system(text_step_out::add_cpu_attrs::<Position>)
-                //         .with_system(text_step_out::add_cpu_attrs::<Area>)
-                //         .with_system(text_step_out::add_cpu_attrs::<Depth>)
-                //         .with_system(text_step_out::add_cpu_attrs::<Color>)
-                //         .with_system(text_step_out::add_cpu_attrs::<RasterizationPlacement>),
-                // );
-                // job.exec.add_stage(
-                //     "add gpu attrs",
-                //     SystemStage::parallel()
-                //         .with_system(text_step_out::add_gpu_attrs::<Position>)
-                //         .with_system(text_step_out::add_gpu_attrs::<Area>)
-                //         .with_system(text_step_out::add_gpu_attrs::<Depth>)
-                //         .with_system(text_step_out::add_gpu_attrs::<Color>)
-                //         .with_system(text_step_out::add_gpu_attrs::<RasterizationPlacement>),
-                // );
-                // job.exec.add_stage(
-                //     "write gpu attrs",
-                //     SystemStage::parallel()
-                //         .with_system(text_step_out::write_gpu_attrs::<Position>)
-                //         .with_system(text_step_out::write_gpu_attrs::<Area>)
-                //         .with_system(text_step_out::write_gpu_attrs::<Depth>)
-                //         .with_system(text_step_out::write_gpu_attrs::<Color>)
-                //         .with_system(text_step_out::write_gpu_attrs::<RasterizationPlacement>),
-                // );
-                job.exec
-                    .add_stage("render", SystemStage::single(renderer::render));
-                job
-            },
+            compute: compute_job(),
+            render: render_job(),
         }
     }
     pub fn attach_window(&mut self, window: Window) {
@@ -215,23 +122,11 @@ impl App {
     pub fn can_idle(&self) -> bool {
         return self.compute.can_idle() && self.render.can_idle();
     }
-    pub fn extract_render_packets(&mut self) {
-        // let mut removed_rasterizations = self
-        //     .compute
-        //     .container
-        //     .get_resource_mut::<ResMut<RemovedRasterizations>>()
-        //     .unwrap();
-        // let mut rasterization_references = self
-        //     .render
-        //     .container
-        //     .get_resource_mut::<RasterizationReferences>()
-        //     .unwrap();
-        // for rast in removed_rasterizations.removed.drain(..) {
-        //     rasterization_references.remove(rast);
-        // }
+    pub fn render_extraction(&mut self) {
+        render_extraction::extraction(&mut self);
     }
-    pub fn render_post_processing(&mut self) {
-        // write swaps back to glyph cache and index to text_instance_infos
+    pub fn render_integration(&mut self) {
+        render_extraction::integration(&mut self);
     }
 }
 
@@ -336,7 +231,7 @@ pub fn run<T>(mut app: App, event_loop: EventLoop<T>) {
             }
             Event::RedrawRequested(_window_id) => {
                 if app.render.active() {
-                    app.extract_render_packets();
+                    app.render_extraction();
                     app.render.exec();
                 }
                 if app.render.should_exit() {
@@ -345,7 +240,7 @@ pub fn run<T>(mut app: App, event_loop: EventLoop<T>) {
             }
             Event::RedrawEventsCleared => {
                 if app.render.active() {
-                    app.render_post_processing();
+                    app.render_integration();
                 }
                 if app.can_idle() {
                     control_flow.set_wait();

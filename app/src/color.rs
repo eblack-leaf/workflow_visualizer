@@ -7,6 +7,11 @@ pub struct Color {
     pub blue: f32,
     pub alpha: f32,
 }
+impl Default for Color {
+    fn default() -> Self {
+        Self::rgb(1.0, 1.0, 1.0)
+    }
+}
 impl Color {
     pub fn rgb(red: f32, green: f32, blue: f32) -> Self {
         Self {

@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::{Bundle, Component};
 #[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default)]
 pub struct Position {
     pub x: f32,
     pub y: f32,
@@ -16,7 +16,7 @@ impl From<(f32, f32)> for Position {
     }
 }
 #[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default)]
 pub struct Area {
     pub width: f32,
     pub height: f32,
@@ -35,7 +35,7 @@ impl From<(f32, f32)> for Area {
     }
 }
 #[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default)]
 pub struct Depth {
     pub layer: f32,
 }
@@ -49,7 +49,7 @@ impl From<f32> for Depth {
         Self { layer }
     }
 }
-#[derive(Bundle, Clone)]
+#[derive(Bundle, Clone, Default)]
 pub struct Section {
     pub position: Position,
     pub area: Area,
@@ -73,7 +73,7 @@ impl From<((f32, f32), (f32, f32))> for Section {
         }
     }
 }
-#[derive(Bundle, Clone)]
+#[derive(Bundle, Clone, Default)]
 pub struct Panel {
     #[bundle]
     pub section: Section,

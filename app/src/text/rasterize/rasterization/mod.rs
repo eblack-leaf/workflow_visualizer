@@ -1,24 +1,15 @@
 use bevy_ecs::prelude::{Commands, Res};
 use wgpu::BufferAddress;
 
+pub(crate) mod cpu;
+pub(crate) mod gpu;
 pub struct GlyphRasterization {
     pub rasterization: Vec<u32>,
 }
-pub struct CpuRasterization {
-    pub buffer: Vec<GlyphRasterization>,
-}
-pub struct GpuRasterization {
-    pub buffer: wgpu::Buffer,
-    pub size: u32,
-}
-pub fn setup(
-    mut cmd: Commands,
-    device: Res<wgpu::Device>,
-
-) {
-    cmd.insert_resource(CpuRasterization{ buffer: vec![] });
+pub fn setup(mut cmd: Commands, device: Res<wgpu::Device>) {
+    cmd.insert_resource(cpu::Rasterization { buffer: vec![] });
     let size = 1024;
-    cmd.insert_resource(GpuRasterization{
+    cmd.insert_resource(gpu::Rasterization {
         buffer: device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("rasterization"),
             size: size as BufferAddress,
