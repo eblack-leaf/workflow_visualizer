@@ -6,6 +6,7 @@ use crate::text_step_out::{Coordinator, GpuAttributes, Rasterizations, TextRende
 use crate::theme::Theme;
 use crate::viewport::{Viewport, ViewportBinding};
 use crate::{text, Area, Color, Depth, Position, RasterizationPlacement};
+use crate::text::RasterizationPlacement;
 
 pub fn get_surface_texture(
     surface: &wgpu::Surface,
@@ -48,6 +49,14 @@ pub fn render(
     viewport: Res<Viewport>,
     viewport_binding: Res<ViewportBinding>,
     text_pipeline: Res<text::Pipeline>,
+    rasterization_binding: Res<RasterizationBinding>,
+    coordinator: Res<Coordinator>,
+    positions: Res<GpuAttributes<Position>>,
+    areas: Res<GpuAttributes<Area>>,
+    depths: Res<GpuAttributes<Depth>>,
+    colors: Res<GpuAttributes<Color>>,
+    rasterization_placements: Res<GpuAttributes<RasterizationPlacement>>,
+    vertex_buffer: Res<VertexBuffer>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
     theme: Res<Theme>,

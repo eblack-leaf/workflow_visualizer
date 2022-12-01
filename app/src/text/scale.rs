@@ -8,3 +8,10 @@ impl From<f32> for Scale {
         Self { scale }
     }
 }
+impl From<u32> for Scale {
+    fn from(scale: u32) -> Self {
+        Self {
+            scale: scale as f32,
+        }
+    }
+}

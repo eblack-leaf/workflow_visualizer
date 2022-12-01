@@ -1,10 +1,10 @@
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct Placement {
+pub struct RasterizationPlacement {
     pub parts: [u32; 3],
 }
 
-impl Placement {
+impl RasterizationPlacement {
     pub fn new(start: u32, row_size: u32, rows: u32) -> Self {
         Self {
             parts: [start, row_size, rows],

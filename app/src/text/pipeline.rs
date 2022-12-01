@@ -1,6 +1,7 @@
 use crate::depth_texture::DepthTexture;
+use crate::text::rasterize::RasterizationBinding;
 use crate::text::vertex::Vertex;
-use crate::text::Placement;
+use crate::text::RasterizationPlacement;
 use crate::viewport::ViewportBinding;
 use crate::{Area, Color, Depth, Position};
 use bevy_ecs::prelude::{Commands, Res};
@@ -13,6 +14,7 @@ pub fn setup(
     mut cmd: Commands,
     device: Res<wgpu::Device>,
     viewport_binding: Res<ViewportBinding>,
+    rasterization_binding: Res<RasterizationBinding>,
     depth_texture: Res<DepthTexture>,
     surface_configuration: Res<wgpu::SurfaceConfiguration>,
 ) {
@@ -25,7 +27,7 @@ pub fn setup(
                     label: Some("text pipeline descriptor"),
                     bind_group_layouts: &[
                         &viewport_binding.bind_group_layout,
-                        &rasterizations.bind_group_layout,
+                        &rasterization_binding.bind_group_layout,
                     ],
                     push_constant_ranges: &[],
                 }),
@@ -76,7 +78,8 @@ pub fn setup(
                         }],
                     },
                     wgpu::VertexBufferLayout {
-                        array_stride: std::mem::size_of::<Placement>() as wgpu::BufferAddress,
+                        array_stride: std::mem::size_of::<RasterizationPlacement>()
+                            as wgpu::BufferAddress,
                         step_mode: wgpu::VertexStepMode::Instance,
                         attributes: &[VertexAttribute {
                             format: VertexFormat::Uint32x3,

@@ -11,7 +11,7 @@ impl Font {
             font_storage: [fdFont::from_bytes(
                 std::fs::read(path).expect("invalid font path read"),
                 FontSettings {
-                    scale: opt_scale.into().px(),
+                    scale: opt_scale.into().scale,
                     ..FontSettings::default()
                 },
             )
