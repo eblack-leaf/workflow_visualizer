@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="CargoProjects">
+    <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5cf69011-a9ae-4729-8a8a-0252354697e1" name="Changes" comment="in-place render world">
+      <change afterPath="$PROJECT_DIR$/focal/src/coord.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/focal/src/render.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/focal/src/uniform.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/focal/src/viewport.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/note-ifications.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/note-ifications.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/text/pipeline.rs" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/text/pipeline.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/focal/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/focal/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/focal/src/canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/canvas.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/focal/src/job.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/job.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/focal/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/src/android.rs" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/src/desktop.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/src/job.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/src/web.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web_app_build/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web_app_build/web_app.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web_app_build/web_app_bg.wasm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web_server/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/web_server/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web_server/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/web_server/src/main.rs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="lyj4e5n4" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2IEbvLROA7TDM3recbYYge0znKv" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "last_opened_file_path": "/home/omi-voshuli/Desktop/note-ifications/focal/src",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/focal/src" />
+      <recent name="$PROJECT_DIR$/app/src/text" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/text/rasterize" />
+    </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="cargo fmi" />
+      <command value="cargo fetch" />
+      <command value="cargo fmt" />
+      <command value="cargo run --package r_app" />
+    </option>
+  </component>
+  <component name="RunManager" selected="Cargo.fmt">
+    <configuration name="build" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="build" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="fetch" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="fetch" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="fmt" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="fmt" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="run" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="run --package r_app" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.fmt" />
+        <item itemvalue="Cargo.run" />
+        <item itemvalue="Cargo.build" />
+        <item itemvalue="Cargo.fetch" />
+        <item itemvalue="Cargo.fmt" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+    <option name="version" value="2" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5cf69011-a9ae-4729-8a8a-0252354697e1" name="Changes" comment="" />
+      <created>1669749918875</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1669749918875</updated>
+      <workItem from="1669749920021" duration="6076000" />
+      <workItem from="1669789233396" duration="1626000" />
+      <workItem from="1669790865066" duration="2116000" />
+      <workItem from="1669858706398" duration="678000" />
+      <workItem from="1669862037413" duration="7215000" />
+      <workItem from="1669916716384" duration="5982000" />
+      <workItem from="1670010240179" duration="619000" />
+      <workItem from="1670032405853" duration="303000" />
+      <workItem from="1670692647709" duration="673000" />
+      <workItem from="1670693328428" duration="3359000" />
+      <workItem from="1670696708294" duration="7697000" />
+    </task>
+    <task id="LOCAL-00001" summary="text">
+      <created>1669792970834</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1669792970834</updated>
+    </task>
+    <task id="LOCAL-00002" summary="text">
+      <created>1669869623746</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1669869623746</updated>
+    </task>
+    <task id="LOCAL-00003" summary="text">
+      <created>1669918674368</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1669918674368</updated>
+    </task>
+    <task id="LOCAL-00004" summary="text">
+      <created>1669922698165</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1669922698165</updated>
+    </task>
+    <task id="LOCAL-00005" summary="in-place render world">
+      <created>1670704406650</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1670704406650</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="text" />
+    <MESSAGE value="in-place render world" />
+    <option name="LAST_COMMIT_MESSAGE" value="in-place render world" />
+  </component>
+</project>
