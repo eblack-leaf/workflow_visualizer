@@ -1,7 +1,5 @@
 fn main() {
-    #[cfg(target_os = "android")]
-    android::main();
     #[cfg(target_arch = "wasm32")]
-    wasm_bindgen_futures::spawn_local(web::main());
-    desktop::main();
+    wasm_bindgen_futures::spawn_local(r_app_lib::web());
+    r_app_lib::native();
 }

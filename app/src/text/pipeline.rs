@@ -1,7 +1,7 @@
 use crate::depth_texture::DepthTexture;
 use crate::text::rasterize::placement::Placement;
 use crate::text::vertex::Vertex;
-use crate::{Area, Color, Depth, Position, text, viewport};
+use crate::{text, viewport, Area, Color, Depth, Position};
 use bevy_ecs::prelude::{Commands, Res};
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
 

@@ -27,7 +27,7 @@ async fn main() {
         .unwrap()
         .to_path_buf();
     let _profile = "debug";
-    let build_dir = project_root.join("web_app_build");
+    let build_dir = project_root.join("r_app_build");
     let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET"]);
     let routes = warp::fs::dir(build_dir)
         .map(cross_origin_embedder_policy)

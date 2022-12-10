@@ -1,6 +1,6 @@
-use bevy_ecs::prelude::{ResMut, Schedule, SystemStage, World};
+use bevy_ecs::prelude::{ResMut, Resource, Schedule, SystemStage, World};
 
-#[derive(Clone)]
+#[derive(Clone, Resource)]
 pub struct Signal<T: Send + Sync + 'static> {
     pub signal: Option<T>,
 }
@@ -26,7 +26,7 @@ pub enum ExecutionState {
     Suspended,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Resource)]
 pub struct Idle {
     pub can_idle: bool,
 }
@@ -41,7 +41,7 @@ pub fn attempt_to_idle(mut idle: ResMut<Idle>) {
     idle.can_idle = true;
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Resource)]
 pub struct Exit {
     pub exit_requested: bool,
 }

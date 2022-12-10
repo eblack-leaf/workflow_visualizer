@@ -7,15 +7,13 @@ edition = "2021"
 [dependencies]
 focal = { path = "../focal" }
 futures = "0.3.24"
-env_logger = "0.9.0"
+env_logger = "0.10.0"
 winit = "0.27.2"
 [target.'cfg(target_os = "android")'.dependencies]
 ndk-glue = { version = "0.7.0", features = ["logger"] }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { version = "0.3.59", features = ["Window"] }
-wasm-bindgen-futures = "0.4.32"
-console_error_panic_hook = "0.1.7"
-console_log = "0.2.0"
+wasm-bindgen-futures = "0.4.33"
 [lib]
-path = "src/android.rs"
+name = "r_app_lib"
+path = "src/lib.rs"
 crate-type = ["lib", "cdylib"]
