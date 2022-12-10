@@ -3,7 +3,7 @@ use std::process::Command;
 
 fn main() {
     let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
-    let package = "web_app";
+    let package = "r_app";
     let profile = "debug";
     let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .ancestors()

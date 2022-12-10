@@ -1,0 +1,17 @@
+[package]
+name = "focal"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy_ecs = "0.8.1"
+winit = "0.27.2"
+bytemuck = { version = "1.12.1", features = ["derive"] }
+wgpu = { version = "0.14.2", features = ["webgl"] }
+regex = "1.6.0"
+nalgebra = "0.31.1"
+fontdue = "0.7.2"
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+futures = "0.3.24"

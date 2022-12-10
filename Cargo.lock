@@ -797,6 +797,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
+name = "focal"
+version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+ "bytemuck",
+ "fontdue",
+ "futures",
+ "nalgebra",
+ "regex",
+ "wgpu",
+ "winit",
+]
+
+[[package]]
 name = "fontdue"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

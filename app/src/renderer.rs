@@ -1,4 +1,6 @@
-use bevy_ecs::prelude::Res;
+use std::sync::Arc;
+
+use bevy_ecs::prelude::{Commands, NonSendMut, Res, ResMut};
 use wgpu::{SurfaceError, SurfaceTexture};
 
 use crate::depth_texture::DepthTexture;
@@ -7,105 +9,99 @@ use crate::theme::Theme;
 use crate::viewport;
 use crate::{text, Area, Color, Depth, Position};
 
+pub struct CurrentSurfaceTexture {
+    pub surface_texture: Option<wgpu::SurfaceTexture>,
+}
+
 pub fn get_surface_texture(
-    surface: &wgpu::Surface,
-    device: &wgpu::Device,
-    surface_configuration: &wgpu::SurfaceConfiguration,
-) -> Option<wgpu::SurfaceTexture> {
-    match surface.get_current_texture() {
+    surface: Res<wgpu::Surface>,
+    device: Res<wgpu::Device>,
+    surface_configuration: Res<wgpu::SurfaceConfiguration>,
+    mut cmd: Commands,
+) {
+    let surface_texture = match surface.get_current_texture() {
         Ok(surface_texture) => Some(surface_texture),
         Err(err) => match err {
-            SurfaceError::Timeout => {
-                return None;
-            }
+            SurfaceError::Timeout => None,
             SurfaceError::Outdated => {
                 surface.configure(&device, &surface_configuration);
-                return Some(
+                Some(
                     surface
                         .get_current_texture()
                         .expect("configuring did not solve surface outdated"),
-                );
+                )
             }
             SurfaceError::Lost => {
                 surface.configure(&device, &surface_configuration);
-                return Some(
+                Some(
                     surface
                         .get_current_texture()
                         .expect("configuring did not solve surface lost"),
-                );
+                )
             }
             SurfaceError::OutOfMemory => {
                 panic!("gpu out of memory");
             }
         },
-    }
+    };
+    cmd.insert_resource(CurrentSurfaceTexture { surface_texture });
 }
 
-pub fn render(
-    surface: Res<wgpu::Surface>,
-    device: Res<wgpu::Device>,
-    queue: Res<wgpu::Queue>,
-    viewport: Res<viewport::Viewport>,
-    viewport_binding: Res<viewport::Binding>,
-    text_pipeline: Res<text::pipeline::Pipeline>,
-    rasterization_binding: Res<text::rasterize::binding::Binding>,
-    coordinator: Res<text::attribute::coordinator::Coordinator>,
-    positions: Res<text::attribute::gpu::Attributes<Position>>,
-    areas: Res<text::attribute::gpu::Attributes<Area>>,
-    depths: Res<text::attribute::gpu::Attributes<Depth>>,
-    colors: Res<text::attribute::gpu::Attributes<Color>>,
-    rasterization_placements: Res<
-        text::attribute::gpu::Attributes<text::rasterize::placement::Placement>,
-    >,
-    vertex_buffer: Res<VertexBuffer>,
-    depth_texture: Res<DepthTexture>,
-    surface_configuration: Res<wgpu::SurfaceConfiguration>,
+pub fn command_encoder(mut cmd: Commands, device: Res<wgpu::Device>) {
+    cmd.insert_resource(
+        device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("command encoder"),
+        }),
+    );
+}
+
+pub fn begin_render_pass(
+    mut cmd: Commands,
+    mut surface_texture: ResMut<CurrentSurfaceTexture>,
     theme: Res<Theme>,
+    depth_texture: Res<DepthTexture>,
+    viewport: Res<viewport::Viewport>,
+    device: Res<wgpu::Device>,
+    mut command_encoder: ResMut<wgpu::CommandEncoder>,
 ) {
-    if let Some(surface_texture) = get_surface_texture(&surface, &device, &surface_configuration) {
+    if let Some(surface_texture) = surface_texture.surface_texture.take() {
         let surface_texture_view = surface_texture
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
-        let mut command_encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("command encoder"),
-        });
-        {
-            let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("render pass"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &surface_texture_view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(theme.background.into()),
-                        store: true,
-                    },
-                })],
-                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                    view: &depth_texture.view,
-                    depth_ops: Some(wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(viewport.far_layer()),
-                        store: true,
-                    }),
-                    stencil_ops: None,
+        let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("render pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &surface_texture_view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(theme.background.into()),
+                    store: true,
+                },
+            })],
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: &depth_texture
+                    .texture
+                    .create_view(&wgpu::TextureViewDescriptor::default()),
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(viewport.far_layer()),
+                    store: true,
                 }),
-            });
-            // contains alpha values
-            text::render::render(
-                &mut render_pass,
-                &text_pipeline,
-                &viewport_binding,
-                &rasterization_binding,
-                &coordinator,
-                &positions,
-                &areas,
-                &depths,
-                &colors,
-                &rasterization_placements,
-                &vertex_buffer,
-            );
-        }
-        // post-processing
-        queue.submit(std::iter::once(command_encoder.finish()));
-        surface_texture.present();
+                stencil_ops: None,
+            }),
+        });
+        cmd.insert_resource(Arc::new(render_pass));
     }
+}
+
+pub fn end_render_pass(mut cmd: Commands) {
+    cmd.remove_resource::<Arc<wgpu::RenderPass>>();
+}
+
+pub fn submit(
+    queue: Res<wgpu::Queue>,
+    mut command_encoder: Res<Arc<wgpu::CommandEncoder>>,
+    surface_texture: Res<wgpu::SurfaceTexture>,
+) {
+    queue.submit(std::iter::once(command_encoder.finish()));
+    surface_texture.present();
 }

@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use bevy_ecs::prelude::{Res, ResMut};
+
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::gpu_bindings::bindings;
@@ -6,18 +10,19 @@ use crate::text::attribute;
 use crate::text::attribute::{coordinator, gpu};
 use crate::text::vertex_buffer::{VertexBuffer, GLYPH_AABB};
 use crate::viewport::Binding;
-pub fn render<'a>(
-    mut render_pass: &mut wgpu::RenderPass<'a>,
-    pipeline: &'a text::pipeline::Pipeline,
-    viewport_binding: &'a Binding,
-    rasterization_binding: &'a text::rasterize::binding::Binding,
-    coordinator: &'a coordinator::Coordinator,
-    positions: &'a gpu::Attributes<Position>,
-    areas: &'a gpu::Attributes<Area>,
-    depths: &'a gpu::Attributes<Depth>,
-    colors: &'a gpu::Attributes<Color>,
-    rasterization_placements: &'a gpu::Attributes<text::rasterize::placement::Placement>,
-    vertex_buffer: &'a VertexBuffer,
+
+pub fn render(
+    mut render_pass: ResMut<Arc<wgpu::RenderPass<'static>>>,
+    pipeline: Res<text::pipeline::Pipeline>,
+    viewport_binding: Res<Binding>,
+    rasterization_binding: Res<text::rasterize::binding::Binding>,
+    coordinator: Res<coordinator::Coordinator>,
+    positions: Res<gpu::Attributes<Position>>,
+    areas: Res<gpu::Attributes<Area>>,
+    depths: Res<gpu::Attributes<Depth>>,
+    colors: Res<gpu::Attributes<Color>>,
+    rasterization_placements: Res<gpu::Attributes<text::rasterize::placement::Placement>>,
+    vertex_buffer: Res<VertexBuffer>,
 ) {
     render_pass.set_pipeline(&pipeline.pipeline);
     render_pass.set_bind_group(bindings::VIEWPORT, &viewport_binding.bind_group, &[]);

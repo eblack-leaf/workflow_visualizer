@@ -1,9 +1,11 @@
+use bevy_ecs::prelude::SystemStage;
+
 use crate::job::{Job, Workload};
 use crate::text::rasterize;
 use crate::theme::Theme;
 use crate::window::Resize;
 use crate::{depth_texture, renderer, text, viewport, window, Signal};
-use bevy_ecs::prelude::SystemStage;
+
 fn startup() -> Workload {
     let mut workload = Workload::default();
     workload.add_stage(
@@ -30,12 +32,13 @@ fn startup() -> Workload {
     );
     workload
 }
+
 fn exec() -> Workload {
     let mut workload = Workload::default();
     workload.add_stage("window_resize", SystemStage::single(window::resize));
-    workload.add_stage("render", SystemStage::single(renderer::render));
     workload
 }
+
 pub fn render_job() -> Job {
     {
         let mut job = Job::new();

@@ -1,6 +1,6 @@
 [alias]
-desktop_build = "build --package desktop_app"
-android_build = "apk build --target-dir android_rebuild_avoidance_target --package android_app --lib"
+desktop_build = "build --package r_app"
+android_build = "apk build --target-dir android_rebuild_avoidance_target --package r_app --lib"
 web_build = "run --release --package web_builder --"
 [build]
 rustflags = [

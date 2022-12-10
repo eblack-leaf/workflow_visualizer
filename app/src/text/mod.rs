@@ -1,3 +1,5 @@
+use bevy_ecs::prelude::Component;
+
 pub(crate) mod attribute;
 mod bundle;
 pub(crate) mod font;
@@ -7,19 +9,21 @@ pub(crate) mod render;
 mod scale;
 mod vertex;
 pub(crate) mod vertex_buffer;
-use bevy_ecs::prelude::Component;
+
 #[derive(Component)]
 pub struct Text {
     pub line: String,
 }
+
 impl Text {
     pub fn new(line: String) -> Self {
         Self {
             line: line
                 .split('\n')
-                .collect::<Vec<String>>()
-                .iter()
+                .collect::<Vec<&'static str>>()
                 .first()
+                .unwrap()
+                .parse()
                 .unwrap(),
         }
     }
