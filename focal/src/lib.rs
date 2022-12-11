@@ -14,6 +14,9 @@ mod job;
 mod render;
 mod uniform;
 mod viewport;
+mod color;
+mod theme;
+
 #[derive(Clone)]
 pub struct VisualizerOptions {
     pub backends: wgpu::Backends,
@@ -41,8 +44,12 @@ impl VisualizerOptions {
         options.limits = wgpu::Limits::downlevel_webgl2_defaults();
         return options;
     }
+    pub fn web_align(mut self) -> Self {
+        self.backends = wgpu::Backends::all();
+        self.limits = wgpu::Limits::downlevel_webgl2_defaults();
+        return self;
+    }
 }
-
 pub struct Visualizer {
     pub options: VisualizerOptions,
     pub event_loop: Option<EventLoop<()>>,
@@ -52,9 +59,12 @@ pub struct Visualizer {
 }
 
 impl Visualizer {
-    pub fn new(options: Option<VisualizerOptions>) -> Self {
+    pub fn native(options: VisualizerOptions) -> Self {
+        Self::new(options)
+    }
+    fn new(options: VisualizerOptions) -> Self {
         Self {
-            options: options.unwrap_or(VisualizerOptions::native()),
+            options,
             event_loop: None,
             window: None,
             canvas: None,
@@ -62,8 +72,8 @@ impl Visualizer {
         }
     }
     #[cfg(target_arch = "wasm32")]
-    pub async fn web(options: Option<VisualizerOptions>) -> Self {
-        let mut visualizer = Visualizer::new(Some(options.unwrap_or(VisualizerOptions::web())));
+    pub async fn web(options: VisualizerOptions) -> Self {
+        let mut visualizer = Visualizer::new(options.web_align());
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
         let event_loop = EventLoop::new();

@@ -16,31 +16,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5cf69011-a9ae-4729-8a8a-0252354697e1" name="Changes" comment="in-place render world">
-      <change afterPath="$PROJECT_DIR$/focal/src/coord.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/focal/src/render.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/focal/src/uniform.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/focal/src/viewport.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/note-ifications.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/note-ifications.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/text/pipeline.rs" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/text/pipeline.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/focal/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/focal/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/focal/src/canvas.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/canvas.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/focal/src/job.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/job.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/focal/src/color.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/focal/src/theme.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/focal/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/r_app/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/r_app/src/android.rs" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/r_app/src/desktop.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/r_app/src/job.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/r_app/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/r_app/src/web.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web_app_build/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web_app_build/web_app.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web_app_build/web_app_bg.wasm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web_server/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/web_server/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web_server/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/web_server/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/r_app/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/r_app/src/lib.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +59,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
+    "TODO_SCOPE": "All Places",
     "WebServerToolWindowFactoryState": "false",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
@@ -108,9 +89,27 @@
       <command value="cargo fetch" />
       <command value="cargo fmt" />
       <command value="cargo run --package r_app" />
+      <command value="cargo android_build" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.fmt">
+  <component name="RunManager" selected="Cargo.build">
+    <configuration name="android_build" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="android_build" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="build" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="build" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -181,11 +180,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.build" />
+        <item itemvalue="Cargo.android_build" />
         <item itemvalue="Cargo.fmt" />
         <item itemvalue="Cargo.run" />
-        <item itemvalue="Cargo.build" />
         <item itemvalue="Cargo.fetch" />
-        <item itemvalue="Cargo.fmt" />
       </list>
     </recent_temporary>
   </component>
@@ -211,7 +210,8 @@
       <workItem from="1670032405853" duration="303000" />
       <workItem from="1670692647709" duration="673000" />
       <workItem from="1670693328428" duration="3359000" />
-      <workItem from="1670696708294" duration="7697000" />
+      <workItem from="1670696708294" duration="8410000" />
+      <workItem from="1670714515926" duration="3278000" />
     </task>
     <task id="LOCAL-00001" summary="text">
       <created>1669792970834</created>
@@ -248,7 +248,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670704406650</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="in-place render world">
+      <created>1670704517351</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1670704517351</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

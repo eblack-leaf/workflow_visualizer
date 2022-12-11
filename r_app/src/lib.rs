@@ -15,11 +15,11 @@ pub fn job() -> Job {
     job
 }
 pub fn native() {
-    let visualizer = Visualizer::new(Some(VisualizerOptions::native()));
+    let visualizer = Visualizer::native(VisualizerOptions::native());
     visualizer.launch(job());
 }
 #[cfg(target_arch = "wasm32")]
 pub async fn web() {
-    let visualizer = Visualizer::web(Some(VisualizerOptions::web())).await;
+    let visualizer = Visualizer::web(VisualizerOptions::web()).await;
     visualizer.launch(job());
 }
