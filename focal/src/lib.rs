@@ -6,19 +6,23 @@ use winit::window::Window;
 
 use crate::canvas::Canvas;
 pub use crate::job::Job;
+use crate::render::{Render, surface_texture};
+use crate::run::{run, web_run};
+use crate::theme::Theme;
 use crate::viewport::Viewport;
 
 mod canvas;
+mod color;
 mod coord;
 mod job;
 mod render;
+mod theme;
 mod uniform;
 mod viewport;
-mod color;
-mod theme;
+mod run;
 
 #[derive(Clone)]
-pub struct VisualizerOptions {
+pub struct GfxOptions {
     pub backends: wgpu::Backends,
     pub power_preferences: wgpu::PowerPreference,
     pub force_fallback_adapter: bool,
@@ -27,7 +31,7 @@ pub struct VisualizerOptions {
     pub present_mode: wgpu::PresentMode,
 }
 
-impl VisualizerOptions {
+impl GfxOptions {
     pub fn native() -> Self {
         Self {
             backends: wgpu::Backends::PRIMARY,
@@ -50,49 +54,32 @@ impl VisualizerOptions {
         return self;
     }
 }
-pub struct Visualizer {
-    pub options: VisualizerOptions,
+pub struct Gfx {
+    pub options: GfxOptions,
     pub event_loop: Option<EventLoop<()>>,
     pub window: Option<Window>,
     pub canvas: Option<Canvas>,
     pub viewport: Option<Viewport>,
+    pub theme: Theme,
+    pub render_implementors: Vec<Box<dyn Render>>,
 }
 
-impl Visualizer {
-    pub fn native(options: VisualizerOptions) -> Self {
-        Self::new(options)
-    }
-    fn new(options: VisualizerOptions) -> Self {
+impl Gfx {
+    pub fn new() -> Self {
         Self {
-            options,
+            options: GfxOptions::native(),
             event_loop: None,
             window: None,
             canvas: None,
             viewport: None,
+            theme: Theme::default(),
+            render_implementors: {
+                let mut render_implementors = Vec::new();
+                render_implementors
+            }
         }
     }
-    #[cfg(target_arch = "wasm32")]
-    pub async fn web(options: VisualizerOptions) -> Self {
-        let mut visualizer = Visualizer::new(options.web_align());
-        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        console_log::init().expect("could not initialize logger");
-        let event_loop = EventLoop::new();
-        let window = Window::new(&event_loop).expect("could not create window");
-        use winit::platform::web::WindowExtWebSys;
-        web_sys::window()
-            .and_then(|win| win.document())
-            .and_then(|doc| doc.body())
-            .and_then(|body| {
-                body.append_child(&web_sys::Element::from(window.canvas()))
-                    .ok()
-            })
-            .expect("couldn't append canvas to document body");
-        visualizer.attach_canvas(visualizer.create_canvas(&window).await);
-        visualizer.attach_window(window);
-        visualizer.attach_event_loop(event_loop);
-        visualizer
-    }
-    pub fn set_options(&mut self, options: VisualizerOptions) {
+    pub fn set_options(&mut self, options: GfxOptions) {
         self.options = options;
     }
     fn attach_window(&mut self, window: Window) {
@@ -107,130 +94,17 @@ impl Visualizer {
     fn detach_canvas(&mut self) -> Canvas {
         self.canvas.take().expect("no canvas")
     }
-    fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {}
-    async fn create_canvas(&self, window: &Window) -> Canvas {
-        Canvas::new(window, self.options.clone()).await
+    fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {
+        self.event_loop = Some(event_loop);
     }
-    fn adjust_canvas(&mut self, width: u32, height: u32) {
-        let mut canvas = self.canvas.as_mut().unwrap();
-        canvas.surface_configuration.width = width;
-        canvas.surface_configuration.height = height;
-        canvas
-            .surface
-            .configure(&canvas.device, &canvas.surface_configuration);
-        self.viewport
-            .as_mut()
-            .unwrap()
-            .adjust(&canvas.device, &canvas.queue, width, height);
-    }
-    fn render(&mut self) {}
     pub fn launch(mut self, mut job: Job) {
+        #[cfg(target_arch = "wasm32")] {
+            wasm_bindgen_futures::spawn_local(web_run(self, job));
+        }
         #[cfg(not(target_arch = "wasm32"))]
         {
-            self.event_loop = Some(EventLoop::new());
+            self.attach_event_loop(EventLoop::new());
+            run(self, job);
         }
-        let event_loop = self.event_loop.take().unwrap();
-        event_loop.run(move |event, _event_loop_window_target, control_flow| {
-            control_flow.set_poll();
-            match event {
-                Event::NewEvents(start_cause) => match start_cause {
-                    StartCause::ResumeTimeReached { .. } => {}
-                    StartCause::WaitCancelled { .. } => {}
-                    StartCause::Poll => {}
-                    StartCause::Init => {
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            let window = Window::new(_event_loop_window_target)
-                                .expect("could not create window");
-                            self.attach_canvas(futures::executor::block_on(
-                                self.create_canvas(&window),
-                            ));
-                            self.attach_window(window);
-                        }
-                        job.startup();
-                        let canvas = self.canvas.as_ref().unwrap();
-                        let configuration = &canvas.surface_configuration;
-                        self.viewport = Option::from(Viewport::new(
-                            &canvas.device,
-                            (configuration.width, configuration.height).into(),
-                        ));
-                    }
-                },
-                Event::WindowEvent { window_id, event } => match event {
-                    WindowEvent::Resized(physical_size) => {
-                        self.adjust_canvas(physical_size.width, physical_size.height);
-                    }
-                    WindowEvent::Moved(_) => {}
-                    WindowEvent::CloseRequested => {
-                        control_flow.set_exit();
-                    }
-                    WindowEvent::Destroyed => {}
-                    WindowEvent::DroppedFile(_) => {}
-                    WindowEvent::HoveredFile(_) => {}
-                    WindowEvent::HoveredFileCancelled => {}
-                    WindowEvent::ReceivedCharacter(_) => {}
-                    WindowEvent::Focused(_) => {}
-                    WindowEvent::KeyboardInput { .. } => {}
-                    WindowEvent::ModifiersChanged(_) => {}
-                    WindowEvent::Ime(_) => {}
-                    WindowEvent::CursorMoved { .. } => {}
-                    WindowEvent::CursorEntered { .. } => {}
-                    WindowEvent::CursorLeft { .. } => {}
-                    WindowEvent::MouseWheel { .. } => {}
-                    WindowEvent::MouseInput { .. } => {}
-                    WindowEvent::TouchpadPressure { .. } => {}
-                    WindowEvent::AxisMotion { .. } => {}
-                    WindowEvent::Touch(_) => {}
-                    WindowEvent::ScaleFactorChanged {
-                        scale_factor,
-                        new_inner_size,
-                    } => {
-                        self.adjust_canvas(new_inner_size.width, new_inner_size.height);
-                    }
-                    WindowEvent::ThemeChanged(_) => {}
-                    WindowEvent::Occluded(_) => {}
-                },
-                Event::DeviceEvent { .. } => {}
-                Event::UserEvent(_) => {}
-                Event::Suspended => {
-                    #[cfg(target_os = "android")]
-                    {
-                        let _ = self.detach_canvas();
-                    }
-                    job.suspend();
-                }
-                Event::Resumed => {
-                    #[cfg(target_os = "android")]
-                    {
-                        let window = self.detach_window();
-                        self.attach_canvas(futures::executor::block_on(
-                            self.create_canvas(&window),
-                        ));
-                        self.attach_window(window);
-                    }
-                    job.activate();
-                }
-                Event::MainEventsCleared => {
-                    if job.active() {
-                        job.exec();
-                    }
-                    if job.should_exit() {
-                        control_flow.set_exit();
-                    }
-                    self.window.as_ref().unwrap().request_redraw();
-                }
-                Event::RedrawRequested(_window_id) => {
-                    self.render();
-                }
-                Event::RedrawEventsCleared => {
-                    if job.can_idle() {
-                        control_flow.set_wait();
-                    }
-                }
-                Event::LoopDestroyed => {
-                    job.teardown();
-                }
-            }
-        });
     }
 }

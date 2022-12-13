@@ -22,6 +22,8 @@ fn main() {
     args.push(&package);
     args.push("--target-dir");
     args.push(target.as_os_str().to_str().unwrap());
+    args.push("--bin");
+    args.push(&package);
     let status = Command::new(&cargo)
         .current_dir(&project_root)
         .args(&args)

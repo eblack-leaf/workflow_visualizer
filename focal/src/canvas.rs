@@ -1,4 +1,4 @@
-use crate::VisualizerOptions;
+use crate::{Gfx, GfxOptions};
 use wgpu::CompositeAlphaMode;
 use winit::window::Window;
 
@@ -10,7 +10,7 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub async fn new(window: &Window, options: VisualizerOptions) -> Self {
+    pub async fn new(window: &Window, options: GfxOptions) -> Self {
         let instance = wgpu::Instance::new(options.backends);
         let surface = unsafe { instance.create_surface(window) };
         let adapter = instance
@@ -52,4 +52,16 @@ impl Canvas {
             surface_configuration,
         }
     }
+}
+pub(crate) fn adjust(gfx: &mut Gfx, width: u32, height: u32) {
+    let mut canvas = gfx.canvas.as_mut().unwrap();
+    canvas.surface_configuration.width = width;
+    canvas.surface_configuration.height = height;
+    canvas
+        .surface
+        .configure(&canvas.device, &canvas.surface_configuration);
+    gfx.viewport
+        .as_mut()
+        .unwrap()
+        .adjust(&canvas.device, &canvas.queue, width, height);
 }
