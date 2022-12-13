@@ -10,6 +10,7 @@ pub struct Viewport {
     pub bind_group_layout: wgpu::BindGroupLayout,
     pub uniform: Uniform<GpuViewport>,
     pub depth_texture: wgpu::Texture,
+    pub depth_format: wgpu::TextureFormat,
 }
 impl Viewport {
     pub fn new(device: &wgpu::Device, area: Area) -> Self {
@@ -39,7 +40,8 @@ impl Viewport {
                 resource: uniform.buffer.as_entire_binding(),
             }],
         });
-        let depth_texture = depth_texture(device, area);
+        let depth_format = wgpu::TextureFormat::Depth32Float;
+        let depth_texture = depth_texture(device, area, depth_format);
         Self {
             cpu: cpu_viewport,
             gpu: gpu_viewport,
@@ -48,6 +50,7 @@ impl Viewport {
             bind_group_layout,
             uniform,
             depth_texture,
+            depth_format,
         }
     }
     pub fn adjust(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, width: u32, height: u32) {
@@ -55,10 +58,10 @@ impl Viewport {
         self.cpu = CpuViewport::new(area, 100f32.into());
         self.gpu = self.cpu.gpu_viewport();
         self.uniform.update(queue, self.gpu);
-        self.depth_texture = depth_texture(device, area);
+        self.depth_texture = depth_texture(device, area, self.depth_format);
     }
 }
-fn depth_texture(device: &wgpu::Device, area: Area) -> wgpu::Texture {
+fn depth_texture(device: &wgpu::Device, area: Area, format: wgpu::TextureFormat) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("depth texture"),
         size: wgpu::Extent3d {
@@ -69,7 +72,7 @@ fn depth_texture(device: &wgpu::Device, area: Area) -> wgpu::Texture {
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Depth32Float,
+        format,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
     })
 }

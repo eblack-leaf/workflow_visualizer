@@ -1,12 +1,14 @@
+use crate::canvas::Canvas;
+use crate::render::render;
+use crate::text::TextRenderer;
+use crate::viewport::Viewport;
+use crate::{canvas, Gfx, GfxOptions, Job};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-use crate::{canvas, Gfx, GfxOptions, Job};
-use crate::canvas::Canvas;
-use crate::render::render;
-use crate::viewport::Viewport;
 pub(crate) async fn web_run(mut gfx: Gfx, job: Job) {
-    #[cfg(target_arch = "wasm32")] {
+    #[cfg(target_arch = "wasm32")]
+    {
         gfx.set_options(GfxOptions::web());
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
@@ -41,9 +43,10 @@ pub(crate) fn run(mut gfx: Gfx, mut job: Job) {
                     {
                         let window = Window::new(_event_loop_window_target)
                             .expect("could not create window");
-                        gfx.attach_canvas(futures::executor::block_on(
-                            Canvas::new(&window, gfx.options.clone()),
-                        ));
+                        gfx.attach_canvas(futures::executor::block_on(Canvas::new(
+                            &window,
+                            gfx.options.clone(),
+                        )));
                         gfx.attach_window(window);
                     }
                     job.startup();
@@ -53,6 +56,10 @@ pub(crate) fn run(mut gfx: Gfx, mut job: Job) {
                         &canvas.device,
                         (configuration.width, configuration.height).into(),
                     ));
+                    gfx.attach_render_implementor(Box::new(TextRenderer::new(
+                        gfx.canvas.as_ref().unwrap(),
+                        gfx.viewport.as_ref().unwrap(),
+                    )));
                 }
             },
             Event::WindowEvent { window_id, event } => match event {
@@ -105,9 +112,10 @@ pub(crate) fn run(mut gfx: Gfx, mut job: Job) {
                     #[cfg(target_os = "android")]
                     {
                         let window = gfx.detach_window();
-                        gfx.attach_canvas(futures::executor::block_on(
-                            Canvas::new(&window, gfx.options.clone()),
-                        ));
+                        gfx.attach_canvas(futures::executor::block_on(Canvas::new(
+                            &window,
+                            gfx.options.clone(),
+                        )));
                         gfx.attach_window(window);
                     }
                     job.activate();
@@ -121,7 +129,6 @@ pub(crate) fn run(mut gfx: Gfx, mut job: Job) {
                 if job.should_exit() {
                     control_flow.set_exit();
                 }
-
             }
             Event::RedrawRequested(_window_id) => {
                 render(&mut gfx);

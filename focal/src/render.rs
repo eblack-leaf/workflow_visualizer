@@ -1,25 +1,30 @@
+use std::sync::{Arc, Mutex};
 use crate::canvas::Canvas;
-use wgpu::{SurfaceError, SurfaceTexture};
-use crate::{Gfx, Job};
 use crate::viewport::Viewport;
+use crate::{Gfx, Job};
+use wgpu::{SurfaceError, SurfaceTexture};
 
 pub trait Render {
-    fn render<'a>(&'a self, render_pass: &'a wgpu::RenderPass<'a>, viewport: &'a Viewport);
+    fn render<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, viewport: &'a Viewport);
     fn extract(&mut self, job: Job);
     fn prepare(&mut self);
 }
 pub(crate) fn render(gfx: &mut Gfx) {
     if let Some(surface_texture) = surface_texture(gfx.canvas.as_ref().unwrap()).take() {
         let mut command_encoder = gfx.canvas.as_ref().unwrap().device.create_command_encoder(
-            &wgpu::CommandEncoderDescriptor{
+            &wgpu::CommandEncoderDescriptor {
                 label: Some("command encoder"),
-            }
+            },
         );
         let surface_texture_view = surface_texture
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
         {
-            let depth_texture_view = gfx.viewport.as_ref().unwrap().depth_texture
+            let depth_texture_view = gfx
+                .viewport
+                .as_ref()
+                .unwrap()
+                .depth_texture
                 .create_view(&wgpu::TextureViewDescriptor::default());
             let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("render pass"),
@@ -44,7 +49,11 @@ pub(crate) fn render(gfx: &mut Gfx) {
                 implementor.render(&mut render_pass, gfx.viewport.as_ref().unwrap());
             });
         }
-        gfx.canvas.as_ref().unwrap().queue.submit(std::iter::once(command_encoder.finish()));
+        gfx.canvas
+            .as_ref()
+            .unwrap()
+            .queue
+            .submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
     }
 }
@@ -54,17 +63,23 @@ pub fn surface_texture(canvas: &Canvas) -> Option<SurfaceTexture> {
         Err(err) => match err {
             SurfaceError::Timeout => None,
             SurfaceError::Outdated => {
-                canvas.surface.configure(&canvas.device, &canvas.surface_configuration);
+                canvas
+                    .surface
+                    .configure(&canvas.device, &canvas.surface_configuration);
                 Some(
-                    canvas.surface
+                    canvas
+                        .surface
                         .get_current_texture()
                         .expect("configuring did not solve surface outdated"),
                 )
             }
             SurfaceError::Lost => {
-                canvas.surface.configure(&canvas.device, &canvas.surface_configuration);
+                canvas
+                    .surface
+                    .configure(&canvas.device, &canvas.surface_configuration);
                 Some(
-                    canvas.surface
+                    canvas
+                        .surface
                         .get_current_texture()
                         .expect("configuring did not solve surface lost"),
                 )

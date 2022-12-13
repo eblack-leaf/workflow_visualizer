@@ -6,7 +6,7 @@ use winit::window::Window;
 
 use crate::canvas::Canvas;
 pub use crate::job::Job;
-use crate::render::{Render, surface_texture};
+use crate::render::{surface_texture, Render};
 use crate::run::{run, web_run};
 use crate::theme::Theme;
 use crate::viewport::Viewport;
@@ -16,10 +16,11 @@ mod color;
 mod coord;
 mod job;
 mod render;
+mod run;
+mod text;
 mod theme;
 mod uniform;
 mod viewport;
-mod run;
 
 #[derive(Clone)]
 pub struct GfxOptions {
@@ -73,10 +74,7 @@ impl Gfx {
             canvas: None,
             viewport: None,
             theme: Theme::default(),
-            render_implementors: {
-                let mut render_implementors = Vec::new();
-                render_implementors
-            }
+            render_implementors: Vec::new(),
         }
     }
     pub fn set_options(&mut self, options: GfxOptions) {
@@ -97,8 +95,12 @@ impl Gfx {
     fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {
         self.event_loop = Some(event_loop);
     }
+    pub fn attach_render_implementor(&mut self, implementor: Box<dyn Render>) {
+        self.render_implementors.push(implementor);
+    }
     pub fn launch(mut self, mut job: Job) {
-        #[cfg(target_arch = "wasm32")] {
+        #[cfg(target_arch = "wasm32")]
+        {
             wasm_bindgen_futures::spawn_local(web_run(self, job));
         }
         #[cfg(not(target_arch = "wasm32"))]
