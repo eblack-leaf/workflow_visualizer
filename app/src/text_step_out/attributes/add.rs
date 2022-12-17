@@ -15,7 +15,6 @@ pub struct IndexResponse {
     pub entity: Entity,
     pub index: Index,
 }
-
 impl IndexResponse {
     pub fn new(entity: Entity, index: Index) -> Self {
         Self { entity, index }

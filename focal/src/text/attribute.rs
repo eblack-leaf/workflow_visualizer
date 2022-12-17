@@ -8,7 +8,7 @@ impl Coordinator {
         Self { current: 0, max }
     }
 }
-
+pub(crate) struct Instance(pub(crate) u32);
 pub(crate) fn buffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
 >(

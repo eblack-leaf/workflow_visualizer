@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
 use crate::canvas::Canvas;
 use crate::viewport::Viewport;
 use crate::{Gfx, Job};
+use std::sync::{Arc, Mutex};
 use wgpu::{SurfaceError, SurfaceTexture};
 
 pub trait Render {

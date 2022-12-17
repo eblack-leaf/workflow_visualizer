@@ -1,14 +1,15 @@
 mod attribute;
+mod font;
 mod pipeline;
 mod rasterization;
-mod vertex;
-mod font;
 mod scale;
+mod vertex;
 
 use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::render::Render;
+use crate::text::font::{font, Font};
 use crate::text::pipeline::pipeline;
 use crate::text::rasterization::Rasterization;
 use crate::text::vertex::GLYPH_AABB;
@@ -16,7 +17,6 @@ use crate::viewport::Viewport;
 use crate::Job;
 use wgpu::util::DeviceExt;
 use wgpu::RenderPass;
-use crate::text::font::{Font, font};
 
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
@@ -28,7 +28,6 @@ pub struct TextRenderer {
     pub(crate) depth_buffer: wgpu::Buffer,
     pub(crate) color_buffer: wgpu::Buffer,
     pub(crate) placement_buffer: wgpu::Buffer,
-    pub(crate) font: Font,
 }
 impl TextRenderer {
     pub fn new(canvas: &Canvas, viewport: &Viewport) -> Self {
@@ -42,7 +41,6 @@ impl TextRenderer {
         let color_buffer = attribute::buffer::<Color>(&canvas.device, coordinator.max);
         let placement_buffer =
             attribute::buffer::<rasterization::Placement>(&canvas.device, coordinator.max);
-        let font = font();
         Self {
             pipeline,
             rasterization,
@@ -53,7 +51,6 @@ impl TextRenderer {
             depth_buffer,
             color_buffer,
             placement_buffer,
-            font,
         }
     }
 }
