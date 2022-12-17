@@ -36,15 +36,6 @@ pub(crate) struct Glyph {
     pub(crate) placement: Placement,
     pub(crate) bitmap: Vec<u32>,
 }
-pub(crate) struct RasterizationWrite {
-    pub(crate) bitmap: Vec<u32>,
-    pub(crate) placement: Placement,
-}
-impl RasterizationWrite {
-    pub(crate) fn new(bitmap: Vec<u32>, placement: Placement) -> Self {
-        Self { bitmap, placement }
-    }
-}
 pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 pub(crate) struct Rasterization {
     pub(crate) cpu: Vec<u32>,
@@ -55,7 +46,7 @@ pub(crate) struct Rasterization {
     pub(crate) rasterization_requests: Vec<RasterizationRequest>,
     pub(crate) rasterization_responses: Vec<RasterizationResponse>,
     pub(crate) rasterization_removals: Vec<RasterizationRemoval>,
-    pub(crate) rasterization_writes: Vec<RasterizationWrite>,
+    pub(crate) rasterization_write: Vec<u32>,
     pub(crate) font: Font,
 }
 impl Rasterization {
@@ -106,12 +97,17 @@ impl Rasterization {
             rasterization_requests: Vec::new(),
             rasterization_responses: Vec::new(),
             rasterization_removals: Vec::new(),
-            rasterization_writes: Vec::new(),
+            rasterization_write: Vec::new(),
             font: font(),
         }
     }
     pub(crate) fn start(&self) -> u32 {
         (self.cpu.len() - 1) as u32
+    }
+    pub(crate) fn interval_adjusted_size(&self, required_size: usize) -> usize {
+        // get to next growth interval to avoid frequent allocations
+        // returning input now as placeholder
+        required_size
     }
 }
 pub(crate) fn remove(rasterization: &mut Rasterization) {
@@ -119,29 +115,29 @@ pub(crate) fn remove(rasterization: &mut Rasterization) {
     // update as normal using writes
 }
 pub(crate) fn grow(device: &wgpu::Device, queue: &wgpu::Queue, rasterization: &mut Rasterization) {
-    let growth = rasterization.rasterization_writes.len() * std::mem::size_of::<u32>();
+    let growth = rasterization.rasterization_write.len() * std::mem::size_of::<u32>();
     let current = rasterization.cpu.len() * std::mem::size_of::<u32>();
-    if current + growth > rasterization.gpu.size() as usize {
+    let required_size = current + growth;
+    if required_size > rasterization.gpu.size() as usize {
         rasterization.gpu = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("rasterization buffer"),
-            size: (current + growth) as BufferAddress,
+            size: rasterization.interval_adjusted_size(required_size) as BufferAddress,
             usage: wgpu::BufferUsages::VERTEX
                 | wgpu::BufferUsages::COPY_DST
                 | wgpu::BufferUsages::STORAGE,
             mapped_at_creation: false,
-        })
+        });
+        queue.write_buffer(
+            &rasterization.gpu,
+            0,
+            bytemuck::cast_slice(&rasterization.cpu),
+        );
+        rasterization.rasterization_write.clear();
     }
-    queue.write_buffer(
-        &rasterization.gpu,
-        0,
-        bytemuck::cast_slice(&rasterization.cpu),
-    );
 }
 pub(crate) fn write(rasterization: &mut Rasterization) {
-    rasterization
-        .rasterization_writes
-        .drain(..)
-        .for_each(|write: RasterizationWrite| {});
+    // write rasterization_write to gpu
+    // only needed if not grown
 }
 pub(crate) fn rasterize(rasterization: &mut Rasterization) {
     let mut requests =
@@ -172,8 +168,8 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
                     .collect::<Vec<u32>>();
                 rasterization.cpu.extend(&bitmap);
                 rasterization
-                    .rasterization_writes
-                    .push(RasterizationWrite::new(bitmap, placement));
+                    .rasterization_write
+                    .extend(&bitmap);
                 rasterization
                     .rasterization_responses
                     .push(RasterizationResponse::new(request.instance, placement));

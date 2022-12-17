@@ -9,7 +9,6 @@ use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::render::Render;
-use crate::text::font::{font, Font};
 use crate::text::pipeline::pipeline;
 use crate::text::rasterization::Rasterization;
 use crate::text::vertex::GLYPH_AABB;
