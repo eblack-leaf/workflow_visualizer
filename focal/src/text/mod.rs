@@ -13,7 +13,7 @@ use crate::text::pipeline::pipeline;
 use crate::text::rasterization::Rasterization;
 use crate::text::vertex::GLYPH_AABB;
 use crate::viewport::Viewport;
-use crate::Job;
+use crate::{Gfx, Job};
 use wgpu::util::DeviceExt;
 use wgpu::RenderPass;
 
@@ -73,7 +73,11 @@ impl Render for TextRenderer {
         todo!()
     }
 
-    fn prepare(&mut self) {
-        todo!()
+    fn prepare(&mut self, gfx: &Gfx) {
+        let queue = &gfx.canvas.as_ref().unwrap().queue;
+        rasterization::remove(queue, &mut self.rasterization);
+        rasterization::rasterize(&mut self.rasterization);
+        rasterization::grow(&gfx.canvas.as_ref().unwrap().device, queue, &mut self.rasterization);
+        rasterization::write(queue, &mut self.rasterization);
     }
 }

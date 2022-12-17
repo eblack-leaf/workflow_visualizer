@@ -14,6 +14,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5cf69011-a9ae-4729-8a8a-0252354697e1" name="Changes" comment="rasterization">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/focal/src/render.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/render.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/focal/src/text/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/text/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/focal/src/text/rasterization/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/focal/src/text/rasterization/mod.rs" afterDir="false" />
     </list>
@@ -216,7 +218,7 @@
       <workItem from="1670912751103" duration="444000" />
       <workItem from="1670918919147" duration="6666000" />
       <workItem from="1670993810751" duration="2837000" />
-      <workItem from="1671231868399" duration="9792000" />
+      <workItem from="1671231868399" duration="14337000" />
     </task>
     <task id="LOCAL-00001" summary="text">
       <created>1669792970834</created>
@@ -323,7 +325,14 @@
       <option name="project" value="LOCAL" />
       <updated>1671241453724</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="rasterization">
+      <created>1671242763277</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1671242763277</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

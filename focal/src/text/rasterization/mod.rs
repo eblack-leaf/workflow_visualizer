@@ -3,7 +3,7 @@ use crate::text::font::{font, Font};
 use crate::text::scale::Scale;
 use crate::text::TextRenderer;
 pub(crate) use placement::Placement;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use wgpu::BufferAddress;
 
 mod placement;
@@ -26,15 +26,17 @@ impl RasterizationResponse {
     }
 }
 pub(crate) struct RasterizationRemoval {
+    pub(crate) hash: GlyphHash,
     pub(crate) placement: Placement,
 }
-pub(crate) struct RasterizationSwaps {
-    pub(crate) old: Placement,
+pub(crate) struct RasterizationReference(pub(crate) u32);
+pub(crate) struct RasterizationSwap {
     pub(crate) new: Placement,
 }
 pub(crate) struct Glyph {
     pub(crate) placement: Placement,
     pub(crate) bitmap: Vec<u32>,
+    pub(crate) references: RasterizationReference,
 }
 pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 pub(crate) struct Rasterization {
@@ -47,6 +49,8 @@ pub(crate) struct Rasterization {
     pub(crate) rasterization_responses: Vec<RasterizationResponse>,
     pub(crate) rasterization_removals: Vec<RasterizationRemoval>,
     pub(crate) rasterization_write: Vec<u32>,
+    pub(crate) retain_glyphs: HashSet<GlyphHash>,
+    pub(crate) rasterization_swaps: HashMap<GlyphHash, RasterizationSwap>,
     pub(crate) font: Font,
 }
 impl Rasterization {
@@ -98,10 +102,12 @@ impl Rasterization {
             rasterization_responses: Vec::new(),
             rasterization_removals: Vec::new(),
             rasterization_write: Vec::new(),
+            retain_glyphs: HashSet::new(),
+            rasterization_swaps: HashMap::new(),
             font: font(),
         }
     }
-    pub(crate) fn start(&self) -> u32 {
+    pub(crate) fn current_cpu_offset(&self) -> u32 {
         (self.cpu.len() - 1) as u32
     }
     pub(crate) fn interval_adjusted_size(&self, required_size: usize) -> usize {
@@ -109,10 +115,36 @@ impl Rasterization {
         // returning input now as placeholder
         required_size
     }
+    pub(crate) fn current_gpu_offset(&self) -> usize {
+        self.current_cpu_offset() as usize - self.rasterization_write.len()
+            * std::mem::size_of::<u32>()
+    }
 }
-pub(crate) fn remove(rasterization: &mut Rasterization) {
-    // shrink cpu here and rewrite base so next part can
-    // update as normal using writes
+pub(crate) fn remove(queue: &wgpu::Queue, rasterization: &mut Rasterization) {
+    let mut removals = rasterization
+        .rasterization_removals
+        .drain(..)
+        .collect::<Vec<RasterizationRemoval>>();
+    removals.iter().for_each(|remove: &RasterizationRemoval| {
+        let glyph = rasterization.glyphs.get_mut(&remove.hash).unwrap();
+        if glyph.references.0 == 0 {
+            if !rasterization.retain_glyphs.contains(&remove.hash) {
+                let start = remove.placement.start() as usize;
+                let end = (remove.placement.start() + remove.placement.size()) as usize;
+                // TODO need to update swaps of moved placements
+                // change start of all antecedent placements by range
+                // add new placement to swaps
+                rasterization.cpu.drain(start..end);
+            }
+        } else {
+            glyph.references.0 -= 1;
+        }
+    });
+    queue.write_buffer(
+        &rasterization.gpu,
+        0,
+        bytemuck::cast_slice(&rasterization.cpu),
+    );
 }
 pub(crate) fn grow(device: &wgpu::Device, queue: &wgpu::Queue, rasterization: &mut Rasterization) {
     let growth = rasterization.rasterization_write.len() * std::mem::size_of::<u32>();
@@ -135,16 +167,24 @@ pub(crate) fn grow(device: &wgpu::Device, queue: &wgpu::Queue, rasterization: &m
         rasterization.rasterization_write.clear();
     }
 }
-pub(crate) fn write(rasterization: &mut Rasterization) {
-    // write rasterization_write to gpu
-    // only needed if not grown
+pub(crate) fn write(queue: &wgpu::Queue, rasterization: &mut Rasterization) {
+    if !rasterization.rasterization_write.is_empty() {
+        queue.write_buffer(
+            &rasterization.gpu,
+            rasterization.current_gpu_offset() as BufferAddress,
+            bytemuck::cast_slice(&rasterization.rasterization_write),
+        );
+    }
+    rasterization.rasterization_write.clear();
 }
 pub(crate) fn rasterize(rasterization: &mut Rasterization) {
-    let mut requests =
-    rasterization
+    let mut requests = rasterization
         .rasterization_requests
-        .drain(..).collect::<Vec<RasterizationRequest>>();
-    requests.drain(..).for_each(|request: RasterizationRequest| {
+        .drain(..)
+        .collect::<Vec<RasterizationRequest>>();
+    requests
+        .drain(..)
+        .for_each(|request: RasterizationRequest| {
             if let Some(cached_glyph) = rasterization.glyphs.get(&request.hash) {
                 rasterization
                     .rasterization_responses
@@ -157,7 +197,7 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
                     .font
                     .font()
                     .rasterize(request.character, request.scale.px());
-                let start: u32 = rasterization.start();
+                let start: u32 = rasterization.current_cpu_offset();
                 let row_size: u32 = rasterized_glyph.0.width as u32;
                 let rows: u32 = (rasterized_glyph.1.len() / row_size as usize) as u32;
                 let placement = Placement::new(start, row_size, rows);
@@ -167,12 +207,24 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
                     .map(|g| *g as u32)
                     .collect::<Vec<u32>>();
                 rasterization.cpu.extend(&bitmap);
-                rasterization
-                    .rasterization_write
-                    .extend(&bitmap);
+                rasterization.rasterization_write.extend(&bitmap);
                 rasterization
                     .rasterization_responses
                     .push(RasterizationResponse::new(request.instance, placement));
+                rasterization.glyphs.insert(
+                    request.hash,
+                    Glyph {
+                        bitmap,
+                        placement,
+                        references: RasterizationReference(0),
+                    },
+                );
             }
+            rasterization
+                .glyphs
+                .get_mut(&request.hash)
+                .unwrap()
+                .references
+                .0 += 1;
         });
 }
