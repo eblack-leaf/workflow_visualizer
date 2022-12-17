@@ -7,7 +7,7 @@ use wgpu::{SurfaceError, SurfaceTexture};
 pub trait Render {
     fn render<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, viewport: &'a Viewport);
     fn extract(&mut self, job: Job);
-    fn prepare(&mut self, gfx: &Gfx);
+    fn prepare(&mut self, canvas: &Canvas);
 }
 pub(crate) fn render(gfx: &mut Gfx) {
     if let Some(surface_texture) = surface_texture(gfx.canvas.as_ref().unwrap()).take() {
@@ -45,7 +45,8 @@ pub(crate) fn render(gfx: &mut Gfx) {
                     stencil_ops: None,
                 }),
             });
-            gfx.render_implementors.iter().for_each(|implementor| {
+            gfx.render_implementors.iter_mut().for_each(|mut implementor| {
+                implementor.prepare(gfx.canvas.as_ref().unwrap());
                 implementor.render(&mut render_pass, gfx.viewport.as_ref().unwrap());
             });
         }

@@ -73,11 +73,10 @@ impl Render for TextRenderer {
         todo!()
     }
 
-    fn prepare(&mut self, gfx: &Gfx) {
-        let queue = &gfx.canvas.as_ref().unwrap().queue;
-        rasterization::remove(queue, &mut self.rasterization);
+    fn prepare(&mut self, canvas: &Canvas) {
+        rasterization::remove(&canvas.queue, &mut self.rasterization);
         rasterization::rasterize(&mut self.rasterization);
-        rasterization::grow(&gfx.canvas.as_ref().unwrap().device, queue, &mut self.rasterization);
-        rasterization::write(queue, &mut self.rasterization);
+        rasterization::grow(&canvas.device, &canvas.queue, &mut self.rasterization);
+        rasterization::write(&canvas.queue, &mut self.rasterization);
     }
 }
