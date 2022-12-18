@@ -74,7 +74,9 @@ impl Render for TextRenderer {
     }
 
     fn prepare(&mut self, canvas: &Canvas) {
+        rasterization::resolve_references(&mut self.rasterization);
         rasterization::remove(&canvas.queue, &mut self.rasterization);
+        rasterization::integrate_swaps(&mut self.rasterization);
         rasterization::rasterize(&mut self.rasterization);
         rasterization::grow(&canvas.device, &canvas.queue, &mut self.rasterization);
         rasterization::write(&canvas.queue, &mut self.rasterization);

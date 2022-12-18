@@ -31,7 +31,7 @@ pub(crate) struct RasterizationRemoval {
 }
 pub(crate) struct RasterizationReference(pub(crate) u32);
 pub(crate) struct RasterizationSwap {
-    pub(crate) new: Placement,
+    pub(crate) new_start: u32,
 }
 pub(crate) struct Glyph {
     pub(crate) placement: Placement,
@@ -51,6 +51,7 @@ pub(crate) struct Rasterization {
     pub(crate) rasterization_write: Vec<u32>,
     pub(crate) retain_glyphs: HashSet<GlyphHash>,
     pub(crate) rasterization_swaps: HashMap<GlyphHash, RasterizationSwap>,
+    pub(crate) ordered_placements: Vec<GlyphHash>,
     pub(crate) font: Font,
 }
 impl Rasterization {
@@ -104,23 +105,48 @@ impl Rasterization {
             rasterization_write: Vec::new(),
             retain_glyphs: HashSet::new(),
             rasterization_swaps: HashMap::new(),
+            ordered_placements: Vec::new(),
             font: font(),
         }
     }
-    pub(crate) fn current_cpu_offset(&self) -> u32 {
-        (self.cpu.len() - 1) as u32
+    pub(crate) fn next_start(&self) -> u32 {
+        (self.cpu.len()) as u32
     }
     pub(crate) fn interval_adjusted_size(&self, required_size: usize) -> usize {
         // get to next growth interval to avoid frequent allocations
         // returning input now as placeholder
         required_size
     }
-    pub(crate) fn current_gpu_offset(&self) -> usize {
-        self.current_cpu_offset() as usize - self.rasterization_write.len()
+    pub(crate) fn gpu_write_offset(&self) -> usize {
+        (self.next_start() as usize - self.rasterization_write.len())
             * std::mem::size_of::<u32>()
+    }
+    pub(crate) fn placement_order(&self, hash: &GlyphHash) -> Option<usize> {
+        let mut order = 0;
+        for placement_hash in self.ordered_placements.iter() {
+            if placement_hash == hash {
+                return Some(order);
+            }
+            order += 1;
+        }
+        None
+    }
+}
+pub(crate) fn resolve_references(rasterization: &mut Rasterization) {
+    for add in rasterization.rasterization_requests.iter() {
+        // add one
+    }
+    for remove in rasterization.rasterization_removals.iter() {
+        // remove one check 0
+    }
+}
+pub(crate) fn integrate_swaps(rasterization: &mut Rasterization) {
+    for swap in rasterization.rasterization_swaps.iter().clone() {
+        rasterization.glyphs.get_mut(swap.0).unwrap().placement.parts[0] = swap.1.new_start;
     }
 }
 pub(crate) fn remove(queue: &wgpu::Queue, rasterization: &mut Rasterization) {
+    let mut dirty = false;
     let mut removals = rasterization
         .rasterization_removals
         .drain(..)
@@ -129,22 +155,29 @@ pub(crate) fn remove(queue: &wgpu::Queue, rasterization: &mut Rasterization) {
         let glyph = rasterization.glyphs.get_mut(&remove.hash).unwrap();
         if glyph.references.0 == 0 {
             if !rasterization.retain_glyphs.contains(&remove.hash) {
+                dirty = true;
                 let start = remove.placement.start() as usize;
                 let end = (remove.placement.start() + remove.placement.size()) as usize;
-                // TODO need to update swaps of moved placements
-                // change start of all antecedent placements by range
-                // add new placement to swaps
+                // if drain cpu then algo to find antecedent starts will misfire
+                // so defer drain but do all other steps
                 rasterization.cpu.drain(start..end);
+                let order = rasterization.placement_order(&remove.hash).unwrap();
+                // move all after that by placement.size() amount
+                // store new in swap
+                // remove from ordered_placements
+                // delete any swaps if swapped previously so can depend on integrity of swap data
+                // remove from glyphs
             }
-        } else {
-            glyph.references.0 -= 1;
         }
     });
-    queue.write_buffer(
-        &rasterization.gpu,
-        0,
-        bytemuck::cast_slice(&rasterization.cpu),
-    );
+    // rewrite
+    if dirty {
+        queue.write_buffer(
+            &rasterization.gpu,
+            0,
+            bytemuck::cast_slice(&rasterization.cpu),
+        );
+    }
 }
 pub(crate) fn grow(device: &wgpu::Device, queue: &wgpu::Queue, rasterization: &mut Rasterization) {
     let growth = rasterization.rasterization_write.len() * std::mem::size_of::<u32>();
@@ -171,7 +204,7 @@ pub(crate) fn write(queue: &wgpu::Queue, rasterization: &mut Rasterization) {
     if !rasterization.rasterization_write.is_empty() {
         queue.write_buffer(
             &rasterization.gpu,
-            rasterization.current_gpu_offset() as BufferAddress,
+            rasterization.gpu_write_offset() as BufferAddress,
             bytemuck::cast_slice(&rasterization.rasterization_write),
         );
     }
@@ -197,7 +230,7 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
                     .font
                     .font()
                     .rasterize(request.character, request.scale.px());
-                let start: u32 = rasterization.current_cpu_offset();
+                let start: u32 = rasterization.next_start();
                 let row_size: u32 = rasterized_glyph.0.width as u32;
                 let rows: u32 = (rasterized_glyph.1.len() / row_size as usize) as u32;
                 let placement = Placement::new(start, row_size, rows);
@@ -206,6 +239,7 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
                     .iter()
                     .map(|g| *g as u32)
                     .collect::<Vec<u32>>();
+                rasterization.ordered_placements.push(request.hash.clone());
                 rasterization.cpu.extend(&bitmap);
                 rasterization.rasterization_write.extend(&bitmap);
                 rasterization
