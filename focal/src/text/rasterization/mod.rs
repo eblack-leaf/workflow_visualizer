@@ -118,8 +118,7 @@ impl Rasterization {
         required_size
     }
     pub(crate) fn gpu_write_offset(&self) -> usize {
-        (self.next_start() as usize - self.rasterization_write.len())
-            * std::mem::size_of::<u32>()
+        (self.next_start() as usize - self.rasterization_write.len()) * std::mem::size_of::<u32>()
     }
     pub(crate) fn placement_order(&self, hash: &GlyphHash) -> Option<usize> {
         let mut order = 0;
@@ -142,7 +141,12 @@ pub(crate) fn resolve_references(rasterization: &mut Rasterization) {
 }
 pub(crate) fn integrate_swaps(rasterization: &mut Rasterization) {
     for swap in rasterization.rasterization_swaps.iter().clone() {
-        rasterization.glyphs.get_mut(swap.0).unwrap().placement.parts[0] = swap.1.new_start;
+        rasterization
+            .glyphs
+            .get_mut(swap.0)
+            .unwrap()
+            .placement
+            .parts[0] = swap.1.new_start;
     }
 }
 pub(crate) fn remove(queue: &wgpu::Queue, rasterization: &mut Rasterization) {

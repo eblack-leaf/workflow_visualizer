@@ -45,10 +45,12 @@ pub(crate) fn render(gfx: &mut Gfx) {
                     stencil_ops: None,
                 }),
             });
-            gfx.render_implementors.iter_mut().for_each(|mut implementor| {
-                implementor.prepare(gfx.canvas.as_ref().unwrap());
-                implementor.render(&mut render_pass, gfx.viewport.as_ref().unwrap());
-            });
+            gfx.render_implementors
+                .iter_mut()
+                .for_each(|mut implementor| {
+                    implementor.prepare(gfx.canvas.as_ref().unwrap());
+                    implementor.render(&mut render_pass, gfx.viewport.as_ref().unwrap());
+                });
         }
         gfx.canvas
             .as_ref()

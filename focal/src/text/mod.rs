@@ -1,7 +1,7 @@
 mod attribute;
 mod font;
 mod pipeline;
-mod rasterization;
+mod r_rasterization;
 mod scale;
 mod vertex;
 
@@ -10,7 +10,7 @@ use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::render::Render;
 use crate::text::pipeline::pipeline;
-use crate::text::rasterization::Rasterization;
+use crate::text::r_rasterization::Rasterization;
 use crate::text::vertex::GLYPH_AABB;
 use crate::viewport::Viewport;
 use crate::{Gfx, Job};
@@ -30,7 +30,7 @@ pub struct TextRenderer {
 }
 impl TextRenderer {
     pub fn new(canvas: &Canvas, viewport: &Viewport) -> Self {
-        let rasterization = Rasterization::new(&canvas.device, 1024);
+        let rasterization = Rasterization::new(&canvas.device);
         let pipeline = pipeline(canvas, viewport, &rasterization);
         let vertex_buffer = vertex::buffer(&canvas.device);
         let coordinator = attribute::Coordinator::new(100);
@@ -39,7 +39,7 @@ impl TextRenderer {
         let depth_buffer = attribute::buffer::<Depth>(&canvas.device, coordinator.max);
         let color_buffer = attribute::buffer::<Color>(&canvas.device, coordinator.max);
         let placement_buffer =
-            attribute::buffer::<rasterization::Placement>(&canvas.device, coordinator.max);
+            attribute::buffer::<r_rasterization::Placement>(&canvas.device, coordinator.max);
         Self {
             pipeline,
             rasterization,
@@ -57,7 +57,7 @@ impl Render for TextRenderer {
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &viewport.bind_group, &[]);
-        render_pass.set_bind_group(1, &self.rasterization.bind_group, &[]);
+        render_pass.set_bind_group(1, &self.rasterization.buffer.bind_group, &[]);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(1, self.position_buffer.slice(..));
         render_pass.set_vertex_buffer(2, self.area_buffer.slice(..));
@@ -74,11 +74,8 @@ impl Render for TextRenderer {
     }
 
     fn prepare(&mut self, canvas: &Canvas) {
-        rasterization::resolve_references(&mut self.rasterization);
-        rasterization::remove(&canvas.queue, &mut self.rasterization);
-        rasterization::integrate_swaps(&mut self.rasterization);
-        rasterization::rasterize(&mut self.rasterization);
-        rasterization::grow(&canvas.device, &canvas.queue, &mut self.rasterization);
-        rasterization::write(&canvas.queue, &mut self.rasterization);
+        r_rasterization::rasterize(&mut self.rasterization);
+        r_rasterization::place(&mut self.rasterization);
+        r_rasterization::write(&mut self.rasterization, canvas);
     }
 }
