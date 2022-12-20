@@ -41,7 +41,12 @@ pub(crate) fn place(rasterization: &mut Rasterization) {
             let row_size: u32 = request.glyph.metrics.width as u32;
             let rows: u32 = (request.glyph.bitmap.len() / row_size as usize) as u32;
             let placement = Placement::new(start, row_size, rows);
+            rasterization.placements.push(placement);
+            rasterization
+                .placement_order
+                .insert(request.hash, rasterization.placements.len() - 1);
             rasterization.write.extend(&request.glyph.bitmap);
         }
     }
+    rasterization.placement_requests.clear();
 }

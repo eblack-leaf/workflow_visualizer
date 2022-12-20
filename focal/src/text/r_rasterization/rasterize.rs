@@ -2,7 +2,7 @@ use crate::text::r_rasterization::placement::PlacementRequest;
 use crate::text::r_rasterization::Rasterization;
 use crate::text::scale::Scale;
 use fontdue::Metrics;
-
+#[derive(Clone)]
 pub(crate) struct Add {
     pub(crate) hash: GlyphHash,
     pub(crate) character: char,
@@ -40,4 +40,5 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
             .placement_requests
             .push(PlacementRequest::new(add.hash, glyph));
     }
+    rasterization.adds.clear();
 }

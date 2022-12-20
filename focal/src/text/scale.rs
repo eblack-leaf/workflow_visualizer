@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::Component;
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Scale {
     pub scale: f32,
 }
