@@ -75,7 +75,7 @@ impl Render for TextRenderer {
 
     fn prepare(&mut self, canvas: &Canvas) {
         r_rasterization::resolve(&mut self.rasterization);
-        r_rasterization::remove(&mut self.rasterization);
+        r_rasterization::remove(&mut self.rasterization, canvas);
         r_rasterization::rasterize(&mut self.rasterization);
         r_rasterization::place(&mut self.rasterization);
         r_rasterization::write(&mut self.rasterization, canvas);

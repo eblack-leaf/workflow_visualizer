@@ -1,4 +1,5 @@
 use crate::text::font::{font, Font};
+use crate::text::r_rasterization::placement::GlyphPlacement;
 pub(crate) use crate::text::r_rasterization::placement::{place, Placement, PlacementRequest};
 pub(crate) use crate::text::r_rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
 use crate::text::r_rasterization::references::PlacementReferences;
@@ -20,7 +21,7 @@ pub(crate) struct Rasterization {
     pub(crate) swaps: HashMap<GlyphHash, Placement>,
     pub(crate) glyphs: HashMap<GlyphHash, Glyph>,
     pub(crate) retain_glyphs: HashSet<GlyphHash>,
-    pub(crate) placements: Vec<Placement>,
+    pub(crate) placements: Vec<GlyphPlacement>,
     pub(crate) placement_order: HashMap<GlyphHash, usize>,
     pub(crate) placement_requests: Vec<PlacementRequest>,
     pub(crate) placement_references: PlacementReferences,

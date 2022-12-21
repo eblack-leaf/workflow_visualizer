@@ -24,6 +24,9 @@ impl Placement {
     pub fn size(&self) -> u32 {
         self.row_size() * self.rows()
     }
+    pub fn end(&self) -> u32 {
+        self.start() + self.size()
+    }
 }
 pub(crate) struct PlacementRequest {
     pub(crate) hash: GlyphHash,
@@ -34,6 +37,15 @@ impl PlacementRequest {
         Self { hash, glyph }
     }
 }
+pub(crate) struct GlyphPlacement {
+    pub(crate) hash: GlyphHash,
+    pub(crate) placement: Placement,
+}
+impl GlyphPlacement {
+    pub(crate) fn new(hash: GlyphHash, placement: Placement) -> Self {
+        Self { hash, placement }
+    }
+}
 pub(crate) fn place(rasterization: &mut Rasterization) {
     for request in rasterization.placement_requests.iter() {
         if !rasterization.placement_order.contains_key(&request.hash) {
@@ -41,7 +53,9 @@ pub(crate) fn place(rasterization: &mut Rasterization) {
             let row_size: u32 = request.glyph.metrics.width as u32;
             let rows: u32 = (request.glyph.bitmap.len() / row_size as usize) as u32;
             let placement = Placement::new(start, row_size, rows);
-            rasterization.placements.push(placement);
+            rasterization
+                .placements
+                .push(GlyphPlacement::new(request.hash, placement));
             rasterization
                 .placement_order
                 .insert(request.hash, rasterization.placements.len() - 1);
