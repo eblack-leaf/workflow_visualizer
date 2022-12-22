@@ -54,10 +54,16 @@ pub(crate) fn remove(rasterization: &mut Rasterization, canvas: &Canvas) {
                 .placement_order
                 .get_mut(&glyph_placement.hash)
                 .unwrap() -= range.len();
+            rasterization.swapped_glyphs.insert(glyph_placement.hash);
         }
         for index in range.iter() {
             rasterization.placements.remove(*index);
         }
     }
+    canvas.queue.write_buffer(
+        &rasterization.buffer.gpu,
+        0,
+        bytemuck::cast_slice(&rasterization.buffer.cpu),
+    );
     rasterization.removes.clear();
 }
