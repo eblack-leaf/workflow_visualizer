@@ -43,15 +43,14 @@ impl Render for TextRenderer {
         render_pass.set_bind_group(0, &viewport.bind_group, &[]);
         render_pass.set_bind_group(1, &self.rasterization.buffer.bind_group, &[]);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.set_vertex_buffer(1, self.coordinator.buffer::<Position>().buffer.slice(..));
-        render_pass.set_vertex_buffer(2, self.coordinator.buffer::<Area>().buffer.slice(..));
-        render_pass.set_vertex_buffer(3, self.coordinator.buffer::<Depth>().buffer.slice(..));
-        render_pass.set_vertex_buffer(4, self.coordinator.buffer::<Color>().buffer.slice(..));
+        render_pass.set_vertex_buffer(1, self.coordinator.buffer::<Position>().slice(..));
+        render_pass.set_vertex_buffer(2, self.coordinator.buffer::<Area>().slice(..));
+        render_pass.set_vertex_buffer(3, self.coordinator.buffer::<Depth>().slice(..));
+        render_pass.set_vertex_buffer(4, self.coordinator.buffer::<Color>().slice(..));
         render_pass.set_vertex_buffer(
             5,
             self.coordinator
                 .buffer::<rasterization::Placement>()
-                .buffer
                 .slice(..),
         );
         if self.coordinator.current() > 0 {
@@ -59,15 +58,22 @@ impl Render for TextRenderer {
         }
     }
 
-    fn extract(&mut self, job: Job) {
+    fn extract(&mut self, job: &Job) {
         todo!()
     }
 
     fn prepare(&mut self, canvas: &Canvas) {
+        attribute::add(&mut self.coordinator);
+        attribute::push_rasterization_requests(&mut self.coordinator, &mut self.rasterization);
         rasterization::resolve(&mut self.rasterization);
         rasterization::remove(&mut self.rasterization, canvas);
         rasterization::rasterize(&mut self.rasterization);
         rasterization::place(&mut self.rasterization);
         rasterization::write(&mut self.rasterization, canvas);
+        attribute::read_rasterizations(&mut self.coordinator, &mut self.rasterization);
+    }
+    fn respond(&mut self, job: &mut Job) {
+        job.container
+            .spawn_batch(self.coordinator.indexer_responses.drain(..));
     }
 }

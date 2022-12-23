@@ -131,7 +131,9 @@ pub(crate) fn run(mut gfx: Gfx, mut job: Job) {
                 }
             }
             Event::RedrawRequested(_window_id) => {
-                render(&mut gfx);
+                if job.active() {
+                    render(&mut gfx, &mut job);
+                }
             }
             Event::RedrawEventsCleared => {
                 if job.can_idle() {

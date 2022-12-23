@@ -1,18 +1,20 @@
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::text::attribute::buffer::Buffer;
-use crate::text::attribute::instance::Instance;
+use crate::text::attribute::instance::{IndexerResponse, Instance};
 use crate::text::rasterization;
 use crate::text::rasterization::{GlyphHash, Placement};
 use add::Add;
+pub(crate) use add::{add, push_rasterization_requests, read_rasterizations};
 use anymap::AnyMap;
+use bevy_ecs::prelude::Entity;
 use instance::Indexer;
 use std::collections::{HashMap, HashSet};
-use wgpu::BufferAddress;
-
+use wgpu::{BufferAddress, BufferSlice};
 mod add;
 mod buffer;
 mod instance;
+mod remove;
 mod write;
 
 pub(crate) struct Coordinator {
@@ -24,6 +26,7 @@ pub(crate) struct Coordinator {
     pub(crate) attribute_adds: AnyMap,
     pub(crate) attribute_updates: AnyMap,
     pub(crate) removes: HashSet<Instance>,
+    pub(crate) indexer_responses: Vec<IndexerResponse>,
 }
 impl Coordinator {
     pub(crate) fn new(device: &wgpu::Device) -> Self {
@@ -64,6 +67,7 @@ impl Coordinator {
             attribute_adds,
             attribute_updates,
             removes: HashSet::new(),
+            indexer_responses: Vec::new(),
         }
     }
     pub(crate) fn max(&self) -> u32 {
@@ -73,10 +77,11 @@ impl Coordinator {
         self.indexer.current
     }
     pub(crate) fn buffer<
+        'a,
         Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
     >(
         &self,
-    ) -> &Buffer<Attribute> {
-        self.buffers.get::<Buffer<Attribute>>().unwrap()
+    ) -> &wgpu::Buffer {
+        &self.buffers.get::<Buffer<Attribute>>().unwrap().buffer
     }
 }
