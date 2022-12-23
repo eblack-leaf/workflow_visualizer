@@ -1,26 +1,33 @@
+use std::marker::PhantomData;
 use wgpu::BufferAddress;
-pub(crate) struct Coordinator {
-    pub(crate) current: u32,
-    pub(crate) max: u32,
+pub(crate) struct Buffer<
+    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+> {
+    pub(crate) buffer: wgpu::Buffer,
+    _phantom_data: PhantomData<Attribute>,
 }
-impl Coordinator {
-    pub(crate) fn new(max: u32) -> Self {
-        Self { current: 0, max }
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
+    Buffer<Attribute>
+{
+    pub(crate) fn new(buffer: wgpu::Buffer) -> Self {
+        Self {
+            buffer,
+            _phantom_data: PhantomData,
+        }
     }
 }
-pub(crate) struct Instance(pub(crate) u32);
 pub(crate) fn buffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
 >(
     device: &wgpu::Device,
     max_instances: u32,
-) -> wgpu::Buffer {
-    device.create_buffer(&wgpu::BufferDescriptor {
+) -> Buffer<Attribute> {
+    Buffer::new(device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("attribute buffer"),
         size: attribute_size::<Attribute>(max_instances) as BufferAddress,
         usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
-    })
+    }))
 }
 pub(crate) fn attribute_size<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,

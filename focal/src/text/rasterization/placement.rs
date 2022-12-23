@@ -1,5 +1,5 @@
-use crate::text::r_rasterization::rasterize::{Glyph, GlyphHash};
-use crate::text::r_rasterization::Rasterization;
+use crate::text::rasterization::rasterize::{Glyph, GlyphHash};
+use crate::text::rasterization::Rasterization;
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable, Default)]

@@ -1,8 +1,8 @@
 use crate::text::font::{font, Font};
-use crate::text::r_rasterization::placement::GlyphPlacement;
-pub(crate) use crate::text::r_rasterization::placement::{place, Placement, PlacementRequest};
-pub(crate) use crate::text::r_rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
-use crate::text::r_rasterization::references::PlacementReferences;
+use crate::text::rasterization::placement::GlyphPlacement;
+pub(crate) use crate::text::rasterization::placement::{place, Placement, PlacementRequest};
+pub(crate) use crate::text::rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
+use crate::text::rasterization::references::PlacementReferences;
 pub(crate) use buffer::{write, Buffer};
 pub(crate) use references::{decrement_reference, get_reference, increment_reference, resolve};
 pub(crate) use remove::{remove, Remove};

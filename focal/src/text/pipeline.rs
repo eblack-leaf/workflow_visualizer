@@ -1,8 +1,8 @@
 use crate::canvas::Canvas;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
-use crate::text::r_rasterization;
-use crate::text::r_rasterization::Rasterization;
+use crate::text::rasterization;
+use crate::text::rasterization::Rasterization;
 use crate::text::vertex::Vertex;
 use crate::viewport::Viewport;
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
@@ -76,7 +76,7 @@ pub(crate) fn pipeline(
                             }],
                         },
                         wgpu::VertexBufferLayout {
-                            array_stride: std::mem::size_of::<r_rasterization::Placement>()
+                            array_stride: std::mem::size_of::<rasterization::Placement>()
                                 as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
                             attributes: &[VertexAttribute {

@@ -1,6 +1,6 @@
-/target
-/wasm_rebuild_avoidance_target
-/android_rebuild_avoidance_target
+/target/
+/wasm_rebuild_avoidance_target/
+/android_rebuild_avoidance_target/
 /wgpu_traces/
 /r_app_build/
-/.idea
+/.idea/

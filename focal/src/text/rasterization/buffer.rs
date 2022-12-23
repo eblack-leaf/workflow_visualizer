@@ -1,5 +1,5 @@
 use crate::canvas::Canvas;
-use crate::text::r_rasterization::Rasterization;
+use crate::text::rasterization::Rasterization;
 use wgpu::Device;
 
 pub(crate) struct Buffer {

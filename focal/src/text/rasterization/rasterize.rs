@@ -1,5 +1,5 @@
-use crate::text::r_rasterization::placement::PlacementRequest;
-use crate::text::r_rasterization::Rasterization;
+use crate::text::rasterization::placement::PlacementRequest;
+use crate::text::rasterization::Rasterization;
 use crate::text::scale::Scale;
 use fontdue::Metrics;
 #[derive(Clone)]
@@ -7,6 +7,15 @@ pub(crate) struct Add {
     pub(crate) hash: GlyphHash,
     pub(crate) character: char,
     pub(crate) scale: Scale,
+}
+impl Add {
+    pub(crate) fn new(hash: GlyphHash, character: char, scale: Scale) -> Self {
+        Self {
+            hash,
+            character,
+            scale,
+        }
+    }
 }
 pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 #[derive(Clone)]

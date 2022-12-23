@@ -1,6 +1,6 @@
 use crate::canvas::Canvas;
-use crate::text::r_rasterization::placement::GlyphPlacement;
-use crate::text::r_rasterization::{get_reference, GlyphHash, Placement, Rasterization};
+use crate::text::rasterization::placement::GlyphPlacement;
+use crate::text::rasterization::{get_reference, GlyphHash, Placement, Rasterization};
 use itertools::Itertools;
 use std::collections::HashSet;
 

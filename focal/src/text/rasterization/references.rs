@@ -1,4 +1,4 @@
-use crate::text::r_rasterization::{GlyphHash, Rasterization};
+use crate::text::rasterization::{GlyphHash, Rasterization};
 use std::collections::HashMap;
 pub(crate) type PlacementReferences = HashMap<GlyphHash, u32>;
 pub(crate) fn get_reference(references: &PlacementReferences, hash: GlyphHash) -> u32 {
