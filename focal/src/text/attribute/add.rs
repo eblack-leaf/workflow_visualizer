@@ -1,6 +1,7 @@
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::text::attribute::buffer::Buffer;
+use crate::text::attribute::instance::GlyphKey;
 use crate::text::attribute::Coordinator;
 use crate::text::rasterization;
 use crate::text::rasterization::{GlyphHash, Rasterization};
@@ -9,7 +10,7 @@ use anymap::AnyMap;
 use bevy_ecs::prelude::Entity;
 
 pub(crate) struct Add {
-    pub(crate) entity: Entity,
+    pub(crate) index_key: GlyphKey,
     pub(crate) character: char,
     pub(crate) scale: Scale,
     pub(crate) hash: GlyphHash,
@@ -33,7 +34,7 @@ pub(crate) fn add(coordinator: &mut Coordinator) {
             .insert((instance, add.hash));
         coordinator
             .indexer_responses
-            .push((add.entity, instance).into());
+            .push((add.index_key, instance).into());
     }
 }
 fn add_attr<
