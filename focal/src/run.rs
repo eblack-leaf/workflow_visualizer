@@ -1,5 +1,5 @@
 use crate::canvas::Canvas;
-use crate::render::render;
+use crate::render::{render, Render};
 use crate::text::TextRenderer;
 use crate::viewport::Viewport;
 use crate::{canvas, Gfx, GfxOptions, Job};

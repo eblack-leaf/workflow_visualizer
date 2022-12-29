@@ -14,6 +14,7 @@ use crate::viewport::Viewport;
 mod canvas;
 mod color;
 mod coord;
+mod instance_coordinator;
 mod job;
 mod render;
 mod run;

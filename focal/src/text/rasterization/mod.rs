@@ -1,8 +1,10 @@
+use crate::instance_coordinator::InstanceCoordinator;
 use crate::text::font::{font, Font};
 use crate::text::rasterization::placement::GlyphPlacement;
 pub(crate) use crate::text::rasterization::placement::{place, Placement, PlacementRequest};
 pub(crate) use crate::text::rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
 use crate::text::rasterization::references::PlacementReferences;
+use crate::text::TextInstanceCoordinator;
 pub(crate) use buffer::{write, Buffer};
 pub(crate) use references::{decrement_reference, get_reference, increment_reference, resolve};
 pub(crate) use remove::{remove, Remove};
@@ -45,4 +47,16 @@ impl Rasterization {
             write: Vec::new(),
         }
     }
+}
+pub(crate) fn read_requests(
+    rasterization: &mut Rasterization,
+    coordinator: &TextInstanceCoordinator,
+) {
+    // use request.hash to send rasterize_request
+}
+pub(crate) fn integrate_placements(
+    rasterization: &Rasterization,
+    coordinator: &mut TextInstanceCoordinator,
+) {
+    // for each instance_request - put Some(placement) in request.placement using request.hash as key
 }

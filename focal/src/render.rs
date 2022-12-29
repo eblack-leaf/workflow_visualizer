@@ -8,7 +8,6 @@ pub trait Render {
     fn render<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, viewport: &'a Viewport);
     fn extract(&mut self, job: &Job);
     fn prepare(&mut self, canvas: &Canvas);
-    fn respond(&mut self, job: &mut Job);
 }
 pub(crate) fn render(gfx: &mut Gfx, job: &mut Job) {
     for implementor in gfx.render_implementors.iter_mut() {
@@ -62,9 +61,6 @@ pub(crate) fn render(gfx: &mut Gfx, job: &mut Job) {
             .queue
             .submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
-        for implementor in gfx.render_implementors.iter_mut() {
-            implementor.respond(job);
-        }
     }
 }
 pub fn surface_texture(canvas: &Canvas) -> Option<SurfaceTexture> {
