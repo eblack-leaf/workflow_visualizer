@@ -80,6 +80,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         Fetcher: Fn(InstanceRequest) -> Attribute + 'static,
     {
         // go through write_requests and check cached values to determine if should go to writes
+        
         // add to cached attribute values
     }
     pub(crate) fn write<
@@ -90,6 +91,9 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         // get indices of writes
         // combine sequential
         // if grown - write all of attribute buffer from cpu
+    }
+    fn get_index(&self, key: Key) -> Index {
+        *self.indices.get(&key).unwrap()
     }
     pub(crate) fn prepare(&mut self) {
         // remove + swap

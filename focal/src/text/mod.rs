@@ -100,6 +100,9 @@ impl Render for TextRenderer {
         self.coordinator.process_attribute(|i| i.color);
         self.coordinator.process_attribute(|i| i.placement.unwrap());
         self.coordinator.write::<Position>();
-        // ...
+        self.coordinator.write::<Area>();
+        self.coordinator.write::<Depth>();
+        self.coordinator.write::<Color>();
+        self.coordinator.write::<rasterization::Placement>();
     }
 }

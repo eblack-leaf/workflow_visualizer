@@ -3,7 +3,7 @@ use std::process::Command;
 
 fn main() {
     let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
-    let package = "r_app";
+    let package = "app";
     let profile = "debug";
     let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .ancestors()
@@ -37,7 +37,7 @@ fn main() {
         .join("wasm32-unknown-unknown")
         .join(&profile)
         .join(format!("{}.wasm", &package));
-    let destination = project_root.join(format!("{}_build", &package));
+    let destination = project_root.join(format!("{}_web_build", &package));
     std::fs::create_dir_all(&destination).unwrap();
     let mut bindgen = wasm_bindgen_cli_support::Bindgen::new();
     bindgen

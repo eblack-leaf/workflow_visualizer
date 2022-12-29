@@ -1,4 +1,3 @@
-#[allow(unused)]
 use bevy_ecs::prelude::{Bundle, Component};
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default)]

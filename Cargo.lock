@@ -68,6 +68,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33954243bd79057c2de7338850b85983a44588021f8a5fee574a8888c6de4344"
 
 [[package]]
+name = "app"
+version = "0.1.0"
+dependencies = [
+ "engen",
+ "ndk-glue",
+]
+
+[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -699,6 +707,25 @@ name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
+
+[[package]]
+name = "engen"
+version = "0.1.0"
+dependencies = [
+ "anymap",
+ "bevy_ecs",
+ "bytemuck",
+ "console_error_panic_hook",
+ "console_log",
+ "fontdue",
+ "futures",
+ "itertools",
+ "nalgebra",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "wgpu",
+ "winit",
+]
 
 [[package]]
 name = "env_logger"
@@ -1821,14 +1848,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbe448f377a7d6961e30f5955f9b8d106c3f5e449d493ee1b125c1d43c2b5179"
 dependencies = [
  "proc-macro2",
-]
-
-[[package]]
-name = "r_app"
-version = "0.1.0"
-dependencies = [
- "focal",
- "ndk-glue",
 ]
 
 [[package]]
