@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["web_server", "web_builder", "focal", "app", "engen"]
+members = ["web_server", "web_builder", "app", "engen"]
 [profile.dev]
 opt-level = 1
 [profile.release]

@@ -1,5 +1,4 @@
 use crate::instance_coordinator::InstanceCoordinator;
-use crate::text::font::{font, Font};
 use crate::text::rasterization::placement::GlyphPlacement;
 pub(crate) use crate::text::rasterization::placement::{place, Placement, PlacementRequest};
 pub(crate) use crate::text::rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
@@ -9,12 +8,14 @@ pub(crate) use buffer::{write, Buffer};
 pub(crate) use references::{decrement_reference, get_reference, increment_reference, resolve};
 pub(crate) use remove::{remove, Remove};
 use std::collections::{HashMap, HashSet};
+use crate::text::rasterization::font::{Font, font};
 
 mod buffer;
 mod placement;
 mod rasterize;
 mod references;
 mod remove;
+mod font;
 
 pub(crate) struct Rasterization {
     pub(crate) buffer: Buffer,

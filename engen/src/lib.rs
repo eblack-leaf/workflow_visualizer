@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 mod options;
 mod app;
 mod launcher;
@@ -7,8 +8,9 @@ mod canvas;
 mod color;
 mod coord;
 mod theme;
-mod viewport;
 mod render;
+mod text;
+mod instance_coordinator;
 
 pub use app::App;
 pub use launcher::Launcher;

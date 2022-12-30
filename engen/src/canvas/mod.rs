@@ -1,8 +1,9 @@
 use bevy_ecs::prelude::Resource;
-use wgpu::CompositeAlphaMode;
+use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
 use crate::{Launcher, LaunchOptions};
-use crate::viewport::Viewport;
+pub(crate) use crate::canvas::viewport::Viewport;
+mod viewport;
 #[derive(Resource)]
 pub struct Canvas {
     pub surface: wgpu::Surface,
@@ -60,6 +61,40 @@ impl Canvas {
         self.surface_configuration.width = width;
         self.surface_configuration.height = height;
         self.viewport.adjust(&self.device, &self.queue, width, height);
+    }
+    pub(crate) fn surface_texture(&self) -> Option<SurfaceTexture> {
+        let surface_texture = match self.surface.get_current_texture() {
+            Ok(surface_texture) => Some(surface_texture),
+            Err(err) => match err {
+                SurfaceError::Timeout => None,
+                SurfaceError::Outdated => {
+                    self
+                        .surface
+                        .configure(&self.device, &self.surface_configuration);
+                    Some(
+                        self
+                            .surface
+                            .get_current_texture()
+                            .expect("configuring did not solve surface outdated"),
+                    )
+                }
+                SurfaceError::Lost => {
+                    self
+                        .surface
+                        .configure(&self.device, &self.surface_configuration);
+                    Some(
+                        self
+                            .surface
+                            .get_current_texture()
+                            .expect("configuring did not solve surface lost"),
+                    )
+                }
+                SurfaceError::OutOfMemory => {
+                    panic!("gpu out of memory");
+                }
+            },
+        };
+        surface_texture
     }
 }
 pub(crate) fn adjust(launcher: &mut Launcher, width: u32, height: u32) {

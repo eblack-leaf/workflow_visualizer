@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use bevy_ecs::prelude::{Resource, SystemStage};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
@@ -5,7 +6,18 @@ use winit::window::Window;
 use crate::app::App;
 use crate::canvas::Canvas;
 use crate::options::LaunchOptions;
-use crate::{canvas};
+use crate::{canvas, render};
+use crate::render::Render;
+pub struct Renderers {
+    pub renderers: HashMap::<render::Id, Box<dyn Render>>,
+}
+impl Renderers {
+    pub fn new() -> Self {
+        Self {
+            renderers: HashMap::new(),
+        }
+    }
+}
 #[derive(Resource)]
 pub(crate) struct LauncherWindow(pub(crate) Window);
 pub struct Launcher {
@@ -18,7 +30,11 @@ impl Launcher {
     pub fn new(compute: App, options: LaunchOptions) -> Self {
         Self {
             compute,
-            render: App::new(),
+            render: {
+                let mut app = App::new();
+                app.job.container.insert_non_send_resource(Renderers::new());
+                app
+            },
             options,
             event_loop: None,
         }

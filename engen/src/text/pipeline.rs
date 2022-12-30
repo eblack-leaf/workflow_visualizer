@@ -4,12 +4,10 @@ use crate::coord::{Area, Depth, Position};
 use crate::text::rasterization;
 use crate::text::rasterization::Rasterization;
 use crate::text::vertex::Vertex;
-use crate::viewport::Viewport;
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
 
 pub(crate) fn pipeline(
     canvas: &Canvas,
-    viewport: &Viewport,
     rasterization: &Rasterization,
 ) -> wgpu::RenderPipeline {
     let shader = canvas
@@ -24,7 +22,7 @@ pub(crate) fn pipeline(
                     &wgpu::PipelineLayoutDescriptor {
                         label: Some("text pipeline descriptor"),
                         bind_group_layouts: &[
-                            &viewport.bind_group_layout,
+                            &canvas.viewport.bind_group_layout,
                             &rasterization.buffer.bind_group_layout,
                         ],
                         push_constant_ranges: &[],
@@ -97,7 +95,7 @@ pub(crate) fn pipeline(
                     conservative: false,
                 },
                 depth_stencil: Some(wgpu::DepthStencilState {
-                    format: viewport.depth_format,
+                    format: canvas.viewport.depth_format,
                     depth_write_enabled: true,
                     depth_compare: wgpu::CompareFunction::Less,
                     stencil: wgpu::StencilState::default(),
