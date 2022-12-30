@@ -1,5 +1,5 @@
-use bevy_ecs::prelude::Resource;
 use crate::color::Color;
+use bevy_ecs::prelude::Resource;
 #[derive(Resource)]
 pub struct Theme {
     pub background: Color,

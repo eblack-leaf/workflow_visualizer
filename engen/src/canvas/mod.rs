@@ -1,8 +1,8 @@
+pub(crate) use crate::canvas::viewport::Viewport;
+use crate::{LaunchOptions, Launcher};
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
-use crate::{Launcher, LaunchOptions};
-pub(crate) use crate::canvas::viewport::Viewport;
 mod viewport;
 #[derive(Resource)]
 pub struct Canvas {
@@ -48,19 +48,23 @@ impl Canvas {
             alpha_mode: CompositeAlphaMode::Auto,
         };
         surface.configure(&device, &surface_configuration);
-        let viewport = Viewport::new(&device, (surface_configuration.width, surface_configuration.height).into());
+        let viewport = Viewport::new(
+            &device,
+            (surface_configuration.width, surface_configuration.height).into(),
+        );
         Self {
             surface,
             device,
             queue,
             surface_configuration,
-            viewport
+            viewport,
         }
     }
     pub(crate) fn adjust(&mut self, width: u32, height: u32) {
         self.surface_configuration.width = width;
         self.surface_configuration.height = height;
-        self.viewport.adjust(&self.device, &self.queue, width, height);
+        self.viewport
+            .adjust(&self.device, &self.queue, width, height);
     }
     pub(crate) fn surface_texture(&self) -> Option<SurfaceTexture> {
         let surface_texture = match self.surface.get_current_texture() {
@@ -68,23 +72,19 @@ impl Canvas {
             Err(err) => match err {
                 SurfaceError::Timeout => None,
                 SurfaceError::Outdated => {
-                    self
-                        .surface
+                    self.surface
                         .configure(&self.device, &self.surface_configuration);
                     Some(
-                        self
-                            .surface
+                        self.surface
                             .get_current_texture()
                             .expect("configuring did not solve surface outdated"),
                     )
                 }
                 SurfaceError::Lost => {
-                    self
-                        .surface
+                    self.surface
                         .configure(&self.device, &self.surface_configuration);
                     Some(
-                        self
-                            .surface
+                        self.surface
                             .get_current_texture()
                             .expect("configuring did not solve surface lost"),
                     )
@@ -98,6 +98,11 @@ impl Canvas {
     }
 }
 pub(crate) fn adjust(launcher: &mut Launcher, width: u32, height: u32) {
-    let mut canvas = launcher.render.job.container.get_resource_mut::<Canvas>().expect("no canvas attached");
+    let mut canvas = launcher
+        .render
+        .job
+        .container
+        .get_resource_mut::<Canvas>()
+        .expect("no canvas attached");
     canvas.adjust(width, height);
 }

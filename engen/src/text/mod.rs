@@ -1,10 +1,8 @@
 mod pipeline;
+mod rasterization;
 mod scale;
 mod vertex;
-mod rasterization;
 
-use wgpu::RenderPass;
-use crate::{App, Launcher, render};
 use crate::canvas::{Canvas, Viewport};
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
@@ -15,6 +13,8 @@ use crate::text::pipeline::pipeline;
 use crate::text::rasterization::{GlyphHash, Rasterization};
 pub use crate::text::scale::Scale;
 use crate::text::vertex::GLYPH_AABB;
+use crate::{render, App, Launcher};
+use wgpu::RenderPass;
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub(crate) struct GlyphOffset(pub(crate) u32);
 pub(crate) struct InstanceRequest {
@@ -28,7 +28,7 @@ pub(crate) struct InstanceRequest {
     pub(crate) placement: Option<rasterization::Placement>,
 }
 pub(crate) type TextInstanceCoordinator =
-InstanceCoordinator<EntityKey<GlyphOffset>, InstanceRequest>;
+    InstanceCoordinator<EntityKey<GlyphOffset>, InstanceRequest>;
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) rasterization: Rasterization,
@@ -61,7 +61,6 @@ impl Render for TextRenderer {
     fn extract(&mut self, compute: &mut App) {
         todo!()
     }
-
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &viewport.bind_group, &[]);
@@ -84,10 +83,23 @@ impl Render for TextRenderer {
             );
         }
     }
-
     fn attach(self, launcher: &mut Launcher) {
-        let text_renderer = TextRenderer::new(launcher.render.job.container.get_resource::<Canvas>().expect("no canvas attached"));
+        let text_renderer = TextRenderer::new(
+            launcher
+                .render
+                .job
+                .container
+                .get_resource::<Canvas>()
+                .expect("no canvas attached"),
+        );
         // ... instrument preparation systems to render.exec
-        launcher.render.job.container.get_non_send_resource_mut::<Renderers>().expect("no renderers attached").renderers.insert(Self::id(), Box::new(text_renderer));
+        launcher
+            .render
+            .job
+            .container
+            .get_non_send_resource_mut::<Renderers>()
+            .expect("no renderers attached")
+            .renderers
+            .insert(Self::id(), Box::new(text_renderer));
     }
 }

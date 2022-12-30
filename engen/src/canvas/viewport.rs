@@ -1,6 +1,6 @@
-use bevy_ecs::prelude::{Resource};
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
+use bevy_ecs::prelude::Resource;
 use nalgebra::matrix;
 #[derive(Resource)]
 pub struct Viewport {

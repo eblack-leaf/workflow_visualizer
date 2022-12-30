@@ -1,16 +1,16 @@
 #![allow(unused, dead_code)]
-mod options;
 mod app;
-mod launcher;
-mod job;
-mod uniform;
 mod canvas;
 mod color;
 mod coord;
-mod theme;
+mod instance_coordinator;
+mod job;
+mod launcher;
+mod options;
 mod render;
 mod text;
-mod instance_coordinator;
+mod theme;
+mod uniform;
 
 pub use app::App;
 pub use launcher::Launcher;

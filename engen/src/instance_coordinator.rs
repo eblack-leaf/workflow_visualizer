@@ -80,7 +80,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         Fetcher: Fn(InstanceRequest) -> Attribute + 'static,
     {
         // go through write_requests and check cached values to determine if should go to writes
-        
+
         // add to cached attribute values
     }
     pub(crate) fn write<

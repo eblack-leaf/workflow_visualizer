@@ -6,8 +6,6 @@ pub struct App {
 }
 impl App {
     pub fn new() -> Self {
-        Self {
-            job: Job::new(),
-        }
+        Self { job: Job::new() }
     }
 }

@@ -1,4 +1,4 @@
-use engen::{App, Launcher, LaunchOptions};
+use engen::{App, LaunchOptions, Launcher};
 
 pub fn app() -> App {
     let app = App::new();

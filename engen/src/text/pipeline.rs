@@ -6,10 +6,7 @@ use crate::text::rasterization::Rasterization;
 use crate::text::vertex::Vertex;
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
 
-pub(crate) fn pipeline(
-    canvas: &Canvas,
-    rasterization: &Rasterization,
-) -> wgpu::RenderPipeline {
+pub(crate) fn pipeline(canvas: &Canvas, rasterization: &Rasterization) -> wgpu::RenderPipeline {
     let shader = canvas
         .device
         .create_shader_module(include_wgsl!("text.wgsl"));
