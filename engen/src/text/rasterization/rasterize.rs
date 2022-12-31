@@ -1,4 +1,4 @@
-use crate::text::rasterization::placement::PlacementRequest;
+use crate::text::rasterization::descriptor::DescriptorRequest;
 use crate::text::rasterization::Rasterization;
 use crate::text::scale::Scale;
 use fontdue::Metrics;
@@ -46,8 +46,8 @@ pub(crate) fn rasterize(rasterization: &mut Rasterization) {
             Some(cached_glyph) => cached_glyph.clone(),
         };
         rasterization
-            .placement_requests
-            .push(PlacementRequest::new(add.hash, glyph));
+            .descriptor_requests
+            .push(DescriptorRequest::new(add.hash, glyph));
     }
     rasterization.adds.clear();
 }

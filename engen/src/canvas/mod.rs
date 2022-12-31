@@ -1,5 +1,5 @@
 pub(crate) use crate::canvas::viewport::Viewport;
-use crate::{LaunchOptions, Launcher};
+use crate::LaunchOptions;
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
@@ -96,13 +96,4 @@ impl Canvas {
         };
         surface_texture
     }
-}
-pub(crate) fn adjust(launcher: &mut Launcher, width: u32, height: u32) {
-    let mut canvas = launcher
-        .render
-        .job
-        .container
-        .get_resource_mut::<Canvas>()
-        .expect("no canvas attached");
-    canvas.adjust(width, height);
 }

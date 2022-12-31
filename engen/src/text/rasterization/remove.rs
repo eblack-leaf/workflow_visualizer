@@ -1,6 +1,6 @@
 use crate::canvas::Canvas;
-use crate::text::rasterization::placement::GlyphPlacement;
-use crate::text::rasterization::{get_reference, GlyphHash, Placement, Rasterization};
+use crate::text::rasterization::descriptor::GlyphDescriptor;
+use crate::text::rasterization::{get_reference, GlyphHash, Rasterization};
 use itertools::Itertools;
 use std::collections::HashSet;
 
@@ -17,11 +17,11 @@ fn consecutive_slices(data: Vec<usize>) -> Vec<Vec<usize>> {
 pub(crate) fn remove(rasterization: &mut Rasterization, canvas: &Canvas) {
     let mut checked_indices = HashSet::<usize>::new();
     for remove in rasterization.removes.iter() {
-        if get_reference(&rasterization.placement_references, remove.hash) == 0
+        if get_reference(&rasterization.references, remove.hash) == 0
             && !rasterization.retain_glyphs.contains(&remove.hash)
         {
-            checked_indices.insert(*rasterization.placement_order.get(&remove.hash).unwrap());
-            rasterization.placement_order.remove(&remove.hash);
+            checked_indices.insert(*rasterization.descriptor_order.get(&remove.hash).unwrap());
+            rasterization.descriptor_order.remove(&remove.hash);
         }
     }
     if checked_indices.is_empty() {
@@ -34,10 +34,10 @@ pub(crate) fn remove(rasterization: &mut Rasterization, canvas: &Canvas) {
         let mut range_size: usize = 0;
         for placement_index in range.iter() {
             let placement = rasterization
-                .placements
+                .descriptors
                 .get(*placement_index)
                 .unwrap()
-                .placement;
+                .descriptor;
             range_size += placement.size() as usize;
             rasterization
                 .buffer
@@ -46,18 +46,18 @@ pub(crate) fn remove(rasterization: &mut Rasterization, canvas: &Canvas) {
         }
         rasterization.buffer.gpu_len -= range_size;
         let last = range.last().unwrap();
-        for index in *last..(rasterization.placements.len() - 1) {
-            let glyph_placement: &mut GlyphPlacement =
-                rasterization.placements.get_mut(index).unwrap();
-            glyph_placement.placement.parts[0] -= range_size as u32;
+        for index in *last..(rasterization.descriptors.len() - 1) {
+            let glyph_placement: &mut GlyphDescriptor =
+                rasterization.descriptors.get_mut(index).unwrap();
+            glyph_placement.descriptor.parts[0] -= range_size as u32;
             *rasterization
-                .placement_order
+                .descriptor_order
                 .get_mut(&glyph_placement.hash)
                 .unwrap() -= range.len();
             rasterization.swapped_glyphs.insert(glyph_placement.hash);
         }
         for index in range.iter() {
-            rasterization.placements.remove(*index);
+            rasterization.descriptors.remove(*index);
         }
     }
     canvas.queue.write_buffer(

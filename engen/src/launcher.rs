@@ -1,41 +1,34 @@
 use crate::app::App;
 use crate::canvas::Canvas;
 use crate::options::LaunchOptions;
-use crate::render::Render;
-use crate::{canvas, render};
-use bevy_ecs::prelude::{Resource, SystemStage};
-use std::collections::HashMap;
+use crate::render;
+use crate::render::Renderers;
+use crate::theme::Theme;
+use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-pub struct Renderers {
-    pub renderers: HashMap<render::Id, Box<dyn Render>>,
-}
-impl Renderers {
-    pub fn new() -> Self {
-        Self {
-            renderers: HashMap::new(),
-        }
-    }
-}
+
 #[derive(Resource)]
 pub(crate) struct LauncherWindow(pub(crate) Window);
 pub struct Launcher {
-    pub compute: App,
-    pub render: App,
-    pub options: LaunchOptions,
+    compute: App,
+    options: LaunchOptions,
+    pub(crate) renderers: Renderers,
+    pub(crate) theme: Theme,
+    window: Option<LauncherWindow>,
+    pub(crate) canvas: Option<Canvas>,
     event_loop: Option<EventLoop<()>>,
 }
 impl Launcher {
     pub fn new(compute: App, options: LaunchOptions) -> Self {
         Self {
             compute,
-            render: {
-                let mut app = App::new();
-                app.job.container.insert_non_send_resource(Renderers::new());
-                app
-            },
             options,
+            renderers: Renderers::new(),
+            theme: Theme::default(),
+            window: None,
+            canvas: None,
             event_loop: None,
         }
     }
@@ -69,33 +62,21 @@ impl Launcher {
         }
     }
     fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {
-        self.event_loop = Some(event_loop);
+        self.event_loop.replace(event_loop);
     }
     fn attach_window(&mut self, window: Window) {
-        self.render
-            .job
-            .container
-            .insert_resource(LauncherWindow(window));
+        self.window.replace(LauncherWindow(window));
     }
     #[allow(dead_code)]
     fn detach_window(&mut self) -> Window {
-        self.render
-            .job
-            .container
-            .remove_resource::<LauncherWindow>()
-            .expect("no window attached")
-            .0
+        self.window.take().expect("no window attached").0
     }
     fn attach_canvas(&mut self, canvas: Canvas) {
-        self.render.job.container.insert_resource(canvas);
+        self.canvas.replace(canvas);
     }
     #[allow(dead_code)]
     fn detach_canvas(&mut self) -> Canvas {
-        self.render
-            .job
-            .container
-            .remove_resource::<Canvas>()
-            .expect("no canvas attached")
+        self.canvas.take().expect("no canvas attached")
     }
     fn run(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop provided");
@@ -118,7 +99,6 @@ impl Launcher {
                             self.attach_window(window);
                         }
                         self.compute.job.startup();
-                        self.render.job.startup();
                     }
                 },
                 Event::WindowEvent {
@@ -126,7 +106,10 @@ impl Launcher {
                     event,
                 } => match event {
                     WindowEvent::Resized(physical_size) => {
-                        canvas::adjust(&mut self, physical_size.width, physical_size.height);
+                        self.canvas
+                            .as_mut()
+                            .unwrap()
+                            .adjust(physical_size.width, physical_size.height);
                     }
                     WindowEvent::Moved(_) => {}
                     WindowEvent::CloseRequested => {
@@ -153,7 +136,10 @@ impl Launcher {
                         scale_factor: _scale_factor,
                         new_inner_size,
                     } => {
-                        canvas::adjust(&mut self, new_inner_size.width, new_inner_size.height);
+                        self.canvas
+                            .as_mut()
+                            .unwrap()
+                            .adjust(new_inner_size.width, new_inner_size.height);
                     }
                     WindowEvent::ThemeChanged(_) => {}
                     WindowEvent::Occluded(_) => {}
@@ -167,7 +153,6 @@ impl Launcher {
                             let _ = gfx.detach_canvas();
                         }
                         self.compute.job.suspend();
-                        self.render.job.suspend();
                     }
                 }
                 Event::Resumed => {
@@ -182,37 +167,35 @@ impl Launcher {
                             self.attach_window(window);
                         }
                         self.compute.job.activate();
-                        self.render.job.activate();
                     }
                 }
                 Event::MainEventsCleared => {
                     if self.compute.job.active() {
                         self.compute.job.exec();
-                        self.render
-                            .job
-                            .container
-                            .get_resource::<LauncherWindow>()
-                            .unwrap()
-                            .0
-                            .request_redraw();
+                        self.window.as_ref().unwrap().0.request_redraw();
                     }
-                    if self.compute.job.should_exit() || self.render.job.should_exit() {
+                    if self.compute.job.should_exit() {
                         control_flow.set_exit();
                     }
                 }
                 Event::RedrawRequested(_window_id) => {
-                    if self.compute.job.active() && self.render.job.active() {
-                        self.render.job.exec();
+                    if self.compute.job.active() {
+                        render::extract(&mut self.renderers, &mut self.compute);
+                        render::prepare(&mut self.renderers, self.canvas.as_ref().unwrap());
+                        render::render(
+                            &mut self.renderers,
+                            self.canvas.as_ref().unwrap(),
+                            &self.theme,
+                        );
                     }
                 }
                 Event::RedrawEventsCleared => {
-                    if self.compute.job.can_idle() && self.render.job.can_idle() {
+                    if self.compute.job.can_idle() {
                         control_flow.set_wait();
                     }
                 }
                 Event::LoopDestroyed => {
                     self.compute.job.teardown();
-                    self.render.job.teardown();
                 }
             }
         });

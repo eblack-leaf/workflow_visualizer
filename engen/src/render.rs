@@ -1,8 +1,6 @@
 use crate::canvas::{Canvas, Viewport};
-use crate::launcher::Renderers;
 use crate::theme::Theme;
 use crate::{App, Launcher};
-use bevy_ecs::prelude::{NonSendMut, Res};
 use std::collections::HashMap;
 use wgpu::RenderPass;
 #[derive(Eq, Hash, PartialEq)]
@@ -12,10 +10,41 @@ pub trait Render {
     where
         Self: Sized;
     fn extract(&mut self, compute: &mut App);
+    fn prepare(&mut self, canvas: &Canvas);
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport);
     fn attach(self, launcher: &mut Launcher);
 }
-pub fn render(canvas: Res<Canvas>, theme: Res<Theme>, renderers: NonSendMut<Renderers>) {
+pub type Renderer = Box<dyn Render>;
+pub type RendererStorage = HashMap<Id, Renderer>;
+pub struct Renderers {
+    pub opaque: RendererStorage,
+    pub alpha: RendererStorage,
+}
+impl Renderers {
+    pub fn new() -> Self {
+        Self {
+            opaque: RendererStorage::new(),
+            alpha: RendererStorage::new(),
+        }
+    }
+}
+pub(crate) fn extract(renderers: &mut Renderers, compute: &mut App) {
+    for (_id, renderer) in renderers.opaque.iter_mut() {
+        renderer.extract(compute);
+    }
+    for (_id, renderer) in renderers.alpha.iter_mut() {
+        renderer.extract(compute);
+    }
+}
+pub(crate) fn prepare(renderers: &mut Renderers, canvas: &Canvas) {
+    for (_id, renderer) in renderers.opaque.iter_mut() {
+        renderer.prepare(canvas);
+    }
+    for (_id, renderer) in renderers.alpha.iter_mut() {
+        renderer.prepare(canvas);
+    }
+}
+pub(crate) fn render(renderers: &mut Renderers, canvas: &Canvas, theme: &Theme) {
     if let Some(surface_texture) = canvas.surface_texture() {
         let mut command_encoder =
             canvas
@@ -50,7 +79,10 @@ pub fn render(canvas: Res<Canvas>, theme: Res<Theme>, renderers: NonSendMut<Rend
                     stencil_ops: None,
                 }),
             });
-            for (_id, renderer) in renderers.renderers.iter() {
+            for (_id, renderer) in renderers.opaque.iter() {
+                renderer.render(&mut render_pass, &canvas.viewport);
+            }
+            for (_id, renderer) in renderers.alpha.iter() {
                 renderer.render(&mut render_pass, &canvas.viewport);
             }
         }

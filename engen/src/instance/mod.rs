@@ -1,18 +1,19 @@
 use anymap::AnyMap;
-use bevy_ecs::prelude::{Commands, Entity, NonSendMut, Query};
+use attribute::AttributeBuffer;
+use bevy_ecs::prelude::Entity;
+use indexer::{Index, Indexer};
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
-use std::marker::PhantomData;
-use wgpu::BufferAddress;
 
-#[derive(Eq, Hash, PartialEq, Copy, Clone)]
-pub(crate) struct Index(pub(crate) usize);
+mod attribute;
+mod indexer;
+
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub(crate) struct EntityKey<Identifier: Eq + Hash + PartialEq + Copy + Clone> {
     pub(crate) entity: Entity,
     pub(crate) identifier: Identifier,
 }
-pub(crate) struct InstanceCoordinator<Key: Eq + Hash + PartialEq + Copy + Clone, InstanceRequest> {
+pub(crate) struct Coordinator<Key: Eq + Hash + PartialEq + Copy + Clone, InstanceRequest> {
     pub(crate) indexer: Indexer,
     pub(crate) attribute_buffers: AnyMap,
     pub(crate) cpu_attribute_buffers: AnyMap,
@@ -24,7 +25,7 @@ pub(crate) struct InstanceCoordinator<Key: Eq + Hash + PartialEq + Copy + Clone,
     pub(crate) attribute_cache: AnyMap,
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
-    InstanceCoordinator<Key, InstanceRequest>
+    Coordinator<Key, InstanceRequest>
 {
     pub(crate) fn new(initial_max: usize) -> Self {
         Self {
@@ -40,21 +41,21 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         }
     }
     pub(crate) fn setup_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
     >(
         &mut self,
         device: &wgpu::Device,
     ) {
         self.attribute_buffers
-            .insert(attribute_buffer::<Attribute>(device, self.indexer.max));
+            .insert(attribute::gpu_buffer::<Attribute>(device, self.indexer.max));
         self.cpu_attribute_buffers
-            .insert(cpu_attribute_buffer::<Attribute>(self.indexer.max));
+            .insert(attribute::cpu_buffer::<Attribute>(self.indexer.max));
         self.attribute_cache
             .insert(HashMap::<Key, Attribute>::new());
         self.writes.insert(HashMap::<Key, Attribute>::new());
     }
     pub(crate) fn attribute_buffer<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
     >(
         &self,
     ) -> &wgpu::Buffer {
@@ -71,20 +72,42 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         self.indexer.current
     }
     pub(crate) fn process_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
         Fetcher,
     >(
         &mut self,
         fetcher: Fetcher,
     ) where
-        Fetcher: Fn(InstanceRequest) -> Attribute + 'static,
+        Fetcher: Fn(&InstanceRequest) -> Attribute + 'static,
     {
         // go through write_requests and check cached values to determine if should go to writes
-
-        // add to cached attribute values
+        for key in self.write_requests.iter() {
+            let requested_value = fetcher(self.requests.get(key).as_ref().expect("no request for key"));
+            let cached_value = self
+                .attribute_cache
+                .get::<HashMap<Key, Attribute>>()
+                .expect("no cache for attribute")
+                .get(key);
+            if let Some(value) = cached_value {
+                if *value == requested_value {
+                    continue;
+                }
+            }
+            self.writes
+                .get_mut::<HashMap<Key, Attribute>>()
+                .expect("no write buffer for attribute")
+                .insert(
+                    *key,
+                    requested_value,
+                );
+            self.attribute_cache
+                .get_mut::<HashMap<Key, Attribute>>()
+                .expect("no cache for attribute")
+                .insert(*key, requested_value);
+        }
     }
     pub(crate) fn write<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
     >(
         &mut self,
     ) {
@@ -109,67 +132,4 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         }
         // grow
     }
-}
-pub(crate) struct Indexer {
-    pub(crate) current: usize,
-    pub(crate) max: usize,
-}
-impl Indexer {
-    pub(crate) fn new(max: usize) -> Self {
-        Self { current: 0, max }
-    }
-    pub(crate) fn next(&mut self) -> Index {
-        self.current += 1;
-        Index(self.current)
-    }
-    pub(crate) fn decrement(&mut self) {
-        self.current -= 1;
-    }
-    pub(crate) fn should_grow(&self) -> bool {
-        self.current > self.max
-    }
-}
-pub(crate) struct AttributeBuffer<
-    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
-> {
-    pub(crate) buffer: wgpu::Buffer,
-    _phantom_data: PhantomData<Attribute>,
-}
-impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
-    AttributeBuffer<Attribute>
-{
-    pub(crate) fn new(buffer: wgpu::Buffer) -> Self {
-        Self {
-            buffer,
-            _phantom_data: PhantomData,
-        }
-    }
-}
-pub(crate) fn attribute_buffer<
-    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    device: &wgpu::Device,
-    max_instances: usize,
-) -> AttributeBuffer<Attribute> {
-    AttributeBuffer::new(device.create_buffer(&wgpu::BufferDescriptor {
-        label: Some("attribute buffer"),
-        size: attribute_size::<Attribute>(max_instances) as BufferAddress,
-        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-        mapped_at_creation: false,
-    }))
-}
-pub(crate) fn attribute_size<
-    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    num: usize,
-) -> usize {
-    std::mem::size_of::<Attribute>() * num
-}
-pub(crate) fn cpu_attribute_buffer<
-    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    initial_max: usize,
-) {
-    let mut buffer = Vec::new();
-    buffer.resize(initial_max, Attribute::default());
 }

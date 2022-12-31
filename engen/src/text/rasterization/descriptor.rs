@@ -2,11 +2,11 @@ use crate::text::rasterization::rasterize::{Glyph, GlyphHash};
 use crate::text::rasterization::Rasterization;
 
 #[repr(C)]
-#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable, Default)]
-pub(crate) struct Placement {
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable, Default, PartialEq)]
+pub(crate) struct Descriptor {
     pub parts: [u32; 3],
 }
-impl Placement {
+impl Descriptor {
     pub fn new(start: u32, row_size: u32, rows: u32) -> Self {
         Self {
             parts: [start, row_size, rows],
@@ -28,39 +28,39 @@ impl Placement {
         self.start() + self.size()
     }
 }
-pub(crate) struct PlacementRequest {
+pub(crate) struct DescriptorRequest {
     pub(crate) hash: GlyphHash,
     pub(crate) glyph: Glyph,
 }
-impl PlacementRequest {
+impl DescriptorRequest {
     pub(crate) fn new(hash: GlyphHash, glyph: Glyph) -> Self {
         Self { hash, glyph }
     }
 }
-pub(crate) struct GlyphPlacement {
+pub(crate) struct GlyphDescriptor {
     pub(crate) hash: GlyphHash,
-    pub(crate) placement: Placement,
+    pub(crate) descriptor: Descriptor,
 }
-impl GlyphPlacement {
-    pub(crate) fn new(hash: GlyphHash, placement: Placement) -> Self {
-        Self { hash, placement }
+impl GlyphDescriptor {
+    pub(crate) fn new(hash: GlyphHash, descriptor: Descriptor) -> Self {
+        Self { hash, descriptor }
     }
 }
 pub(crate) fn place(rasterization: &mut Rasterization) {
-    for request in rasterization.placement_requests.iter() {
-        if !rasterization.placement_order.contains_key(&request.hash) {
+    for request in rasterization.descriptor_requests.iter() {
+        if !rasterization.descriptor_order.contains_key(&request.hash) {
             let start: u32 = (rasterization.buffer.cpu.len() + rasterization.write.len()) as u32;
             let row_size: u32 = request.glyph.metrics.width as u32;
             let rows: u32 = (request.glyph.bitmap.len() / row_size as usize) as u32;
-            let placement = Placement::new(start, row_size, rows);
+            let descriptor = Descriptor::new(start, row_size, rows);
             rasterization
-                .placements
-                .push(GlyphPlacement::new(request.hash, placement));
+                .descriptors
+                .push(GlyphDescriptor::new(request.hash, descriptor));
             rasterization
-                .placement_order
-                .insert(request.hash, rasterization.placements.len() - 1);
+                .descriptor_order
+                .insert(request.hash, rasterization.descriptors.len() - 1);
             rasterization.write.extend(&request.glyph.bitmap);
         }
     }
-    rasterization.placement_requests.clear();
+    rasterization.descriptor_requests.clear();
 }

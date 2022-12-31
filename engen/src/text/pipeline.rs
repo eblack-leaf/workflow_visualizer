@@ -71,7 +71,7 @@ pub(crate) fn pipeline(canvas: &Canvas, rasterization: &Rasterization) -> wgpu::
                             }],
                         },
                         wgpu::VertexBufferLayout {
-                            array_stride: std::mem::size_of::<rasterization::Placement>()
+                            array_stride: std::mem::size_of::<rasterization::Descriptor>()
                                 as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
                             attributes: &[VertexAttribute {

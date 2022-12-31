@@ -1,5 +1,4 @@
 use crate::text::scale::Scale;
-use bevy_ecs::prelude::Commands;
 use fontdue::{Font as fdFont, FontSettings};
 use std::path::Path;
 pub struct Font {
