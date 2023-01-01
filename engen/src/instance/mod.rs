@@ -71,6 +71,17 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
     pub(crate) fn current(&self) -> usize {
         self.indexer.current
     }
+    pub(crate) fn prepare(&mut self) {
+        // remove + swap
+        for (key, request) in self.requests.iter() {
+            if !self.indices.contains_key(key) {
+                let index = self.indexer.next();
+                self.indices.insert(*key, index);
+            }
+            self.write_requests.insert(*key);
+        }
+        // grow
+    }
     pub(crate) fn process_attribute<
         Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
         Fetcher,
@@ -112,24 +123,14 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         &mut self,
     ) {
         // get indices of writes
+        let indexed_writes = self.writes.get_mut::<HashMap<Key, Attribute>>().expect("no write map for attribute").drain().for_each(|(key, attr)| -> (Index, Attribute) {
+            return (self.get_index(key), attr);
+        }).collect::<Vec<(Index, Attribute)>>();
         // combine sequential
         // if grown - write all of attribute buffer from cpu
+        // else - write the write_ranges from combine
     }
     fn get_index(&self, key: Key) -> Index {
         *self.indices.get(&key).unwrap()
-    }
-    pub(crate) fn prepare(&mut self) {
-        // remove + swap
-        for (key, request) in self.requests.iter() {
-            if self.indices.contains_key(key) {
-                /* make cache check with this key */
-                /* this will remove the request if cached value is same */
-            } else {
-                let index = self.indexer.next();
-                self.indices.insert(*key, index);
-            }
-            self.write_requests.insert(*key);
-        }
-        // grow
     }
 }
