@@ -68,18 +68,19 @@ impl Render for TextRenderer {
         rasterization::place(&mut self.rasterization);
         rasterization::write(&mut self.rasterization, canvas);
         rasterization::integrate_placements(&self.rasterization, &mut self.coordinator);
-        self.coordinator.prepare();
+        self.coordinator.prepare(&canvas.device);
         self.coordinator.process_attribute(|i| i.position);
         self.coordinator.process_attribute(|i| i.area);
         self.coordinator.process_attribute(|i| i.depth);
         self.coordinator.process_attribute(|i| i.color);
         self.coordinator
             .process_attribute(|i| i.descriptor.unwrap());
-        self.coordinator.write::<Position>();
-        self.coordinator.write::<Area>();
-        self.coordinator.write::<Depth>();
-        self.coordinator.write::<Color>();
-        self.coordinator.write::<rasterization::Descriptor>();
+        self.coordinator.write::<Position>(&canvas.queue);
+        self.coordinator.write::<Area>(&canvas.queue);
+        self.coordinator.write::<Depth>(&canvas.queue);
+        self.coordinator.write::<Color>(&canvas.queue);
+        self.coordinator
+            .write::<rasterization::Descriptor>(&canvas.queue);
     }
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport) {
         render_pass.set_pipeline(&self.pipeline);

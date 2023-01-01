@@ -45,7 +45,8 @@ pub(crate) fn cpu_buffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
 >(
     initial_max: usize,
-) {
+) -> Vec<Attribute> {
     let mut buffer = Vec::new();
     buffer.resize(initial_max, Attribute::default());
+    buffer
 }
