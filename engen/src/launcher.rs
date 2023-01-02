@@ -2,7 +2,8 @@ use crate::app::App;
 use crate::canvas::Canvas;
 use crate::options::LaunchOptions;
 use crate::render;
-use crate::render::Renderers;
+use crate::render::{Render, RenderMode, Renderers};
+use crate::text::TextRenderer;
 use crate::theme::Theme;
 use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
@@ -61,6 +62,25 @@ impl Launcher {
             self.run();
         }
     }
+    pub fn attach_renderer<Renderer: Render + 'static>(&mut self) {
+        let mut renderer = Renderer::renderer(self.canvas.as_ref().expect("no canvas attached"));
+        renderer.instrument(&mut self.compute);
+        self.insert_renderer(renderer);
+    }
+    fn insert_renderer<Renderer: Render + 'static>(&mut self, renderer: Renderer) {
+        match Renderer::mode() {
+            RenderMode::Opaque => {
+                self.renderers
+                    .opaque
+                    .insert(Renderer::id(), Box::new(renderer));
+            }
+            RenderMode::Alpha => {
+                self.renderers
+                    .alpha
+                    .insert(Renderer::id(), Box::new(renderer));
+            }
+        }
+    }
     fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {
         self.event_loop.replace(event_loop);
     }
@@ -99,6 +119,7 @@ impl Launcher {
                             self.attach_window(window);
                         }
                         self.compute.job.startup();
+                        self.attach_renderer::<TextRenderer>();
                     }
                 },
                 Event::WindowEvent {

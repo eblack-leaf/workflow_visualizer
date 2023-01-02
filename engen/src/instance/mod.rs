@@ -1,3 +1,4 @@
+use crate::canvas::Canvas;
 use crate::instance::attribute::{attribute_size, gpu_buffer};
 use crate::instance::indexer::IndexedAttribute;
 use anymap::AnyMap;
@@ -5,26 +6,23 @@ use attribute::AttributeBuffer;
 use bevy_ecs::prelude::Entity;
 use indexer::{Index, Indexer};
 use itertools::Itertools;
+pub(crate) use key::EntityKey;
+use key::IndexedKey;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use write_range::WriteRange;
-
 mod attribute;
 mod indexer;
+mod key;
 mod write_range;
 
-#[derive(Eq, Hash, PartialEq, Copy, Clone)]
-pub(crate) struct EntityKey<Identifier: Eq + Hash + PartialEq + Copy + Clone> {
-    pub(crate) entity: Entity,
-    pub(crate) identifier: Identifier,
-}
 pub(crate) struct Swap<Key: Eq + Hash + PartialEq + Copy + Clone> {
-    pub(crate) src: (Key, Index),
-    pub(crate) dest: Index,
+    pub(crate) src: IndexedKey<Key>,
+    pub(crate) dest: IndexedKey<Key>,
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone> Swap<Key> {
-    pub(crate) fn new(src: (Key, Index), dest: Index) -> Self {
+    pub(crate) fn new(src: IndexedKey<Key>, dest: IndexedKey<Key>) -> Self {
         Self { src, dest }
     }
 }
@@ -39,6 +37,7 @@ pub(crate) struct Coordinator<Key: Eq + Hash + PartialEq + Copy + Clone, Instanc
     pub(crate) indices: HashMap<Key, Index>,
     pub(crate) growth: Option<usize>,
     pub(crate) swaps: Vec<Swap<Key>>,
+    pub(crate) keys: HashMap<Index, Key>,
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
     Coordinator<Key, InstanceRequest>
@@ -55,6 +54,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             indices: HashMap::new(),
             growth: None,
             swaps: Vec::new(),
+            keys: HashMap::new(),
         }
     }
     pub(crate) fn setup_attribute<
@@ -80,6 +80,70 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             .unwrap()
             .buffer
     }
+    pub(crate) fn current(&self) -> usize {
+        self.indexer.current
+    }
+    pub(crate) fn prepare(&mut self, device: &wgpu::Device) {
+        self.prepare_swaps();
+        self.prepare_writes();
+        self.prepare_growth();
+    }
+    pub(crate) fn process_attribute<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+        Fetcher,
+    >(
+        &mut self,
+        canvas: &Canvas,
+        fetcher: Fetcher,
+    ) where
+        Fetcher: Fn(&InstanceRequest) -> Attribute + 'static,
+    {
+        self.swap::<Attribute>();
+        self.resolve::<Attribute, _>(fetcher);
+        self.write::<Attribute>(canvas);
+    }
+    pub(crate) fn finish(&mut self) {
+        let _ = self.growth.take();
+        self.write_requests.clear();
+        self.requests.clear();
+        for swap in self.swaps.drain(..) {
+            self.indices.remove(&swap.src.key);
+            self.keys.remove(&swap.src.index);
+        }
+    }
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
+    Coordinator<Key, InstanceRequest>
+{
+    fn max(&self) -> usize {
+        self.indexer.max
+    }
+    fn prepare_growth(&mut self) {
+        if self.indexer.should_grow() {
+            self.growth.replace(self.indexer.grow(self.growth_factor()));
+        }
+    }
+    fn prepare_writes(&mut self) {
+        for (key, request) in self.requests.iter() {
+            if !self.indices.contains_key(key) {
+                let index = self.indexer.next();
+                self.indices.insert(*key, index);
+                self.keys.insert(index, *key);
+            }
+            self.write_requests.insert(*key);
+        }
+    }
+    fn prepare_swaps(&mut self) {
+        for key in self.removes.iter() {
+            let src = self.indexer.decrement();
+            let dest = self.get_index(*key);
+            let dest_key = self.get_key(dest);
+            self.swaps.push(Swap::new(
+                IndexedKey::new(*key, src),
+                IndexedKey::new(dest_key, dest),
+            ));
+        }
+    }
     fn cpu_buffer<
         Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
     >(
@@ -90,31 +154,48 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             .get::<Vec<Attribute>>()
             .expect("no cpu buffer for attribute")
     }
-    pub(crate) fn max(&self) -> usize {
-        self.indexer.max
+    fn get_key(&self, index: Index) -> Key {
+        *self.keys.get(&index).expect("no key for index")
     }
-    pub(crate) fn current(&self) -> usize {
-        self.indexer.current
-    }
-    pub(crate) fn prepare(&mut self, device: &wgpu::Device) {
-        // remove + swap (just store indexes of changes + attr)
-        for key in self.removes.iter() {
-            let src = self.indexer.decrement();
-            let dest = self.get_index(*key);
-            self.swaps.push(Swap::new((*key, src), dest));
-        }
-        for (key, request) in self.requests.iter() {
-            if !self.indices.contains_key(key) {
-                let index = self.indexer.next();
-                self.indices.insert(*key, index);
-            }
-            self.write_requests.insert(*key);
-        }
-        if self.indexer.should_grow() {
-            self.growth.replace(self.indexer.grow(self.growth_factor()));
+    fn swap<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        &mut self,
+    ) {
+        for swap in self.swaps.iter() {
+            let index = *self.indices.get(&swap.src.key).expect("no index present");
+            let attribute: Attribute = self.get_attribute(index);
+            Self::send_write(&mut self.writes, swap.dest.key, attribute);
+            Self::set_attribute(&mut self.cpu_buffers, swap.dest.index, attribute);
+            Self::remove_attribute::<Attribute>(&mut self.cpu_buffers, swap.src.index);
         }
     }
-    pub(crate) fn process_attribute<
+
+    fn get_attribute<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        &self,
+        index: Index,
+    ) -> Attribute {
+        *self
+            .cpu_buffers
+            .get::<Vec<Attribute>>()
+            .expect("no cpu buffer for attribute")
+            .get(index.0)
+            .expect("invalid index")
+    }
+    fn remove_attribute<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        cpu_buffers: &mut AnyMap,
+        index: Index,
+    ) {
+        cpu_buffers
+            .get_mut::<Vec<Attribute>>()
+            .expect("no cpu buffer for attribute")
+            .remove(index.0);
+    }
+    fn resolve<
         Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
         Fetcher,
     >(
@@ -123,48 +204,85 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
     ) where
         Fetcher: Fn(&InstanceRequest) -> Attribute + 'static,
     {
-        // go through write_requests and check cached values to determine if should go to writes
-        if let Some(growth_amount) = self.growth.as_ref() {
-            self.cpu_buffers
-                .get_mut::<Vec<Attribute>>()
-                .expect("no cpu buffer for attribute")
-                .resize(*growth_amount, Attribute::default());
+        if let Some(growth_amount) = self.growth {
+            self.grow_cpu_buffer::<Attribute>(growth_amount);
         }
         for key in self.write_requests.iter() {
             let index = self.get_index(*key);
             let requested_value =
                 fetcher(self.requests.get(key).as_ref().expect("no request for key"));
-            let cached_value = self
-                .cpu_buffers
-                .get::<Vec<Attribute>>()
-                .expect("no cache for attribute")
-                .get(index.0);
+            let cached_value = self.get_cached_value::<Attribute>(index);
             if let Some(value) = cached_value {
                 if *value == requested_value {
                     continue;
                 }
             }
-            self.writes
-                .get_mut::<HashMap<Key, Attribute>>()
-                .expect("no write buffer for attribute")
-                .insert(*key, requested_value);
-            self.cpu_buffers
-                .get_mut::<Vec<Attribute>>()
-                .expect("no cpu buffer for attribute")
-                .insert(index.0, requested_value);
+            Self::send_write(&mut self.writes, *key, requested_value);
+            Self::set_attribute(&mut self.cpu_buffers, index, requested_value);
         }
     }
-    pub(crate) fn write<
+
+    fn get_cached_value<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        &self,
+        index: Index,
+    ) -> Option<&Attribute> {
+        let cached_value = self
+            .cpu_buffers
+            .get::<Vec<Attribute>>()
+            .expect("no cache for attribute")
+            .get(index.0);
+        cached_value
+    }
+
+    fn grow_cpu_buffer<
         Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
     >(
         &mut self,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
+        growth_amount: usize,
+    ) {
+        self.cpu_buffers
+            .get_mut::<Vec<Attribute>>()
+            .expect("no cpu buffer for attribute")
+            .resize(growth_amount, Attribute::default());
+    }
+
+    fn set_attribute<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        cpu_buffers: &mut AnyMap,
+        index: Index,
+        requested_value: Attribute,
+    ) {
+        cpu_buffers
+            .get_mut::<Vec<Attribute>>()
+            .expect("no cpu buffer for attribute")
+            .insert(index.0, requested_value);
+    }
+
+    fn send_write<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        writes: &mut AnyMap,
+        key: Key,
+        requested_value: Attribute,
+    ) {
+        writes
+            .get_mut::<HashMap<Key, Attribute>>()
+            .expect("no write buffer for attribute")
+            .insert(key, requested_value);
+    }
+    fn write<
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    >(
+        &mut self,
+        canvas: &Canvas,
     ) {
         if let Some(growth_amount) = self.growth.as_ref() {
             self.gpu_buffers
-                .insert(gpu_buffer::<Attribute>(device, self.max()));
-            queue.write_buffer(
+                .insert(gpu_buffer::<Attribute>(&canvas.device, self.max()));
+            canvas.queue.write_buffer(
                 self.gpu_buffer::<Attribute>(),
                 0,
                 bytemuck::cast_slice(self.cpu_buffer::<Attribute>()),
@@ -176,13 +294,9 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             let mut combined_writes = Self::combined_writes(indexed_writes);
             // write the write_ranges from combine
             for range in combined_writes.drain(..) {
-                range.write(queue, self.gpu_buffer::<Attribute>());
+                range.write(&canvas.queue, self.gpu_buffer::<Attribute>());
             }
         }
-    }
-    pub(crate) fn finish(&mut self) {
-        // clear buffers used in processing if not drained already
-        let _ = self.growth.take();
     }
     fn growth_factor(&self) -> usize {
         10

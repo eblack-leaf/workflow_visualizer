@@ -5,14 +5,24 @@ use std::collections::HashMap;
 use wgpu::RenderPass;
 #[derive(Eq, Hash, PartialEq)]
 pub struct Id(pub &'static str);
+pub enum RenderMode {
+    Opaque,
+    Alpha,
+}
 pub trait Render {
+    fn mode() -> RenderMode
+    where
+        Self: Sized;
     fn id() -> Id
     where
         Self: Sized;
     fn extract(&mut self, compute: &mut App);
     fn prepare(&mut self, canvas: &Canvas);
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport);
-    fn attach(self, launcher: &mut Launcher);
+    fn instrument(&self, app: &mut App);
+    fn renderer(canvas: &Canvas) -> Self
+    where
+        Self: Sized;
 }
 pub type Renderer = Box<dyn Render>;
 pub type RendererStorage = HashMap<Id, Renderer>;
