@@ -75,26 +75,31 @@ impl Render for TextRenderer {
         self.coordinator.process_attribute(|i| i.color);
         self.coordinator
             .process_attribute(|i| i.descriptor.unwrap());
-        self.coordinator.write::<Position>(&canvas.queue);
-        self.coordinator.write::<Area>(&canvas.queue);
-        self.coordinator.write::<Depth>(&canvas.queue);
-        self.coordinator.write::<Color>(&canvas.queue);
         self.coordinator
-            .write::<rasterization::Descriptor>(&canvas.queue);
+            .write::<Position>(&canvas.device, &canvas.queue);
+        self.coordinator
+            .write::<Area>(&canvas.device, &canvas.queue);
+        self.coordinator
+            .write::<Depth>(&canvas.device, &canvas.queue);
+        self.coordinator
+            .write::<Color>(&canvas.device, &canvas.queue);
+        self.coordinator
+            .write::<rasterization::Descriptor>(&canvas.device, &canvas.queue);
+        self.coordinator.finish();
     }
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport) {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &viewport.bind_group, &[]);
         render_pass.set_bind_group(1, &self.rasterization.buffer.bind_group, &[]);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.set_vertex_buffer(1, self.coordinator.attribute_buffer::<Position>().slice(..));
-        render_pass.set_vertex_buffer(2, self.coordinator.attribute_buffer::<Area>().slice(..));
-        render_pass.set_vertex_buffer(3, self.coordinator.attribute_buffer::<Depth>().slice(..));
-        render_pass.set_vertex_buffer(4, self.coordinator.attribute_buffer::<Color>().slice(..));
+        render_pass.set_vertex_buffer(1, self.coordinator.gpu_buffer::<Position>().slice(..));
+        render_pass.set_vertex_buffer(2, self.coordinator.gpu_buffer::<Area>().slice(..));
+        render_pass.set_vertex_buffer(3, self.coordinator.gpu_buffer::<Depth>().slice(..));
+        render_pass.set_vertex_buffer(4, self.coordinator.gpu_buffer::<Color>().slice(..));
         render_pass.set_vertex_buffer(
             5,
             self.coordinator
-                .attribute_buffer::<rasterization::Descriptor>()
+                .gpu_buffer::<rasterization::Descriptor>()
                 .slice(..),
         );
         if self.coordinator.current() > 0 {
