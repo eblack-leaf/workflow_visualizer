@@ -3,7 +3,7 @@ use crate::text::rasterization::Rasterization;
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable, Default, PartialEq)]
-pub(crate) struct Descriptor {
+pub struct Descriptor {
     pub parts: [u32; 3],
 }
 impl Descriptor {

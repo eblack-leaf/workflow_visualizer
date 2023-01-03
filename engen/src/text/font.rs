@@ -1,6 +1,9 @@
 use crate::text::scale::Scale;
+use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 use std::path::Path;
+
+#[derive(Resource)]
 pub struct Font {
     pub font_storage: [fdFont; 1],
 }
@@ -27,7 +30,7 @@ impl Font {
         0
     }
 }
-pub(crate) fn font() -> Font {
+pub fn font() -> Font {
     Font::new(
         "/home/omi-voshuli/Desktop/note-ifications/focal/fonts/JetBrainsMono-Medium.ttf",
         13u32,

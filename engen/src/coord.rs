@@ -1,4 +1,5 @@
 use bevy_ecs::prelude::{Bundle, Component};
+use std::ops::Add;
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Position {
@@ -23,6 +24,12 @@ impl From<(u32, u32)> for Position {
         }
     }
 }
+impl Add for Position {
+    type Output = Position;
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::Output::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Area {
@@ -44,6 +51,14 @@ impl From<(f32, f32)> for Area {
 }
 impl From<(u32, u32)> for Area {
     fn from(wh: (u32, u32)) -> Self {
+        Self {
+            width: wh.0 as f32,
+            height: wh.1 as f32,
+        }
+    }
+}
+impl From<(usize, usize)> for Area {
+    fn from(wh: (usize, usize)) -> Self {
         Self {
             width: wh.0 as f32,
             height: wh.1 as f32,

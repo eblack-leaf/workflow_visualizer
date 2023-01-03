@@ -1,5 +1,7 @@
+mod font;
 mod pipeline;
 mod rasterization;
+mod request;
 mod scale;
 mod vertex;
 
@@ -11,24 +13,15 @@ use crate::instance::EntityKey;
 use crate::render::{Render, RenderPhase};
 use crate::text::pipeline::pipeline;
 use crate::text::rasterization::{GlyphHash, Rasterization};
+use crate::text::request::InstanceRequests;
 pub use crate::text::scale::Scale;
 use crate::text::vertex::GLYPH_AABB;
 use crate::{render, Launcher, Task};
+use bevy_ecs::prelude::SystemStage;
+pub use font::{font, Font};
+pub(crate) use request::{GlyphOffset, InstanceRequest};
 use wgpu::RenderPass;
 
-#[derive(Eq, Hash, PartialEq, Copy, Clone)]
-pub(crate) struct GlyphOffset(pub(crate) u32);
-#[derive(Clone)]
-pub(crate) struct InstanceRequest {
-    pub(crate) character: char,
-    pub(crate) scale: Scale,
-    pub(crate) hash: GlyphHash,
-    pub(crate) position: Position,
-    pub(crate) area: Area,
-    pub(crate) depth: Depth,
-    pub(crate) color: Color,
-    pub(crate) descriptor: Option<rasterization::Descriptor>,
-}
 pub(crate) type InstanceCoordinator = Coordinator<EntityKey<GlyphOffset>, InstanceRequest>;
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
@@ -47,7 +40,14 @@ impl Render for TextRenderer {
         render::Id("text")
     }
     fn extract(&mut self, compute: &mut Task) {
-        todo!()
+        self.coordinator.requests = compute
+            .job
+            .container
+            .get_resource_mut::<InstanceRequests>()
+            .expect("no instance requests")
+            .requests
+            .drain()
+            .collect();
     }
     fn prepare(&mut self, canvas: &Canvas) {
         rasterization::read_requests(&mut self.rasterization, &self.coordinator);
@@ -88,8 +88,13 @@ impl Render for TextRenderer {
             );
         }
     }
-    fn instrument(&self, app: &mut Task) {
-        todo!()
+    fn instrument(&self, task: &mut Task) {
+        task.job.container.insert_resource(InstanceRequests::new());
+        task.job.container.insert_resource(font());
+        // replace with labeled stages of task so this can be last
+        task.job
+            .exec
+            .add_stage("text request", SystemStage::single(request::emit_requests));
     }
     fn renderer(canvas: &Canvas) -> Self
     where

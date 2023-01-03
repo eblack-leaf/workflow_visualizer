@@ -1,6 +1,6 @@
+use crate::text::font::{font, Font};
 use crate::text::rasterization::descriptor::GlyphDescriptor;
 pub(crate) use crate::text::rasterization::descriptor::{place, Descriptor, DescriptorRequest};
-use crate::text::rasterization::font::{font, Font};
 pub(crate) use crate::text::rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
 use crate::text::rasterization::references::References;
 use crate::text::InstanceCoordinator;
@@ -11,7 +11,6 @@ use std::collections::{HashMap, HashSet};
 
 mod buffer;
 mod descriptor;
-mod font;
 mod rasterize;
 mod references;
 mod remove;

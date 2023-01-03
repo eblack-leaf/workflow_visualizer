@@ -211,9 +211,9 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             let index = self.get_index(*key);
             let requested_value =
                 fetcher(self.requests.get(key).as_ref().expect("no request for key"));
-            let cached_value = self.get_cached_value::<Attribute>(index);
+            let cached_value: Option<Attribute> = self.get_cached_value::<Attribute>(index);
             if let Some(value) = cached_value {
-                if *value == requested_value {
+                if value == requested_value {
                     continue;
                 }
             }
@@ -227,13 +227,12 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
     >(
         &self,
         index: Index,
-    ) -> Option<&Attribute> {
-        let cached_value = self
-            .cpu_buffers
+    ) -> Option<Attribute> {
+        self.cpu_buffers
             .get::<Vec<Attribute>>()
             .expect("no cache for attribute")
-            .get(index.0);
-        cached_value
+            .get(index.0)
+            .copied()
     }
 
     fn grow_cpu_buffer<
