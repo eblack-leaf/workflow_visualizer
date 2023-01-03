@@ -1,10 +1,10 @@
 use crate::job::Job;
 
-pub struct App {
+pub struct Task {
     pub job: Job,
     // ... room for other instrumentation e.g. diagnostics
 }
-impl App {
+impl Task {
     pub fn new() -> Self {
         Self { job: Job::new() }
     }

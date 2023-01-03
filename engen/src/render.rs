@@ -1,25 +1,25 @@
 use crate::canvas::{Canvas, Viewport};
 use crate::theme::Theme;
-use crate::{App, Launcher};
+use crate::{Launcher, Task};
 use std::collections::HashMap;
 use wgpu::RenderPass;
 #[derive(Eq, Hash, PartialEq)]
 pub struct Id(pub &'static str);
-pub enum RenderMode {
+pub enum RenderPhase {
     Opaque,
     Alpha,
 }
 pub trait Render {
-    fn mode() -> RenderMode
+    fn phase() -> RenderPhase
     where
         Self: Sized;
     fn id() -> Id
     where
         Self: Sized;
-    fn extract(&mut self, compute: &mut App);
+    fn extract(&mut self, compute: &mut Task);
     fn prepare(&mut self, canvas: &Canvas);
     fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport);
-    fn instrument(&self, app: &mut App);
+    fn instrument(&self, app: &mut Task);
     fn renderer(canvas: &Canvas) -> Self
     where
         Self: Sized;
@@ -38,7 +38,7 @@ impl Renderers {
         }
     }
 }
-pub(crate) fn extract(renderers: &mut Renderers, compute: &mut App) {
+pub(crate) fn extract(renderers: &mut Renderers, compute: &mut Task) {
     for (_id, renderer) in renderers.opaque.iter_mut() {
         renderer.extract(compute);
     }

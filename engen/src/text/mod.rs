@@ -8,12 +8,12 @@ use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::instance::Coordinator;
 use crate::instance::EntityKey;
-use crate::render::{Render, RenderMode};
+use crate::render::{Render, RenderPhase};
 use crate::text::pipeline::pipeline;
 use crate::text::rasterization::{GlyphHash, Rasterization};
 pub use crate::text::scale::Scale;
 use crate::text::vertex::GLYPH_AABB;
-use crate::{render, App, Launcher};
+use crate::{render, Launcher, Task};
 use wgpu::RenderPass;
 
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
@@ -37,16 +37,16 @@ pub struct TextRenderer {
     pub(crate) coordinator: InstanceCoordinator,
 }
 impl Render for TextRenderer {
-    fn mode() -> RenderMode
+    fn phase() -> RenderPhase
     where
         Self: Sized,
     {
-        RenderMode::Alpha
+        RenderPhase::Alpha
     }
     fn id() -> render::Id {
         render::Id("text")
     }
-    fn extract(&mut self, compute: &mut App) {
+    fn extract(&mut self, compute: &mut Task) {
         todo!()
     }
     fn prepare(&mut self, canvas: &Canvas) {
@@ -88,7 +88,7 @@ impl Render for TextRenderer {
             );
         }
     }
-    fn instrument(&self, app: &mut App) {
+    fn instrument(&self, app: &mut Task) {
         todo!()
     }
     fn renderer(canvas: &Canvas) -> Self

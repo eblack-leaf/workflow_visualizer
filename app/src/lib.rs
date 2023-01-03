@@ -1,7 +1,7 @@
-use engen::{App, LaunchOptions, Launcher};
+use engen::{LaunchOptions, Launcher, Task};
 
-pub fn app() -> App {
-    let app = App::new();
+pub fn app() -> Task {
+    let app = Task::new();
     // ...
     app
 }

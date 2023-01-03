@@ -49,11 +49,26 @@ impl Rasterization {
     }
 }
 pub(crate) fn read_requests(rasterization: &mut Rasterization, coordinator: &InstanceCoordinator) {
-    // use request.hash to send rasterize_request
+    for (_key, request) in coordinator.requests.iter() {
+        rasterization
+            .adds
+            .push(Add::new(request.hash, request.character, request.scale));
+    }
 }
 pub(crate) fn integrate_placements(
     rasterization: &Rasterization,
     coordinator: &mut InstanceCoordinator,
 ) {
-    // for each instance_request - put Some(placement) in request.placement using request.hash as key
+    for (_key, request) in coordinator.requests.iter_mut() {
+        let index = *rasterization
+            .descriptor_order
+            .get(&request.hash)
+            .expect("no index for rasterization");
+        let descriptor = rasterization
+            .descriptors
+            .get(index)
+            .expect("no descriptor for hash")
+            .descriptor;
+        request.descriptor.replace(descriptor);
+    }
 }
