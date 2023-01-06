@@ -1832,6 +1832,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "r_engen"
+version = "0.1.0"
+dependencies = [
+ "anymap",
+ "bevy_ecs",
+ "bytemuck",
+ "console_error_panic_hook",
+ "console_log",
+ "fontdue",
+ "futures",
+ "itertools",
+ "nalgebra",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "wgpu",
+ "winit",
+]
+
+[[package]]
 name = "rand"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

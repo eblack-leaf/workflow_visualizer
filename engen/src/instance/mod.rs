@@ -26,6 +26,14 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone> Swap<Key> {
         Self { src, dest }
     }
 }
+pub(crate) struct SwapRange<Key: Eq + Hash + PartialEq + Copy + Clone> {
+    pub(crate) range: Vec<IndexedKey<Key>>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone> SwapRange<Key> {
+    pub(crate) fn new(range: Vec<IndexedKey<Key>>) -> Self {
+        Self { range }
+    }
+}
 pub(crate) struct Coordinator<Key: Eq + Hash + PartialEq + Copy + Clone, InstanceRequest> {
     pub(crate) indexer: Indexer,
     pub(crate) gpu_buffers: AnyMap,
@@ -33,6 +41,7 @@ pub(crate) struct Coordinator<Key: Eq + Hash + PartialEq + Copy + Clone, Instanc
     pub(crate) writes: AnyMap,
     pub(crate) write_requests: HashSet<Key>,
     pub(crate) removes: HashSet<Key>,
+    pub(crate) swap_ranges: Vec<SwapRange<Key>>,
     pub(crate) requests: HashMap<Key, InstanceRequest>,
     pub(crate) indices: HashMap<Key, Index>,
     pub(crate) growth: Option<usize>,
@@ -84,6 +93,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
         self.indexer.current
     }
     pub(crate) fn prepare(&mut self, device: &wgpu::Device) {
+        self.remove();
         self.prepare_swaps();
         self.prepare_writes();
         self.prepare_growth();
@@ -110,6 +120,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             self.indices.remove(&swap.src.key);
             self.keys.remove(&swap.src.index);
         }
+        self.removes.clear();
     }
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
@@ -133,15 +144,71 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             self.write_requests.insert(*key);
         }
     }
-    fn prepare_swaps(&mut self) {
+    fn indexed_removals(&self) -> Vec<IndexedKey<Key>> {
+        let mut indexed_removals = Vec::new();
         for key in self.removes.iter() {
-            let src = self.indexer.decrement();
-            let dest = self.get_index(*key);
-            let dest_key = self.get_key(dest);
-            self.swaps.push(Swap::new(
-                IndexedKey::new(*key, src),
-                IndexedKey::new(dest_key, dest),
-            ));
+            let index = self.get_index(*key);
+            indexed_removals.push(IndexedKey::new(*key, index));
+        }
+        indexed_removals
+    }
+    fn remove(&mut self) {
+        let mut indexed_removals = self.indexed_removals();
+        indexed_removals.sort_by(|lhs, rhs| -> Ordering {
+            if lhs.index.0 < rhs.index.0 {
+                return Ordering::Less;
+            }
+            if lhs.index.0 > rhs.index.0 {
+                return Ordering::Greater;
+            }
+            Ordering::Equal
+        });
+        let mut remove_ranges = Self::consecutive_removes(indexed_removals);
+        remove_ranges.retain(|range| {
+            let mut contains = false;
+            for indexed_key in range.iter() {
+                if indexed_key.index == self.indexer.current_index() {
+                    contains = true;
+                }
+            }
+            if contains {
+                for indexed_key in range.iter() {
+                    Self::remove_attribute(&mut self.cpu_buffers, indexed_key.index);
+                    self.indexer.decrement();
+                    self.indices.remove(indexed_key.key);
+                    self.keys.remove(&indexed_key.index);
+                }
+            }
+            !contains
+        });
+        self.swap_ranges = remove_ranges
+            .drain(..)
+            .map(|range| SwapRange::new(range))
+            .collect();
+    }
+    fn prepare_swaps(&mut self) {
+        let mut keys_to_swap = HashSet::new();
+        for swap_range in self.swap_ranges.iter() {
+            for indexed_key in swap_range.range.iter() {
+                keys_to_swap.insert(indexed_key.key);
+            }
+        }
+        let mut swap_ranges = self.swap_ranges.drain(..).collect::<Vec<SwapRange<Key>>>();
+        for swap_range in swap_ranges.iter() {
+            for indexed_key in swap_range.range.iter() {
+                if self.indexer.current == 1 {}
+                let mut src = self.indexer.decrement();
+                let mut src_key = self.get_key(src);
+                while keys_to_swap.contains(src_key) {
+                    src -= 1;
+                    src_key = self.get_key(src);
+                }
+                let dest = self.get_index(*key);
+                self.swaps.push(Swap::new(
+                    IndexedKey::new(src_key, src),
+                    IndexedKey::new(*key, dest),
+                ));
+            }
         }
     }
     fn cpu_buffer<
@@ -317,7 +384,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             }
             Ordering::Equal
         });
-        let mut consecutive_slices = Self::consecutive_slices(indexed_writes);
+        let mut consecutive_slices = Self::consecutive_indexed_attributes(indexed_writes);
         for slice in consecutive_slices.drain(..) {
             write_ranges.push(WriteRange::new(slice));
         }
@@ -340,11 +407,17 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
             })
             .collect::<Vec<IndexedAttribute<Attribute>>>()
     }
-    fn consecutive_slices<
+    fn consecutive_indexed_attributes<
         Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
     >(
         data: Vec<IndexedAttribute<Attribute>>,
     ) -> Vec<Vec<IndexedAttribute<Attribute>>> {
+        (&(0..data.len()).group_by(|&i| data[i].index.0 - i))
+            .into_iter()
+            .map(|(_, group)| group.map(|i| data[i]).collect())
+            .collect()
+    }
+    fn consecutive_removes(data: Vec<IndexedKey<Key>>) -> Vec<Vec<IndexedKey<Key>>> {
         (&(0..data.len()).group_by(|&i| data[i].index.0 - i))
             .into_iter()
             .map(|(_, group)| group.map(|i| data[i]).collect())

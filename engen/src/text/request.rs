@@ -105,6 +105,7 @@ pub fn emit_requests(
                     ),
                 );
             }
+            text.dirty = false;
         }
     }
 }

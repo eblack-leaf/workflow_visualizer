@@ -45,4 +45,7 @@ impl Indexer {
     fn index(val: usize) -> Index {
         Index(val - 1)
     }
+    pub(crate) fn current_index(&self) -> Index {
+        Self::index(self.current)
+    }
 }
