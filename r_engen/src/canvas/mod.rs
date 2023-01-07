@@ -1,7 +1,7 @@
 mod options;
 mod viewport;
 pub use crate::canvas::options::CanvasOptions;
-pub(crate) use crate::canvas::viewport::Viewport;
+pub use crate::canvas::viewport::Viewport;
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;

@@ -1,7 +1,9 @@
-use crate::instance::indexer::Index;
-use bevy_ecs::entity::Entity;
+use bevy_ecs::prelude::Entity;
 use std::hash::Hash;
+use anymap::AnyMap;
 
+#[derive(Eq, Hash, PartialEq, Copy, Clone)]
+pub(crate) struct Index(pub(crate) usize);
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub struct EntityKey<Identifier: Eq + Hash + PartialEq + Copy + Clone> {
     pub entity: Entity,
@@ -12,12 +14,12 @@ impl<Identifier: Eq + Hash + PartialEq + Copy + Clone> EntityKey<Identifier> {
         Self { entity, identifier }
     }
 }
-pub(crate) struct IndexedKey<Key: Eq + Hash + PartialEq + Copy + Clone> {
-    pub(crate) key: Key,
-    pub(crate) index: Index,
+pub struct Coordinator<Key: Eq + Hash + PartialEq + Copy + Clone, Request> {
+    cpu_buffers: AnyMap,
+    gpu_buffers: AnyMap,
 }
-impl<Key: Eq + Hash + PartialEq + Copy + Clone> IndexedKey<Key> {
-    pub(crate) fn new(key: Key, index: Index) -> Self {
-        Self { key, index }
-    }
+struct Placer {
+    current: usize,
+    max: usize,
+    empty_slots: Vec<usize>,
 }

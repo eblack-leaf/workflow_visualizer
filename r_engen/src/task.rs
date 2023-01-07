@@ -1,7 +1,24 @@
-use bevy_ecs::prelude::{ResMut, Resource, Schedule, SystemStage, World};
+use bevy_ecs::prelude::{ResMut, Resource, Schedule, StageLabel, SystemStage, World};
 
 pub type Container = World;
-pub type Workload = Schedule;
+pub struct Workload {
+    pub schedule: Schedule,
+}
+impl Workload {
+    pub fn new() -> Self {
+        Self {
+            schedule: {
+                let mut schedule = Schedule::default();
+                schedule.add_stage(Stage::First, SystemStage::parallel());
+                schedule.add_stage(Stage::Before, SystemStage::parallel());
+                schedule.add_stage(Stage::During, SystemStage::parallel());
+                schedule.add_stage(Stage::After, SystemStage::parallel());
+                schedule.add_stage(Stage::Last, SystemStage::parallel());
+                schedule
+            },
+        }
+    }
+}
 #[derive(PartialEq)]
 pub enum ExecutionState {
     Active,
@@ -38,6 +55,14 @@ impl Exit {
         self.exit_requested = true;
     }
 }
+#[derive(StageLabel)]
+pub enum Stage {
+    First,
+    Before,
+    During,
+    After,
+    Last,
+}
 pub struct Task {
     pub execution_state: ExecutionState,
     pub container: Container,
@@ -56,28 +81,24 @@ impl Task {
                 container.insert_resource(Idle::new());
                 container
             },
-            startup: Workload::default(),
+            startup: Workload::new(),
             main: {
-                let mut workload = Workload::default();
-                workload.add_stage("attempt to idle", SystemStage::single(attempt_to_idle));
+                let mut workload = Workload::new();
+                workload
+                    .schedule
+                    .add_system_to_stage(Stage::First, attempt_to_idle);
                 workload
             },
-            teardown: Workload::default(),
+            teardown: Workload::new(),
         }
     }
-    pub fn exec(&mut self, task_workload: TaskWorkload) {
-        let workload = match task_workload {
-            TaskWorkload::Startup => {
-                &mut self.startup
-            }
-            TaskWorkload::Main => {
-                &mut self.main
-            }
-            TaskWorkload::Teardown => {
-                &mut self.teardown
-            }
+    pub fn exec(&mut self, workload_id: WorkloadId) {
+        let workload = match workload_id {
+            WorkloadId::Startup => &mut self.startup,
+            WorkloadId::Main => &mut self.main,
+            WorkloadId::Teardown => &mut self.teardown,
         };
-        workload.run_once(&mut self.container);
+        workload.schedule.run_once(&mut self.container);
     }
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;
@@ -107,7 +128,7 @@ impl Task {
     }
 }
 
-pub enum TaskWorkload {
+pub enum WorkloadId {
     Startup,
     Main,
     Teardown,

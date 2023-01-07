@@ -1,5 +1,4 @@
 pub(crate) use crate::canvas::viewport::Viewport;
-use crate::LaunchOptions;
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
