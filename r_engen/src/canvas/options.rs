@@ -1,11 +1,4 @@
 use bevy_ecs::prelude::Resource;
-use crate::{Attachable, Engen};
-
-impl Attachable for CanvasOptions {
-    fn attach(self, engen: &mut Engen) {
-        engen.render.container.insert_resource(self);
-    }
-}
 #[derive(Clone, Resource)]
 pub struct CanvasOptions {
     pub backends: wgpu::Backends,

@@ -66,17 +66,18 @@ impl Task {
         }
     }
     pub fn exec(&mut self, task_workload: TaskWorkload) {
-        match task_workload {
+        let workload = match task_workload {
             TaskWorkload::Startup => {
-                self.startup.run_once(&mut self.container);
+                &mut self.startup
             }
             TaskWorkload::Main => {
-                self.main.run_once(&mut self.container);
+                &mut self.main
             }
             TaskWorkload::Teardown => {
-                self.teardown.run_once(&mut self.container);
+                &mut self.teardown
             }
-        }
+        };
+        workload.run_once(&mut self.container);
     }
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;

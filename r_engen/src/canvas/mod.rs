@@ -2,22 +2,11 @@ mod options;
 mod viewport;
 pub use crate::canvas::options::CanvasOptions;
 pub(crate) use crate::canvas::viewport::Viewport;
-use crate::{Attachable, Engen};
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
-impl Attachable for CanvasWindow {
-    fn attach(self, engen: &mut Engen) {
-        engen.render.container.insert_resource(self);
-    }
-}
 #[derive(Resource)]
 pub struct CanvasWindow(pub Window);
-impl Attachable for Canvas {
-    fn attach(self, engen: &mut Engen) {
-        engen.render.container.insert_resource(self);
-    }
-}
 #[derive(Resource)]
 pub struct Canvas {
     pub surface: wgpu::Surface,

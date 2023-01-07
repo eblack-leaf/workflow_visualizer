@@ -1,9 +1,11 @@
+#![allow(unused)]
 use crate::canvas::{Canvas, CanvasOptions, CanvasWindow};
 use crate::task::TaskWorkload;
 use task::Task;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
+use crate::render::{RenderAttachment, Extract, RenderPhases};
 
 mod canvas;
 mod color;
@@ -12,31 +14,38 @@ mod render;
 mod task;
 mod theme;
 mod uniform;
-
-pub trait Attachable {
-    fn attach(self, engen: &mut Engen);
-}
-pub struct PlatformContext(pub EventLoop<()>);
-impl Attachable for PlatformContext {
-    fn attach(self, engen: &mut Engen) {
-        engen.platform_context.replace(self);
-    }
-}
 pub struct Engen {
-    platform_context: Option<PlatformContext>,
+    event_loop: Option<EventLoop<()>>,
     pub(crate) compute: Task,
     pub(crate) render: Task,
+    pub(crate) extractors: Vec<Box<dyn Extract>>,
 }
 impl Engen {
     pub fn new(task: Task) -> Self {
         Self {
-            platform_context: None,
+            event_loop: None,
             compute: task,
             render: Task::new(),
+            extractors: Vec::new(),
         }
     }
-    pub fn attach<Attachment: Attachable>(&mut self, attachment: Attachment) {
-        attachment.attach( self);
+    pub fn attach_renderer<Attachment: RenderAttachment + Default>(&mut self, attachment: Attachment) {
+        self.extractors.push(attachment.extractor());
+        let renderer = attachment.renderer(self.render.container.get_resource::<Canvas>().expect("no canvas attached"));
+        self.render.container.get_non_send_resource_mut::<RenderPhases>().expect("no render phases attached").insert(renderer);
+        attachment.instrument(self);
+    }
+    pub fn set_canvas_options(&mut self, options: CanvasOptions) {
+        self.render.container.insert_resource(options);
+    }
+    fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {
+        self.event_loop.replace(event_loop);
+    }
+    fn attach_canvas(&mut self, canvas: Canvas) {
+        self.render.container.insert_resource(canvas);
+    }
+    fn attach_window(&mut self, window: Window) {
+        self.render.container.insert_resource(CanvasWindow(window));
     }
     pub fn launch(mut self) {
         #[cfg(target_arch = "wasm32")]
@@ -55,26 +64,30 @@ impl Engen {
                             .ok()
                     })
                     .expect("couldn't append canvas to document body");
-                self.attach(Canvas::new(&window, self.options.clone()).await);
-                self.attach(CanvasWindow(window));
-                self.attach(PlatformContext(event_loop));
+                let options = self.render.container.get_resource::<CanvasOptions>().expect("no canvas options attached");
+                self.attach_canvas(Canvas::new(&window, options.clone().web_align()).await);
+                self.attach_window(window);
+                self.attach_event_loop(event_loop);
                 self.run();
             });
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
-            self.attach(PlatformContext(EventLoop::new()));
+            self.attach_event_loop(EventLoop::new());
             self.run();
         }
     }
+    fn extract(&mut self) {
+        for extractor in self.extractors.iter_mut() {
+            extractor.extract(&self.compute, &mut self.render);
+        }
+    }
     fn run(mut self) {
-        let platform_context = self
-            .platform_context
+        let event_loop = self
+            .event_loop
             .take()
             .expect("no event loop provided");
-        platform_context
-            .0
-            .run(move |event, _event_loop_window_target, control_flow| {
+        event_loop.run(move |event, _event_loop_window_target, control_flow| {
                 control_flow.set_poll();
                 match event {
                     Event::NewEvents(start_cause) => match start_cause {
@@ -90,11 +103,11 @@ impl Engen {
                                     .render
                                     .container
                                     .get_resource::<CanvasOptions>().expect("no canvas options provided");
-                                self.attach(futures::executor::block_on(Canvas::new(
+                                self.attach_canvas(futures::executor::block_on(Canvas::new(
                                     &window,
                                     options.clone(),
                                 )));
-                                self.attach(CanvasWindow(window));
+                                self.attach_window(window);
                             }
                             self.compute.exec(TaskWorkload::Startup);
                             self.render.exec(TaskWorkload::Startup);
@@ -171,7 +184,7 @@ impl Engen {
                                     .container
                                     .get_resource::<CanvasOptions>()
                                     .expect("no canvas options attached");
-                                self.attach(futures::executor::block_on(Canvas::new(
+                                self.attach_canvas(futures::executor::block_on(Canvas::new(
                                     &window.0,
                                     options.clone(),
                                 )));
@@ -196,7 +209,7 @@ impl Engen {
                     }
                     Event::RedrawRequested(_window_id) => {
                         if self.render.active() {
-                            // extract
+                            self.extract();
                             self.render.exec(TaskWorkload::Main);
                         }
                         if self.render.should_exit() {
