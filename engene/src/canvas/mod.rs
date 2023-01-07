@@ -5,7 +5,10 @@ pub use crate::canvas::viewport::Viewport;
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Resource)]
+pub struct CanvasWindow(pub Window);
+#[cfg(target_arch = "wasm32")]
 pub struct CanvasWindow(pub Window);
 #[derive(Resource)]
 pub struct Canvas {

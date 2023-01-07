@@ -3,12 +3,15 @@ mod color;
 mod coord;
 mod render;
 mod task;
+mod text;
 mod theme;
 mod uniform;
+
 use crate::canvas::{Canvas, CanvasOptions, CanvasWindow};
 use crate::render::{ExtractCalls, Render, RenderCalls, RenderPassHandle};
 pub use crate::task::Task;
 use crate::task::{Workload, WorkloadId};
+use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
@@ -33,18 +36,11 @@ impl Engen {
             render_calls: RenderCalls::new(),
         }
     }
-    pub fn attach<
-        Renderer: Render + Attach,
-        ExtractCall: FnMut(&mut Task, &Task) + 'static,
-        RenderCall: FnMut(&Task, &mut RenderPassHandle) + 'static,
-    >(
-        &mut self,
-        extract_call: ExtractCall,
-        render_call: RenderCall,
-    ) {
+    pub fn attach<Renderer: Render + Attach + Resource>(&mut self) {
         Renderer::attach(self);
-        self.extract_calls.fns.push(Box::new(extract_call));
-        self.render_calls.insert(Renderer::phase(), render_call);
+        self.extract_calls.add(render::call_extract::<Renderer>);
+        self.render_calls
+            .add(Renderer::phase(), render::call_render::<Renderer>);
     }
     pub fn set_canvas_options(&mut self, options: CanvasOptions) {
         self.render.container.insert_resource(options);
@@ -56,7 +52,31 @@ impl Engen {
         self.render.container.insert_resource(canvas);
     }
     fn attach_window(&mut self, window: Window) {
-        self.render.container.insert_resource(CanvasWindow(window));
+        #[cfg(target_arch = "wasm32")] {
+            self.render.container.insert_non_send_resource(CanvasWindow(window));
+            return;
+        }
+        #[cfg(not(target_arch = "wasm32"))] {
+            self.render.container.insert_resource(CanvasWindow(window));
+        }
+
+    }
+    fn detach_window(&mut self) -> Window {
+        #[cfg(target_arch = "wasm32")] {
+            return self.render.container.remove_non_send_resource::<CanvasWindow>().expect("no canvas window attached").0
+        }
+        #[cfg(not(target_arch = "wasm32"))] {
+            self.render.container.remove_resource::<CanvasWindow>().expect("no canvas window attached").0
+        }
+    }
+    fn get_window(&self) -> &Window {
+        #[cfg(target_arch = "wasm32")] {
+            return &self.render.container.get_non_send_resource::<CanvasWindow>().expect("no canvas window attached").0
+        }
+        #[cfg(not(target_arch = "wasm32"))] {
+            return &self.render.container.get_non_send_resource::<CanvasWindow>().expect("no canvas window attached").0
+        }
+
     }
     pub fn launch(mut self) {
         #[cfg(target_arch = "wasm32")]
@@ -182,20 +202,17 @@ impl Engen {
                     if self.compute.suspended() {
                         #[cfg(target_os = "android")]
                         {
-                            let window = self
-                                .render
-                                .container
-                                .remove_resource::<CanvasWindow>()
-                                .expect("no canvas window attached");
+                            let window = self.detach_window();
                             let options = self
                                 .render
                                 .container
                                 .get_resource::<CanvasOptions>()
                                 .expect("no canvas options attached");
                             self.attach_canvas(futures::executor::block_on(Canvas::new(
-                                &window.0,
+                                &window,
                                 options.clone(),
                             )));
+                            self.attach_window(window);
                         }
                         self.compute.activate();
                         self.render.activate();
@@ -204,12 +221,7 @@ impl Engen {
                 Event::MainEventsCleared => {
                     if self.compute.active() {
                         self.compute.exec(WorkloadId::Main);
-                        self.render
-                            .container
-                            .get_resource::<CanvasWindow>()
-                            .expect("no canvas window attached")
-                            .0
-                            .request_redraw();
+                        self.get_window().request_redraw();
                     }
                     if self.compute.should_exit() {
                         control_flow.set_exit();

@@ -1,15 +1,32 @@
 use crate::canvas::{Canvas, Viewport};
 use crate::theme::Theme;
 use crate::{Engen, Task};
+use bevy_ecs::prelude::Resource;
 pub enum RenderPhase {
     Opaque,
     Alpha,
 }
-type RenderCallFn = dyn FnMut(&Task, &mut RenderPassHandle);
-type ExtractCallFn = dyn FnMut(&mut Task, &Task);
+pub(crate) fn call_extract<Renderer: Render>(compute: &Task, render: &mut Task) {
+    Renderer::extract(compute, render);
+}
+pub(crate) fn call_render<'a, Renderer: Render + Resource>(
+    render: &'a Task,
+    render_pass_handle: &mut RenderPassHandle<'a>,
+) {
+    let viewport = &render
+        .container
+        .get_resource::<Canvas>()
+        .expect("no canvas attached")
+        .viewport;
+    render
+        .container
+        .get_resource::<Renderer>()
+        .expect("no renderer attached")
+        .render(render_pass_handle, viewport);
+}
 pub(crate) struct RenderCalls {
-    pub(crate) opaque: Vec<Box<RenderCallFn>>,
-    pub(crate) alpha: Vec<Box<RenderCallFn>>,
+    pub(crate) opaque: Vec<Box<for<'a> fn(&'a Task, &mut RenderPassHandle<'a>)>>,
+    pub(crate) alpha: Vec<Box<for<'a> fn(&'a Task, &mut RenderPassHandle<'a>)>>,
 }
 impl RenderCalls {
     pub(crate) fn new() -> Self {
@@ -18,10 +35,10 @@ impl RenderCalls {
             alpha: Vec::new(),
         }
     }
-    pub(crate) fn insert<RenderCall: FnMut(&Task, &mut RenderPassHandle) + 'static>(
+    pub(crate) fn add(
         &mut self,
         phase: RenderPhase,
-        render_call: RenderCall,
+        render_call: for<'a> fn(&'a Task, &mut RenderPassHandle<'a>),
     ) {
         let storage = match phase {
             RenderPhase::Opaque => &mut self.opaque,
@@ -31,15 +48,18 @@ impl RenderCalls {
     }
 }
 pub(crate) struct ExtractCalls {
-    pub(crate) fns: Vec<Box<ExtractCallFn>>,
+    pub(crate) fns: Vec<Box<fn(&Task, &mut Task)>>,
 }
 impl ExtractCalls {
     pub(crate) fn new() -> Self {
         Self { fns: Vec::new() }
     }
+    pub(crate) fn add(&mut self, caller: fn(&Task, &mut Task)) {
+        self.fns.push(Box::new(caller));
+    }
 }
 pub trait Render {
-    fn extract(compute: &mut Task, render: &Task)
+    fn extract(compute: &Task, render: &mut Task)
     where
         Self: Sized;
     fn phase() -> RenderPhase;
@@ -47,7 +67,7 @@ pub trait Render {
 }
 pub(crate) fn extract(engen: &mut Engen) {
     for caller in engen.extract_calls.fns.iter_mut() {
-        caller(&mut engen.compute, &engen.render);
+        caller(&engen.compute, &mut engen.render);
     }
 }
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
