@@ -1,7 +1,4 @@
-mod custom_render_attachment;
-
-use crate::custom_render_attachment::CustomRenderAttachment;
-use r_engen::{CanvasOptions, Engen, Task, TextAttachment};
+use engene::{Engen, Task};
 
 pub fn task() -> Task {
     let task = Task::new();
@@ -14,9 +11,5 @@ pub fn task() -> Task {
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());
-    engen.set_canvas_options(CanvasOptions::default());
-    engen.attach(TextAttachment::default());
-    // ...
-    engen.attach(CustomRenderAttachment::default());
     engen.launch();
 }

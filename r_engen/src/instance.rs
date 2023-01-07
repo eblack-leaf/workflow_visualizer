@@ -1,6 +1,6 @@
+use anymap::AnyMap;
 use bevy_ecs::prelude::Entity;
 use std::hash::Hash;
-use anymap::AnyMap;
 
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub(crate) struct Index(pub(crate) usize);

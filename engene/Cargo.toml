@@ -1,0 +1,21 @@
+[package]
+name = "engene"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy_ecs = "0.9.1"
+winit = "0.27.5"
+bytemuck = { version = "1.12.3", features = ["derive"] }
+wgpu = { version = "0.14.2", features = ["webgl"] }
+nalgebra = "0.31.4"
+fontdue = "0.7.2"
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+futures = "0.3.25"
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3.59", features = ["Window"] }
+wasm-bindgen-futures = "0.4.33"
+console_error_panic_hook = "0.1.7"
+console_log = "0.2.0"
