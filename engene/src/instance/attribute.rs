@@ -41,13 +41,22 @@ pub(crate) fn attribute_size<
 ) -> usize {
     std::mem::size_of::<Attribute>() * num
 }
-
-pub(crate) fn cpu_buffer<
+#[derive(Resource)]
+pub(crate) struct CpuBuffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    initial_max: usize,
-) -> Vec<Attribute> {
-    let mut buffer = Vec::new();
-    buffer.resize(initial_max, Attribute::default());
-    buffer
+> {
+    pub(crate) buffer: Vec<Attribute>,
+}
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
+    CpuBuffer<Attribute>
+{
+    pub(crate) fn new(max: usize) -> Self {
+        Self {
+            buffer: {
+                let mut buffer = Vec::new();
+                buffer.resize(max, Attribute::default());
+                buffer
+            },
+        }
+    }
 }

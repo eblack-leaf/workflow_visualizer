@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Bundle, Component};
+use bevy_ecs::prelude::{Bundle, Component, Resource};
 use std::ops::Add;
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]

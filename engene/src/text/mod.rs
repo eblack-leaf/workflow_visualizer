@@ -1,6 +1,8 @@
 mod attribute;
 mod font;
+mod pipeline;
 mod rasterization;
+mod request;
 mod scale;
 mod vertex;
 
@@ -14,20 +16,11 @@ use crate::text::scale::Scale;
 use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::{instance, Attach, Canvas, Engen, Task};
 use bevy_ecs::prelude::{Commands, Res, ResMut, Resource};
-use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
+use rasterization::Descriptor;
+pub(crate) use request::Request;
 pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub struct GlyphOffset(pub usize);
-pub struct Request {
-    pub character: char,
-    pub scale: Scale,
-    pub hash: GlyphHash,
-    pub position: Position,
-    pub area: Area,
-    pub depth: Depth,
-    pub color: Color,
-    pub descriptor: Option<rasterization::Descriptor>,
-}
 pub(crate) type InstanceCoordinator = instance::Coordinator<EntityKey<GlyphOffset>, Request>;
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -46,119 +39,14 @@ impl TextRenderer {
     pub(crate) fn new(canvas: &Canvas) -> Self {
         let rasterization = rasterization::Handler::new(&canvas.device);
         Self {
-            pipeline: {
-                let shader = canvas
-                    .device
-                    .create_shader_module(include_wgsl!("text.wgsl"));
-                let pipeline = canvas.device.create_render_pipeline(
-                    &wgpu::RenderPipelineDescriptor {
-                        label: Some("text pipeline"),
-                        layout: Some(&canvas.device.create_pipeline_layout(
-                            &wgpu::PipelineLayoutDescriptor {
-                                label: Some("text pipeline descriptor"),
-                                bind_group_layouts: &[
-                                    &canvas.viewport.bind_group_layout,
-                                    &rasterization.binding.bind_group_layout,
-                                ],
-                                push_constant_ranges: &[],
-                            },
-                        )),
-                        vertex: wgpu::VertexState {
-                            module: &shader,
-                            entry_point: "vertex_entry",
-                            buffers: &[
-                                wgpu::VertexBufferLayout {
-                                    array_stride: std::mem::size_of::<Vertex>()
-                                        as wgpu::BufferAddress,
-                                    step_mode: wgpu::VertexStepMode::Vertex,
-                                    attributes: Vertex::attributes().as_slice(),
-                                },
-                                wgpu::VertexBufferLayout {
-                                    array_stride: std::mem::size_of::<Position>()
-                                        as wgpu::BufferAddress,
-                                    step_mode: wgpu::VertexStepMode::Instance,
-                                    attributes: &[VertexAttribute {
-                                        format: VertexFormat::Float32x2,
-                                        offset: 0,
-                                        shader_location: 1,
-                                    }],
-                                },
-                                wgpu::VertexBufferLayout {
-                                    array_stride: std::mem::size_of::<Area>()
-                                        as wgpu::BufferAddress,
-                                    step_mode: wgpu::VertexStepMode::Instance,
-                                    attributes: &[VertexAttribute {
-                                        format: VertexFormat::Float32x2,
-                                        offset: 0,
-                                        shader_location: 2,
-                                    }],
-                                },
-                                wgpu::VertexBufferLayout {
-                                    array_stride: std::mem::size_of::<Depth>()
-                                        as wgpu::BufferAddress,
-                                    step_mode: wgpu::VertexStepMode::Instance,
-                                    attributes: &[VertexAttribute {
-                                        format: VertexFormat::Float32,
-                                        offset: 0,
-                                        shader_location: 3,
-                                    }],
-                                },
-                                wgpu::VertexBufferLayout {
-                                    array_stride: std::mem::size_of::<Color>()
-                                        as wgpu::BufferAddress,
-                                    step_mode: wgpu::VertexStepMode::Instance,
-                                    attributes: &[VertexAttribute {
-                                        format: VertexFormat::Float32x4,
-                                        offset: 0,
-                                        shader_location: 4,
-                                    }],
-                                },
-                                wgpu::VertexBufferLayout {
-                                    array_stride: std::mem::size_of::<rasterization::Descriptor>()
-                                        as wgpu::BufferAddress,
-                                    step_mode: wgpu::VertexStepMode::Instance,
-                                    attributes: &[VertexAttribute {
-                                        format: VertexFormat::Uint32x3,
-                                        offset: 0,
-                                        shader_location: 5,
-                                    }],
-                                },
-                            ],
-                        },
-                        primitive: wgpu::PrimitiveState {
-                            topology: wgpu::PrimitiveTopology::TriangleList,
-                            strip_index_format: None,
-                            front_face: wgpu::FrontFace::Ccw,
-                            cull_mode: Some(wgpu::Face::Back),
-                            unclipped_depth: false,
-                            polygon_mode: wgpu::PolygonMode::Fill,
-                            conservative: false,
-                        },
-                        depth_stencil: Some(wgpu::DepthStencilState {
-                            format: canvas.viewport.depth_format,
-                            depth_write_enabled: true,
-                            depth_compare: wgpu::CompareFunction::Less,
-                            stencil: wgpu::StencilState::default(),
-                            bias: wgpu::DepthBiasState::default(),
-                        }),
-                        multisample: Default::default(),
-                        fragment: Option::from(wgpu::FragmentState {
-                            module: &shader,
-                            entry_point: "fragment_entry",
-                            targets: &[Some(wgpu::ColorTargetState {
-                                format: canvas.surface_configuration.format,
-                                blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                                write_mask: Default::default(),
-                            })],
-                        }),
-                        multiview: None,
-                    },
-                );
-                pipeline
-            },
+            pipeline: pipeline::pipeline(canvas, &rasterization),
             coordinator: {
-                let mut coordinator = instance::Coordinator::new();
-                // setup attributes
+                let mut coordinator = instance::Coordinator::new(10);
+                coordinator.setup_attribute::<Position>(&canvas.device);
+                coordinator.setup_attribute::<Area>(&canvas.device);
+                coordinator.setup_attribute::<Depth>(&canvas.device);
+                coordinator.setup_attribute::<Color>(&canvas.device);
+                coordinator.setup_attribute::<rasterization::Descriptor>(&canvas.device);
                 coordinator
             },
             vertex_buffer: vertex::buffer(&canvas.device),
@@ -173,9 +61,7 @@ pub fn prepare(canvas: Res<Canvas>, mut renderer: ResMut<TextRenderer>) {
     renderer.read_rasterization_requests();
     // ...
     renderer.integrate_rasterization_descriptors();
-    renderer.coordinator.prepare();
-    renderer.coordinator.process();
-    renderer.coordinator.finish();
+    renderer.coordinator.coordinate();
 }
 impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {
@@ -232,10 +118,10 @@ impl Render for TextRenderer {
                 .gpu_buffer::<rasterization::Descriptor>()
                 .slice(..),
         );
-        if self.coordinator.current() > 0 {
+        if self.coordinator.has_instances() {
             render_pass_handle.0.draw(
                 0..GLYPH_AABB.len() as u32,
-                0..self.coordinator.current() as u32,
+                0..self.coordinator.count() as u32,
             );
         }
     }

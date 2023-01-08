@@ -1,36 +1,31 @@
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::instance::AttributeHandler;
-use crate::text::{rasterization, Request};
-use bytemuck::{Pod, Zeroable};
+use crate::text::rasterization;
+use crate::text::request::Request;
 
 impl AttributeHandler<Request> for Position {
-    type Attribute = Self;
-    fn extract(request: &Request) -> Self::Attribute {
+    fn extract(request: &Request) -> Self {
         request.position
     }
 }
 impl AttributeHandler<Request> for Area {
-    type Attribute = Self;
-    fn extract(request: &Request) -> Self::Attribute {
+    fn extract(request: &Request) -> Self {
         request.area
     }
 }
 impl AttributeHandler<Request> for Depth {
-    type Attribute = Self;
-    fn extract(request: &Request) -> Self::Attribute {
+    fn extract(request: &Request) -> Self {
         request.depth
     }
 }
 impl AttributeHandler<Request> for Color {
-    type Attribute = Self;
-    fn extract(request: &Request) -> Self::Attribute {
+    fn extract(request: &Request) -> Self {
         request.color
     }
 }
 impl AttributeHandler<Request> for rasterization::Descriptor {
-    type Attribute = Self;
-    fn extract(request: &Request) -> Self::Attribute {
+    fn extract(request: &Request) -> Self {
         request.descriptor.expect("no descriptor attached")
     }
 }
