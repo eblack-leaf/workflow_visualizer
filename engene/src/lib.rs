@@ -6,8 +6,8 @@ mod task;
 mod text;
 mod theme;
 mod uniform;
-
-use crate::canvas::{Canvas, CanvasOptions, CanvasWindow};
+pub use crate::canvas::{Canvas, CanvasOptions};
+use crate::canvas::{CanvasWindow};
 use crate::render::{ExtractCalls, Render, RenderCalls, RenderPassHandle};
 pub use crate::task::Task;
 use crate::task::{Workload, WorkloadId};
@@ -15,7 +15,7 @@ use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-
+pub use crate::text::TextRenderer;
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }

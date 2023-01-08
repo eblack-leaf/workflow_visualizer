@@ -1,7 +1,8 @@
+use bevy_ecs::prelude::Resource;
 use crate::canvas::Viewport;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::{Attach, Engen, Task};
-
+#[derive(Resource)]
 pub struct TextRenderer {}
 impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {

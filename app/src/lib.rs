@@ -1,4 +1,4 @@
-use engene::{Engen, Task};
+use engene::{Engen, Task, CanvasOptions, TextRenderer};
 
 pub fn task() -> Task {
     let task = Task::new();
@@ -11,5 +11,8 @@ pub fn task() -> Task {
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());
+    engen.set_canvas_options(CanvasOptions::default());
+    engen.attach::<TextRenderer>();
+    // ...
     engen.launch();
 }
