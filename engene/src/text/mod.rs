@@ -10,6 +10,20 @@ use crate::text::vertex::Vertex;
 use crate::{instance, Attach, Canvas, Engen, Task};
 use bevy_ecs::prelude::Resource;
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
+use crate::text::scale::Scale;
+pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
+#[derive(Eq, Hash, PartialEq, Copy, Clone)]
+pub struct GlyphOffset(pub usize);
+pub struct Request {
+    pub character: char,
+    pub scale: Scale,
+    pub hash: GlyphHash,
+    pub position: Position,
+    pub area: Area,
+    pub depth: Depth,
+    pub color: Color,
+    pub descriptor: Option<rasterization::Descriptor>,
+}
 #[derive(Resource)]
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
