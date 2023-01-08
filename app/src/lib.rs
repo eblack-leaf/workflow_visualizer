@@ -1,4 +1,4 @@
-use engene::{Engen, Task, CanvasOptions, TextRenderer};
+use engene::{CanvasOptions, Engen, Task, TextRenderer};
 
 pub fn task() -> Task {
     let task = Task::new();

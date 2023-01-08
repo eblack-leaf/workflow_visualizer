@@ -1,21 +1,25 @@
 mod canvas;
 mod color;
+#[allow(unused)]
 mod coord;
+mod instance;
 mod render;
 mod task;
+#[allow(unused)]
 mod text;
 mod theme;
 mod uniform;
+
+use crate::canvas::CanvasWindow;
 pub use crate::canvas::{Canvas, CanvasOptions};
-use crate::canvas::{CanvasWindow};
-use crate::render::{ExtractCalls, Render, RenderCalls, RenderPassHandle};
+use crate::render::{ExtractCalls, Render, RenderCalls};
 pub use crate::task::Task;
-use crate::task::{Workload, WorkloadId};
+use crate::task::WorkloadId;
+pub use crate::text::TextRenderer;
 use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-pub use crate::text::TextRenderer;
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }
@@ -52,31 +56,57 @@ impl Engen {
         self.render.container.insert_resource(canvas);
     }
     fn attach_window(&mut self, window: Window) {
-        #[cfg(target_arch = "wasm32")] {
-            self.render.container.insert_non_send_resource(CanvasWindow(window));
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.render
+                .container
+                .insert_non_send_resource(CanvasWindow(window));
             return;
         }
-        #[cfg(not(target_arch = "wasm32"))] {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
             self.render.container.insert_resource(CanvasWindow(window));
         }
-
     }
+    #[allow(unused)]
     fn detach_window(&mut self) -> Window {
-        #[cfg(target_arch = "wasm32")] {
-            return self.render.container.remove_non_send_resource::<CanvasWindow>().expect("no canvas window attached").0
+        #[cfg(target_arch = "wasm32")]
+        {
+            return self
+                .render
+                .container
+                .remove_non_send_resource::<CanvasWindow>()
+                .expect("no canvas window attached")
+                .0;
         }
-        #[cfg(not(target_arch = "wasm32"))] {
-            self.render.container.remove_resource::<CanvasWindow>().expect("no canvas window attached").0
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            self.render
+                .container
+                .remove_resource::<CanvasWindow>()
+                .expect("no canvas window attached")
+                .0
         }
     }
     fn get_window(&self) -> &Window {
-        #[cfg(target_arch = "wasm32")] {
-            return &self.render.container.get_non_send_resource::<CanvasWindow>().expect("no canvas window attached").0
+        #[cfg(target_arch = "wasm32")]
+        {
+            return &self
+                .render
+                .container
+                .get_non_send_resource::<CanvasWindow>()
+                .expect("no canvas window attached")
+                .0;
         }
-        #[cfg(not(target_arch = "wasm32"))] {
-            return &self.render.container.get_non_send_resource::<CanvasWindow>().expect("no canvas window attached").0
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            return &self
+                .render
+                .container
+                .get_non_send_resource::<CanvasWindow>()
+                .expect("no canvas window attached")
+                .0;
         }
-
     }
     pub fn launch(mut self) {
         #[cfg(target_arch = "wasm32")]

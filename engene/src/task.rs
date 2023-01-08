@@ -51,6 +51,7 @@ impl Exit {
             exit_requested: false,
         }
     }
+    #[allow(unused)]
     pub fn request_exit(&mut self) {
         self.exit_requested = true;
     }
