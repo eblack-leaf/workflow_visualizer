@@ -17,11 +17,11 @@ use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::{instance, Attach, Canvas, Engen, Task};
 use bevy_ecs::prelude::{Commands, Res, ResMut, Resource};
 use rasterization::Descriptor;
-pub(crate) use request::Request;
+pub(crate) use request::RequestData;
 pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub struct GlyphOffset(pub usize);
-pub(crate) type InstanceCoordinator = instance::Coordinator<EntityKey<GlyphOffset>, Request>;
+pub(crate) type InstanceCoordinator = instance::Coordinator<EntityKey<GlyphOffset>, RequestData>;
 #[derive(Resource)]
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
@@ -30,10 +30,9 @@ pub struct TextRenderer {
     pub(crate) rasterization: rasterization::Handler,
 }
 impl TextRenderer {
-    pub(crate) fn read_rasterization_requests(&mut self) {
+    pub(crate) fn prepare_rasterization(&mut self, canvas: &Canvas) {
         self.rasterization.read_requests(&self.coordinator);
-    }
-    pub(crate) fn integrate_rasterization_descriptors(&mut self) {
+        self.rasterization.prepare(canvas);
         self.rasterization.integrate_requests(&mut self.coordinator);
     }
     pub(crate) fn new(canvas: &Canvas) -> Self {
@@ -58,9 +57,7 @@ pub fn startup(canvas: Res<Canvas>, mut cmd: Commands) {
     cmd.insert_resource(TextRenderer::new(&canvas));
 }
 pub fn prepare(canvas: Res<Canvas>, mut renderer: ResMut<TextRenderer>) {
-    renderer.read_rasterization_requests();
-    // ...
-    renderer.integrate_rasterization_descriptors();
+    renderer.prepare_rasterization(&canvas);
     renderer.coordinator.coordinate();
 }
 impl Attach for TextRenderer {

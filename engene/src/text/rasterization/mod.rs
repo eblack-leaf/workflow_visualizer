@@ -2,7 +2,9 @@ use crate::text::InstanceCoordinator;
 use bevy_ecs::prelude::Resource;
 
 mod descriptor;
+use crate::Canvas;
 pub(crate) use descriptor::Descriptor;
+
 pub(crate) struct Binding {
     pub(crate) cpu: Vec<u32>,
     pub(crate) gpu: wgpu::Buffer,
@@ -76,5 +78,6 @@ impl Handler {
         }
     }
     pub(crate) fn read_requests(&mut self, coordinator: &InstanceCoordinator) {}
+    pub(crate) fn prepare(&mut self, canvas: &Canvas) {}
     pub(crate) fn integrate_requests(&mut self, coordinator: &mut InstanceCoordinator) {}
 }

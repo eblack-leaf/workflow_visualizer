@@ -2,7 +2,7 @@ use bevy_ecs::prelude::Resource;
 use std::marker::PhantomData;
 use wgpu::BufferAddress;
 #[derive(Resource)]
-pub(crate) struct AttributeBuffer<
+pub(crate) struct GpuBuffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
 > {
     pub(crate) buffer: wgpu::Buffer,
@@ -10,7 +10,7 @@ pub(crate) struct AttributeBuffer<
 }
 
 impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
-    AttributeBuffer<Attribute>
+    GpuBuffer<Attribute>
 {
     pub(crate) fn new(buffer: wgpu::Buffer) -> Self {
         Self {
@@ -25,8 +25,8 @@ pub(crate) fn gpu_buffer<
 >(
     device: &wgpu::Device,
     max_instances: usize,
-) -> AttributeBuffer<Attribute> {
-    AttributeBuffer::new(device.create_buffer(&wgpu::BufferDescriptor {
+) -> GpuBuffer<Attribute> {
+    GpuBuffer::new(device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("attribute buffer"),
         size: attribute_size::<Attribute>(max_instances) as BufferAddress,
         usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
@@ -59,4 +59,11 @@ impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync 
             },
         }
     }
+}
+
+pub trait AttributeExtractor<Request>
+where
+    Self: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+{
+    fn extract(request: &Request) -> Self;
 }

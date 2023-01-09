@@ -3,7 +3,7 @@ use crate::coord::{Area, Depth, Position};
 use crate::text::scale::Scale;
 use crate::text::{rasterization, GlyphHash};
 
-pub struct Request {
+pub struct RequestData {
     pub character: char,
     pub scale: Scale,
     pub hash: GlyphHash,
