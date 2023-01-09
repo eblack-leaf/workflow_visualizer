@@ -61,12 +61,18 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> IndexHandler<Key> {
         self.count > self.max
     }
     pub(crate) fn remove(&mut self, key: &Key) -> Option<Index> {
-        self.indices.remove(key)
+        if let Some(index) = self.indices.remove(key) {
+            self.holes.insert(index);
+            return Some(index);
+        }
+        None
     }
     pub(crate) fn get_index(&self, key: Key) -> Option<Index> {
         self.indices.get(&key).copied()
     }
     pub(crate) fn grow(&mut self, growth_factor: usize) {
-        // update new max to bigger than count using factor to add
+        while self.count > self.max {
+            self.max += growth_factor;
+        }
     }
 }

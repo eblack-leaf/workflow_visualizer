@@ -6,7 +6,7 @@ pub(crate) use crate::instance::attribute::{CpuBuffer, GpuBuffer};
 use crate::instance::index::Index;
 use crate::task::Container;
 use crate::Canvas;
-pub use attribute::AttributeExtractor;
+pub use attribute::AttributeHandler;
 use bevy_ecs::prelude::{Component, Resource};
 pub(crate) use index::IndexHandler;
 use iter_tools::Itertools;
@@ -136,7 +136,7 @@ impl<
             _request: PhantomData,
         }
     }
-    pub fn setup_attribute<Attribute: AttributeExtractor<RequestData>>(
+    pub fn setup_attribute<Attribute: AttributeHandler<RequestData>>(
         &mut self,
         device: &wgpu::Device,
     ) {
@@ -168,12 +168,19 @@ impl<
             self.growth.new_max.replace(self.index_handler.max());
         }
     }
-    fn cpu_buffer<Attribute: AttributeExtractor<RequestData>>(&self) -> &CpuBuffer<Attribute> {
+    fn cpu_buffer<Attribute: AttributeHandler<RequestData>>(&self) -> &CpuBuffer<Attribute> {
         self.container
             .get_resource::<CpuBuffer<Attribute>>()
             .expect("no cpu buffer attached")
     }
-    pub fn prepare<Attribute: AttributeExtractor<RequestData>>(&mut self, canvas: &Canvas) {
+    pub fn prepare<Attribute: AttributeHandler<RequestData>>(&mut self, canvas: &Canvas) {
+        for index in self.null_requests.requests.iter() {
+            self.container
+                .get_resource_mut::<CpuBuffer<Attribute>>()
+                .expect("")
+                .buffer
+                .insert(index.value, Attribute::null())
+        }
         // iter cache checks
         for key in self.cache_check_requests.requests.iter() {
             let cached_value = *self
@@ -279,7 +286,7 @@ impl<
         self.null_requests.requests.clear();
         self.cache_check_requests.requests.clear();
     }
-    fn combine<Attribute: AttributeExtractor<RequestData>>(
+    fn combine<Attribute: AttributeHandler<RequestData>>(
         mut writes: Vec<(Index, Attribute)>,
     ) -> Vec<Vec<(Index, Attribute)>> {
         writes.sort_by(|lhs, rhs| -> Ordering { lhs.0.value.cmp(&rhs.0.value) });
@@ -288,7 +295,7 @@ impl<
             .map(|(_, group)| group.map(|i| writes[i]).collect())
             .collect()
     }
-    pub fn gpu_buffer<Attribute: AttributeExtractor<RequestData>>(&self) -> &wgpu::Buffer {
+    pub fn gpu_buffer<Attribute: AttributeHandler<RequestData>>(&self) -> &wgpu::Buffer {
         &self
             .container
             .get_resource::<GpuBuffer<Attribute>>()
