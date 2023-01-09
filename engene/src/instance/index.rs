@@ -66,4 +66,5 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> IndexHandler<Key> {
     pub(crate) fn get_index(&self, key: Key) -> Option<Index> {
         self.indices.get(&key).copied()
     }
+    pub(crate) fn grow(&mut self, growth_factor: usize) {}
 }

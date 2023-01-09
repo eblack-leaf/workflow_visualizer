@@ -58,7 +58,15 @@ pub fn startup(canvas: Res<Canvas>, mut cmd: Commands) {
 }
 pub fn prepare(canvas: Res<Canvas>, mut renderer: ResMut<TextRenderer>) {
     renderer.prepare_rasterization(&canvas);
-    renderer.coordinator.coordinate();
+    renderer.coordinator.start_processing();
+    renderer.coordinator.process_attribute::<Position>(&canvas);
+    renderer.coordinator.process_attribute::<Area>(&canvas);
+    renderer.coordinator.process_attribute::<Depth>(&canvas);
+    renderer.coordinator.process_attribute::<Color>(&canvas);
+    renderer
+        .coordinator
+        .process_attribute::<rasterization::Descriptor>(&canvas);
+    renderer.coordinator.finish_processing();
 }
 impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {

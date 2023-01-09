@@ -63,7 +63,7 @@ impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync 
 
 pub trait AttributeExtractor<Request>
 where
-    Self: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
+    Self: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
 {
     fn extract(request: &Request) -> Self;
 }
