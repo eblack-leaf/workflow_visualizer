@@ -141,11 +141,11 @@ impl<
         device: &wgpu::Device,
     ) {
         self.container
-            .insert_resource(attribute::CpuBuffer::<Attribute>::new(self.max()));
+            .insert_resource(CpuBuffer::<Attribute>::new(self.max()));
         self.container
-            .insert_resource(attribute::gpu_buffer::<Attribute>(device, self.max()));
+            .insert_resource(GpuBuffer::<Attribute>::new(device, self.max()));
     }
-    pub fn start_processing(&mut self) {
+    pub fn start(&mut self) {
         for key in self.remove_handler.removes.iter() {
             let removed_index = self.index_handler.remove(key);
             if let Some(index) = removed_index {
@@ -168,10 +168,12 @@ impl<
             self.growth.new_max.replace(self.index_handler.max());
         }
     }
-    pub fn process_attribute<Attribute: AttributeExtractor<RequestData>>(
-        &mut self,
-        canvas: &Canvas,
-    ) {
+    fn cpu_buffer<Attribute: AttributeExtractor<RequestData>>(&self) -> &CpuBuffer<Attribute> {
+        self.container
+            .get_resource::<CpuBuffer<Attribute>>()
+            .expect("no cpu buffer attached")
+    }
+    pub fn prepare<Attribute: AttributeExtractor<RequestData>>(&mut self, canvas: &Canvas) {
         // iter cache checks
         for key in self.cache_check_requests.requests.iter() {
             let cached_value = *self
@@ -198,8 +200,35 @@ impl<
                 self.write_requests.requests.insert(*key);
             }
         }
-        if let Some(new_size) = self.growth.new_max {
+        if let Some(new_max) = self.growth.new_max {
             // grown so remake buffer and write all cpu write requests then gpu all cpu
+            self.container
+                .insert_resource(GpuBuffer::<Attribute>::new(&canvas.device, new_max));
+            for key in self.write_requests.requests.iter() {
+                // write to cpu
+                let index = self
+                    .index_handler
+                    .get_index(*key)
+                    .expect("no index for key");
+                let attribute = Attribute::extract(
+                    &self
+                        .request_handler
+                        .requests
+                        .get(key)
+                        .expect("no request data")
+                        .data,
+                );
+                self.container
+                    .get_resource_mut::<CpuBuffer<Attribute>>()
+                    .expect("no cpu buffer attached")
+                    .buffer
+                    .insert(index.value, attribute);
+            }
+            canvas.queue.write_buffer(
+                self.gpu_buffer::<Attribute>(),
+                0,
+                bytemuck::cast_slice(&self.cpu_buffer::<Attribute>().buffer),
+            );
         } else {
             // iter write requests to resolve writes
             let mut writes = Vec::<(Index, Attribute)>::new();
@@ -233,26 +262,27 @@ impl<
                     .map(|write| -> Attribute { write.1 })
                     .collect::<Vec<Attribute>>();
                 // write to gpu_buffer
+                canvas.queue.write_buffer(
+                    self.gpu_buffer::<Attribute>(),
+                    offset as wgpu::BufferAddress,
+                    bytemuck::cast_slice(&attributes),
+                );
             }
         }
     }
-    pub fn finish_processing(&mut self) {
+    pub fn finish(&mut self) {
         // clear and reset
+        self.growth.new_max.take();
+        self.request_handler.requests.clear();
+        self.remove_handler.removes.clear();
+        self.write_requests.requests.clear();
+        self.null_requests.requests.clear();
+        self.cache_check_requests.requests.clear();
     }
     fn combine<Attribute: AttributeExtractor<RequestData>>(
         mut writes: Vec<(Index, Attribute)>,
     ) -> Vec<Vec<(Index, Attribute)>> {
-        writes.sort_by(|lhs, rhs| -> Ordering {
-            let right_index = rhs.0.value;
-            let left_index = lhs.0.value;
-            if left_index < right_index {
-                return Ordering::Less;
-            }
-            if left_index > right_index {
-                return Ordering::Greater;
-            }
-            Ordering::Equal
-        });
+        writes.sort_by(|lhs, rhs| -> Ordering { lhs.0.value.cmp(&rhs.0.value) });
         (&(0..writes.len()).group_by(|&i| writes[i].0.value - i))
             .into_iter()
             .map(|(_, group)| group.map(|i| writes[i]).collect())

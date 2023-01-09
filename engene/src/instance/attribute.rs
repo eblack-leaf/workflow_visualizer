@@ -12,26 +12,19 @@ pub(crate) struct GpuBuffer<
 impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
     GpuBuffer<Attribute>
 {
-    pub(crate) fn new(buffer: wgpu::Buffer) -> Self {
+    pub(crate) fn new(device: &wgpu::Device, max_instances: usize) -> Self {
         Self {
-            buffer,
+            buffer: {
+                device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some("attribute buffer"),
+                    size: attribute_size::<Attribute>(max_instances) as BufferAddress,
+                    usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                })
+            },
             _phantom_data: PhantomData,
         }
     }
-}
-
-pub(crate) fn gpu_buffer<
-    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    device: &wgpu::Device,
-    max_instances: usize,
-) -> GpuBuffer<Attribute> {
-    GpuBuffer::new(device.create_buffer(&wgpu::BufferDescriptor {
-        label: Some("attribute buffer"),
-        size: attribute_size::<Attribute>(max_instances) as BufferAddress,
-        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-        mapped_at_creation: false,
-    }))
 }
 
 pub(crate) fn attribute_size<
