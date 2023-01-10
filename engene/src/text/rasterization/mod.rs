@@ -75,7 +75,7 @@ impl RasterizationHandler {
             .decrement()
     }
     pub(crate) fn prepare(&mut self, canvas: &Canvas) {
-        request::rasterize(self);
+        request::request(self);
         resolve::resolve(self);
         write::write(self);
     }

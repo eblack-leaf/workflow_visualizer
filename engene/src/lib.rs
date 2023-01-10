@@ -9,6 +9,7 @@ mod task;
 mod text;
 mod theme;
 mod uniform;
+mod icon;
 
 use crate::canvas::CanvasWindow;
 pub use crate::canvas::{Canvas, CanvasOptions};

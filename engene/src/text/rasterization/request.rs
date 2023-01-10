@@ -18,7 +18,7 @@ impl Request {
         }
     }
 }
-pub(crate) fn rasterize(rasterization: &mut RasterizationHandler) {
+pub(crate) fn request(rasterization: &mut RasterizationHandler) {
     for request in rasterization.requests.iter() {
         if !rasterization.cached_glyphs.contains_key(&request.glyph) {
             rasterization
