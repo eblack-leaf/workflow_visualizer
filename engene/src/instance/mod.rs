@@ -79,11 +79,11 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CacheChe
 }
 // track what keys coordinator user uses to send removes / requests appropriately
 #[derive(Component, Resource)]
-pub(crate) struct CachedKeys<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
-    pub(crate) used_keys: HashSet<Key>,
+pub struct CachedKeys<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
+    pub used_keys: HashSet<Key>,
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CachedKeys<Key> {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             used_keys: HashSet::new(),
         }

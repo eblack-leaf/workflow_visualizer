@@ -2,6 +2,7 @@ mod canvas;
 mod color;
 #[allow(unused)]
 mod coord;
+mod icon;
 mod instance;
 mod render;
 mod task;
@@ -9,7 +10,6 @@ mod task;
 mod text;
 mod theme;
 mod uniform;
-mod icon;
 
 use crate::canvas::CanvasWindow;
 pub use crate::canvas::{Canvas, CanvasOptions};

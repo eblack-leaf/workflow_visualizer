@@ -1,4 +1,5 @@
 mod attribute;
+mod component;
 mod font;
 mod pipeline;
 mod rasterization;
