@@ -47,8 +47,8 @@ fn fragment_entry(
     let rasterization_px = fragment_input.position - vec4<f32>(fragment_input.instance_position.xy, 0.0, 0.0);
     let row_index = rasterization_px.y * f32(fragment_input.instance_rasterization_descriptor.y);
     let rasterization_offset = row_index + rasterization_px.x;
-    let coverage = glyph_rasterization[u32(rasterization_offset)];
-    let normalized_coverage = coverage / 255u;
-    let coverage_applied_color = vec4<f32>(fragment_input.color.rgb, fragment_input.color.a * f32(normalized_coverage));
+    let coverage = f32(glyph_rasterization[u32(rasterization_offset)]);
+    let normalized_coverage = coverage / 255;
+    let coverage_applied_color = vec4<f32>(fragment_input.color.rgb, fragment_input.color.a * normalized_coverage);
     return coverage_applied_color;
 }
