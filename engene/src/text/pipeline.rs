@@ -1,12 +1,15 @@
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
 use crate::text::rasterization;
-use crate::text::rasterization::{Descriptor, Handler};
+use crate::text::rasterization::{PlacementDescriptor, RasterizationHandler};
 use crate::text::vertex::Vertex;
 use crate::Canvas;
 use wgpu::{include_wgsl, VertexAttribute, VertexFormat};
 
-pub(crate) fn pipeline(canvas: &Canvas, rasterization: &Handler) -> wgpu::RenderPipeline {
+pub(crate) fn pipeline(
+    canvas: &Canvas,
+    rasterization: &RasterizationHandler,
+) -> wgpu::RenderPipeline {
     let shader = canvas
         .device
         .create_shader_module(include_wgsl!("text.wgsl"));
@@ -71,7 +74,7 @@ pub(crate) fn pipeline(canvas: &Canvas, rasterization: &Handler) -> wgpu::Render
                             }],
                         },
                         wgpu::VertexBufferLayout {
-                            array_stride: std::mem::size_of::<rasterization::Descriptor>()
+                            array_stride: std::mem::size_of::<rasterization::PlacementDescriptor>()
                                 as wgpu::BufferAddress,
                             step_mode: wgpu::VertexStepMode::Instance,
                             attributes: &[VertexAttribute {

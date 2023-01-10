@@ -6,10 +6,10 @@ use crate::text::{rasterization, GlyphHash};
 pub struct RequestData {
     pub character: char,
     pub scale: Scale,
-    pub hash: GlyphHash,
+    pub glyph: GlyphHash,
     pub position: Position,
     pub area: Area,
     pub depth: Depth,
     pub color: Color,
-    pub descriptor: Option<rasterization::Descriptor>,
+    pub placement_descriptor: Option<rasterization::PlacementDescriptor>,
 }

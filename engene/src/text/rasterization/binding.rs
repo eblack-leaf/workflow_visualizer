@@ -6,7 +6,6 @@ pub(crate) struct Binding {
     pub(crate) bind_group: wgpu::BindGroup,
     pub(crate) bind_group_layout: wgpu::BindGroupLayout,
     pub(crate) gpu_len: usize,
-    pub(crate) growth_factor: usize,
 }
 
 impl Binding {
@@ -46,7 +45,6 @@ impl Binding {
             bind_group,
             bind_group_layout,
             gpu_len: 0,
-            growth_factor: 256,
         }
     }
 

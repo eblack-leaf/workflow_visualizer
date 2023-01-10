@@ -30,9 +30,11 @@ impl Font {
         0
     }
 }
-pub fn font() -> Font {
-    Font::new(
-        "/home/omi-voshuli/Desktop/note-ifications/focal/fonts/JetBrainsMono-Medium.ttf",
-        13u32,
-    )
+impl Default for Font {
+    fn default() -> Self {
+        Font::new(
+            "/home/omi-voshuli/Desktop/note-ifications/focal/fonts/JetBrainsMono-Medium.ttf",
+            13u32,
+        )
+    }
 }

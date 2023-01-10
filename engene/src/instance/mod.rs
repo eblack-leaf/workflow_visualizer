@@ -101,7 +101,7 @@ impl Growth {
         }
     }
 }
-pub struct Coordinator<
+pub struct BufferCoordinator<
     Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
     RequestData: Send + Sync + 'static,
 > {
@@ -120,7 +120,7 @@ pub struct Coordinator<
 impl<
         Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
         RequestData: Send + Sync + 'static,
-    > Coordinator<Key, RequestData>
+    > BufferCoordinator<Key, RequestData>
 {
     pub fn new(max: usize) -> Self {
         Self {

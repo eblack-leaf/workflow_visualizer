@@ -36,9 +36,11 @@ impl AttributeHandler<RequestData> for Color {
         Self::default()
     }
 }
-impl AttributeHandler<RequestData> for rasterization::Descriptor {
+impl AttributeHandler<RequestData> for rasterization::PlacementDescriptor {
     fn extract(request: &RequestData) -> Self {
-        request.descriptor.expect("no descriptor attached")
+        request
+            .placement_descriptor
+            .expect("no descriptor attached")
     }
     fn null() -> Self {
         Self::default()

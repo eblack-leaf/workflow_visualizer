@@ -1,10 +1,10 @@
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable, Default, PartialEq)]
-pub struct Descriptor {
+pub struct PlacementDescriptor {
     pub parts: [u32; 3],
 }
 
-impl Descriptor {
+impl PlacementDescriptor {
     pub fn new(start: u32, row_size: u32, rows: u32) -> Self {
         Self {
             parts: [start, row_size, rows],
