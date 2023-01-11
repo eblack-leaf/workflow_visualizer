@@ -1,7 +1,9 @@
 mod attribute;
+mod cache;
 mod index;
 mod key;
 
+pub use crate::instance::attribute::AttributeUpdates;
 pub(crate) use crate::instance::attribute::{CpuBuffer, GpuBuffer};
 use crate::instance::index::Index;
 use crate::task::Container;
@@ -15,31 +17,37 @@ use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::marker::PhantomData;
-pub struct Request<RequestData: Send + Sync + 'static> {
+#[derive(Clone)]
+pub struct Request<RequestData: Send + Sync + Clone + 'static> {
     pub data: RequestData,
 }
-pub(crate) struct RequestHandler<
+impl<RequestData: Send + Sync + Clone + 'static> Request<RequestData> {
+    pub fn new(data: RequestData) -> Self {
+        Self { data }
+    }
+}
+pub struct RequestHandler<
     Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-    RequestData: Send + Sync + 'static,
+    RequestData: Send + Sync + Clone + 'static,
 > {
-    pub(crate) requests: HashMap<Key, Request<RequestData>>,
+    pub requests: HashMap<Key, Request<RequestData>>,
 }
 impl<
         Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-        Request: Send + Sync + 'static,
+        Request: Send + Sync + Clone + 'static,
     > RequestHandler<Key, Request>
 {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             requests: HashMap::new(),
         }
     }
 }
-pub(crate) struct RemoveHandler<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
-    pub(crate) removes: HashSet<Key>,
+pub struct RemoveHandler<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
+    pub removes: HashSet<Key>,
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> RemoveHandler<Key> {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             removes: HashSet::new(),
         }
@@ -103,7 +111,7 @@ impl Growth {
 }
 pub struct BufferCoordinator<
     Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-    RequestData: Send + Sync + 'static,
+    RequestData: Send + Sync + Clone + 'static,
 > {
     // open slot policy - nullable - shrink occasionally
     pub(crate) container: Container,
@@ -119,7 +127,7 @@ pub struct BufferCoordinator<
 }
 impl<
         Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-        RequestData: Send + Sync + 'static,
+        RequestData: Send + Sync + Clone + 'static,
     > BufferCoordinator<Key, RequestData>
 {
     pub fn new(max: usize) -> Self {

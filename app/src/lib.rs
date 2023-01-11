@@ -1,8 +1,14 @@
-use engene::{CanvasOptions, Engen, Task, TextRenderer};
+use engene::{CanvasOptions, Color, Depth, Engen, Position, Scale, Task, Text, TextBundle, TextRenderer, Theme};
 
 pub fn task() -> Task {
-    let task = Task::new();
-    // ...
+    let mut task = Task::new();
+    task.container.spawn(TextBundle::new(
+        Text::new("a".to_string()),
+        Scale::new(13f32),
+        Position::new(10f32, 10f32),
+        Depth::new(0f32),
+        Color::default(),
+    ));
     task
 }
 #[cfg_attr(
@@ -12,6 +18,7 @@ pub fn task() -> Task {
 pub fn launch() {
     let mut engen = Engen::new(task());
     engen.set_canvas_options(CanvasOptions::default());
+    engen.set_theme(Theme::default());
     engen.attach::<TextRenderer>();
     // ...
     engen.launch();

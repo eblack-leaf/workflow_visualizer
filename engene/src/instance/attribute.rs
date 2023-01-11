@@ -1,4 +1,6 @@
 use bevy_ecs::prelude::Resource;
+use std::collections::HashMap;
+use std::hash::Hash;
 use std::marker::PhantomData;
 use wgpu::BufferAddress;
 #[derive(Resource)]
@@ -53,7 +55,24 @@ impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync 
         }
     }
 }
-
+#[derive(Resource)]
+pub struct AttributeUpdates<
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+> {
+    pub updates: HashMap<Key, Attribute>,
+}
+impl<
+        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    > AttributeUpdates<Key, Attribute>
+{
+    pub fn new() -> Self {
+        Self {
+            updates: HashMap::new(),
+        }
+    }
+}
 pub trait AttributeHandler<Request>
 where
     Self: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,

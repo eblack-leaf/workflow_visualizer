@@ -5,9 +5,11 @@ pub struct PlacementDescriptor {
 }
 
 impl PlacementDescriptor {
-    pub fn new(start: u32, row_size: u32, rows: u32) -> Self {
+    pub fn new(start: usize, glyph_width: usize, glyph_height: usize) -> Self {
+        let row_size = glyph_width;
+        let rows = glyph_width * glyph_height / row_size;
         Self {
-            parts: [start, row_size, rows],
+            parts: [start as u32, row_size as u32, rows as u32],
         }
     }
     pub fn start(&self) -> u32 {

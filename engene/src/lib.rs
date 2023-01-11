@@ -13,14 +13,18 @@ mod uniform;
 
 use crate::canvas::CanvasWindow;
 pub use crate::canvas::{Canvas, CanvasOptions};
+pub use crate::color::Color;
+pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{ExtractCalls, Render, RenderCalls};
 pub use crate::task::Task;
 use crate::task::WorkloadId;
-pub use crate::text::TextRenderer;
+pub use crate::text::{Delete, Scale, Text, TextBundle, TextRenderer};
 use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
+pub use crate::theme::Theme;
+
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }
@@ -49,6 +53,9 @@ impl Engen {
     }
     pub fn set_canvas_options(&mut self, options: CanvasOptions) {
         self.render.container.insert_resource(options);
+    }
+    pub fn set_theme(&mut self, theme: Theme) {
+        self.render.container.insert_resource(theme);
     }
     fn attach_event_loop(&mut self, event_loop: EventLoop<()>) {
         self.event_loop.replace(event_loop);

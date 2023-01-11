@@ -33,7 +33,7 @@ impl Font {
 impl Default for Font {
     fn default() -> Self {
         Font::new(
-            "/home/omi-voshuli/Desktop/note-ifications/focal/fonts/JetBrainsMono-Medium.ttf",
+            "/home/omi-voshuli/Desktop/note-ifications/engene/fonts/JetBrainsMono-Medium.ttf",
             13u32,
         )
     }

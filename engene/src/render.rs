@@ -6,7 +6,7 @@ pub enum RenderPhase {
     Opaque,
     Alpha,
 }
-pub(crate) fn call_extract<Renderer: Render>(compute: &Task, render: &mut Task) {
+pub(crate) fn call_extract<Renderer: Render>(compute: &mut Task, render: &mut Task) {
     Renderer::extract(compute, render);
 }
 pub(crate) fn call_render<'a, Renderer: Render + Resource>(
@@ -48,18 +48,18 @@ impl RenderCalls {
     }
 }
 pub(crate) struct ExtractCalls {
-    pub(crate) fns: Vec<Box<fn(&Task, &mut Task)>>,
+    pub(crate) fns: Vec<Box<fn(&mut Task, &mut Task)>>,
 }
 impl ExtractCalls {
     pub(crate) fn new() -> Self {
         Self { fns: Vec::new() }
     }
-    pub(crate) fn add(&mut self, caller: fn(&Task, &mut Task)) {
+    pub(crate) fn add(&mut self, caller: fn(&mut Task, &mut Task)) {
         self.fns.push(Box::new(caller));
     }
 }
 pub trait Render {
-    fn extract(compute: &Task, render: &mut Task)
+    fn extract(compute: &mut Task, render: &mut Task)
     where
         Self: Sized;
     fn phase() -> RenderPhase;
@@ -67,7 +67,7 @@ pub trait Render {
 }
 pub(crate) fn extract(engen: &mut Engen) {
     for caller in engen.extract_calls.fns.iter_mut() {
-        caller(&engen.compute, &mut engen.render);
+        caller(&mut engen.compute, &mut engen.render);
     }
 }
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);

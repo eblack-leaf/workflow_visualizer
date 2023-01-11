@@ -1,7 +1,10 @@
 use crate::text::rasterization;
+use crate::text::rasterization::bytes;
+use crate::Canvas;
 
 pub(crate) struct Binding {
     pub(crate) cpu: Vec<u32>,
+    pub(crate) write: Vec<u32>,
     pub(crate) gpu: wgpu::Buffer,
     pub(crate) bind_group: wgpu::BindGroup,
     pub(crate) bind_group_layout: wgpu::BindGroupLayout,
@@ -9,6 +12,30 @@ pub(crate) struct Binding {
 }
 
 impl Binding {
+    pub(crate) fn write_queued(&mut self, canvas: &Canvas) {
+        // handle grow here
+        let projected_size = bytes(self.write.len()) + self.gpu_len;
+        if projected_size > self.gpu.size() as usize {
+            self.cpu.extend(&self.write);
+            self.gpu = Self::buffer(&canvas.device, projected_size);
+            canvas
+                .queue
+                .write_buffer(&self.gpu, 0, bytemuck::cast_slice(&self.cpu));
+        } else {
+            canvas.queue.write_buffer(
+                &self.gpu,
+                bytes(self.cpu.len()) as wgpu::BufferAddress,
+                bytemuck::cast_slice(&self.write),
+            );
+            self.cpu.extend(&self.write);
+        }
+        self.write.clear();
+        self.gpu_len = bytes(self.cpu.len());
+    }
+    pub(crate) fn queue_bitmap(&mut self, bitmap: Vec<u32>) -> usize {
+        self.write.extend(bitmap);
+        return self.cpu.len() + self.write.len();
+    }
     pub(crate) fn new(device: &wgpu::Device, num_elements: usize) -> Self {
         let size = rasterization::bytes(num_elements);
         let mut cpu = Vec::new();
@@ -41,6 +68,7 @@ impl Binding {
         });
         Self {
             cpu,
+            write: Vec::new(),
             gpu,
             bind_group,
             bind_group_layout,

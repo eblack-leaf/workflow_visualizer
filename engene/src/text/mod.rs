@@ -1,5 +1,6 @@
 mod attribute;
 mod component;
+mod extractor;
 mod font;
 mod pipeline;
 mod rasterization;
@@ -13,8 +14,11 @@ use crate::coord::{Area, Depth, Position};
 use crate::instance::EntityKey;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::task::Stage;
+use crate::text::component::{delete, emit_requests};
+pub use crate::text::component::{Delete, Text, TextBundle};
+use crate::text::extractor::Extractor;
 use crate::text::font::Font;
-use crate::text::scale::Scale;
+pub use crate::text::scale::Scale;
 use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::{instance, Attach, Canvas, Engen, Task};
 use bevy_ecs::prelude::{Commands, Res, ResMut, Resource};
@@ -50,7 +54,7 @@ impl TextRenderer {
                 coordinator.setup_attribute::<Area>(&canvas.device);
                 coordinator.setup_attribute::<Depth>(&canvas.device);
                 coordinator.setup_attribute::<Color>(&canvas.device);
-                coordinator.setup_attribute::<rasterization::PlacementDescriptor>(&canvas.device);
+                coordinator.setup_attribute::<PlacementDescriptor>(&canvas.device);
                 coordinator
             },
             vertex_buffer: vertex::buffer(&canvas.device),
@@ -60,6 +64,7 @@ impl TextRenderer {
 }
 pub fn compute_startup(mut cmd: Commands) {
     cmd.insert_resource(Font::default());
+    cmd.insert_resource(Extractor::new());
 }
 pub fn startup(canvas: Res<Canvas>, mut cmd: Commands) {
     cmd.insert_resource(TextRenderer::new(&canvas));
@@ -73,7 +78,7 @@ pub fn prepare(canvas: Res<Canvas>, mut renderer: ResMut<TextRenderer>) {
     renderer.buffer_coordinator.prepare::<Color>(&canvas);
     renderer
         .buffer_coordinator
-        .prepare::<rasterization::PlacementDescriptor>(&canvas);
+        .prepare::<PlacementDescriptor>(&canvas);
     renderer.buffer_coordinator.finish();
 }
 impl Attach for TextRenderer {
@@ -83,6 +88,16 @@ impl Attach for TextRenderer {
             .startup
             .schedule
             .add_system_to_stage(Stage::During, compute_startup);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, delete);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Last, emit_requests);
         engen
             .render
             .startup
@@ -96,11 +111,54 @@ impl Attach for TextRenderer {
     }
 }
 impl Render for TextRenderer {
-    fn extract(compute: &Task, render: &mut Task)
+    fn extract(compute: &mut Task, render: &mut Task)
     where
         Self: Sized,
     {
-        todo!()
+        let requests = compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .request_handler
+            .requests
+            .clone();
+        render
+            .container
+            .get_resource_mut::<TextRenderer>()
+            .expect("no text renderer attached")
+            .buffer_coordinator
+            .request_handler
+            .requests
+            .extend(requests);
+        compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .request_handler
+            .requests
+            .clear();
+        let removals = compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .remove_handler
+            .removes
+            .clone();
+        render
+            .container
+            .get_resource_mut::<TextRenderer>()
+            .expect("")
+            .buffer_coordinator
+            .remove_handler
+            .removes
+            .extend(removals);
+        compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .remove_handler
+            .removes
+            .clear();
     }
 
     fn phase() -> RenderPhase {
@@ -134,7 +192,7 @@ impl Render for TextRenderer {
         render_pass_handle.0.set_vertex_buffer(
             5,
             self.buffer_coordinator
-                .gpu_buffer::<rasterization::PlacementDescriptor>()
+                .gpu_buffer::<PlacementDescriptor>()
                 .slice(..),
         );
         if self.buffer_coordinator.has_instances() {
