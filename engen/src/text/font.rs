@@ -1,23 +1,27 @@
-use crate::text::scale::Scale;
+use std::ops::Deref;
+use std::path::Path;
+
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
-use std::path::Path;
+
+use crate::text::scale::Scale;
 
 #[derive(Resource)]
 pub struct Font {
     pub font_storage: [fdFont; 1],
 }
+
 impl Font {
-    pub fn new<V: AsRef<Path>, T: Into<Scale>>(path: V, opt_scale: T) -> Self {
+    pub fn new<Data: Deref<Target=[u8]>, T: Into<Scale>>(font_data: Data, opt_scale: T) -> Self {
         Self {
             font_storage: [fdFont::from_bytes(
-                std::fs::read(path).expect("invalid font path read"),
+                font_data,
                 FontSettings {
                     scale: opt_scale.into().scale,
                     ..FontSettings::default()
                 },
             )
-            .expect("text font creation")],
+                .expect("text font creation")],
         }
     }
     pub fn font_slice(&self) -> &[fdFont] {
@@ -29,10 +33,17 @@ impl Font {
     pub fn index() -> usize {
         0
     }
+    pub fn advance_width(&self, character: char, scale: f32) -> f32 {
+        let metrics = self.font().metrics(character, scale);
+        metrics.advance_width
+    }
 }
-pub fn font() -> Font {
-    Font::new(
-        "/home/omi-voshuli/Desktop/note-ifications/focal/fonts/JetBrainsMono-Medium.ttf",
-        13u32,
-    )
+
+impl Default for Font {
+    fn default() -> Self {
+        Font::new(
+            include_bytes!("./JetBrainsMono-Medium.ttf").as_slice(),
+            15u32,
+        )
+    }
 }

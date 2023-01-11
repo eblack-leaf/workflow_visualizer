@@ -1,73 +1,93 @@
-use crate::text::font::{font, Font};
-use crate::text::rasterization::descriptor::GlyphDescriptor;
-pub(crate) use crate::text::rasterization::descriptor::{place, Descriptor, DescriptorRequest};
-pub(crate) use crate::text::rasterization::rasterize::{rasterize, Add, Glyph, GlyphHash};
-use crate::text::rasterization::references::References;
-use crate::text::InstanceCoordinator;
-pub(crate) use buffer::{write, Buffer};
-pub(crate) use references::{get_reference, resolve};
-pub(crate) use remove::{remove, Remove};
+use crate::text::{GlyphOffset, TextBufferCoordinator};
+use bevy_ecs::prelude::Resource;
+pub(crate) use binding::Binding;
 use std::collections::{HashMap, HashSet};
 
-mod buffer;
-mod descriptor;
-mod rasterize;
-mod references;
-mod remove;
+mod binding;
+mod glyph;
+mod placement;
+mod request;
+mod resolve;
+mod write;
 
-pub(crate) struct Rasterization {
-    pub(crate) buffer: Buffer,
-    pub(crate) adds: Vec<Add>,
-    pub(crate) removes: Vec<Remove>,
-    pub(crate) swapped_glyphs: HashSet<GlyphHash>,
-    pub(crate) glyphs: HashMap<GlyphHash, Glyph>,
-    pub(crate) retain_glyphs: HashSet<GlyphHash>,
-    pub(crate) descriptors: Vec<GlyphDescriptor>,
-    pub(crate) descriptor_order: HashMap<GlyphHash, usize>,
-    pub(crate) descriptor_requests: Vec<DescriptorRequest>,
-    pub(crate) references: References,
-    pub(crate) font: Font,
-    pub(crate) write: Vec<u32>,
+use crate::instance::EntityKey;
+use crate::text::font::Font;
+use crate::text::rasterization::glyph::{GlyphReference, RasterizedGlyph};
+use crate::text::rasterization::request::Request;
+use crate::text::GlyphHash;
+use crate::Canvas;
+pub(crate) use placement::PlacementDescriptor;
+
+pub(crate) fn bytes(num: usize) -> usize {
+    num * std::mem::size_of::<u32>()
 }
-impl Rasterization {
-    pub fn new(device: &wgpu::Device) -> Self {
+pub(crate) struct RasterizationHandler {
+    pub(crate) binding: Binding,
+    pub(crate) requests: Vec<Request>,
+    pub(crate) placement_descriptors: HashMap<GlyphHash, PlacementDescriptor>,
+    pub(crate) references: HashMap<GlyphHash, GlyphReference>,
+    pub(crate) keyed_glyphs: HashMap<EntityKey<GlyphOffset>, GlyphHash>,
+    pub(crate) font: Font,
+    pub(crate) cached_rasterized_glyphs: HashMap<GlyphHash, RasterizedGlyph>,
+    pub(crate) write_requests: HashSet<GlyphHash>,
+    pub(crate) retain_glyphs: HashSet<GlyphHash>,
+}
+impl RasterizationHandler {
+    pub(crate) fn new(device: &wgpu::Device) -> Self {
         Self {
-            buffer: Buffer::new(device, 1024),
-            adds: Vec::new(),
-            removes: Vec::new(),
-            swapped_glyphs: HashSet::new(),
-            glyphs: HashMap::new(),
-            retain_glyphs: HashSet::new(),
-            descriptors: Vec::new(),
-            descriptor_order: HashMap::new(),
-            descriptor_requests: Vec::new(),
+            binding: Binding::new(device, 1024),
+            requests: Vec::new(),
+            placement_descriptors: HashMap::new(),
             references: HashMap::new(),
-            font: font(),
-            write: Vec::new(),
+            keyed_glyphs: HashMap::new(),
+            font: Font::default(),
+            cached_rasterized_glyphs: HashMap::new(),
+            write_requests: HashSet::new(),
+            retain_glyphs: HashSet::new(),
         }
     }
-}
-pub(crate) fn read_requests(rasterization: &mut Rasterization, coordinator: &InstanceCoordinator) {
-    for (_key, request) in coordinator.requests.iter() {
-        rasterization
-            .adds
-            .push(Add::new(request.hash, request.character, request.scale));
+    pub(crate) fn read_requests(&mut self, coordinator: &TextBufferCoordinator) {
+        for key in coordinator.remove_handler.removes.iter() {
+            if let Some(glyph) = self.keyed_glyphs.get(key).copied() {
+                self.keyed_glyphs.remove(key);
+                self.decrement_reference(&glyph);
+            }
+        }
+        for (key, request) in coordinator.request_handler.requests.iter() {
+            let old = self.keyed_glyphs.insert(*key, request.data.glyph_hash);
+            if let Some(glyph_hash) = old {
+                if request.data.glyph_hash == glyph_hash {
+                    continue;
+                }
+                self.decrement_reference(&glyph_hash);
+            }
+            self.requests.push(Request::new(
+                request.data.glyph_hash,
+                request.data.character,
+                request.data.scale,
+            ));
+        }
     }
-}
-pub(crate) fn integrate_placements(
-    rasterization: &Rasterization,
-    coordinator: &mut InstanceCoordinator,
-) {
-    for (_key, request) in coordinator.requests.iter_mut() {
-        let index = *rasterization
-            .descriptor_order
-            .get(&request.hash)
-            .expect("no index for rasterization");
-        let descriptor = rasterization
-            .descriptors
-            .get(index)
-            .expect("no descriptor for hash")
-            .descriptor;
-        request.descriptor.replace(descriptor);
+
+    fn decrement_reference(&mut self, glyph_hash: &GlyphHash) {
+        self.references
+            .get_mut(&glyph_hash)
+            .expect("no reference count for glyph")
+            .decrement()
+    }
+    pub(crate) fn prepare(&mut self, canvas: &Canvas) {
+        request::request(self);
+        resolve::resolve(self);
+        write::write(self, canvas);
+    }
+    pub(crate) fn integrate_requests(&self, coordinator: &mut TextBufferCoordinator) {
+        for (_key, mut request) in coordinator.request_handler.requests.iter_mut() {
+            request.data.placement_descriptor.replace(
+                *self
+                    .placement_descriptors
+                    .get(&request.data.glyph_hash)
+                    .expect("no placement descriptor for requested glyph hash"),
+            );
+        }
     }
 }

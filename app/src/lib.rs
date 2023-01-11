@@ -1,19 +1,20 @@
-use engene::{CanvasOptions, Color, Depth, Engen, Position, Scale, Task, Text, TextBundle, TextRenderer, Theme};
+use engen::{CanvasOptions, Color, Depth, Engen, Position, Scale, Task, Text, TextBundle, TextRenderer, Theme};
 
 pub fn task() -> Task {
     let mut task = Task::new();
     task.container.spawn(TextBundle::new(
         Text::new("a".to_string()),
-        Scale::new(13f32),
+        Scale::new(60f32),
         Position::new(10f32, 10f32),
         Depth::new(0f32),
         Color::default(),
     ));
     task
 }
+
 #[cfg_attr(
-    target_os = "android",
-    ndk_glue::main(backtrace = "on", logger(level = "debug"))
+target_os = "android",
+ndk_glue::main(backtrace = "on", logger(level = "debug"))
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());

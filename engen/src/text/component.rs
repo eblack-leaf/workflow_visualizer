@@ -1,12 +1,14 @@
+use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, Res, ResMut};
+use fontdue::layout::{CoordinateSystem, TextStyle};
+
 use crate::color::Color;
 use crate::coord::{Depth, Position};
 use crate::instance::{CachedKeys, EntityKey, Request};
+use crate::text::{GlyphOffset, RequestData};
 use crate::text::extractor::Extractor;
 use crate::text::font::Font;
 use crate::text::scale::Scale;
-use crate::text::{GlyphOffset, RequestData};
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, Res, ResMut};
-use fontdue::layout::{CoordinateSystem, TextStyle};
+
 #[derive(Bundle)]
 pub struct TextBundle {
     pub text: Text,
@@ -17,6 +19,7 @@ pub struct TextBundle {
     pub placer: Placer,
     pub cached_keys: CachedKeys<EntityKey<GlyphOffset>>,
 }
+
 impl TextBundle {
     pub fn new(text: Text, scale: Scale, position: Position, depth: Depth, color: Color) -> Self {
         Self {
@@ -30,11 +33,13 @@ impl TextBundle {
         }
     }
 }
+
 #[derive(Component)]
 pub struct Text {
     pub string: String,
     pub(crate) updated: bool,
 }
+
 impl Text {
     pub fn new(string: String) -> Self {
         Self {
@@ -43,8 +48,10 @@ impl Text {
         }
     }
 }
+
 #[derive(Component)]
 pub struct Delete {}
+
 pub fn delete(
     text: Query<(Entity, &Text, &Delete, &CachedKeys<EntityKey<GlyphOffset>>)>,
     mut cmd: Commands,
@@ -58,10 +65,12 @@ pub fn delete(
         cmd.entity(entity).despawn();
     }
 }
+
 #[derive(Component)]
 pub struct Placer {
     pub layout: fontdue::layout::Layout,
 }
+
 impl Placer {
     pub fn new() -> Self {
         Self {
@@ -69,6 +78,7 @@ impl Placer {
         }
     }
 }
+
 pub fn emit_requests(
     mut text: Query<(
         Entity,
@@ -85,7 +95,7 @@ pub fn emit_requests(
 ) {
     // iterate placer glyphs ond see if cached keys has value for offset,
     for (entity, mut text, position, depth, scale, color, mut cached_keys, mut placer) in
-        text.iter_mut()
+    text.iter_mut()
     {
         if text.updated {
             text.updated = false;
@@ -97,11 +107,12 @@ pub fn emit_requests(
             for glyph in placer.layout.glyphs() {
                 let offset = GlyphOffset(glyph.byte_offset);
                 let key = EntityKey::new(entity, offset);
+                let position_x_offset = offset.0 as f32 * font.advance_width(glyph.parent, scale.px());
                 let request = Request::new(RequestData::new(
                     glyph.parent,
                     *scale,
                     glyph.key,
-                    *position,
+                    *position + (position_x_offset, 0f32).into(),
                     (glyph.width, glyph.height).into(),
                     *depth,
                     *color,

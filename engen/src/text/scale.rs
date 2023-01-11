@@ -4,6 +4,9 @@ pub struct Scale {
     pub scale: f32,
 }
 impl Scale {
+    pub fn new(scale: f32) -> Self {
+        Self { scale }
+    }
     pub fn px(&self) -> f32 {
         self.scale
     }

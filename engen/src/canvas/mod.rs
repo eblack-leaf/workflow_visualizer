@@ -1,8 +1,15 @@
-pub(crate) use crate::canvas::viewport::Viewport;
+mod options;
+mod viewport;
+pub use crate::canvas::options::CanvasOptions;
+pub use crate::canvas::viewport::Viewport;
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
-mod viewport;
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Resource)]
+pub struct CanvasWindow(pub Window);
+#[cfg(target_arch = "wasm32")]
+pub struct CanvasWindow(pub Window);
 #[derive(Resource)]
 pub struct Canvas {
     pub surface: wgpu::Surface,
@@ -12,7 +19,7 @@ pub struct Canvas {
     pub viewport: Viewport,
 }
 impl Canvas {
-    pub async fn new(window: &Window, options: LaunchOptions) -> Self {
+    pub async fn new(window: &Window, options: CanvasOptions) -> Self {
         let instance = wgpu::Instance::new(options.backends);
         let surface = unsafe { instance.create_surface(window) };
         let adapter = instance
@@ -64,6 +71,7 @@ impl Canvas {
         self.surface_configuration.height = height;
         self.viewport
             .adjust(&self.device, &self.queue, width, height);
+        self.surface.configure(&self.device, &self.surface_configuration);
     }
     pub(crate) fn surface_texture(&self) -> Option<SurfaceTexture> {
         let surface_texture = match self.surface.get_current_texture() {

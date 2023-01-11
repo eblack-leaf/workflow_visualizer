@@ -1,4 +1,5 @@
 use bevy_ecs::prelude::Resource;
+
 #[derive(Clone, Resource)]
 pub struct CanvasOptions {
     pub backends: wgpu::Backends,
@@ -8,6 +9,7 @@ pub struct CanvasOptions {
     pub limits: wgpu::Limits,
     pub present_mode: wgpu::PresentMode,
 }
+
 impl Default for CanvasOptions {
     fn default() -> Self {
         Self {
@@ -20,6 +22,7 @@ impl Default for CanvasOptions {
         }
     }
 }
+
 impl CanvasOptions {
     pub fn web_align(mut self) -> Self {
         self.backends = wgpu::Backends::all();

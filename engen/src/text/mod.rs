@@ -1,3 +1,6 @@
+mod attribute;
+mod component;
+mod extractor;
 mod font;
 mod pipeline;
 mod rasterization;
@@ -5,115 +8,198 @@ mod request;
 mod scale;
 mod vertex;
 
-use crate::canvas::{Canvas, Viewport};
+use crate::canvas::Viewport;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position};
-use crate::instance::Coordinator;
 use crate::instance::EntityKey;
-use crate::render::{Render, RenderPhase};
-use crate::text::pipeline::pipeline;
-use crate::text::rasterization::{GlyphHash, Rasterization};
-use crate::text::request::InstanceRequests;
+use crate::render::{Render, RenderPassHandle, RenderPhase};
+use crate::task::Stage;
+use crate::text::component::{delete, emit_requests};
+pub use crate::text::component::{Delete, Text, TextBundle};
+use crate::text::extractor::Extractor;
+use crate::text::font::Font;
 pub use crate::text::scale::Scale;
-use crate::text::vertex::GLYPH_AABB;
-use crate::{render, Launcher, Task};
-use bevy_ecs::prelude::SystemStage;
-pub use font::{font, Font};
-pub(crate) use request::{GlyphOffset, InstanceRequest};
-use wgpu::RenderPass;
+use crate::text::vertex::{Vertex, GLYPH_AABB};
+use crate::{instance, Attach, Canvas, Engen, Task};
+use bevy_ecs::prelude::{Commands, Res, ResMut, Resource};
+use rasterization::PlacementDescriptor;
+pub(crate) use request::RequestData;
 
-pub(crate) type InstanceCoordinator = Coordinator<EntityKey<GlyphOffset>, InstanceRequest>;
+pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
+#[derive(Eq, Hash, PartialEq, Copy, Clone)]
+pub struct GlyphOffset(pub usize);
+pub(crate) type TextBufferCoordinator =
+    instance::BufferCoordinator<EntityKey<GlyphOffset>, RequestData>;
+#[derive(Resource)]
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
-    pub(crate) rasterization: Rasterization,
+    pub(crate) buffer_coordinator: TextBufferCoordinator,
     pub(crate) vertex_buffer: wgpu::Buffer,
-    pub(crate) coordinator: InstanceCoordinator,
+    pub(crate) rasterization: rasterization::RasterizationHandler,
 }
-impl Render for TextRenderer {
-    fn phase() -> RenderPhase
-    where
-        Self: Sized,
-    {
-        RenderPhase::Alpha
+impl TextRenderer {
+    pub(crate) fn prepare_rasterization(&mut self, canvas: &Canvas) {
+        self.rasterization.read_requests(&self.buffer_coordinator);
+        self.rasterization.prepare(canvas);
+        self.rasterization
+            .integrate_requests(&mut self.buffer_coordinator);
     }
-    fn id() -> render::Id {
-        render::Id("text")
-    }
-    fn extract(&mut self, compute: &mut Task) {
-        self.coordinator.requests = compute
-            .job
-            .container
-            .get_resource_mut::<InstanceRequests>()
-            .expect("no instance requests")
-            .requests
-            .drain()
-            .collect();
-    }
-    fn prepare(&mut self, canvas: &Canvas) {
-        rasterization::read_requests(&mut self.rasterization, &self.coordinator);
-        rasterization::resolve(&mut self.rasterization);
-        rasterization::remove(&mut self.rasterization, canvas);
-        rasterization::rasterize(&mut self.rasterization);
-        rasterization::place(&mut self.rasterization);
-        rasterization::write(&mut self.rasterization, canvas);
-        rasterization::integrate_placements(&self.rasterization, &mut self.coordinator);
-        self.coordinator.prepare(&canvas.device);
-        self.coordinator.process_attribute(&canvas, |i| i.position);
-        self.coordinator.process_attribute(&canvas, |i| i.area);
-        self.coordinator.process_attribute(&canvas, |i| i.depth);
-        self.coordinator.process_attribute(&canvas, |i| i.color);
-        self.coordinator
-            .process_attribute(&canvas, |i| i.descriptor.unwrap());
-        self.coordinator.finish();
-    }
-    fn render<'a>(&'a self, render_pass: &mut RenderPass<'a>, viewport: &'a Viewport) {
-        render_pass.set_pipeline(&self.pipeline);
-        render_pass.set_bind_group(0, &viewport.bind_group, &[]);
-        render_pass.set_bind_group(1, &self.rasterization.buffer.bind_group, &[]);
-        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.set_vertex_buffer(1, self.coordinator.gpu_buffer::<Position>().slice(..));
-        render_pass.set_vertex_buffer(2, self.coordinator.gpu_buffer::<Area>().slice(..));
-        render_pass.set_vertex_buffer(3, self.coordinator.gpu_buffer::<Depth>().slice(..));
-        render_pass.set_vertex_buffer(4, self.coordinator.gpu_buffer::<Color>().slice(..));
-        render_pass.set_vertex_buffer(
-            5,
-            self.coordinator
-                .gpu_buffer::<rasterization::Descriptor>()
-                .slice(..),
-        );
-        if self.coordinator.current() > 0 {
-            render_pass.draw(
-                0..GLYPH_AABB.len() as u32,
-                0..self.coordinator.current() as u32,
-            );
+    pub(crate) fn new(canvas: &Canvas) -> Self {
+        let rasterization = rasterization::RasterizationHandler::new(&canvas.device);
+        Self {
+            pipeline: pipeline::pipeline(canvas, &rasterization),
+            buffer_coordinator: {
+                let mut coordinator = instance::BufferCoordinator::new(10);
+                coordinator.setup_attribute::<Position>(&canvas.device);
+                coordinator.setup_attribute::<Area>(&canvas.device);
+                coordinator.setup_attribute::<Depth>(&canvas.device);
+                coordinator.setup_attribute::<Color>(&canvas.device);
+                coordinator.setup_attribute::<PlacementDescriptor>(&canvas.device);
+                coordinator
+            },
+            vertex_buffer: vertex::buffer(&canvas.device),
+            rasterization,
         }
     }
-    fn instrument(&self, task: &mut Task) {
-        task.job.container.insert_resource(InstanceRequests::new());
-        task.job.container.insert_resource(font());
-        // replace with labeled stages of task so this can be last
-        task.job
-            .exec
-            .add_stage("text request", SystemStage::single(request::emit_requests));
+}
+pub fn compute_startup(mut cmd: Commands) {
+    cmd.insert_resource(Font::default());
+    cmd.insert_resource(Extractor::new());
+}
+pub fn startup(canvas: Res<Canvas>, mut cmd: Commands) {
+    cmd.insert_resource(TextRenderer::new(&canvas));
+}
+pub fn prepare(canvas: Res<Canvas>, mut renderer: ResMut<TextRenderer>) {
+    renderer.prepare_rasterization(&canvas);
+    renderer.buffer_coordinator.start();
+    renderer.buffer_coordinator.prepare::<Position>(&canvas);
+    renderer.buffer_coordinator.prepare::<Area>(&canvas);
+    renderer.buffer_coordinator.prepare::<Depth>(&canvas);
+    renderer.buffer_coordinator.prepare::<Color>(&canvas);
+    renderer
+        .buffer_coordinator
+        .prepare::<PlacementDescriptor>(&canvas);
+    renderer.buffer_coordinator.finish();
+}
+impl Attach for TextRenderer {
+    fn attach(engen: &mut Engen) {
+        engen
+            .compute
+            .startup
+            .schedule
+            .add_system_to_stage(Stage::During, compute_startup);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, delete);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Last, emit_requests);
+        engen
+            .render
+            .startup
+            .schedule
+            .add_system_to_stage(Stage::During, startup);
+        engen
+            .render
+            .main
+            .schedule
+            .add_system_to_stage(Stage::During, prepare);
     }
-    fn renderer(canvas: &Canvas) -> Self
+}
+impl Render for TextRenderer {
+    fn extract(compute: &mut Task, render: &mut Task)
     where
         Self: Sized,
     {
-        let rasterization = Rasterization::new(&canvas.device);
-        let pipeline = pipeline(canvas, &rasterization);
-        let vertex_buffer = vertex::buffer(&canvas.device);
-        let mut coordinator = InstanceCoordinator::new(10);
-        coordinator.setup_attribute::<Position>(&canvas.device);
-        coordinator.setup_attribute::<Area>(&canvas.device);
-        coordinator.setup_attribute::<Depth>(&canvas.device);
-        coordinator.setup_attribute::<Color>(&canvas.device);
-        coordinator.setup_attribute::<rasterization::Descriptor>(&canvas.device);
-        Self {
-            pipeline,
-            rasterization,
-            vertex_buffer,
-            coordinator,
+        let requests = compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .request_handler
+            .requests
+            .clone();
+        render
+            .container
+            .get_resource_mut::<TextRenderer>()
+            .expect("no text renderer attached")
+            .buffer_coordinator
+            .request_handler
+            .requests
+            .extend(requests);
+        compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .request_handler
+            .requests
+            .clear();
+        let removals = compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .remove_handler
+            .removes
+            .clone();
+        render
+            .container
+            .get_resource_mut::<TextRenderer>()
+            .expect("")
+            .buffer_coordinator
+            .remove_handler
+            .removes
+            .extend(removals);
+        compute
+            .container
+            .get_resource_mut::<Extractor>()
+            .expect("no extractor attached")
+            .remove_handler
+            .removes
+            .clear();
+    }
+
+    fn phase() -> RenderPhase {
+        RenderPhase::Alpha
+    }
+
+    fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
+        render_pass_handle.0.set_pipeline(&self.pipeline);
+        render_pass_handle
+            .0
+            .set_bind_group(0, &viewport.bind_group, &[]);
+        render_pass_handle
+            .0
+            .set_bind_group(1, &self.rasterization.binding.bind_group, &[]);
+        render_pass_handle
+            .0
+            .set_vertex_buffer(0, self.vertex_buffer.slice(..));
+        render_pass_handle.0.set_vertex_buffer(
+            1,
+            self.buffer_coordinator.gpu_buffer::<Position>().slice(..),
+        );
+        render_pass_handle
+            .0
+            .set_vertex_buffer(2, self.buffer_coordinator.gpu_buffer::<Area>().slice(..));
+        render_pass_handle
+            .0
+            .set_vertex_buffer(3, self.buffer_coordinator.gpu_buffer::<Depth>().slice(..));
+        render_pass_handle
+            .0
+            .set_vertex_buffer(4, self.buffer_coordinator.gpu_buffer::<Color>().slice(..));
+        render_pass_handle.0.set_vertex_buffer(
+            5,
+            self.buffer_coordinator
+                .gpu_buffer::<PlacementDescriptor>()
+                .slice(..),
+        );
+        if self.buffer_coordinator.has_instances() {
+            render_pass_handle.0.draw(
+                0..GLYPH_AABB.len() as u32,
+                0..self.buffer_coordinator.count() as u32,
+            );
         }
     }
 }

@@ -1,426 +1,322 @@
-use crate::canvas::Canvas;
-use crate::instance::attribute::{attribute_size, gpu_buffer};
-use crate::instance::indexer::IndexedAttribute;
-use anymap::AnyMap;
-use attribute::AttributeBuffer;
-use bevy_ecs::prelude::Entity;
-use indexer::{Index, Indexer};
-use itertools::Itertools;
-pub(crate) use key::EntityKey;
-use key::IndexedKey;
+mod attribute;
+mod cache;
+mod index;
+mod key;
+
+pub use crate::instance::attribute::AttributeUpdates;
+pub(crate) use crate::instance::attribute::{CpuBuffer, GpuBuffer};
+use crate::instance::index::Index;
+use crate::task::Container;
+use crate::Canvas;
+pub use attribute::AttributeHandler;
+use bevy_ecs::prelude::{Component, Resource};
+pub(crate) use index::IndexHandler;
+use iter_tools::Itertools;
+pub use key::EntityKey;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
-use write_range::WriteRange;
-mod attribute;
-mod indexer;
-mod key;
-mod write_range;
-
-pub(crate) struct Swap<Key: Eq + Hash + PartialEq + Copy + Clone> {
-    pub(crate) src: IndexedKey<Key>,
-    pub(crate) dest: IndexedKey<Key>,
+use std::marker::PhantomData;
+#[derive(Clone)]
+pub struct Request<RequestData: Send + Sync + Clone + 'static> {
+    pub data: RequestData,
 }
-impl<Key: Eq + Hash + PartialEq + Copy + Clone> Swap<Key> {
-    pub(crate) fn new(src: IndexedKey<Key>, dest: IndexedKey<Key>) -> Self {
-        Self { src, dest }
+impl<RequestData: Send + Sync + Clone + 'static> Request<RequestData> {
+    pub fn new(data: RequestData) -> Self {
+        Self { data }
     }
 }
-pub(crate) struct SwapRange<Key: Eq + Hash + PartialEq + Copy + Clone> {
-    pub(crate) range: Vec<IndexedKey<Key>>,
+pub struct RequestHandler<
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+    RequestData: Send + Sync + Clone + 'static,
+> {
+    pub requests: HashMap<Key, Request<RequestData>>,
 }
-impl<Key: Eq + Hash + PartialEq + Copy + Clone> SwapRange<Key> {
-    pub(crate) fn new(range: Vec<IndexedKey<Key>>) -> Self {
-        Self { range }
-    }
-}
-pub(crate) struct Coordinator<Key: Eq + Hash + PartialEq + Copy + Clone, InstanceRequest> {
-    pub(crate) indexer: Indexer,
-    pub(crate) gpu_buffers: AnyMap,
-    pub(crate) cpu_buffers: AnyMap,
-    pub(crate) writes: AnyMap,
-    pub(crate) write_requests: HashSet<Key>,
-    pub(crate) removes: HashSet<Key>,
-    pub(crate) swap_ranges: Vec<SwapRange<Key>>,
-    pub(crate) requests: HashMap<Key, InstanceRequest>,
-    pub(crate) indices: HashMap<Key, Index>,
-    pub(crate) growth: Option<usize>,
-    pub(crate) swaps: Vec<Swap<Key>>,
-    pub(crate) keys: HashMap<Index, Key>,
-}
-impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
-    Coordinator<Key, InstanceRequest>
+impl<
+        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+        Request: Send + Sync + Clone + 'static,
+    > RequestHandler<Key, Request>
 {
-    pub(crate) fn new(initial_max: usize) -> Self {
+    pub fn new() -> Self {
         Self {
-            indexer: Indexer::new(initial_max),
-            gpu_buffers: AnyMap::new(),
-            cpu_buffers: AnyMap::new(),
-            writes: AnyMap::new(),
-            write_requests: HashSet::new(),
-            removes: HashSet::new(),
             requests: HashMap::new(),
-            indices: HashMap::new(),
-            growth: None,
-            swaps: Vec::new(),
-            keys: HashMap::new(),
         }
     }
-    pub(crate) fn setup_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
+}
+pub struct RemoveHandler<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
+    pub removes: HashSet<Key>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> RemoveHandler<Key> {
+    pub fn new() -> Self {
+        Self {
+            removes: HashSet::new(),
+        }
+    }
+}
+pub(crate) struct WriteRequests<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
+    pub(crate) requests: HashSet<Key>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> WriteRequests<Key> {
+    pub(crate) fn new() -> Self {
+        Self {
+            requests: HashSet::new(),
+        }
+    }
+}
+pub(crate) struct NullRequests {
+    pub(crate) requests: HashSet<Index>,
+}
+impl NullRequests {
+    pub(crate) fn new() -> Self {
+        Self {
+            requests: HashSet::new(),
+        }
+    }
+}
+pub(crate) struct CacheCheckRequests<
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+> {
+    pub(crate) requests: HashSet<Key>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CacheCheckRequests<Key> {
+    pub(crate) fn new() -> Self {
+        Self {
+            requests: HashSet::new(),
+        }
+    }
+}
+// track what keys coordinator user uses to send removes / requests appropriately
+#[derive(Component, Resource)]
+pub struct CachedKeys<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
+    pub used_keys: HashSet<Key>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CachedKeys<Key> {
+    pub fn new() -> Self {
+        Self {
+            used_keys: HashSet::new(),
+        }
+    }
+}
+pub(crate) struct Growth {
+    pub(crate) new_max: Option<usize>,
+    pub(crate) growth_factor: usize,
+}
+impl Growth {
+    pub(crate) fn new(growth_factor: usize) -> Self {
+        Self {
+            new_max: None,
+            growth_factor,
+        }
+    }
+}
+pub struct BufferCoordinator<
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+    RequestData: Send + Sync + Clone + 'static,
+> {
+    // open slot policy - nullable - shrink occasionally
+    pub(crate) container: Container,
+    pub(crate) index_handler: IndexHandler<Key>,
+    pub(crate) request_handler: RequestHandler<Key, RequestData>,
+    pub(crate) remove_handler: RemoveHandler<Key>,
+    pub(crate) write_requests: WriteRequests<Key>,
+    pub(crate) null_requests: NullRequests,
+    pub(crate) cache_check_requests: CacheCheckRequests<Key>,
+    pub(crate) growth: Growth,
+    _key: PhantomData<Key>,
+    _request: PhantomData<RequestData>,
+}
+impl<
+        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+        RequestData: Send + Sync + Clone + 'static,
+    > BufferCoordinator<Key, RequestData>
+{
+    pub fn new(max: usize) -> Self {
+        Self {
+            container: Container::new(),
+            index_handler: IndexHandler::<Key>::new(max),
+            request_handler: RequestHandler::<Key, RequestData>::new(),
+            remove_handler: RemoveHandler::<Key>::new(),
+            write_requests: WriteRequests::<Key>::new(),
+            null_requests: NullRequests::new(),
+            cache_check_requests: CacheCheckRequests::<Key>::new(),
+            growth: Growth::new(5),
+            _key: PhantomData,
+            _request: PhantomData,
+        }
+    }
+    pub fn setup_attribute<Attribute: AttributeHandler<RequestData>>(
         &mut self,
         device: &wgpu::Device,
     ) {
-        self.gpu_buffers
-            .insert(attribute::gpu_buffer::<Attribute>(device, self.indexer.max));
-        self.cpu_buffers
-            .insert(attribute::cpu_buffer::<Attribute>(self.indexer.max));
-        self.writes.insert(HashMap::<Key, Attribute>::new());
+        self.container
+            .insert_resource(CpuBuffer::<Attribute>::new(self.max()));
+        self.container
+            .insert_resource(GpuBuffer::<Attribute>::new(device, self.max()));
     }
-    pub(crate) fn gpu_buffer<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &self,
-    ) -> &wgpu::Buffer {
-        &self
-            .gpu_buffers
-            .get::<AttributeBuffer<Attribute>>()
-            .unwrap()
-            .buffer
-    }
-    pub(crate) fn current(&self) -> usize {
-        self.indexer.current
-    }
-    pub(crate) fn prepare(&mut self, device: &wgpu::Device) {
-        self.remove();
-        self.prepare_swaps();
-        self.prepare_writes();
-        self.prepare_growth();
-    }
-    pub(crate) fn process_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-        Fetcher,
-    >(
-        &mut self,
-        canvas: &Canvas,
-        fetcher: Fetcher,
-    ) where
-        Fetcher: Fn(&InstanceRequest) -> Attribute + 'static,
-    {
-        self.swap::<Attribute>();
-        self.resolve::<Attribute, _>(fetcher);
-        self.write::<Attribute>(canvas);
-    }
-    pub(crate) fn finish(&mut self) {
-        let _ = self.growth.take();
-        self.write_requests.clear();
-        self.requests.clear();
-        for swap in self.swaps.drain(..) {
-            self.indices.remove(&swap.src.key);
-            self.keys.remove(&swap.src.index);
-        }
-        self.removes.clear();
-    }
-}
-impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static, InstanceRequest>
-    Coordinator<Key, InstanceRequest>
-{
-    fn max(&self) -> usize {
-        self.indexer.max
-    }
-    fn prepare_growth(&mut self) {
-        if self.indexer.should_grow() {
-            self.growth.replace(self.indexer.grow(self.growth_factor()));
-        }
-    }
-    fn prepare_writes(&mut self) {
-        for (key, request) in self.requests.iter() {
-            if !self.indices.contains_key(key) {
-                let index = self.indexer.next();
-                self.indices.insert(*key, index);
-                self.keys.insert(index, *key);
+    pub fn start(&mut self) {
+        for key in self.remove_handler.removes.iter() {
+            let removed_index = self.index_handler.remove(key);
+            if let Some(index) = removed_index {
+                self.null_requests.requests.insert(index);
             }
-            self.write_requests.insert(*key);
         }
-    }
-    fn indexed_removals(&self) -> Vec<IndexedKey<Key>> {
-        let mut indexed_removals = Vec::new();
-        for key in self.removes.iter() {
-            let index = self.get_index(*key);
-            indexed_removals.push(IndexedKey::new(*key, index));
-        }
-        indexed_removals
-    }
-    fn remove(&mut self) {
-        let mut indexed_removals = self.indexed_removals();
-        indexed_removals.sort_by(|lhs, rhs| -> Ordering {
-            if lhs.index.0 < rhs.index.0 {
-                return Ordering::Less;
-            }
-            if lhs.index.0 > rhs.index.0 {
-                return Ordering::Greater;
-            }
-            Ordering::Equal
-        });
-        let mut remove_ranges = Self::consecutive_removes(indexed_removals);
-        remove_ranges.retain(|range| {
-            let mut contains = false;
-            for indexed_key in range.iter() {
-                if indexed_key.index == self.indexer.current_index() {
-                    contains = true;
+        for (key, _request) in self.request_handler.requests.iter() {
+            match self.index_handler.exists(*key) {
+                true => {
+                    self.cache_check_requests.requests.insert(*key);
+                }
+                false => {
+                    let _index = self.index_handler.next(*key);
+                    self.write_requests.requests.insert(*key);
                 }
             }
-            if contains {
-                for indexed_key in range.iter() {
-                    Self::remove_attribute(&mut self.cpu_buffers, indexed_key.index);
-                    self.indexer.decrement();
-                    self.indices.remove(indexed_key.key);
-                    self.keys.remove(&indexed_key.index);
-                }
+        }
+        if self.index_handler.should_grow() {
+            self.index_handler.grow(self.growth.growth_factor);
+            self.growth.new_max.replace(self.index_handler.max());
+        }
+    }
+    fn cpu_buffer<Attribute: AttributeHandler<RequestData>>(&self) -> &CpuBuffer<Attribute> {
+        self.container
+            .get_resource::<CpuBuffer<Attribute>>()
+            .expect("no cpu buffer attached")
+    }
+    pub fn prepare<Attribute: AttributeHandler<RequestData>>(&mut self, canvas: &Canvas) {
+        for index in self.null_requests.requests.iter() {
+            self.container
+                .get_resource_mut::<CpuBuffer<Attribute>>()
+                .expect("")
+                .buffer
+                .insert(index.value, Attribute::null())
+        }
+        // iter cache checks
+        for key in self.cache_check_requests.requests.iter() {
+            let cached_value = *self
+                .container
+                .get_resource::<CpuBuffer<Attribute>>()
+                .expect("")
+                .buffer
+                .get(
+                    self.index_handler
+                        .get_index(*key)
+                        .expect("no index for key")
+                        .value,
+                )
+                .expect("no cached value");
+            let requested_value = Attribute::extract(
+                &self
+                    .request_handler
+                    .requests
+                    .get(key)
+                    .expect("no requested value")
+                    .data,
+            );
+            if cached_value != requested_value {
+                self.write_requests.requests.insert(*key);
             }
-            !contains
-        });
-        self.swap_ranges = remove_ranges
-            .drain(..)
-            .map(|range| SwapRange::new(range))
-            .collect();
-    }
-    fn prepare_swaps(&mut self) {
-        let mut keys_to_swap = HashSet::new();
-        for swap_range in self.swap_ranges.iter() {
-            for indexed_key in swap_range.range.iter() {
-                keys_to_swap.insert(indexed_key.key);
+        }
+        if let Some(new_max) = self.growth.new_max {
+            // grown so remake buffer and write all cpu write requests then gpu all cpu
+            self.container
+                .insert_resource(GpuBuffer::<Attribute>::new(&canvas.device, new_max));
+            for key in self.write_requests.requests.iter() {
+                // write to cpu
+                let index = self
+                    .index_handler
+                    .get_index(*key)
+                    .expect("no index for key");
+                let attribute = Attribute::extract(
+                    &self
+                        .request_handler
+                        .requests
+                        .get(key)
+                        .expect("no request data")
+                        .data,
+                );
+                self.container
+                    .get_resource_mut::<CpuBuffer<Attribute>>()
+                    .expect("no cpu buffer attached")
+                    .buffer
+                    .insert(index.value, attribute);
             }
-        }
-        let mut swap_ranges = self.swap_ranges.drain(..).collect::<Vec<SwapRange<Key>>>();
-        for swap_range in swap_ranges.iter() {
-            for indexed_key in swap_range.range.iter() {
-                if self.indexer.current == 1 {}
-                let mut src = self.indexer.decrement();
-                let mut src_key = self.get_key(src);
-                while keys_to_swap.contains(src_key) {
-                    src -= 1;
-                    src_key = self.get_key(src);
-                }
-                let dest = self.get_index(*key);
-                self.swaps.push(Swap::new(
-                    IndexedKey::new(src_key, src),
-                    IndexedKey::new(*key, dest),
-                ));
-            }
-        }
-    }
-    fn cpu_buffer<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &self,
-    ) -> &Vec<Attribute> {
-        &self
-            .cpu_buffers
-            .get::<Vec<Attribute>>()
-            .expect("no cpu buffer for attribute")
-    }
-    fn get_key(&self, index: Index) -> Key {
-        *self.keys.get(&index).expect("no key for index")
-    }
-    fn swap<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &mut self,
-    ) {
-        for swap in self.swaps.iter() {
-            let index = *self.indices.get(&swap.src.key).expect("no index present");
-            let attribute: Attribute = self.get_attribute(index);
-            Self::send_write(&mut self.writes, swap.dest.key, attribute);
-            Self::set_attribute(&mut self.cpu_buffers, swap.dest.index, attribute);
-            Self::remove_attribute::<Attribute>(&mut self.cpu_buffers, swap.src.index);
-        }
-    }
-
-    fn get_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &self,
-        index: Index,
-    ) -> Attribute {
-        *self
-            .cpu_buffers
-            .get::<Vec<Attribute>>()
-            .expect("no cpu buffer for attribute")
-            .get(index.0)
-            .expect("invalid index")
-    }
-    fn remove_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        cpu_buffers: &mut AnyMap,
-        index: Index,
-    ) {
-        cpu_buffers
-            .get_mut::<Vec<Attribute>>()
-            .expect("no cpu buffer for attribute")
-            .remove(index.0);
-    }
-    fn resolve<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-        Fetcher,
-    >(
-        &mut self,
-        fetcher: Fetcher,
-    ) where
-        Fetcher: Fn(&InstanceRequest) -> Attribute + 'static,
-    {
-        if let Some(growth_amount) = self.growth {
-            self.grow_cpu_buffer::<Attribute>(growth_amount);
-        }
-        for key in self.write_requests.iter() {
-            let index = self.get_index(*key);
-            let requested_value =
-                fetcher(self.requests.get(key).as_ref().expect("no request for key"));
-            let cached_value: Option<Attribute> = self.get_cached_value::<Attribute>(index);
-            if let Some(value) = cached_value {
-                if value == requested_value {
-                    continue;
-                }
-            }
-            Self::send_write(&mut self.writes, *key, requested_value);
-            Self::set_attribute(&mut self.cpu_buffers, index, requested_value);
-        }
-    }
-
-    fn get_cached_value<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &self,
-        index: Index,
-    ) -> Option<Attribute> {
-        self.cpu_buffers
-            .get::<Vec<Attribute>>()
-            .expect("no cache for attribute")
-            .get(index.0)
-            .copied()
-    }
-
-    fn grow_cpu_buffer<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &mut self,
-        growth_amount: usize,
-    ) {
-        self.cpu_buffers
-            .get_mut::<Vec<Attribute>>()
-            .expect("no cpu buffer for attribute")
-            .resize(growth_amount, Attribute::default());
-    }
-
-    fn set_attribute<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        cpu_buffers: &mut AnyMap,
-        index: Index,
-        requested_value: Attribute,
-    ) {
-        cpu_buffers
-            .get_mut::<Vec<Attribute>>()
-            .expect("no cpu buffer for attribute")
-            .insert(index.0, requested_value);
-    }
-
-    fn send_write<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        writes: &mut AnyMap,
-        key: Key,
-        requested_value: Attribute,
-    ) {
-        writes
-            .get_mut::<HashMap<Key, Attribute>>()
-            .expect("no write buffer for attribute")
-            .insert(key, requested_value);
-    }
-    fn write<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &mut self,
-        canvas: &Canvas,
-    ) {
-        if let Some(growth_amount) = self.growth.as_ref() {
-            self.gpu_buffers
-                .insert(gpu_buffer::<Attribute>(&canvas.device, self.max()));
             canvas.queue.write_buffer(
                 self.gpu_buffer::<Attribute>(),
                 0,
-                bytemuck::cast_slice(self.cpu_buffer::<Attribute>()),
+                bytemuck::cast_slice(&self.cpu_buffer::<Attribute>().buffer),
             );
         } else {
-            // get indices of writes
-            let indexed_writes = self.indexed_writes::<Attribute>();
-            // combine sequential
-            let mut combined_writes = Self::combined_writes(indexed_writes);
-            // write the write_ranges from combine
-            for range in combined_writes.drain(..) {
-                range.write(&canvas.queue, self.gpu_buffer::<Attribute>());
+            // iter write requests to resolve writes
+            let mut writes = Vec::<(Index, Attribute)>::new();
+            for key in self.write_requests.requests.iter() {
+                let write_value = Attribute::extract(
+                    &self
+                        .request_handler
+                        .requests
+                        .get(key)
+                        .expect("no requested_value")
+                        .data,
+                );
+                let index = self.index_handler.get_index(*key).expect("key not indexed");
+                writes.push((index, write_value));
+            }
+            // combine write ranges
+            let combined_writes = Self::combine(writes);
+            // write all ranges to cpu / gpu
+            for range in combined_writes.iter() {
+                for write in range {
+                    self.container
+                        .get_resource_mut::<CpuBuffer<Attribute>>()
+                        .expect("")
+                        .buffer
+                        .insert(write.0.value, write.1);
+                }
+                let first_index = range.first().expect("no writes in range");
+                let offset = attribute::attribute_size::<Attribute>(first_index.0.value);
+                let attributes = range
+                    .iter()
+                    .map(|write| -> Attribute { write.1 })
+                    .collect::<Vec<Attribute>>();
+                // write to gpu_buffer
+                canvas.queue.write_buffer(
+                    self.gpu_buffer::<Attribute>(),
+                    offset as wgpu::BufferAddress,
+                    bytemuck::cast_slice(&attributes),
+                );
             }
         }
     }
-    fn growth_factor(&self) -> usize {
-        10
+    pub fn finish(&mut self) {
+        // clear and reset
+        self.growth.new_max.take();
+        self.request_handler.requests.clear();
+        self.remove_handler.removes.clear();
+        self.write_requests.requests.clear();
+        self.null_requests.requests.clear();
+        self.cache_check_requests.requests.clear();
     }
-    fn combined_writes<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        mut indexed_writes: Vec<IndexedAttribute<Attribute>>,
-    ) -> Vec<WriteRange<Attribute>> {
-        let mut write_ranges = Vec::new();
-        indexed_writes.sort_by(|lhs, rhs| -> Ordering {
-            let right_index = rhs.index.0;
-            let left_index = lhs.index.0;
-            if left_index < right_index {
-                return Ordering::Less;
-            }
-            if left_index > right_index {
-                return Ordering::Greater;
-            }
-            Ordering::Equal
-        });
-        let mut consecutive_slices = Self::consecutive_indexed_attributes(indexed_writes);
-        for slice in consecutive_slices.drain(..) {
-            write_ranges.push(WriteRange::new(slice));
-        }
-        write_ranges
-    }
-    fn get_index(&self, key: Key) -> Index {
-        *self.indices.get(&key).unwrap()
-    }
-    fn indexed_writes<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        &mut self,
-    ) -> Vec<IndexedAttribute<Attribute>> {
-        self.writes
-            .get_mut::<HashMap<Key, Attribute>>()
-            .expect("no write map for attribute")
-            .drain()
-            .map(|(key, attr)| -> IndexedAttribute<Attribute> {
-                return IndexedAttribute::new(*self.indices.get(&key).unwrap(), attr);
-            })
-            .collect::<Vec<IndexedAttribute<Attribute>>>()
-    }
-    fn consecutive_indexed_attributes<
-        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
-    >(
-        data: Vec<IndexedAttribute<Attribute>>,
-    ) -> Vec<Vec<IndexedAttribute<Attribute>>> {
-        (&(0..data.len()).group_by(|&i| data[i].index.0 - i))
+    fn combine<Attribute: AttributeHandler<RequestData>>(
+        mut writes: Vec<(Index, Attribute)>,
+    ) -> Vec<Vec<(Index, Attribute)>> {
+        writes.sort_by(|lhs, rhs| -> Ordering { lhs.0.value.cmp(&rhs.0.value) });
+        (&(0..writes.len()).group_by(|&i| writes[i].0.value - i))
             .into_iter()
-            .map(|(_, group)| group.map(|i| data[i]).collect())
+            .map(|(_, group)| group.map(|i| writes[i]).collect())
             .collect()
     }
-    fn consecutive_removes(data: Vec<IndexedKey<Key>>) -> Vec<Vec<IndexedKey<Key>>> {
-        (&(0..data.len()).group_by(|&i| data[i].index.0 - i))
-            .into_iter()
-            .map(|(_, group)| group.map(|i| data[i]).collect())
-            .collect()
+    pub fn gpu_buffer<Attribute: AttributeHandler<RequestData>>(&self) -> &wgpu::Buffer {
+        &self
+            .container
+            .get_resource::<GpuBuffer<Attribute>>()
+            .expect("no gpu buffer attached")
+            .buffer
+    }
+    pub fn count(&self) -> usize {
+        self.index_handler.count()
+    }
+    pub fn max(&self) -> usize {
+        self.index_handler.max()
+    }
+    pub fn has_instances(&self) -> bool {
+        self.count() > 0
     }
 }

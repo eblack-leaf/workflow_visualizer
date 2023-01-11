@@ -1,21 +1,26 @@
-use bevy_ecs::prelude::{Bundle, Component};
 use std::ops::Add;
+
+use bevy_ecs::prelude::{Bundle, Component, Resource};
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Position {
     pub x: f32,
     pub y: f32,
 }
+
 impl Position {
     pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
 }
+
 impl From<(f32, f32)> for Position {
     fn from(xy: (f32, f32)) -> Self {
         Self { x: xy.0, y: xy.1 }
     }
 }
+
 impl From<(u32, u32)> for Position {
     fn from(xy: (u32, u32)) -> Self {
         Self {
@@ -24,23 +29,36 @@ impl From<(u32, u32)> for Position {
         }
     }
 }
+
+impl From<(usize, usize)> for Position {
+    fn from(xy: (usize, usize)) -> Self {
+        Self {
+            x: xy.0 as f32,
+            y: xy.1 as f32,
+        }
+    }
+}
+
 impl Add for Position {
     type Output = Position;
     fn add(self, rhs: Self) -> Self::Output {
         Self::Output::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Area {
     pub width: f32,
     pub height: f32,
 }
+
 impl Area {
     pub const fn new(width: f32, height: f32) -> Self {
         Self { width, height }
     }
 }
+
 impl From<(f32, f32)> for Area {
     fn from(wh: (f32, f32)) -> Self {
         Self {
@@ -49,6 +67,7 @@ impl From<(f32, f32)> for Area {
         }
     }
 }
+
 impl From<(u32, u32)> for Area {
     fn from(wh: (u32, u32)) -> Self {
         Self {
@@ -57,6 +76,7 @@ impl From<(u32, u32)> for Area {
         }
     }
 }
+
 impl From<(usize, usize)> for Area {
     fn from(wh: (usize, usize)) -> Self {
         Self {
@@ -65,21 +85,25 @@ impl From<(usize, usize)> for Area {
         }
     }
 }
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Depth {
     pub layer: f32,
 }
+
 impl Depth {
     pub const fn new(layer: f32) -> Self {
         Self { layer }
     }
 }
+
 impl From<f32> for Depth {
     fn from(layer: f32) -> Self {
         Self { layer }
     }
 }
+
 impl From<u32> for Depth {
     fn from(layer: u32) -> Self {
         Self {
@@ -87,11 +111,13 @@ impl From<u32> for Depth {
         }
     }
 }
+
 #[derive(Bundle, Clone, Default)]
 pub struct Section {
     pub position: Position,
     pub area: Area,
 }
+
 impl Section {
     pub fn new(position: Position, area: Area) -> Self {
         Self { position, area }
@@ -103,6 +129,7 @@ impl Section {
         return self.area.height;
     }
 }
+
 impl From<((f32, f32), (f32, f32))> for Section {
     fn from(data: ((f32, f32), (f32, f32))) -> Self {
         Self {
@@ -111,12 +138,14 @@ impl From<((f32, f32), (f32, f32))> for Section {
         }
     }
 }
+
 #[derive(Bundle, Clone, Default)]
 pub struct Panel {
     #[bundle]
     pub section: Section,
     pub depth: Depth,
 }
+
 impl Panel {
     pub fn new(section: Section, depth: Depth) -> Self {
         Self { section, depth }
@@ -131,6 +160,7 @@ impl Panel {
         return self.depth.layer;
     }
 }
+
 impl From<((f32, f32), (f32, f32), f32)> for Panel {
     fn from(data: ((f32, f32), (f32, f32), f32)) -> Self {
         Self {

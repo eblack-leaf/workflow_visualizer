@@ -1,7 +1,10 @@
+use bevy_ecs::prelude::Resource;
+use std::collections::HashMap;
+use std::hash::Hash;
 use std::marker::PhantomData;
 use wgpu::BufferAddress;
-
-pub(crate) struct AttributeBuffer<
+#[derive(Resource)]
+pub(crate) struct GpuBuffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
 > {
     pub(crate) buffer: wgpu::Buffer,
@@ -9,28 +12,21 @@ pub(crate) struct AttributeBuffer<
 }
 
 impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
-    AttributeBuffer<Attribute>
+    GpuBuffer<Attribute>
 {
-    pub(crate) fn new(buffer: wgpu::Buffer) -> Self {
+    pub(crate) fn new(device: &wgpu::Device, max_instances: usize) -> Self {
         Self {
-            buffer,
+            buffer: {
+                device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some("attribute buffer"),
+                    size: attribute_size::<Attribute>(max_instances) as BufferAddress,
+                    usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                })
+            },
             _phantom_data: PhantomData,
         }
     }
-}
-
-pub(crate) fn gpu_buffer<
-    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    device: &wgpu::Device,
-    max_instances: usize,
-) -> AttributeBuffer<Attribute> {
-    AttributeBuffer::new(device.create_buffer(&wgpu::BufferDescriptor {
-        label: Some("attribute buffer"),
-        size: attribute_size::<Attribute>(max_instances) as BufferAddress,
-        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-        mapped_at_creation: false,
-    }))
 }
 
 pub(crate) fn attribute_size<
@@ -40,13 +36,47 @@ pub(crate) fn attribute_size<
 ) -> usize {
     std::mem::size_of::<Attribute>() * num
 }
-
-pub(crate) fn cpu_buffer<
+#[derive(Resource)]
+pub(crate) struct CpuBuffer<
     Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default,
->(
-    initial_max: usize,
-) -> Vec<Attribute> {
-    let mut buffer = Vec::new();
-    buffer.resize(initial_max, Attribute::default());
-    buffer
+> {
+    pub(crate) buffer: Vec<Attribute>,
+}
+impl<Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default>
+    CpuBuffer<Attribute>
+{
+    pub(crate) fn new(max: usize) -> Self {
+        Self {
+            buffer: {
+                let mut buffer = Vec::new();
+                buffer.resize(max, Attribute::default());
+                buffer
+            },
+        }
+    }
+}
+#[derive(Resource)]
+pub struct AttributeUpdates<
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+    Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+> {
+    pub updates: HashMap<Key, Attribute>,
+}
+impl<
+        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+        Attribute: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+    > AttributeUpdates<Key, Attribute>
+{
+    pub fn new() -> Self {
+        Self {
+            updates: HashMap::new(),
+        }
+    }
+}
+pub trait AttributeHandler<Request>
+where
+    Self: bytemuck::Pod + bytemuck::Zeroable + Copy + Clone + Send + Sync + Default + PartialEq,
+{
+    fn extract(request: &Request) -> Self;
+    fn null() -> Self;
 }

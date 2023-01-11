@@ -12,8 +12,7 @@ bytemuck = { version = "1.12.3", features = ["derive"] }
 wgpu = { version = "0.14.2", features = ["webgl"] }
 nalgebra = "0.31.4"
 fontdue = "0.7.2"
-itertools = "0.10.5"
-anymap = "0.12.1"
+iter_tools = "0.1.4"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 futures = "0.3.25"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
