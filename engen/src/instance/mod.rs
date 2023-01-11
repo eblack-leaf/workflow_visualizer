@@ -1,41 +1,49 @@
+use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
+use std::marker::PhantomData;
+
+use bevy_ecs::prelude::{Component, Resource};
+use iter_tools::Itertools;
+
+pub use attribute::AttributeHandler;
+pub(crate) use index::IndexHandler;
+pub use key::EntityKey;
+
+use crate::Canvas;
+pub(crate) use crate::instance::attribute::{CpuBuffer, GpuBuffer};
+// need to add updates using cached_keys to sort emission of requests(adds)/updates/removes,
+pub use crate::instance::attribute::AttributeUpdates;
+use crate::instance::index::Index;
+use crate::task::Container;
+
 mod attribute;
 mod cache;
 mod index;
 mod key;
 
-pub use crate::instance::attribute::AttributeUpdates;
-pub(crate) use crate::instance::attribute::{CpuBuffer, GpuBuffer};
-use crate::instance::index::Index;
-use crate::task::Container;
-use crate::Canvas;
-pub use attribute::AttributeHandler;
-use bevy_ecs::prelude::{Component, Resource};
-pub(crate) use index::IndexHandler;
-use iter_tools::Itertools;
-pub use key::EntityKey;
-use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
-use std::hash::Hash;
-use std::marker::PhantomData;
 #[derive(Clone)]
 pub struct Request<RequestData: Send + Sync + Clone + 'static> {
     pub data: RequestData,
 }
+
 impl<RequestData: Send + Sync + Clone + 'static> Request<RequestData> {
     pub fn new(data: RequestData) -> Self {
         Self { data }
     }
 }
+
 pub struct RequestHandler<
     Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
     RequestData: Send + Sync + Clone + 'static,
 > {
     pub requests: HashMap<Key, Request<RequestData>>,
 }
+
 impl<
-        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-        Request: Send + Sync + Clone + 'static,
-    > RequestHandler<Key, Request>
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+    Request: Send + Sync + Clone + 'static,
+> RequestHandler<Key, Request>
 {
     pub fn new() -> Self {
         Self {
@@ -43,9 +51,11 @@ impl<
         }
     }
 }
+
 pub struct RemoveHandler<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
     pub removes: HashSet<Key>,
 }
+
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> RemoveHandler<Key> {
     pub fn new() -> Self {
         Self {
@@ -53,9 +63,11 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> RemoveHa
         }
     }
 }
+
 pub(crate) struct WriteRequests<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
     pub(crate) requests: HashSet<Key>,
 }
+
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> WriteRequests<Key> {
     pub(crate) fn new() -> Self {
         Self {
@@ -63,9 +75,11 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> WriteReq
         }
     }
 }
+
 pub(crate) struct NullRequests {
     pub(crate) requests: HashSet<Index>,
 }
+
 impl NullRequests {
     pub(crate) fn new() -> Self {
         Self {
@@ -73,11 +87,13 @@ impl NullRequests {
         }
     }
 }
+
 pub(crate) struct CacheCheckRequests<
     Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
 > {
     pub(crate) requests: HashSet<Key>,
 }
+
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CacheCheckRequests<Key> {
     pub(crate) fn new() -> Self {
         Self {
@@ -85,11 +101,13 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CacheChe
         }
     }
 }
+
 // track what keys coordinator user uses to send removes / requests appropriately
 #[derive(Component, Resource)]
 pub struct CachedKeys<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> {
     pub used_keys: HashSet<Key>,
 }
+
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CachedKeys<Key> {
     pub fn new() -> Self {
         Self {
@@ -97,10 +115,12 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static> CachedKe
         }
     }
 }
+
 pub(crate) struct Growth {
     pub(crate) new_max: Option<usize>,
     pub(crate) growth_factor: usize,
 }
+
 impl Growth {
     pub(crate) fn new(growth_factor: usize) -> Self {
         Self {
@@ -109,6 +129,7 @@ impl Growth {
         }
     }
 }
+
 pub struct BufferCoordinator<
     Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
     RequestData: Send + Sync + Clone + 'static,
@@ -125,10 +146,11 @@ pub struct BufferCoordinator<
     _key: PhantomData<Key>,
     _request: PhantomData<RequestData>,
 }
+
 impl<
-        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-        RequestData: Send + Sync + Clone + 'static,
-    > BufferCoordinator<Key, RequestData>
+    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+    RequestData: Send + Sync + Clone + 'static,
+> BufferCoordinator<Key, RequestData>
 {
     pub fn new(max: usize) -> Self {
         Self {
@@ -219,6 +241,8 @@ impl<
             // grown so remake buffer and write all cpu write requests then gpu all cpu
             self.container
                 .insert_resource(GpuBuffer::<Attribute>::new(&canvas.device, new_max));
+            self.container.get_resource_mut::<CpuBuffer<Attribute>>().expect("")
+                .buffer.resize(new_max, Attribute::null());
             for key in self.write_requests.requests.iter() {
                 // write to cpu
                 let index = self
