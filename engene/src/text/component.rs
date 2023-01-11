@@ -15,6 +15,7 @@ pub struct TextBundle {
     pub depth: Depth,
     pub color: Color,
     pub placer: Placer,
+    pub cached_keys: CachedKeys<EntityKey<GlyphOffset>>,
 }
 impl TextBundle {
     pub fn new(text: Text, scale: Scale, position: Position, depth: Depth, color: Color) -> Self {
@@ -25,6 +26,7 @@ impl TextBundle {
             depth,
             color,
             placer: Placer::new(),
+            cached_keys: CachedKeys::new(),
         }
     }
 }
@@ -70,7 +72,7 @@ impl Placer {
 pub fn emit_requests(
     mut text: Query<(
         Entity,
-        &Text,
+        &mut Text,
         &Position,
         &Depth,
         &Scale,
@@ -82,10 +84,11 @@ pub fn emit_requests(
     mut extractor: ResMut<Extractor>,
 ) {
     // iterate placer glyphs ond see if cached keys has value for offset,
-    for (entity, text, position, depth, scale, color, mut cached_keys, mut placer) in
+    for (entity, mut text, position, depth, scale, color, mut cached_keys, mut placer) in
         text.iter_mut()
     {
         if text.updated {
+            text.updated = false;
             placer.layout.clear();
             placer.layout.append(
                 font.font_slice(),
