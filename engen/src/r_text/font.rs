@@ -1,10 +1,9 @@
 use std::ops::Deref;
 use std::path::Path;
 
+use crate::r_text::{GlyphHash, Scale};
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
-
-use crate::text::scale::Scale;
 
 #[derive(Resource)]
 pub struct Font {
@@ -33,9 +32,9 @@ impl Font {
     pub fn index() -> usize {
         0
     }
-    pub fn advance_width(&self, character: char, scale: f32) -> f32 {
-        let metrics = self.font().metrics(character, scale);
-        metrics.advance_width
+    pub fn character_dimensions(&self, character: char, px: f32) -> [f32; 2] {
+        let metrics = self.font().metrics(character, px);
+        [metrics.advance_width, metrics.advance_height]
     }
 }
 

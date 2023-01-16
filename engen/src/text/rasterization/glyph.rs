@@ -17,17 +17,13 @@ pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 #[derive(Clone)]
 pub(crate) struct RasterizedGlyph {
     pub(crate) metrics: Metrics,
-    pub(crate) bitmap: Vec<u32>,
+    pub(crate) bitmap: Vec<u8>,
 }
 impl From<(Metrics, Vec<u8>)> for RasterizedGlyph {
     fn from(rasterize_response: (Metrics, Vec<u8>)) -> Self {
         Self {
             metrics: rasterize_response.0,
-            bitmap: rasterize_response
-                .1
-                .iter()
-                .map(|c| *c as u32)
-                .collect::<Vec<u32>>(),
+            bitmap: rasterize_response.1.iter().map(|c| *c).collect::<Vec<u8>>(),
         }
     }
 }

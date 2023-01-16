@@ -71,7 +71,8 @@ impl Canvas {
         self.surface_configuration.height = height;
         self.viewport
             .adjust(&self.device, &self.queue, width, height);
-        self.surface.configure(&self.device, &self.surface_configuration);
+        self.surface
+            .configure(&self.device, &self.surface_configuration);
     }
     pub(crate) fn surface_texture(&self) -> Option<SurfaceTexture> {
         let surface_texture = match self.surface.get_current_texture() {

@@ -1,7 +1,7 @@
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable, Default, PartialEq)]
 pub struct PlacementDescriptor {
-    pub parts: [u32; 3],
+    pub parts: [f32; 4],
 }
 
 impl PlacementDescriptor {

@@ -19,7 +19,7 @@ use crate::Canvas;
 pub(crate) use placement::PlacementDescriptor;
 
 pub(crate) fn bytes(num: usize) -> usize {
-    num * std::mem::size_of::<u32>()
+    num * std::mem::size_of::<u8>()
 }
 pub(crate) struct RasterizationHandler {
     pub(crate) binding: Binding,

@@ -6,8 +6,8 @@ pub fn task() -> Task {
 }
 
 #[cfg_attr(
-target_os = "android",
-ndk_glue::main(backtrace = "on", logger(level = "debug"))
+    target_os = "android",
+    ndk_glue::main(backtrace = "on", logger(level = "debug"))
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());

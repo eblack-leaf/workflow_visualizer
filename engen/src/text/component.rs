@@ -4,10 +4,10 @@ use fontdue::layout::{CoordinateSystem, TextStyle};
 use crate::color::Color;
 use crate::coord::{Depth, Position};
 use crate::instance::{CachedKeys, EntityKey, Request};
-use crate::text::{GlyphOffset, RequestData};
 use crate::text::extractor::Extractor;
 use crate::text::font::Font;
 use crate::text::scale::Scale;
+use crate::text::{GlyphOffset, RequestData};
 
 #[derive(Bundle)]
 pub struct TextBundle {
@@ -95,7 +95,7 @@ pub fn emit_requests(
 ) {
     // iterate placer glyphs ond see if cached keys has value for offset,
     for (entity, mut text, position, depth, scale, color, mut cached_keys, mut placer) in
-    text.iter_mut()
+        text.iter_mut()
     {
         if text.updated {
             text.updated = false;
@@ -107,7 +107,8 @@ pub fn emit_requests(
             for glyph in placer.layout.glyphs() {
                 let offset = GlyphOffset(glyph.byte_offset);
                 let key = EntityKey::new(entity, offset);
-                let position_x_offset = offset.0 as f32 * font.advance_width(glyph.parent, scale.px());
+                let position_x_offset =
+                    offset.0 as f32 * font.advance_width(glyph.parent, scale.px());
                 let request = Request::new(RequestData::new(
                     glyph.parent,
                     *scale,

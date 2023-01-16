@@ -4,13 +4,12 @@ mod color;
 mod coord;
 mod icon;
 mod instance;
+#[allow(unused)]
+mod r_text;
 mod render;
 mod task;
-#[allow(unused)]
-mod text;
 mod theme;
 mod uniform;
-
 use crate::canvas::CanvasWindow;
 pub use crate::canvas::{Canvas, CanvasOptions};
 pub use crate::color::Color;
@@ -18,12 +17,11 @@ pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{ExtractCalls, Render, RenderCalls};
 pub use crate::task::Task;
 use crate::task::WorkloadId;
-pub use crate::text::{Delete, Scale, Text, TextBundle, TextRenderer};
+pub use crate::theme::Theme;
 use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-pub use crate::theme::Theme;
 
 pub trait Attach {
     fn attach(engen: &mut Engen);

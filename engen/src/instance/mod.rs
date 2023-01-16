@@ -10,8 +10,8 @@ pub use attribute::AttributeHandler;
 pub(crate) use index::IndexHandler;
 pub use key::EntityKey;
 
-use crate::Canvas;
 pub(crate) use crate::instance::attribute::{CpuBuffer, GpuBuffer};
+use crate::Canvas;
 // need to add updates using cached_keys to sort emission of requests(adds)/updates/removes,
 pub use crate::instance::attribute::AttributeUpdates;
 use crate::instance::index::Index;
@@ -41,9 +41,9 @@ pub struct RequestHandler<
 }
 
 impl<
-    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-    Request: Send + Sync + Clone + 'static,
-> RequestHandler<Key, Request>
+        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+        Request: Send + Sync + Clone + 'static,
+    > RequestHandler<Key, Request>
 {
     pub fn new() -> Self {
         Self {
@@ -148,9 +148,9 @@ pub struct BufferCoordinator<
 }
 
 impl<
-    Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
-    RequestData: Send + Sync + Clone + 'static,
-> BufferCoordinator<Key, RequestData>
+        Key: Eq + Hash + PartialEq + Copy + Clone + Send + Sync + 'static,
+        RequestData: Send + Sync + Clone + 'static,
+    > BufferCoordinator<Key, RequestData>
 {
     pub fn new(max: usize) -> Self {
         Self {
@@ -241,8 +241,11 @@ impl<
             // grown so remake buffer and write all cpu write requests then gpu all cpu
             self.container
                 .insert_resource(GpuBuffer::<Attribute>::new(&canvas.device, new_max));
-            self.container.get_resource_mut::<CpuBuffer<Attribute>>().expect("")
-                .buffer.resize(new_max, Attribute::null());
+            self.container
+                .get_resource_mut::<CpuBuffer<Attribute>>()
+                .expect("")
+                .buffer
+                .resize(new_max, Attribute::null());
             for key in self.write_requests.requests.iter() {
                 // write to cpu
                 let index = self
