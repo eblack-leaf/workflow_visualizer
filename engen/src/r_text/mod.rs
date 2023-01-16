@@ -77,6 +77,8 @@ pub(crate) struct Changes {
     pub updates: HashMap<Key, Attributes>,
     pub removes: HashSet<Key>,
     pub glyphs: HashMap<Key, GlyphHash>,
+    pub bounds: HashMap<Entity, Area>,
+    pub removed_bounds: HashSet<Entity>,
 }
 impl Changes {
     pub(crate) fn new() -> Self {
@@ -85,6 +87,8 @@ impl Changes {
             updates: HashMap::new(),
             removes: HashSet::new(),
             glyphs: HashMap::new(),
+            bounds: HashMap::new(),
+            removed_bounds: HashSet::new(),
         }
     }
 }
@@ -94,6 +98,7 @@ pub(crate) struct Cache {
     pub glyphs: HashMap<Key, GlyphHash>,
     pub attributes: HashMap<Key, Attributes>,
     pub changes: Changes,
+    pub bounds: HashMap<Entity, Area>,
 }
 impl Cache {
     pub(crate) fn new() -> Self {
@@ -101,6 +106,7 @@ impl Cache {
             glyphs: HashMap::new(),
             attributes: HashMap::new(),
             changes: Changes::new(),
+            bounds: HashMap::new(),
         }
     }
 }
@@ -183,6 +189,7 @@ pub(crate) struct Rasterization {
     pub(crate) instances: InstanceBuffer,
     pub(crate) texture_atlas: TextureAtlas,
     pub(crate) bind_group: wgpu::BindGroup,
+    pub(crate) bounds: Option<Area>,
 }
 #[derive(Resource)]
 pub struct Renderer {
@@ -357,7 +364,8 @@ pub(crate) fn emit(
     >,
     font: Res<Font>,
 ) {
-    for (entity, text, mut placer, mut keys, position, area, depth, color, scale) in text.iter_mut() {
+    for (entity, text, mut placer, mut keys, position, area, depth, color, scale) in text.iter_mut()
+    {
         placer.placer.clear();
         placer.placer.append(
             font.font_slice(),
@@ -365,6 +373,15 @@ pub(crate) fn emit(
         );
         let mut retained_keys = HashSet::new();
         let mut added_keys = HashSet::new();
+        if let Some(bound) = area {
+            cache.bounds.insert(entity, *bound);
+            cache.changes.bounds.insert(entity, *bound);
+        } else {
+            let bound = cache.bounds.remove(&entity);
+            if let Some(b) = bound {
+                cache.changes.removed_bounds.insert(entity);
+            }
+        }
         for glyph in placer.placer.glyphs() {
             let key = Key::new(entity, TextOffset(glyph.byte_offset));
             if cache.attributes.contains_key(&key) {
@@ -403,7 +420,11 @@ impl Attach for Renderer {
             .startup
             .schedule
             .add_system_to_stage(Stage::Before, compute_setup);
-        engen.compute.main.schedule.add_system_to_stage(Stage::After, emit);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, emit);
         engen
             .render
             .startup
