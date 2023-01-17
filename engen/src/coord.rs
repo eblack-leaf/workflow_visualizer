@@ -138,7 +138,14 @@ impl From<((f32, f32), (f32, f32))> for Section {
         }
     }
 }
-
+impl From<(Position, Area)> for Section {
+    fn from(data: (Position, Area)) -> Self {
+        Self {
+            position: data.0,
+            area: data.1,
+        }
+    }
+}
 #[derive(Bundle, Clone, Default)]
 pub struct Panel {
     #[bundle]

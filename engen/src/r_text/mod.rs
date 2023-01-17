@@ -1,18 +1,24 @@
 mod font;
+mod index;
+
 use crate::canvas::Viewport;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::task::Stage;
-use crate::{Area, Attach, Canvas, Color, Depth, Engen, Position, Task};
+use crate::{Area, Attach, Canvas, Color, Depth, Engen, Position, Section, Task};
 use bevy_ecs::prelude::{
-    Bundle, Changed, Commands, Component, Entity, Query, Res, ResMut, Resource,
+    Added, Bundle, Changed, Commands, Component, Entity, Query, RemovedComponents, Res, ResMut,
+    Resource,
 };
 pub(crate) use font::Font;
 use std::collections::{HashMap, HashSet};
 use wgpu::util::DeviceExt;
 use wgpu::{
-    include_wgsl, vertex_attr_array, BufferAddress, SamplerBindingType, TextureSampleType,
-    TextureViewDimension, VertexAttribute, VertexState,
+    include_wgsl, vertex_attr_array, BufferAddress, Extent3d, SamplerBindingType, TextureDimension,
+    TextureFormat, TextureSampleType, TextureUsages, TextureViewDescriptor, TextureViewDimension,
+    VertexAttribute, VertexState,
 };
+use crate::r_text::index::Indexer;
+
 #[derive(Bundle)]
 pub struct TextBundle {
     pub text: Text,
@@ -72,18 +78,31 @@ pub struct Placer {
 pub(crate) struct Keys {
     pub keys: HashSet<Key>,
 }
+pub(crate) struct Alignment {
+    pub(crate) dimensions: [f32; 2],
+}
+impl Alignment {
+    pub(crate) fn new(dimensions: [f32; 2]) -> Self {
+        Self { dimensions }
+    }
+}
+#[derive(Resource)]
 pub(crate) struct Changes {
-    pub adds: Vec<Attributes>,
+    pub added_text_entities: HashMap<Entity, (usize, Alignment)>,
+    pub removed_text_entities: HashSet<Entity>,
+    pub adds: HashMap<Key, Attributes>,
     pub updates: HashMap<Key, Attributes>,
     pub removes: HashSet<Key>,
     pub glyphs: HashMap<Key, GlyphHash>,
-    pub bounds: HashMap<Entity, Area>,
+    pub bounds: HashMap<Entity, Section>,
     pub removed_bounds: HashSet<Entity>,
 }
 impl Changes {
     pub(crate) fn new() -> Self {
         Self {
-            adds: Vec::new(),
+            added_text_entities: HashMap::new(),
+            removed_text_entities: HashSet::new(),
+            adds: HashMap::new(),
             updates: HashMap::new(),
             removes: HashSet::new(),
             glyphs: HashMap::new(),
@@ -97,15 +116,13 @@ pub(crate) type GlyphHash = fontdue::layout::GlyphRasterConfig;
 pub(crate) struct Cache {
     pub glyphs: HashMap<Key, GlyphHash>,
     pub attributes: HashMap<Key, Attributes>,
-    pub changes: Changes,
-    pub bounds: HashMap<Entity, Area>,
+    pub bounds: HashMap<Entity, Section>,
 }
 impl Cache {
     pub(crate) fn new() -> Self {
         Self {
             glyphs: HashMap::new(),
             attributes: HashMap::new(),
-            changes: Changes::new(),
             bounds: HashMap::new(),
         }
     }
@@ -113,7 +130,7 @@ impl Cache {
 pub(crate) struct InstanceBuffer {
     pub(crate) cpu: Vec<Instance>,
     pub(crate) gpu: wgpu::Buffer,
-    pub(crate) supported_instances: usize,
+    pub(crate) indexer: Indexer<Key>,
 }
 impl InstanceBuffer {
     pub(crate) fn new(canvas: &Canvas, initial_supported_instances: usize) -> Self {
@@ -126,7 +143,7 @@ impl InstanceBuffer {
                 usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                 mapped_at_creation: false,
             }),
-            supported_instances: initial_supported_instances,
+            indexer: Indexer::new(initial_supported_instances),
         }
     }
     pub(crate) fn count(&self) -> usize {
@@ -181,25 +198,83 @@ pub struct Instance {
     pub tex_coords: TexCoords,
 }
 pub(crate) struct TextureAtlas {
-    // align by character dimensions
     pub(crate) texture: wgpu::Texture,
     pub(crate) view: wgpu::TextureView,
+}
+impl TextureAtlas {
+    pub(crate) fn new(
+        canvas: &Canvas,
+        alignment: Alignment,
+        initial_supported_instances: usize,
+    ) -> Self {
+        let mut dimension = initial_supported_instances.sqrt();
+        while dimension.pow(2) > initial_supported_instances {
+            dimension += 1;
+        }
+        let texture_width = dimension * alignment[0];
+        let texture_height = dimension * alignment[1];
+        texture_width.min(2048);// replace with hardware max
+        texture_height.min(2048);
+        let texture_descriptor = wgpu::TextureDescriptor {
+            label: Some("texture atlas"),
+            size: Extent3d {
+                width: texture_width,
+                height: texture_height,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::R8Uint,
+            usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+        };
+        let texture = canvas.device.create_texture(&texture_descriptor);
+        let view = texture.create_view(&TextureViewDescriptor::default());
+        Self { texture, view }
+    }
 }
 pub(crate) struct Rasterization {
     pub(crate) instances: InstanceBuffer,
     pub(crate) texture_atlas: TextureAtlas,
     pub(crate) bind_group: wgpu::BindGroup,
-    pub(crate) bounds: Option<Area>,
+    pub(crate) bounds: Option<Section>,
+}
+impl Rasterization {
+    pub(crate) fn new(
+        canvas: &Canvas,
+        bind_group_layout: &wgpu::BindGroupLayout,
+        alignment: Alignment,
+        initial_supported_instances: usize,
+    ) -> Self {
+        let instances = InstanceBuffer::new(canvas, initial_supported_instances);
+        let texture_atlas = TextureAtlas::new(canvas, alignment, initial_supported_instances);
+        let descriptor = wgpu::BindGroupDescriptor {
+            label: Some("texture atlas bind group"),
+            layout: bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(&texture_atlas.view),
+            }],
+        };
+        let bind_group = canvas.device.create_bind_group(&descriptor);
+        Self {
+            instances,
+            texture_atlas,
+            bind_group,
+            bounds: None,
+        }
+    }
 }
 #[derive(Resource)]
 pub struct Renderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) rasterizations: HashMap<Entity, Rasterization>,
+    pub(crate) rasterization_bind_group_layout: wgpu::BindGroupLayout,
     pub(crate) sampler: wgpu::Sampler,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
 }
-pub fn setup(canvas: Res<Canvas>, mut cmd: Commands) {
+pub fn render_setup(canvas: Res<Canvas>, mut cmd: Commands) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("sampler bind group layout"),
         entries: &[wgpu::BindGroupLayoutEntry {
@@ -337,17 +412,20 @@ pub fn setup(canvas: Res<Canvas>, mut cmd: Commands) {
         pipeline,
         vertex_buffer,
         rasterizations,
+        rasterization_bind_group_layout,
         sampler,
         sampler_bind_group,
     });
     cmd.insert_resource(Extraction::new());
 }
 pub(crate) fn compute_setup(mut cmd: Commands) {
+    cmd.insert_resource(Changes::new());
     cmd.insert_resource(Cache::new());
     cmd.insert_resource(Font::default());
 }
 pub(crate) fn emit(
     mut cache: ResMut<Cache>,
+    mut changes: ResMut<Changes>,
     mut text: Query<
         (
             Entity,
@@ -360,11 +438,12 @@ pub(crate) fn emit(
             &Color,
             &Scale,
         ),
-        (Changed<Placer>),
+        (Changed<Text>),
     >,
     font: Res<Font>,
 ) {
-    for (entity, text, mut placer, mut keys, position, area, depth, color, scale) in text.iter_mut()
+    for (entity, text, mut placer, mut keys, position, maybe_area, depth, color, scale) in
+        text.iter_mut()
     {
         placer.placer.clear();
         placer.placer.append(
@@ -373,35 +452,38 @@ pub(crate) fn emit(
         );
         let mut retained_keys = HashSet::new();
         let mut added_keys = HashSet::new();
-        if let Some(bound) = area {
-            cache.bounds.insert(entity, *bound);
-            cache.changes.bounds.insert(entity, *bound);
+        if let Some(area) = maybe_area {
+            cache.bounds.insert(entity, (*position, *area).into());
+            changes.bounds.insert(entity, (*position, *area).into());
         } else {
-            let bound = cache.bounds.remove(&entity);
-            if let Some(b) = bound {
-                cache.changes.removed_bounds.insert(entity);
+            let old_bound = cache.bounds.remove(&entity);
+            if old_bound.is_some() {
+                changes.removed_bounds.insert(entity);
             }
         }
         for glyph in placer.placer.glyphs() {
             let key = Key::new(entity, TextOffset(glyph.byte_offset));
+            let current_attributes = Attributes::new(
+                *position + (glyph.x, glyph.y).into(),
+                (glyph.width, glyph.height).into(),
+                *depth,
+                *color,
+            );
             if cache.attributes.contains_key(&key) {
                 retained_keys.insert(key);
                 let cached_glyph = cache.glyphs.get(&key).expect("no cached glyph for key");
                 if *cached_glyph != glyph.key {
-                    cache.changes.glyphs.insert(key, glyph.key);
+                    changes.glyphs.insert(key, glyph.key);
                 }
                 let cached_attributes = cache.attributes.get(&key).expect("no cached attributes");
-                let character_dimensions = font.character_dimensions(glyph.parent, scale.px());
-                let current_attributes = Attributes::new(
-                    *position + (glyph.x, glyph.y).into(),
-                    (character_dimensions[0], character_dimensions[1]).into(),
-                    *depth,
-                    *color,
-                );
-                // tolerance check each value to decide if should be replaced ond go to cache.changes
+                // tolerance check each value to decide if should be replaced ond go to cache.changes.updates
+                // also store in cache if changed
             } else {
-                // add new request for instance
                 added_keys.insert(key);
+                changes.adds.insert(key, current_attributes);
+                cache.attributes.insert(key, current_attributes);
+                changes.glyphs.insert(key, glyph.key);
+                cache.glyphs.insert(key, glyph.key);
             }
         }
         let keys_to_remove = keys
@@ -409,8 +491,47 @@ pub(crate) fn emit(
             .difference(&retained_keys)
             .copied()
             .collect::<HashSet<Key>>();
-        cache.changes.removes.extend(keys_to_remove);
+        changes.removes.extend(keys_to_remove);
         keys.keys.extend(added_keys);
+    }
+}
+pub(crate) fn text_entity_changes(
+    added: Query<(Entity, &Text, &Scale), (Added<Text>)>,
+    removed: RemovedComponents<Text>,
+    mut changes: ResMut<Changes>,
+    font: Res<Font>,
+) {
+    for (entity, text, scale) in added.iter() {
+        changes.added_text_entities.insert(
+            entity,
+            (
+                text.string.len(),
+                Alignment::new(font.character_dimensions('a', scale.px())),
+            ),
+        );
+    }
+    for entity in removed.iter() {
+        changes.removed_text_entities.insert(entity);
+    }
+}
+pub(crate) fn add_remove_rasterizations(
+    mut changes: ResMut<Changes>,
+    renderer: ResMut<Renderer>,
+    canvas: Res<Canvas>,
+) {
+    for (entity, (length, alignment)) in changes.added_text_entities.drain() {
+        renderer.rasterizations.insert(
+            entity,
+            Rasterization::new(
+                &canvas,
+                &renderer.rasterization_bind_group_layout,
+                alignment,
+                length,
+            ),
+        );
+    }
+    for entity in changes.removed_text_entities.drain() {
+        renderer.rasterizations.remove(&entity);
     }
 }
 impl Attach for Renderer {
@@ -424,12 +545,22 @@ impl Attach for Renderer {
             .compute
             .main
             .schedule
-            .add_system_to_stage(Stage::After, emit);
+            .add_system_to_stage(Stage::After, text_entity_changes);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Last, emit);
         engen
             .render
             .startup
             .schedule
-            .add_system_to_stage(Stage::Before, setup);
+            .add_system_to_stage(Stage::Before, render_setup);
+        engen
+            .render
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Before, add_remove_rasterizations);
     }
 }
 #[derive(Resource)]
@@ -448,28 +579,52 @@ impl Render for Renderer {
     where
         Self: Sized,
     {
-        let mut cache = compute
+        let mut changes = compute
             .container
-            .get_resource_mut::<Cache>()
-            .expect("no text cache attached");
+            .get_resource_mut::<Changes>()
+            .expect("no text changes attached");
         render
             .container
             .get_resource_mut::<Extraction>()
             .expect("no extraction attached")
             .changes
-            .adds = cache.changes.adds.drain(..).collect();
+            .adds = changes.adds.drain().collect();
         render
             .container
             .get_resource_mut::<Extraction>()
             .expect("no extraction attached")
             .changes
-            .updates = cache.changes.updates.drain().collect();
+            .updates = changes.updates.drain().collect();
         render
             .container
             .get_resource_mut::<Extraction>()
             .expect("no extraction attached")
             .changes
-            .removes = cache.changes.removes.drain().collect();
+            .removes = changes.removes.drain().collect();
+        render
+            .container
+            .get_resource_mut::<Extraction>()
+            .expect("no extraction attached")
+            .changes
+            .glyphs = changes.glyphs.drain().collect();
+        render
+            .container
+            .get_resource_mut::<Extraction>()
+            .expect("no extraction attached")
+            .changes
+            .bounds = changes.bounds.drain().collect();
+        render
+            .container
+            .get_resource_mut::<Extraction>()
+            .expect("no extraction attached")
+            .changes
+            .added_text_entities = changes.added_text_entities.drain().collect();
+        render
+            .container
+            .get_resource_mut::<Extraction>()
+            .expect("no extraction attached")
+            .changes
+            .removed_text_entities = changes.removed_text_entities.drain().collect();
     }
 
     fn phase() -> RenderPhase {
@@ -495,7 +650,14 @@ impl Render for Renderer {
                 render_pass_handle
                     .0
                     .set_bind_group(2, &rasterization.bind_group, &[]);
-
+                if let Some(bound) = &rasterization.bounds {
+                    render_pass_handle.0.set_scissor_rect(
+                        bound.position.x as u32,
+                        bound.position.y as u32,
+                        bound.area.width as u32,
+                        bound.area.height as u32,
+                    );
+                }
                 render_pass_handle.0.draw(
                     0..GLYPH_AABB.len() as u32,
                     0..rasterization.instances.count() as u32,

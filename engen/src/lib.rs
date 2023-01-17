@@ -3,6 +3,7 @@ mod color;
 #[allow(unused)]
 mod coord;
 mod icon;
+#[allow(unused)]
 mod instance;
 #[allow(unused)]
 mod r_text;
