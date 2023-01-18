@@ -2,6 +2,7 @@ mod font;
 mod index;
 
 use crate::canvas::Viewport;
+use crate::r_text::index::Indexer;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::task::Stage;
 use crate::{Area, Attach, Canvas, Color, Depth, Engen, Position, Section, Task};
@@ -17,7 +18,6 @@ use wgpu::{
     TextureFormat, TextureSampleType, TextureUsages, TextureViewDescriptor, TextureViewDimension,
     VertexAttribute, VertexState,
 };
-use crate::r_text::index::Indexer;
 
 #[derive(Bundle)]
 pub struct TextBundle {
@@ -191,6 +191,11 @@ impl Attributes {
 pub struct TexCoords {
     pub coords: [f32; 4],
 }
+impl TexCoords {
+    pub fn new(coords: [f32; 4]) -> Self {
+        Self { coords }
+    }
+}
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 pub struct Instance {
@@ -200,6 +205,86 @@ pub struct Instance {
 pub(crate) struct TextureAtlas {
     pub(crate) texture: wgpu::Texture,
     pub(crate) view: wgpu::TextureView,
+    pub(crate) grid: Grid,
+}
+#[derive(Hash, Eq, PartialEq, Copy, Clone)]
+pub(crate) struct GridLocation {
+    pub(crate) x: usize,
+    pub(crate) y: usize,
+}
+impl GridLocation {
+    pub(crate) fn new(x: usize, y: usize) -> Self {
+        Self { x, y }
+    }
+}
+pub(crate) type Bitmap = Vec<u8>;
+pub(crate) struct GridEntry {
+    pub(crate) bitmap: Bitmap,
+    pub(crate) area: Area,
+}
+impl GridEntry {
+    pub(crate) fn new(bitmap: Bitmap, area: Area) -> Self {
+        Self { bitmap, area }
+    }
+}
+pub(crate) struct Grid {
+    pub(crate) grid: HashMap<GridLocation, GridEntry>,
+    pub(crate) alignment: Alignment,
+    pub(crate) logical_dimension: usize,
+    pub(crate) next_location: GridLocation,
+}
+impl Grid {
+    pub(crate) fn new(alignment: Alignment, logical_dimension: usize) -> Self {
+        Self {
+            grid: HashMap::new(),
+            alignment,
+            logical_dimension,
+            next_location: GridLocation::new(0, 0),
+        }
+    }
+    pub(crate) fn position(&self, grid_location: GridLocation) -> Position {
+        (
+            grid_location.x as f32 * self.alignment.dimensions[0],
+            grid_location.y as f32 * self.alignment.dimensions[1],
+        )
+            .into()
+    }
+    pub(crate) fn total_x(&self) -> f32 {
+        self.alignment.dimensions[0] * self.logical_dimension as f32
+    }
+    pub(crate) fn total_y(&self) -> f32 {
+        self.alignment.dimensions[1] * self.logical_dimension as f32
+    }
+    pub(crate) fn place(&mut self, grid_entry: GridEntry) -> TexCoords {
+        let position = self.position(self.next_location);
+        let normalized_position: Position =
+            (position.x / self.total_x(), position.y / self.total_y()).into();
+        let normalized_area: Area = (
+            grid_entry.area.width / self.total_x(),
+            grid_entry.area.height / self.total_y(),
+        )
+            .into();
+        self.grid.insert(self.next_location, grid_entry);
+        let next = match self.next_location.x + 1 == self.logical_dimension {
+            true => {
+                let x = 0;
+                let y = self.next_location.y.min(self.logical_dimension - 1);
+                GridLocation::new(x, y)
+            }
+            false => {
+                let x = self.next_location.x + 1;
+                let y = self.next_location.y;
+                GridLocation::new(x, y)
+            }
+        };
+        self.next_location = next;
+        TexCoords::new([
+            normalized_position.x,
+            normalized_position.y,
+            normalized_position.x + normalized_area.width,
+            normalized_position.y + normalized_area.height,
+        ])
+    }
 }
 impl TextureAtlas {
     pub(crate) fn new(
@@ -207,14 +292,19 @@ impl TextureAtlas {
         alignment: Alignment,
         initial_supported_instances: usize,
     ) -> Self {
-        let mut dimension = initial_supported_instances.sqrt();
-        while dimension.pow(2) > initial_supported_instances {
-            dimension += 1;
+        let mut logical_dimension = (initial_supported_instances as f32).sqrt() as usize;
+        while logical_dimension.pow(2) > initial_supported_instances {
+            logical_dimension += 1;
         }
-        let texture_width = dimension * alignment[0];
-        let texture_height = dimension * alignment[1];
-        texture_width.min(2048);// replace with hardware max
-        texture_height.min(2048);
+        let texture_width: u32 = (logical_dimension * alignment.dimensions[0] as usize) as u32;
+        let texture_height: u32 = (logical_dimension * alignment.dimensions[1] as usize) as u32;
+        let hardware_max = canvas.options.limits.max_texture_dimension_2d;
+        if texture_width > hardware_max {
+            panic!("requested larger than possible texture")
+        }
+        if texture_height > hardware_max {
+            panic!("requested larger than possible texture")
+        }
         let texture_descriptor = wgpu::TextureDescriptor {
             label: Some("texture atlas"),
             size: Extent3d {
@@ -230,7 +320,12 @@ impl TextureAtlas {
         };
         let texture = canvas.device.create_texture(&texture_descriptor);
         let view = texture.create_view(&TextureViewDescriptor::default());
-        Self { texture, view }
+        let grid = Grid::new(alignment, logical_dimension);
+        Self {
+            texture,
+            view,
+            grid,
+        }
     }
 }
 pub(crate) struct Rasterization {
@@ -516,19 +611,17 @@ pub(crate) fn text_entity_changes(
 }
 pub(crate) fn add_remove_rasterizations(
     mut changes: ResMut<Changes>,
-    renderer: ResMut<Renderer>,
+    mut renderer: ResMut<Renderer>,
     canvas: Res<Canvas>,
 ) {
     for (entity, (length, alignment)) in changes.added_text_entities.drain() {
-        renderer.rasterizations.insert(
-            entity,
-            Rasterization::new(
-                &canvas,
-                &renderer.rasterization_bind_group_layout,
-                alignment,
-                length,
-            ),
+        let rasterization = Rasterization::new(
+            &canvas,
+            &renderer.rasterization_bind_group_layout,
+            alignment,
+            length,
         );
+        renderer.rasterizations.insert(entity, rasterization);
     }
     for entity in changes.removed_text_entities.drain() {
         renderer.rasterizations.remove(&entity);

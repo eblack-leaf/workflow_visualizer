@@ -17,6 +17,7 @@ pub struct Canvas {
     pub queue: wgpu::Queue,
     pub surface_configuration: wgpu::SurfaceConfiguration,
     pub viewport: Viewport,
+    pub options: CanvasOptions,
 }
 impl Canvas {
     pub async fn new(window: &Window, options: CanvasOptions) -> Self {
@@ -64,6 +65,7 @@ impl Canvas {
             queue,
             surface_configuration,
             viewport,
+            options,
         }
     }
     pub(crate) fn adjust(&mut self, width: u32, height: u32) {
