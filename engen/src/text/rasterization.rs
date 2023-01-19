@@ -270,25 +270,25 @@ pub(crate) fn rasterize(
     }
     for (entity, glyphs) in extraction.changes.glyphs.iter() {
         for (key, glyph) in glyphs.iter() {
-            let rasterizations = renderer
+            let rasterization = renderer
                 .rasterizations
                 .get_mut(&entity)
                 .expect("no rasterization for entity");
-            rasterizations.keyed_glyph_hashes.insert(*key, glyph.hash);
-            if rasterizations.glyph_locations.contains_key(&glyph.hash) {
-                rasterizations
+            rasterization.keyed_glyph_hashes.insert(*key, glyph.hash);
+            if rasterization.glyph_locations.contains_key(&glyph.hash) {
+                rasterization
                     .references
                     .get_mut(&glyph.hash)
                     .expect("no references")
                     .increment();
             } else {
                 let (metrics, bitmap) = font.font().rasterize(glyph.character, glyph.scale.px());
-                rasterizations.add(
+                rasterization.add(
                     &canvas,
                     GridEntry::new(bitmap, (metrics.width, metrics.height).into()),
                     glyph.hash,
                 );
-                rasterizations
+                rasterization
                     .references
                     .insert(glyph.hash, GlyphReference::new());
             }

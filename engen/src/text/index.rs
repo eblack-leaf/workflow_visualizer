@@ -57,9 +57,6 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn exists(&self, key: Key) -> bool {
         self.indices.contains_key(&key)
     }
-    pub(crate) fn should_grow(&self) -> bool {
-        self.count > self.max
-    }
     pub(crate) fn remove(&mut self, key: &Key) -> Option<Index> {
         if let Some(index) = self.indices.remove(key) {
             self.holes.insert(index);
@@ -70,9 +67,17 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn get_index(&self, key: Key) -> Option<Index> {
         self.indices.get(&key).copied()
     }
-    pub(crate) fn grow(&mut self, growth_factor: u32) {
-        while self.count > self.max {
-            self.max += growth_factor;
+    pub(crate) fn total_instances(&self) -> u32 {
+        self.count - self.holes.len() as u32
+    }
+    pub(crate) fn growth_check(&mut self, num_to_add: u32, num_to_remove: u32) -> Option<u32> {
+        let projected_total = self.total_instances() + num_to_add - num_to_remove;
+        if projected_total > self.max {
+            while projected_total > self.max {
+                self.max += 1; // replace with growth factor
+            }
+            return Some(self.max);
         }
+        None
     }
 }

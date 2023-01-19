@@ -64,12 +64,37 @@ pub(crate) struct InstanceBuffer {
     pub(crate) gpu: wgpu::Buffer,
     pub(crate) indexer: Indexer<Key>,
     pub(crate) write: HashMap<Index, Instance>,
+    pub(crate) keyed_indexes: HashMap<Key, Index>,
 }
 
 impl InstanceBuffer {
-    pub(crate) fn add(&mut self, key: Key, instance: Instance) {}
-    pub(crate) fn write(&mut self, canvas: &Canvas) {}
-    pub(crate) fn update(&mut self, key: Key, attributes: Attributes) {}
+    pub(crate) fn update_non_attributes(&self, key: Key, area: Area, tex_coords: TexCoords) {
+        todo!()
+    }
+    pub(crate) fn add(&mut self, key: Key, instance: Instance) {
+        let index = self.indexer.next(key);
+        self.keyed_indexes.insert(key, index);
+        self.queue_write(index, instance);
+    }
+    pub(crate) fn write(&mut self, canvas: &Canvas) {
+        for (index, instance) in self.write.iter() {
+            self.cpu.insert(index.value as usize, *instance);
+            let offset =
+                (std::mem::size_of::<Instance>() as u32 * index.value) as wgpu::BufferAddress;
+            canvas
+                .queue
+                .write_buffer(&self.gpu, offset, bytemuck::cast_slice(&[*instance]));
+        }
+    }
+    pub(crate) fn update(&mut self, key: Key, attributes: Attributes) {
+        let index = self.keyed_indexes.get(&key).expect("no index for key");
+        let mut instance: Instance = *self
+            .cpu
+            .get(index.value as usize)
+            .expect("no instance present");
+        instance.attributes = attributes;
+        self.queue_write(*index, instance);
+    }
     pub(crate) fn remove(&mut self, key: Key) {
         let removed_index = self.indexer.remove(&key);
         if let Some(index) = removed_index {
@@ -77,7 +102,7 @@ impl InstanceBuffer {
         }
     }
     pub(crate) fn queue_write(&mut self, index: Index, instance: Instance) {
-        todo!()
+        self.write.insert(index, instance);
     }
     pub(crate) fn new(canvas: &Canvas, initial_supported_instances: u32) -> Self {
         Self {
@@ -91,6 +116,7 @@ impl InstanceBuffer {
             }),
             indexer: Indexer::new(initial_supported_instances),
             write: HashMap::new(),
+            keyed_indexes: HashMap::new(),
         }
     }
     pub(crate) fn count(&self) -> usize {

@@ -74,6 +74,19 @@ pub(crate) fn integrate_extraction(
             rasterization.instances.update(*key, *attributes);
         }
     }
+    for (entity, glyph_changes) in extraction.changes.glyphs.iter() {
+        let rasterization = renderer
+            .rasterizations
+            .get_mut(&entity)
+            .expect("no rasterization");
+        for (key, _glyph) in glyph_changes.iter() {
+            let area = ();
+            let tex_coords = ();
+            rasterization
+                .instances
+                .update_non_attributes(*key, area, tex_coords);
+        }
+    }
     for (_entity, mut rasterization) in renderer.rasterizations.iter_mut() {
         rasterization.instances.write(&canvas);
     }

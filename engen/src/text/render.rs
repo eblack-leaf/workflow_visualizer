@@ -1,11 +1,11 @@
 use crate::canvas::Viewport;
+use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::changes::Changes;
 use crate::text::extract::Extraction;
 use crate::text::font::Font;
 use crate::text::instance::Instance;
 use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::text::Renderer;
-use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::{Canvas, Task};
 use bevy_ecs::prelude::{Commands, Res, Resource};
 use std::collections::{HashMap, HashSet};

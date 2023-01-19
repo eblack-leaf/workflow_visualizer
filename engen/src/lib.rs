@@ -5,10 +5,10 @@ mod coord;
 mod icon;
 #[allow(unused)]
 mod instance;
-#[allow(unused)]
-mod text;
 mod render;
 mod task;
+#[allow(unused)]
+mod text;
 mod theme;
 mod uniform;
 use crate::canvas::CanvasWindow;

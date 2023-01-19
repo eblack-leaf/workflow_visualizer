@@ -38,11 +38,10 @@ impl Font {
         [metrics.advance_width, metrics.advance_height]
     }
 }
-
 impl Default for Font {
     fn default() -> Self {
         Font::new(
-            include_bytes!("../r_text/JetBrainsMono-Medium.ttf").as_slice(),
+            include_bytes!("./JetBrainsMono-Medium.ttf").as_slice(),
             15u32,
         )
     }

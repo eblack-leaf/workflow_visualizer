@@ -6,7 +6,7 @@ mod attach;
 mod cache;
 mod changes;
 mod component;
-mod compute_instrumentation;
+mod compute;
 mod extract;
 mod font;
 mod grow;
