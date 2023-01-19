@@ -16,7 +16,7 @@ impl Font {
             font_storage: [fdFont::from_bytes(
                 font_data,
                 FontSettings {
-                    scale: opt_scale.into().scale,
+                    scale: opt_scale.into().px(),
                     ..FontSettings::default()
                 },
             )

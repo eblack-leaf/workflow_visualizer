@@ -3,27 +3,27 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub(crate) struct Index {
-    pub(crate) value: usize,
+    pub(crate) value: u32,
 }
 impl Index {
-    pub(crate) fn new(value: usize) -> Self {
+    pub(crate) fn new(value: u32) -> Self {
         Self { value }
     }
 }
-impl From<usize> for Index {
-    fn from(value: usize) -> Self {
+impl From<u32> for Index {
+    fn from(value: u32) -> Self {
         Self::new(value)
     }
 }
 #[derive(Resource)]
 pub(crate) struct Indexer<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
     pub(crate) indices: HashMap<Key, Index>,
-    pub(crate) count: usize,
-    pub(crate) max: usize,
+    pub(crate) count: u32,
+    pub(crate) max: u32,
     pub(crate) holes: HashSet<Index>,
 }
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
-    pub(crate) fn new(max: usize) -> Self {
+    pub(crate) fn new(max: u32) -> Self {
         Self {
             indices: HashMap::new(),
             count: 0,
@@ -31,10 +31,10 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
             holes: HashSet::new(),
         }
     }
-    pub(crate) fn max(&self) -> usize {
+    pub(crate) fn max(&self) -> u32 {
         self.max
     }
-    pub(crate) fn count(&self) -> usize {
+    pub(crate) fn count(&self) -> u32 {
         self.count
     }
     pub(crate) fn current_index(&self) -> Option<Index> {
@@ -70,7 +70,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn get_index(&self, key: Key) -> Option<Index> {
         self.indices.get(&key).copied()
     }
-    pub(crate) fn grow(&mut self, growth_factor: usize) {
+    pub(crate) fn grow(&mut self, growth_factor: u32) {
         while self.count > self.max {
             self.max += growth_factor;
         }

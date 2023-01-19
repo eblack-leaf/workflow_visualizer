@@ -112,7 +112,7 @@ impl From<u32> for Depth {
     }
 }
 
-#[derive(Bundle, Clone, Default)]
+#[derive(Bundle, Copy, Clone, Default)]
 pub struct Section {
     pub position: Position,
     pub area: Area,
@@ -127,6 +127,18 @@ impl Section {
     }
     pub fn height(&self) -> f32 {
         return self.area.height;
+    }
+    pub fn left(&self) -> f32 {
+        return self.position.x;
+    }
+    pub fn right(&self) -> f32 {
+        self.position.x + self.area.width
+    }
+    pub fn top(&self) -> f32 {
+        self.position.y
+    }
+    pub fn bottom(&self) -> f32 {
+        self.position.y + self.area.height
     }
 }
 

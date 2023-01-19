@@ -1,7 +1,16 @@
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
-use bevy_ecs::prelude::Resource;
+use bevy_ecs::prelude::{Component, Resource};
 use nalgebra::matrix;
+#[derive(Component, Copy, Clone)]
+pub struct Visibility {
+    pub visible: bool,
+}
+impl Visibility {
+    pub fn new() -> Self {
+        Self { visible: false }
+    }
+}
 #[derive(Resource)]
 pub struct Viewport {
     pub cpu: CpuViewport,
