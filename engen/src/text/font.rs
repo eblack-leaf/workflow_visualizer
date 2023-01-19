@@ -7,11 +7,11 @@ use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
 #[derive(Resource)]
-pub struct Font {
+pub struct MonoSpacedFont {
     pub font_storage: [fdFont; 1],
 }
 
-impl Font {
+impl MonoSpacedFont {
     pub fn new<Data: Deref<Target = [u8]>, T: Into<Scale>>(font_data: Data, opt_scale: T) -> Self {
         Self {
             font_storage: [fdFont::from_bytes(
@@ -38,9 +38,9 @@ impl Font {
         [metrics.advance_width, metrics.advance_height]
     }
 }
-impl Default for Font {
+impl Default for MonoSpacedFont {
     fn default() -> Self {
-        Font::new(
+        MonoSpacedFont::new(
             include_bytes!("./JetBrainsMono-Medium.ttf").as_slice(),
             15u32,
         )

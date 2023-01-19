@@ -2,7 +2,7 @@ use crate::canvas::Visibility;
 use crate::text::cache::Cache;
 use crate::text::changes::Changes;
 use crate::text::component::{Key, Keys, Placer, Text, TextOffset};
-use crate::text::font::Font;
+use crate::text::font::MonoSpacedFont;
 use crate::text::instance::Attributes;
 use crate::text::rasterization::{Alignment, Glyph};
 use crate::text::Scale;
@@ -15,7 +15,7 @@ use std::collections::{HashMap, HashSet};
 pub(crate) fn compute_setup(mut cmd: Commands) {
     cmd.insert_resource(Changes::new());
     cmd.insert_resource(Cache::new());
-    cmd.insert_resource(Font::default());
+    cmd.insert_resource(MonoSpacedFont::default());
 }
 
 pub(crate) fn update_attrs(
@@ -43,9 +43,9 @@ pub(crate) fn push_compute_changes(
             &Visibility,
         ),
         // if changed position or color or depth try to just write to changes.updates if present
-        (Or<(Changed<Text>, Changed<Area>)>),
+        (Or<(Changed<Text>, Changed<Area>, Changed<Scale>)>),
     >,
-    font: Res<Font>,
+    font: Res<MonoSpacedFont>,
 ) {
     for (
         entity,
@@ -64,7 +64,11 @@ pub(crate) fn push_compute_changes(
             placer.placer.clear();
             placer.placer.append(
                 font.font_slice(),
-                &fontdue::layout::TextStyle::new(text.string.as_str(), scale.px(), Font::index()),
+                &fontdue::layout::TextStyle::new(
+                    text.string.as_str(),
+                    scale.px(),
+                    MonoSpacedFont::index(),
+                ),
             );
             let mut retained_keys = HashSet::new();
             let mut added_keys = HashSet::new();
@@ -135,6 +139,11 @@ pub(crate) fn push_compute_changes(
                 .copied()
                 .collect::<HashSet<Key>>();
             removes.extend(keys_to_remove);
+            for remove in removes.iter() {
+                keys.keys.remove(remove);
+                cache.glyphs.remove(remove);
+                cache.attributes.remove(remove);
+            }
             if !removes.is_empty() {
                 changes.removes.insert(entity, removes);
             }
@@ -162,21 +171,28 @@ pub(crate) fn visibility(
 }
 
 pub(crate) fn text_entity_changes(
-    added: Query<(Entity, &Text, &Scale), (Added<Text>)>,
+    added: Query<(Entity, &Text, &Scale), (Or<(Added<Text>, Changed<Scale>)>)>,
     removed: RemovedComponents<Text>,
     mut changes: ResMut<Changes>,
-    font: Res<Font>,
+    mut cache: ResMut<Cache>,
+    font: Res<MonoSpacedFont>,
 ) {
     for (entity, text, scale) in added.iter() {
+        let different_letter_count = text.string.len() as u32; // count unique letters from str
+                                                               // not just total length
         changes.added_text_entities.insert(
             entity,
             (
-                text.string.len() as u32,
+                different_letter_count,
                 Alignment::new(font.character_dimensions('a', scale.px())),
             ),
         );
+        // clear cached values that have entity in key
+        // reset keys of component
+        // render side will be recreated so dont need anything there
     }
     for entity in removed.iter() {
         changes.removed_text_entities.insert(entity);
+        // clear cached values that have entity in key
     }
 }

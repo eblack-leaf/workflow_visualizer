@@ -1,6 +1,6 @@
 use crate::text::component::Key;
 use crate::text::extract::Extraction;
-use crate::text::font::Font;
+use crate::text::font::MonoSpacedFont;
 use crate::text::instance::{InstanceBuffer, TexCoords};
 use crate::text::{Renderer, Scale};
 use crate::{Area, Canvas, Position, Section};
@@ -245,7 +245,7 @@ impl Rasterization {
 }
 
 pub(crate) fn rasterize(
-    font: Res<Font>,
+    font: Res<MonoSpacedFont>,
     mut renderer: ResMut<Renderer>,
     extraction: Res<Extraction>,
     canvas: Res<Canvas>,
