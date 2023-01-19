@@ -9,7 +9,9 @@ use crate::text::Scale;
 use crate::{Area, Color, Depth, Position, Section};
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
+use bevy_ecs::prelude::{
+    Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without,
+};
 use std::collections::{HashMap, HashSet};
 
 pub(crate) fn compute_setup(mut cmd: Commands) {
@@ -17,15 +19,6 @@ pub(crate) fn compute_setup(mut cmd: Commands) {
     cmd.insert_resource(Cache::new());
     cmd.insert_resource(MonoSpacedFont::default());
 }
-
-pub(crate) fn update_attrs(
-    text: Query<
-        (Entity, &Text, &Position, &Color, &Depth),
-        (Or<(Changed<Position>, Changed<Color>, Changed<Depth>)>),
-    >,
-) {
-}
-
 pub(crate) fn push_compute_changes(
     mut cache: ResMut<Cache>,
     mut changes: ResMut<Changes>,
@@ -43,7 +36,13 @@ pub(crate) fn push_compute_changes(
             &Visibility,
         ),
         // if changed position or color or depth try to just write to changes.updates if present
-        (Or<(Changed<Text>, Changed<Area>, Changed<Scale>)>),
+        (Or<(
+            Changed<Text>,
+            Changed<Area>,
+            Changed<Scale>,
+            Changed<Position>,
+            Changed<Depth>,
+        )>),
     >,
     font: Res<MonoSpacedFont>,
 ) {
@@ -73,8 +72,15 @@ pub(crate) fn push_compute_changes(
             let mut retained_keys = HashSet::new();
             let mut added_keys = HashSet::new();
             if let Some(area) = maybe_area {
-                cache.bounds.insert(entity, (*position, *area).into());
-                changes.bounds.insert(entity, (*position, *area).into());
+                if let Some(cached_bound) = cache.bounds.get(&entity) {
+                    if *area != cached_bound.area {
+                        cache.bounds.insert(entity, (*position, *area).into());
+                        changes.bounds.insert(entity, (*position, *area).into());
+                    }
+                } else {
+                    cache.bounds.insert(entity, (*position, *area).into());
+                    changes.bounds.insert(entity, (*position, *area).into());
+                }
             } else {
                 let old_bound = cache.bounds.remove(&entity);
                 if old_bound.is_some() {
