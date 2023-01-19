@@ -6,7 +6,7 @@ mod icon;
 #[allow(unused)]
 mod instance;
 #[allow(unused)]
-mod r_text;
+mod text;
 mod render;
 mod task;
 mod theme;
