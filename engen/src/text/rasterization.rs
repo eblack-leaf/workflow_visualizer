@@ -49,6 +49,7 @@ impl Rasterization {
         // let normalized_position = self.normalize_pos(position);
         // let normalized_area = self.normalize_area(&grid_entry);
         self.insert_at(placement_location, &grid_entry);
+        self.glyph_locations.insert(glyph_hash, placement_location);
         self.write_to_texture(canvas, &grid_entry, position);
         self.generate_tex_coords(glyph_hash, position, grid_entry.area);
         self.attempt_to_set_next_location(placement_location);
@@ -116,14 +117,14 @@ impl Rasterization {
         let block_width = grid_entry.area.width as u32;
         let block_height = grid_entry.area.height as u32;
         let image_data_layout = ImageDataLayout {
-            offset: 0,
+            offset: 1,
             bytes_per_row: NonZeroU32::new(block_width),
             rows_per_image: NonZeroU32::new(block_height),
         };
         let extent = Extent3d {
             width: block_width,
             height: block_height,
-            depth_or_array_layers: 1,
+            depth_or_array_layers: 0,
         };
         canvas.queue.write_texture(
             image_copy_texture,

@@ -70,6 +70,8 @@ pub(crate) struct InstanceBuffer {
 impl InstanceBuffer {
     pub(crate) fn update_non_attributes(&mut self, key: Key, area: Area, tex_coords: TexCoords) {
         let index = *self.keyed_indexes.get(&key).expect("no index");
+        // TODO fails because hasnt been written yet ... if break up into attrs / texture_info then can write attrs separately
+        // TODO and fill in texture_info without depending on these attrs
         let mut instance = *self.cpu.get(index.value as usize).expect("instance not added");
         instance.area = area;
         instance.tex_coords = tex_coords;
