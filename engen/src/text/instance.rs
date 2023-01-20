@@ -68,8 +68,12 @@ pub(crate) struct InstanceBuffer {
 }
 
 impl InstanceBuffer {
-    pub(crate) fn update_non_attributes(&self, key: Key, area: Area, tex_coords: TexCoords) {
-        todo!()
+    pub(crate) fn update_non_attributes(&mut self, key: Key, area: Area, tex_coords: TexCoords) {
+        let index = *self.keyed_indexes.get(&key).expect("no index");
+        let mut instance = *self.cpu.get(index.value as usize).expect("instance not added");
+        instance.area = area;
+        instance.tex_coords = tex_coords;
+        self.queue_write(index, instance);
     }
     pub(crate) fn add(&mut self, key: Key, instance: Instance) {
         let index = self.indexer.next(key);

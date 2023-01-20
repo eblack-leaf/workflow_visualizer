@@ -1,6 +1,6 @@
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
-use bevy_ecs::prelude::{Component, Resource};
+use bevy_ecs::prelude::{Commands, Component, Query, Resource};
 use nalgebra::matrix;
 #[derive(Component, Copy, Clone)]
 pub struct Visibility {
@@ -10,6 +10,9 @@ impl Visibility {
     pub fn new() -> Self {
         Self { visible: false }
     }
+}
+pub(crate) fn visibility(entities: Query<(), ()>, mut cmd: Commands, /* needs bounds from viewport to check*/) {
+
 }
 #[derive(Resource)]
 pub struct Viewport {

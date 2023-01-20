@@ -8,7 +8,7 @@ mod instance;
 mod render;
 mod task;
 #[allow(unused)]
-mod text;
+pub mod text;
 mod theme;
 mod uniform;
 use crate::canvas::CanvasWindow;
@@ -23,7 +23,7 @@ use bevy_ecs::prelude::Resource;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-
+pub use crate::canvas::Visibility;
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }

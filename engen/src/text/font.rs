@@ -35,7 +35,7 @@ impl MonoSpacedFont {
     }
     pub fn character_dimensions(&self, character: char, px: f32) -> [f32; 2] {
         let metrics = self.font().metrics(character, px);
-        [metrics.advance_width, metrics.advance_height]
+        [metrics.advance_width.ceil(), px.ceil()]
     }
 }
 impl Default for MonoSpacedFont {

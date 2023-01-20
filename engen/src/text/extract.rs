@@ -79,9 +79,10 @@ pub(crate) fn integrate_extraction(
             .rasterizations
             .get_mut(&entity)
             .expect("no rasterization");
-        for (key, _glyph) in glyph_changes.iter() {
-            let area = ();
-            let tex_coords = ();
+        for (key, glyph) in glyph_changes.iter() {
+            let location = rasterization.glyph_locations.get(&glyph.hash).expect("no glyph location");
+            let area = rasterization.grid.get(location).expect("no grid entry").area;
+            let tex_coords = *rasterization.tex_coords.get(&glyph.hash).expect("no tex coords");
             rasterization
                 .instances
                 .update_non_attributes(*key, area, tex_coords);

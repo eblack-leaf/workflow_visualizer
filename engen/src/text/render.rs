@@ -143,9 +143,9 @@ fn pipeline(
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &vertex_attr_array![
                     1 => Float32x2,
-                    3 => Float32,
-                    4 => Float32x4,
-                    2 => Float32x2,
+                    2 => Float32,
+                    3 => Float32x4,
+                    4 => Float32x2,
                     5 => Float32x4,
                 ],
             },
@@ -197,7 +197,7 @@ fn rasterization_resources(canvas: &Canvas) -> BindGroupLayout {
             binding: 0,
             visibility: wgpu::ShaderStages::FRAGMENT,
             ty: wgpu::BindingType::Texture {
-                sample_type: TextureSampleType::Uint,
+                sample_type: TextureSampleType::Float { filterable: true },
                 view_dimension: TextureViewDimension::D2,
                 multisampled: false,
             },

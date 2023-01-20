@@ -46,11 +46,11 @@ impl Rasterization {
         glyph_hash: GlyphHash,
     ) {
         let position = self.position(placement_location);
-        let normalized_position = self.normalize_pos(position);
-        let normalized_area = self.normalize_area(&grid_entry);
+        // let normalized_position = self.normalize_pos(position);
+        // let normalized_area = self.normalize_area(&grid_entry);
         self.insert_at(placement_location, &grid_entry);
         self.write_to_texture(canvas, &grid_entry, position);
-        self.generate_tex_coords(glyph_hash, normalized_position, normalized_area);
+        self.generate_tex_coords(glyph_hash, position, grid_entry.area);
         self.attempt_to_set_next_location(placement_location);
     }
     fn insert_at(&mut self, placement_location: GridLocation, grid_entry: &GridEntry) {
@@ -69,14 +69,14 @@ impl Rasterization {
     fn generate_tex_coords(
         &mut self,
         glyph_hash: GlyphHash,
-        normalized_position: Position,
-        normalized_area: Area,
+        position: Position,
+        area: Area,
     ) {
         let tex_coords = TexCoords::new([
-            normalized_position.x,
-            normalized_position.y,
-            normalized_position.x + normalized_area.width,
-            normalized_position.y + normalized_area.height,
+            position.x,
+            position.y,
+            position.x + area.width,
+            position.y + area.height,
         ]);
         self.tex_coords.insert(glyph_hash, tex_coords);
     }
@@ -116,7 +116,7 @@ impl Rasterization {
         let block_width = grid_entry.area.width as u32;
         let block_height = grid_entry.area.height as u32;
         let image_data_layout = ImageDataLayout {
-            offset: 1,
+            offset: 0,
             bytes_per_row: NonZeroU32::new(block_width),
             rows_per_image: NonZeroU32::new(block_height),
         };
@@ -210,7 +210,7 @@ impl Rasterization {
             mip_level_count: 1,
             sample_count: 1,
             dimension: TextureDimension::D2,
-            format: TextureFormat::R8Uint,
+            format: TextureFormat::R8Unorm,
             usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
         };
         let texture = canvas.device.create_texture(&texture_descriptor);
