@@ -19,7 +19,7 @@ impl Visibility {
 pub(crate) fn visibility(
     entities: Query<
         (Entity, &Position, Option<&Area>, &mut Visibility),
-        (Or<(Changed<Position>, Changed<Area>)>),
+        Or<(Changed<Position>, Changed<Area>)>,
     >,
     mut cmd: Commands,
     viewport_bounds: Res<ViewportBounds>,

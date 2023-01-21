@@ -1,9 +1,9 @@
+use engen::{CanvasOptions, Color, Depth, Engen, Position, Task, text, Theme};
 use engen::text::{Scale, Text, TextBundle};
-use engen::{text, CanvasOptions, Color, Depth, Engen, Position, Task, Theme, Visibility};
 
 pub fn task() -> Task {
     let mut task = Task::new();
-    let tester = task
+    let _tester = task
         .container
         .spawn(TextBundle::new(
             Text::new("ah".to_string()),
@@ -13,16 +13,12 @@ pub fn task() -> Task {
             Color::rgb(1.0, 1.0, 1.0),
         ))
         .id();
-    task.container
-        .get_mut::<Visibility>(tester)
-        .expect("")
-        .visible = true;
     task
 }
 
 #[cfg_attr(
-    target_os = "android",
-    ndk_glue::main(backtrace = "on", logger(level = "debug"))
+target_os = "android",
+ndk_glue::main(backtrace = "on", logger(level = "debug"))
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());

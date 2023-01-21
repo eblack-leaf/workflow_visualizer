@@ -53,7 +53,7 @@ impl Extraction {
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
-    differences: Query<(Entity, &mut Difference, &Visibility), (Changed<Difference>)>,
+    differences: Query<(Entity, &mut Difference, &Visibility), Changed<Difference>>,
 ) {
     // drain from diffs into extraction if visible
 }

@@ -1,17 +1,21 @@
-mod options;
-mod viewport;
-pub use crate::canvas::options::CanvasOptions;
-pub use crate::canvas::viewport::Viewport;
-pub use crate::canvas::viewport::Visibility;
-pub(crate) use crate::canvas::viewport::{visibility, ViewportBounds};
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
+
+pub use crate::canvas::options::CanvasOptions;
+pub(crate) use crate::canvas::viewport::{visibility, Visibility};
+pub use crate::canvas::viewport::Viewport;
+
+mod options;
+mod viewport;
+
 #[cfg(not(target_arch = "wasm32"))]
 #[derive(Resource)]
 pub struct CanvasWindow(pub Window);
+
 #[cfg(target_arch = "wasm32")]
 pub struct CanvasWindow(pub Window);
+
 #[derive(Resource)]
 pub struct Canvas {
     pub surface: wgpu::Surface,
@@ -21,6 +25,7 @@ pub struct Canvas {
     pub viewport: Viewport,
     pub options: CanvasOptions,
 }
+
 impl Canvas {
     pub async fn new(window: &Window, options: CanvasOptions) -> Self {
         let instance = wgpu::Instance::new(options.backends);

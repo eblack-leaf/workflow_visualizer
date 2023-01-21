@@ -1,8 +1,9 @@
-use crate::clean_text::scale::Scale;
+use std::ops::Deref;
+
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
-use std::ops::Deref;
-use std::path::Path;
+
+use crate::clean_text::scale::Scale;
 
 #[derive(Resource)]
 pub struct MonoSpacedFont {
@@ -36,6 +37,7 @@ impl MonoSpacedFont {
         [metrics.advance_width.ceil(), px.ceil()]
     }
 }
+
 impl Default for MonoSpacedFont {
     fn default() -> Self {
         MonoSpacedFont::new(

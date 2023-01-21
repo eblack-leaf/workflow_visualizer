@@ -2,12 +2,11 @@ use std::collections::{HashMap, HashSet};
 use std::num::NonZeroU32;
 
 use fontdue::Metrics;
-use wgpu::Label;
 
-use crate::{Area, Canvas, Position, Section};
 use crate::clean_text::coords::Coords;
 use crate::clean_text::font::MonoSpacedFont;
 use crate::clean_text::glyph::{Glyph, GlyphId, Key};
+use crate::{Area, Canvas, Position, Section};
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct Location {
@@ -78,7 +77,7 @@ impl Atlas {
             .expect("no references for glyph id")
             .decrement();
     }
-    pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph) {
+    pub(crate) fn add_glyph(&mut self, glyph: Glyph) {
         if self.glyphs.contains_key(&glyph.id) {
             self.increment_reference(glyph.id);
             return;

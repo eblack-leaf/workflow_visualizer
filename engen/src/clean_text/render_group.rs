@@ -110,7 +110,7 @@ impl RenderGroup {
             }
         }
         self.keyed_glyph_ids.insert(key, glyph.id);
-        self.atlas.add_glyph(key, glyph);
+        self.atlas.add_glyph(glyph);
     }
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
         self.atlas.remove_glyph(glyph_id);
@@ -235,9 +235,9 @@ impl RenderGroup {
 }
 
 pub(crate) fn depth_diff(
-    mut text: Query<(Entity, &Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<Text>)>,
+    mut text: Query<(&Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<Text>)>,
 ) {
-    for (entity, depth, mut cache, mut difference) in text.iter_mut() {
+    for (depth, mut cache, mut difference) in text.iter_mut() {
         if *depth != cache.depth {
             difference.depth.replace(*depth);
         }
@@ -245,12 +245,9 @@ pub(crate) fn depth_diff(
 }
 
 pub(crate) fn position_diff(
-    mut text: Query<
-        (Entity, &Position, &mut Cache, &mut Difference),
-        (Changed<Position>, With<Text>),
-    >,
+    mut text: Query<(&Position, &mut Cache, &mut Difference), (Changed<Position>, With<Text>)>,
 ) {
-    for (entity, position, mut cache, mut difference) in text.iter_mut() {
+    for (position, mut cache, mut difference) in text.iter_mut() {
         if *position != cache.position {
             difference.position.replace(*position);
         }
@@ -258,9 +255,9 @@ pub(crate) fn position_diff(
 }
 
 pub(crate) fn color_diff(
-    mut text: Query<(Entity, &Color, &mut Cache, &mut Difference), (Changed<Color>, With<Text>)>,
+    mut text: Query<(&Color, &mut Cache, &mut Difference), (Changed<Color>, With<Text>)>,
 ) {
-    for (entity, color, mut cache, mut difference) in text.iter_mut() {
+    for (color, mut cache, mut difference) in text.iter_mut() {
         if *color != cache.color {
             difference.color.replace(*color);
         }
@@ -278,7 +275,7 @@ pub(crate) fn manage_render_groups(
             &mut Cache,
             &mut Difference,
         ),
-        (Or<(Changed<Visibility>, Added<Text>, Changed<Scale>)>),
+        Or<(Changed<Visibility>, Added<Text>, Changed<Scale>)>,
     >,
     removed: RemovedComponents<Text>,
     mut extraction: ResMut<Extraction>,

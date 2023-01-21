@@ -1,4 +1,20 @@
+use bevy_ecs::prelude::{Resource, SystemStage};
+use winit::event::{Event, StartCause, WindowEvent};
+use winit::event_loop::EventLoop;
+use winit::window::Window;
+
+pub use crate::canvas::{Canvas, CanvasOptions};
+use crate::canvas::CanvasWindow;
+pub(crate) use crate::canvas::Visibility;
+pub use crate::color::Color;
+pub use crate::coord::{Area, Depth, Panel, Position, Section};
+use crate::render::{ExtractCalls, Render, RenderCalls};
+use crate::task::{Stage, WorkloadId};
+pub use crate::task::Task;
+pub use crate::theme::Theme;
+
 mod canvas;
+#[allow(unused)]
 mod clean_text;
 mod color;
 #[allow(unused)]
@@ -13,22 +29,10 @@ pub mod text;
 mod theme;
 mod uniform;
 
-pub use crate::canvas::Visibility;
-pub use crate::canvas::{Canvas, CanvasOptions};
-use crate::canvas::{CanvasWindow, ViewportBounds};
-pub use crate::color::Color;
-pub use crate::coord::{Area, Depth, Panel, Position, Section};
-use crate::render::{ExtractCalls, Render, RenderCalls};
-pub use crate::task::Task;
-use crate::task::{Stage, WorkloadId};
-pub use crate::theme::Theme;
-use bevy_ecs::prelude::{Resource, SystemStage};
-use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::EventLoop;
-use winit::window::Window;
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }
+
 pub struct Engen {
     event_loop: Option<EventLoop<()>>,
     pub compute: Task,
@@ -36,6 +40,7 @@ pub struct Engen {
     extract_calls: ExtractCalls,
     render_calls: RenderCalls,
 }
+
 impl Engen {
     pub fn new(compute: Task) -> Self {
         Self {
