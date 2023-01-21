@@ -1,25 +1,30 @@
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub(crate) struct Index {
     pub(crate) value: u32,
 }
+
 impl Index {
     pub(crate) fn new(value: u32) -> Self {
         Self { value }
     }
 }
+
 impl From<u32> for Index {
     fn from(value: u32) -> Self {
         Self::new(value)
     }
 }
+
 pub(crate) struct Indexer<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
     pub(crate) indices: HashMap<Key, Index>,
     pub(crate) count: u32,
     pub(crate) max: u32,
     pub(crate) holes: HashSet<Index>,
 }
+
 impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn new(max: u32) -> Self {
         Self {
@@ -55,8 +60,8 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn exists(&self, key: Key) -> bool {
         self.indices.contains_key(&key)
     }
-    pub(crate) fn remove(&mut self, key: &Key) -> Option<Index> {
-        if let Some(index) = self.indices.remove(key) {
+    pub(crate) fn remove(&mut self, key: Key) -> Option<Index> {
+        if let Some(index) = self.indices.remove(&key) {
             self.holes.insert(index);
             return Some(index);
         }

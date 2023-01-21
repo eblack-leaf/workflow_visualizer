@@ -1,7 +1,9 @@
 use std::collections::{HashMap, HashSet};
+
 use bevy_ecs::prelude::{Changed, Component, Entity, Query, ResMut, Resource};
-use crate::{Color, Depth, Position, Section};
-use crate::clean_text::glyph::{Glyph, Key, GlyphId};
+
+use crate::{Color, Depth, Position, Section, Visibility};
+use crate::clean_text::glyph::{Glyph, GlyphId, Key};
 
 #[derive(Component)]
 pub(crate) struct Difference {
@@ -16,6 +18,7 @@ pub(crate) struct Difference {
     pub(crate) update: HashMap<Key, Position>,
     pub(crate) remove: HashSet<Key>,
 }
+
 impl Difference {
     pub(crate) fn new() -> Self {
         Self {
@@ -32,11 +35,13 @@ impl Difference {
         }
     }
 }
+
 #[derive(Resource)]
 pub(crate) struct Extraction {
     pub(crate) added_render_groups: HashMap<Entity, ()>,
     pub(crate) removed_render_groups: HashSet<Entity>,
 }
+
 impl Extraction {
     pub(crate) fn new() -> Self {
         Self {
@@ -45,6 +50,7 @@ impl Extraction {
         }
     }
 }
-pub(crate) fn pull_differences(mut extraction: ResMut<Extraction>, differences: Query<(Entity, &mut Difference), (Changed<Difference>)>) {
-    // drain from diffs into extraction
+
+pub(crate) fn pull_differences(mut extraction: ResMut<Extraction>, differences: Query<(Entity, &mut Difference, &Visibility), (Changed<Difference>)>) {
+    // drain from diffs into extraction if visible
 }

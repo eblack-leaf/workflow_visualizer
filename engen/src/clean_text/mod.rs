@@ -11,3 +11,4 @@ mod extraction;
 mod coords;
 mod place;
 mod attach;
+mod atlas;
