@@ -3,14 +3,14 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
 
-pub use crate::canvas::{Canvas, CanvasOptions};
 use crate::canvas::CanvasWindow;
 pub(crate) use crate::canvas::Visibility;
+pub use crate::canvas::{Canvas, CanvasOptions};
 pub use crate::color::Color;
 pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{ExtractCalls, Render, RenderCalls};
-use crate::task::{Stage, WorkloadId};
 pub use crate::task::Task;
+use crate::task::{Stage, WorkloadId};
 pub use crate::theme::Theme;
 
 mod canvas;
@@ -20,8 +20,6 @@ mod color;
 #[allow(unused)]
 mod coord;
 mod icon;
-#[allow(unused)]
-mod instance;
 mod render;
 mod task;
 #[allow(unused)]

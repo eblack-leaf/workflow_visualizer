@@ -2,8 +2,10 @@ use std::collections::HashSet;
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Component, Or, Query, Res};
-use fontdue::layout::{GlyphPosition, TextStyle};
+use fontdue::layout::{CoordinateSystem, GlyphPosition, TextStyle};
 
+use crate::clean_text::cache::Cache;
+use crate::clean_text::difference::Difference;
 use crate::clean_text::font::MonoSpacedFont;
 use crate::clean_text::glyph::Key;
 use crate::clean_text::scale::Scale;
@@ -14,7 +16,15 @@ use crate::{Area, Position, Section, Visibility};
 pub(crate) struct Placer {
     pub(crate) layout: fontdue::layout::Layout,
     pub(crate) placement: Vec<GlyphPosition>,
-    pub(crate) out_of_bounds_glyphs: HashSet<Key>,
+}
+
+impl Placer {
+    pub(crate) fn new() -> Self {
+        Self {
+            layout: fontdue::layout::Layout::new(CoordinateSystem::PositiveYDown),
+            placement: vec![],
+        }
+    }
 }
 
 pub(crate) fn place(
@@ -35,14 +45,32 @@ pub(crate) fn place(
 }
 
 pub(crate) fn discard_out_of_bounds(
-    mut text: Query<(&mut Placer, &Position, &Area), Or<(Changed<Placer>, Changed<Area>)>>,
+    mut text: Query<
+        (&mut Placer, &Area, &mut Cache, &mut Difference),
+        Or<(Changed<Placer>, Changed<Area>)>,
+    >,
 ) {
-    // discard glyphs from placer.placement if not in entity section bounds
-    for (mut placer, position, area) in text.iter_mut() {
-        let section = Section::new(*position, *area);
-        placer.out_of_bounds_glyphs.clear();
+    for (mut placer, area, mut cache, mut difference) in text.iter_mut() {
+        let text_section = Section::new((0u32, 0u32).into(), *area);
+        let mut placement_removals = HashSet::new();
         for glyph in placer.placement.iter() {
-            // check section bounds with glyph bounds - insert into out of bounds if not covered
+            let key = Key::new(glyph.byte_offset as u32);
+            let glyph_section =
+                Section::new((0u32, 0u32).into(), (glyph.width, glyph.height).into());
+            let within_bounds = text_section.left() < glyph_section.right()
+                && text_section.right() > glyph_section.left()
+                && text_section.top() < glyph_section.bottom()
+                && text_section.bottom() > glyph_section.top();
+            if !within_bounds {
+                if cache.exists(key) {
+                    difference.remove.insert(key);
+                    placement_removals.insert(key);
+                    cache.remove(key);
+                }
+            }
+        }
+        for key in placement_removals {
+            placer.placement.remove(key.offset as usize);
         }
     }
 }

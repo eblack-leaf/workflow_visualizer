@@ -3,8 +3,8 @@ use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
 
 pub use crate::canvas::options::CanvasOptions;
-pub(crate) use crate::canvas::viewport::{visibility, Visibility};
 pub use crate::canvas::viewport::Viewport;
+pub(crate) use crate::canvas::viewport::{visibility, Visibility};
 
 mod options;
 mod viewport;

@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
 use crate::clean_text::cache::Cache;
-use crate::clean_text::extraction::Difference;
+use crate::clean_text::difference::Difference;
 use crate::clean_text::place::Placer;
 use crate::clean_text::scale::Scale;
 use crate::{Color, Depth, Position, Visibility};
@@ -30,4 +30,19 @@ pub struct TextBundle {
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
     pub(crate) visibility: Visibility,
+}
+impl TextBundle {
+    pub fn new(text: Text, position: Position, depth: Depth, color: Color, scale: Scale) -> Self {
+        Self {
+            text,
+            position,
+            depth,
+            color,
+            scale,
+            placer: Placer::new(),
+            cache: Cache::new(position, depth, color),
+            difference: Difference::new(),
+            visibility: Visibility::new(),
+        }
+    }
 }

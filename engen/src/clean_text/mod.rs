@@ -2,6 +2,7 @@ mod atlas;
 mod attach;
 mod cache;
 mod coords;
+mod difference;
 mod extraction;
 mod font;
 mod glyph;
