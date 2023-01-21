@@ -11,15 +11,17 @@ mod task;
 pub mod text;
 mod theme;
 mod uniform;
-use crate::canvas::CanvasWindow;
+mod clean_text;
+
+use crate::canvas::{CanvasWindow, ViewportBounds};
 pub use crate::canvas::{Canvas, CanvasOptions};
 pub use crate::color::Color;
 pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{ExtractCalls, Render, RenderCalls};
 pub use crate::task::Task;
-use crate::task::WorkloadId;
+use crate::task::{Stage, WorkloadId};
 pub use crate::theme::Theme;
-use bevy_ecs::prelude::Resource;
+use bevy_ecs::prelude::{Resource, SystemStage};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
@@ -39,7 +41,11 @@ impl Engen {
         Self {
             event_loop: None,
             compute,
-            render: Task::new(),
+            render: {
+                let mut task = Task::new();
+                task.main.schedule.add_stage_before(Stage::After, "visibility", SystemStage::single(canvas::visibility));
+                task
+            },
             extract_calls: ExtractCalls::new(),
             render_calls: RenderCalls::new(),
         }
@@ -174,6 +180,7 @@ impl Engen {
                             )));
                             self.attach_window(window);
                         }
+                        self.attach_viewport_bounds();
                         self.compute.exec(WorkloadId::Startup);
                         self.render.exec(WorkloadId::Startup);
                     }
@@ -188,6 +195,7 @@ impl Engen {
                             .get_resource_mut::<Canvas>()
                             .expect("no canvas attached")
                             .adjust(physical_size.width, physical_size.height);
+                        self.attach_viewport_bounds();
                     }
                     WindowEvent::Moved(_) => {}
                     WindowEvent::CloseRequested => {
@@ -219,6 +227,7 @@ impl Engen {
                             .get_resource_mut::<Canvas>()
                             .expect("no canvas attached")
                             .adjust(new_inner_size.width, new_inner_size.height);
+                        self.attach_viewport_bounds();
                     }
                     WindowEvent::ThemeChanged(_) => {}
                     WindowEvent::Occluded(_) => {}
@@ -251,6 +260,7 @@ impl Engen {
                             )));
                             self.attach_window(window);
                         }
+                        self.attach_viewport_bounds();
                         self.compute.activate();
                         self.render.activate();
                     }
@@ -285,5 +295,10 @@ impl Engen {
                 }
             }
         });
+    }
+
+    fn attach_viewport_bounds(&mut self) {
+        let bounds = self.render.container.get_resource::<Canvas>().unwrap().viewport.bounds();
+        self.compute.container.insert_resource(bounds);
     }
 }

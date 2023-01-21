@@ -1,7 +1,9 @@
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
-use bevy_ecs::prelude::{Commands, Component, Query, Resource};
+use bevy_ecs::prelude::{Changed, Commands, Component, Entity, Or, Query, Res, Resource};
 use nalgebra::matrix;
+use crate::{Position, Section};
+
 #[derive(Component, Copy, Clone)]
 pub struct Visibility {
     pub visible: bool,
@@ -11,8 +13,20 @@ impl Visibility {
         Self { visible: false }
     }
 }
-pub(crate) fn visibility(entities: Query<(), ()>, mut cmd: Commands, /* needs bounds from viewport to check*/) {
-
+pub(crate) fn visibility(entities: Query<(Entity, &Position, Option<&Area>, &mut Visibility), (Or<(Changed<Position>, Changed<Area>)>)>, mut cmd: Commands, viewport_bounds: Res<ViewportBounds>) {
+    // if within bounds - set visibility.visible = true
+    // else false
+}
+#[derive(Resource)]
+pub(crate) struct ViewportBounds {
+    pub(crate) section: Section,
+}
+impl ViewportBounds {
+    pub(crate) fn new(section: Section) -> Self {
+        Self {
+            section
+        }
+    }
 }
 #[derive(Resource)]
 pub struct Viewport {
@@ -73,6 +87,9 @@ impl Viewport {
         self.uniform.update(queue, self.gpu);
         self.depth_texture = depth_texture(device, area, self.depth_format);
     }
+    pub fn bounds(&self) -> ViewportBounds {
+        ViewportBounds::new(Section::new((0.0, 0.0).into(), self.cpu.area))
+    }
 }
 fn depth_texture(device: &wgpu::Device, area: Area, format: wgpu::TextureFormat) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
@@ -91,6 +108,7 @@ fn depth_texture(device: &wgpu::Device, area: Area, format: wgpu::TextureFormat)
 }
 #[derive(Resource)]
 pub struct CpuViewport {
+    // TODO incorporate position here so can move and accurately set viewport bounds
     pub area: Area,
     pub depth: Depth,
     pub orthographic: nalgebra::Matrix4<f32>,
