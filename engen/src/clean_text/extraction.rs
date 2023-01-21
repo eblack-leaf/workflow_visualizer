@@ -2,8 +2,8 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Changed, Component, Entity, Query, ResMut, Resource};
 
-use crate::{Color, Depth, Position, Section, Visibility};
 use crate::clean_text::glyph::{Glyph, GlyphId, Key};
+use crate::{Color, Depth, Position, Section, Visibility};
 
 #[derive(Component)]
 pub(crate) struct Difference {
@@ -51,6 +51,9 @@ impl Extraction {
     }
 }
 
-pub(crate) fn pull_differences(mut extraction: ResMut<Extraction>, differences: Query<(Entity, &mut Difference, &Visibility), (Changed<Difference>)>) {
+pub(crate) fn pull_differences(
+    mut extraction: ResMut<Extraction>,
+    differences: Query<(Entity, &mut Difference, &Visibility), (Changed<Difference>)>,
+) {
     // drain from diffs into extraction if visible
 }

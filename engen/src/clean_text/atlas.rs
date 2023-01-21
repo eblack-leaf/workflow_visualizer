@@ -10,29 +10,24 @@ use crate::clean_text::font::MonoSpacedFont;
 use crate::clean_text::glyph::{Glyph, GlyphId, Key};
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
-struct Location {
-    x: u32,
-    y: u32,
+pub(crate) struct Location {
+    pub(crate) x: u32,
+    pub(crate) y: u32,
 }
 
 impl Location {
-    fn new(x: u32, y: u32) -> Self {
-        Self {
-            x,
-            y,
-        }
+    pub(crate) fn new(x: u32, y: u32) -> Self {
+        Self { x, y }
     }
 }
 
-struct Reference {
-    count: u32,
+pub(crate) struct Reference {
+    pub(crate) count: u32,
 }
 
 impl Reference {
-    fn new() -> Self {
-        Self {
-            count: 0
-        }
+    pub(crate) fn new() -> Self {
+        Self { count: 0 }
     }
     pub(crate) fn increment(&mut self) {
         self.count += 1;
@@ -58,8 +53,9 @@ pub(crate) struct Atlas {
 }
 
 impl Atlas {
-    pub(crate) fn new(canvas: &Canvas, block: Area, num_unique_glyphs: u32) -> Self {
-        let (dimension, texture_width, texture_height) = Self::texture_dimensions(block, num_unique_glyphs);
+    pub(crate) fn new(canvas: &Canvas, block: Area, unique_glyphs: u32) -> Self {
+        let (dimension, texture_width, texture_height) =
+            Self::texture_dimensions(block, unique_glyphs);
         let texture_descriptor = Self::texture_descriptor(texture_width, texture_height);
         let texture = canvas.device.create_texture(&texture_descriptor);
         let texture_view = texture.create_view(&wgpu::TextureViewDescriptor::default());
@@ -77,7 +73,10 @@ impl Atlas {
         }
     }
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
-        self.references.get_mut(&glyph_id).expect("no references for glyph id").decrement();
+        self.references
+            .get_mut(&glyph_id)
+            .expect("no references for glyph id")
+            .decrement();
     }
     pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph) {
         if self.glyphs.contains_key(&glyph.id) {
@@ -90,15 +89,21 @@ impl Atlas {
         self.glyphs.insert(glyph.id, (coords, location));
     }
     pub(crate) fn write(&mut self, canvas: &Canvas) {
-        for (location, (coords, bitmap)) in self.write.iter() {
-            self.write_texture(canvas, *location, *coords, bitmap.clone());
+        let mut write = self
+            .write
+            .drain()
+            .collect::<Vec<(Location, (Coords, Bitmap))>>();
+        for (location, (coords, bitmap)) in write {
+            self.write_texture(canvas, location, coords, bitmap);
         }
-        self.write.clear();
     }
     pub(crate) fn read_glyph_coords(&self, glyph_id: GlyphId) -> Coords {
         self.glyphs.get(&glyph_id).expect("no glyph for id").0
     }
-    fn texture_descriptor(texture_width: u32, texture_height: u32) -> wgpu::TextureDescriptor {
+    fn texture_descriptor(
+        texture_width: u32,
+        texture_height: u32,
+    ) -> wgpu::TextureDescriptor<'static> {
         wgpu::TextureDescriptor {
             label: Some("texture atlas"),
             size: wgpu::Extent3d {
@@ -124,12 +129,22 @@ impl Atlas {
         free
     }
     fn increment_reference(&mut self, glyph_id: GlyphId) {
-        self.references.get(&glyph_id).unwrap().increment();
+        self.references.get_mut(&glyph_id).unwrap().increment();
     }
     fn position_from(&self, location: Location) -> Position {
-        (location.x * self.block.width as u32, location.y * self.block.height as u32).into()
+        (
+            location.x * self.block.width as u32,
+            location.y * self.block.height as u32,
+        )
+            .into()
     }
-    fn write_texture(&mut self, canvas: &Canvas, location: Location, coords: Coords, bitmap: Bitmap) {
+    fn write_texture(
+        &mut self,
+        canvas: &Canvas,
+        location: Location,
+        coords: Coords,
+        bitmap: Bitmap,
+    ) {
         let position = self.position_from(location);
         let area = coords.section().area;
         let image_copy_texture = wgpu::ImageCopyTexture {
@@ -169,13 +184,20 @@ impl Atlas {
         let position = self.position_from(location);
         let (metrics, bitmap) = self.rasterize(glyph);
         let section = Section::new(position, (metrics.width, metrics.height).into());
-        let coords = Coords::new(section.left(), section.top(), section.right(), section.bottom());
+        let coords = Coords::new(
+            section.left(),
+            section.top(),
+            section.right(),
+            section.bottom(),
+        );
         self.queue_write(location, coords, bitmap);
         (coords, location)
     }
     fn rasterize(&mut self, glyph: Glyph) -> (Metrics, Vec<u8>) {
         // optimize by caching rasterizations
-        self.font.font().rasterize(glyph.character, glyph.scale.px())
+        self.font
+            .font()
+            .rasterize(glyph.character, glyph.scale.px())
     }
     fn next(&mut self) -> Location {
         let location = match self.free.is_empty() {
@@ -183,22 +205,30 @@ impl Atlas {
                 // needs to grow
                 panic!("needs to grow texture")
             }
-            false => {
-                *self.free.iter().next().expect("no free locations")
-            }
+            false => *self.free.iter().next().expect("no free locations"),
         };
         self.free.remove(&location);
         location
     }
     fn free(&mut self) {
+        let mut orphaned_glyphs = HashSet::new();
         for (glyph_id, reference) in self.references.iter() {
             if reference.count == 0 {
-                self.free_glyph(*glyph_id);
+                orphaned_glyphs.insert(*glyph_id);
             }
+        }
+        // retain filter
+        // ...
+        // free
+        for glyph_id in orphaned_glyphs {
+            self.free_glyph(glyph_id);
         }
     }
     fn free_glyph(&mut self, glyph_id: GlyphId) {
-        let (_coords, location) = self.glyphs.remove(&glyph_id).expect("no glyph for glyph id");
+        let (_coords, location) = self
+            .glyphs
+            .remove(&glyph_id)
+            .expect("no glyph for glyph id");
         self.free.insert(location);
         self.references.remove(&glyph_id);
     }

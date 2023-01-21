@@ -2,7 +2,7 @@ mod options;
 mod viewport;
 pub use crate::canvas::options::CanvasOptions;
 pub use crate::canvas::viewport::Viewport;
-pub use crate::canvas::viewport::{Visibility};
+pub use crate::canvas::viewport::Visibility;
 pub(crate) use crate::canvas::viewport::{visibility, ViewportBounds};
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};

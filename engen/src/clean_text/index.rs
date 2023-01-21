@@ -73,7 +73,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn should_grow(&mut self) -> bool {
         if self.count > self.max {
             while self.count > self.max {
-                self.max += 1;// replace with growth factor
+                self.max += 1; // replace with growth factor
             }
             return true;
         }

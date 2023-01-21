@@ -1,11 +1,11 @@
+use crate::canvas::Visibility;
 use crate::text::Scale;
 use crate::{Color, Depth, Position};
 use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-use std::collections::HashSet;
 use fontdue::layout::CoordinateSystem;
-use crate::canvas::Visibility;
+use std::collections::HashSet;
 
 #[derive(Bundle)]
 pub struct TextBundle {
@@ -54,9 +54,7 @@ pub struct Text {
 }
 impl Text {
     pub fn new(string: String) -> Self {
-        Self {
-            string
-        }
+        Self { string }
     }
 }
 #[derive(Component)]

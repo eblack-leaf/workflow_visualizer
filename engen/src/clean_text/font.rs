@@ -1,8 +1,8 @@
-use std::ops::Deref;
-use std::path::Path;
+use crate::clean_text::scale::Scale;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
-use crate::clean_text::scale::Scale;
+use std::ops::Deref;
+use std::path::Path;
 
 #[derive(Resource)]
 pub struct MonoSpacedFont {

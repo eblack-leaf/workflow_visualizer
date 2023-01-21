@@ -1,10 +1,10 @@
-use std::collections::{HashMap, HashSet};
-use bevy_ecs::prelude::{Entity, Resource};
 use crate::canvas::Viewport;
 use crate::clean_text::render_group::RenderGroup;
 use crate::clean_text::vertex::GLYPH_AABB;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::Task;
+use bevy_ecs::prelude::{Entity, Resource};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Resource)]
 pub struct Renderer {
@@ -18,7 +18,10 @@ pub struct Renderer {
 }
 
 impl Render for Renderer {
-    fn extract(compute: &mut Task, render: &mut Task) where Self: Sized {
+    fn extract(compute: &mut Task, render: &mut Task)
+    where
+        Self: Sized,
+    {
         todo!()
     }
 
@@ -39,9 +42,15 @@ impl Render for Renderer {
             .set_bind_group(1, &self.sampler_bind_group, &[]);
         for (entity, render_group) in self.render_groups.iter() {
             if render_group.count() > 0 && self.visible_entities.contains(entity) {
-                render_pass_handle.0.set_vertex_buffer(1, render_group.glyph_position_gpu.slice(..));
-                render_pass_handle.0.set_vertex_buffer(2, render_group.coords_gpu.slice(..));
-                render_pass_handle.0.set_vertex_buffer(3, render_group.null_gpu.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(1, render_group.glyph_position_gpu.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(2, render_group.coords_gpu.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(3, render_group.null_gpu.slice(..));
                 render_pass_handle
                     .0
                     .set_bind_group(2, &render_group.bind_group, &[]);
@@ -53,10 +62,9 @@ impl Render for Renderer {
                         bound.area.height as u32,
                     );
                 }
-                render_pass_handle.0.draw(
-                    0..GLYPH_AABB.len() as u32,
-                    0..render_group.count() as u32,
-                );
+                render_pass_handle
+                    .0
+                    .draw(0..GLYPH_AABB.len() as u32, 0..render_group.count() as u32);
             }
         }
     }

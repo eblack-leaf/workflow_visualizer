@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Added, Changed, Entity, Or, Query, RemovedComponents, ResMut, With};
-use wgpu::{BindGroupEntry, Buffer, BufferUsages};
+use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
-use crate::{Area, Canvas, Color, Depth, Position, Section, Visibility};
 use crate::clean_text::atlas::Atlas;
 use crate::clean_text::cache::Cache;
 use crate::clean_text::coords::Coords;
@@ -13,6 +12,7 @@ use crate::clean_text::index::{Index, Indexer};
 use crate::clean_text::scale::Scale;
 use crate::clean_text::text::Text;
 use crate::uniform::Uniform;
+use crate::{Area, Canvas, Color, Depth, Position, Section, Visibility};
 
 pub(crate) struct RenderGroup {
     pub(crate) bounds: Option<Section>,
@@ -38,11 +38,20 @@ pub(crate) struct RenderGroup {
 }
 
 impl RenderGroup {
-    pub(crate) fn new(canvas: &Canvas, bind_group_layout: &wgpu::BindGroupLayout, max: u32, position: Position, depth: Depth, color: Color, unique_glyphs: u32) -> Self {
+    pub(crate) fn new(
+        canvas: &Canvas,
+        bind_group_layout: &wgpu::BindGroupLayout,
+        max: u32,
+        position: Position,
+        depth: Depth,
+        color: Color,
+        atlas_block: Area,
+        unique_glyphs: u32,
+    ) -> Self {
         let position_uniform = Uniform::new(&canvas.device, position);
         let depth_uniform = Uniform::new(&canvas.device, depth);
         let color_uniform = Uniform::new(&canvas.device, color);
-        let atlas = Atlas::new(canvas, unique_glyphs);
+        let atlas = Atlas::new(canvas, atlas_block, unique_glyphs);
         Self {
             bounds: None,
             bind_group: canvas.device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -68,7 +77,7 @@ impl RenderGroup {
                     BindGroupEntry {
                         binding: 3,
                         resource: wgpu::BindingResource::TextureView(&atlas.texture_view),
-                    }
+                    },
                 ],
             }),
             position_uniform,
@@ -96,7 +105,7 @@ impl RenderGroup {
     }
     pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph) {
         if let Some(glyph_id) = self.keyed_glyph_ids.get(&key) {
-            if glyph_id == glyph.id {
+            if *glyph_id == glyph.id {
                 return;
             }
         }
@@ -154,12 +163,12 @@ impl RenderGroup {
     fn gpu_buffer<T>(canvas: &Canvas, max: u32) -> Buffer {
         canvas.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("render group gpu buffer"),
-            size: (std::mem::size_of::<T>() * max) as wgpu::BufferAddress,
+            size: (std::mem::size_of::<T>() * max as usize) as wgpu::BufferAddress,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         })
     }
-    fn cpu_buffer<T: Default>(max: u32) -> Vec<T> {
+    fn cpu_buffer<T: Default + Clone>(max: u32) -> Vec<T> {
         let mut vec = Vec::new();
         vec.resize(max as usize, T::default());
         vec
@@ -185,23 +194,35 @@ impl RenderGroup {
     fn write_coords(&mut self, canvas: &Canvas) {
         for (index, coords) in self.coords_write.iter() {
             self.coords_cpu.insert(index.value as usize, *coords);
-            let offset = (std::mem::size_of::<Position>() * index.value) as wgpu::BufferAddress;
-            canvas.queue.write_buffer(&self.coords_gpu, offset, bytemuck::cast_slice(&[*coords]));
+            let offset = Self::offset::<Coords>(index);
+            canvas
+                .queue
+                .write_buffer(&self.coords_gpu, offset, bytemuck::cast_slice(&[*coords]));
         }
     }
     fn write_null(&mut self, canvas: &Canvas) {
         for (index, null) in self.null_write.iter() {
             self.null_cpu.insert(index.value as usize, *null);
-            let offset = (std::mem::size_of::<bool>() * index.value) as wgpu::BufferAddress;
-            canvas.queue.write_buffer(&self.null_gpu, offset, bytemuck::cast_slice(&[*null]));
+            let offset = Self::offset::<bool>(index);
+            canvas
+                .queue
+                .write_buffer(&self.null_gpu, offset, bytemuck::cast_slice(&[*null]));
         }
     }
     fn write_glyph_positions(&mut self, canvas: &Canvas) {
         for (index, glyph_position) in self.glyph_position_write.iter() {
-            self.glyph_position_cpu.insert(index.value as usize, *glyph_position);
-            let offset = (std::mem::size_of::<Position>() * index.value) as wgpu::BufferAddress;
-            canvas.queue.write_buffer(&self.glyph_position_gpu, offset, bytemuck::cast_slice(&[*glyph_position]));
+            self.glyph_position_cpu
+                .insert(index.value as usize, *glyph_position);
+            let offset = Self::offset::<Position>(index);
+            canvas.queue.write_buffer(
+                &self.glyph_position_gpu,
+                offset,
+                bytemuck::cast_slice(&[*glyph_position]),
+            );
         }
+    }
+    fn offset<T>(index: &Index) -> BufferAddress {
+        (std::mem::size_of::<T>() * index.value as usize) as wgpu::BufferAddress
     }
     fn get_glyph_id(&self, key: Key) -> GlyphId {
         *self.keyed_glyph_ids.get(&key).expect("no glyph id for key")
@@ -213,7 +234,9 @@ impl RenderGroup {
     }
 }
 
-pub(crate) fn depth_diff(mut text: Query<(Entity, &Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<Text>)>) {
+pub(crate) fn depth_diff(
+    mut text: Query<(Entity, &Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<Text>)>,
+) {
     for (entity, depth, mut cache, mut difference) in text.iter_mut() {
         if *depth != cache.depth {
             difference.depth.replace(*depth);
@@ -221,7 +244,12 @@ pub(crate) fn depth_diff(mut text: Query<(Entity, &Depth, &mut Cache, &mut Diffe
     }
 }
 
-pub(crate) fn position_diff(mut text: Query<(Entity, &Position, &mut Cache, &mut Difference), (Changed<Position>, With<Text>)>) {
+pub(crate) fn position_diff(
+    mut text: Query<
+        (Entity, &Position, &mut Cache, &mut Difference),
+        (Changed<Position>, With<Text>),
+    >,
+) {
     for (entity, position, mut cache, mut difference) in text.iter_mut() {
         if *position != cache.position {
             difference.position.replace(*position);
@@ -229,7 +257,9 @@ pub(crate) fn position_diff(mut text: Query<(Entity, &Position, &mut Cache, &mut
     }
 }
 
-pub(crate) fn color_diff(mut text: Query<(Entity, &Color, &mut Cache, &mut Difference), (Changed<Color>, With<Text>)>) {
+pub(crate) fn color_diff(
+    mut text: Query<(Entity, &Color, &mut Cache, &mut Difference), (Changed<Color>, With<Text>)>,
+) {
     for (entity, color, mut cache, mut difference) in text.iter_mut() {
         if *color != cache.color {
             difference.color.replace(*color);
@@ -237,9 +267,22 @@ pub(crate) fn color_diff(mut text: Query<(Entity, &Color, &mut Cache, &mut Diffe
     }
 }
 
-pub(crate) fn manage_render_groups(text: Query<(Entity, &Position, &Depth, &Color, Option<&Area>, &mut Cache, &mut Difference), (Or<(Changed<Visibility>, Added<Text>, Changed<Scale>)>)>,
-                                   removed: RemovedComponents<Text>,
-                                   mut extraction: ResMut<Extraction>) {
+pub(crate) fn manage_render_groups(
+    text: Query<
+        (
+            Entity,
+            &Position,
+            &Depth,
+            &Color,
+            Option<&Area>,
+            &mut Cache,
+            &mut Difference,
+        ),
+        (Or<(Changed<Visibility>, Added<Text>, Changed<Scale>)>),
+    >,
+    removed: RemovedComponents<Text>,
+    mut extraction: ResMut<Extraction>,
+) {
     // clear cache + write initial to diff
     // if visible / or added - extraction.added_render_groups.insert(entity, info)
     // if not visible / or removed - extraction.removed_render_groups.insert(entity)

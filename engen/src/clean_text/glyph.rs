@@ -1,6 +1,6 @@
-use std::collections::HashSet;
-use bevy_ecs::prelude::{Component, Resource};
 use crate::clean_text::scale::Scale;
+use bevy_ecs::prelude::{Component, Resource};
+use std::collections::HashSet;
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct Key {

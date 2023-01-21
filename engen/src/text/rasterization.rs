@@ -67,12 +67,7 @@ impl Rasterization {
     fn normalize_pos(&mut self, position: Position) -> Position {
         (position.x / self.total_x(), position.y / self.total_y()).into()
     }
-    fn generate_tex_coords(
-        &mut self,
-        glyph_hash: GlyphHash,
-        position: Position,
-        area: Area,
-    ) {
+    fn generate_tex_coords(&mut self, glyph_hash: GlyphHash, position: Position, area: Area) {
         let tex_coords = TexCoords::new([
             position.x,
             position.y,

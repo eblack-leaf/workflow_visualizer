@@ -1,4 +1,5 @@
 mod canvas;
+mod clean_text;
 mod color;
 #[allow(unused)]
 mod coord;
@@ -11,10 +12,10 @@ mod task;
 pub mod text;
 mod theme;
 mod uniform;
-mod clean_text;
 
-use crate::canvas::{CanvasWindow, ViewportBounds};
+pub use crate::canvas::Visibility;
 pub use crate::canvas::{Canvas, CanvasOptions};
+use crate::canvas::{CanvasWindow, ViewportBounds};
 pub use crate::color::Color;
 pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{ExtractCalls, Render, RenderCalls};
@@ -25,7 +26,6 @@ use bevy_ecs::prelude::{Resource, SystemStage};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-pub use crate::canvas::Visibility;
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }
@@ -43,7 +43,11 @@ impl Engen {
             compute,
             render: {
                 let mut task = Task::new();
-                task.main.schedule.add_stage_before(Stage::After, "visibility", SystemStage::single(canvas::visibility));
+                task.main.schedule.add_stage_before(
+                    Stage::After,
+                    "visibility",
+                    SystemStage::single(canvas::visibility),
+                );
                 task
             },
             extract_calls: ExtractCalls::new(),
@@ -298,7 +302,13 @@ impl Engen {
     }
 
     fn attach_viewport_bounds(&mut self) {
-        let bounds = self.render.container.get_resource::<Canvas>().unwrap().viewport.bounds();
+        let bounds = self
+            .render
+            .container
+            .get_resource::<Canvas>()
+            .unwrap()
+            .viewport
+            .bounds();
         self.compute.container.insert_resource(bounds);
     }
 }
