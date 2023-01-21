@@ -9,6 +9,7 @@ use crate::clean_text::difference::Difference;
 pub(crate) struct Extraction {
     pub(crate) added_render_groups: HashMap<Entity, ()>,
     pub(crate) removed_render_groups: HashSet<Entity>,
+    pub(crate) differences: HashMap<Entity, Difference>,
 }
 
 impl Extraction {
@@ -16,13 +17,19 @@ impl Extraction {
         Self {
             added_render_groups: HashMap::new(),
             removed_render_groups: HashSet::new(),
+            differences: HashMap::new(),
         }
     }
 }
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
-    differences: Query<(Entity, &mut Difference, &Visibility), Changed<Difference>>,
+    mut differences: Query<(Entity, &mut Difference, &Visibility), Changed<Difference>>,
 ) {
-    // drain from diffs into extraction if visible
+    for (entity, mut difference, visibility) in differences.iter_mut() {
+        if visibility.visible {
+            extraction.differences.insert(entity, difference.clone());
+            difference.reset();
+        }
+    }
 }

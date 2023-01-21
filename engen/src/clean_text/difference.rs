@@ -1,7 +1,9 @@
-use crate::clean_text::glyph::{Glyph, GlyphId, Key};
-use crate::{Color, Depth, Position, Section};
-use bevy_ecs::component::Component;
 use std::collections::{HashMap, HashSet};
+
+use bevy_ecs::component::Component;
+
+use crate::{Color, Depth, Position, Section};
+use crate::clean_text::glyph::{Glyph, GlyphId, Key};
 
 #[derive(Component)]
 pub(crate) struct Difference {
@@ -31,5 +33,8 @@ impl Difference {
             update: HashMap::new(),
             remove: HashSet::new(),
         }
+    }
+    pub(crate) fn reset(&mut self) {
+        *self = Self::new();
     }
 }
