@@ -1,31 +1,50 @@
-use bevy_ecs::prelude::{Changed, Commands, Component, Entity, Or, Query, Res, Resource};
+use bevy_ecs::prelude::{Changed, Component, Entity, Or, Query, Res, Resource};
 use nalgebra::matrix;
 
+use crate::{Position, Section};
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
-use crate::{Position, Section};
 
 #[derive(Component, Copy, Clone)]
-pub struct Visibility {
-    pub visible: bool,
+pub(crate) struct Visibility {
+    visible: bool,
+    cached_visibility: bool,
 }
 
 impl Visibility {
-    pub fn new() -> Self {
-        Self { visible: false }
+    pub(crate) fn new() -> Self {
+        Self { visible: false, cached_visibility: false }
+    }
+    pub fn visibility_changed(&self) -> bool {
+        self.visible != self.cached_visibility
+    }
+    pub fn set(&mut self, value: bool) {
+        self.visible = value;
+    }
+    pub fn update_cached(&mut self) {
+        self.cached_visibility = self.visible
+    }
+    pub fn visible(&self) -> bool {
+        self.visible
+    }
+}
+
+pub(crate) fn update_visibility_cache(mut entities: Query<(Entity, &mut Visibility)>) {
+    for (entity, mut visibility) in entities.iter_mut() {
+        visibility.update_cached();
     }
 }
 
 pub(crate) fn visibility(
-    entities: Query<
+    mut entities: Query<
         (Entity, &Position, Option<&Area>, &mut Visibility),
         Or<(Changed<Position>, Changed<Area>)>,
     >,
-    mut cmd: Commands,
     viewport_bounds: Res<ViewportBounds>,
 ) {
-    // if within bounds - set visibility.visible = true
-    // else false
+    for (entity, position, maybe_area, mut visibility) in entities.iter_mut() {
+        visibility.set(true);
+    }
 }
 
 #[derive(Resource)]

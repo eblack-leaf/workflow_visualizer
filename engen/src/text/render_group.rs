@@ -1,19 +1,41 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Added, Changed, Entity, Or, Query, RemovedComponents, ResMut, With};
+use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
-use crate::clean_text::atlas::Atlas;
-use crate::clean_text::cache::Cache;
-use crate::clean_text::coords::Coords;
-use crate::clean_text::difference::Difference;
-use crate::clean_text::extraction::Extraction;
-use crate::clean_text::glyph::{Glyph, GlyphId, Key};
-use crate::clean_text::index::{Index, Indexer};
-use crate::clean_text::scale::Scale;
-use crate::clean_text::text::Text;
-use crate::uniform::Uniform;
 use crate::{Area, Canvas, Color, Depth, Position, Section, Visibility};
+use crate::text::atlas::Atlas;
+use crate::text::cache::Cache;
+use crate::text::coords::Coords;
+use crate::text::difference::Difference;
+use crate::text::extraction::Extraction;
+use crate::text::font::MonoSpacedFont;
+use crate::text::glyph::{Glyph, GlyphId, Key};
+use crate::text::index::{Index, Indexer};
+use crate::text::scale::Scale;
+use crate::text::text::Text;
+use crate::uniform::Uniform;
+
+#[repr(C)]
+#[derive(Pod, Zeroable, Copy, Clone, Default)]
+pub(crate) struct NullBit {
+    bit: u32,
+}
+
+impl NullBit {
+    pub(crate) const NOT_NULL: u32 = 0u32;
+    pub(crate) const NULL: u32 = 1u32;
+    fn new(bit: u32) -> Self {
+        Self { bit }
+    }
+    pub(crate) fn not_null() -> NullBit {
+        Self::new(Self::NOT_NULL)
+    }
+    pub(crate) fn null() -> Self {
+        Self::new(Self::NULL)
+    }
+}
 
 pub(crate) struct RenderGroup {
     pub(crate) bounds: Option<Section>,
@@ -26,8 +48,8 @@ pub(crate) struct RenderGroup {
     pub(crate) color_write: Option<Color>,
     pub(crate) indexer: Indexer<Key>,
     pub(crate) null_gpu: wgpu::Buffer,
-    pub(crate) null_cpu: Vec<bool>,
-    pub(crate) null_write: HashMap<Index, bool>,
+    pub(crate) null_cpu: Vec<NullBit>,
+    pub(crate) null_write: HashMap<Index, NullBit>,
     pub(crate) coords_gpu: wgpu::Buffer,
     pub(crate) coords_cpu: Vec<Coords>,
     pub(crate) coords_write: HashMap<Index, Coords>,
@@ -88,7 +110,7 @@ impl RenderGroup {
             color_uniform,
             color_write: None,
             indexer: Indexer::new(max),
-            null_gpu: Self::gpu_buffer::<bool>(canvas, max),
+            null_gpu: Self::gpu_buffer::<NullBit>(canvas, max),
             null_cpu: Self::cpu_buffer(max),
             null_write: HashMap::new(),
             coords_gpu: Self::gpu_buffer::<Coords>(canvas, max),
@@ -101,17 +123,20 @@ impl RenderGroup {
             atlas,
         }
     }
+    pub(crate) fn set_bounds(&mut self, bounds: Option<Section>) {
+        self.bounds = bounds;
+    }
     pub(crate) fn count(&self) -> u32 {
         self.indexer.count()
     }
-    pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph) {
+    pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph, font: &MonoSpacedFont) {
         if let Some(glyph_id) = self.keyed_glyph_ids.get(&key) {
             if *glyph_id == glyph.id {
                 return;
             }
         }
         self.keyed_glyph_ids.insert(key, glyph.id);
-        self.atlas.add_glyph(glyph);
+        self.atlas.add_glyph(glyph, font);
     }
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
         self.atlas.remove_glyph(glyph_id);
@@ -123,11 +148,11 @@ impl RenderGroup {
     pub(crate) fn add(&mut self, key: Key, glyph_position: Position) {
         let _index = self.indexer.next(key);
         self.queue_glyph_position(key, glyph_position);
-        self.queue_null(key, false);
+        self.queue_null(key, NullBit::not_null());
     }
     pub(crate) fn remove(&mut self, key: Key) {
         self.keyed_glyph_ids.remove(&key);
-        self.queue_null(key, true);
+        self.queue_null(key, NullBit::null());
         let _old_index = self.indexer.remove(key);
     }
     pub(crate) fn write(&mut self, canvas: &Canvas) {
@@ -157,7 +182,7 @@ impl RenderGroup {
     pub(crate) fn queue_depth(&mut self, depth: Depth) {
         self.depth_write.replace(depth);
     }
-    fn queue_null(&mut self, key: Key, null_bit: bool) {
+    fn queue_null(&mut self, key: Key, null_bit: NullBit) {
         let index = self.get_index(key);
         self.null_write.insert(index, null_bit);
     }
@@ -204,7 +229,7 @@ impl RenderGroup {
     fn write_null(&mut self, canvas: &Canvas) {
         for (index, null) in self.null_write.iter() {
             self.null_cpu.insert(index.value as usize, *null);
-            let offset = Self::offset::<bool>(index);
+            let offset = Self::offset::<NullBit>(index);
             canvas
                 .queue
                 .write_buffer(&self.null_gpu, offset, bytemuck::cast_slice(&[*null]));
@@ -233,55 +258,4 @@ impl RenderGroup {
         self.null_write.clear();
         self.coords_write.clear();
     }
-}
-
-pub(crate) fn depth_diff(
-    mut text: Query<(&Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<Text>)>,
-) {
-    for (depth, mut cache, mut difference) in text.iter_mut() {
-        if *depth != cache.depth {
-            difference.depth.replace(*depth);
-        }
-    }
-}
-
-pub(crate) fn position_diff(
-    mut text: Query<(&Position, &mut Cache, &mut Difference), (Changed<Position>, With<Text>)>,
-) {
-    for (position, mut cache, mut difference) in text.iter_mut() {
-        if *position != cache.position {
-            difference.position.replace(*position);
-        }
-    }
-}
-
-pub(crate) fn color_diff(
-    mut text: Query<(&Color, &mut Cache, &mut Difference), (Changed<Color>, With<Text>)>,
-) {
-    for (color, mut cache, mut difference) in text.iter_mut() {
-        if *color != cache.color {
-            difference.color.replace(*color);
-        }
-    }
-}
-
-pub(crate) fn manage_render_groups(
-    text: Query<
-        (
-            Entity,
-            &Position,
-            &Depth,
-            &Color,
-            Option<&Area>,
-            &mut Cache,
-            &mut Difference,
-        ),
-        Or<(Changed<Visibility>, Added<Text>, Changed<Scale>)>,
-    >,
-    removed: RemovedComponents<Text>,
-    mut extraction: ResMut<Extraction>,
-) {
-    // clear cache + write initial to diff
-    // if visible / or added - extraction.added_render_groups.insert(entity, info)
-    // if not visible / or removed - extraction.removed_render_groups.insert(entity)
 }

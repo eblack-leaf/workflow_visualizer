@@ -3,27 +3,26 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
 
-use crate::canvas::CanvasWindow;
-pub(crate) use crate::canvas::Visibility;
 pub use crate::canvas::{Canvas, CanvasOptions};
+use crate::canvas::{CanvasWindow, update_visibility_cache};
+pub(crate) use crate::canvas::Visibility;
 pub use crate::color::Color;
 pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{ExtractCalls, Render, RenderCalls};
-pub use crate::task::Task;
 use crate::task::{Stage, WorkloadId};
+pub use crate::task::Task;
+pub use crate::text::{Scale, Text, TextBundle, TextRenderer};
 pub use crate::theme::Theme;
 
 mod canvas;
 #[allow(unused)]
-mod clean_text;
+mod text;
 mod color;
 #[allow(unused)]
 mod coord;
 mod icon;
 mod render;
 mod task;
-#[allow(unused)]
-pub mod text;
 mod theme;
 mod uniform;
 
@@ -40,19 +39,19 @@ pub struct Engen {
 }
 
 impl Engen {
-    pub fn new(compute: Task) -> Self {
+    pub fn new(mut compute: Task) -> Self {
         Self {
             event_loop: None,
-            compute,
-            render: {
-                let mut task = Task::new();
-                task.main.schedule.add_stage_before(
+            compute: {
+                compute.main.schedule.add_stage_before(
                     Stage::After,
                     "visibility",
                     SystemStage::single(canvas::visibility),
                 );
-                task
+                compute.main.schedule.add_stage_after(Stage::Last, "update visibility cache", SystemStage::single(update_visibility_cache));
+                compute
             },
+            render: Task::new(),
             extract_calls: ExtractCalls::new(),
             render_calls: RenderCalls::new(),
         }

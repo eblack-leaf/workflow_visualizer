@@ -3,12 +3,11 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::component::Component;
 
 use crate::{Color, Depth, Position, Section};
-use crate::clean_text::glyph::{Glyph, GlyphId, Key};
+use crate::text::glyph::{Glyph, GlyphId, Key};
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub(crate) struct Difference {
-    pub(crate) bound: Option<Section>,
-    pub(crate) remove_bound: bool,
+    pub(crate) bounds: Option<Section>,
     pub(crate) position: Option<Position>,
     pub(crate) depth: Option<Depth>,
     pub(crate) color: Option<Color>,
@@ -22,8 +21,7 @@ pub(crate) struct Difference {
 impl Difference {
     pub(crate) fn new() -> Self {
         Self {
-            bound: None,
-            remove_bound: false,
+            bounds: None,
             position: None,
             depth: None,
             color: None,

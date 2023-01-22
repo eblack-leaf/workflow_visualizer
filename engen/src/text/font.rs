@@ -1,10 +1,10 @@
 use std::ops::Deref;
-use std::path::Path;
 
-use crate::text::rasterization::GlyphHash;
-use crate::text::scale::Scale;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
+
+use crate::Area;
+use crate::text::scale::Scale;
 
 #[derive(Resource)]
 pub struct MonoSpacedFont {
@@ -12,7 +12,7 @@ pub struct MonoSpacedFont {
 }
 
 impl MonoSpacedFont {
-    pub fn new<Data: Deref<Target = [u8]>, T: Into<Scale>>(font_data: Data, opt_scale: T) -> Self {
+    pub fn new<Data: Deref<Target=[u8]>, T: Into<Scale>>(font_data: Data, opt_scale: T) -> Self {
         Self {
             font_storage: [fdFont::from_bytes(
                 font_data,
@@ -21,7 +21,7 @@ impl MonoSpacedFont {
                     ..FontSettings::default()
                 },
             )
-            .expect("text font creation")],
+                .expect("text font creation")],
         }
     }
     pub fn font_slice(&self) -> &[fdFont] {
@@ -33,11 +33,12 @@ impl MonoSpacedFont {
     pub fn index() -> usize {
         0
     }
-    pub fn character_dimensions(&self, character: char, px: f32) -> [f32; 2] {
+    pub fn character_dimensions(&self, character: char, px: f32) -> Area {
         let metrics = self.font().metrics(character, px);
-        [metrics.advance_width.ceil(), px.ceil()]
+        (metrics.advance_width.ceil(), px.ceil()).into()
     }
 }
+
 impl Default for MonoSpacedFont {
     fn default() -> Self {
         MonoSpacedFont::new(

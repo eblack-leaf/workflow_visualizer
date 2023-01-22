@@ -3,10 +3,10 @@ use std::num::NonZeroU32;
 
 use fontdue::Metrics;
 
-use crate::clean_text::coords::Coords;
-use crate::clean_text::font::MonoSpacedFont;
-use crate::clean_text::glyph::{Glyph, GlyphId, Key};
-use crate::{Area, Canvas, Position, Section};
+use crate::{Area, Canvas, CanvasOptions, Position, Section};
+use crate::text::coords::Coords;
+use crate::text::font::MonoSpacedFont;
+use crate::text::glyph::{Glyph, GlyphId, Key};
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct Location {
@@ -48,7 +48,6 @@ pub(crate) struct Atlas {
     pub(crate) glyphs: HashMap<GlyphId, (Coords, Location)>,
     pub(crate) references: HashMap<GlyphId, Reference>,
     pub(crate) write: HashMap<Location, (Coords, Bitmap)>,
-    pub(crate) font: MonoSpacedFont,
 }
 
 impl Atlas {
@@ -68,7 +67,6 @@ impl Atlas {
             glyphs: HashMap::new(),
             references: HashMap::new(),
             write: HashMap::new(),
-            font: MonoSpacedFont::default(),
         }
     }
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
@@ -77,14 +75,15 @@ impl Atlas {
             .expect("no references for glyph id")
             .decrement();
     }
-    pub(crate) fn add_glyph(&mut self, glyph: Glyph) {
+    pub(crate) fn add_glyph(&mut self, glyph: Glyph, font: &MonoSpacedFont) {
         if self.glyphs.contains_key(&glyph.id) {
             self.increment_reference(glyph.id);
             return;
         }
         self.references.insert(glyph.id, Reference::new());
         self.increment_reference(glyph.id);
-        let (coords, location) = self.place(glyph.clone());
+        let rasterization = font.font().rasterize(glyph.character, glyph.scale.px());
+        let (coords, location) = self.place(rasterization);
         self.glyphs.insert(glyph.id, (coords, location));
     }
     pub(crate) fn write(&mut self, canvas: &Canvas) {
@@ -178,25 +177,21 @@ impl Atlas {
     fn queue_write(&mut self, location: Location, coords: Coords, bitmap: Bitmap) {
         self.write.insert(location, (coords, bitmap));
     }
-    fn place(&mut self, glyph: Glyph) -> (Coords, Location) {
+    fn place(&mut self, rasterization: (Metrics, Bitmap)) -> (Coords, Location) {
         let location = self.next();
         let position = self.position_from(location);
-        let (metrics, bitmap) = self.rasterize(glyph);
-        let section = Section::new(position, (metrics.width, metrics.height).into());
+        let section = Section::new(
+            position,
+            (rasterization.0.width, rasterization.0.height).into(),
+        );
         let coords = Coords::new(
             section.left(),
             section.top(),
             section.right(),
             section.bottom(),
         );
-        self.queue_write(location, coords, bitmap);
+        self.queue_write(location, coords, rasterization.1);
         (coords, location)
-    }
-    fn rasterize(&mut self, glyph: Glyph) -> (Metrics, Vec<u8>) {
-        // optimize by caching rasterizations
-        self.font
-            .font()
-            .rasterize(glyph.character, glyph.scale.px())
     }
     fn next(&mut self) -> Location {
         let location = match self.free.is_empty() {
@@ -231,7 +226,30 @@ impl Atlas {
         self.free.insert(location);
         self.references.remove(&glyph_id);
     }
+    fn dimension(unique_glyphs: u32) -> u32 {
+        let mut logical_dimension = (unique_glyphs as f32).sqrt() as u32;
+        while logical_dimension.pow(2) < unique_glyphs {
+            logical_dimension += 1;
+        }
+        logical_dimension
+    }
+    fn hardware_max_check(texture_width: u32, texture_height: u32) {
+        let hardware_max = CanvasOptions::default()
+            .web_align()
+            .limits
+            .max_texture_dimension_2d;
+        if texture_width > hardware_max {
+            panic!("requested larger than possible texture")
+        }
+        if texture_height > hardware_max {
+            panic!("requested larger than possible texture")
+        }
+    }
     fn texture_dimensions(block: Area, unique_glyphs: u32) -> (u32, u32, u32) {
-        todo!()
+        let dimension = Self::dimension(unique_glyphs);
+        let texture_width: u32 = dimension * block.width as u32;
+        let texture_height: u32 = dimension * block.height as u32;
+        Self::hardware_max_check(texture_width, texture_height);
+        (dimension, texture_width, texture_height)
     }
 }

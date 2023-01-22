@@ -1,31 +1,22 @@
-use crate::text::rasterization::Rasterization;
-use bevy_ecs::prelude::{Entity, Resource};
-use std::collections::{HashMap, HashSet};
+pub use crate::text::renderer::TextRenderer;
+pub use crate::text::scale::Scale;
+pub use crate::text::text::{Text, TextBundle};
 
+mod atlas;
 mod attach;
 mod cache;
-mod changes;
-mod component;
-mod compute;
-mod extract;
+mod compute_system;
+mod coords;
+mod difference;
+mod extraction;
 mod font;
-mod grow;
+mod glyph;
 mod index;
-mod instance;
-mod rasterization;
-mod render;
+mod place;
+mod render_group;
+mod render_system;
+mod renderer;
 mod scale;
+mod text;
 mod vertex;
-pub use crate::text::component::{Text, TextBundle};
-pub use crate::text::scale::Scale;
 
-#[derive(Resource)]
-pub struct Renderer {
-    pub(crate) pipeline: wgpu::RenderPipeline,
-    pub(crate) vertex_buffer: wgpu::Buffer,
-    pub(crate) rasterizations: HashMap<Entity, Rasterization>,
-    pub(crate) visible_text_entities: HashSet<Entity>,
-    pub(crate) rasterization_bind_group_layout: wgpu::BindGroupLayout,
-    pub(crate) sampler: wgpu::Sampler,
-    pub(crate) sampler_bind_group: wgpu::BindGroup,
-}

@@ -1,28 +1,35 @@
-use crate::canvas::Viewport;
-use crate::clean_text::render_group::RenderGroup;
-use crate::clean_text::vertex::GLYPH_AABB;
-use crate::render::{Render, RenderPassHandle, RenderPhase};
-use crate::Task;
-use bevy_ecs::prelude::{Entity, Resource};
 use std::collections::{HashMap, HashSet};
 
+use bevy_ecs::prelude::{Entity, Resource};
+
+use crate::canvas::Viewport;
+use crate::render::{Render, RenderPassHandle, RenderPhase};
+use crate::Task;
+use crate::text::extraction::Extraction;
+use crate::text::render_group::RenderGroup;
+use crate::text::vertex::GLYPH_AABB;
+
 #[derive(Resource)]
-pub struct Renderer {
+pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) render_groups: HashMap<Entity, RenderGroup>,
-    pub(crate) visible_entities: HashSet<Entity>,
     pub(crate) render_group_bind_group_layout: wgpu::BindGroupLayout,
     pub(crate) sampler: wgpu::Sampler,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
 }
 
-impl Render for Renderer {
+impl Render for TextRenderer {
     fn extract(compute: &mut Task, render: &mut Task)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
-        todo!()
+        let mut extraction = compute
+            .container
+            .get_resource_mut::<Extraction>()
+            .expect("no extraction in compute");
+        render.container.insert_resource(extraction.clone());
+        *extraction = Extraction::new();
     }
 
     fn phase() -> RenderPhase {
@@ -41,16 +48,17 @@ impl Render for Renderer {
             .0
             .set_bind_group(1, &self.sampler_bind_group, &[]);
         for (entity, render_group) in self.render_groups.iter() {
-            if render_group.count() > 0 && self.visible_entities.contains(entity) {
+            if render_group.count() > 0 {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(1, render_group.glyph_position_gpu.slice(..));
                 render_pass_handle
                     .0
-                    .set_vertex_buffer(2, render_group.coords_gpu.slice(..));
+                    .set_vertex_buffer(2, render_group.null_gpu.slice(..));
                 render_pass_handle
                     .0
-                    .set_vertex_buffer(3, render_group.null_gpu.slice(..));
+                    .set_vertex_buffer(3, render_group.coords_gpu.slice(..));
+
                 render_pass_handle
                     .0
                     .set_bind_group(2, &render_group.bind_group, &[]);

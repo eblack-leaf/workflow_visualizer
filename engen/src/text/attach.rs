@@ -1,34 +1,87 @@
-use crate::task::Stage;
-use crate::text::{compute, extract, grow, rasterization, render, Renderer};
-use crate::{text, Attach, Engen};
-use bevy_ecs::prelude::*;
+use bevy_ecs::prelude::IntoSystemDescriptor;
 
-impl Attach for Renderer {
+use crate::{Attach, Engen};
+use crate::task::Stage;
+use crate::text::compute_system::{
+    bounds_diff, color_diff, depth_diff, discard_out_of_bounds, letter_diff, manage_render_groups,
+    place, position_diff, pull_differences, setup as compute_setup,
+};
+use crate::text::render_system::{
+    create_render_groups, render_group_differences, reset_extraction, setup as render_setup,
+};
+use crate::text::renderer::TextRenderer;
+
+impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {
-        let compute_startup = &mut engen.compute.startup.schedule;
-        compute_startup.add_system_to_stage(Stage::Before, compute::compute_setup);
-        let compute_main = &mut engen.compute.main.schedule;
-        compute_main.add_system_to_stage(Stage::After, compute::text_entity_changes);
-        compute_main.add_system_to_stage(Stage::After, compute::visibility);
-        compute_main.add_system_to_stage(Stage::Last, compute::push_compute_changes);
+        engen
+            .compute
+            .startup
+            .schedule
+            .add_system_to_stage(Stage::Before, compute_setup);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, manage_render_groups.before("place"));
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, bounds_diff);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, color_diff);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, depth_diff);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, position_diff);
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, place.label("place"));
+        engen.compute.main.schedule.add_system_to_stage(
+            Stage::After,
+            discard_out_of_bounds.label("out of bounds").after("place"),
+        );
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::After, letter_diff.after("out of bounds"));
+        engen
+            .compute
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Last, pull_differences);
+        // render side
         engen
             .render
             .startup
             .schedule
-            .add_system_to_stage(Stage::Before, render::render_setup);
-        let engen_main = &mut engen.render.main.schedule;
-        engen_main.add_system_to_stage(Stage::First, rasterization::add_remove_rasterizations);
-        engen_main.add_system_to_stage(Stage::Before, grow::grow);
-        engen_main.add_system_to_stage(
-            Stage::During,
-            rasterization::rasterize
-                .label("rasterization")
-                .before("integration"),
-        );
-        engen_main.add_system_to_stage(
-            Stage::During,
-            extract::integrate_extraction.label("integration"),
-        );
-        engen_main.add_system_to_stage(Stage::Last, extract::reset_extraction);
+            .add_system_to_stage(Stage::Before, render_setup);
+        engen
+            .render
+            .main
+            .schedule
+            .add_system_to_stage(Stage::First, create_render_groups);
+        engen
+            .render
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Before, render_group_differences);
+        engen
+            .render
+            .main
+            .schedule
+            .add_system_to_stage(Stage::Last, reset_extraction);
     }
 }

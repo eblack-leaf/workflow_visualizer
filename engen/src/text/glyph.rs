@@ -1,4 +1,4 @@
-use crate::clean_text::scale::Scale;
+use crate::text::scale::Scale;
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct Key {
