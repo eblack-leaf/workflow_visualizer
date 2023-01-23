@@ -1,6 +1,6 @@
 use crate::text::scale::Scale;
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone)]
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
 pub(crate) struct Key {
     pub(crate) offset: u32,
 }

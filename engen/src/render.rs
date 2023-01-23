@@ -1,14 +1,18 @@
+use bevy_ecs::prelude::Resource;
+
+use crate::{Engen, Task};
 use crate::canvas::{Canvas, Viewport};
 use crate::theme::Theme;
-use crate::{Engen, Task};
-use bevy_ecs::prelude::Resource;
+
 pub enum RenderPhase {
     Opaque,
     Alpha,
 }
-pub(crate) fn call_extract<Renderer: Render>(compute: &mut Task, render: &mut Task) {
-    Renderer::extract(compute, render);
+
+pub(crate) fn call_extract<Extractor: Extract>(compute: &mut Task, render: &mut Task) {
+    Extractor::extract(compute, render);
 }
+
 pub(crate) fn call_render<'a, Renderer: Render + Resource>(
     render: &'a Task,
     render_pass_handle: &mut RenderPassHandle<'a>,
@@ -24,10 +28,12 @@ pub(crate) fn call_render<'a, Renderer: Render + Resource>(
         .expect("no renderer attached")
         .render(render_pass_handle, viewport);
 }
+
 pub(crate) struct RenderCalls {
     pub(crate) opaque: Vec<Box<for<'a> fn(&'a Task, &mut RenderPassHandle<'a>)>>,
     pub(crate) alpha: Vec<Box<for<'a> fn(&'a Task, &mut RenderPassHandle<'a>)>>,
 }
+
 impl RenderCalls {
     pub(crate) fn new() -> Self {
         Self {
@@ -47,9 +53,11 @@ impl RenderCalls {
         storage.push(Box::new(render_call));
     }
 }
+
 pub(crate) struct ExtractCalls {
     pub(crate) fns: Vec<Box<fn(&mut Task, &mut Task)>>,
 }
+
 impl ExtractCalls {
     pub(crate) fn new() -> Self {
         Self { fns: Vec::new() }
@@ -58,19 +66,26 @@ impl ExtractCalls {
         self.fns.push(Box::new(caller));
     }
 }
-pub trait Render {
+
+pub trait Extract {
     fn extract(compute: &mut Task, render: &mut Task)
-    where
-        Self: Sized;
+        where
+            Self: Sized;
+}
+
+pub trait Render {
     fn phase() -> RenderPhase;
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
+
 pub(crate) fn extract(engen: &mut Engen) {
     for caller in engen.extract_calls.fns.iter_mut() {
         caller(&mut engen.compute, &mut engen.render);
     }
 }
+
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
+
 pub fn render(engen: &mut Engen) {
     let canvas = engen
         .render

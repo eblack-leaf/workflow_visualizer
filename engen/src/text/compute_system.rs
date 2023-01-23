@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, 
 use fontdue::layout::TextStyle;
 
 use crate::{Area, Color, Depth, Position, Section};
-use crate::canvas::Visibility;
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::extraction::Extraction;
@@ -15,6 +14,7 @@ use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::scale::Scale;
 use crate::text::text::Text;
+use crate::visibility::Visibility;
 
 pub(crate) fn setup(mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -184,26 +184,24 @@ pub(crate) fn place(
 
 pub(crate) fn discard_out_of_bounds(
     mut text: Query<
-        (&mut Placer, &Area, &mut Cache, &mut Difference),
+        (&mut Placer, &Position, &Area, &mut Cache, &mut Difference),
         Or<(Changed<Placer>, Changed<Area>)>,
     >,
 ) {
-    for (mut placer, area, mut cache, mut difference) in text.iter_mut() {
-        let text_section = Section::new((0u32, 0u32).into(), *area);
+    for (mut placer, position, area, mut cache, mut difference) in text.iter_mut() {
+        let text_section = Section::new(*position, *area);
         placer.reset_filtered();
         let mut filter_queue = HashSet::new();
         for glyph in placer.unfiltered_placement().iter() {
             let key = Key::new(glyph.byte_offset as u32);
             let glyph_section =
-                Section::new((0u32, 0u32).into(), (glyph.width, glyph.height).into());
+                Section::new((position.x + glyph.x, position.y + glyph.y), (glyph.width, glyph.height));
             let within_bounds = text_section.left() < glyph_section.right()
                 && text_section.right() > glyph_section.left()
                 && text_section.top() < glyph_section.bottom()
                 && text_section.bottom() > glyph_section.top();
             if !within_bounds {
-                if cache.exists(key) {
-                    filter_queue.insert(key);
-                }
+                filter_queue.insert(key);
             }
         }
         placer.filter_placement(filter_queue);

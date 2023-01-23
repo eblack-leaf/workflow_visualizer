@@ -1,15 +1,15 @@
-use engen::{CanvasOptions, Color, Depth, Engen, Position, Scale, Task, Text, TextBundle, TextRenderer, Theme};
+use engen::{Area, CanvasOptions, Color, Depth, Engen, Position, Scale, Task, Text, TextBundle, TextRenderer, Theme};
 
 pub fn task() -> Task {
     let mut task = Task::new();
     let _tester = task
         .container
         .spawn(TextBundle::new(
-            Text::new("ah".to_string()),
+            Text::new("pepperminnnntttt!!! hey...".to_string()),
             Position::new(10f32, 10f32),
             Depth::new(0f32),
             Color::rgb(1.0, 1.0, 1.0),
-            Scale::new(60u32),
+            Scale::new(45u32),
         ))
         .id();
     task

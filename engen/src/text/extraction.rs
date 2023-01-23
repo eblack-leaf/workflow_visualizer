@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Changed, Entity, Query, ResMut, Resource};
 
 use crate::{Area, Color, Depth, Position};
-use crate::canvas::Visibility;
 use crate::text::difference::Difference;
+use crate::visibility::Visibility;
 
 #[derive(Resource, Clone)]
 pub(crate) struct Extraction {

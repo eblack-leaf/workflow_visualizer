@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, AddAssign};
 
 use bevy_ecs::prelude::{Bundle, Component, Resource};
 
@@ -10,8 +10,12 @@ pub struct Position {
 }
 
 impl Position {
-    pub const fn new(x: f32, y: f32) -> Self {
-        Self { x, y }
+    pub fn new<F: Into<f32>>(x: F, y: F) -> Self {
+        Self { x: x.into(), y: y.into() }
+    }
+    pub fn apply(&mut self, movement: Movement) {
+        self.x += movement.x;
+        self.y += movement.y;
     }
 }
 
@@ -43,6 +47,22 @@ impl Add for Position {
     type Output = Position;
     fn add(self, rhs: Self) -> Self::Output {
         Self::Output::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+#[repr(C)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
+pub struct Movement {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Movement {
+    pub fn new<F: Into<f32>>(x: F, y: F) -> Self {
+        Self {
+            x: x.into(),
+            y: y.into(),
+        }
     }
 }
 
@@ -119,8 +139,8 @@ pub struct Section {
 }
 
 impl Section {
-    pub fn new(position: Position, area: Area) -> Self {
-        Self { position, area }
+    pub fn new<P: Into<Position>, A: Into<Area>>(position: P, area: A) -> Self {
+        Self { position: position.into(), area: area.into() }
     }
     pub fn width(&self) -> f32 {
         return self.area.width;

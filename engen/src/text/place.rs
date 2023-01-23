@@ -12,7 +12,6 @@ pub(crate) struct Placer {
     layout: fontdue::layout::Layout,
     unfiltered_placement: Vec<GlyphPosition>,
     filtered_placement: Vec<GlyphPosition>,
-    dirty: bool,
 }
 
 impl Placer {
@@ -21,7 +20,6 @@ impl Placer {
             layout: fontdue::layout::Layout::new(CoordinateSystem::PositiveYDown),
             unfiltered_placement: vec![],
             filtered_placement: vec![],
-            dirty: false,
         }
     }
     pub(crate) fn place(&mut self, text: &Text, scale: &Scale, font: &MonoSpacedFont) {
@@ -32,7 +30,6 @@ impl Placer {
         );
         self.unfiltered_placement = self.layout.glyphs().clone();
         self.filtered_placement = self.unfiltered_placement.clone();
-        self.dirty = true;
     }
     pub(crate) fn unfiltered_placement(&self) -> &Vec<GlyphPosition> {
         &self.unfiltered_placement
@@ -40,12 +37,15 @@ impl Placer {
     pub(crate) fn filtered_placement(&self) -> &Vec<GlyphPosition> {
         &self.filtered_placement
     }
-    pub(crate) fn filter_placement(&mut self, filter_queue: HashSet<Key>) {
-        for remove in filter_queue.iter() {
+    pub(crate) fn filter_placement(&mut self, mut filter_queue: HashSet<Key>) {
+        let mut queue = filter_queue.drain().collect::<Vec<Key>>();
+        queue.sort();
+        queue.reverse();
+        for remove in queue.iter() {
             self.filtered_placement.remove(remove.offset as usize);
         }
     }
     pub(crate) fn reset_filtered(&mut self) {
-        self.filtered_placement.clear();
+        self.filtered_placement = self.unfiltered_placement.clone();
     }
 }

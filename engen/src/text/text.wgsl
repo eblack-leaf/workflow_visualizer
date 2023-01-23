@@ -4,6 +4,9 @@ struct Viewport {
 @group(0)
 @binding(0)
 var<uniform> viewport: Viewport;
+@group(0)
+@binding(1)
+var<uniform> viewport_offset: vec2<f32>;
 @group(2)
 @binding(0)
 var<uniform> text_position: vec2<f32>;
@@ -22,19 +25,13 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) sample_coords: vec2<f32>,
 };
-@vertex
-fn vertex_entry(
-    vertex_input: VertexInput,
-) -> VertexOutput {
-    if (bool(vertex_input.null_bit) == true) {
-        // discard this or null it out
-    }
+fn adjust_coords_of(vertex_index: u32, tex_coords: vec4<f32>) -> vec2<f32> {
     var adjusted_coords = vec2<f32>(0.0, 0.0);
-    var top = vertex_input.tex_coords.g;
-    var left = vertex_input.tex_coords.r;
-    var bottom = vertex_input.tex_coords.a;
-    var right = vertex_input.tex_coords.b;
-    switch (i32(vertex_input.vertex_index)) {
+    var top = tex_coords.g;
+    var left = tex_coords.r;
+    var bottom = tex_coords.a;
+    var right = tex_coords.b;
+    switch (i32(vertex_index)) {
         case 0: {
             // top left
             adjusted_coords = vec2<f32>(left, top);
@@ -61,12 +58,23 @@ fn vertex_entry(
         }
         default: {}
     }
-    let coordinates = vec4<f32>(
+    return adjusted_coords;
+}
+@vertex
+fn vertex_entry(
+    vertex_input: VertexInput,
+) -> VertexOutput {
+    if (bool(vertex_input.null_bit) == true) {
+        // discard this or null it out
+    }
+    var adjusted_coords = adjust_coords_of(vertex_input.vertex_index, vertex_input.tex_coords);
+    var coordinates = vec4<f32>(
         text_position.x + vertex_input.position.x + (vertex_input.vertex_position.x * vertex_input.area.x),
         text_position.y + vertex_input.position.y + (vertex_input.vertex_position.y * vertex_input.area.y),
         text_depth,
         1.0);
-    return VertexOutput(viewport.view_matrix * coordinates, adjusted_coords);
+    var offset_coordinates = vec4<f32>(coordinates.rg - viewport_offset, coordinates.ba);
+    return VertexOutput(viewport.view_matrix * offset_coordinates, adjusted_coords);
 }
 @group(1)
 @binding(0)

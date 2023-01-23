@@ -290,7 +290,6 @@ pub(crate) fn render_group_differences(
             let (coords, glyph_area) = render_group.read_glyph_info(*key);
             render_group.queue_glyph_info(*key, coords, glyph_area);
         }
-
         render_group.write(&canvas);
     }
 }

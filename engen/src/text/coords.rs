@@ -16,8 +16,8 @@ impl Coords {
     }
     pub(crate) fn section(&self) -> Section {
         Section::new(
-            (self.data[0], self.data[1]).into(),
-            (self.data[2] - self.data[0], self.data[3] - self.data[1]).into(),
+            (self.data[0], self.data[1]),
+            (self.data[2] - self.data[0], self.data[3] - self.data[1]),
         )
     }
 }

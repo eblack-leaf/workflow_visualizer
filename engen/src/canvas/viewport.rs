@@ -5,70 +5,17 @@ use crate::{Position, Section};
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
 
-#[derive(Component, Copy, Clone)]
-pub(crate) struct Visibility {
-    visible: bool,
-    cached_visibility: bool,
-}
-
-impl Visibility {
-    pub(crate) fn new() -> Self {
-        Self { visible: false, cached_visibility: false }
-    }
-    pub fn visibility_changed(&self) -> bool {
-        self.visible != self.cached_visibility
-    }
-    pub fn set(&mut self, value: bool) {
-        self.visible = value;
-    }
-    pub fn update_cached(&mut self) {
-        self.cached_visibility = self.visible
-    }
-    pub fn visible(&self) -> bool {
-        self.visible
-    }
-}
-
-pub(crate) fn update_visibility_cache(mut entities: Query<(Entity, &mut Visibility)>) {
-    for (entity, mut visibility) in entities.iter_mut() {
-        visibility.update_cached();
-    }
-}
-
-pub(crate) fn visibility(
-    mut entities: Query<
-        (Entity, &Position, Option<&Area>, &mut Visibility),
-        Or<(Changed<Position>, Changed<Area>)>,
-    >,
-    viewport_bounds: Res<ViewportBounds>,
-) {
-    for (entity, position, maybe_area, mut visibility) in entities.iter_mut() {
-        // if in viewport_bounds
-        visibility.set(true);
-    }
-}
-
-#[derive(Resource)]
-pub(crate) struct ViewportBounds {
-    pub(crate) section: Section,
-}
-
-impl ViewportBounds {
-    pub(crate) fn new(section: Section) -> Self {
-        Self { section }
-    }
-}
-
 #[derive(Resource)]
 pub struct Viewport {
     pub cpu: CpuViewport,
     pub gpu: GpuViewport,
-    pub binding: u32,
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
     pub uniform: Uniform<GpuViewport>,
     pub depth_texture: wgpu::Texture,
     pub depth_format: wgpu::TextureFormat,
+    pub(crate) offset: Position,
+    pub(crate) offset_uniform: Uniform<Position>,
 }
 
 impl Viewport {
@@ -77,11 +24,10 @@ impl Viewport {
         let cpu_viewport = CpuViewport::new(area, depth);
         let gpu_viewport = cpu_viewport.gpu_viewport();
         let uniform = Uniform::new(device, gpu_viewport);
-        let binding = 0;
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("view bind group layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
-                binding,
+                binding: 0,
                 visibility: wgpu::ShaderStages::VERTEX,
                 ty: wgpu::BindingType::Buffer {
                     ty: wgpu::BufferBindingType::Uniform,
@@ -89,38 +35,57 @@ impl Viewport {
                     min_binding_size: None,
                 },
                 count: None,
-            }],
+            },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }
+            ],
         });
+        let offset = Position::new(0.0, 0.0);
+        let offset_uniform = Uniform::new(device, offset);
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("view bind group"),
             layout: &bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
-                binding,
+                binding: 0,
                 resource: uniform.buffer.as_entire_binding(),
-            }],
+            },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: offset_uniform.buffer.as_entire_binding(),
+                }
+            ],
         });
         let depth_format = wgpu::TextureFormat::Depth32Float;
         let depth_texture = depth_texture(device, area, depth_format);
         Self {
             cpu: cpu_viewport,
             gpu: gpu_viewport,
-            binding,
             bind_group,
             bind_group_layout,
             uniform,
             depth_texture,
             depth_format,
+            offset,
+            offset_uniform,
         }
     }
-    pub fn adjust(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, width: u32, height: u32) {
+    pub fn adjust_area(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, width: u32, height: u32) {
         let area = (width, height).into();
         self.cpu = CpuViewport::new(area, 100f32.into());
         self.gpu = self.cpu.gpu_viewport();
         self.uniform.update(queue, self.gpu);
         self.depth_texture = depth_texture(device, area, self.depth_format);
     }
-    pub(crate) fn bounds(&self) -> ViewportBounds {
-        ViewportBounds::new(Section::new((0.0, 0.0).into(), self.cpu.area))
+    pub(crate) fn update_offset(&mut self, queue: &wgpu::Queue, offset: Position) {
+        self.offset_uniform.update(queue, offset);
     }
 }
 
@@ -142,7 +107,6 @@ fn depth_texture(device: &wgpu::Device, area: Area, format: wgpu::TextureFormat)
 
 #[derive(Resource)]
 pub struct CpuViewport {
-    // TODO incorporate position here so can move and accurately set viewport bounds
     pub area: Area,
     pub depth: Depth,
     pub orthographic: nalgebra::Matrix4<f32>,

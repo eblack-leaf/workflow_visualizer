@@ -3,17 +3,16 @@ use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
 
 pub use crate::canvas::options::CanvasOptions;
-pub(crate) use crate::canvas::viewport::{update_visibility_cache, visibility, Visibility};
 pub use crate::canvas::viewport::Viewport;
+use crate::Position;
+pub(crate) use crate::visibility::update_visibility_cache;
+pub(crate) use crate::visibility::Visibility;
+pub(crate) use crate::visibility::visibility;
 
 mod options;
 mod viewport;
 
-#[cfg(not(target_arch = "wasm32"))]
-#[derive(Resource)]
-pub struct CanvasWindow(pub Window);
-
-#[cfg(target_arch = "wasm32")]
+#[cfg_attr(not(target_arch = "wasm32"), derive(Resource))]
 pub struct CanvasWindow(pub Window);
 
 #[derive(Resource)]
@@ -79,9 +78,12 @@ impl Canvas {
         self.surface_configuration.width = width;
         self.surface_configuration.height = height;
         self.viewport
-            .adjust(&self.device, &self.queue, width, height);
+            .adjust_area(&self.device, &self.queue, width, height);
         self.surface
             .configure(&self.device, &self.surface_configuration);
+    }
+    pub(crate) fn update_viewport_offset(&mut self, offset: Position) {
+        self.viewport.update_offset(&self.queue, offset);
     }
     pub(crate) fn surface_texture(&self) -> Option<SurfaceTexture> {
         let surface_texture = match self.surface.get_current_texture() {
