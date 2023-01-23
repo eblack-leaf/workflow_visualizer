@@ -54,28 +54,26 @@ pub(crate) fn manage_render_groups(
         visibility,
     ) in text.iter_mut()
     {
-        if visibility.visibility_changed() {
-            if visibility.visible() {
-                *difference = Difference::new();
-                *cache = Cache::new(*position, *depth, *color);
-                difference.position.replace(*position);
-                difference.depth.replace(*depth);
-                difference.color.replace(*color);
-                if let Some(bounds) = maybe_area {
-                    let section = Section::new(*position, *bounds);
-                    cache.bound.replace(section);
-                    difference.bounds.replace(section);
-                }
-                let max = text.len();
-                let unique_glyphs = text.len();
-                let atlas_block = font.character_dimensions('a', scale.px());
-                extraction.added_render_groups.insert(
-                    entity,
-                    (max, *position, *depth, *color, atlas_block, unique_glyphs),
-                );
-            } else {
-                extraction.removed_render_groups.insert(entity);
+        if visibility.visible() {
+            *difference = Difference::new();
+            *cache = Cache::new(*position, *depth, *color);
+            difference.position.replace(*position);
+            difference.depth.replace(*depth);
+            difference.color.replace(*color);
+            if let Some(bounds) = maybe_area {
+                let section = Section::new(*position, *bounds);
+                cache.bound.replace(section);
+                difference.bounds.replace(section);
             }
+            let max = text.len();
+            let unique_glyphs = text.len();
+            let atlas_block = font.character_dimensions('a', scale.px());
+            extraction.added_render_groups.insert(
+                entity,
+                (max, *position, *depth, *color, atlas_block, unique_glyphs),
+            );
+        } else {
+            extraction.removed_render_groups.insert(entity);
         }
     }
     for entity in removed.iter() {
@@ -176,7 +174,7 @@ pub(crate) fn place(
     font: Res<MonoSpacedFont>,
 ) {
     for (text, scale, mut placer, visibility) in dirty_text.iter_mut() {
-        if (text.is_dirty() || visibility.visibility_changed()) && visibility.visible() {
+        if visibility.visible() {
             placer.place(text, scale, &font);
         }
     }
@@ -196,11 +194,7 @@ pub(crate) fn discard_out_of_bounds(
             let key = Key::new(glyph.byte_offset as u32);
             let glyph_section =
                 Section::new((position.x + glyph.x, position.y + glyph.y), (glyph.width, glyph.height));
-            let within_bounds = text_section.left() < glyph_section.right()
-                && text_section.right() > glyph_section.left()
-                && text_section.top() < glyph_section.bottom()
-                && text_section.bottom() > glyph_section.top();
-            if !within_bounds {
+            if !text_section.is_overlapping(glyph_section) {
                 filter_queue.insert(key);
             }
         }

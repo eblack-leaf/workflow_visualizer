@@ -160,6 +160,12 @@ impl Section {
     pub fn bottom(&self) -> f32 {
         self.position.y + self.area.height
     }
+    pub fn is_overlapping(&self, other: Section) -> bool {
+        self.left() < other.right()
+            && self.right() > other.left()
+            && self.top() < other.bottom()
+            && self.bottom() > other.top()
+    }
 }
 
 impl From<((f32, f32), (f32, f32))> for Section {

@@ -3,10 +3,7 @@ use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
-
-use visibility::update_visibility_cache;
 pub(crate) use visibility::Visibility;
-
 pub use crate::canvas::{Canvas, CanvasOptions};
 use crate::canvas::{CanvasWindow, Viewport};
 pub use crate::color::Color;
@@ -16,7 +13,7 @@ use crate::task::{Stage, WorkloadId};
 pub use crate::task::Task;
 pub use crate::text::{Scale, Text, TextBundle, TextRenderer};
 pub use crate::theme::Theme;
-use crate::visibility::ViewportBounds;
+use crate::visibility::{ViewportBounds, VisibleEntities};
 
 mod canvas;
 #[allow(unused)]
@@ -53,7 +50,6 @@ impl Engen {
                     "visibility",
                     SystemStage::single(canvas::visibility),
                 );
-                compute.main.schedule.add_stage_after(Stage::Last, "update visibility cache", SystemStage::single(update_visibility_cache));
                 compute
             },
             render: Task::new(),
@@ -197,6 +193,7 @@ impl Engen {
                                 (800.0, 600.0), // pull from viewport
                             )
                         ));
+                        self.compute.container.insert_resource(VisibleEntities::new());
                         self.extract_calls.add(render::call_extract::<ViewportBounds>);
                         self.compute.exec(WorkloadId::Startup);
                         self.render.exec(WorkloadId::Startup);
