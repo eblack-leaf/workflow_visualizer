@@ -56,6 +56,9 @@ pub(crate) struct RenderGroup {
     pub(crate) glyph_position_cpu: Vec<Position>,
     pub(crate) glyph_position_gpu: wgpu::Buffer,
     pub(crate) glyph_position_write: HashMap<Index, Position>,
+    pub(crate) glyph_area_cpu: Vec<Area>,
+    pub(crate) glyph_area_gpu: wgpu::Buffer,
+    pub(crate) glyph_area_write: HashMap<Index, Area>,
     pub(crate) keyed_glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) atlas: Atlas,
 }
@@ -119,6 +122,9 @@ impl RenderGroup {
             glyph_position_cpu: Self::cpu_buffer(max),
             coords_write: HashMap::new(),
             glyph_position_write: HashMap::new(),
+            glyph_area_cpu: Self::cpu_buffer(max),
+            glyph_area_gpu: Self::gpu_buffer::<Area>(canvas, max),
+            glyph_area_write: HashMap::new(),
             keyed_glyph_ids: HashMap::new(),
             atlas,
         }
@@ -141,9 +147,9 @@ impl RenderGroup {
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
         self.atlas.remove_glyph(glyph_id);
     }
-    pub(crate) fn read_glyph_coords(&self, key: Key) -> Coords {
+    pub(crate) fn read_glyph_info(&self, key: Key) -> (Coords, Area) {
         let glyph_id = self.get_glyph_id(key);
-        self.atlas.read_glyph_coords(glyph_id)
+        self.atlas.read_glyph_info(glyph_id)
     }
     pub(crate) fn add(&mut self, key: Key, glyph_position: Position) {
         let _index = self.indexer.next(key);
@@ -157,6 +163,7 @@ impl RenderGroup {
     }
     pub(crate) fn write(&mut self, canvas: &Canvas) {
         self.write_glyph_positions(canvas);
+        self.write_glyph_area(canvas);
         self.write_null(canvas);
         self.write_coords(canvas);
         self.write_position(canvas);
@@ -172,8 +179,9 @@ impl RenderGroup {
     pub(crate) fn queue_color(&mut self, color: Color) {
         self.color_write.replace(color);
     }
-    pub(crate) fn queue_coords(&mut self, key: Key, coords: Coords) {
+    pub(crate) fn queue_glyph_info(&mut self, key: Key, coords: Coords, glyph_area: Area) {
         let index = self.get_index(key);
+        self.glyph_area_write.insert(index, glyph_area);
         self.coords_write.insert(index, coords);
     }
     pub(crate) fn queue_position(&mut self, position: Position) {
@@ -244,6 +252,18 @@ impl RenderGroup {
                 &self.glyph_position_gpu,
                 offset,
                 bytemuck::cast_slice(&[*glyph_position]),
+            );
+        }
+    }
+    fn write_glyph_area(&mut self, canvas: &Canvas) {
+        for (index, glyph_area) in self.glyph_area_write.iter() {
+            self.glyph_area_cpu
+                .insert(index.value as usize, *glyph_area);
+            let offset = Self::offset::<Position>(index);
+            canvas.queue.write_buffer(
+                &self.glyph_area_gpu,
+                offset,
+                bytemuck::cast_slice(&[*glyph_area]),
             );
         }
     }

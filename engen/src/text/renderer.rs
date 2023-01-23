@@ -52,13 +52,13 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(1, render_group.glyph_position_gpu.slice(..));
+                render_pass_handle.0.set_vertex_buffer(4, render_group.glyph_area_gpu.slice(..));
                 render_pass_handle
                     .0
                     .set_vertex_buffer(2, render_group.null_gpu.slice(..));
                 render_pass_handle
                     .0
                     .set_vertex_buffer(3, render_group.coords_gpu.slice(..));
-
                 render_pass_handle
                     .0
                     .set_bind_group(2, &render_group.bind_group, &[]);

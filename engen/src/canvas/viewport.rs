@@ -43,6 +43,7 @@ pub(crate) fn visibility(
     viewport_bounds: Res<ViewportBounds>,
 ) {
     for (entity, position, maybe_area, mut visibility) in entities.iter_mut() {
+        // if in viewport_bounds
         visibility.set(true);
     }
 }

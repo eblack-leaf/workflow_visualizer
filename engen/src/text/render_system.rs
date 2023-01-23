@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{Commands, Res, ResMut};
 use wgpu::util::DeviceExt;
 
-use crate::{Canvas, Depth, Position};
+use crate::{Area, Canvas, Depth, Position};
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
@@ -147,6 +147,11 @@ fn pipeline(
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &wgpu::vertex_attr_array![3 => Float32x4],
             },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<Area>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![4 => Float32x2],
+            },
         ],
     };
     let primitive_state = wgpu::PrimitiveState {
@@ -282,8 +287,8 @@ pub(crate) fn render_group_differences(
         }
         for (key, glyph) in difference.glyph_add.iter() {
             render_group.add_glyph(*key, glyph.clone(), &font);
-            let coords = render_group.read_glyph_coords(*key);
-            render_group.queue_coords(*key, coords);
+            let (coords, glyph_area) = render_group.read_glyph_info(*key);
+            render_group.queue_glyph_info(*key, coords, glyph_area);
         }
 
         render_group.write(&canvas);

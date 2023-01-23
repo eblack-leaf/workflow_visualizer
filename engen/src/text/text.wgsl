@@ -14,6 +14,7 @@ struct VertexInput {
     @builtin(vertex_index) vertex_index: u32,
     @location(0) vertex_position: vec2<f32>,
     @location(1) position: vec2<f32>,
+    @location(4) area: vec2<f32>,
     @location(2) null_bit: u32,
     @location(3) tex_coords: vec4<f32>,
 };
@@ -60,10 +61,9 @@ fn vertex_entry(
         }
         default: {}
     }
-    let area = vec2<f32>(right - left, bottom - top);
     let coordinates = vec4<f32>(
-        text_position.x + (vertex_input.vertex_position.x * area.x),
-        text_position.y + (vertex_input.vertex_position.y * area.y),
+        text_position.x + vertex_input.position.x + (vertex_input.vertex_position.x * vertex_input.area.x),
+        text_position.y + vertex_input.position.y + (vertex_input.vertex_position.y * vertex_input.area.y),
         text_depth,
         1.0);
     return VertexOutput(viewport.view_matrix * coordinates, adjusted_coords);

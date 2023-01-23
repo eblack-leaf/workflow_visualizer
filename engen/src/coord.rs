@@ -150,6 +150,7 @@ impl From<((f32, f32), (f32, f32))> for Section {
         }
     }
 }
+
 impl From<(Position, Area)> for Section {
     fn from(data: (Position, Area)) -> Self {
         Self {
@@ -158,6 +159,7 @@ impl From<(Position, Area)> for Section {
         }
     }
 }
+
 #[derive(Bundle, Clone, Default)]
 pub struct Panel {
     #[bundle]

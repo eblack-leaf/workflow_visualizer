@@ -41,13 +41,15 @@ pub(crate) type Bitmap = Vec<u8>;
 
 pub(crate) struct Atlas {
     pub(crate) texture: wgpu::Texture,
+    pub(crate) texture_width: u32,
+    pub(crate) texture_height: u32,
     pub(crate) texture_view: wgpu::TextureView,
     pub(crate) block: Area,
     pub(crate) dimension: u32,
     pub(crate) free: HashSet<Location>,
-    pub(crate) glyphs: HashMap<GlyphId, (Coords, Location)>,
+    pub(crate) glyphs: HashMap<GlyphId, (Coords, Area, Location)>,
     pub(crate) references: HashMap<GlyphId, Reference>,
-    pub(crate) write: HashMap<Location, (Coords, Bitmap)>,
+    pub(crate) write: HashMap<Location, (Coords, Area, Bitmap)>,
 }
 
 impl Atlas {
@@ -60,6 +62,8 @@ impl Atlas {
         let free = Self::calc_free(dimension);
         Self {
             texture,
+            texture_width,
+            texture_height,
             texture_view,
             block,
             dimension,
@@ -83,20 +87,22 @@ impl Atlas {
         self.references.insert(glyph.id, Reference::new());
         self.increment_reference(glyph.id);
         let rasterization = font.font().rasterize(glyph.character, glyph.scale.px());
+        let glyph_area: Area = (rasterization.0.width, rasterization.0.height).into();
         let (coords, location) = self.place(rasterization);
-        self.glyphs.insert(glyph.id, (coords, location));
+        self.glyphs.insert(glyph.id, (coords, glyph_area, location));
     }
     pub(crate) fn write(&mut self, canvas: &Canvas) {
         let mut write = self
             .write
             .drain()
-            .collect::<Vec<(Location, (Coords, Bitmap))>>();
-        for (location, (coords, bitmap)) in write {
-            self.write_texture(canvas, location, coords, bitmap);
+            .collect::<Vec<(Location, (Coords, Area, Bitmap))>>();
+        for (location, (coords, glyph_area, bitmap)) in write {
+            self.write_texture(canvas, location, coords, glyph_area, bitmap);
         }
     }
-    pub(crate) fn read_glyph_coords(&self, glyph_id: GlyphId) -> Coords {
-        self.glyphs.get(&glyph_id).expect("no glyph for id").0
+    pub(crate) fn read_glyph_info(&self, glyph_id: GlyphId) -> (Coords, Area) {
+        let glyph_info = self.glyphs.get(&glyph_id).expect("no glyph for id");
+        (glyph_info.0, glyph_info.1)
     }
     fn texture_descriptor(
         texture_width: u32,
@@ -140,11 +146,11 @@ impl Atlas {
         &mut self,
         canvas: &Canvas,
         location: Location,
-        coords: Coords,
+        _coords: Coords,
+        glyph_area: Area,
         bitmap: Bitmap,
     ) {
         let position = self.position_from(location);
-        let area = coords.section().area;
         let image_copy_texture = wgpu::ImageCopyTexture {
             texture: &self.texture,
             mip_level: 1,
@@ -155,42 +161,36 @@ impl Atlas {
             },
             aspect: wgpu::TextureAspect::All,
         };
-        let glyph_width = area.width as u32;
-        let glyph_height = area.height as u32;
         let image_data_layout = wgpu::ImageDataLayout {
             offset: 1,
-            bytes_per_row: NonZeroU32::new(glyph_width),
-            rows_per_image: NonZeroU32::new(glyph_height),
+            bytes_per_row: NonZeroU32::new(glyph_area.width as u32),
+            rows_per_image: NonZeroU32::new(glyph_area.height as u32),
         };
         let extent = wgpu::Extent3d {
-            width: glyph_width,
-            height: glyph_height,
+            width: glyph_area.width as u32,
+            height: glyph_area.height as u32,
             depth_or_array_layers: 0,
         };
         canvas.queue.write_texture(
             image_copy_texture,
-            bytemuck::cast_slice(&bitmap),
+            bitmap.as_slice(),
             image_data_layout,
             extent,
         );
     }
-    fn queue_write(&mut self, location: Location, coords: Coords, bitmap: Bitmap) {
-        self.write.insert(location, (coords, bitmap));
+    fn queue_write(&mut self, location: Location, coords: Coords, glyph_area: Area, bitmap: Bitmap) {
+        self.write.insert(location, (coords, glyph_area, bitmap));
     }
     fn place(&mut self, rasterization: (Metrics, Bitmap)) -> (Coords, Location) {
         let location = self.next();
         let position = self.position_from(location);
+        let glyph_area = (rasterization.0.width, rasterization.0.height).into();
         let section = Section::new(
             position,
-            (rasterization.0.width, rasterization.0.height).into(),
+            glyph_area,
         );
-        let coords = Coords::new(
-            section.left(),
-            section.top(),
-            section.right(),
-            section.bottom(),
-        );
-        self.queue_write(location, coords, rasterization.1);
+        let coords = self.coords(section);
+        self.queue_write(location, coords, glyph_area, rasterization.1);
         (coords, location)
     }
     fn next(&mut self) -> Location {
@@ -219,7 +219,7 @@ impl Atlas {
         }
     }
     fn free_glyph(&mut self, glyph_id: GlyphId) {
-        let (_coords, location) = self
+        let (_coords, _area, location) = self
             .glyphs
             .remove(&glyph_id)
             .expect("no glyph for glyph id");
@@ -251,5 +251,25 @@ impl Atlas {
         let texture_height: u32 = dimension * block.height as u32;
         Self::hardware_max_check(texture_width, texture_height);
         (dimension, texture_width, texture_height)
+    }
+    fn coords(&self, glyph_section: Section) -> Coords {
+        let normalized_position = Position::new(
+            glyph_section.position.x / self.texture_width as f32,
+            glyph_section.position.y / self.texture_height as f32,
+        );
+        let normalized_area = Area::new(
+            glyph_section.width() / self.texture_width as f32,
+            glyph_section.height() / self.texture_height as f32,
+        );
+        let normalized_section = Section::new(
+            normalized_position,
+            normalized_area,
+        );
+        Coords::new(
+            normalized_section.left(),
+            normalized_section.top(),
+            normalized_section.right(),
+            normalized_section.bottom(),
+        )
     }
 }
