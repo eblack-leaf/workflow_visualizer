@@ -9,7 +9,7 @@ pub fn task() -> Task {
             Position::new(10f32, 10f32),
             Depth::new(0f32),
             Color::rgb(1.0, 1.0, 1.0),
-            Scale::new(13u32),
+            Scale::new(60u32),
         ))
         .id();
     task

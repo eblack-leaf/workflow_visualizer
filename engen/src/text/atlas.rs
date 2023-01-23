@@ -58,6 +58,19 @@ impl Atlas {
             Self::texture_dimensions(block, unique_glyphs);
         let texture_descriptor = Self::texture_descriptor(texture_width, texture_height);
         let texture = canvas.device.create_texture(&texture_descriptor);
+        // temp code
+        // let mut data = Vec::new();
+        // data.resize((texture_width * texture_height) as usize, 255u8);
+        // canvas.queue.write_texture(texture.as_image_copy(), data.as_slice(), wgpu::ImageDataLayout {
+        //     offset: 0,
+        //     bytes_per_row: NonZeroU32::new(texture_width),
+        //     rows_per_image: NonZeroU32::new(texture_height),
+        // }, wgpu::Extent3d {
+        //     width: texture_width,
+        //     height: texture_height,
+        //     depth_or_array_layers: 1,
+        // });
+        // end temp
         let texture_view = texture.create_view(&wgpu::TextureViewDescriptor::default());
         let free = Self::calc_free(dimension);
         Self {
@@ -151,9 +164,10 @@ impl Atlas {
         bitmap: Bitmap,
     ) {
         let position = self.position_from(location);
+        let other_copy = self.texture.as_image_copy();
         let image_copy_texture = wgpu::ImageCopyTexture {
             texture: &self.texture,
-            mip_level: 1,
+            mip_level: 0,
             origin: wgpu::Origin3d {
                 x: position.x as u32,
                 y: position.y as u32,
@@ -162,14 +176,14 @@ impl Atlas {
             aspect: wgpu::TextureAspect::All,
         };
         let image_data_layout = wgpu::ImageDataLayout {
-            offset: 1,
+            offset: 0,
             bytes_per_row: NonZeroU32::new(glyph_area.width as u32),
             rows_per_image: NonZeroU32::new(glyph_area.height as u32),
         };
         let extent = wgpu::Extent3d {
             width: glyph_area.width as u32,
             height: glyph_area.height as u32,
-            depth_or_array_layers: 0,
+            depth_or_array_layers: 1,
         };
         canvas.queue.write_texture(
             image_copy_texture,
