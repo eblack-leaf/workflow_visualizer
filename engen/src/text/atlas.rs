@@ -3,10 +3,10 @@ use std::num::NonZeroU32;
 
 use fontdue::Metrics;
 
-use crate::{Area, Canvas, CanvasOptions, Position, Section};
 use crate::text::coords::Coords;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, GlyphId, Key};
+use crate::{Area, Canvas, CanvasOptions, Position, Section};
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct Location {
@@ -192,17 +192,20 @@ impl Atlas {
             extent,
         );
     }
-    fn queue_write(&mut self, location: Location, coords: Coords, glyph_area: Area, bitmap: Bitmap) {
+    fn queue_write(
+        &mut self,
+        location: Location,
+        coords: Coords,
+        glyph_area: Area,
+        bitmap: Bitmap,
+    ) {
         self.write.insert(location, (coords, glyph_area, bitmap));
     }
     fn place(&mut self, rasterization: (Metrics, Bitmap)) -> (Coords, Location) {
         let location = self.next();
         let position = self.position_from(location);
         let glyph_area = (rasterization.0.width, rasterization.0.height).into();
-        let section = Section::new(
-            position,
-            glyph_area,
-        );
+        let section = Section::new(position, glyph_area);
         let coords = self.coords(section);
         self.queue_write(location, coords, glyph_area, rasterization.1);
         (coords, location)
@@ -275,10 +278,7 @@ impl Atlas {
             glyph_section.width() / self.texture_width as f32,
             glyph_section.height() / self.texture_height as f32,
         );
-        let normalized_section = Section::new(
-            normalized_position,
-            normalized_area,
-        );
+        let normalized_section = Section::new(normalized_position, normalized_area);
         Coords::new(
             normalized_section.left(),
             normalized_section.top(),

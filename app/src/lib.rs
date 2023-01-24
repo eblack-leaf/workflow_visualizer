@@ -1,4 +1,7 @@
-use engen::{Area, CanvasOptions, Color, Depth, Engen, Position, Scale, Task, Text, TextBundle, TextRenderer, Theme};
+use engen::{
+    Area, CanvasOptions, Color, Depth, Engen, Position, Task, Text, TextBundle, TextRenderer,
+    TextScale, Theme,
+};
 
 pub fn task() -> Task {
     let mut task = Task::new();
@@ -9,15 +12,15 @@ pub fn task() -> Task {
             Position::new(10f32, 10f32),
             Depth::new(0f32),
             Color::rgb(1.0, 1.0, 1.0),
-            Scale::new(45u32),
+            TextScale::new(45u32),
         ))
         .id();
     task
 }
 
 #[cfg_attr(
-target_os = "android",
-ndk_glue::main(backtrace = "on", logger(level = "debug"))
+    target_os = "android",
+    ndk_glue::main(backtrace = "on", logger(level = "debug"))
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());

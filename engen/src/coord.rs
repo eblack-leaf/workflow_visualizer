@@ -11,7 +11,10 @@ pub struct Position {
 
 impl Position {
     pub fn new<F: Into<f32>>(x: F, y: F) -> Self {
-        Self { x: x.into(), y: y.into() }
+        Self {
+            x: x.into(),
+            y: y.into(),
+        }
     }
     pub fn apply(&mut self, movement: Movement) {
         self.x += movement.x;
@@ -77,6 +80,10 @@ impl Area {
     pub const fn new(width: f32, height: f32) -> Self {
         Self { width, height }
     }
+    pub fn apply(&mut self, scale: Scale) {
+        self.width += scale.width;
+        self.height += scale.height;
+    }
 }
 
 impl From<(f32, f32)> for Area {
@@ -84,6 +91,22 @@ impl From<(f32, f32)> for Area {
         Self {
             width: wh.0,
             height: wh.1,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, Default, PartialEq)]
+pub struct Scale {
+    pub width: f32,
+    pub height: f32,
+}
+
+impl Scale {
+    pub fn new<F: Into<f32>>(w: F, h: F) -> Self {
+        Self {
+            width: w.into(),
+            height: h.into(),
         }
     }
 }
@@ -140,7 +163,10 @@ pub struct Section {
 
 impl Section {
     pub fn new<P: Into<Position>, A: Into<Area>>(position: P, area: A) -> Self {
-        Self { position: position.into(), area: area.into() }
+        Self {
+            position: position.into(),
+            area: area.into(),
+        }
     }
     pub fn width(&self) -> f32 {
         return self.area.width;

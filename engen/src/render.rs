@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::Resource;
 
-use crate::{Engen, Task};
 use crate::canvas::{Canvas, Viewport};
 use crate::theme::Theme;
+use crate::{Engen, Task};
 
 pub enum RenderPhase {
     Opaque,
@@ -69,8 +69,8 @@ impl ExtractCalls {
 
 pub trait Extract {
     fn extract(compute: &mut Task, render: &mut Task)
-        where
-            Self: Sized;
+    where
+        Self: Sized;
 }
 
 pub trait Render {

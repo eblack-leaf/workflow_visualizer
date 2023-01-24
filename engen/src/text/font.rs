@@ -3,8 +3,8 @@ use std::ops::Deref;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
+use crate::text::scale::TextScale;
 use crate::Area;
-use crate::text::scale::Scale;
 
 #[derive(Resource)]
 pub struct MonoSpacedFont {
@@ -12,7 +12,10 @@ pub struct MonoSpacedFont {
 }
 
 impl MonoSpacedFont {
-    pub fn new<Data: Deref<Target=[u8]>, T: Into<Scale>>(font_data: Data, opt_scale: T) -> Self {
+    pub fn new<Data: Deref<Target = [u8]>, T: Into<TextScale>>(
+        font_data: Data,
+        opt_scale: T,
+    ) -> Self {
         Self {
             font_storage: [fdFont::from_bytes(
                 font_data,
@@ -21,7 +24,7 @@ impl MonoSpacedFont {
                     ..FontSettings::default()
                 },
             )
-                .expect("text font creation")],
+            .expect("text font creation")],
         }
     }
     pub fn font_slice(&self) -> &[fdFont] {

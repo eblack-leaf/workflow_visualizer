@@ -4,7 +4,6 @@ use bevy_ecs::prelude::{Added, Changed, Entity, Or, Query, RemovedComponents, Re
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
-use crate::{Area, Canvas, Color, Depth, Position, Section};
 use crate::text::atlas::Atlas;
 use crate::text::cache::Cache;
 use crate::text::coords::Coords;
@@ -13,10 +12,11 @@ use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::index::{Index, Indexer};
-use crate::text::scale::Scale;
+use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::Visibility;
+use crate::{Area, Canvas, Color, Depth, Position, Section};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]

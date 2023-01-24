@@ -1,18 +1,17 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::{Color, Depth, Position};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
-use crate::text::scale::Scale;
+use crate::text::scale::TextScale;
 use crate::visibility::Visibility;
+use crate::{Color, Depth, Position};
 
 #[derive(Component)]
 pub struct Text {
     string: String,
     dirty: bool,
 }
-
 
 impl Text {
     pub fn new<T: Into<String>>(string: T) -> Self {
@@ -44,7 +43,7 @@ pub struct TextBundle {
     pub position: Position,
     pub depth: Depth,
     pub color: Color,
-    pub scale: Scale,
+    pub scale: TextScale,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
@@ -52,7 +51,13 @@ pub struct TextBundle {
 }
 
 impl TextBundle {
-    pub fn new(text: Text, position: Position, depth: Depth, color: Color, scale: Scale) -> Self {
+    pub fn new(
+        text: Text,
+        position: Position,
+        depth: Depth,
+        color: Color,
+        scale: TextScale,
+    ) -> Self {
         Self {
             text,
             position,

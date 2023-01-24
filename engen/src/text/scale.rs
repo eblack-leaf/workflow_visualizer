@@ -1,11 +1,11 @@
 use bevy_ecs::component::Component;
 
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
-pub struct Scale {
+pub struct TextScale {
     pub scale: u32,
 }
 
-impl Scale {
+impl TextScale {
     pub fn new(scale: u32) -> Self {
         Self { scale }
     }
@@ -14,7 +14,7 @@ impl Scale {
     }
 }
 
-impl From<f32> for Scale {
+impl From<f32> for TextScale {
     fn from(scale: f32) -> Self {
         Self {
             scale: scale as u32,
@@ -22,7 +22,7 @@ impl From<f32> for Scale {
     }
 }
 
-impl From<u32> for Scale {
+impl From<u32> for TextScale {
     fn from(scale: u32) -> Self {
         Self { scale }
     }

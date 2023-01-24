@@ -5,8 +5,6 @@ use winit::window::Window;
 pub use crate::canvas::options::CanvasOptions;
 pub use crate::canvas::viewport::Viewport;
 use crate::Position;
-pub(crate) use crate::visibility::Visibility;
-pub(crate) use crate::visibility::visibility;
 
 mod options;
 mod viewport;

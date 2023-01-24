@@ -1,29 +1,32 @@
-use bevy_ecs::prelude::{Resource, SystemStage};
+use bevy_ecs::prelude::{IntoSystemDescriptor, Resource, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
+
 pub(crate) use visibility::Visibility;
+
 pub use crate::canvas::{Canvas, CanvasOptions};
 use crate::canvas::{CanvasWindow, Viewport};
 pub use crate::color::Color;
 pub use crate::coord::{Area, Depth, Panel, Position, Section};
+use crate::coord::Scale;
 use crate::render::{Extract, ExtractCalls, Render, RenderCalls};
 use crate::task::{Stage, WorkloadId};
 pub use crate::task::Task;
-pub use crate::text::{Scale, Text, TextBundle, TextRenderer};
+pub use crate::text::{Text, TextBundle, TextRenderer, TextScale};
 pub use crate::theme::Theme;
-use crate::visibility::{ViewportBounds, VisibleEntities};
+use crate::visibility::{move_viewport_bounds, ViewportBounds, ViewportBoundsMovement, ViewportBoundsScale, visibility, VisibleEntities};
 
 mod canvas;
-#[allow(unused)]
-mod text;
 mod color;
 #[allow(unused)]
 mod coord;
 mod icon;
 mod render;
 mod task;
+#[allow(unused)]
+mod text;
 mod theme;
 mod uniform;
 mod visibility;
@@ -47,8 +50,10 @@ impl Engen {
             compute: {
                 compute.main.schedule.add_stage_before(
                     Stage::After,
-                    "visibility",
-                    SystemStage::single(canvas::visibility),
+                    "move viewport bounds",
+                    SystemStage::parallel()
+                        .with_system(move_viewport_bounds.label("move viewport bounds"))
+                        .with_system(visibility.after("move viewport bounds")),
                 );
                 compute
             },
@@ -187,14 +192,19 @@ impl Engen {
                             )));
                             self.attach_window(window);
                         }
-                        self.compute.container.insert_resource(ViewportBounds::new(
-                            Section::new(
+                        self.compute
+                            .container
+                            .insert_resource(ViewportBounds::new(Section::new(
                                 (0.0, 0.0),
                                 (800.0, 600.0), // pull from viewport
-                            )
-                        ));
-                        self.compute.container.insert_resource(VisibleEntities::new());
-                        self.extract_calls.add(render::call_extract::<ViewportBounds>);
+                            )));
+                        self.compute
+                            .container
+                            .insert_resource(VisibleEntities::new());
+                        self.compute.container.insert_resource(ViewportBoundsMovement::new());
+                        self.compute.container.insert_resource(ViewportBoundsScale::new());
+                        self.extract_calls
+                            .add(render::call_extract::<ViewportBounds>);
                         self.compute.exec(WorkloadId::Startup);
                         self.render.exec(WorkloadId::Startup);
                     }
@@ -205,6 +215,7 @@ impl Engen {
                 } => match event {
                     WindowEvent::Resized(physical_size) => {
                         self.adjust_canvas_size(physical_size);
+                        self.resize_viewport_bounds(physical_size);
                     }
                     WindowEvent::Moved(_) => {}
                     WindowEvent::CloseRequested => {
@@ -232,6 +243,7 @@ impl Engen {
                         new_inner_size,
                     } => {
                         self.adjust_canvas_size(*new_inner_size);
+                        self.resize_viewport_bounds(*new_inner_size);
                     }
                     WindowEvent::ThemeChanged(_) => {}
                     WindowEvent::Occluded(_) => {}
@@ -300,12 +312,22 @@ impl Engen {
         });
     }
 
+    fn resize_viewport_bounds(&mut self, physical_size: PhysicalSize<u32>) {
+        self.compute
+            .container
+            .get_resource_mut::<ViewportBounds>()
+            .expect("no bounds")
+            .resize(Scale::new(
+                physical_size.width as f32,
+                physical_size.height as f32,
+            ));
+    }
+
     fn adjust_canvas_size(&mut self, physical_size: PhysicalSize<u32>) {
         self.render
             .container
             .get_resource_mut::<Canvas>()
             .expect("no canvas attached")
             .adjust(physical_size.width, physical_size.height);
-        // self.compute.container change viewport bounds area;
     }
 }

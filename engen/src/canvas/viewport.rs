@@ -1,9 +1,9 @@
 use bevy_ecs::prelude::{Changed, Component, Entity, Or, Query, Res, Resource};
 use nalgebra::matrix;
 
-use crate::{Position, Section};
 use crate::coord::{Area, Depth};
 use crate::uniform::Uniform;
+use crate::{Position, Section};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -26,16 +26,17 @@ impl Viewport {
         let uniform = Uniform::new(device, gpu_viewport);
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("view bind group layout"),
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
                 },
-                count: None,
-            },
                 wgpu::BindGroupLayoutEntry {
                     binding: 1,
                     visibility: wgpu::ShaderStages::VERTEX,
@@ -45,7 +46,7 @@ impl Viewport {
                         min_binding_size: None,
                     },
                     count: None,
-                }
+                },
             ],
         });
         let offset = Position::new(0.0, 0.0);
@@ -53,14 +54,15 @@ impl Viewport {
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("view bind group"),
             layout: &bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: uniform.buffer.as_entire_binding(),
-            },
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: uniform.buffer.as_entire_binding(),
+                },
                 wgpu::BindGroupEntry {
                     binding: 1,
                     resource: offset_uniform.buffer.as_entire_binding(),
-                }
+                },
             ],
         });
         let depth_format = wgpu::TextureFormat::Depth32Float;
@@ -77,7 +79,13 @@ impl Viewport {
             offset_uniform,
         }
     }
-    pub fn adjust_area(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, width: u32, height: u32) {
+    pub fn adjust_area(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        width: u32,
+        height: u32,
+    ) {
         let area = (width, height).into();
         self.cpu = CpuViewport::new(area, 100f32.into());
         self.gpu = self.cpu.gpu_viewport();
@@ -85,6 +93,7 @@ impl Viewport {
         self.depth_texture = depth_texture(device, area, self.depth_format);
     }
     pub(crate) fn update_offset(&mut self, queue: &wgpu::Queue, offset: Position) {
+        self.offset = offset;
         self.offset_uniform.update(queue, offset);
     }
 }

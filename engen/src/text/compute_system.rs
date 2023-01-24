@@ -5,16 +5,16 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res, With};
 use fontdue::layout::TextStyle;
 
-use crate::{Area, Color, Depth, Position, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
-use crate::text::scale::Scale;
+use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::visibility::Visibility;
+use crate::{Area, Color, Depth, Position, Section};
 
 pub(crate) fn setup(mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -26,7 +26,7 @@ pub(crate) fn manage_render_groups(
         (
             Entity,
             &Text,
-            &Scale,
+            &TextScale,
             &Position,
             &Depth,
             &Color,
@@ -35,7 +35,7 @@ pub(crate) fn manage_render_groups(
             &mut Difference,
             &Visibility,
         ),
-        Or<(Changed<Visibility>, Added<Text>, Changed<Scale>)>,
+        Or<(Changed<Visibility>, Added<Text>, Changed<TextScale>)>,
     >,
     removed: RemovedComponents<Text>,
     mut extraction: ResMut<Extraction>,
@@ -82,7 +82,10 @@ pub(crate) fn manage_render_groups(
 }
 
 pub(crate) fn letter_diff(
-    mut text: Query<(&Scale, &mut Placer, &mut Cache, &mut Difference), Or<(Changed<Placer>, Changed<Area>)>>,
+    mut text: Query<
+        (&TextScale, &mut Placer, &mut Cache, &mut Difference),
+        Or<(Changed<Placer>, Changed<Area>)>,
+    >,
 ) {
     for (scale, mut placer, mut cache, mut difference) in text.iter_mut() {
         let mut retained_keys = HashSet::new();
@@ -168,8 +171,8 @@ pub(crate) fn color_diff(
 
 pub(crate) fn place(
     mut dirty_text: Query<
-        (&Text, &Scale, &mut Placer, &Visibility),
-        Or<(Changed<Text>, Changed<Scale>, Changed<Visibility>)>,
+        (&Text, &TextScale, &mut Placer, &Visibility),
+        Or<(Changed<Text>, Changed<TextScale>, Changed<Visibility>)>,
     >,
     font: Res<MonoSpacedFont>,
 ) {
@@ -192,8 +195,10 @@ pub(crate) fn discard_out_of_bounds(
         let mut filter_queue = HashSet::new();
         for glyph in placer.unfiltered_placement().iter() {
             let key = Key::new(glyph.byte_offset as u32);
-            let glyph_section =
-                Section::new((position.x + glyph.x, position.y + glyph.y), (glyph.width, glyph.height));
+            let glyph_section = Section::new(
+                (position.x + glyph.x, position.y + glyph.y),
+                (glyph.width, glyph.height),
+            );
             if !text_section.is_overlapping(glyph_section) {
                 filter_queue.insert(key);
             }

@@ -1,6 +1,5 @@
 use bevy_ecs::prelude::IntoSystemDescriptor;
 
-use crate::{Attach, Engen};
 use crate::task::Stage;
 use crate::text::compute_system::{
     bounds_diff, color_diff, depth_diff, discard_out_of_bounds, letter_diff, manage_render_groups,
@@ -10,6 +9,7 @@ use crate::text::render_system::{
     create_render_groups, render_group_differences, reset_extraction, setup as render_setup,
 };
 use crate::text::renderer::TextRenderer;
+use crate::{Attach, Engen};
 
 impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {

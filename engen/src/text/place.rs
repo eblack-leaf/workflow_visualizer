@@ -3,9 +3,9 @@ use std::collections::HashSet;
 use bevy_ecs::prelude::Component;
 use fontdue::layout::{CoordinateSystem, GlyphPosition, TextStyle};
 
-use crate::{Scale, Text};
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::Key;
+use crate::{Text, TextScale};
 
 #[derive(Component)]
 pub(crate) struct Placer {
@@ -22,7 +22,7 @@ impl Placer {
             filtered_placement: vec![],
         }
     }
-    pub(crate) fn place(&mut self, text: &Text, scale: &Scale, font: &MonoSpacedFont) {
+    pub(crate) fn place(&mut self, text: &Text, scale: &TextScale, font: &MonoSpacedFont) {
         self.layout.clear();
         self.layout.append(
             font.font_slice(),

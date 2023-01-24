@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Changed, Component, Entity, Query};
 
-use crate::{Area, Color, Depth, Position, Section};
 use crate::text::difference::Difference;
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::place::Placer;
-use crate::text::scale::Scale;
+use crate::text::scale::TextScale;
+use crate::{Area, Color, Depth, Position, Section};
 
 #[derive(Component)]
 pub(crate) struct Cache {

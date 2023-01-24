@@ -1,5 +1,5 @@
 pub use crate::text::renderer::TextRenderer;
-pub use crate::text::scale::Scale;
+pub use crate::text::scale::TextScale;
 pub use crate::text::text::{Text, TextBundle};
 
 mod atlas;
@@ -19,4 +19,3 @@ mod renderer;
 mod scale;
 mod text;
 mod vertex;
-

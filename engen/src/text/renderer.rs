@@ -4,10 +4,10 @@ use bevy_ecs::prelude::{Entity, Resource};
 
 use crate::canvas::Viewport;
 use crate::render::{Extract, Render, RenderPassHandle, RenderPhase};
-use crate::Task;
 use crate::text::extraction::Extraction;
 use crate::text::render_group::RenderGroup;
 use crate::text::vertex::GLYPH_AABB;
+use crate::Task;
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -21,8 +21,8 @@ pub struct TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(compute: &mut Task, render: &mut Task)
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let mut extraction = compute
             .container
@@ -54,7 +54,9 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(1, render_group.glyph_position_gpu.slice(..));
-                render_pass_handle.0.set_vertex_buffer(4, render_group.glyph_area_gpu.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(4, render_group.glyph_area_gpu.slice(..));
                 render_pass_handle
                     .0
                     .set_vertex_buffer(2, render_group.null_gpu.slice(..));
