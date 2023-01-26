@@ -8,7 +8,7 @@ pub fn task() -> Task {
     let _tester = task
         .container
         .spawn(TextBundle::new(
-            Text::new("peppermiiiiint".to_string()),
+            Text::new("peppermint".to_string()),
             Position::new(10f32, 10f32),
             Depth::new(0f32),
             Color::rgb(1.0, 1.0, 1.0),
