@@ -14,10 +14,21 @@ pub struct Viewport {
     pub uniform: Uniform<GpuViewport>,
     pub depth_texture: wgpu::Texture,
     pub depth_format: wgpu::TextureFormat,
-    pub(crate) offset: Position,
-    pub(crate) offset_uniform: Uniform<Position>,
+    pub(crate) offset: ViewportOffset,
+    pub(crate) offset_uniform: Uniform<ViewportOffset>,
 }
-
+#[repr(C)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq)]
+pub(crate) struct ViewportOffset {
+    pub(crate) offset: [f32; 4],
+}
+impl ViewportOffset {
+    pub(crate) fn new(position: Position) -> Self {
+        Self {
+            offset: [position.x, position.y, 0.0, 0.0],
+        }
+    }
+}
 impl Viewport {
     pub fn new(device: &wgpu::Device, area: Area) -> Self {
         let depth = 100f32.into();
@@ -49,7 +60,7 @@ impl Viewport {
                 },
             ],
         });
-        let offset = Position::new(0.0, 0.0);
+        let offset = ViewportOffset::new(Position::new(0.0, 0.0));
         let offset_uniform = Uniform::new(device, offset);
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("view bind group"),
@@ -93,8 +104,8 @@ impl Viewport {
         self.depth_texture = depth_texture(device, area, self.depth_format);
     }
     pub(crate) fn update_offset(&mut self, queue: &wgpu::Queue, offset: Position) {
-        self.offset = offset;
-        self.offset_uniform.update(queue, offset);
+        self.offset = ViewportOffset::new(offset);
+        self.offset_uniform.update(queue, self.offset);
     }
 }
 

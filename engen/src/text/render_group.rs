@@ -41,9 +41,9 @@ impl NullBit {
 pub(crate) struct RenderGroup {
     pub(crate) bounds: Option<Section>,
     pub(crate) bind_group: wgpu::BindGroup,
-    pub(crate) position_uniform: Uniform<Position>,
+    pub(crate) text_placement: TextPlacement,
+    pub(crate) text_placement_uniform: Uniform<TextPlacement>,
     pub(crate) position_write: Option<Position>,
-    pub(crate) depth_uniform: Uniform<Depth>,
     pub(crate) depth_write: Option<Depth>,
     pub(crate) color_uniform: Uniform<Color>,
     pub(crate) color_write: Option<Color>,
@@ -63,7 +63,18 @@ pub(crate) struct RenderGroup {
     pub(crate) keyed_glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) atlas: Atlas,
 }
-
+#[repr(C)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq)]
+pub(crate) struct TextPlacement {
+    pub(crate) placement: [f32; 4],
+}
+impl TextPlacement {
+    pub(crate) fn new(position: Position, depth: Depth) -> Self {
+        Self {
+            placement: [position.x, position.y, depth.layer, 0.0],
+        }
+    }
+}
 impl RenderGroup {
     pub(crate) fn new(
         canvas: &Canvas,
@@ -75,8 +86,8 @@ impl RenderGroup {
         atlas_block: Area,
         unique_glyphs: u32,
     ) -> Self {
-        let position_uniform = Uniform::new(&canvas.device, position);
-        let depth_uniform = Uniform::new(&canvas.device, depth);
+        let text_placement = TextPlacement::new(position, depth);
+        let text_placement_uniform = Uniform::new(&canvas.device, text_placement);
         let color_uniform = Uniform::new(&canvas.device, color);
         let atlas = Atlas::new(canvas, atlas_block, unique_glyphs);
         Self {
@@ -85,31 +96,23 @@ impl RenderGroup {
                 label: Some("render group bind group"),
                 layout: bind_group_layout,
                 entries: &[
-                    // position
                     BindGroupEntry {
                         binding: 0,
-                        resource: position_uniform.buffer.as_entire_binding(),
+                        resource: text_placement_uniform.buffer.as_entire_binding(),
                     },
-                    // depth
                     BindGroupEntry {
                         binding: 1,
-                        resource: depth_uniform.buffer.as_entire_binding(),
-                    },
-                    // color
-                    BindGroupEntry {
-                        binding: 2,
                         resource: color_uniform.buffer.as_entire_binding(),
                     },
-                    // texture
                     BindGroupEntry {
-                        binding: 3,
+                        binding: 2,
                         resource: wgpu::BindingResource::TextureView(&atlas.texture_view),
                     },
                 ],
             }),
-            position_uniform,
+            text_placement,
+            text_placement_uniform,
             position_write: None,
-            depth_uniform,
             depth_write: None,
             color_uniform,
             color_write: None,
@@ -167,8 +170,7 @@ impl RenderGroup {
         self.write_glyph_area(canvas);
         self.write_null(canvas);
         self.write_coords(canvas);
-        self.write_position(canvas);
-        self.write_depth(canvas);
+        self.write_text_placement(canvas);
         self.write_color(canvas);
         self.atlas.write(canvas);
         self.reset_writes();
@@ -216,15 +218,15 @@ impl RenderGroup {
             self.color_uniform.update(&canvas.queue, color);
         }
     }
-    fn write_depth(&mut self, canvas: &Canvas) {
-        if let Some(depth) = self.depth_write.take() {
-            self.depth_uniform.update(&canvas.queue, depth);
-        }
-    }
-    fn write_position(&mut self, canvas: &Canvas) {
+    fn write_text_placement(&mut self, canvas: &Canvas) {
         if let Some(position) = self.position_write.take() {
-            self.position_uniform.update(&canvas.queue, position);
+            self.text_placement.placement[0] = position.x;
+            self.text_placement.placement[1] = position.y;
         }
+        if let Some(depth) = self.depth_write.take() {
+            self.text_placement.placement[2] = depth.layer;
+        }
+        self.text_placement_uniform.update(&canvas.queue, self.text_placement);
     }
     fn write_coords(&mut self, canvas: &Canvas) {
         for (index, coords) in self.coords_write.iter() {

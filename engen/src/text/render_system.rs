@@ -69,16 +69,6 @@ fn render_group_resources(canvas: &Canvas) -> wgpu::BindGroupLayout {
             },
             wgpu::BindGroupLayoutEntry {
                 binding: 1,
-                visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 2,
                 visibility: wgpu::ShaderStages::FRAGMENT,
                 ty: wgpu::BindingType::Buffer {
                     ty: wgpu::BufferBindingType::Uniform,
@@ -88,7 +78,7 @@ fn render_group_resources(canvas: &Canvas) -> wgpu::BindGroupLayout {
                 count: None,
             },
             wgpu::BindGroupLayoutEntry {
-                binding: 3,
+                binding: 2,
                 visibility: wgpu::ShaderStages::FRAGMENT,
                 ty: wgpu::BindingType::Texture {
                     sample_type: wgpu::TextureSampleType::Float { filterable: true },
@@ -122,7 +112,7 @@ fn pipeline(
     let layout = canvas.device.create_pipeline_layout(&layout_descriptor);
     let shader = canvas
         .device
-        .create_shader_module(wgpu::include_wgsl!("text.wgsl"));
+        .create_shader_module(wgpu::include_wgsl!("padded_text.wgsl"));
     let vertex_state = wgpu::VertexState {
         module: &shader,
         entry_point: "vertex_entry",
