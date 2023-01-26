@@ -9,8 +9,8 @@ edition = "2021"
 bevy_ecs = "0.9.1"
 winit = "0.27.5"
 bytemuck = { version = "1.12.3", features = ["derive"] }
-wgpu = { version = "0.14.2", features = ["webgl", "trace"] }
-nalgebra = "0.31.4"
+wgpu = { version = "0.15.0", features = ["webgl", "trace"] }
+nalgebra = "0.32.1"
 fontdue = "0.7.2"
 iter_tools = "0.1.4"
 log = "0.4.17"

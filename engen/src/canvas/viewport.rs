@@ -122,6 +122,7 @@ fn depth_texture(device: &wgpu::Device, area: Area, format: wgpu::TextureFormat)
         dimension: wgpu::TextureDimension::D2,
         format,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+        view_formats: &[format],
     })
 }
 

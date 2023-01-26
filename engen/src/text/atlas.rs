@@ -58,19 +58,6 @@ impl Atlas {
             Self::texture_dimensions(block, unique_glyphs);
         let texture_descriptor = Self::texture_descriptor(texture_width, texture_height);
         let texture = canvas.device.create_texture(&texture_descriptor);
-        // temp code
-        // let mut data = Vec::new();
-        // data.resize((texture_width * texture_height) as usize, 255u8);
-        // canvas.queue.write_texture(texture.as_image_copy(), data.as_slice(), wgpu::ImageDataLayout {
-        //     offset: 0,
-        //     bytes_per_row: NonZeroU32::new(texture_width),
-        //     rows_per_image: NonZeroU32::new(texture_height),
-        // }, wgpu::Extent3d {
-        //     width: texture_width,
-        //     height: texture_height,
-        //     depth_or_array_layers: 1,
-        // });
-        // end temp
         let texture_view = texture.create_view(&wgpu::TextureViewDescriptor::default());
         let free = Self::calc_free(dimension);
         Self {
@@ -133,6 +120,7 @@ impl Atlas {
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::R8Unorm,
             usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[wgpu::TextureFormat::R8Unorm],
         }
     }
     fn calc_free(dimension: u32) -> HashSet<Location> {

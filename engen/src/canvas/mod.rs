@@ -26,8 +26,12 @@ pub struct Canvas {
 
 impl Canvas {
     pub async fn new(window: &Window, options: CanvasOptions) -> Self {
-        let instance = wgpu::Instance::new(options.backends);
-        let surface = unsafe { instance.create_surface(window) };
+        let instance_descriptor = wgpu::InstanceDescriptor{
+            backends: options.backends,
+            dx12_shader_compiler: Default::default(),
+        };
+        let instance = wgpu::Instance::new(instance_descriptor);
+        let surface = unsafe { instance.create_surface(window).expect("could not create surface") };
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: options.power_preferences,
@@ -48,16 +52,17 @@ impl Canvas {
             )
             .await
             .expect("device/queue request failed");
+        let surface_format = *surface.get_capabilities(&adapter).formats
+            .first()
+            .expect("surface format unsupported");
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: *surface
-                .get_supported_formats(&adapter)
-                .first()
-                .expect("surface format unsupported"),
+            format: surface_format,
             width: window.inner_size().width,
             height: window.inner_size().height,
             present_mode: options.present_mode,
             alpha_mode: CompositeAlphaMode::Auto,
+            view_formats: vec![surface_format],
         };
         surface.configure(&device, &surface_configuration);
         let viewport = Viewport::new(
