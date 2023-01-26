@@ -12,6 +12,12 @@ pub struct MonoSpacedFont {
 }
 
 impl MonoSpacedFont {
+    pub fn jet_brains_mono<T: Into<TextScale>>(opt_scale: T) -> Self {
+        Self::new(
+            include_bytes!("./JetBrainsMono-Medium.ttf").as_slice(),
+            opt_scale,
+        )
+    }
     pub fn new<Data: Deref<Target = [u8]>, T: Into<TextScale>>(
         font_data: Data,
         opt_scale: T,
@@ -39,14 +45,5 @@ impl MonoSpacedFont {
     pub fn character_dimensions(&self, character: char, px: f32) -> Area {
         let metrics = self.font().metrics(character, px);
         (metrics.advance_width.ceil(), px.ceil()).into()
-    }
-}
-
-impl Default for MonoSpacedFont {
-    fn default() -> Self {
-        MonoSpacedFont::new(
-            include_bytes!("./JetBrainsMono-Medium.ttf").as_slice(),
-            15u32,
-        )
     }
 }

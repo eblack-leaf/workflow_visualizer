@@ -210,7 +210,7 @@ pub(crate) fn setup(canvas: Res<Canvas>, mut cmd: Commands) {
         sampler_bind_group,
     });
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::default());
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(30u32));
 }
 
 pub(crate) fn create_render_groups(

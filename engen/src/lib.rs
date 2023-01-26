@@ -1,7 +1,11 @@
+#![allow(unused)]
+
+use std::u32;
+
 use bevy_ecs::prelude::{IntoSystemDescriptor, Resource, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::EventLoop;
+use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::Window;
 
 pub(crate) use visibility::Visibility;
@@ -9,15 +13,15 @@ pub(crate) use visibility::Visibility;
 pub use crate::canvas::{Canvas, CanvasOptions};
 use crate::canvas::{CanvasWindow, Viewport};
 pub use crate::color::Color;
-use crate::coord::Scale;
 pub use crate::coord::{Area, Depth, Panel, Position, Section};
+use crate::coord::Scale;
 use crate::render::{Extract, ExtractCalls, Render, RenderCalls};
-pub use crate::task::Task;
 use crate::task::{Stage, WorkloadId};
+pub use crate::task::Task;
 pub use crate::text::{Text, TextBundle, TextRenderer, TextScale};
 pub use crate::theme::Theme;
 use crate::visibility::{
-    move_viewport_bounds, visibility, ViewportBounds, ViewportBoundsMovement, ViewportBoundsScale,
+    move_viewport_bounds, ViewportBounds, ViewportBoundsMovement, ViewportBoundsScale, visibility,
     VisibleEntities,
 };
 
@@ -161,7 +165,7 @@ impl Engen {
                 self.attach_canvas(Canvas::new(&window, options.clone().web_align()).await);
                 self.attach_window(window);
                 self.attach_event_loop(event_loop);
-                use wasm_bindgen::{prelude::*, JsCast};
+                use wasm_bindgen::{JsCast, prelude::*};
                 if let Err(error) = call_catch(&Closure::once_into_js(move || self.run())) {
                     let is_control_flow_exception =
                         error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
@@ -186,7 +190,7 @@ impl Engen {
     }
     fn run(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop provided");
-        event_loop.run(move |event, _event_loop_window_target, control_flow| {
+        event_loop.run(move |event, event_loop_window_target, control_flow| {
             control_flow.set_poll();
             match event {
                 Event::NewEvents(start_cause) => match start_cause {
@@ -196,38 +200,11 @@ impl Engen {
                     StartCause::Init => {
                         #[cfg(not(target_arch = "wasm32"))]
                         {
-                            let window = Window::new(_event_loop_window_target)
-                                .expect("could not create window");
-                            let options = self
-                                .render
-                                .container
-                                .get_resource::<CanvasOptions>()
-                                .expect("no canvas options provided");
-                            self.attach_canvas(futures::executor::block_on(Canvas::new(
-                                &window,
-                                options.clone(),
-                            )));
-                            self.attach_window(window);
+                            self.setup_native_window(event_loop_window_target);
                         }
-                        self.compute
-                            .container
-                            .insert_resource(ViewportBounds::new(Section::new(
-                                (0.0, 0.0),
-                                (800.0, 600.0), // pull from viewport
-                            )));
-                        self.compute
-                            .container
-                            .insert_resource(VisibleEntities::new());
-                        self.compute
-                            .container
-                            .insert_resource(ViewportBoundsMovement::new());
-                        self.compute
-                            .container
-                            .insert_resource(ViewportBoundsScale::new());
-                        self.extract_calls
-                            .add(render::call_extract::<ViewportBounds>);
-                        self.compute.exec(WorkloadId::Startup);
-                        self.render.exec(WorkloadId::Startup);
+                        self.set_canvas_size();
+                        self.setup_viewport_bounds();
+                        self.exec_startup();
                     }
                 },
                 Event::WindowEvent {
@@ -334,6 +311,45 @@ impl Engen {
             }
         });
     }
+    #[cfg(not(target_arch = "wasm32"))]
+    fn setup_native_window(&mut self, _event_loop_window_target: &EventLoopWindowTarget<()>) {
+        let window = Window::new(_event_loop_window_target).expect("could not create window");
+        let options = self
+            .render
+            .container
+            .get_resource::<CanvasOptions>()
+            .expect("no canvas options provided");
+        self.attach_canvas(futures::executor::block_on(Canvas::new(
+            &window,
+            options.clone(),
+        )));
+        self.attach_window(window);
+    }
+
+    fn setup_viewport_bounds(&mut self) {
+        self.compute
+            .container
+            .insert_resource(ViewportBounds::new(Section::new(
+                (0.0, 0.0),
+                (800.0, 600.0), // pull from viewport
+            )));
+        self.compute
+            .container
+            .insert_resource(VisibleEntities::new());
+        self.compute
+            .container
+            .insert_resource(ViewportBoundsMovement::new());
+        self.compute
+            .container
+            .insert_resource(ViewportBoundsScale::new());
+        self.extract_calls
+            .add(render::call_extract::<ViewportBounds>);
+    }
+
+    fn exec_startup(&mut self) {
+        self.compute.exec(WorkloadId::Startup);
+        self.render.exec(WorkloadId::Startup);
+    }
 
     fn resize_viewport_bounds(&mut self, physical_size: PhysicalSize<u32>) {
         self.compute
@@ -353,4 +369,55 @@ impl Engen {
             .expect("no canvas attached")
             .adjust(physical_size.width, physical_size.height);
     }
+    fn set_canvas_size(&mut self) {
+        let new_size = self.set_window_inner();
+        self.adjust_canvas_size(new_size);
+        let aspect_ratio = new_size.width as f32 / new_size.height as f32;
+        let orientation = match aspect_ratio > 1f32 {
+            true => Orientation::Landscape,
+            false => Orientation::Portrait,
+        };
+    }
+
+    fn set_window_inner(&mut self) -> PhysicalSize<u32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let window = self
+                .render
+                .container
+                .get_non_send_resource_mut::<CanvasWindow>()
+                .expect("no canvas window");
+            use winit::platform::web::WindowExtWebSys;
+            let monitor_size = web_sys::window()
+                .and_then(|win| win.document())
+                .and_then(|doc| doc.body())
+                .and_then(|body: web_sys::HtmlElement| -> Option<PhysicalSize<u32>> {
+                    let width: u32 = body.client_width().try_into().unwrap();
+                    let height: u32 = body.client_height().try_into().unwrap();
+                    Some(PhysicalSize::new(
+                        (width as f64 * window.0.scale_factor()) as u32,
+                        (height as f64 * window.0.scale_factor()) as u32,
+                    ))
+                })
+                .expect("could not create body size");
+            window.0.set_inner_size(monitor_size);
+            monitor_size
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let window = self
+                .render
+                .container
+                .get_resource_mut::<CanvasWindow>()
+                .expect("no canvas window");
+            let monitor_size = window.0.current_monitor().expect("no monitor info").size();
+            window.0.set_inner_size(monitor_size);
+            monitor_size
+        }
+    }
+}
+
+pub(crate) enum Orientation {
+    Landscape,
+    Portrait,
 }

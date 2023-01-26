@@ -1,6 +1,6 @@
 use engen::{
-    Area, CanvasOptions, Color, Depth, Engen, Position, Task, Text, TextBundle, TextRenderer,
-    TextScale, Theme,
+    CanvasOptions, Color, Depth, Engen, Position, Task, Text, TextBundle, TextRenderer, TextScale,
+    Theme,
 };
 
 pub fn task() -> Task {
@@ -12,7 +12,7 @@ pub fn task() -> Task {
             Position::new(10f32, 10f32),
             Depth::new(0f32),
             Color::rgb(1.0, 1.0, 1.0),
-            TextScale::new(20u32),
+            TextScale::new(30u32),
         ))
         .id();
     task

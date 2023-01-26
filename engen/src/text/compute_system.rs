@@ -18,7 +18,7 @@ use crate::{Area, Color, Depth, Position, Section};
 
 pub(crate) fn setup(mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::default());
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(30u32));
 }
 
 pub(crate) fn manage_render_groups(
