@@ -9,14 +9,17 @@ pub(crate) use visibility::Visibility;
 pub use crate::canvas::{Canvas, CanvasOptions};
 use crate::canvas::{CanvasWindow, Viewport};
 pub use crate::color::Color;
-pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::coord::Scale;
+pub use crate::coord::{Area, Depth, Panel, Position, Section};
 use crate::render::{Extract, ExtractCalls, Render, RenderCalls};
-use crate::task::{Stage, WorkloadId};
 pub use crate::task::Task;
+use crate::task::{Stage, WorkloadId};
 pub use crate::text::{Text, TextBundle, TextRenderer, TextScale};
 pub use crate::theme::Theme;
-use crate::visibility::{move_viewport_bounds, ViewportBounds, ViewportBoundsMovement, ViewportBoundsScale, visibility, VisibleEntities};
+use crate::visibility::{
+    move_viewport_bounds, visibility, ViewportBounds, ViewportBoundsMovement, ViewportBoundsScale,
+    VisibleEntities,
+};
 
 mod canvas;
 mod color;
@@ -136,7 +139,7 @@ impl Engen {
     pub fn launch(mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            wasm_bindgen_futures::spawn_local(async {
+            wasm_bindgen_futures::spawn_local(async move {
                 std::panic::set_hook(Box::new(console_error_panic_hook::hook));
                 console_log::init().expect("could not initialize logger");
                 let event_loop = EventLoop::new();
@@ -158,7 +161,21 @@ impl Engen {
                 self.attach_canvas(Canvas::new(&window, options.clone().web_align()).await);
                 self.attach_window(window);
                 self.attach_event_loop(event_loop);
-                self.run();
+                use wasm_bindgen::{prelude::*, JsCast};
+                if let Err(error) = call_catch(&Closure::once_into_js(move || self.run())) {
+                    let is_control_flow_exception =
+                        error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
+                            e.message().includes("Using exceptions for control flow", 0)
+                        });
+                    if !is_control_flow_exception {
+                        web_sys::console::error_1(&error);
+                    }
+                }
+                #[wasm_bindgen]
+                extern "C" {
+                    #[wasm_bindgen(catch, js_namespace = Function, js_name = "prototype.call.call")]
+                    fn call_catch(this: &JsValue) -> Result<(), JsValue>;
+                }
             });
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -201,8 +218,12 @@ impl Engen {
                         self.compute
                             .container
                             .insert_resource(VisibleEntities::new());
-                        self.compute.container.insert_resource(ViewportBoundsMovement::new());
-                        self.compute.container.insert_resource(ViewportBoundsScale::new());
+                        self.compute
+                            .container
+                            .insert_resource(ViewportBoundsMovement::new());
+                        self.compute
+                            .container
+                            .insert_resource(ViewportBoundsScale::new());
                         self.extract_calls
                             .add(render::call_extract::<ViewportBounds>);
                         self.compute.exec(WorkloadId::Startup);
@@ -283,7 +304,6 @@ impl Engen {
                 Event::MainEventsCleared => {
                     if self.compute.active() {
                         self.compute.exec(WorkloadId::Main);
-                        self.get_window().request_redraw();
                     }
                     if self.compute.should_exit() {
                         control_flow.set_exit();
@@ -300,6 +320,9 @@ impl Engen {
                     }
                 }
                 Event::RedrawEventsCleared => {
+                    if self.render.active() {
+                        self.get_window().request_redraw();
+                    }
                     if self.compute.can_idle() && self.render.can_idle() {
                         control_flow.set_wait();
                     }

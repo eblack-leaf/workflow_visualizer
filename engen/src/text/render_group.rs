@@ -63,11 +63,13 @@ pub(crate) struct RenderGroup {
     pub(crate) keyed_glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) atlas: Atlas,
 }
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq)]
 pub(crate) struct TextPlacement {
     pub(crate) placement: [f32; 4],
 }
+
 impl TextPlacement {
     pub(crate) fn new(position: Position, depth: Depth) -> Self {
         Self {
@@ -75,6 +77,7 @@ impl TextPlacement {
         }
     }
 }
+
 impl RenderGroup {
     pub(crate) fn new(
         canvas: &Canvas,
@@ -219,14 +222,20 @@ impl RenderGroup {
         }
     }
     fn write_text_placement(&mut self, canvas: &Canvas) {
+        let mut dirty = false;
         if let Some(position) = self.position_write.take() {
             self.text_placement.placement[0] = position.x;
             self.text_placement.placement[1] = position.y;
+            dirty = true;
         }
         if let Some(depth) = self.depth_write.take() {
             self.text_placement.placement[2] = depth.layer;
+            dirty = true;
         }
-        self.text_placement_uniform.update(&canvas.queue, self.text_placement);
+        if dirty {
+            self.text_placement_uniform
+                .update(&canvas.queue, self.text_placement);
+        }
     }
     fn write_coords(&mut self, canvas: &Canvas) {
         for (index, coords) in self.coords_write.iter() {

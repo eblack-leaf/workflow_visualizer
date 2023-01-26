@@ -1,7 +1,9 @@
+use std::path::Path;
+
 use bevy_ecs::prelude::Resource;
 use wgpu::{CompositeAlphaMode, SurfaceError, SurfaceTexture};
 use winit::window::Window;
-use std::path::Path;
+
 pub use crate::canvas::options::CanvasOptions;
 pub use crate::canvas::viewport::Viewport;
 use crate::Position;
@@ -41,7 +43,8 @@ impl Canvas {
                     features: options.features,
                     limits: options.limits.clone(),
                 },
-                Some(Path::new("/home/omi-voshuli/note-ifications/web-trace")),
+                // Some(Path::new("/home/omi-voshuli/note-ifications/web-trace")),
+                None,
             )
             .await
             .expect("device/queue request failed");
