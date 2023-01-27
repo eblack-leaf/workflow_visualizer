@@ -60,7 +60,7 @@ impl Canvas {
     pub(crate) async fn new(window: &Window, options: CanvasOptions) -> Self {
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
-            dx12_shader_compiler: Default::default(),
+            ..wgpu::InstanceDescriptor::default()
         };
         let instance = wgpu::Instance::new(instance_descriptor);
         let surface = unsafe {

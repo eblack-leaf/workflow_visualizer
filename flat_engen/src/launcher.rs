@@ -215,10 +215,10 @@ impl Launcher {
         event_loop_window_target: &EventLoopWindowTarget<()>,
     ) {
         let mut builder = WindowBuilder::new();
-        if let Some(dimensions) = engen.engen_options.native_dimensions {
-            builder =
-                builder.with_inner_size(PhysicalSize::new(dimensions.width, dimensions.height));
-        }
+        // if let Some(dimensions) = engen.engen_options.native_dimensions {
+        //     builder =
+        //         builder.with_inner_size(PhysicalSize::new(dimensions.width, dimensions.height));
+        // }
         let window = builder
             .build(event_loop_window_target)
             .expect("could not create window");

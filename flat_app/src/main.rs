@@ -11,9 +11,9 @@ fn main() {
         .with_native_dimensions(flat_engen::Area::new(700 as f32, 500 as f32))
         .with_min_canvas_dimensions(flat_engen::Area::new(400 as f32, 300 as f32));
     let mut engen = flat_engen::Engen::new(engen_descriptor);
-    let args: Vec<String> = std::env::args().collect();
     #[cfg(not(target_arch = "wasm32"))]
     {
+        let args: Vec<String> = std::env::args().collect();
         if let Some(param) = args.get(1) {
             if param == "web-serve" {
                 let compile_descriptor =

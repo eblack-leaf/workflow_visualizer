@@ -2971,21 +2971,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "web_builder"
-version = "0.1.0"
-dependencies = [
- "wasm-bindgen-cli-support",
-]
-
-[[package]]
-name = "web_server"
-version = "0.1.0"
-dependencies = [
- "tokio",
- "warp",
-]
-
-[[package]]
 name = "webpki"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
