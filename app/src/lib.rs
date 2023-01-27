@@ -8,7 +8,7 @@ pub fn task() -> Task {
     let _tester = task
         .container
         .spawn(TextBundle::new(
-            Text::new("peppermint".to_string()),
+            Text::new("boil bay?".to_string()),
             Position::new(10f32, 10f32),
             Depth::new(0f32),
             Color::rgb(1.0, 1.0, 1.0),
@@ -19,8 +19,8 @@ pub fn task() -> Task {
 }
 
 #[cfg_attr(
-    target_os = "android",
-    ndk_glue::main(backtrace = "on", logger(level = "debug"))
+target_os = "android",
+ndk_glue::main(backtrace = "on", logger(level = "debug"))
 )]
 pub fn launch() {
     let mut engen = Engen::new(task());

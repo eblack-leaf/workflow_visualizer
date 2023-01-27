@@ -213,7 +213,7 @@ impl Engen {
                 } => match event {
                     WindowEvent::Resized(physical_size) => {
                         self.adjust_canvas_size(physical_size);
-                        self.resize_viewport_bounds(physical_size);
+                        self.adjust_viewport_bounds(physical_size);
                     }
                     WindowEvent::Moved(_) => {}
                     WindowEvent::CloseRequested => {
@@ -241,7 +241,7 @@ impl Engen {
                         new_inner_size,
                     } => {
                         self.adjust_canvas_size(*new_inner_size);
-                        self.resize_viewport_bounds(*new_inner_size);
+                        self.adjust_viewport_bounds(*new_inner_size);
                     }
                     WindowEvent::ThemeChanged(_) => {}
                     WindowEvent::Occluded(_) => {}
@@ -351,12 +351,12 @@ impl Engen {
         self.render.exec(WorkloadId::Startup);
     }
 
-    fn resize_viewport_bounds(&mut self, physical_size: PhysicalSize<u32>) {
+    fn adjust_viewport_bounds(&mut self, physical_size: PhysicalSize<u32>) {
         self.compute
             .container
             .get_resource_mut::<ViewportBounds>()
             .expect("no bounds")
-            .resize(Scale::new(
+            .adjust(Scale::new(
                 physical_size.width as f32,
                 physical_size.height as f32,
             ));

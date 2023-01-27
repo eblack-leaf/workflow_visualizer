@@ -4,9 +4,9 @@ use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, Res, ResMut, Resource};
 
+use crate::{Area, Canvas, Position, Section, Task};
 use crate::coord::{Movement, Scale};
 use crate::render::Extract;
-use crate::{Area, Canvas, Position, Section, Task};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct Visibility {
@@ -56,8 +56,9 @@ impl ViewportBounds {
         self.section.position.apply(movement);
         self.dirty = true;
     }
-    pub(crate) fn resize(&mut self, scale: Scale) {
+    pub(crate) fn adjust(&mut self, scale: Scale) {
         self.section.area.apply(scale);
+        self.dirty = true;
     }
 }
 
@@ -93,15 +94,15 @@ pub(crate) fn move_viewport_bounds(
         viewport_bounds.apply(movement);
     }
     if let Some(scale) = viewport_bounds_scale.scale.take() {
-        viewport_bounds.resize(scale);
+        viewport_bounds.adjust(scale);
     }
     // take new spacial hash and add all entities to visible_entities_update
 }
 
 impl Extract for ViewportBounds {
     fn extract(compute: &mut Task, render: &mut Task)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut viewport_bounds = compute
             .container
