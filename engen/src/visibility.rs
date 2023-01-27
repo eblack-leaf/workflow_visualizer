@@ -4,9 +4,9 @@ use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, Res, ResMut, Resource};
 
-use crate::{Area, Canvas, Position, Section, Task};
 use crate::coord::{Movement, Scale};
 use crate::render::Extract;
+use crate::{Area, Canvas, Position, Section, Task};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct Visibility {
@@ -101,8 +101,8 @@ pub(crate) fn move_viewport_bounds(
 
 impl Extract for ViewportBounds {
     fn extract(compute: &mut Task, render: &mut Task)
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let mut viewport_bounds = compute
             .container
