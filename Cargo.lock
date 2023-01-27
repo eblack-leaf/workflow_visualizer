@@ -810,6 +810,19 @@ dependencies = [
 [[package]]
 name = "flat_engen"
 version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+ "bytemuck",
+ "console_error_panic_hook",
+ "console_log",
+ "js-sys",
+ "nalgebra",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "wgpu",
+ "winit",
+]
 
 [[package]]
 name = "flate2"
