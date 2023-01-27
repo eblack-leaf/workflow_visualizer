@@ -16,10 +16,10 @@ impl CompileDescriptor {
             destination: destination.into(),
         }
     }
-    pub(crate) fn compile(&self, theme: &Theme) {
+    pub(crate) fn compile(&self, theme: &Theme) -> Result<(), bool> {
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let package = self.package.as_str();
-        let profile = self.package_options.as_str();
+        let profile = self.package_options.as_str().strip_prefix("--").expect("could not strip");
         let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .ancestors()
             .nth(1)
@@ -28,7 +28,9 @@ impl CompileDescriptor {
         let target = Path::new("wasm_rebuild_avoidance_target");
         let mut args = Vec::<&str>::new();
         args.push("build");
-        args.push(&profile);
+        if profile == "--release" {
+            args.push("--release");
+        }
         args.push("--target");
         args.push("wasm32-unknown-unknown");
         args.push("--package");
@@ -43,7 +45,7 @@ impl CompileDescriptor {
             .status()
             .unwrap();
         if !status.success() {
-            return;
+            return Err(true);
         }
         let absolute_target = project_root.join(&target);
         let source = absolute_target
@@ -65,5 +67,6 @@ impl CompileDescriptor {
         let css_theme_background = "#000000"; // TODO pull from theme.background into hex
         let processed = processed.replace("{{background}}", css_theme_background);
         std::fs::write(destination.join("index.html"), processed).unwrap();
+        Ok(())
     }
 }

@@ -63,7 +63,7 @@ impl EngenDescriptor {
     }
 }
 
-pub(crate) struct EngenOptions {
+pub struct EngenOptions {
     pub(crate) canvas_options: CanvasOptions,
     pub(crate) theme: Theme,
     pub(crate) native_dimensions: Option<Area>,
@@ -130,9 +130,14 @@ impl Engen {
             Launcher::web(self);
         }
     }
-    pub fn compile_wasm_to(&self, compile_descriptor: CompileDescriptor) -> Server {
-        compile_descriptor.compile(&self.engen_options.theme);
-        Server::new(compile_descriptor.destination)
+    pub fn compile_wasm_to(&self, compile_descriptor: CompileDescriptor) -> Option<Server> {
+        match compile_descriptor.compile(&self.engen_options.theme) {
+            Ok(_) => {}
+            Err(_) => {
+                return None;
+            }
+        }
+        Some(Server::new(compile_descriptor.destination))
     }
 }
 

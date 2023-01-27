@@ -1,5 +1,9 @@
+use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::Resource;
 use winit::window::Window;
+
+use crate::Engen;
+
 #[derive(Clone)]
 pub struct CanvasOptions {
     pub backends: wgpu::Backends,
@@ -9,6 +13,7 @@ pub struct CanvasOptions {
     pub limits: wgpu::Limits,
     pub present_mode: wgpu::PresentMode,
 }
+
 impl CanvasOptions {
     pub fn web_align(mut self) -> Self {
         self.backends = wgpu::Backends::all();
@@ -29,6 +34,7 @@ impl CanvasOptions {
         }
     }
 }
+
 impl Default for CanvasOptions {
     fn default() -> Self {
         #[cfg(not(target_arch = "wasm32"))]
@@ -41,6 +47,7 @@ impl Default for CanvasOptions {
         }
     }
 }
+
 #[derive(Resource)]
 pub(crate) struct Canvas {
     pub(crate) surface: wgpu::Surface,
@@ -48,6 +55,7 @@ pub(crate) struct Canvas {
     pub(crate) queue: wgpu::Queue,
     pub(crate) surface_configuration: wgpu::SurfaceConfiguration,
 }
+
 impl Canvas {
     pub(crate) async fn new(window: &Window, options: CanvasOptions) -> Self {
         let instance_descriptor = wgpu::InstanceDescriptor {
@@ -75,7 +83,6 @@ impl Canvas {
                     features: options.features,
                     limits: options.limits.clone(),
                 },
-                // Some(Path::new("/home/omi-voshuli/note-ifications/web-trace")),
                 None,
             )
             .await
@@ -137,5 +144,24 @@ impl Canvas {
         self.surface_configuration.height = height;
         self.surface
             .configure(&self.device, &self.surface_configuration);
+    }
+    pub(crate) async fn attach(window: &Window, engen: &mut Engen) {
+        let options = engen.engen_options.canvas_options.clone();
+        let canvas = Canvas::new(window, options).await;
+        engen.backend.container.insert_resource(canvas);
+    }
+    pub(crate) fn get(engen: &Engen) -> &Canvas {
+        engen
+            .backend
+            .container
+            .get_resource::<Canvas>()
+            .expect("no canvas attached")
+    }
+    pub(crate) fn get_mut(engen: &mut Engen) -> Mut<'_, Canvas> {
+        engen
+            .backend
+            .container
+            .get_resource_mut::<Canvas>()
+            .expect("no canvas attached")
     }
 }

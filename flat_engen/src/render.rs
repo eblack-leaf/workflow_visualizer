@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::Resource;
 
-use crate::{Engen, Task, Theme};
 use crate::canvas::Canvas;
 use crate::viewport::Viewport;
+use crate::{Engen, Task, Theme};
 
 pub enum RenderPhase {
     Opaque,
@@ -13,7 +13,10 @@ pub(crate) fn invoke_render<'a, RenderAttachment: Render + Resource>(
     backend: &'a Task,
     render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
-    let viewport = backend.container.get_resource::<Viewport>().expect("no viewport attached");
+    let viewport = backend
+        .container
+        .get_resource::<Viewport>()
+        .expect("no viewport attached");
     backend
         .container
         .get_resource::<RenderAttachment>()
@@ -30,7 +33,13 @@ pub trait Render {
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
 
-pub fn render(engen: &mut Engen) {
+pub(crate) fn extract(engen: &mut Engen) {
+    for invoke in engen.extract_fns.iter_mut() {
+        invoke(&mut engen.front_end, &mut engen.backend);
+    }
+}
+
+pub(crate) fn render(engen: &mut Engen) {
     let canvas = engen
         .backend
         .container

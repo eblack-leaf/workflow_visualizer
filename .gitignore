@@ -2,5 +2,5 @@
 /wasm_rebuild_avoidance_target/
 /android_rebuild_avoidance_target/
 /wgpu_traces/
-/app_web_build/
+/flat_app_web_build/
 /.idea/
