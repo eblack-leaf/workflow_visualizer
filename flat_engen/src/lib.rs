@@ -1,16 +1,19 @@
+use std::net::SocketAddr;
+
+use bevy_ecs::prelude::Resource;
+
+pub use canvas::CanvasOptions;
+pub use compile_wasm::CompileDescriptor;
+use render::RenderFns;
+pub use server::Server;
+pub use task::Task;
+pub use theme::Theme;
+
 pub use crate::coord::Area;
 pub use crate::coord::Position;
 use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::launcher::Launcher;
 use crate::render::{invoke_render, Render, RenderPhase};
-use bevy_ecs::prelude::Resource;
-pub use canvas::CanvasOptions;
-pub use compile_wasm::CompileDescriptor;
-use render::RenderFns;
-pub use server::Server;
-use std::net::SocketAddr;
-pub use task::Task;
-pub use theme::Theme;
 
 mod canvas;
 mod color;
@@ -23,8 +26,8 @@ mod render;
 mod server;
 mod task;
 mod theme;
-mod viewport;
 mod uniform;
+mod viewport;
 
 pub struct EngenDescriptor {
     pub canvas_options: Option<CanvasOptions>,
@@ -32,6 +35,7 @@ pub struct EngenDescriptor {
     pub native_dimensions: Option<Area>,
     pub min_canvas_dimensions: Option<Area>,
 }
+
 impl EngenDescriptor {
     pub fn new() -> Self {
         Self {
@@ -58,22 +62,45 @@ impl EngenDescriptor {
         self
     }
 }
+
+pub(crate) struct EngenOptions {
+    pub(crate) canvas_options: CanvasOptions,
+    pub(crate) theme: Theme,
+    pub(crate) native_dimensions: Option<Area>,
+    pub(crate) min_canvas_dimensions: Option<Area>,
+}
+
+impl EngenOptions {
+    pub(crate) fn new(engen_descriptor: EngenDescriptor) -> Self {
+        Self {
+            canvas_options: engen_descriptor.canvas_options.unwrap_or_default(),
+            theme: engen_descriptor.theme.unwrap_or_default(),
+            native_dimensions: engen_descriptor.native_dimensions,
+            min_canvas_dimensions: engen_descriptor.min_canvas_dimensions,
+        }
+    }
+}
+
 pub struct Engen {
-    pub engen_descriptor: EngenDescriptor,
+    pub engen_options: EngenOptions,
     pub(crate) front_end: Task,
     pub(crate) backend: Task,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
 }
+
 impl Engen {
     pub fn new(engen_descriptor: EngenDescriptor) -> Self {
         Self {
-            engen_descriptor,
+            engen_options: EngenOptions::new(engen_descriptor),
             front_end: Task::new(),
             backend: Task::new(),
             render_fns: (RenderFns::new(), RenderFns::new()),
             extract_fns: ExtractFns::new(),
         }
+    }
+    pub(crate) fn attach<Attachment: Attach>(&mut self) {
+        Attachment::attach(self);
     }
     pub fn add_render_attachment<RenderAttachment: Attach + Render + Extract + Resource>(
         &mut self,
@@ -104,12 +131,15 @@ impl Engen {
         }
     }
     pub fn compile_wasm_to(&self, compile_descriptor: CompileDescriptor) -> Server {
+        compile_descriptor.compile(&self.engen_options.theme);
         Server::new(compile_descriptor.destination)
     }
 }
+
 pub trait Attach {
     fn attach(engen: &mut Engen);
 }
+
 pub trait FrontEnd {
     fn setup(task: &mut Task);
 }

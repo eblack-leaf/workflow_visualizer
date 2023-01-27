@@ -11,6 +11,9 @@ wgpu = { version = "0.15.0", features = ["webgl"] }
 bytemuck = { version = "1.12.3", features = ["derive"] }
 bevy_ecs = "0.9.1"
 nalgebra = "0.32.1"
+wasm-bindgen-cli-support = "0.2.83"
+warp = { version = "0.3.3", features = ["tls"] }
+futures = "0.3.25"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { version = "0.3.59", features = ["Window"] }
 wasm-bindgen-futures = "0.4.33"

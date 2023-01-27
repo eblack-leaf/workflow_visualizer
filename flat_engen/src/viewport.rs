@@ -1,7 +1,10 @@
-use bevy_ecs::prelude::Resource;
+use bevy_ecs::prelude::{Commands, Res, Resource};
 use nalgebra::matrix;
-use crate::{Area, Position};
+
+use crate::{Area, Attach, Engen, Position};
+use crate::canvas::Canvas;
 use crate::coord::Depth;
+use crate::task::Stage;
 use crate::uniform::Uniform;
 
 #[derive(Resource)]
@@ -127,6 +130,7 @@ fn depth_texture(device: &wgpu::Device, area: Area, format: wgpu::TextureFormat)
         view_formats: &[format],
     })
 }
+
 #[derive(Resource)]
 pub struct CpuViewport {
     pub area: Area,
@@ -162,5 +166,19 @@ pub struct GpuViewport {
 impl From<[[f32; 4]; 4]> for GpuViewport {
     fn from(matrix: [[f32; 4]; 4]) -> Self {
         Self { matrix }
+    }
+}
+
+pub(crate) fn attach(
+    canvas: Res<Canvas>, mut cmd: Commands,
+) {
+    let surface_configuration = &canvas.surface_configuration;
+    let area = Area::new(surface_configuration.width, surface_configuration.height);
+    cmd.insert_resource(Viewport::new(&canvas.device, area));
+}
+
+impl Attach for Viewport {
+    fn attach(engen: &mut Engen) {
+        engen.backend.startup.schedule.add_system_to_stage(Stage::First, attach);
     }
 }

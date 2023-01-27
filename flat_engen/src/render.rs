@@ -1,27 +1,35 @@
-use crate::{Engen, Task, Theme};
 use bevy_ecs::prelude::Resource;
+
+use crate::{Engen, Task, Theme};
 use crate::canvas::Canvas;
+use crate::viewport::Viewport;
 
 pub enum RenderPhase {
     Opaque,
     Alpha,
 }
+
 pub(crate) fn invoke_render<'a, RenderAttachment: Render + Resource>(
     backend: &'a Task,
     render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
+    let viewport = backend.container.get_resource::<Viewport>().expect("no viewport attached");
     backend
         .container
         .get_resource::<RenderAttachment>()
         .expect("no render attachment")
-        .render(render_pass_handle, ());
+        .render(render_pass_handle, viewport);
 }
+
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
+
 pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Task, &mut RenderPassHandle<'a>)>>;
+
 pub trait Render {
     fn phase() -> RenderPhase;
-    fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a ());
+    fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
+
 pub fn render(engen: &mut Engen) {
     let canvas = engen
         .backend
@@ -33,7 +41,10 @@ pub fn render(engen: &mut Engen) {
         .container
         .get_resource::<Theme>()
         .expect("no theme attached");
-    let viewport = engen.backend.container.get_resource::<Viewport>()
+    let viewport = engen
+        .backend
+        .container
+        .get_resource::<Viewport>()
         .expect("no viewport attached");
     if let Some(surface_texture) = canvas.surface_texture() {
         let mut command_encoder =
