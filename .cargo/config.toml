@@ -1,11 +1,10 @@
 [alias]
 desktop_build = "build --package flat_app --bin flat_app"
 desktop_run = "run --package flat_app --bin flat_app"
+web_build = "run --package flat_app --bin flat_app -- web-compile"
 web_run = "run --package flat_app --bin flat_app -- web-serve"
 #android_build = "apk build --target-dir android_rebuild_avoidance_target --package app --lib"
 #android_run = "apk run --target-dir android_rebuild_avoidance_target --package app --lib"
-#web_build = "run --release --package web_builder --"
-#web_run = "run --release --package web_server --"
 [build]
 rustflags = [
     "--cfg=web_sys_unstable_apis"
