@@ -16,7 +16,7 @@ impl CompileDescriptor {
             destination: destination.into(),
         }
     }
-    pub(crate) fn compile(&self, theme: &Theme) -> Result<(), bool> {
+    pub(crate) fn compile(&self) -> Result<(), bool> {
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let package = self.package.as_str();
         let profile = self.package_options.as_str().strip_prefix("--").expect("could not strip");
@@ -64,8 +64,6 @@ impl CompileDescriptor {
             .unwrap();
         let template = include_str!("index.template.html");
         let processed = template.replace("{{name}}", &package);
-        let css_theme_background = "#000000"; // TODO pull from theme.background into hex
-        let processed = processed.replace("{{background}}", css_theme_background);
         std::fs::write(destination.join("index.html"), processed).unwrap();
         Ok(())
     }

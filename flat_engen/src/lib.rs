@@ -130,8 +130,8 @@ impl Engen {
             Launcher::web(self);
         }
     }
-    pub fn compile_wasm_to(&self, compile_descriptor: CompileDescriptor) -> Option<Server> {
-        match compile_descriptor.compile(&self.engen_options.theme) {
+    pub fn compile_wasm_to(compile_descriptor: CompileDescriptor) -> Option<Server> {
+        match compile_descriptor.compile() {
             Ok(_) => {}
             Err(_) => {
                 return None;
