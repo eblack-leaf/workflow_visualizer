@@ -3,10 +3,10 @@ use bevy_ecs::prelude::{Commands, Res, Resource};
 use nalgebra::matrix;
 
 use crate::canvas::Canvas;
-use crate::coord::{Depth, GpuArea, GpuPosition};
 use crate::task::Stage;
 use crate::uniform::Uniform;
 use crate::{Attach, Engen};
+use crate::coord::{Depth, GpuArea, GpuPosition};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -95,6 +95,9 @@ impl Viewport {
             offset,
             offset_uniform,
         }
+    }
+    pub(crate) fn offset_position(&self) -> GpuPosition {
+        GpuPosition::new(self.offset.offset[0], self.offset.offset[1])
     }
     pub(crate) fn adjust_area(&mut self, canvas: &Canvas, width: u32, height: u32) {
         let area = GpuArea::new(width as f32, height as f32);

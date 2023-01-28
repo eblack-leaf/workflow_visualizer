@@ -35,7 +35,7 @@ pub trait Render {
 
 pub(crate) fn extract(engen: &mut Engen) {
     for invoke in engen.extract_fns.iter_mut() {
-        invoke(&mut engen.front_end, &mut engen.backend);
+        invoke(&mut engen.frontend, &mut engen.backend);
     }
 }
 

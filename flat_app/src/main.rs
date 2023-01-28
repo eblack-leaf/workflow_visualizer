@@ -1,7 +1,11 @@
+use flat_engen::{Color, Depth, Position, Text, TextBundle, TextScaleAlignment};
+
 struct App;
 
 impl flat_engen::FrontEnd for App {
-    fn setup(task: &mut flat_engen::Task) {}
+    fn setup(task: &mut flat_engen::Task) {
+        task.container.spawn(TextBundle::new(Text::new("ah".to_string()), Position::new(10.0, 10.0), Depth::new(0u32), Color::rgb(1.0, 1.0, 1.0), TextScaleAlignment::Medium));
+    }
 }
 
 fn main() {
@@ -27,6 +31,6 @@ fn main() {
         .with_native_dimensions(flat_engen::Area::new(400 as f32, 600 as f32))
         .with_min_canvas_dimensions(flat_engen::Area::new(400 as f32, 300 as f32));
     let mut engen = flat_engen::Engen::new(engen_descriptor);
-    // engen.add_render_attachment::<flat_engen::TextRenderer>();
+    engen.add_render_attachment::<flat_engen::TextRenderer>();
     engen.launch::<App>();
 }

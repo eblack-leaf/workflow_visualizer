@@ -8,12 +8,14 @@ use render::RenderFns;
 pub use server::Server;
 pub use task::Task;
 pub use theme::Theme;
-
-pub use crate::coord::Area;
-pub use crate::coord::Position;
+pub use crate::color::Color;
 use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::launcher::Launcher;
 use crate::render::{invoke_render, Render, RenderPhase};
+pub(crate) use crate::visibility::Visibility;
+pub use crate::text::{Text, TextBundle, TextRenderer, TextScaleAlignment};
+pub(crate) use visibility::ScaleFactor;
+pub use crate::coord::{Position, Area, Depth, Section};
 
 mod canvas;
 mod color;
@@ -28,6 +30,8 @@ mod task;
 mod theme;
 mod uniform;
 mod viewport;
+mod text;
+mod visibility;
 
 pub struct EngenDescriptor {
     pub canvas_options: Option<CanvasOptions>,
@@ -83,7 +87,7 @@ impl EngenOptions {
 
 pub struct Engen {
     pub engen_options: EngenOptions,
-    pub(crate) front_end: Task,
+    pub(crate) frontend: Task,
     pub(crate) backend: Task,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
@@ -93,7 +97,7 @@ impl Engen {
     pub fn new(engen_descriptor: EngenDescriptor) -> Self {
         Self {
             engen_options: EngenOptions::new(engen_descriptor),
-            front_end: Task::new(),
+            frontend: Task::new(),
             backend: Task::new(),
             render_fns: (RenderFns::new(), RenderFns::new()),
             extract_fns: ExtractFns::new(),
@@ -120,7 +124,7 @@ impl Engen {
             .push(Box::new(invoke_extract::<RenderAttachment>));
     }
     pub fn launch<FrontEndImpl: FrontEnd>(mut self) {
-        FrontEndImpl::setup(&mut self.front_end);
+        FrontEndImpl::setup(&mut self.frontend);
         #[cfg(not(target_arch = "wasm32"))]
         {
             Launcher::native(self);

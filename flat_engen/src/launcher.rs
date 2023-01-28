@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use bevy_ecs::prelude::Resource;
 
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
@@ -9,6 +10,7 @@ use crate::{Engen, render, Theme};
 use crate::canvas::Canvas;
 use crate::task::WorkloadId;
 use crate::viewport::Viewport;
+use crate::visibility::{ScaleFactor, Visibility};
 
 pub(crate) struct Launcher {
     pub(crate) event_loop: Option<EventLoop<()>>,
@@ -96,7 +98,6 @@ impl Launcher {
         }
     }
     fn launch(mut self, mut engen: Engen) {
-        self.attach_core_attachments(&mut engen);
         let event_loop = self.event_loop.take().expect("no event loop");
         event_loop.run(move |event, event_loop_window_target, control_flow| {
             control_flow.set_poll();
@@ -110,7 +111,8 @@ impl Launcher {
                         {
                             self.attach_native_window(&mut engen, event_loop_window_target);
                         }
-                        engen.front_end.exec(WorkloadId::Startup);
+                        self.attach_core_attachments(&mut engen);
+                        engen.frontend.exec(WorkloadId::Startup);
                         engen.backend.exec(WorkloadId::Startup);
                     }
                 },
@@ -151,6 +153,7 @@ impl Launcher {
                         new_inner_size,
                     } => {
                         Self::resize_callback(&mut engen, *new_inner_size, scale_factor);
+                        ScaleFactor::attach(self.window.as_ref().expect("no window"), &mut engen);
                     }
                     WindowEvent::ThemeChanged(_) => {}
                     WindowEvent::Occluded(_) => {}
@@ -158,30 +161,30 @@ impl Launcher {
                 Event::DeviceEvent { .. } => {}
                 Event::UserEvent(_) => {}
                 Event::Suspended => {
-                    if engen.front_end.active() {
+                    if engen.frontend.active() {
                         #[cfg(target_os = "android")]
                         {
                             let _ = self.backend.container.remove_resource::<Canvas>();
                         }
-                        engen.front_end.suspend();
+                        engen.frontend.suspend();
                         engen.backend.suspend();
                     }
                 }
                 Event::Resumed => {
-                    if engen.front_end.suspended() {
+                    if engen.frontend.suspended() {
                         #[cfg(target_os = "android")]
                         {
                             futures::executor::block_on(Canvas::attach(&self.window, engen));
                         }
-                        engen.front_end.activate();
+                        engen.frontend.activate();
                         engen.backend.activate();
                     }
                 }
                 Event::MainEventsCleared => {
-                    if engen.front_end.active() {
-                        engen.front_end.exec(WorkloadId::Main);
+                    if engen.frontend.active() {
+                        engen.frontend.exec(WorkloadId::Main);
                     }
-                    if engen.front_end.should_exit() {
+                    if engen.frontend.should_exit() {
                         control_flow.set_exit();
                     }
                 }
@@ -199,12 +202,12 @@ impl Launcher {
                     if engen.backend.active() {
                         self.window.as_ref().expect("no window").request_redraw();
                     }
-                    if engen.front_end.can_idle() && engen.backend.can_idle() {
+                    if engen.frontend.can_idle() && engen.backend.can_idle() {
                         control_flow.set_wait();
                     }
                 }
                 Event::LoopDestroyed => {
-                    engen.front_end.exec(WorkloadId::Teardown);
+                    engen.frontend.exec(WorkloadId::Teardown);
                     engen.backend.exec(WorkloadId::Teardown);
                 }
             }
@@ -249,8 +252,10 @@ impl Launcher {
     }
 
     fn attach_core_attachments(&self, engen: &mut Engen) {
+        engen.attach::<Visibility>();
         engen.attach::<Viewport>();
         engen.backend.container.insert_resource(engen.engen_options.theme.clone());
+        ScaleFactor::attach(self.window.as_ref().expect("no window"), engen);
         // ...
         // visibility + orientation
     }
