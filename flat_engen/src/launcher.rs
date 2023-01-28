@@ -5,7 +5,7 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
-use crate::{Engen, render};
+use crate::{Engen, render, Theme};
 use crate::canvas::Canvas;
 use crate::task::WorkloadId;
 use crate::viewport::Viewport;
@@ -34,6 +34,8 @@ impl Launcher {
     async fn web_launch(mut engen: Engen) {
         use wasm_bindgen::{JsCast, prelude::*};
         use winit::platform::web::WindowExtWebSys;
+        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+        console_log::init().expect("could not initialize logger");
         let mut launcher = Launcher::new();
         let inner_size = |scale_factor: f64| {
             web_sys::window()
@@ -248,6 +250,7 @@ impl Launcher {
 
     fn attach_core_attachments(&self, engen: &mut Engen) {
         engen.attach::<Viewport>();
+        engen.backend.container.insert_resource(engen.engen_options.theme.clone());
         // ...
         // visibility + orientation
     }

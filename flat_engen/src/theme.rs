@@ -1,6 +1,7 @@
 use bevy_ecs::prelude::Resource;
 
 use crate::color::Color;
+use crate::Engen;
 
 pub struct ThemeDescriptor {
     pub background: Option<Color>,
@@ -12,7 +13,7 @@ impl ThemeDescriptor {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct Theme {
     pub background: Color,
 }
@@ -20,7 +21,7 @@ pub struct Theme {
 impl Theme {
     pub fn new(descriptor: ThemeDescriptor) -> Self {
         Self {
-            background: descriptor.background.unwrap_or_default(),
+            background: descriptor.background.unwrap_or(Color::rgb(0.0, 0.0, 0.0)),
         }
     }
 }
@@ -30,3 +31,4 @@ impl Default for Theme {
         Theme::new(ThemeDescriptor::new())
     }
 }
+
