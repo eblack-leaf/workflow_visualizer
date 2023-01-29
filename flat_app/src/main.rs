@@ -4,13 +4,17 @@ struct App;
 
 impl flat_engen::FrontEnd for App {
     fn setup(task: &mut flat_engen::Task) {
-        let _off_camera = task.container.spawn(TextBundle::new(
-            Text::new("small...".to_string()),
-            Position::new(330.0, 10.0),
-            Depth::new(0u32),
-            Color::rgb(1.0, 1.0, 1.0),
-            TextScaleAlignment::Small,
-        )).insert(Area::new(80.0, 20.0)).id();
+        let _off_camera = task
+            .container
+            .spawn(TextBundle::new(
+                Text::new("small...".to_string()),
+                Position::new(330.0, 10.0),
+                Depth::new(0u32),
+                Color::rgb(1.0, 1.0, 1.0),
+                TextScaleAlignment::Small,
+            ))
+            .insert(Area::new(80.0, 20.0))
+            .id();
         task.container.spawn(TextBundle::new(
             Text::new("medium...".to_string()),
             Position::new(10.0, 40.0),

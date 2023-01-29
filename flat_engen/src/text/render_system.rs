@@ -12,10 +12,10 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::TextScale;
-use crate::text::vertex::{GLYPH_AABB, Vertex};
-use crate::TextScaleAlignment;
+use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::visibility::ScaleFactor;
+use crate::TextScaleAlignment;
 
 fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, wgpu::BindGroup) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
@@ -238,7 +238,7 @@ pub(crate) fn create_render_groups(
         renderer.render_groups.remove(entity);
     }
     for (entity, (max, position, depth, color, atlas_block, unique_glyphs)) in
-    extraction.added_render_groups.iter()
+        extraction.added_render_groups.iter()
     {
         let render_group = RenderGroup::new(
             &canvas,
@@ -258,7 +258,11 @@ pub(crate) fn reset_extraction(mut extraction: ResMut<Extraction>) {
     *extraction = Extraction::new();
 }
 
-pub(crate) fn resize_receiver(mut renderer: ResMut<TextRenderer>, mut event_reader: EventReader<ResizeEvent>, viewport: Res<Viewport>) {
+pub(crate) fn resize_receiver(
+    mut renderer: ResMut<TextRenderer>,
+    mut event_reader: EventReader<ResizeEvent>,
+    viewport: Res<Viewport>,
+) {
     for event in event_reader.iter() {
         for (_entity, mut group) in renderer.render_groups.iter_mut() {
             group.adjust_bounds(viewport.as_section(), event.scale_factor);

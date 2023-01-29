@@ -5,7 +5,6 @@ use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
 use crate::canvas::Canvas;
-use crate::Color;
 use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
 use crate::text::atlas::Atlas;
 use crate::text::cache::Cache;
@@ -19,6 +18,7 @@ use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::Visibility;
+use crate::Color;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -165,7 +165,10 @@ impl RenderGroup {
             let area = bound.area.to_scaled(scale_factor);
             let scaled_section = ScaledSection::new(position, area);
             if let Some(intersection) = scaled_section.intersection(viewport_section) {
-                let draw_bounds = ScaledSection::new(intersection.position - viewport_section.position, intersection.area);
+                let draw_bounds = ScaledSection::new(
+                    intersection.position - viewport_section.position,
+                    intersection.area,
+                );
                 self.draw_bounds = Some(draw_bounds);
             }
         } else {

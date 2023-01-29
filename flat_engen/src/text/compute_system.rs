@@ -7,7 +7,6 @@ use bevy_ecs::prelude::{
 };
 use fontdue::layout::TextStyle;
 
-use crate::Color;
 use crate::coord::{Area, Depth, Position, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
@@ -19,6 +18,7 @@ use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::text::text::Text;
 use crate::visibility::ScaleFactor;
 use crate::visibility::Visibility;
+use crate::Color;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -28,7 +28,10 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 }
 
 pub(crate) fn calc_scale_from_alignment(
-    text: Query<(Entity, &TextScaleAlignment), (Or<(Without<TextScale>, Changed<TextScaleAlignment>)>)>,
+    text: Query<
+        (Entity, &TextScaleAlignment),
+        (Or<(Without<TextScale>, Changed<TextScaleAlignment>)>),
+    >,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
 ) {
@@ -207,9 +210,10 @@ pub(crate) fn discard_out_of_bounds(
         (&mut Placer, &Position, &Area, &mut Cache, &mut Difference),
         Or<(Changed<Placer>, Changed<Area>)>,
     >,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for (mut placer, position, area, mut cache, mut difference) in text.iter_mut() {
-        let text_section = Section::new(*position, *area);
+        let text_section = Section::new(*position, area.to_scaled(scale_factor.factor).as_area());
         placer.reset_filtered();
         let mut filter_queue = HashSet::new();
         for glyph in placer.unfiltered_placement().iter() {

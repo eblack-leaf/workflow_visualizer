@@ -5,13 +5,13 @@ use bevy_ecs::prelude::{
 };
 use winit::window::Window;
 
-use crate::{Attach, Engen, Section, Task};
 use crate::canvas::Canvas;
-use crate::coord::{Area, ScaledArea};
 use crate::coord::Position;
+use crate::coord::{Area, ScaledArea};
 use crate::extract::Extract;
 use crate::task::Stage;
 use crate::viewport::Viewport;
+use crate::{Attach, Engen, Section, Task};
 
 #[derive(Component)]
 pub(crate) struct Visibility {

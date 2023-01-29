@@ -1,8 +1,8 @@
 use bevy_ecs::bundle::Bundle;
 
-use crate::coord::{ScaledArea, ScaledPosition};
 use crate::coord::area::Area;
 use crate::coord::position::Position;
+use crate::coord::{ScaledArea, ScaledPosition};
 
 #[derive(Bundle, Copy, Clone, Default, PartialEq)]
 pub struct Section {
@@ -58,7 +58,9 @@ impl Section {
         return false;
     }
     pub fn intersection(&self, other: Self) -> Self {
-        if !self.is_overlapping(other) { return Self::default(); }
+        if !self.is_overlapping(other) {
+            return Self::default();
+        }
         let top = self.top().min(other.top());
         let bottom = self.bottom().min(other.bottom());
         let left = self.left().min(other.left());
@@ -130,7 +132,9 @@ impl ScaledSection {
         return false;
     }
     pub fn intersection(&self, other: Self) -> Option<Self> {
-        if !self.is_overlapping(other) { return None; }
+        if !self.is_overlapping(other) {
+            return None;
+        }
         let top = self.top().max(other.top());
         let bottom = self.bottom().min(other.bottom());
         let left = self.left().max(other.left());

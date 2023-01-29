@@ -6,16 +6,16 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
-use crate::{Area, Engen, render, Section, Theme};
 use crate::canvas::Canvas;
 use crate::coord::ScaledArea;
 use crate::extract::invoke_extract;
 use crate::task::{Stage, WorkloadId};
 use crate::viewport::{attach, Viewport};
 use crate::visibility::{
-    integrate_spacial_hash_changes, ScaleFactor, update_spacial_hash, visibility, Visibility,
+    integrate_spacial_hash_changes, update_spacial_hash, visibility, ScaleFactor, Visibility,
     VisibleBounds,
 };
+use crate::{render, Area, Engen, Section, Theme};
 
 pub(crate) struct Launcher {
     pub(crate) event_loop: Option<EventLoop<()>>,
@@ -37,7 +37,7 @@ impl Launcher {
     }
     #[cfg(target_arch = "wasm32")]
     async fn web_launch(mut engen: Engen) {
-        use wasm_bindgen::{JsCast, prelude::*};
+        use wasm_bindgen::{prelude::*, JsCast};
         use winit::platform::web::WindowExtWebSys;
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
@@ -252,18 +252,41 @@ impl Launcher {
             .area = ScaledArea::new(physical_size.width as f32, physical_size.height as f32)
             .to_area(scale_factor);
         engen.backend.container.insert_resource(canvas);
-        engen.frontend.container.insert_resource(ScaleFactor::new(scale_factor));
-        engen.backend.container.insert_resource(ScaleFactor::new(scale_factor));
-        let resize_event = ResizeEvent::new((physical_size.width, physical_size.height).into(), scale_factor);
+        engen
+            .frontend
+            .container
+            .insert_resource(ScaleFactor::new(scale_factor));
+        engen
+            .backend
+            .container
+            .insert_resource(ScaleFactor::new(scale_factor));
+        let resize_event = ResizeEvent::new(
+            (physical_size.width, physical_size.height).into(),
+            scale_factor,
+        );
         engen.frontend.container.send_event(resize_event);
         engen.backend.container.send_event(resize_event);
     }
 
     fn core_instrumentation(&self, engen: &mut Engen) {
-        engen.frontend.container.insert_resource(Events::<ResizeEvent>::default());
-        engen.frontend.main.schedule.add_system_to_stage(Stage::First, Events::<ResizeEvent>::update_system);
-        engen.backend.container.insert_resource(Events::<ResizeEvent>::default());
-        engen.backend.main.schedule.add_system_to_stage(Stage::First, Events::<ResizeEvent>::update_system);
+        engen
+            .frontend
+            .container
+            .insert_resource(Events::<ResizeEvent>::default());
+        engen
+            .frontend
+            .main
+            .schedule
+            .add_system_to_stage(Stage::First, Events::<ResizeEvent>::update_system);
+        engen
+            .backend
+            .container
+            .insert_resource(Events::<ResizeEvent>::default());
+        engen
+            .backend
+            .main
+            .schedule
+            .add_system_to_stage(Stage::First, Events::<ResizeEvent>::update_system);
         engen
             .backend
             .container
@@ -301,7 +324,10 @@ impl Launcher {
         engen
             .frontend
             .container
-            .insert_resource(VisibleBounds::new(Section::new((0.0, 0.0), logical_window_area)));
+            .insert_resource(VisibleBounds::new(Section::new(
+                (0.0, 0.0),
+                logical_window_area,
+            )));
         engen
             .extract_fns
             .push(Box::new(invoke_extract::<VisibleBounds>));
