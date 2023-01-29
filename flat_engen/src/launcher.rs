@@ -247,8 +247,7 @@ impl Launcher {
             .container
             .get_resource_mut::<VisibleBounds>()
             .expect("no visible bounds")
-            .section()
-            .area = GpuArea::new(physical_size.width as f32, physical_size.height as f32)
+            .adjust().area = GpuArea::new(physical_size.width as f32, physical_size.height as f32)
             .as_area(engen.window.as_ref().expect("no window").scale_factor());
         engen.backend.container.insert_resource(canvas);
     }

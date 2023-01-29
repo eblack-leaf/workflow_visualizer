@@ -89,8 +89,8 @@ impl VisibleBounds {
             dirty: false,
         }
     }
-    pub(crate) fn section(&self) -> Section {
-        self.section
+    pub(crate) fn section(&self) -> &Section {
+        &self.section
     }
     pub(crate) fn adjust(&mut self) -> &mut Section {
         self.dirty = true;
