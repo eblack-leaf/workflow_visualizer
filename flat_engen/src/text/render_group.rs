@@ -5,7 +5,8 @@ use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
 use crate::canvas::Canvas;
-use crate::coord::{Area, Depth, GpuPosition, Position, Section};
+use crate::Color;
+use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
 use crate::text::atlas::Atlas;
 use crate::text::cache::Cache;
 use crate::text::coords::Coords;
@@ -18,7 +19,6 @@ use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::Visibility;
-use crate::Color;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -42,10 +42,11 @@ impl NullBit {
 
 pub(crate) struct RenderGroup {
     pub(crate) bounds: Option<Section>,
+    pub(crate) draw_bounds: Option<ScaledSection>,
     pub(crate) bind_group: wgpu::BindGroup,
     pub(crate) text_placement: TextPlacement,
     pub(crate) text_placement_uniform: Uniform<TextPlacement>,
-    pub(crate) position_write: Option<GpuPosition>,
+    pub(crate) position_write: Option<ScaledPosition>,
     pub(crate) depth_write: Option<Depth>,
     pub(crate) color_uniform: Uniform<Color>,
     pub(crate) color_write: Option<Color>,
@@ -73,7 +74,7 @@ pub(crate) struct TextPlacement {
 }
 
 impl TextPlacement {
-    pub(crate) fn new(position: GpuPosition, depth: Depth) -> Self {
+    pub(crate) fn new(position: ScaledPosition, depth: Depth) -> Self {
         Self {
             placement: [position.x, position.y, depth.layer, 0.0],
         }
@@ -85,7 +86,7 @@ impl RenderGroup {
         canvas: &Canvas,
         bind_group_layout: &wgpu::BindGroupLayout,
         max: u32,
-        position: GpuPosition,
+        position: ScaledPosition,
         depth: Depth,
         color: Color,
         atlas_block: Area,
@@ -97,6 +98,7 @@ impl RenderGroup {
         let atlas = Atlas::new(canvas, atlas_block, unique_glyphs);
         Self {
             bounds: None,
+            draw_bounds: None,
             bind_group: canvas.device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("render group bind group"),
                 layout: bind_group_layout,
@@ -138,18 +140,37 @@ impl RenderGroup {
             atlas,
         }
     }
+    pub(crate) fn adjust_bounds(&mut self, viewport_section: ScaledSection, scale_factor: f64) {
+        if let Some(bound) = self.bounds {
+            let position = bound.position.to_scaled(scale_factor);
+            let area = bound.area.to_scaled(scale_factor);
+            let section = ScaledSection::new(position, area);
+            if let Some(intersection) = section.intersection(viewport_section) {
+                let section = ScaledSection::new(intersection.position, intersection.area);
+                self.draw_bounds = Some(section);
+            } else {
+                self.draw_bounds = None;
+            }
+        }
+    }
     pub(crate) fn set_bounds(
         &mut self,
         bounds: Option<Section>,
         scale_factor: f64,
-        viewport_offset: GpuPosition,
+        viewport_section: ScaledSection,
     ) {
         if let Some(bound) = bounds {
-            let position = bound.position.to_gpu(scale_factor) - viewport_offset;
-            let area = bound.area.to_gpu(scale_factor);
-            self.bounds = Some(Section::new(position.to_pos(1.0), area.as_area(1.0)));
+            self.bounds.replace(bound);
+            let position = bound.position.to_scaled(scale_factor);
+            let area = bound.area.to_scaled(scale_factor);
+            let scaled_section = ScaledSection::new(position, area);
+            if let Some(intersection) = scaled_section.intersection(viewport_section) {
+                let draw_bounds = ScaledSection::new(intersection.position - viewport_section.position, intersection.area);
+                self.draw_bounds = Some(draw_bounds);
+            }
         } else {
             self.bounds = None;
+            self.draw_bounds = None;
         }
     }
     pub(crate) fn count(&self) -> u32 {
@@ -203,7 +224,7 @@ impl RenderGroup {
         self.glyph_area_write.insert(index, glyph_area);
         self.coords_write.insert(index, coords);
     }
-    pub(crate) fn queue_position(&mut self, position: GpuPosition) {
+    pub(crate) fn queue_position(&mut self, position: ScaledPosition) {
         self.position_write.replace(position);
     }
     pub(crate) fn queue_depth(&mut self, depth: Depth) {

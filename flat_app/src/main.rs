@@ -1,15 +1,29 @@
-use flat_engen::{Color, Depth, Position, Text, TextBundle, TextScaleAlignment};
+use flat_engen::{Area, Color, Depth, Position, Text, TextBundle, TextScaleAlignment};
 
 struct App;
 
 impl flat_engen::FrontEnd for App {
     fn setup(task: &mut flat_engen::Task) {
+        let _off_camera = task.container.spawn(TextBundle::new(
+            Text::new("small...".to_string()),
+            Position::new(330.0, 10.0),
+            Depth::new(0u32),
+            Color::rgb(1.0, 1.0, 1.0),
+            TextScaleAlignment::Small,
+        )).insert(Area::new(80.0, 20.0)).id();
         task.container.spawn(TextBundle::new(
-            Text::new("Hello...".to_string()),
-            Position::new(10.0, 10.0),
+            Text::new("medium...".to_string()),
+            Position::new(10.0, 40.0),
             Depth::new(0u32),
             Color::rgb(1.0, 1.0, 1.0),
             TextScaleAlignment::Medium,
+        ));
+        task.container.spawn(TextBundle::new(
+            Text::new("large...".to_string()),
+            Position::new(10.0, 70.0),
+            Depth::new(0u32),
+            Color::rgb(1.0, 1.0, 1.0),
+            TextScaleAlignment::Large,
         ));
     }
 }

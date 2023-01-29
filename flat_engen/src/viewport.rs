@@ -2,11 +2,11 @@ use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{Commands, Res, Resource};
 use nalgebra::matrix;
 
+use crate::{Attach, Engen, Section};
 use crate::canvas::Canvas;
-use crate::coord::{Depth, GpuArea, GpuPosition};
+use crate::coord::{Depth, ScaledArea, ScaledPosition, ScaledSection};
 use crate::task::Stage;
 use crate::uniform::Uniform;
-use crate::{Attach, Engen, Section};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -28,7 +28,7 @@ pub(crate) struct ViewportOffset {
 }
 
 impl ViewportOffset {
-    pub(crate) fn new(position: GpuPosition) -> Self {
+    pub(crate) fn new(position: ScaledPosition) -> Self {
         Self {
             offset: [position.x, position.y, 0.0, 0.0],
         }
@@ -36,7 +36,7 @@ impl ViewportOffset {
 }
 
 impl Viewport {
-    pub(crate) fn new(device: &wgpu::Device, area: GpuArea) -> Self {
+    pub(crate) fn new(device: &wgpu::Device, area: ScaledArea) -> Self {
         let depth = 100u32.into();
         let cpu_viewport = CpuViewport::new(area, depth);
         let gpu_viewport = cpu_viewport.gpu_viewport();
@@ -66,7 +66,7 @@ impl Viewport {
                 },
             ],
         });
-        let offset = ViewportOffset::new(GpuPosition::new(0.0, 0.0));
+        let offset = ViewportOffset::new(ScaledPosition::new(0.0, 0.0));
         let offset_uniform = Uniform::new(device, offset);
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("view bind group"),
@@ -96,17 +96,18 @@ impl Viewport {
             offset_uniform,
         }
     }
-    pub(crate) fn offset_position(&self) -> GpuPosition {
-        GpuPosition::new(self.offset.offset[0], self.offset.offset[1])
+    pub(crate) fn as_section(&self) -> ScaledSection {
+        ScaledSection::new(ScaledPosition::new(self.offset.offset[0], self.offset.offset[1]),
+                           self.cpu.area)
     }
     pub(crate) fn adjust_area(&mut self, canvas: &Canvas, width: u32, height: u32) {
-        let area = GpuArea::new(width as f32, height as f32);
+        let area = ScaledArea::new(width as f32, height as f32);
         self.cpu = CpuViewport::new(area, 100u32.into());
         self.gpu = self.cpu.gpu_viewport();
         self.uniform.update(&canvas.queue, self.gpu);
         self.depth_texture = depth_texture(&canvas.device, area, self.depth_format);
     }
-    pub(crate) fn update_offset(&mut self, queue: &wgpu::Queue, offset: GpuPosition) {
+    pub(crate) fn update_offset(&mut self, queue: &wgpu::Queue, offset: ScaledPosition) {
         self.offset = ViewportOffset::new(offset);
         self.offset_uniform.update(queue, self.offset);
     }
@@ -128,7 +129,7 @@ impl Viewport {
 
 fn depth_texture(
     device: &wgpu::Device,
-    area: GpuArea,
+    area: ScaledArea,
     format: wgpu::TextureFormat,
 ) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
@@ -149,13 +150,13 @@ fn depth_texture(
 
 #[derive(Resource)]
 pub(crate) struct CpuViewport {
-    pub(crate) area: GpuArea,
+    pub(crate) area: ScaledArea,
     pub(crate) depth: Depth,
     pub(crate) orthographic: nalgebra::Matrix4<f32>,
 }
 
 impl CpuViewport {
-    pub(crate) fn new(area: GpuArea, depth: Depth) -> Self {
+    pub(crate) fn new(area: ScaledArea, depth: Depth) -> Self {
         Self {
             area,
             depth,
@@ -187,7 +188,7 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
 
 pub(crate) fn attach(canvas: Res<Canvas>, mut cmd: Commands) {
     let surface_configuration = &canvas.surface_configuration;
-    let area = GpuArea::new(
+    let area = ScaledArea::new(
         surface_configuration.width as f32,
         surface_configuration.height as f32,
     );

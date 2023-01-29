@@ -1,13 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
+use bevy_ecs::prelude::{Entity, Resource};
+
 use crate::extract::Extract;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
+use crate::Task;
 use crate::text::extraction::Extraction;
 use crate::text::render_group::RenderGroup;
 use crate::text::vertex::GLYPH_AABB;
 use crate::viewport::Viewport;
-use crate::Task;
-use bevy_ecs::prelude::{Entity, Resource};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -21,8 +22,8 @@ pub struct TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(compute: &mut Task, render: &mut Task)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = compute
             .container
@@ -66,8 +67,7 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .set_bind_group(2, &render_group.bind_group, &[]);
-                if let Some(bound) = &render_group.bounds {
-                    // adjust bound to fit 0/0 w/h of viewport
+                if let Some(bound) = &render_group.draw_bounds {
                     render_pass_handle.0.set_scissor_rect(
                         bound.position.x as u32,
                         bound.position.y as u32,
@@ -78,8 +78,10 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .draw(0..GLYPH_AABB.len() as u32, 0..render_group.count() as u32);
+                if let Some(_) = &render_group.bounds {
+                    render_pass_handle.0.set_scissor_rect(0, 0, viewport.cpu.area.width as u32, viewport.cpu.area.height as u32)
+                }
             }
         }
-        // reset scissor_rect if needed
     }
 }

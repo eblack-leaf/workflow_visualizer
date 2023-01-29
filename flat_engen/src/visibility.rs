@@ -1,20 +1,23 @@
-use crate::canvas::Canvas;
-use crate::coord::Position;
-use crate::coord::{Area, GpuArea};
-use crate::extract::Extract;
-use crate::task::Stage;
-use crate::viewport::Viewport;
-use crate::{Attach, Engen, Section, Task};
+use std::collections::HashSet;
+
 use bevy_ecs::prelude::{
     Changed, Commands, Component, Entity, Or, Query, Res, ResMut, Resource, SystemStage,
 };
-use std::collections::HashSet;
 use winit::window::Window;
+
+use crate::{Attach, Engen, Section, Task};
+use crate::canvas::Canvas;
+use crate::coord::{Area, ScaledArea};
+use crate::coord::Position;
+use crate::extract::Extract;
+use crate::task::Stage;
+use crate::viewport::Viewport;
 
 #[derive(Component)]
 pub(crate) struct Visibility {
     visible: bool,
 }
+
 impl Visibility {
     pub(crate) fn new() -> Self {
         Self { visible: false }
@@ -28,6 +31,7 @@ impl Visibility {
 pub(crate) struct ScaleFactor {
     pub(crate) factor: f64,
 }
+
 impl ScaleFactor {
     pub(crate) fn new(factor: f64) -> Self {
         Self { factor }
@@ -39,6 +43,7 @@ impl From<f64> for ScaleFactor {
         Self::new(value)
     }
 }
+
 pub(crate) fn visibility(
     mut entities: Query<
         (Entity, &Position, Option<&Area>, &mut Visibility),
@@ -75,12 +80,14 @@ pub(crate) fn visibility(
         }
     }
 }
+
 #[derive(Resource)]
 pub(crate) struct VisibleBounds {
     section: Section,
     cache: Section,
     dirty: bool,
 }
+
 impl VisibleBounds {
     pub(crate) fn new(section: Section) -> Self {
         Self {
@@ -97,17 +104,21 @@ impl VisibleBounds {
         &mut self.section
     }
 }
+
 #[derive(Resource)]
 pub(crate) struct SpacialHasher {}
+
 impl SpacialHasher {
     pub(crate) fn new() -> Self {
         Self {}
     }
 }
+
 #[derive(Component)]
 pub(crate) struct VisibilityChanged {
     pub(crate) new_visibility: bool,
 }
+
 impl VisibilityChanged {
     pub(crate) fn new(visibility: bool) -> Self {
         Self {
@@ -115,6 +126,7 @@ impl VisibilityChanged {
         }
     }
 }
+
 pub(crate) fn update_spacial_hash(mut visible_bounds: ResMut<VisibleBounds>, mut cmd: Commands) {
     if visible_bounds.dirty && visible_bounds.section != visible_bounds.cache {
         // check spacial hash of new place vs old place and
@@ -122,6 +134,7 @@ pub(crate) fn update_spacial_hash(mut visible_bounds: ResMut<VisibleBounds>, mut
         visible_bounds.cache = visible_bounds.section;
     }
 }
+
 pub(crate) fn integrate_spacial_hash_changes(
     mut text: Query<(Entity, &mut Visibility, &VisibilityChanged), ()>,
     mut cmd: Commands,
@@ -136,6 +149,7 @@ pub(crate) fn integrate_spacial_hash_changes(
         cmd.entity(entity).remove::<VisibilityChanged>();
     }
 }
+
 impl Extract for VisibleBounds {
     fn extract(frontend: &mut Task, backend: &mut Task) {
         let scale_factor = frontend
@@ -158,7 +172,7 @@ impl Extract for VisibleBounds {
                 .expect("no canvas");
             viewport.update_offset(
                 &canvas.queue,
-                visible_bounds.section.position.to_gpu(scale_factor),
+                visible_bounds.section.position.to_scaled(scale_factor),
             );
             backend.container.insert_resource(viewport);
             visible_bounds.dirty = false;

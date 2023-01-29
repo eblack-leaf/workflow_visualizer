@@ -40,10 +40,12 @@ impl From<u32> for TextScale {
         Self { scale }
     }
 }
+
 #[derive(Component, Copy, Clone)]
 pub enum TextScaleAlignment {
     Small,
     Medium,
     Large,
 }
-const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [20, 40, 60];
+
+const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [16, 22, 28];

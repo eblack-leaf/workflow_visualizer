@@ -1,16 +1,14 @@
 use bevy_ecs::prelude::IntoSystemDescriptor;
 
+use crate::{Attach, Engen};
 use crate::task::Stage;
 use crate::text::compute_system::{
     bounds_diff, calc_scale_from_alignment, color_diff, depth_diff, discard_out_of_bounds,
     letter_diff, manage_render_groups, place, position_diff, pull_differences,
     setup as frontend_setup,
 };
-use crate::text::render_system::{
-    create_render_groups, render_group_differences, reset_extraction, setup as backend_setup,
-};
+use crate::text::render_system::{create_render_groups, render_group_differences, reset_extraction, resize_receiver, setup as backend_setup};
 use crate::text::renderer::TextRenderer;
-use crate::{Attach, Engen};
 
 impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {
@@ -84,6 +82,7 @@ impl Attach for TextRenderer {
             .main
             .schedule
             .add_system_to_stage(Stage::Before, render_group_differences);
+        engen.backend.main.schedule.add_system_to_stage(Stage::Before, resize_receiver);
         engen
             .backend
             .main

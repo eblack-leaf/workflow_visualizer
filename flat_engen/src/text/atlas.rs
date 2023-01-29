@@ -4,11 +4,11 @@ use std::num::NonZeroU32;
 use fontdue::Metrics;
 
 use crate::canvas::Canvas;
+use crate::CanvasOptions;
 use crate::coord::{Area, Position, Section};
 use crate::text::coords::Coords;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, GlyphId, Key};
-use crate::CanvasOptions;
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
 pub(crate) struct Location {
@@ -154,7 +154,6 @@ impl Atlas {
         bitmap: Bitmap,
     ) {
         let position = self.position_from(location);
-        let other_copy = self.texture.as_image_copy();
         let image_copy_texture = wgpu::ImageCopyTexture {
             texture: &self.texture,
             mip_level: 0,

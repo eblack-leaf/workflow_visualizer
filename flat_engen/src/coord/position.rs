@@ -1,6 +1,8 @@
+use std::ops::Sub;
+
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
-use std::ops::Sub;
+
 #[repr(C)]
 #[derive(Pod, Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Position {
@@ -12,8 +14,8 @@ impl Position {
     pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
-    pub(crate) fn to_gpu(&self, scale_factor: f64) -> GpuPosition {
-        GpuPosition::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
+    pub fn to_scaled(&self, scale_factor: f64) -> ScaledPosition {
+        ScaledPosition::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
     }
 }
 
@@ -45,27 +47,32 @@ impl From<(usize, usize)> for Position {
 }
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone)]
-pub(crate) struct GpuPosition {
-    pub(crate) x: f32,
-    pub(crate) y: f32,
+#[derive(Component, Pod, Zeroable, Copy, Clone, Default, PartialEq)]
+pub struct ScaledPosition {
+    pub x: f32,
+    pub y: f32,
 }
 
-impl GpuPosition {
+impl ScaledPosition {
     pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
     pub fn to_pos(&self, scale_factor: f64) -> Position {
         Position::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
     }
-}
-impl Sub for GpuPosition {
-    type Output = GpuPosition;
-    fn sub(self, rhs: Self) -> Self::Output {
-        GpuPosition::new(self.x - rhs.x, self.y - rhs.y)
+    pub fn as_pos(&self) -> Position {
+        Position::new(self.x, self.y)
     }
 }
-impl From<(f32, f32)> for GpuPosition {
+
+impl Sub for ScaledPosition {
+    type Output = ScaledPosition;
+    fn sub(self, rhs: Self) -> Self::Output {
+        ScaledPosition::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl From<(f32, f32)> for ScaledPosition {
     fn from(value: (f32, f32)) -> Self {
         Self {
             x: value.0 as f32,
@@ -74,7 +81,7 @@ impl From<(f32, f32)> for GpuPosition {
     }
 }
 
-impl From<(u32, u32)> for GpuPosition {
+impl From<(u32, u32)> for ScaledPosition {
     fn from(value: (u32, u32)) -> Self {
         Self {
             x: value.0 as f32,
@@ -83,7 +90,7 @@ impl From<(u32, u32)> for GpuPosition {
     }
 }
 
-impl From<(usize, usize)> for GpuPosition {
+impl From<(usize, usize)> for ScaledPosition {
     fn from(value: (usize, usize)) -> Self {
         Self {
             x: value.0 as f32,

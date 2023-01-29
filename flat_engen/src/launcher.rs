@@ -1,21 +1,21 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, Resource, SystemStage};
 use std::rc::Rc;
 
+use bevy_ecs::prelude::{Events, IntoSystemDescriptor, Resource, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
+use crate::{Area, Engen, render, Section, Theme};
 use crate::canvas::Canvas;
-use crate::coord::GpuArea;
+use crate::coord::ScaledArea;
 use crate::extract::invoke_extract;
 use crate::task::{Stage, WorkloadId};
 use crate::viewport::{attach, Viewport};
 use crate::visibility::{
-    integrate_spacial_hash_changes, update_spacial_hash, visibility, ScaleFactor, Visibility,
+    integrate_spacial_hash_changes, ScaleFactor, update_spacial_hash, visibility, Visibility,
     VisibleBounds,
 };
-use crate::{render, Engen, Section, Theme};
 
 pub(crate) struct Launcher {
     pub(crate) event_loop: Option<EventLoop<()>>,
@@ -37,7 +37,7 @@ impl Launcher {
     }
     #[cfg(target_arch = "wasm32")]
     async fn web_launch(mut engen: Engen) {
-        use wasm_bindgen::{prelude::*, JsCast};
+        use wasm_bindgen::{JsCast, prelude::*};
         use winit::platform::web::WindowExtWebSys;
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
@@ -242,18 +242,28 @@ impl Launcher {
             .get_resource_mut::<Viewport>()
             .expect("no viewport attached")
             .adjust_area(&canvas, physical_size.width, physical_size.height);
+        let scale_factor = engen.window.as_ref().expect("no window").scale_factor();
         engen
             .frontend
             .container
             .get_resource_mut::<VisibleBounds>()
             .expect("no visible bounds")
             .adjust()
-            .area = GpuArea::new(physical_size.width as f32, physical_size.height as f32)
-            .as_area(engen.window.as_ref().expect("no window").scale_factor());
+            .area = ScaledArea::new(physical_size.width as f32, physical_size.height as f32)
+            .to_area(scale_factor);
         engen.backend.container.insert_resource(canvas);
+        engen.frontend.container.insert_resource(ScaleFactor::new(scale_factor));
+        engen.backend.container.insert_resource(ScaleFactor::new(scale_factor));
+        let resize_event = ResizeEvent::new((physical_size.width, physical_size.height).into(), scale_factor);
+        engen.frontend.container.send_event(resize_event);
+        engen.backend.container.send_event(resize_event);
     }
 
     fn core_instrumentation(&self, engen: &mut Engen) {
+        engen.frontend.container.insert_resource(Events::<ResizeEvent>::default());
+        engen.frontend.main.schedule.add_system_to_stage(Stage::First, Events::<ResizeEvent>::update_system);
+        engen.backend.container.insert_resource(Events::<ResizeEvent>::default());
+        engen.backend.main.schedule.add_system_to_stage(Stage::First, Events::<ResizeEvent>::update_system);
         engen
             .backend
             .container
@@ -283,15 +293,15 @@ impl Launcher {
             SystemStage::single(visibility),
         );
         let window_dimensions = window.inner_size();
-        let window_dimensions = GpuArea::new(
+        let window_dimensions = ScaledArea::new(
             window_dimensions.width as f32,
             window_dimensions.height as f32,
         );
-        let area = window_dimensions.as_area(window.scale_factor());
+        let logical_window_area = window_dimensions.to_area(window.scale_factor());
         engen
             .frontend
             .container
-            .insert_resource(VisibleBounds::new(Section::new((0.0, 0.0), area)));
+            .insert_resource(VisibleBounds::new(Section::new((0.0, 0.0), logical_window_area)));
         engen
             .extract_fns
             .push(Box::new(invoke_extract::<VisibleBounds>));
@@ -300,5 +310,20 @@ impl Launcher {
             .startup
             .schedule
             .add_system_to_stage(Stage::First, attach);
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct ResizeEvent {
+    pub(crate) scaled: ScaledArea,
+    pub(crate) scale_factor: f64,
+}
+
+impl ResizeEvent {
+    pub(crate) fn new(scaled: ScaledArea, scale_factor: f64) -> Self {
+        Self {
+            scaled,
+            scale_factor,
+        }
     }
 }

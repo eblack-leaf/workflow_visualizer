@@ -7,6 +7,7 @@ use bevy_ecs::prelude::{
 };
 use fontdue::layout::TextStyle;
 
+use crate::Color;
 use crate::coord::{Area, Depth, Position, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
@@ -18,7 +19,6 @@ use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::text::text::Text;
 use crate::visibility::ScaleFactor;
 use crate::visibility::Visibility;
-use crate::Color;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -26,8 +26,9 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
         TextScale::from_alignment(TextScaleAlignment::Medium, scale_factor.factor).scale,
     ));
 }
+
 pub(crate) fn calc_scale_from_alignment(
-    text: Query<(Entity, &TextScaleAlignment), (Without<TextScale>)>,
+    text: Query<(Entity, &TextScaleAlignment), (Or<(Without<TextScale>, Changed<TextScaleAlignment>)>)>,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
 ) {
@@ -38,6 +39,7 @@ pub(crate) fn calc_scale_from_alignment(
         ));
     }
 }
+
 pub(crate) fn manage_render_groups(
     mut text: Query<
         (

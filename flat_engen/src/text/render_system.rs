@@ -1,20 +1,21 @@
 use std::collections::HashMap;
 
-use crate::canvas::Canvas;
-use crate::coord::{Area, GpuPosition, Position};
-use bevy_ecs::prelude::{Commands, Res, ResMut};
+use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut};
 use wgpu::util::DeviceExt;
 
+use crate::canvas::Canvas;
+use crate::coord::{Area, Position, ScaledPosition};
+use crate::launcher::ResizeEvent;
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::TextScale;
-use crate::text::vertex::{Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex};
+use crate::TextScaleAlignment;
 use crate::viewport::Viewport;
 use crate::visibility::ScaleFactor;
-use crate::TextScaleAlignment;
 
 fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, wgpu::BindGroup) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
@@ -237,13 +238,13 @@ pub(crate) fn create_render_groups(
         renderer.render_groups.remove(entity);
     }
     for (entity, (max, position, depth, color, atlas_block, unique_glyphs)) in
-        extraction.added_render_groups.iter()
+    extraction.added_render_groups.iter()
     {
         let render_group = RenderGroup::new(
             &canvas,
             &renderer.render_group_bind_group_layout,
             *max as u32,
-            position.to_gpu(scale_factor.factor),
+            position.to_scaled(scale_factor.factor),
             *depth,
             *color,
             *atlas_block,
@@ -255,6 +256,14 @@ pub(crate) fn create_render_groups(
 
 pub(crate) fn reset_extraction(mut extraction: ResMut<Extraction>) {
     *extraction = Extraction::new();
+}
+
+pub(crate) fn resize_receiver(mut renderer: ResMut<TextRenderer>, mut event_reader: EventReader<ResizeEvent>, viewport: Res<Viewport>) {
+    for event in event_reader.iter() {
+        for (_entity, mut group) in renderer.render_groups.iter_mut() {
+            group.adjust_bounds(viewport.as_section(), event.scale_factor);
+        }
+    }
 }
 
 pub(crate) fn render_group_differences(
@@ -273,10 +282,10 @@ pub(crate) fn render_group_differences(
         render_group.set_bounds(
             difference.bounds,
             scale_factor.factor,
-            viewport.offset_position(),
+            viewport.as_section(),
         );
         if let Some(position) = difference.position {
-            render_group.queue_position(position.to_gpu(scale_factor.factor));
+            render_group.queue_position(position.to_scaled(scale_factor.factor));
         }
         if let Some(depth) = difference.depth {
             render_group.queue_depth(depth);
