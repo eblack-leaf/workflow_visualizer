@@ -31,4 +31,3 @@ impl Default for Theme {
         Theme::new(ThemeDescriptor::new())
     }
 }
-

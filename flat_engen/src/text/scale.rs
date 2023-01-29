@@ -44,6 +44,6 @@ impl From<u32> for TextScale {
 pub enum TextScaleAlignment {
     Small,
     Medium,
-    Large
+    Large,
 }
 const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [20, 40, 60];

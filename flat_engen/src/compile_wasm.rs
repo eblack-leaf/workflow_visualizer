@@ -19,7 +19,11 @@ impl CompileDescriptor {
     pub(crate) fn compile(&self) -> Result<(), bool> {
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let package = self.package.as_str();
-        let profile = self.package_options.as_str().strip_prefix("--").expect("could not strip");
+        let profile = self
+            .package_options
+            .as_str()
+            .strip_prefix("--")
+            .expect("could not strip");
         let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .ancestors()
             .nth(1)

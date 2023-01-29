@@ -1,13 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Entity, Resource};
 use crate::extract::Extract;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::extraction::Extraction;
 use crate::text::render_group::RenderGroup;
 use crate::text::vertex::GLYPH_AABB;
-use crate::Task;
 use crate::viewport::Viewport;
+use crate::Task;
+use bevy_ecs::prelude::{Entity, Resource};
 
 #[derive(Resource)]
 pub struct TextRenderer {

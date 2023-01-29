@@ -1,27 +1,30 @@
+use bevy_ecs::prelude::{IntoSystemDescriptor, Resource, SystemStage};
 use std::rc::Rc;
-use bevy_ecs::prelude::Resource;
 
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
-use crate::{Engen, render, Theme};
 use crate::canvas::Canvas;
-use crate::task::WorkloadId;
-use crate::viewport::Viewport;
-use crate::visibility::{ScaleFactor, Visibility};
+use crate::coord::GpuArea;
+use crate::extract::invoke_extract;
+use crate::task::{Stage, WorkloadId};
+use crate::viewport::{attach, Viewport};
+use crate::visibility::{
+    integrate_spacial_hash_changes, update_spacial_hash, visibility,
+    ScaleFactor, Visibility, VisibleBounds,
+};
+use crate::{render, Engen, Section, Theme};
 
 pub(crate) struct Launcher {
     pub(crate) event_loop: Option<EventLoop<()>>,
-    pub(crate) window: Option<Rc<Window>>,
 }
 
 impl Launcher {
     fn new() -> Self {
         Self {
             event_loop: Some(EventLoop::new()),
-            window: None,
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -34,7 +37,7 @@ impl Launcher {
     }
     #[cfg(target_arch = "wasm32")]
     async fn web_launch(mut engen: Engen) {
-        use wasm_bindgen::{JsCast, prelude::*};
+        use wasm_bindgen::{prelude::*, JsCast};
         use winit::platform::web::WindowExtWebSys;
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
@@ -81,8 +84,8 @@ impl Launcher {
                     .ok()
             })
             .expect("couldn't append canvas to document body");
-        Canvas::attach(&window, &mut engen).await;
-        launcher.window.replace(window);
+        engen.window.replace(window);
+        Canvas::attach(&mut engen).await;
         if let Err(error) = call_catch(&Closure::once_into_js(move || launcher.launch(engen))) {
             let is_control_flow_exception = error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
                 e.message().includes("Using exceptions for control flow", 0)
@@ -111,7 +114,7 @@ impl Launcher {
                         {
                             self.attach_native_window(&mut engen, event_loop_window_target);
                         }
-                        self.attach_core_attachments(&mut engen);
+                        self.core_instrumentation(&mut engen);
                         engen.frontend.exec(WorkloadId::Startup);
                         engen.backend.exec(WorkloadId::Startup);
                     }
@@ -121,11 +124,7 @@ impl Launcher {
                     event,
                 } => match event {
                     WindowEvent::Resized(physical_size) => {
-                        Self::resize_callback(
-                            &mut engen,
-                            physical_size,
-                            self.window.as_ref().expect("no window").scale_factor(),
-                        );
+                        Self::resize_callback(&mut engen, physical_size);
                     }
                     WindowEvent::Moved(_) => {}
                     WindowEvent::CloseRequested => {
@@ -152,8 +151,7 @@ impl Launcher {
                         scale_factor,
                         new_inner_size,
                     } => {
-                        Self::resize_callback(&mut engen, *new_inner_size, scale_factor);
-                        ScaleFactor::attach(self.window.as_ref().expect("no window"), &mut engen);
+                        Self::resize_callback(&mut engen, *new_inner_size);
                     }
                     WindowEvent::ThemeChanged(_) => {}
                     WindowEvent::Occluded(_) => {}
@@ -174,7 +172,7 @@ impl Launcher {
                     if engen.frontend.suspended() {
                         #[cfg(target_os = "android")]
                         {
-                            futures::executor::block_on(Canvas::attach(&self.window, engen));
+                            futures::executor::block_on(Canvas::attach(engen));
                         }
                         engen.frontend.activate();
                         engen.backend.activate();
@@ -200,7 +198,7 @@ impl Launcher {
                 }
                 Event::RedrawEventsCleared => {
                     if engen.backend.active() {
-                        self.window.as_ref().expect("no window").request_redraw();
+                        engen.window.as_ref().expect("no window").request_redraw();
                     }
                     if engen.frontend.can_idle() && engen.backend.can_idle() {
                         control_flow.set_wait();
@@ -215,7 +213,7 @@ impl Launcher {
     }
     #[cfg(not(target_arch = "wasm32"))]
     fn attach_native_window(
-        &mut self,
+        &self,
         mut engen: &mut Engen,
         event_loop_window_target: &EventLoopWindowTarget<()>,
     ) {
@@ -227,15 +225,11 @@ impl Launcher {
         let window = builder
             .build(event_loop_window_target)
             .expect("could not create window");
-        futures::executor::block_on(Canvas::attach(&window, &mut engen));
-        self.window.replace(Rc::new(window));
+        engen.window.replace(Rc::new(window));
+        futures::executor::block_on(Canvas::attach(&mut engen));
     }
 
-    fn resize_callback(
-        mut engen: &mut Engen,
-        physical_size: PhysicalSize<u32>,
-        _scale_factor: f64,
-    ) {
+    fn resize_callback(mut engen: &mut Engen, physical_size: PhysicalSize<u32>) {
         Canvas::get_mut(&mut engen).adjust(physical_size.width, physical_size.height);
         let canvas = engen
             .backend
@@ -248,15 +242,63 @@ impl Launcher {
             .get_resource_mut::<Viewport>()
             .expect("no viewport attached")
             .adjust_area(&canvas, physical_size.width, physical_size.height);
+        engen
+            .frontend
+            .container
+            .get_resource_mut::<VisibleBounds>()
+            .expect("no visible bounds")
+            .section()
+            .area = GpuArea::new(physical_size.width as f32, physical_size.height as f32)
+            .as_area(engen.window.as_ref().expect("no window").scale_factor());
         engen.backend.container.insert_resource(canvas);
     }
 
-    fn attach_core_attachments(&self, engen: &mut Engen) {
-        engen.attach::<Visibility>();
-        engen.attach::<Viewport>();
-        engen.backend.container.insert_resource(engen.engen_options.theme.clone());
-        ScaleFactor::attach(self.window.as_ref().expect("no window"), engen);
-        // ...
-        // visibility + orientation
+    fn core_instrumentation(&self, engen: &mut Engen) {
+        let window = engen.window.as_ref().expect("no window");
+        engen
+            .frontend
+            .container
+            .insert_resource(ScaleFactor::new(window.scale_factor()));
+        engen
+            .backend
+            .container
+            .insert_resource(ScaleFactor::new(window.scale_factor()));
+        engen.frontend.main.schedule.add_stage_before(
+            Stage::After,
+            "update spacial hash",
+            SystemStage::single(update_spacial_hash),
+        );
+        engen.frontend.main.schedule.add_stage_after(
+            "update spacial hash",
+            "integrate spacial hash",
+            SystemStage::single(integrate_spacial_hash_changes),
+        );
+        engen.frontend.main.schedule.add_stage_after(
+            "integrate spacial hash",
+            "visibility",
+            SystemStage::single(visibility),
+        );
+        let window_dimensions = window.inner_size();
+        let window_dimensions = GpuArea::new(
+            window_dimensions.width as f32,
+            window_dimensions.height as f32,
+        );
+        let area = window_dimensions.as_area(window.scale_factor());
+        engen
+            .frontend
+            .container
+            .insert_resource(VisibleBounds::new(Section::new((0.0, 0.0), area)));
+        engen
+            .extract_fns
+            .push(Box::new(invoke_extract::<VisibleBounds>));
+        engen
+            .backend
+            .startup
+            .schedule
+            .add_system_to_stage(Stage::First, attach);
+        engen
+            .backend
+            .container
+            .insert_resource(engen.engen_options.theme.clone());
     }
 }

@@ -2,9 +2,12 @@ use std::collections::HashSet;
 
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without};
+use bevy_ecs::prelude::{
+    Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without,
+};
 use fontdue::layout::TextStyle;
 
+use crate::coord::{Area, Depth, Position, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::extraction::Extraction;
@@ -13,18 +16,24 @@ use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::text::text::Text;
+use crate::visibility::ScaleFactor;
 use crate::visibility::Visibility;
 use crate::Color;
-use crate::coord::{Area, Depth, Position, Section};
-use crate::visibility::ScaleFactor;
 
 pub(crate) fn setup(mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(MonoSpacedFont::jet_brains_mono(30u32));
 }
-pub(crate) fn calc_scale_from_alignment(text: Query<(Entity, &TextScaleAlignment), (Without<TextScale>)>, scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
+pub(crate) fn calc_scale_from_alignment(
+    text: Query<(Entity, &TextScaleAlignment), (Without<TextScale>)>,
+    scale_factor: Res<ScaleFactor>,
+    mut cmd: Commands,
+) {
     for (entity, text_scale_alignment) in text.iter() {
-        cmd.entity(entity).insert(TextScale::from_alignment(*text_scale_alignment, scale_factor.factor));
+        cmd.entity(entity).insert(TextScale::from_alignment(
+            *text_scale_alignment,
+            scale_factor.factor,
+        ));
     }
 }
 pub(crate) fn manage_render_groups(

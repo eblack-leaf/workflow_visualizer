@@ -1,6 +1,6 @@
-use std::ops::Sub;
-use bytemuck::{Pod, Zeroable};
 use bevy_ecs::component::Component;
+use bytemuck::{Pod, Zeroable};
+use std::ops::Sub;
 #[repr(C)]
 #[derive(Pod, Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Position {
@@ -55,8 +55,8 @@ impl GpuPosition {
     pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
-    pub fn as_pos(&self) -> Position {
-        Position::new(self.x, self.y)
+    pub fn to_pos(&self, scale_factor: f64) -> Position {
+        Position::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
     }
 }
 impl Sub for GpuPosition {

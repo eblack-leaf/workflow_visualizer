@@ -5,8 +5,8 @@ use fontdue::layout::{CoordinateSystem, GlyphPosition, TextStyle};
 
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::Key;
-use crate::{Text};
 use crate::text::scale::TextScale;
+use crate::Text;
 
 #[derive(Component)]
 pub(crate) struct Placer {

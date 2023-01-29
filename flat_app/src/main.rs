@@ -4,7 +4,13 @@ struct App;
 
 impl flat_engen::FrontEnd for App {
     fn setup(task: &mut flat_engen::Task) {
-        task.container.spawn(TextBundle::new(Text::new("ah".to_string()), Position::new(10.0, 10.0), Depth::new(0u32), Color::rgb(1.0, 1.0, 1.0), TextScaleAlignment::Medium));
+        task.container.spawn(TextBundle::new(
+            Text::new("Hello...".to_string()),
+            Position::new(10.0, 10.0),
+            Depth::new(0u32),
+            Color::rgb(1.0, 1.0, 1.0),
+            TextScaleAlignment::Medium,
+        ));
     }
 }
 
@@ -16,8 +22,11 @@ fn main() {
             if param.starts_with("web") {
                 let compile_descriptor =
                     flat_engen::CompileDescriptor::new("flat_app", "--debug", "flat_app_web_build");
-                let server = flat_engen::Engen::compile_wasm_to(compile_descriptor).expect("could not compile");
-                if param == "web-compile" { return; }
+                let server = flat_engen::Engen::compile_wasm_to(compile_descriptor)
+                    .expect("could not compile");
+                if param == "web-compile" {
+                    return;
+                }
                 if param == "web-serve" {
                     server.serve_at(([0, 0, 0, 0], 3030));
                     return;

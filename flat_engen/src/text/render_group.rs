@@ -4,6 +4,8 @@ use bevy_ecs::prelude::{Added, Changed, Entity, Or, Query, RemovedComponents, Re
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
+use crate::canvas::Canvas;
+use crate::coord::{Area, Depth, GpuPosition, Position, Section};
 use crate::text::atlas::Atlas;
 use crate::text::cache::Cache;
 use crate::text::coords::Coords;
@@ -17,8 +19,6 @@ use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::Visibility;
 use crate::Color;
-use crate::canvas::Canvas;
-use crate::coord::{Area, Depth, GpuPosition, Position, Section};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -138,11 +138,16 @@ impl RenderGroup {
             atlas,
         }
     }
-    pub(crate) fn set_bounds(&mut self, bounds: Option<Section>, scale_factor: f64, viewport_offset: GpuPosition) {
+    pub(crate) fn set_bounds(
+        &mut self,
+        bounds: Option<Section>,
+        scale_factor: f64,
+        viewport_offset: GpuPosition,
+    ) {
         if let Some(bound) = bounds {
             let position = bound.position.to_gpu(scale_factor) - viewport_offset;
             let area = bound.area.to_gpu(scale_factor);
-            self.bounds = Some(Section::new(position.as_pos(), area.as_area()));
+            self.bounds = Some(Section::new(position.to_pos(1.0), area.as_area(1.0)));
         } else {
             self.bounds = None;
         }

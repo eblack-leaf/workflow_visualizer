@@ -1,8 +1,8 @@
 use std::ops::Deref;
 
+use crate::coord::Area;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
-use crate::coord::Area;
 
 use crate::text::scale::TextScale;
 

@@ -145,9 +145,9 @@ impl Canvas {
         self.surface
             .configure(&self.device, &self.surface_configuration);
     }
-    pub(crate) async fn attach(window: &Window, engen: &mut Engen) {
+    pub(crate) async fn attach(engen: &mut Engen) {
         let options = engen.engen_options.canvas_options.clone();
-        let canvas = Canvas::new(window, options).await;
+        let canvas = Canvas::new(engen.window.as_ref().expect("no window"), options).await;
         engen.backend.container.insert_resource(canvas);
     }
     pub(crate) fn get(engen: &Engen) -> &Canvas {

@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
+use crate::coord::{Depth, Position};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::visibility::Visibility;
 use crate::Color;
-use crate::coord::{Depth, Position};
 
 #[derive(Component)]
 pub struct Text {

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["engen", "flat_engen", "flat_app"]
+members = ["flat_engen", "flat_app"]
 #[profile.dev]
 #opt-level = 1
 [profile.release]

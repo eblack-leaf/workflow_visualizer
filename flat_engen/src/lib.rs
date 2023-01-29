@@ -1,21 +1,23 @@
 use std::net::SocketAddr;
+use std::rc::Rc;
 
 use bevy_ecs::prelude::Resource;
+use winit::window::Window;
 
+pub use crate::color::Color;
+pub use crate::coord::{Area, Depth, Position, Section};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::launcher::Launcher;
+use crate::render::{invoke_render, Render, RenderPhase};
+pub use crate::text::{Text, TextBundle, TextRenderer, TextScaleAlignment};
+pub(crate) use crate::visibility::Visibility;
 pub use canvas::CanvasOptions;
 pub use compile_wasm::CompileDescriptor;
 use render::RenderFns;
 pub use server::Server;
 pub use task::Task;
 pub use theme::Theme;
-pub use crate::color::Color;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
-use crate::launcher::Launcher;
-use crate::render::{invoke_render, Render, RenderPhase};
-pub(crate) use crate::visibility::Visibility;
-pub use crate::text::{Text, TextBundle, TextRenderer, TextScaleAlignment};
 pub(crate) use visibility::ScaleFactor;
-pub use crate::coord::{Position, Area, Depth, Section};
 
 mod canvas;
 mod color;
@@ -27,10 +29,10 @@ mod orientation;
 mod render;
 mod server;
 mod task;
+mod text;
 mod theme;
 mod uniform;
 mod viewport;
-mod text;
 mod visibility;
 
 pub struct EngenDescriptor {
@@ -91,6 +93,7 @@ pub struct Engen {
     pub(crate) backend: Task,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
+    pub(crate) window: Option<Rc<Window>>,
 }
 
 impl Engen {
@@ -101,6 +104,7 @@ impl Engen {
             backend: Task::new(),
             render_fns: (RenderFns::new(), RenderFns::new()),
             extract_fns: ExtractFns::new(),
+            window: None,
         }
     }
     pub(crate) fn attach<Attachment: Attach>(&mut self) {

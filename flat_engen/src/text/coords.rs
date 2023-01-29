@@ -1,5 +1,5 @@
-use bytemuck::{Pod, Zeroable};
 use crate::coord::Section;
+use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]

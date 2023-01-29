@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Res, ResMut};
-use wgpu::util::DeviceExt;
 use crate::canvas::Canvas;
 use crate::coord::{Area, GpuPosition, Position};
+use bevy_ecs::prelude::{Commands, Res, ResMut};
+use wgpu::util::DeviceExt;
 
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
-use crate::text::vertex::{GLYPH_AABB, Vertex};
-use crate::visibility::ScaleFactor;
+use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
+use crate::visibility::ScaleFactor;
 
 fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, wgpu::BindGroup) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
@@ -215,7 +215,7 @@ pub(crate) fn setup(canvas: Res<Canvas>, viewport: Res<Viewport>, mut cmd: Comma
         sampler_bind_group,
     });
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(40u32));// should pull from alignment medium
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(40u32)); // should pull from alignment medium
 }
 
 pub(crate) fn create_render_groups(
@@ -261,7 +261,11 @@ pub(crate) fn render_group_differences(
             .render_groups
             .get_mut(entity)
             .expect(format!("no render group for {:?}", *entity).as_str());
-        render_group.set_bounds(difference.bounds, scale_factor.factor, viewport.offset_position());
+        render_group.set_bounds(
+            difference.bounds,
+            scale_factor.factor,
+            viewport.offset_position(),
+        );
         if let Some(position) = difference.position {
             render_group.queue_position(position.to_gpu(scale_factor.factor));
         }

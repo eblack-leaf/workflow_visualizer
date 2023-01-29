@@ -12,7 +12,10 @@ impl Area {
         Self { width, height }
     }
     pub(crate) fn to_gpu(&self, scale_factor: f64) -> GpuArea {
-        GpuArea::new(self.width * scale_factor as f32, self.height * scale_factor as f32)
+        GpuArea::new(
+            self.width * scale_factor as f32,
+            self.height * scale_factor as f32,
+        )
     }
 }
 
@@ -51,8 +54,11 @@ pub(crate) struct GpuArea {
 }
 
 impl GpuArea {
-    pub(crate) fn as_area(&self) -> Area {
-        Area::new(self.width, self.height)
+    pub(crate) fn as_area(&self, scale_factor: f64) -> Area {
+        Area::new(
+            self.width / scale_factor as f32,
+            self.height / scale_factor as f32,
+        )
     }
     pub fn new(width: f32, height: f32) -> Self {
         Self { width, height }

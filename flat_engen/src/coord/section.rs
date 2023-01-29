@@ -1,8 +1,8 @@
-use bevy_ecs::bundle::Bundle;
 use crate::coord::area::Area;
 use crate::coord::position::Position;
+use bevy_ecs::bundle::Bundle;
 
-#[derive(Bundle, Copy, Clone, Default)]
+#[derive(Bundle, Copy, Clone, Default, PartialEq)]
 pub struct Section {
     pub position: Position,
     pub area: Area,
@@ -38,6 +38,16 @@ impl Section {
             && self.right() > other.left()
             && self.top() < other.bottom()
             && self.bottom() > other.top()
+    }
+    pub fn contains(&self, position: Position) -> bool {
+        if position.x > self.left()
+            && position.x < self.right()
+            && position.y > self.top()
+            && position.y < self.bottom()
+        {
+            return true;
+        }
+        return false;
     }
 }
 

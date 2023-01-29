@@ -3,10 +3,10 @@ use bevy_ecs::prelude::{Commands, Res, Resource};
 use nalgebra::matrix;
 
 use crate::canvas::Canvas;
+use crate::coord::{Depth, GpuArea, GpuPosition};
 use crate::task::Stage;
 use crate::uniform::Uniform;
-use crate::{Attach, Engen};
-use crate::coord::{Depth, GpuArea, GpuPosition};
+use crate::{Attach, Engen, Section};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -192,14 +192,4 @@ pub(crate) fn attach(canvas: Res<Canvas>, mut cmd: Commands) {
         surface_configuration.height as f32,
     );
     cmd.insert_resource(Viewport::new(&canvas.device, area));
-}
-
-impl Attach for Viewport {
-    fn attach(engen: &mut Engen) {
-        engen
-            .backend
-            .startup
-            .schedule
-            .add_system_to_stage(Stage::First, attach);
-    }
 }
