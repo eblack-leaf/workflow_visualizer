@@ -10,9 +10,11 @@ use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
+use crate::text::scale::TextScale;
 use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::visibility::ScaleFactor;
+use crate::TextScaleAlignment;
 
 fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, wgpu::BindGroup) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
@@ -197,7 +199,12 @@ fn vertex_buffer(canvas: &Canvas) -> wgpu::Buffer {
         })
 }
 
-pub(crate) fn setup(canvas: Res<Canvas>, viewport: Res<Viewport>, mut cmd: Commands) {
+pub(crate) fn setup(
+    canvas: Res<Canvas>,
+    viewport: Res<Viewport>,
+    scale_factor: Res<ScaleFactor>,
+    mut cmd: Commands,
+) {
     let (sampler_bind_group_layout, sampler, sampler_bind_group) = sampler_resources(&canvas);
     let render_group_bind_group_layout = render_group_resources(&canvas);
     let pipeline = pipeline(
@@ -215,7 +222,9 @@ pub(crate) fn setup(canvas: Res<Canvas>, viewport: Res<Viewport>, mut cmd: Comma
         sampler_bind_group,
     });
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(40u32)); // should pull from alignment medium
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
+        TextScale::from_alignment(TextScaleAlignment::Medium, scale_factor.factor).scale,
+    ));
 }
 
 pub(crate) fn create_render_groups(

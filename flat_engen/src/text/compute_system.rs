@@ -20,9 +20,11 @@ use crate::visibility::ScaleFactor;
 use crate::visibility::Visibility;
 use crate::Color;
 
-pub(crate) fn setup(mut cmd: Commands) {
+pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(30u32));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
+        TextScale::from_alignment(TextScaleAlignment::Medium, scale_factor.factor).scale,
+    ));
 }
 pub(crate) fn calc_scale_from_alignment(
     text: Query<(Entity, &TextScaleAlignment), (Without<TextScale>)>,

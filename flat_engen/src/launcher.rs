@@ -12,8 +12,8 @@ use crate::extract::invoke_extract;
 use crate::task::{Stage, WorkloadId};
 use crate::viewport::{attach, Viewport};
 use crate::visibility::{
-    integrate_spacial_hash_changes, update_spacial_hash, visibility,
-    ScaleFactor, Visibility, VisibleBounds,
+    integrate_spacial_hash_changes, update_spacial_hash, visibility, ScaleFactor, Visibility,
+    VisibleBounds,
 };
 use crate::{render, Engen, Section, Theme};
 
@@ -247,12 +247,17 @@ impl Launcher {
             .container
             .get_resource_mut::<VisibleBounds>()
             .expect("no visible bounds")
-            .adjust().area = GpuArea::new(physical_size.width as f32, physical_size.height as f32)
+            .adjust()
+            .area = GpuArea::new(physical_size.width as f32, physical_size.height as f32)
             .as_area(engen.window.as_ref().expect("no window").scale_factor());
         engen.backend.container.insert_resource(canvas);
     }
 
     fn core_instrumentation(&self, engen: &mut Engen) {
+        engen
+            .backend
+            .container
+            .insert_resource(engen.engen_options.theme.clone());
         let window = engen.window.as_ref().expect("no window");
         engen
             .frontend
@@ -295,9 +300,5 @@ impl Launcher {
             .startup
             .schedule
             .add_system_to_stage(Stage::First, attach);
-        engen
-            .backend
-            .container
-            .insert_resource(engen.engen_options.theme.clone());
     }
 }
