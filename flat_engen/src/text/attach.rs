@@ -1,5 +1,6 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, SystemStage};
+use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemStage};
 
+use crate::{Attach, Engen};
 use crate::task::Stage;
 use crate::text::compute_system::{
     bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
@@ -11,7 +12,13 @@ use crate::text::render_system::{
     setup as backend_setup,
 };
 use crate::text::renderer::TextRenderer;
-use crate::{Attach, Engen};
+use crate::visibility::VisibilityStages;
+
+#[derive(StageLabel)]
+pub enum TextStages {
+    CalcTextScale,
+    CalcArea,
+}
 
 impl Attach for TextRenderer {
     fn attach(engen: &mut Engen) {
@@ -21,13 +28,13 @@ impl Attach for TextRenderer {
             .schedule
             .add_system_to_stage(Stage::Before, frontend_setup);
         engen.frontend.main.schedule.add_stage_before(
-            Stage::Before,
-            "calc scale alignment",
+            VisibilityStages::UpdateSpacialHash,
+            TextStages::CalcTextScale,
             SystemStage::single(calc_scale_from_alignment),
         );
         engen.frontend.main.schedule.add_stage_after(
-            Stage::Before,
-            "calc area",
+            TextStages::CalcTextScale,
+            TextStages::CalcArea,
             SystemStage::single(calc_area),
         );
         engen

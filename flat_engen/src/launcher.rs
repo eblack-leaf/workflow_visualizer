@@ -1,21 +1,18 @@
 use std::rc::Rc;
 
-use bevy_ecs::prelude::{Events, IntoSystemDescriptor, Resource, SystemStage};
+use bevy_ecs::prelude::{Events, IntoSystemDescriptor, Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
+use crate::{Area, Engen, render, Section, Theme};
 use crate::canvas::Canvas;
 use crate::coord::ScaledArea;
 use crate::extract::invoke_extract;
 use crate::task::{Stage, WorkloadId};
 use crate::viewport::{attach, Viewport};
-use crate::visibility::{
-    calc_visible_area, calc_visible_area_on_resize, integrate_spacial_hash_changes,
-    update_spacial_hash, visibility, ScaleFactor, Visibility, VisibleBounds,
-};
-use crate::{render, Area, Engen, Section, Theme};
+use crate::visibility::{calc_visible_area, calc_visible_area_on_resize, integrate_spacial_hash_changes, ScaleFactor, update_spacial_hash, visibility, Visibility, VisibilityStages, VisibleBounds};
 
 pub(crate) struct Launcher {
     pub(crate) event_loop: Option<EventLoop<()>>,
@@ -37,7 +34,7 @@ impl Launcher {
     }
     #[cfg(target_arch = "wasm32")]
     async fn web_launch(mut engen: Engen) {
-        use wasm_bindgen::{prelude::*, JsCast};
+        use wasm_bindgen::{JsCast, prelude::*};
         use winit::platform::web::WindowExtWebSys;
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
@@ -115,6 +112,7 @@ impl Launcher {
                             self.attach_native_window(&mut engen, event_loop_window_target);
                         }
                         self.core_instrumentation(&mut engen);
+                        self.integrate_attachment_queue(&mut engen);
                         engen.frontend.exec(WorkloadId::Startup);
                         engen.backend.exec(WorkloadId::Startup);
                     }
@@ -267,7 +265,12 @@ impl Launcher {
         engen.frontend.container.send_event(resize_event);
         engen.backend.container.send_event(resize_event);
     }
-
+    fn integrate_attachment_queue(&self, engen: &mut Engen) {
+        let attachment_queue = engen.attachment_queue.drain(..).collect::<Vec<Box<fn(&mut Engen)>>>();
+        for attach_to in attachment_queue {
+            attach_to(engen);
+        }
+    }
     fn core_instrumentation(&self, engen: &mut Engen) {
         engen
             .frontend
@@ -302,22 +305,22 @@ impl Launcher {
             .insert_resource(ScaleFactor::new(window.scale_factor()));
         engen.frontend.main.schedule.add_stage_before(
             Stage::After,
-            "update spacial hash",
+            VisibilityStages::UpdateSpacialHash,
             SystemStage::single(update_spacial_hash),
         );
         engen.frontend.main.schedule.add_stage_after(
-            "update spacial hash",
-            "integrate spacial hash",
+            VisibilityStages::UpdateSpacialHash,
+            VisibilityStages::IntegrateSpacialHashChanges,
             SystemStage::single(integrate_spacial_hash_changes),
         );
         engen.frontend.main.schedule.add_stage_after(
-            "integrate spacial hash",
-            "visibility",
+            VisibilityStages::IntegrateSpacialHashChanges,
+            VisibilityStages::Visibility,
             SystemStage::single(visibility),
         );
         engen.frontend.main.schedule.add_stage_after(
-            "visibility",
-            "calc visible area",
+            VisibilityStages::Visibility,
+            VisibilityStages::VisibleArea,
             SystemStage::parallel()
                 .with_system(calc_visible_area)
                 .with_system(calc_visible_area_on_resize),

@@ -14,7 +14,7 @@ pub(crate) use visibility::ScaleFactor;
 
 pub use crate::color::Color;
 pub use crate::coord::{Area, Depth, Position, Section};
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::launcher::Launcher;
 use crate::render::{invoke_render, Render, RenderPhase};
 pub use crate::text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
@@ -95,6 +95,7 @@ pub struct Engen {
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
     pub(crate) window: Option<Rc<Window>>,
+    attachment_queue: Vec<Box<fn(&mut Engen)>>,
 }
 
 impl Engen {
@@ -106,6 +107,7 @@ impl Engen {
             render_fns: (RenderFns::new(), RenderFns::new()),
             extract_fns: ExtractFns::new(),
             window: None,
+            attachment_queue: vec![],
         }
     }
     pub(crate) fn attach<Attachment: Attach>(&mut self) {
@@ -114,7 +116,7 @@ impl Engen {
     pub fn add_render_attachment<RenderAttachment: Attach + Render + Extract + Resource>(
         &mut self,
     ) {
-        RenderAttachment::attach(self);
+        self.attachment_queue.push(Box::new(RenderAttachment::attach));
         match RenderAttachment::phase() {
             RenderPhase::Opaque => self
                 .render_fns
