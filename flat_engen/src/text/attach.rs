@@ -1,10 +1,10 @@
-use bevy_ecs::prelude::IntoSystemDescriptor;
+use bevy_ecs::prelude::{IntoSystemDescriptor, SystemStage};
 
 use crate::task::Stage;
 use crate::text::compute_system::{
-    bounds_diff, calc_scale_from_alignment, color_diff, depth_diff, discard_out_of_bounds,
-    letter_diff, manage_render_groups, place, position_diff, pull_differences,
-    setup as frontend_setup,
+    bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
+    discard_out_of_bounds, letter_diff, manage_render_groups, place, position_diff,
+    pull_differences, setup as frontend_setup,
 };
 use crate::text::render_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
@@ -20,11 +20,16 @@ impl Attach for TextRenderer {
             .startup
             .schedule
             .add_system_to_stage(Stage::Before, frontend_setup);
-        engen
-            .frontend
-            .main
-            .schedule
-            .add_system_to_stage(Stage::Before, calc_scale_from_alignment);
+        engen.frontend.main.schedule.add_stage_before(
+            Stage::Before,
+            "calc scale alignment",
+            SystemStage::single(calc_scale_from_alignment),
+        );
+        engen.frontend.main.schedule.add_stage_after(
+            Stage::Before,
+            "calc area",
+            SystemStage::single(calc_area),
+        );
         engen
             .frontend
             .main

@@ -7,17 +7,18 @@ use bevy_ecs::prelude::{
 };
 use fontdue::layout::TextStyle;
 
-use crate::coord::{Area, Depth, Position, Section};
+use crate::coord::{Area, Depth, Position, ScaledSection, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
+use crate::text::render_group::TextBound;
 use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::text::text::Text;
-use crate::visibility::ScaleFactor;
 use crate::visibility::Visibility;
+use crate::visibility::{ScaleFactor, VisibleSection};
 use crate::Color;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
@@ -50,9 +51,10 @@ pub(crate) fn manage_render_groups(
             &Text,
             &TextScale,
             &Position,
+            &VisibleSection,
+            Option<&TextBound>,
             &Depth,
             &Color,
-            Option<&Area>,
             &mut Cache,
             &mut Difference,
             &Visibility,
@@ -68,9 +70,10 @@ pub(crate) fn manage_render_groups(
         text,
         scale,
         position,
+        visible_area,
+        maybe_bound,
         depth,
         color,
-        maybe_area,
         mut cache,
         mut difference,
         visibility,
@@ -78,12 +81,12 @@ pub(crate) fn manage_render_groups(
     {
         if visibility.visible() {
             *difference = Difference::new();
-            *cache = Cache::new(*position, *depth, *color);
+            *cache = Cache::new(*position, *depth, *color, *visible_area);
             difference.position.replace(*position);
             difference.depth.replace(*depth);
             difference.color.replace(*color);
-            if let Some(bounds) = maybe_area {
-                let section = Section::new(*position, *bounds);
+            if let Some(bounds) = maybe_bound {
+                let section = Section::new(*position, bounds.area);
                 cache.bound.replace(section);
                 difference.bounds.replace(section);
             }
@@ -92,7 +95,15 @@ pub(crate) fn manage_render_groups(
             let atlas_block = font.character_dimensions('a', scale.px());
             extraction.added_render_groups.insert(
                 entity,
-                (max, *position, *depth, *color, atlas_block, unique_glyphs),
+                (
+                    max,
+                    *position,
+                    *visible_area,
+                    *depth,
+                    *color,
+                    atlas_block,
+                    unique_glyphs,
+                ),
             );
         } else {
             extraction.removed_render_groups.insert(entity);
@@ -106,7 +117,7 @@ pub(crate) fn manage_render_groups(
 pub(crate) fn letter_diff(
     mut text: Query<
         (&TextScale, &mut Placer, &mut Cache, &mut Difference),
-        Or<(Changed<Placer>, Changed<Area>)>,
+        Or<(Changed<Placer>, Changed<TextBound>, Changed<VisibleSection>)>,
     >,
 ) {
     for (scale, mut placer, mut cache, mut difference) in text.iter_mut() {
@@ -146,14 +157,46 @@ pub(crate) fn letter_diff(
     }
 }
 
-pub(crate) fn bounds_diff(
-    mut text: Query<(&Position, Option<&Area>, &mut Cache, &mut Difference), Changed<Area>>,
+pub(crate) fn calc_area(
+    text: Query<(Entity, &Text, &TextScale), (Changed<Text>)>,
+    mut cmd: Commands,
+    font: Res<MonoSpacedFont>,
 ) {
-    for (position, maybe_area, mut cache, mut difference) in text.iter_mut() {
-        if let Some(area) = maybe_area {
-            let section = Section::new(*position, *area);
-            difference.bounds.replace(section);
-            cache.bound.replace(section);
+    for (entity, text, text_scale) in text.iter() {
+        let dimensions = font.character_dimensions('A', text_scale.px());
+        let mut max_width_letters = 0;
+        let mut lines = 0;
+        for line in text.string().lines() {
+            max_width_letters = max_width_letters.max(line.len());
+            lines += 1;
+        }
+        let line_height_advancement = 3f32;
+        let area = Area::new(
+            dimensions.width * max_width_letters.max(1) as f32,
+            dimensions.height + line_height_advancement * lines.max(1) as f32,
+        );
+        cmd.entity(entity).insert(area);
+    }
+}
+
+pub(crate) fn bounds_diff(
+    mut text: Query<
+        (&Position, Option<&TextBound>, &mut Cache, &mut Difference),
+        Changed<TextBound>,
+    >,
+) {
+    for (position, maybe_bound, mut cache, mut difference) in text.iter_mut() {
+        if let Some(bound) = maybe_bound {
+            let section = Section::new(*position, bound.area);
+            if let Some(cached_bound) = cache.bound {
+                if cached_bound != section {
+                    difference.bounds.replace(section);
+                    cache.bound.replace(section);
+                }
+            } else {
+                difference.bounds.replace(section);
+                cache.bound.replace(section);
+            }
         } else if cache.bound.is_some() {
             difference.bounds = None;
             cache.bound.take();
@@ -167,6 +210,7 @@ pub(crate) fn depth_diff(
     for (depth, mut cache, mut difference) in text.iter_mut() {
         if *depth != cache.depth {
             difference.depth.replace(*depth);
+            cache.depth = *depth;
         }
     }
 }
@@ -177,6 +221,7 @@ pub(crate) fn position_diff(
     for (position, mut cache, mut difference) in text.iter_mut() {
         if *position != cache.position {
             difference.position.replace(*position);
+            cache.position = *position;
         }
     }
 }
@@ -187,6 +232,7 @@ pub(crate) fn color_diff(
     for (color, mut cache, mut difference) in text.iter_mut() {
         if *color != cache.color {
             difference.color.replace(*color);
+            cache.color = *color;
         }
     }
 }
@@ -205,28 +251,55 @@ pub(crate) fn place(
     }
 }
 
+pub(crate) fn visible_area_diff(
+    mut text: Query<
+        (Entity, &VisibleSection, &mut Difference, &mut Cache),
+        (Changed<VisibleSection>, With<Text>),
+    >,
+) {
+    for (entity, visible_section, mut difference, mut cache) in text.iter_mut() {
+        if cache.visible_section.section != visible_section.section {
+            difference.visible_section.replace(*visible_section);
+            cache.visible_section = *visible_section;
+        }
+    }
+}
+
 pub(crate) fn discard_out_of_bounds(
     mut text: Query<
-        (&mut Placer, &Position, &Area, &mut Cache, &mut Difference),
-        Or<(Changed<Placer>, Changed<Area>)>,
+        (
+            &mut Placer,
+            &Position,
+            &TextBound,
+            &VisibleSection,
+            &mut Cache,
+            &mut Difference,
+        ),
+        Or<(Changed<Placer>, Changed<VisibleSection>, Changed<TextBound>)>,
     >,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, position, area, mut cache, mut difference) in text.iter_mut() {
-        let text_section = Section::new(*position, area.to_scaled(scale_factor.factor).as_area());
+    for (mut placer, position, bound, visible_section, mut cache, mut difference) in text.iter_mut()
+    {
+        let text_section = visible_section.section.intersection(ScaledSection::new(
+            position.to_scaled(scale_factor.factor),
+            bound.area.to_scaled(scale_factor.factor),
+        ));
         placer.reset_filtered();
-        let mut filter_queue = HashSet::new();
-        for glyph in placer.unfiltered_placement().iter() {
-            let key = Key::new(glyph.byte_offset as u32);
-            let glyph_section = Section::new(
-                (position.x + glyph.x, position.y + glyph.y),
-                (glyph.width, glyph.height),
-            );
-            if !text_section.is_overlapping(glyph_section) {
-                filter_queue.insert(key);
+        if let Some(section) = text_section {
+            let mut filter_queue = HashSet::new();
+            for glyph in placer.unfiltered_placement().iter() {
+                let key = Key::new(glyph.byte_offset as u32);
+                let glyph_section = ScaledSection::new(
+                    (section.position.x + glyph.x, section.position.y + glyph.y),
+                    (glyph.width, glyph.height),
+                );
+                if !section.is_overlapping(glyph_section) {
+                    filter_queue.insert(key);
+                }
             }
+            placer.filter_placement(filter_queue);
         }
-        placer.filter_placement(filter_queue);
     }
 }
 

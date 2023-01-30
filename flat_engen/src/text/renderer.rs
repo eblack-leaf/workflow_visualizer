@@ -67,7 +67,7 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .set_bind_group(2, &render_group.bind_group, &[]);
-                if let Some(bound) = &render_group.draw_bounds {
+                if let Some(bound) = &render_group.draw_section {
                     render_pass_handle.0.set_scissor_rect(
                         bound.position.x as u32,
                         bound.position.y as u32,
@@ -78,7 +78,7 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .draw(0..GLYPH_AABB.len() as u32, 0..render_group.count() as u32);
-                if let Some(_) = &render_group.bounds {
+                if let Some(_) = &render_group.draw_section {
                     render_pass_handle.0.set_scissor_rect(
                         0,
                         0,

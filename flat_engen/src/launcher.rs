@@ -12,8 +12,8 @@ use crate::extract::invoke_extract;
 use crate::task::{Stage, WorkloadId};
 use crate::viewport::{attach, Viewport};
 use crate::visibility::{
-    integrate_spacial_hash_changes, update_spacial_hash, visibility, ScaleFactor, Visibility,
-    VisibleBounds,
+    calc_visible_area, calc_visible_area_on_resize, integrate_spacial_hash_changes,
+    update_spacial_hash, visibility, ScaleFactor, Visibility, VisibleBounds,
 };
 use crate::{render, Area, Engen, Section, Theme};
 
@@ -314,6 +314,13 @@ impl Launcher {
             "integrate spacial hash",
             "visibility",
             SystemStage::single(visibility),
+        );
+        engen.frontend.main.schedule.add_stage_after(
+            "visibility",
+            "calc visible area",
+            SystemStage::parallel()
+                .with_system(calc_visible_area)
+                .with_system(calc_visible_area_on_resize),
         );
         let window_dimensions = window.inner_size();
         let window_dimensions = ScaledArea::new(

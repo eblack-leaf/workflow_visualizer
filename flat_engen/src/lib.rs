@@ -4,13 +4,6 @@ use std::rc::Rc;
 use bevy_ecs::prelude::Resource;
 use winit::window::Window;
 
-pub use crate::color::Color;
-pub use crate::coord::{Area, Depth, Position, Section};
-use crate::extract::{invoke_extract, Extract, ExtractFns};
-use crate::launcher::Launcher;
-use crate::render::{invoke_render, Render, RenderPhase};
-pub use crate::text::{Text, TextBundle, TextRenderer, TextScaleAlignment};
-pub(crate) use crate::visibility::Visibility;
 pub use canvas::CanvasOptions;
 pub use compile_wasm::CompileDescriptor;
 use render::RenderFns;
@@ -18,6 +11,14 @@ pub use server::Server;
 pub use task::Task;
 pub use theme::Theme;
 pub(crate) use visibility::ScaleFactor;
+
+pub use crate::color::Color;
+pub use crate::coord::{Area, Depth, Position, Section};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::launcher::Launcher;
+use crate::render::{invoke_render, Render, RenderPhase};
+pub use crate::text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
+pub(crate) use crate::visibility::Visibility;
 
 mod canvas;
 mod color;

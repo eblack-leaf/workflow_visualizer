@@ -7,6 +7,7 @@ use crate::text::difference::Difference;
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::place::Placer;
 use crate::text::scale::TextScale;
+use crate::visibility::VisibleSection;
 use crate::Color;
 
 #[derive(Component)]
@@ -18,10 +19,16 @@ pub(crate) struct Cache {
     pub(crate) position: Position,
     pub(crate) depth: Depth,
     pub(crate) color: Color,
+    pub(crate) visible_section: VisibleSection,
 }
 
 impl Cache {
-    pub(crate) fn new(position: Position, depth: Depth, color: Color) -> Self {
+    pub(crate) fn new(
+        position: Position,
+        depth: Depth,
+        color: Color,
+        visible_section: VisibleSection,
+    ) -> Self {
         Self {
             keys: HashSet::new(),
             glyph_positions: HashMap::new(),
@@ -30,6 +37,7 @@ impl Cache {
             position,
             depth,
             color,
+            visible_section,
         }
     }
     pub(crate) fn exists(&self, key: Key) -> bool {

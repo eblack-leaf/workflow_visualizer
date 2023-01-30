@@ -237,7 +237,7 @@ pub(crate) fn create_render_groups(
     for entity in extraction.removed_render_groups.iter() {
         renderer.render_groups.remove(entity);
     }
-    for (entity, (max, position, depth, color, atlas_block, unique_glyphs)) in
+    for (entity, (max, position, visible_section, depth, color, atlas_block, unique_glyphs)) in
         extraction.added_render_groups.iter()
     {
         let render_group = RenderGroup::new(
@@ -245,6 +245,7 @@ pub(crate) fn create_render_groups(
             &renderer.render_group_bind_group_layout,
             *max as u32,
             position.to_scaled(scale_factor.factor),
+            *visible_section,
             *depth,
             *color,
             *atlas_block,
@@ -265,7 +266,7 @@ pub(crate) fn resize_receiver(
 ) {
     for event in event_reader.iter() {
         for (_entity, mut group) in renderer.render_groups.iter_mut() {
-            group.adjust_bounds(viewport.as_section(), event.scale_factor);
+            group.adjust_draw_section(viewport.as_section(), event.scale_factor);
         }
     }
 }
@@ -283,11 +284,18 @@ pub(crate) fn render_group_differences(
             .render_groups
             .get_mut(entity)
             .expect(format!("no render group for {:?}", *entity).as_str());
-        render_group.set_bounds(
-            difference.bounds,
-            scale_factor.factor,
-            viewport.as_section(),
-        );
+        let mut draw_section_need_resize = false;
+        if let Some(bounds) = difference.bounds {
+            render_group.bound_section.replace(bounds);
+            draw_section_need_resize = true;
+        }
+        if let Some(visible_area) = difference.visible_section {
+            render_group.visible_section = visible_area;
+            draw_section_need_resize = true;
+        }
+        if draw_section_need_resize {
+            render_group.adjust_draw_section(viewport.as_section(), scale_factor.factor);
+        }
         if let Some(position) = difference.position {
             render_group.queue_position(position.to_scaled(scale_factor.factor));
         }

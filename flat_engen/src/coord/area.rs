@@ -48,7 +48,7 @@ impl From<(f32, f32)> for Area {
 }
 
 #[repr(C)]
-#[derive(Component, Pod, Zeroable, Clone, Copy, Default, PartialEq)]
+#[derive(Component, Pod, Zeroable, Clone, Copy, Default, PartialEq, Debug)]
 pub struct ScaledArea {
     pub width: f32,
     pub height: f32,

@@ -23,6 +23,12 @@ impl Section {
             area: (left - right, top - bottom).into(),
         }
     }
+    pub(crate) fn to_scaled(&self, scale_factor: f64) -> ScaledSection {
+        ScaledSection::new(
+            self.position.to_scaled(scale_factor),
+            self.area.to_scaled(scale_factor),
+        )
+    }
     pub fn width(&self) -> f32 {
         return self.area.width;
     }
@@ -78,7 +84,7 @@ impl From<((f32, f32), (f32, f32))> for Section {
     }
 }
 
-#[derive(Bundle, Copy, Clone, Default, PartialEq)]
+#[derive(Bundle, Copy, Clone, Default, PartialEq, Debug)]
 pub struct ScaledSection {
     pub position: ScaledPosition,
     pub area: ScaledArea,

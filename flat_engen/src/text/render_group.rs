@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Added, Changed, Entity, Or, Query, RemovedComponents, ResMut, With};
+use bevy_ecs::prelude::{
+    Added, Changed, Component, Entity, Or, Query, RemovedComponents, ResMut, With,
+};
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
@@ -17,7 +19,7 @@ use crate::text::index::{Index, Indexer};
 use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
-use crate::visibility::Visibility;
+use crate::visibility::{Visibility, VisibleSection};
 use crate::Color;
 
 #[repr(C)]
@@ -40,9 +42,21 @@ impl NullBit {
     }
 }
 
+#[derive(Component, Copy, Clone)]
+pub struct TextBound {
+    pub area: Area,
+}
+
+impl TextBound {
+    pub fn new<A: Into<Area>>(area: A) -> Self {
+        Self { area: area.into() }
+    }
+}
+
 pub(crate) struct RenderGroup {
-    pub(crate) bounds: Option<Section>,
-    pub(crate) draw_bounds: Option<ScaledSection>,
+    pub(crate) bound_section: Option<Section>,
+    pub(crate) draw_section: Option<ScaledSection>,
+    pub(crate) visible_section: VisibleSection,
     pub(crate) bind_group: wgpu::BindGroup,
     pub(crate) text_placement: TextPlacement,
     pub(crate) text_placement_uniform: Uniform<TextPlacement>,
@@ -87,6 +101,7 @@ impl RenderGroup {
         bind_group_layout: &wgpu::BindGroupLayout,
         max: u32,
         position: ScaledPosition,
+        visible_section: VisibleSection,
         depth: Depth,
         color: Color,
         atlas_block: Area,
@@ -97,8 +112,9 @@ impl RenderGroup {
         let color_uniform = Uniform::new(&canvas.device, color);
         let atlas = Atlas::new(canvas, atlas_block, unique_glyphs);
         Self {
-            bounds: None,
-            draw_bounds: None,
+            bound_section: None,
+            draw_section: None,
+            visible_section,
             bind_group: canvas.device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("render group bind group"),
                 layout: bind_group_layout,
@@ -140,40 +156,29 @@ impl RenderGroup {
             atlas,
         }
     }
-    pub(crate) fn adjust_bounds(&mut self, viewport_section: ScaledSection, scale_factor: f64) {
-        if let Some(bound) = self.bounds {
-            let position = bound.position.to_scaled(scale_factor);
-            let area = bound.area.to_scaled(scale_factor);
-            let section = ScaledSection::new(position, area);
-            if let Some(intersection) = section.intersection(viewport_section) {
-                let section = ScaledSection::new(intersection.position, intersection.area);
-                self.draw_bounds = Some(section);
-            } else {
-                self.draw_bounds = None;
-            }
-        }
-    }
-    pub(crate) fn set_bounds(
+    pub(crate) fn adjust_draw_section(
         &mut self,
-        bounds: Option<Section>,
-        scale_factor: f64,
         viewport_section: ScaledSection,
+        scale_factor: f64,
     ) {
-        if let Some(bound) = bounds {
-            self.bounds.replace(bound);
-            let position = bound.position.to_scaled(scale_factor);
-            let area = bound.area.to_scaled(scale_factor);
-            let scaled_section = ScaledSection::new(position, area);
-            if let Some(intersection) = scaled_section.intersection(viewport_section) {
-                let draw_bounds = ScaledSection::new(
-                    intersection.position - viewport_section.position,
-                    intersection.area,
-                );
-                self.draw_bounds = Some(draw_bounds);
+        if let Some(bounds) = self.bound_section {
+            let scaled_bounds = bounds.to_scaled(scale_factor);
+            let bounded_visible_bounds = scaled_bounds.intersection(self.visible_section.section);
+            if let Some(section) = bounded_visible_bounds {
+                let viewport_bounded_visible_bounds = section.intersection(viewport_section);
+                if let Some(d_section) = viewport_bounded_visible_bounds {
+                    self.draw_section.replace(ScaledSection::new(
+                        d_section.position - viewport_section.position,
+                        d_section.area,
+                    ));
+                } else {
+                    self.draw_section.take();
+                }
+            } else {
+                self.draw_section.take();
             }
         } else {
-            self.bounds = None;
-            self.draw_bounds = None;
+            self.draw_section.take();
         }
     }
     pub(crate) fn count(&self) -> u32 {

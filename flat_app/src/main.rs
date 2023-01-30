@@ -1,4 +1,4 @@
-use flat_engen::{Area, Color, Depth, Position, Text, TextBundle, TextScaleAlignment};
+use flat_engen::{Area, Color, Depth, Position, Text, TextBound, TextBundle, TextScaleAlignment};
 
 struct App;
 
@@ -8,12 +8,12 @@ impl flat_engen::FrontEnd for App {
             .container
             .spawn(TextBundle::new(
                 Text::new("small...".to_string()),
-                Position::new(330.0, 10.0),
+                Position::new(130.0, 10.0),
                 Depth::new(0u32),
                 Color::rgb(1.0, 1.0, 1.0),
                 TextScaleAlignment::Small,
             ))
-            .insert(Area::new(80.0, 20.0))
+            .insert(TextBound::new((80.0, 20.0)))
             .id();
         task.container.spawn(TextBundle::new(
             Text::new("medium...".to_string()),

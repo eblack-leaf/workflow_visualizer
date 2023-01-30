@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::coord::{Depth, Position};
+use crate::coord::{Depth, Position, ScaledSection};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::{TextScale, TextScaleAlignment};
-use crate::visibility::Visibility;
+use crate::visibility::{Visibility, VisibleSection};
 use crate::Color;
 
 #[derive(Component)]
@@ -66,7 +66,12 @@ impl TextBundle {
             color,
             scale_alignment,
             placer: Placer::new(),
-            cache: Cache::new(position, depth, color),
+            cache: Cache::new(
+                position,
+                depth,
+                color,
+                VisibleSection::new(ScaledSection::default()),
+            ),
             difference: Difference::new(),
             visibility: Visibility::new(),
         }

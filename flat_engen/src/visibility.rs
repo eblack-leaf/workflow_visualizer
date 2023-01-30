@@ -1,14 +1,16 @@
 use std::collections::HashSet;
 
 use bevy_ecs::prelude::{
-    Changed, Commands, Component, Entity, Or, Query, Res, ResMut, Resource, SystemStage,
+    Changed, Commands, Component, Entity, EventReader, Or, Query, Res, ResMut, Resource,
+    SystemStage,
 };
 use winit::window::Window;
 
 use crate::canvas::Canvas;
-use crate::coord::Position;
 use crate::coord::{Area, ScaledArea};
+use crate::coord::{Position, ScaledPosition, ScaledSection};
 use crate::extract::Extract;
+use crate::launcher::ResizeEvent;
 use crate::task::Stage;
 use crate::viewport::Viewport;
 use crate::{Attach, Engen, Section, Task};
@@ -177,5 +179,78 @@ impl Extract for VisibleBounds {
             backend.container.insert_resource(viewport);
             visible_bounds.dirty = false;
         }
+    }
+}
+
+pub(crate) fn calc_visible_area_on_resize(
+    visible_bounds: Res<VisibleBounds>,
+    scale_factor: Res<ScaleFactor>,
+    visibles: Query<(Entity, &Position, &Area, &Visibility)>,
+    // spacial hasher
+    mut cmd: Commands,
+    mut event_reader: EventReader<ResizeEvent>,
+) {
+    for event in event_reader.iter() {
+        /* for all in spacial hash visible */
+        {
+            // let (entity, position, area, visibility) = visibles.get().expect("entity not present");
+            // if visibility.visible() {
+            //     let section = ScaledSection::new(
+            //         position.to_scaled(scale_factor.factor),
+            //         area.to_scaled(scale_factor.factor),
+            //     );
+            //     match section.intersection(visible_bounds.section.to_scaled(scale_factor.factor)) {
+            //         None => {}
+            //         Some(intersection) => {
+            //             let visible_section = VisibleSection::new(ScaledSection::new(
+            //                 intersection.position,
+            //                 intersection.area,
+            //             ));
+            //             cmd.entity(entity)
+            //                 .insert(visible_section);
+            //         }
+            //     }
+            // }
+        }
+    }
+}
+
+pub(crate) fn calc_visible_area(
+    visible_bounds: Res<VisibleBounds>,
+    scale_factor: Res<ScaleFactor>,
+    visibles: Query<
+        (Entity, &Position, &Area, &Visibility),
+        (Or<(Changed<Position>, Changed<Area>)>),
+    >,
+    mut cmd: Commands,
+) {
+    for (entity, position, area, visibility) in visibles.iter() {
+        if visibility.visible() {
+            let section = ScaledSection::new(
+                position.to_scaled(scale_factor.factor),
+                area.to_scaled(scale_factor.factor),
+            );
+            match section.intersection(visible_bounds.section.to_scaled(scale_factor.factor)) {
+                None => {}
+                Some(intersection) => {
+                    let visible_section = VisibleSection::new(ScaledSection::new(
+                        intersection.position,
+                        intersection.area,
+                    ));
+                    cmd.entity(entity).insert(visible_section);
+                }
+            }
+        }
+    }
+}
+
+#[derive(Component, Copy, Clone)]
+pub(crate) struct VisibleSection {
+    pub(crate) section: ScaledSection,
+}
+
+impl VisibleSection {
+    pub(crate) fn new(section: ScaledSection) -> Self {
+        Self { section }
     }
 }

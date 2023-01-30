@@ -47,7 +47,7 @@ impl From<(usize, usize)> for Position {
 }
 
 #[repr(C)]
-#[derive(Component, Pod, Zeroable, Copy, Clone, Default, PartialEq)]
+#[derive(Component, Pod, Zeroable, Copy, Clone, Default, PartialEq, Debug)]
 pub struct ScaledPosition {
     pub x: f32,
     pub y: f32,
