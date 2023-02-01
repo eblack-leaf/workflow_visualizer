@@ -1,4 +1,4 @@
-use mise_en_place::{Cook, DeliveryTicket, Job, Recipe, Stove};
+use mise_en_place::{Cook, DeliveryTicket, Recipe, Stove};
 
 struct Meal;
 
@@ -21,5 +21,6 @@ fn main() {
         }
     }
     let mut stove = Stove::new();
+    // stove.add_ingredient::<()>();
     stove.cook::<Meal>();
 }
