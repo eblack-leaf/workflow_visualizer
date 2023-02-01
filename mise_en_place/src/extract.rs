@@ -1,16 +1,16 @@
-use crate::{Engen, Job};
+use crate::{Stove, RecipeDirections};
 
-pub(crate) type ExtractFns = Vec<Box<fn(&mut Job, &mut Job)>>;
+pub(crate) type ExtractFns = Vec<Box<fn(&mut RecipeDirections, &mut RecipeDirections)>>;
 
-pub trait Extract {
-    fn extract(frontend: &mut Job, backend: &mut Job);
+pub trait Season {
+    fn extract(frontend: &mut RecipeDirections, backend: &mut RecipeDirections);
 }
 
-pub(crate) fn invoke_extract<Extractor: Extract>(frontend: &mut Job, backend: &mut Job) {
+pub(crate) fn invoke_extract<Extractor: Season>(frontend: &mut RecipeDirections, backend: &mut RecipeDirections) {
     Extractor::extract(frontend, backend);
 }
 
-pub(crate) fn extract(engen: &mut Engen) {
+pub(crate) fn extract(engen: &mut Stove) {
     for invoke in engen.extract_fns.iter_mut() {
         invoke(&mut engen.frontend, &mut engen.backend);
     }

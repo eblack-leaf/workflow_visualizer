@@ -6,16 +6,16 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::window::Window;
 
-pub use job::Job;
-pub use wasm_server::WasmServer;
+pub use job::RecipeDirections;
+pub use wasm_server::DeliveryService;
 
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{Season, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
 use crate::job::TaskLabel;
-use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
+use crate::render::{invoke_render, Saute, RenderFns, RenderPhase};
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
-pub use crate::wasm_compiler::WasmCompiler;
+pub use crate::wasm_compiler::DeliveryTicket;
 use crate::window::{Resize, ScaleFactor};
 
 mod color;
@@ -45,25 +45,25 @@ pub enum BackendStages {
     Resize,
 }
 
-pub struct Engen {
+pub struct Stove {
     event_loop: Option<EventLoop<()>>,
-    attachment_queue: Vec<Box<fn(&mut Engen)>>,
+    ingredient_preparation_queue: Vec<Box<fn(&mut Stove)>>,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
-    pub(crate) frontend: Job,
-    pub(crate) backend: Job,
+    pub(crate) frontend: RecipeDirections,
+    pub(crate) backend: RecipeDirections,
     pub(crate) window: Option<Rc<Window>>,
 }
 
-impl Engen {
+impl Stove {
     pub fn new() -> Self {
         Self {
             event_loop: None,
-            attachment_queue: vec![],
+            ingredient_preparation_queue: vec![],
             render_fns: (vec![], vec![]),
             extract_fns: vec![],
             frontend: {
-                let mut job = Job::new();
+                let mut job = RecipeDirections::new();
                 job.startup
                     .add_stage(FrontEndStages::Startup, SystemStage::parallel());
                 job.main
@@ -71,7 +71,7 @@ impl Engen {
                 job
             },
             backend: {
-                let mut job = Job::new();
+                let mut job = RecipeDirections::new();
                 job.startup
                     .add_stage(BackendStages::Startup, SystemStage::parallel());
                 job.main
@@ -87,32 +87,32 @@ impl Engen {
             window: None,
         }
     }
-    pub fn add_render_attachment<RenderAttachment: Attach + Render + Extract + Resource>(
+    pub fn add_ingredient<Ingredient: Preparation + Season + Saute + Resource>(
         &mut self,
     ) {
-        self.attachment_queue
-            .push(Box::new(RenderAttachment::attach));
-        match RenderAttachment::phase() {
+        self.ingredient_preparation_queue
+            .push(Box::new(Ingredient::prepare));
+        match Ingredient::phase() {
             RenderPhase::Opaque => self
                 .render_fns
                 .0
-                .push(Box::new(invoke_render::<RenderAttachment>)),
+                .push(Box::new(invoke_render::<Ingredient>)),
             RenderPhase::Alpha => self
                 .render_fns
                 .1
-                .push(Box::new(invoke_render::<RenderAttachment>)),
+                .push(Box::new(invoke_render::<Ingredient>)),
         }
         self.extract_fns
-            .push(Box::new(invoke_extract::<RenderAttachment>));
+            .push(Box::new(invoke_extract::<Ingredient>));
     }
-    pub(crate) fn invoke_attach<Attachment: Attach>(&mut self) {
-        Attachment::attach(self);
+    pub(crate) fn prepare<IngredientPreparation: Preparation>(&mut self) {
+        IngredientPreparation::prepare(self);
     }
-    pub fn launch<Job: Launch>(mut self) {
+    pub fn cook<Recipe: Cook>(mut self) {
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.event_loop.replace(EventLoop::new());
-            Self::internal_launch(self);
+            self.apply_heat();
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -121,6 +121,17 @@ impl Engen {
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
+            let event_loop = EventLoop::new();
+            let window = Rc::new(Window::new(&event_loop).expect("could not create window"));
+            web_sys::window()
+                .and_then(|win| win.document())
+                .and_then(|doc| doc.body())
+                .and_then(|body| {
+                    body.append_child(&web_sys::Element::from(window.canvas()))
+                        .ok()
+                })
+                .expect("couldn't append canvas to document body");
+            self.event_loop.replace(event_loop);
             let inner_size = |scale_factor: f64| {
                 web_sys::window()
                     .and_then(|win| win.document())
@@ -135,12 +146,6 @@ impl Engen {
                     })
                     .expect("could not create inner size")
             };
-            let event_loop = EventLoop::new();
-            let window = Rc::new(Window::new(&event_loop).expect("could not create window"));
-            let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
-            self.backend.container.insert_resource(gfx.0);
-            self.backend.container.insert_resource(gfx.1);
-            self.event_loop.replace(event_loop);
             let scale_factor = ScaleFactor::new(window.scale_factor());
             window.set_inner_size(inner_size(scale_factor.factor));
             {
@@ -156,17 +161,12 @@ impl Engen {
                     .unwrap();
                 closure.forget();
             }
-            web_sys::window()
-                .and_then(|win| win.document())
-                .and_then(|doc| doc.body())
-                .and_then(|body| {
-                    body.append_child(&web_sys::Element::from(window.canvas()))
-                        .ok()
-                })
-                .expect("couldn't append canvas to document body");
+            let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
+            self.backend.container.insert_resource(gfx.0);
+            self.backend.container.insert_resource(gfx.1);
             self.window.replace(window);
             if let Err(error) =
-                call_catch(&Closure::once_into_js(move || Self::internal_launch(self)))
+                call_catch(&Closure::once_into_js(move || self.apply_heat()))
             {
                 let is_control_flow_exception =
                     error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
@@ -183,12 +183,12 @@ impl Engen {
             }
         });
     }
-    fn resize_callback(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
+    fn change_pan(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
         let resize_event = Resize::new((size.width, size.height).into(), scale_factor);
         self.frontend.container.send_event(resize_event);
         self.backend.container.send_event(resize_event);
     }
-    fn internal_launch(mut self) {
+    fn apply_heat(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop");
         event_loop.run(
             move |event, event_loop_window_target, control_flow| match event {
@@ -205,10 +205,10 @@ impl Engen {
                             self.backend.container.insert_resource(gfx.0);
                             self.backend.container.insert_resource(gfx.1);
                         }
-                        self.invoke_attach::<Resize>();
-                        self.invoke_attach::<Viewport>();
-                        self.invoke_attach::<Theme>();
-                        self.process_attachment_queue();
+                        self.prepare::<Resize>();
+                        self.prepare::<Viewport>();
+                        self.prepare::<Theme>();
+                        self.prepare_ingredients();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
                     }
@@ -222,13 +222,13 @@ impl Engen {
                         let scale_factor = self
                             .window.as_ref().expect("no window")
                             .scale_factor();
-                        self.resize_callback(size, scale_factor);
+                        self.change_pan(size, scale_factor);
                     }
                     WindowEvent::ScaleFactorChanged {
                         new_inner_size,
                         scale_factor,
                     } => {
-                        self.resize_callback(*new_inner_size, scale_factor);
+                        self.change_pan(*new_inner_size, scale_factor);
                     }
                     WindowEvent::CloseRequested => {
                         control_flow.set_exit();
@@ -295,27 +295,27 @@ impl Engen {
         );
     }
 
-    fn process_attachment_queue(&mut self) {
-        let attachment_queue = self
-            .attachment_queue
+    fn prepare_ingredients(&mut self) {
+        let ingredient_preparation_queue = self
+            .ingredient_preparation_queue
             .drain(..)
-            .collect::<Vec<Box<fn(&mut Engen)>>>();
-        for attachment_fn in attachment_queue {
-            attachment_fn(self);
+            .collect::<Vec<Box<fn(&mut Stove)>>>();
+        for ingredient_preparation in ingredient_preparation_queue {
+            ingredient_preparation(self);
         }
     }
-    pub fn compile_wasm(wasm_compiler: WasmCompiler) -> Option<WasmServer> {
-        match wasm_compiler.compile() {
-            Ok(_) => Some(WasmServer::new(wasm_compiler)),
+    pub fn order_delivery(togo_ticket: DeliveryTicket) -> Option<DeliveryService> {
+        match togo_ticket.order() {
+            Ok(_) => Some(DeliveryService::new(togo_ticket)),
             Err(_) => None,
         }
     }
 }
 
-pub trait Launch {
-    fn setup(job: &mut Job);
+pub trait Cook {
+    fn recipe(recipe_directions: &mut RecipeDirections);
 }
 
-pub trait Attach {
-    fn attach(engen: &mut Engen);
+pub trait Preparation {
+    fn prepare(stove: &mut Stove);
 }

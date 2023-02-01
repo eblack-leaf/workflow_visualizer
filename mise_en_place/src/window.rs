@@ -4,7 +4,7 @@ use bevy_ecs::prelude::{Events, Resource};
 use winit::event_loop::EventLoopWindowTarget;
 use winit::window::Window;
 
-use crate::{Attach, BackendStages, Engen, FrontEndStages};
+use crate::{Preparation, BackendStages, Stove, FrontEndStages};
 use crate::coord::ScaledArea;
 
 #[derive(Resource)]
@@ -36,8 +36,8 @@ impl Resize {
     }
 }
 
-impl Attach for Resize {
-    fn attach(engen: &mut Engen) {
+impl Preparation for Resize {
+    fn prepare(engen: &mut Stove) {
         engen
             .frontend
             .container

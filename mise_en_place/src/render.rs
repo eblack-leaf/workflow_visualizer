@@ -2,15 +2,15 @@ use bevy_ecs::prelude::Resource;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
-use crate::{Engen, Job, Theme};
+use crate::{Stove, RecipeDirections, Theme};
 
 pub enum RenderPhase {
     Opaque,
     Alpha,
 }
 
-pub(crate) fn invoke_render<'a, RenderAttachment: Render + Resource>(
-    backend: &'a Job,
+pub(crate) fn invoke_render<'a, RenderAttachment: Saute + Resource>(
+    backend: &'a RecipeDirections,
     render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
     let viewport = backend
@@ -26,19 +26,19 @@ pub(crate) fn invoke_render<'a, RenderAttachment: Render + Resource>(
 
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
 
-pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Job, &mut RenderPassHandle<'a>)>>;
+pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a RecipeDirections, &mut RenderPassHandle<'a>)>>;
 
-pub trait Render {
+pub trait Saute {
     fn phase() -> RenderPhase;
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
 
-pub(crate) fn render(engen: &mut Engen) {
+pub(crate) fn render(engen: &mut Stove) {
     let gfx_surface = engen
         .backend
         .container
         .get_resource::<GfxSurface>()
-        .expect("no canvas attached");
+        .expect("no gfx surface attached");
     let gfx_surface_configuration = engen
         .backend
         .container

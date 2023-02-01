@@ -5,7 +5,7 @@ use warp::hyper::header::HeaderName;
 #[cfg(not(target_arch = "wasm32"))]
 use warp::Filter;
 
-use crate::wasm_compiler::WasmCompiler;
+use crate::wasm_compiler::DeliveryTicket;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
@@ -25,18 +25,18 @@ fn cross_origin_opener_policy(reply: impl warp::Reply) -> impl warp::Reply {
     )
 }
 
-pub struct WasmServer {
+pub struct DeliveryService {
     src: String,
 }
 
-impl WasmServer {
-    pub(crate) fn new(wasm_compiler: WasmCompiler) -> Self {
+impl DeliveryService {
+    pub(crate) fn new(delivery_ticket: DeliveryTicket) -> Self {
         Self {
-            src: wasm_compiler.destination,
+            src: delivery_ticket.destination,
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn serve_at<Addr: Into<SocketAddr>>(mut self, addr: Addr) {
+    pub fn deliver_to<Addr: Into<SocketAddr>>(mut self, addr: Addr) {
         let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET"]);
         let routes = warp::fs::dir(self.src)
             .map(cross_origin_embedder_policy)

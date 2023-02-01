@@ -6,7 +6,7 @@ use crate::coord::{Depth, ScaledArea, ScaledPosition, ScaledSection};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
-use crate::{Attach, BackendStages, Engen};
+use crate::{Preparation, BackendStages, Stove};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -200,8 +200,8 @@ pub(crate) fn adjust_area(
     }
 }
 
-impl Attach for Viewport {
-    fn attach(engen: &mut Engen) {
+impl Preparation for Viewport {
+    fn prepare(engen: &mut Stove) {
         engen
             .backend
             .startup
