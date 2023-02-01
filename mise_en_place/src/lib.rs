@@ -1,7 +1,10 @@
+use std::rc::Rc;
+
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::EventLoop;
+use winit::window::Window;
 
 pub use job::Job;
 pub use wasm_server::WasmServer;
@@ -13,7 +16,7 @@ use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
 pub use crate::wasm_compiler::WasmCompiler;
-use crate::window::{EngenWindow, Resize, ScaleFactor};
+use crate::window::{Resize, ScaleFactor};
 
 mod color;
 mod coord;
@@ -49,6 +52,7 @@ pub struct Engen {
     pub(crate) extract_fns: ExtractFns,
     pub(crate) frontend: Job,
     pub(crate) backend: Job,
+    pub(crate) window: Option<Rc<Window>>,
 }
 
 impl Engen {
@@ -72,11 +76,15 @@ impl Engen {
                     .add_stage(BackendStages::Startup, SystemStage::parallel());
                 job.main
                     .add_stage(BackendStages::Initialize, SystemStage::parallel());
-                job.main.add_stage(BackendStages::GfxSurfaceResize, SystemStage::single(gfx::resize));
+                job.main.add_stage(
+                    BackendStages::GfxSurfaceResize,
+                    SystemStage::single(gfx::resize),
+                );
                 job.main
                     .add_stage(BackendStages::Resize, SystemStage::parallel());
                 job
             },
+            window: None,
         }
     }
     pub fn add_render_attachment<RenderAttachment: Attach + Render + Extract + Resource>(
@@ -101,7 +109,8 @@ impl Engen {
         Attachment::attach(self);
     }
     pub fn launch<Job: Launch>(mut self) {
-        #[cfg(not(target_arch = "wasm32"))] {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
             self.event_loop.replace(EventLoop::new());
             Self::internal_launch(self);
         }
@@ -127,17 +136,15 @@ impl Engen {
                     .expect("could not create inner size")
             };
             let event_loop = EventLoop::new();
-            let window = EngenWindow::new(&event_loop);
+            let window = Rc::new(Window::new(&event_loop).expect("could not create window"));
             let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
             self.backend.container.insert_resource(gfx.0);
             self.backend.container.insert_resource(gfx.1);
             self.event_loop.replace(event_loop);
-            let scale_factor = ScaleFactor::new(window.window_ref.scale_factor());
-            window
-                .window_ref
-                .set_inner_size(inner_size(scale_factor.factor));
+            let scale_factor = ScaleFactor::new(window.scale_factor());
+            window.set_inner_size(inner_size(scale_factor.factor));
             {
-                let w_window = window.window_ref.clone();
+                let w_window = window.clone();
                 let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
                     let scale_factor = w_window.scale_factor();
                     let size = inner_size(scale_factor);
@@ -157,7 +164,7 @@ impl Engen {
                         .ok()
                 })
                 .expect("couldn't append canvas to document body");
-            self.backend.container.insert_resource(window);
+            self.window.replace(window);
             if let Err(error) =
                 call_catch(&Closure::once_into_js(move || Self::internal_launch(self)))
             {
@@ -189,12 +196,12 @@ impl Engen {
                     StartCause::Init => {
                         #[cfg(not(target_arch = "wasm32"))]
                         {
-                            let window = EngenWindow::new(event_loop_window_target);
+                            let window = Rc::new(Window::new(event_loop_window_target).expect("no window"));
                             let gfx = futures::executor::block_on(GfxSurface::new(
                                 &window,
                                 GfxOptions::native(),
                             ));
-                            self.backend.container.insert_resource(window);
+                            self.window.replace(window);
                             self.backend.container.insert_resource(gfx.0);
                             self.backend.container.insert_resource(gfx.1);
                         }
@@ -213,11 +220,7 @@ impl Engen {
                 } => match w_event {
                     WindowEvent::Resized(size) => {
                         let scale_factor = self
-                            .backend
-                            .container
-                            .get_resource::<EngenWindow>()
-                            .expect("no window")
-                            .window_ref
+                            .window.as_ref().expect("no window")
                             .scale_factor();
                         self.resize_callback(size, scale_factor);
                     }
@@ -246,11 +249,7 @@ impl Engen {
                     if self.frontend.suspended() {
                         #[cfg(target_os = "android")]
                         {
-                            let window = self
-                                .backend
-                                .container
-                                .get_resource::<EngenWindow>()
-                                .expect("no window");
+                            let window = self.window.take().expect("no window");
                             let gfx = futures::executor::block_on(GfxSurface::new(
                                 &window,
                                 GfxOptions::native(),
@@ -279,12 +278,8 @@ impl Engen {
                 }
                 Event::RedrawEventsCleared => {
                     if self.backend.active() {
-                        self.backend
-                            .container
-                            .get_resource::<EngenWindow>()
+                        self.window.as_ref()
                             .expect("no window")
-                            .window_ref
-                            .as_ref()
                             .request_redraw();
                     }
                     if self.frontend.can_idle() && self.backend.can_idle() {

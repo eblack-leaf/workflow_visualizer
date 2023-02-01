@@ -1447,13 +1447,17 @@ version = "0.1.0"
 dependencies = [
  "bevy_ecs",
  "bytemuck",
+ "console_error_panic_hook",
+ "console_log",
  "futures",
+ "js-sys",
  "nalgebra",
  "tokio",
  "warp",
  "wasm-bindgen",
  "wasm-bindgen-cli-support",
  "wasm-bindgen-futures",
+ "web-sys",
  "wgpu",
  "winit",
 ]

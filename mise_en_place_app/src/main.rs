@@ -12,8 +12,10 @@ fn main() {
         let compiler =
             WasmCompiler::new("mise_en_place_app", "debug", "mise_en_place_app_web_build");
         let server = Engen::compile_wasm(compiler).expect("could not compile to wasm");
-        if args.contains(&"serve".to_string()) {
-            server.serve_at(([0, 0, 0, 0], 3030));
+        #[cfg(not(target_arch = "wasm32"))]{
+            if args.contains(&"serve".to_string()) {
+                server.serve_at(([0, 0, 0, 0], 3030));
+            }
         }
     }
     let engen = Engen::new();

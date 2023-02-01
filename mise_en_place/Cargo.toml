@@ -9,11 +9,17 @@ edition = "2021"
 winit = "0.27.5"
 wgpu = { version = "0.15.0", features = ["webgl"] }
 bevy_ecs = "0.9.1"
-warp = { version = "0.3.3", features = ["tls"] }
-tokio = { version = "1.24.2", features = ["full"] }
-futures = "0.3.25"
 nalgebra = "0.32.1"
 bytemuck = { version = "1.12.3", features = ["derive"] }
 wasm-bindgen-cli-support = "0.2.83"
 wasm-bindgen-futures = "0.4.33"
 wasm-bindgen = "0.2.83"
+web-sys = { version = "0.3.60", features = ["Window"] }
+console_error_panic_hook = "0.1.7"
+console_log = "0.2.0"
+js-sys = "0.3.60"
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+warp = { version = "0.3.3", features = ["tls"] }
+futures = "0.3.25"
+tokio = { version = "1.24.2", features = ["full"] }
+

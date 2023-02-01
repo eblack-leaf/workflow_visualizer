@@ -1,7 +1,8 @@
 use bevy_ecs::prelude::{EventReader, Res, ResMut, Resource, SystemStage};
+use winit::window::Window;
 
 use crate::{Attach, BackendStages, Engen};
-use crate::window::{EngenWindow, Resize};
+use crate::window::Resize;
 
 #[derive(Clone)]
 pub struct GfxOptions {
@@ -43,7 +44,7 @@ pub(crate) struct GfxSurface {
 
 impl GfxSurface {
     pub(crate) async fn new(
-        window: &EngenWindow,
+        window: &Window,
         options: GfxOptions,
     ) -> (Self, GfxSurfaceConfiguration) {
         let instance_descriptor = wgpu::InstanceDescriptor {
@@ -53,7 +54,7 @@ impl GfxSurface {
         let instance = wgpu::Instance::new(instance_descriptor);
         let surface = unsafe {
             instance
-                .create_surface(window.window_ref.as_ref())
+                .create_surface(window)
                 .expect("could not create surface")
         };
         let adapter = instance
@@ -83,8 +84,8 @@ impl GfxSurface {
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: window.window_ref.as_ref().inner_size().width,
-            height: window.window_ref.as_ref().inner_size().height,
+            width: window.inner_size().width,
+            height: window.inner_size().height,
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![surface_format],
@@ -145,10 +146,17 @@ impl GfxSurfaceConfiguration {
     }
 }
 
-pub(crate) fn resize(gfx_surface: Res<GfxSurface>, mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>, mut resize_events: EventReader<Resize>) {
+pub(crate) fn resize(
+    gfx_surface: Res<GfxSurface>,
+    mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
+    mut resize_events: EventReader<Resize>,
+) {
     for resize in resize_events.iter() {
         gfx_surface_configuration.configuration.width = resize.size.width as u32;
         gfx_surface_configuration.configuration.height = resize.size.height as u32;
-        gfx_surface.surface.configure(&gfx_surface.device, &gfx_surface_configuration.configuration);
+        gfx_surface.surface.configure(
+            &gfx_surface.device,
+            &gfx_surface_configuration.configuration,
+        );
     }
 }

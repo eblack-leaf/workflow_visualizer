@@ -1,10 +1,13 @@
 use std::net::SocketAddr;
 
+#[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::header::HeaderName;
+#[cfg(not(target_arch = "wasm32"))]
 use warp::Filter;
 
 use crate::wasm_compiler::WasmCompiler;
 
+#[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
     warp::reply::with_header(
         reply,
@@ -13,6 +16,7 @@ fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
     )
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_opener_policy(reply: impl warp::Reply) -> impl warp::Reply {
     warp::reply::with_header(
         reply,
@@ -31,6 +35,7 @@ impl WasmServer {
             src: wasm_compiler.destination,
         }
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn serve_at<Addr: Into<SocketAddr>>(mut self, addr: Addr) {
         let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET"]);
         let routes = warp::fs::dir(self.src)

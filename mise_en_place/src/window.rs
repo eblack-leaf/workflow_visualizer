@@ -1,24 +1,11 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
-use crate::{Attach, BackendStages, Engen, FrontEndStages};
 use bevy_ecs::prelude::{Events, Resource};
 use winit::event_loop::EventLoopWindowTarget;
 use winit::window::Window;
 
+use crate::{Attach, BackendStages, Engen, FrontEndStages};
 use crate::coord::ScaledArea;
-
-#[derive(Resource)]
-pub(crate) struct EngenWindow {
-    pub(crate) window_ref: Arc<Window>,
-}
-
-impl EngenWindow {
-    pub(crate) fn new(event_loop_window_target: &EventLoopWindowTarget<()>) -> Self {
-        Self {
-            window_ref: Arc::new(Window::new(event_loop_window_target).expect("window new")),
-        }
-    }
-}
 
 #[derive(Resource)]
 pub(crate) struct ScaleFactor {
@@ -42,11 +29,13 @@ pub(crate) struct Resize {
     pub(crate) size: ScaledArea,
     pub(crate) scale_factor: f64,
 }
+
 impl Resize {
     pub(crate) fn new(size: ScaledArea, scale_factor: f64) -> Self {
         Self { size, scale_factor }
     }
 }
+
 impl Attach for Resize {
     fn attach(engen: &mut Engen) {
         engen
