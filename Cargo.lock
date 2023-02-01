@@ -1442,6 +1442,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "mise_en_place"
+version = "0.1.0"
+dependencies = [
+ "bevy_ecs",
+ "bytemuck",
+ "futures",
+ "nalgebra",
+ "tokio",
+ "warp",
+ "wasm-bindgen",
+ "wasm-bindgen-cli-support",
+ "wasm-bindgen-futures",
+ "wgpu",
+ "winit",
+]
+
+[[package]]
+name = "mise_en_place_app"
+version = "0.1.0"
+dependencies = [
+ "mise_en_place",
+]
+
+[[package]]
 name = "multipart"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

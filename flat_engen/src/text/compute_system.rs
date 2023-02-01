@@ -7,7 +7,6 @@ use bevy_ecs::prelude::{
 };
 use fontdue::layout::TextStyle;
 
-use crate::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
@@ -18,8 +17,9 @@ use crate::text::place::Placer;
 use crate::text::render_group::TextBound;
 use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::text::text::Text;
-use crate::visibility::{ScaleFactor, VisibleSection};
 use crate::visibility::Visibility;
+use crate::visibility::{ScaleFactor, VisibleSection};
+use crate::Color;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());

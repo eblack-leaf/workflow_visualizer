@@ -6,13 +6,16 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
-use crate::{Area, Engen, render, Section, Theme};
 use crate::canvas::Canvas;
 use crate::coord::ScaledArea;
 use crate::extract::invoke_extract;
 use crate::task::{Stage, WorkloadId};
 use crate::viewport::{attach, Viewport};
-use crate::visibility::{calc_visible_area, calc_visible_area_on_resize, integrate_spacial_hash_changes, ScaleFactor, update_spacial_hash, visibility, Visibility, VisibilityStages, VisibleBounds};
+use crate::visibility::{
+    calc_visible_area, calc_visible_area_on_resize, integrate_spacial_hash_changes,
+    update_spacial_hash, visibility, ScaleFactor, Visibility, VisibilityStages, VisibleBounds,
+};
+use crate::{render, Area, Engen, Section, Theme};
 
 pub(crate) struct Launcher {
     pub(crate) event_loop: Option<EventLoop<()>>,
@@ -34,7 +37,7 @@ impl Launcher {
     }
     #[cfg(target_arch = "wasm32")]
     async fn web_launch(mut engen: Engen) {
-        use wasm_bindgen::{JsCast, prelude::*};
+        use wasm_bindgen::{prelude::*, JsCast};
         use winit::platform::web::WindowExtWebSys;
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
@@ -266,7 +269,10 @@ impl Launcher {
         engen.backend.container.send_event(resize_event);
     }
     fn integrate_attachment_queue(&self, engen: &mut Engen) {
-        let attachment_queue = engen.attachment_queue.drain(..).collect::<Vec<Box<fn(&mut Engen)>>>();
+        let attachment_queue = engen
+            .attachment_queue
+            .drain(..)
+            .collect::<Vec<Box<fn(&mut Engen)>>>();
         for attach_to in attachment_queue {
             attach_to(engen);
         }

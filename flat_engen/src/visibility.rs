@@ -1,9 +1,11 @@
 use std::collections::HashSet;
 
-use bevy_ecs::prelude::{Changed, Commands, Component, Entity, EventReader, Or, Query, Res, ResMut, Resource, StageLabel, SystemStage};
+use bevy_ecs::prelude::{
+    Changed, Commands, Component, Entity, EventReader, Or, Query, Res, ResMut, Resource,
+    StageLabel, SystemStage,
+};
 use winit::window::Window;
 
-use crate::{Attach, Engen, Section, Task};
 use crate::canvas::Canvas;
 use crate::coord::{Area, ScaledArea};
 use crate::coord::{Position, ScaledPosition, ScaledSection};
@@ -11,6 +13,7 @@ use crate::extract::Extract;
 use crate::launcher::ResizeEvent;
 use crate::task::Stage;
 use crate::viewport::Viewport;
+use crate::{Attach, Engen, Section, Task};
 
 #[derive(Component)]
 pub(crate) struct Visibility {

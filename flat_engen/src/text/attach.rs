@@ -1,6 +1,5 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemStage};
 
-use crate::{Attach, Engen};
 use crate::task::Stage;
 use crate::text::compute_system::{
     bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
@@ -13,6 +12,7 @@ use crate::text::render_system::{
 };
 use crate::text::renderer::TextRenderer;
 use crate::visibility::VisibilityStages;
+use crate::{Attach, Engen};
 
 #[derive(StageLabel)]
 pub enum TextStages {
