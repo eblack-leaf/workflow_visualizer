@@ -1,0 +1,19 @@
+[package]
+name = "mise_en_place"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+winit = "0.27.5"
+wgpu = { version = "0.15.0", features = ["webgl"] }
+bevy_ecs = "0.9.1"
+warp = { version = "0.3.3", features = ["tls"] }
+tokio = { version = "1.24.2", features = ["full"] }
+futures = "0.3.25"
+nalgebra = "0.32.1"
+bytemuck = { version = "1.12.3", features = ["derive"] }
+wasm-bindgen-cli-support = "0.2.83"
+wasm-bindgen-futures = "0.4.33"
+wasm-bindgen = "0.2.83"
