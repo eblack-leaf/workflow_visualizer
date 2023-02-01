@@ -14,11 +14,11 @@ impl ThemeDescriptor {
 }
 
 #[derive(Resource, Clone)]
-pub struct Theme {
+pub struct Butter {
     pub background: Color,
 }
 
-impl Theme {
+impl Butter {
     pub fn new(descriptor: ThemeDescriptor) -> Self {
         Self {
             background: descriptor.background.unwrap_or(Color::rgb(0.0, 0.0, 0.0)),
@@ -26,14 +26,14 @@ impl Theme {
     }
 }
 
-impl Default for Theme {
+impl Default for Butter {
     fn default() -> Self {
-        Theme::new(ThemeDescriptor::new())
+        Butter::new(ThemeDescriptor::new())
     }
 }
 
-impl Preparation for Theme {
+impl Preparation for Butter {
     fn prepare(engen: &mut Stove) {
-        engen.backend.container.insert_resource(Theme::default());
+        engen.backend.container.insert_resource(Butter::default());
     }
 }

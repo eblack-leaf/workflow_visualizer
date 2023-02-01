@@ -9,12 +9,12 @@ use winit::window::Window;
 pub use job::RecipeDirections;
 pub use wasm_server::DeliveryService;
 
-use crate::extract::{Season, ExtractFns, invoke_extract};
-use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
+use crate::extract::{Season, Spices, add_seasoning};
+use crate::gfx::{GfxOptions, Pan, Duvet};
 use crate::job::TaskLabel;
-use crate::render::{invoke_render, Saute, RenderFns, RenderPhase};
-pub use crate::theme::Theme;
-use crate::viewport::Viewport;
+use crate::render::{saute_ingredient, Saute, SauteDirections, SautePhase};
+pub use crate::theme::Butter;
+use crate::viewport::Spatula;
 pub use crate::wasm_compiler::DeliveryTicket;
 use crate::window::{Resize, ScaleFactor};
 
@@ -48,8 +48,8 @@ pub enum BackendStages {
 pub struct Stove {
     event_loop: Option<EventLoop<()>>,
     ingredient_preparation_queue: Vec<Box<fn(&mut Stove)>>,
-    pub(crate) render_fns: (RenderFns, RenderFns),
-    pub(crate) extract_fns: ExtractFns,
+    pub(crate) render_fns: (SauteDirections, SauteDirections),
+    pub(crate) spices: Spices,
     pub(crate) frontend: RecipeDirections,
     pub(crate) backend: RecipeDirections,
     pub(crate) window: Option<Rc<Window>>,
@@ -61,7 +61,7 @@ impl Stove {
             event_loop: None,
             ingredient_preparation_queue: vec![],
             render_fns: (vec![], vec![]),
-            extract_fns: vec![],
+            spices: vec![],
             frontend: {
                 let mut job = RecipeDirections::new();
                 job.startup
@@ -93,17 +93,17 @@ impl Stove {
         self.ingredient_preparation_queue
             .push(Box::new(Ingredient::prepare));
         match Ingredient::phase() {
-            RenderPhase::Opaque => self
+            SautePhase::Opaque => self
                 .render_fns
                 .0
-                .push(Box::new(invoke_render::<Ingredient>)),
-            RenderPhase::Alpha => self
+                .push(Box::new(saute_ingredient::<Ingredient>)),
+            SautePhase::Alpha => self
                 .render_fns
                 .1
-                .push(Box::new(invoke_render::<Ingredient>)),
+                .push(Box::new(saute_ingredient::<Ingredient>)),
         }
-        self.extract_fns
-            .push(Box::new(invoke_extract::<Ingredient>));
+        self.spices
+            .push(Box::new(add_seasoning::<Ingredient>));
     }
     pub(crate) fn prepare<IngredientPreparation: Preparation>(&mut self) {
         IngredientPreparation::prepare(self);
@@ -161,7 +161,7 @@ impl Stove {
                     .unwrap();
                 closure.forget();
             }
-            let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
+            let gfx = Pan::new(&window, GfxOptions::web()).await;
             self.backend.container.insert_resource(gfx.0);
             self.backend.container.insert_resource(gfx.1);
             self.window.replace(window);
@@ -197,7 +197,7 @@ impl Stove {
                         #[cfg(not(target_arch = "wasm32"))]
                         {
                             let window = Rc::new(Window::new(event_loop_window_target).expect("no window"));
-                            let gfx = futures::executor::block_on(GfxSurface::new(
+                            let gfx = futures::executor::block_on(Pan::new(
                                 &window,
                                 GfxOptions::native(),
                             ));
@@ -206,9 +206,9 @@ impl Stove {
                             self.backend.container.insert_resource(gfx.1);
                         }
                         self.prepare::<Resize>();
-                        self.prepare::<Viewport>();
-                        self.prepare::<Theme>();
-                        self.prepare_ingredients();
+                        self.prepare::<Spatula>();
+                        self.prepare::<Butter>();
+                        self.prepare_ingredients_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
                     }
@@ -239,7 +239,7 @@ impl Stove {
                     if self.frontend.active() {
                         #[cfg(target_os = "android")]
                         {
-                            let _ = self.backend.container.remove_resource::<GfxSurface>();
+                            let _ = self.backend.container.remove_resource::<Pan>();
                         }
                         self.frontend.suspend();
                         self.backend.suspend();
@@ -250,7 +250,7 @@ impl Stove {
                         #[cfg(target_os = "android")]
                         {
                             let window = self.window.take().expect("no window");
-                            let gfx = futures::executor::block_on(GfxSurface::new(
+                            let gfx = futures::executor::block_on(Pan::new(
                                 &window,
                                 GfxOptions::native(),
                             ));
@@ -271,9 +271,9 @@ impl Stove {
                 }
                 Event::RedrawRequested(_) => {
                     if self.backend.active() {
-                        extract::extract(&mut self);
+                        extract::season(&mut self);
                         self.backend.exec(TaskLabel::Main);
-                        render::render(&mut self);
+                        render::saute(&mut self);
                     }
                 }
                 Event::RedrawEventsCleared => {
@@ -295,7 +295,7 @@ impl Stove {
         );
     }
 
-    fn prepare_ingredients(&mut self) {
+    fn prepare_ingredients_from_queue(&mut self) {
         let ingredient_preparation_queue = self
             .ingredient_preparation_queue
             .drain(..)

@@ -36,17 +36,17 @@ impl GfxOptions {
 }
 
 #[derive(Resource)]
-pub(crate) struct GfxSurface {
+pub(crate) struct Pan {
     pub(crate) surface: wgpu::Surface,
     pub(crate) device: wgpu::Device,
     pub(crate) queue: wgpu::Queue,
 }
 
-impl GfxSurface {
+impl Pan {
     pub(crate) async fn new(
         window: &Window,
         options: GfxOptions,
-    ) -> (Self, GfxSurfaceConfiguration) {
+    ) -> (Self, Duvet) {
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()
@@ -97,12 +97,12 @@ impl GfxSurface {
                 device,
                 queue,
             },
-            GfxSurfaceConfiguration::new(surface_configuration),
+            Duvet::new(surface_configuration),
         )
     }
     pub(crate) fn surface_texture(
         &self,
-        surface_configuration: &GfxSurfaceConfiguration,
+        surface_configuration: &Duvet,
     ) -> Option<wgpu::SurfaceTexture> {
         let surface_texture = match self.surface.get_current_texture() {
             Ok(surface_texture) => Some(surface_texture),
@@ -136,19 +136,19 @@ impl GfxSurface {
 }
 
 #[derive(Resource)]
-pub(crate) struct GfxSurfaceConfiguration {
+pub(crate) struct Duvet {
     pub(crate) configuration: wgpu::SurfaceConfiguration,
 }
 
-impl GfxSurfaceConfiguration {
+impl Duvet {
     pub(crate) fn new(configuration: wgpu::SurfaceConfiguration) -> Self {
         Self { configuration }
     }
 }
 
 pub(crate) fn resize(
-    gfx_surface: Res<GfxSurface>,
-    mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
+    gfx_surface: Res<Pan>,
+    mut gfx_surface_configuration: ResMut<Duvet>,
     mut resize_events: EventReader<Resize>,
 ) {
     for resize in resize_events.iter() {

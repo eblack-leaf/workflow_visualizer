@@ -1,17 +1,17 @@
 use crate::{Stove, RecipeDirections};
 
-pub(crate) type ExtractFns = Vec<Box<fn(&mut RecipeDirections, &mut RecipeDirections)>>;
+pub(crate) type Spices = Vec<Box<fn(&mut RecipeDirections, &mut RecipeDirections)>>;
 
 pub trait Season {
-    fn extract(frontend: &mut RecipeDirections, backend: &mut RecipeDirections);
+    fn season(frontend: &mut RecipeDirections, backend: &mut RecipeDirections);
 }
 
-pub(crate) fn invoke_extract<Extractor: Season>(frontend: &mut RecipeDirections, backend: &mut RecipeDirections) {
-    Extractor::extract(frontend, backend);
+pub(crate) fn add_seasoning<Extractor: Season>(frontend: &mut RecipeDirections, backend: &mut RecipeDirections) {
+    Extractor::season(frontend, backend);
 }
 
-pub(crate) fn extract(engen: &mut Stove) {
-    for invoke in engen.extract_fns.iter_mut() {
-        invoke(&mut engen.frontend, &mut engen.backend);
+pub(crate) fn season(engen: &mut Stove) {
+    for seasoning in engen.spices.iter_mut() {
+        seasoning(&mut engen.frontend, &mut engen.backend);
     }
 }
