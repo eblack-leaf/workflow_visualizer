@@ -21,7 +21,7 @@ pub(crate) fn saute_ingredient<'a, Ingredient: Saute + Resource>(
         .container
         .get_resource::<Ingredient>()
         .expect("no render attachment")
-        .render(render_pass_handle, viewport);
+        .saute(render_pass_handle, viewport);
 }
 
 pub struct PanHandle<'a>(pub wgpu::RenderPass<'a>);
