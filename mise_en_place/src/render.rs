@@ -1,21 +1,21 @@
 use bevy_ecs::prelude::Resource;
 
-use crate::gfx::{Pan, Duvet};
-use crate::viewport::Spatula;
-use crate::{Stove, RecipeDirections, Butter};
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
+use crate::viewport::Viewport;
+use crate::{Job, Stove, Theme};
 
-pub enum SautePhase {
+pub enum RenderPhase {
     Opaque,
     Alpha,
 }
 
-pub(crate) fn saute_ingredient<'a, Ingredient: Saute + Resource>(
-    backend: &'a RecipeDirections,
+pub(crate) fn invoke_render<'a, Ingredient: Render + Resource>(
+    backend: &'a Job,
     render_pass_handle: &mut PanHandle<'a>,
 ) {
     let viewport = backend
         .container
-        .get_resource::<Spatula>()
+        .get_resource::<Viewport>()
         .expect("no viewport attached");
     backend
         .container
@@ -26,33 +26,33 @@ pub(crate) fn saute_ingredient<'a, Ingredient: Saute + Resource>(
 
 pub struct PanHandle<'a>(pub wgpu::RenderPass<'a>);
 
-pub(crate) type SauteDirections = Vec<Box<for<'a> fn(&'a RecipeDirections, &mut PanHandle<'a>)>>;
+pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Job, &mut PanHandle<'a>)>>;
 
-pub trait Saute {
-    fn phase() -> SautePhase;
-    fn saute<'a>(&'a self, pan_handle: &mut PanHandle<'a>, viewport: &'a Spatula);
+pub trait Render {
+    fn phase() -> RenderPhase;
+    fn saute<'a>(&'a self, pan_handle: &mut PanHandle<'a>, viewport: &'a Viewport);
 }
 
-pub(crate) fn saute(engen: &mut Stove) {
-    let gfx_surface = engen
+pub(crate) fn render(stove: &mut Stove) {
+    let gfx_surface = stove
         .backend
         .container
-        .get_resource::<Pan>()
+        .get_resource::<GfxSurface>()
         .expect("no gfx surface attached");
-    let gfx_surface_configuration = engen
+    let gfx_surface_configuration = stove
         .backend
         .container
-        .get_resource::<Duvet>()
+        .get_resource::<GfxSurfaceConfiguration>()
         .expect("no gfx surface configuration");
-    let theme = engen
+    let theme = stove
         .backend
         .container
-        .get_resource::<Butter>()
+        .get_resource::<Theme>()
         .expect("no theme attached");
-    let viewport = engen
+    let viewport = stove
         .backend
         .container
-        .get_resource::<Spatula>()
+        .get_resource::<Viewport>()
         .expect("no viewport attached");
     if let Some(surface_texture) = gfx_surface.surface_texture(gfx_surface_configuration) {
         let mut command_encoder =
@@ -89,11 +89,11 @@ pub(crate) fn saute(engen: &mut Stove) {
                     }),
                 },
             ));
-            for invoke in engen.render_fns.0.iter_mut() {
-                invoke(&engen.backend, &mut render_pass_handle);
+            for invoke in stove.render_fns.0.iter_mut() {
+                invoke(&stove.backend, &mut render_pass_handle);
             }
-            for invoke in engen.render_fns.1.iter_mut() {
-                invoke(&engen.backend, &mut render_pass_handle);
+            for invoke in stove.render_fns.1.iter_mut() {
+                invoke(&stove.backend, &mut render_pass_handle);
             }
         }
         gfx_surface

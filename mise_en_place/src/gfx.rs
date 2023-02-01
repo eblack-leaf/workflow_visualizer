@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{EventReader, Res, ResMut, Resource, SystemStage};
 use winit::window::Window;
 
-use crate::{Preparation, BackendStages, Stove};
 use crate::window::Resize;
+use crate::{Attach, BackendStages, Stove};
 
 #[derive(Clone)]
 pub struct GfxOptions {
@@ -36,17 +36,17 @@ impl GfxOptions {
 }
 
 #[derive(Resource)]
-pub(crate) struct Pan {
+pub(crate) struct GfxSurface {
     pub(crate) surface: wgpu::Surface,
     pub(crate) device: wgpu::Device,
     pub(crate) queue: wgpu::Queue,
 }
 
-impl Pan {
+impl GfxSurface {
     pub(crate) async fn new(
         window: &Window,
         options: GfxOptions,
-    ) -> (Self, Duvet) {
+    ) -> (Self, GfxSurfaceConfiguration) {
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()
@@ -97,12 +97,12 @@ impl Pan {
                 device,
                 queue,
             },
-            Duvet::new(surface_configuration),
+            GfxSurfaceConfiguration::new(surface_configuration),
         )
     }
     pub(crate) fn surface_texture(
         &self,
-        surface_configuration: &Duvet,
+        surface_configuration: &GfxSurfaceConfiguration,
     ) -> Option<wgpu::SurfaceTexture> {
         let surface_texture = match self.surface.get_current_texture() {
             Ok(surface_texture) => Some(surface_texture),
@@ -136,19 +136,19 @@ impl Pan {
 }
 
 #[derive(Resource)]
-pub(crate) struct Duvet {
+pub(crate) struct GfxSurfaceConfiguration {
     pub(crate) configuration: wgpu::SurfaceConfiguration,
 }
 
-impl Duvet {
+impl GfxSurfaceConfiguration {
     pub(crate) fn new(configuration: wgpu::SurfaceConfiguration) -> Self {
         Self { configuration }
     }
 }
 
 pub(crate) fn resize(
-    gfx_surface: Res<Pan>,
-    mut gfx_surface_configuration: ResMut<Duvet>,
+    gfx_surface: Res<GfxSurface>,
+    mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
     mut resize_events: EventReader<Resize>,
 ) {
     for resize in resize_events.iter() {

@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::Resource;
 
 use crate::color::Color;
-use crate::{Preparation, Stove};
+use crate::{Attach, Stove};
 
 pub struct ThemeDescriptor {
     pub background: Option<Color>,
@@ -14,11 +14,11 @@ impl ThemeDescriptor {
 }
 
 #[derive(Resource, Clone)]
-pub struct Butter {
+pub struct Theme {
     pub background: Color,
 }
 
-impl Butter {
+impl Theme {
     pub fn new(descriptor: ThemeDescriptor) -> Self {
         Self {
             background: descriptor.background.unwrap_or(Color::rgb(0.0, 0.0, 0.0)),
@@ -26,14 +26,14 @@ impl Butter {
     }
 }
 
-impl Default for Butter {
+impl Default for Theme {
     fn default() -> Self {
-        Butter::new(ThemeDescriptor::new())
+        Theme::new(ThemeDescriptor::new())
     }
 }
 
-impl Preparation for Butter {
-    fn prepare(engen: &mut Stove) {
-        engen.backend.container.insert_resource(Butter::default());
+impl Attach for Theme {
+    fn attach(stove: &mut Stove) {
+        stove.backend.container.insert_resource(Theme::default());
     }
 }

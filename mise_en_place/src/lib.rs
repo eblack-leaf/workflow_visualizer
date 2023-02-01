@@ -3,18 +3,18 @@ use std::rc::Rc;
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::EventLoop;
+use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::Window;
 
-pub use job::RecipeDirections;
+pub use job::Job;
 pub use wasm_server::DeliveryService;
 
-use crate::extract::{Season, Spices, add_seasoning};
-use crate::gfx::{GfxOptions, Pan, Duvet};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
 use crate::job::TaskLabel;
-use crate::render::{saute_ingredient, Saute, SauteDirections, SautePhase};
-pub use crate::theme::Butter;
-use crate::viewport::Spatula;
+use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
+pub use crate::theme::Theme;
+use crate::viewport::Viewport;
 pub use crate::wasm_compiler::DeliveryTicket;
 use crate::window::{Resize, ScaleFactor};
 
@@ -47,11 +47,11 @@ pub enum BackendStages {
 
 pub struct Stove {
     event_loop: Option<EventLoop<()>>,
-    ingredient_preparation_queue: Vec<Box<fn(&mut Stove)>>,
-    pub(crate) render_fns: (SauteDirections, SauteDirections),
-    pub(crate) spices: Spices,
-    pub(crate) frontend: RecipeDirections,
-    pub(crate) backend: RecipeDirections,
+    attachment_queue: Vec<Box<fn(&mut Stove)>>,
+    pub(crate) render_fns: (RenderFns, RenderFns),
+    pub(crate) extract_fns: ExtractFns,
+    pub(crate) frontend: Job,
+    pub(crate) backend: Job,
     pub(crate) window: Option<Rc<Window>>,
 }
 
@@ -59,11 +59,11 @@ impl Stove {
     pub fn new() -> Self {
         Self {
             event_loop: None,
-            ingredient_preparation_queue: vec![],
+            attachment_queue: vec![],
             render_fns: (vec![], vec![]),
-            spices: vec![],
+            extract_fns: vec![],
             frontend: {
-                let mut job = RecipeDirections::new();
+                let mut job = Job::new();
                 job.startup
                     .add_stage(FrontEndStages::Startup, SystemStage::parallel());
                 job.main
@@ -71,7 +71,7 @@ impl Stove {
                 job
             },
             backend: {
-                let mut job = RecipeDirections::new();
+                let mut job = Job::new();
                 job.startup
                     .add_stage(BackendStages::Startup, SystemStage::parallel());
                 job.main
@@ -87,26 +87,23 @@ impl Stove {
             window: None,
         }
     }
-    pub fn add_ingredient<Ingredient: Preparation + Season + Saute + Resource>(
-        &mut self,
-    ) {
-        self.ingredient_preparation_queue
-            .push(Box::new(Ingredient::prepare));
+    pub fn add_ingredient<Ingredient: Attach + Extract + Render + Resource>(&mut self) {
+        self.attachment_queue.push(Box::new(Ingredient::attach));
         match Ingredient::phase() {
-            SautePhase::Opaque => self
+            RenderPhase::Opaque => self
                 .render_fns
                 .0
-                .push(Box::new(saute_ingredient::<Ingredient>)),
-            SautePhase::Alpha => self
+                .push(Box::new(invoke_render::<Ingredient>)),
+            RenderPhase::Alpha => self
                 .render_fns
                 .1
-                .push(Box::new(saute_ingredient::<Ingredient>)),
+                .push(Box::new(invoke_render::<Ingredient>)),
         }
-        self.spices
-            .push(Box::new(add_seasoning::<Ingredient>));
+        self.extract_fns
+            .push(Box::new(invoke_extract::<Ingredient>));
     }
-    pub(crate) fn prepare<IngredientPreparation: Preparation>(&mut self) {
-        IngredientPreparation::prepare(self);
+    pub(crate) fn invoke_attach<IngredientPreparation: Attach>(&mut self) {
+        IngredientPreparation::attach(self);
     }
     pub fn cook<Recipe: Cook>(mut self) {
         #[cfg(not(target_arch = "wasm32"))]
@@ -117,7 +114,7 @@ impl Stove {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -161,13 +158,11 @@ impl Stove {
                     .unwrap();
                 closure.forget();
             }
-            let gfx = Pan::new(&window, GfxOptions::web()).await;
+            let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
             self.backend.container.insert_resource(gfx.0);
             self.backend.container.insert_resource(gfx.1);
             self.window.replace(window);
-            if let Err(error) =
-                call_catch(&Closure::once_into_js(move || self.apply_heat()))
-            {
+            if let Err(error) = call_catch(&Closure::once_into_js(move || self.apply_heat())) {
                 let is_control_flow_exception =
                     error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
                         e.message().includes("Using exceptions for control flow", 0)
@@ -183,7 +178,7 @@ impl Stove {
             }
         });
     }
-    fn change_pan(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
+    fn resize_callback(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
         let resize_event = Resize::new((size.width, size.height).into(), scale_factor);
         self.frontend.container.send_event(resize_event);
         self.backend.container.send_event(resize_event);
@@ -194,21 +189,11 @@ impl Stove {
             move |event, event_loop_window_target, control_flow| match event {
                 Event::NewEvents(start_cause) => match start_cause {
                     StartCause::Init => {
-                        #[cfg(not(target_arch = "wasm32"))]
-                        {
-                            let window = Rc::new(Window::new(event_loop_window_target).expect("no window"));
-                            let gfx = futures::executor::block_on(Pan::new(
-                                &window,
-                                GfxOptions::native(),
-                            ));
-                            self.window.replace(window);
-                            self.backend.container.insert_resource(gfx.0);
-                            self.backend.container.insert_resource(gfx.1);
-                        }
-                        self.prepare::<Resize>();
-                        self.prepare::<Spatula>();
-                        self.prepare::<Butter>();
-                        self.prepare_ingredients_from_queue();
+                        self.init_native_gfx(event_loop_window_target);
+                        self.invoke_attach::<Resize>();
+                        self.invoke_attach::<Viewport>();
+                        self.invoke_attach::<Theme>();
+                        self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
                     }
@@ -219,16 +204,14 @@ impl Stove {
                     event: w_event,
                 } => match w_event {
                     WindowEvent::Resized(size) => {
-                        let scale_factor = self
-                            .window.as_ref().expect("no window")
-                            .scale_factor();
-                        self.change_pan(size, scale_factor);
+                        let scale_factor = self.window.as_ref().expect("no window").scale_factor();
+                        self.resize_callback(size, scale_factor);
                     }
                     WindowEvent::ScaleFactorChanged {
                         new_inner_size,
                         scale_factor,
                     } => {
-                        self.change_pan(*new_inner_size, scale_factor);
+                        self.resize_callback(*new_inner_size, scale_factor);
                     }
                     WindowEvent::CloseRequested => {
                         control_flow.set_exit();
@@ -239,7 +222,7 @@ impl Stove {
                     if self.frontend.active() {
                         #[cfg(target_os = "android")]
                         {
-                            let _ = self.backend.container.remove_resource::<Pan>();
+                            let _ = self.backend.container.remove_resource::<GfxSurface>();
                         }
                         self.frontend.suspend();
                         self.backend.suspend();
@@ -249,8 +232,8 @@ impl Stove {
                     if self.frontend.suspended() {
                         #[cfg(target_os = "android")]
                         {
-                            let window = self.window.take().expect("no window");
-                            let gfx = futures::executor::block_on(Pan::new(
+                            let window = self.window.as_ref().expect("no window");
+                            let gfx = futures::executor::block_on(GfxSurface::new(
                                 &window,
                                 GfxOptions::native(),
                             ));
@@ -271,16 +254,14 @@ impl Stove {
                 }
                 Event::RedrawRequested(_) => {
                     if self.backend.active() {
-                        extract::season(&mut self);
+                        extract::extract(&mut self);
                         self.backend.exec(TaskLabel::Main);
-                        render::saute(&mut self);
+                        render::render(&mut self);
                     }
                 }
                 Event::RedrawEventsCleared => {
                     if self.backend.active() {
-                        self.window.as_ref()
-                            .expect("no window")
-                            .request_redraw();
+                        self.window.as_ref().expect("no window").request_redraw();
                     }
                     if self.frontend.can_idle() && self.backend.can_idle() {
                         control_flow.set_wait();
@@ -295,13 +276,24 @@ impl Stove {
         );
     }
 
-    fn prepare_ingredients_from_queue(&mut self) {
-        let ingredient_preparation_queue = self
-            .ingredient_preparation_queue
+    fn init_native_gfx(&mut self, event_loop_window_target: &EventLoopWindowTarget<()>) {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let window = Rc::new(Window::new(event_loop_window_target).expect("no window"));
+            let gfx = futures::executor::block_on(GfxSurface::new(&window, GfxOptions::native()));
+            self.window.replace(window);
+            self.backend.container.insert_resource(gfx.0);
+            self.backend.container.insert_resource(gfx.1);
+        }
+    }
+
+    fn attach_from_queue(&mut self) {
+        let attachment_queue = self
+            .attachment_queue
             .drain(..)
             .collect::<Vec<Box<fn(&mut Stove)>>>();
-        for ingredient_preparation in ingredient_preparation_queue {
-            ingredient_preparation(self);
+        for attach_fn in attachment_queue {
+            attach_fn(self);
         }
     }
     pub fn order_delivery(togo_ticket: DeliveryTicket) -> Option<DeliveryService> {
@@ -312,10 +304,12 @@ impl Stove {
     }
 }
 
+pub type Recipe = Job;
+
 pub trait Cook {
-    fn recipe(recipe_directions: &mut RecipeDirections);
+    fn recipe(recipe: &mut Recipe);
 }
 
-pub trait Preparation {
-    fn prepare(stove: &mut Stove);
+pub trait Attach {
+    fn attach(stove: &mut Stove);
 }

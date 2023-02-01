@@ -3,17 +3,17 @@ use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
 use nalgebra::matrix;
 
 use crate::coord::{Depth, ScaledArea, ScaledPosition, ScaledSection};
-use crate::gfx::{Pan, Duvet};
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
-use crate::{Preparation, BackendStages, Stove};
+use crate::{Attach, BackendStages, Stove};
 
 #[derive(Resource)]
-pub struct Spatula {
+pub struct Viewport {
     pub(crate) cpu: CpuViewport,
     pub(crate) gpu: GpuViewport,
-    pub(crate) bind_group: wgpu::BindGroup,
-    pub(crate) bind_group_layout: wgpu::BindGroupLayout,
+    pub bind_group: wgpu::BindGroup,
+    pub bind_group_layout: wgpu::BindGroupLayout,
     pub(crate) uniform: Uniform<GpuViewport>,
     pub(crate) depth_texture: wgpu::Texture,
     pub(crate) depth_format: wgpu::TextureFormat,
@@ -35,7 +35,7 @@ impl ViewportOffset {
     }
 }
 
-impl Spatula {
+impl Viewport {
     pub(crate) fn new(device: &wgpu::Device, area: ScaledArea) -> Self {
         let depth = 100u32.into();
         let cpu_viewport = CpuViewport::new(area, depth);
@@ -102,7 +102,7 @@ impl Spatula {
             self.cpu.area,
         )
     }
-    pub(crate) fn adjust_area(&mut self, gfx_surface: &Pan, width: u32, height: u32) {
+    pub(crate) fn adjust_area(&mut self, gfx_surface: &GfxSurface, width: u32, height: u32) {
         let area = ScaledArea::new(width as f32, height as f32);
         self.cpu = CpuViewport::new(area, 100u32.into());
         self.gpu = self.cpu.gpu_viewport();
@@ -175,20 +175,21 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
 }
 
 pub(crate) fn attach(
-    gfx_surface: Res<Pan>,
-    gfx_surface_configuration: Res<Duvet>,
+    gfx_surface: Res<GfxSurface>,
+    gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
     mut cmd: Commands,
 ) {
     let area = ScaledArea::new(
         gfx_surface_configuration.configuration.width as f32,
         gfx_surface_configuration.configuration.height as f32,
     );
-    cmd.insert_resource(Spatula::new(&gfx_surface.device, area));
+    cmd.insert_resource(Viewport::new(&gfx_surface.device, area));
 }
+
 pub(crate) fn adjust_area(
-    gfx_surface: Res<Pan>,
-    gfx_surface_configuration: Res<Duvet>,
-    mut viewport: ResMut<Spatula>,
+    gfx_surface: Res<GfxSurface>,
+    gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
+    mut viewport: ResMut<Viewport>,
     mut resize_events: EventReader<Resize>,
 ) {
     for _resize in resize_events.iter() {
@@ -200,13 +201,13 @@ pub(crate) fn adjust_area(
     }
 }
 
-impl Preparation for Spatula {
-    fn prepare(engen: &mut Stove) {
-        engen
+impl Attach for Viewport {
+    fn attach(stove: &mut Stove) {
+        stove
             .backend
             .startup
             .add_system_to_stage(BackendStages::Startup, attach);
-        engen
+        stove
             .backend
             .main
             .add_system_to_stage(BackendStages::Resize, adjust_area);

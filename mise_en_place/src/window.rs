@@ -4,8 +4,8 @@ use bevy_ecs::prelude::{Events, Resource};
 use winit::event_loop::EventLoopWindowTarget;
 use winit::window::Window;
 
-use crate::{Preparation, BackendStages, Stove, FrontEndStages};
 use crate::coord::ScaledArea;
+use crate::{Attach, BackendStages, FrontEndStages, Stove};
 
 #[derive(Resource)]
 pub(crate) struct ScaleFactor {
@@ -36,21 +36,21 @@ impl Resize {
     }
 }
 
-impl Preparation for Resize {
-    fn prepare(engen: &mut Stove) {
-        engen
+impl Attach for Resize {
+    fn attach(stove: &mut Stove) {
+        stove
             .frontend
             .container
             .insert_resource(Events::<Resize>::default());
-        engen
+        stove
             .backend
             .container
             .insert_resource(Events::<Resize>::default());
-        engen
+        stove
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Initialize, Events::<Resize>::update_system);
-        engen
+        stove
             .backend
             .main
             .add_system_to_stage(BackendStages::Initialize, Events::<Resize>::update_system);

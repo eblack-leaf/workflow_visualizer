@@ -47,7 +47,7 @@ impl Exit {
     }
 }
 
-pub struct RecipeDirections {
+pub struct Job {
     pub execution_state: ExecutionState,
     pub container: Container,
     pub startup: Task,
@@ -55,7 +55,7 @@ pub struct RecipeDirections {
     pub teardown: Task,
 }
 
-impl RecipeDirections {
+impl Job {
     pub(crate) fn new() -> Self {
         Self {
             execution_state: ExecutionState::Active,

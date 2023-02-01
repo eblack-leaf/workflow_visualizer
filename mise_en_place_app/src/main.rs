@@ -1,8 +1,9 @@
-use mise_en_place::{Stove, RecipeDirections, Cook, DeliveryTicket};
+use mise_en_place::{Cook, DeliveryTicket, Job, Recipe, Stove};
 
-struct Recipe;
-impl Cook for Recipe {
-    fn recipe(recipe_directions: &mut RecipeDirections) {}
+struct Meal;
+
+impl Cook for Meal {
+    fn recipe(recipe: &mut Recipe) {}
 }
 
 fn main() {
@@ -10,13 +11,15 @@ fn main() {
     if args.contains(&"web".to_string()) {
         let delivery_ticket =
             DeliveryTicket::new("mise_en_place_app", "debug", "mise_en_place_app_web_build");
-        let delivery_service = Stove::order_delivery(delivery_ticket).expect("could not compile to wasm");
-        #[cfg(not(target_arch = "wasm32"))]{
+        let delivery_service =
+            Stove::order_delivery(delivery_ticket).expect("could not compile to wasm");
+        #[cfg(not(target_arch = "wasm32"))]
+        {
             if args.contains(&"serve".to_string()) {
                 delivery_service.deliver_to(([0, 0, 0, 0], 3030));
             }
         }
     }
-    let stove = Stove::new();
-    stove.cook::<Recipe>();
+    let mut stove = Stove::new();
+    stove.cook::<Meal>();
 }
