@@ -1,6 +1,7 @@
-use bevy_ecs::prelude::Resource;
+use bevy_ecs::prelude::{EventReader, Res, ResMut, Resource, SystemStage};
 
-use crate::window::EngenWindow;
+use crate::{Attach, BackendStages, Engen};
+use crate::window::{EngenWindow, Resize};
 
 #[derive(Clone)]
 pub struct GfxOptions {
@@ -141,5 +142,13 @@ pub(crate) struct GfxSurfaceConfiguration {
 impl GfxSurfaceConfiguration {
     pub(crate) fn new(configuration: wgpu::SurfaceConfiguration) -> Self {
         Self { configuration }
+    }
+}
+
+pub(crate) fn resize(gfx_surface: Res<GfxSurface>, mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>, mut resize_events: EventReader<Resize>) {
+    for resize in resize_events.iter() {
+        gfx_surface_configuration.configuration.width = resize.size.width as u32;
+        gfx_surface_configuration.configuration.height = resize.size.height as u32;
+        gfx_surface.surface.configure(&gfx_surface.device, &gfx_surface_configuration.configuration);
     }
 }
