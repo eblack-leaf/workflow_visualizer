@@ -122,7 +122,11 @@ impl SpacialHasher {
         let old = self.current_overlaps.remove(&entity);
         if let Some(overlaps) = old {
             for other in overlaps.entities {
-                self.current_overlaps.get_mut(&other).expect("no overlaps").entities.remove(&entity);
+                self.current_overlaps
+                    .get_mut(&other)
+                    .expect("no overlaps")
+                    .entities
+                    .remove(&entity);
             }
         }
     }
@@ -158,13 +162,16 @@ pub(crate) fn update_spacial_hash(
             spacial_hasher
                 .spacial_hash_cache
                 .get_mut(&entity)
-                .expect("spacial hash cache not setup").remove(&hash);
+                .expect("spacial hash cache not setup")
+                .remove(&hash);
         }
         let added = current_hashes
-            .difference(&spacial_hasher
-                .spacial_hash_cache
-                .get(&entity)
-                .expect("spacial hash cache not setup"))
+            .difference(
+                &spacial_hasher
+                    .spacial_hash_cache
+                    .get(&entity)
+                    .expect("spacial hash cache not setup"),
+            )
             .copied()
             .collect::<HashSet<SpacialHash>>();
         for hash in added {
@@ -173,7 +180,8 @@ pub(crate) fn update_spacial_hash(
             spacial_hasher
                 .spacial_hash_cache
                 .get_mut(&entity)
-                .expect("spacial hash cache not setup").insert(hash);
+                .expect("spacial hash cache not setup")
+                .insert(hash);
         }
     }
     for added_region in added_hash_regions {

@@ -6,7 +6,7 @@ use crate::coord::{Depth, ScaledArea, ScaledPosition, ScaledSection};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
-use crate::{Attach, BackendStages, BackEndStartupStages, Stove};
+use crate::{Attach, BackEndStartupStages, BackendStages, Stove};
 
 #[derive(Resource)]
 pub struct Viewport {
