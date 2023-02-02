@@ -93,6 +93,7 @@ impl Stove {
                 );
                 job.main
                     .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
+                job.main.add_stage(FrontEndStages::Last, SystemStage::parallel());
                 job
             },
             backend: {
