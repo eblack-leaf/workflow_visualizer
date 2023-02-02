@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{
-    Added, Changed, Commands, Component, Entity, EventReader, IntoSystemDescriptor, Or, Query, Res,
-    ResMut, Resource, SystemLabel, With, Without,
+    Added, Changed, Commands, Component, Entity, EventReader, EventWriter, IntoSystemDescriptor,
+    Or, Query, RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
@@ -82,6 +82,9 @@ pub(crate) struct SpacialHasher {
     pub(crate) alignment: f32,
     pub(crate) cached_hash_range: SpacialHashRange,
     pub(crate) entities: HashMap<SpacialHash, HashSet<Entity>>,
+    spacial_hash_cache: HashMap<Entity, HashSet<SpacialHash>>,
+    pub current_overlaps: HashMap<Entity, CurrentOverlaps>,
+    overlap_check_queue: HashSet<(Entity, SpacialHash)>,
     an_entity_changed: bool,
     visible_bounds_changed: bool,
 }
@@ -92,6 +95,9 @@ impl SpacialHasher {
             alignment,
             cached_hash_range: SpacialHashRange::new(visible_section, alignment),
             entities: HashMap::new(),
+            spacial_hash_cache: HashMap::new(),
+            current_overlaps: HashMap::new(),
+            overlap_check_queue: HashSet::new(),
             an_entity_changed: false,
             visible_bounds_changed: false,
         }
@@ -99,42 +105,75 @@ impl SpacialHasher {
     pub(crate) fn current_range(&self, visible_section: Section) -> SpacialHashRange {
         SpacialHashRange::new(visible_section, self.alignment)
     }
+    fn setup(&mut self, entity: Entity) {
+        self.spacial_hash_cache.insert(entity, HashSet::new());
+        self.current_overlaps.insert(entity, CurrentOverlaps::new());
+    }
+    fn cleanup(&mut self, entity: Entity) {
+        let old = self.spacial_hash_cache.remove(&entity);
+        if let Some(hashes) = old {
+            for hash in hashes {
+                self.entities
+                    .get_mut(&hash)
+                    .expect("entity set not setup")
+                    .remove(&entity);
+            }
+        }
+        let old = self.current_overlaps.remove(&entity);
+        if let Some(overlaps) = old {
+            for other in overlaps.entities {
+                self.current_overlaps.get_mut(&other).expect("no overlaps").entities.remove(&entity);
+            }
+        }
+    }
 }
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
-    mut changed: Query<
-        (Entity, &Position, &Area, &mut SpacialHashCache),
-        Or<(Changed<Position>, Changed<Area>)>,
-    >,
+    mut changed: Query<(Entity, &Position, &Area), Or<(Changed<Position>, Changed<Area>)>>,
 ) {
     let mut deferred_add = HashSet::<(Entity, SpacialHash)>::new();
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
-    for (entity, position, area, mut spacial_hash_cache) in changed.iter_mut() {
+    for (entity, position, area) in changed.iter() {
         spacial_hasher.an_entity_changed = true;
         let section: Section = (*position, *area).into();
         let current_range = spacial_hasher.current_range(section);
-        let hashes = current_range.hashes();
-        let removed = spacial_hash_cache
-            .hashes
-            .difference(&hashes)
+        let current_hashes = current_range.hashes();
+        for hash in current_hashes.iter() {
+            spacial_hasher.overlap_check_queue.insert((entity, *hash));
+        }
+        let removed = spacial_hasher
+            .spacial_hash_cache
+            .get_mut(&entity)
+            .expect("spacial hash cache not setup")
+            .difference(&current_hashes)
             .copied()
             .collect::<HashSet<SpacialHash>>();
         for hash in removed {
+            spacial_hasher.overlap_check_queue.insert((entity, hash));
             spacial_hasher
                 .entities
                 .get_mut(&hash)
                 .expect("no entity set")
                 .remove(&entity);
-            spacial_hash_cache.hashes.remove(&hash);
+            spacial_hasher
+                .spacial_hash_cache
+                .get_mut(&entity)
+                .expect("spacial hash cache not setup").remove(&hash);
         }
-        let added = hashes
-            .difference(&spacial_hash_cache.hashes)
+        let added = current_hashes
+            .difference(&spacial_hasher
+                .spacial_hash_cache
+                .get(&entity)
+                .expect("spacial hash cache not setup"))
             .copied()
             .collect::<HashSet<SpacialHash>>();
         for hash in added {
             deferred_add.insert((entity, hash));
             added_hash_regions.insert(hash);
-            spacial_hash_cache.hashes.insert(hash);
+            spacial_hasher
+                .spacial_hash_cache
+                .get_mut(&entity)
+                .expect("spacial hash cache not setup").insert(hash);
         }
     }
     for added_region in added_hash_regions {
@@ -149,13 +188,77 @@ pub(crate) fn update_spacial_hash(
     }
 }
 #[derive(Component)]
-pub(crate) struct SpacialHashCache {
-    pub(crate) hashes: HashSet<SpacialHash>,
+pub struct CollisionBegin {
+    pub others: HashSet<Entity>,
 }
-impl SpacialHashCache {
+impl CollisionBegin {
     pub(crate) fn new() -> Self {
         Self {
-            hashes: HashSet::new(),
+            others: HashSet::new(),
+        }
+    }
+}
+#[derive(Component)]
+pub struct CollisionEnd {
+    pub others: HashSet<Entity>,
+}
+impl CollisionEnd {
+    pub(crate) fn new() -> Self {
+        Self {
+            others: HashSet::new(),
+        }
+    }
+}
+pub(crate) fn collision_responses(
+    mut spacial_hasher: ResMut<SpacialHasher>,
+    entities: Query<
+        (
+            Entity,
+            &Position,
+            &Area,
+            &mut CollisionBegin,
+            &mut CollisionEnd,
+        ),
+        With<Visibility>,
+    >,
+) {
+    let mut checks = HashSet::new();
+    for (entity, hash) in spacial_hasher.overlap_check_queue.iter() {
+        let others = spacial_hasher.entities.get(hash).expect("no entity set");
+        for other in others {
+            let mut smaller_index_entity = entity;
+            let mut higher_index_entity = other;
+            if entity.index() > other.index() {
+                smaller_index_entity = other;
+                higher_index_entity = entity;
+            } else if entity.index() == other.index() {
+                if entity.generation() > other.generation() {
+                    smaller_index_entity = other;
+                    higher_index_entity = entity;
+                }
+            }
+            checks.insert((*smaller_index_entity, *higher_index_entity));
+        }
+    }
+    for check in checks {
+        // TODO check overlap and send responses
+    }
+}
+pub(crate) fn clean_collision_responses(
+    mut entities: Query<(&mut CollisionBegin, &mut CollisionEnd)>,
+) {
+    for (mut collision_begin, mut collision_end) in entities.iter_mut() {
+        collision_begin.others.clear();
+        collision_end.others.clear();
+    }
+}
+pub struct CurrentOverlaps {
+    pub entities: HashSet<Entity>,
+}
+impl CurrentOverlaps {
+    pub(crate) fn new() -> Self {
+        Self {
+            entities: HashSet::new(),
         }
     }
 }
@@ -167,14 +270,34 @@ pub(crate) fn visibility_setup(
             With<Position>,
             With<Area>,
             Without<Visibility>,
-            Without<SpacialHashCache>,
         ),
     >,
+    mut spacial_hasher: ResMut<SpacialHasher>,
     mut cmd: Commands,
 ) {
     for entity in added.iter() {
-        cmd.entity(entity)
-            .insert((Visibility::new(), SpacialHashCache::new()));
+        cmd.entity(entity).insert((
+            Visibility::new(),
+            CollisionBegin::new(),
+            CollisionEnd::new(),
+        ));
+        spacial_hasher.setup(entity);
+    }
+}
+pub(crate) fn visibility_cleanup(
+    lost_position: RemovedComponents<Position>,
+    lost_area: RemovedComponents<Area>,
+    lost_visibility: RemovedComponents<Visibility>,
+    mut spacial_hasher: ResMut<SpacialHasher>,
+) {
+    for entity in lost_visibility.iter() {
+        spacial_hasher.cleanup(entity);
+    }
+    for entity in lost_position.iter() {
+        spacial_hasher.cleanup(entity);
+    }
+    for entity in lost_area.iter() {
+        spacial_hasher.cleanup(entity);
     }
 }
 pub(crate) fn calc_visible_section(
@@ -378,10 +501,6 @@ impl Attach for Visibility {
             .container
             .insert_resource(VisibleBoundsPositionAdjust::new());
         stove
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::VisibilitySetup, visibility_setup);
-        stove
             .backend
             .main
             .add_system_to_stage(BackendStages::Resize, viewport_read_offset);
@@ -389,6 +508,14 @@ impl Attach for Visibility {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Resize, resize);
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::VisibilityPreparation, visibility_setup);
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::VisibilityPreparation, visibility_cleanup);
         stove.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
             adjust_position.label(VisibilitySystems::AdjustPosition),
@@ -401,8 +528,16 @@ impl Attach for Visibility {
         );
         stove.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
+            collision_responses.after(VisibilitySystems::UpdateSpacialHash),
+        );
+        stove.frontend.main.add_system_to_stage(
+            FrontEndStages::ResolveVisibility,
             calc_visible_section.after(VisibilitySystems::UpdateSpacialHash),
         );
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Last, clean_collision_responses);
     }
 }
 

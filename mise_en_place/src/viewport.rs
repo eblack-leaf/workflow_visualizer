@@ -6,7 +6,7 @@ use crate::coord::{Depth, ScaledArea, ScaledPosition, ScaledSection};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
-use crate::{Attach, BackendStages, Stove};
+use crate::{Attach, BackendStages, BackEndStartupStages, Stove};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -206,7 +206,7 @@ impl Attach for Viewport {
         stove
             .backend
             .startup
-            .add_system_to_stage(BackendStages::Startup, attach);
+            .add_system_to_stage(BackEndStartupStages::Startup, attach);
         stove
             .backend
             .main

@@ -49,7 +49,7 @@ impl Attach for Resize {
         stove
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Initialize, Events::<Resize>::update_system);
+            .add_system_to_stage(FrontEndStages::First, Events::<Resize>::update_system);
         stove
             .backend
             .main

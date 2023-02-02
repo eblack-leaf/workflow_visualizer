@@ -33,21 +33,26 @@ mod visibility;
 mod wasm_compiler;
 mod wasm_server;
 mod window;
-
+#[derive(StageLabel)]
+pub enum FrontEndStartupStages {
+    Startup,
+}
 #[derive(StageLabel)]
 pub enum FrontEndStages {
-    Startup,
-    Initialize,
+    First,
     Resize,
     Process,
     CoordAdjust,
-    VisibilitySetup,
+    VisibilityPreparation,
     ResolveVisibility,
+    Last,
 }
-
+#[derive(StageLabel)]
+pub enum BackEndStartupStages {
+    Startup,
+}
 #[derive(StageLabel)]
 pub enum BackendStages {
-    Startup,
     Initialize,
     GfxSurfaceResize,
     Resize,
@@ -73,17 +78,19 @@ impl Stove {
             frontend: {
                 let mut job = Job::new();
                 job.startup
-                    .add_stage(FrontEndStages::Startup, SystemStage::parallel());
+                    .add_stage(FrontEndStartupStages::Startup, SystemStage::parallel());
                 job.main
-                    .add_stage(FrontEndStages::Initialize, SystemStage::parallel());
+                    .add_stage(FrontEndStages::First, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::Resize, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::Process, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::VisibilitySetup, SystemStage::parallel());
+                job.main.add_stage(
+                    FrontEndStages::VisibilityPreparation,
+                    SystemStage::parallel(),
+                );
                 job.main
                     .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
                 job
@@ -91,7 +98,7 @@ impl Stove {
             backend: {
                 let mut job = Job::new();
                 job.startup
-                    .add_stage(BackendStages::Startup, SystemStage::parallel());
+                    .add_stage(BackEndStartupStages::Startup, SystemStage::parallel());
                 job.main
                     .add_stage(BackendStages::Initialize, SystemStage::parallel());
                 job.main.add_stage(
