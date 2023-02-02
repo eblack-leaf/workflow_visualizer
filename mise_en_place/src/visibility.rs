@@ -1,16 +1,16 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{
-    Commands, Component, Entity, EventReader, IntoSystemDescriptor, Query, Res, ResMut, Resource,
-    SystemLabel,
+    Changed, Commands, Component, Entity, EventReader, IntoSystemDescriptor, Or, Query, Res,
+    ResMut, Resource, SystemLabel,
 };
 
-use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 
 #[derive(Component)]
 pub(crate) struct Visibility {
@@ -42,11 +42,45 @@ pub(crate) struct SpacialHash {
     pub(crate) x: u32,
     pub(crate) y: u32,
 }
-
+impl SpacialHash {
+    pub(crate) fn new(x: u32, y: u32) -> Self {
+        Self { x, y }
+    }
+}
+#[derive(Eq, Copy, Clone, PartialEq)]
+pub(crate) struct SpacialHashRange {
+    pub(crate) left: u32,
+    pub(crate) top: u32,
+    pub(crate) right: u32,
+    pub(crate) bottom: u32,
+}
+impl SpacialHashRange {
+    pub(crate) fn new(visible_section: Section, alignment: f32) -> Self {
+        let left = (visible_section.left() / alignment).floor() as u32;
+        let top = (visible_section.top() / alignment).floor() as u32;
+        let right = (visible_section.right() / alignment).ceil() as u32;
+        let bottom = (visible_section.bottom() / alignment).ceil() as u32;
+        Self {
+            left,
+            top,
+            right,
+            bottom,
+        }
+    }
+    pub(crate) fn hashes(&self) -> HashSet<SpacialHash> {
+        let mut hashes = HashSet::new();
+        for x in self.left..self.right {
+            for y in self.top..self.bottom {
+                hashes.insert(SpacialHash::new(x, y));
+            }
+        }
+        hashes
+    }
+}
 #[derive(Resource)]
 pub(crate) struct SpacialHasher {
     pub(crate) alignment: f32,
-    pub(crate) cached_hash_range: (),
+    pub(crate) cached_hash_range: SpacialHashRange,
     pub(crate) entities: HashMap<SpacialHash, HashSet<Entity>>,
 }
 
@@ -54,17 +88,115 @@ impl SpacialHasher {
     pub(crate) fn new() -> Self {
         todo!()
     }
+    pub(crate) fn current_range(&self, visible_section: Section) -> SpacialHashRange {
+        SpacialHashRange::new(visible_section, self.alignment)
+    }
 }
-
+pub(crate) fn update_spacial_hash(
+    mut spacial_hasher: ResMut<SpacialHasher>,
+    mut changed: Query<
+        (Entity, &Position, &Area, &mut SpacialHashCache),
+        Or<(Changed<Position>, Changed<Area>)>,
+    >,
+) {
+    let mut deferred_add = HashSet::<(Entity, SpacialHash)>::new();
+    let mut added_hash_regions = HashSet::<SpacialHash>::new();
+    for (entity, position, area, mut spacial_hash_cache) in changed.iter_mut() {
+        let section: Section = (*position, *area).into();
+        let current_range = spacial_hasher.current_range(section);
+        let hashes = current_range.hashes();
+        let removed = spacial_hash_cache.hashes.difference(&hashes);
+        let added = hashes.difference(&spacial_hash_cache.hashes);
+        for hash in removed {
+            spacial_hasher
+                .entities
+                .get_mut(hash)
+                .expect("no entity set")
+                .remove(&entity);
+            spacial_hash_cache.hashes.remove(hash);
+        }
+        for hash in added {
+            deferred_add.insert((entity, *hash));
+            added_hash_regions.insert(*hash);
+            spacial_hash_cache.hashes.insert(*hash);
+        }
+    }
+    for added_region in added_hash_regions {
+        spacial_hasher.entities.insert(added_region, HashSet::new());
+    }
+    for (entity, hash) in deferred_add {
+        spacial_hasher
+            .entities
+            .get_mut(&hash)
+            .expect("no entity set")
+            .insert(entity);
+    }
+}
+#[derive(Component)]
+pub(crate) struct SpacialHashCache {
+    pub(crate) hashes: HashSet<SpacialHash>,
+}
+impl SpacialHashCache {
+    pub(crate) fn new() -> Self {
+        Self {
+            hashes: HashSet::new(),
+        }
+    }
+}
 pub(crate) fn calc_visible_section(
     visible_bounds: Res<VisibleBounds>,
-    mut entities: Query<(Entity, &mut Visibility, &mut VisibleSection)>,
-    mut spacial_hash: ResMut<SpacialHasher>,
+    mut entities: Query<(
+        Entity,
+        &Position,
+        &Area,
+        &mut Visibility,
+        Option<&mut VisibleSection>,
+    )>,
+    mut spacial_hasher: ResMut<SpacialHasher>,
+    mut cmd: Commands,
 ) {
-    // for cached hash range
-    // check visibility and update
-    // for new range
-    // check visibility and update
+    let current_range = spacial_hasher.current_range(visible_bounds.section);
+    let cached_hashes = spacial_hasher.cached_hash_range.hashes();
+    let current_hashes = current_range.hashes();
+    let removed_hashes = cached_hashes.difference(&current_hashes);
+    let mut entity_remove_queue = HashSet::<Entity>::new();
+    for hash in removed_hashes {
+        for entity in spacial_hasher
+            .entities
+            .get(hash)
+            .expect("no entity set")
+            .iter()
+        {
+            entity_remove_queue.insert(*entity);
+        }
+    }
+    for hash in current_hashes.iter() {
+        for entity in spacial_hasher.entities.get(hash).expect("no entity set") {
+            let (_entity, position, area, mut visibility, mut maybe_visible_section) =
+                entities.get_mut(*entity).expect("no entity found");
+            if !visibility.visible() {
+                visibility.visible = true;
+            }
+            let section: Section = (*position, *area).into();
+            let current_visible_section = section.intersection(visible_bounds.section);
+            if let Some(visible_section) = maybe_visible_section {
+                if visible_section.section != current_visible_section {
+                    *visible_section = VisibleSection::new(current_visible_section);
+                }
+            } else {
+                cmd.entity(*entity).insert(current_visible_section);
+            }
+            entity_remove_queue.remove(entity);
+        }
+    }
+    for entity in entity_remove_queue {
+        entities
+            .get_mut(entity)
+            .expect("entity not alive any longer")
+            .3
+            .visible = false;
+        cmd.entity(entity).remove::<VisibleSection>();
+    }
 }
 
 #[derive(Resource)]
@@ -206,7 +338,13 @@ impl Attach for Visibility {
         );
         stove.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
-            calc_visible_section.after(VisibilitySystems::AdjustPosition),
+            update_spacial_hash
+                .label(VisibilitySystems::UpdateSpacialHash)
+                .after(VisibilitySystems::AdjustPosition),
+        );
+        stove.frontend.main.add_system_to_stage(
+            FrontEndStages::ResolveVisibility,
+            calc_visible_section.after(VisibilitySystems::UpdateSpacialHash),
         );
     }
 }
@@ -214,4 +352,5 @@ impl Attach for Visibility {
 #[derive(SystemLabel)]
 pub enum VisibilitySystems {
     AdjustPosition,
+    UpdateSpacialHash,
 }

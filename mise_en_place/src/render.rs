@@ -11,7 +11,7 @@ pub enum RenderPhase {
 
 pub(crate) fn invoke_render<'a, Ingredient: Render + Resource>(
     backend: &'a Job,
-    render_pass_handle: &mut PanHandle<'a>,
+    render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
     let viewport = backend
         .container
@@ -24,13 +24,13 @@ pub(crate) fn invoke_render<'a, Ingredient: Render + Resource>(
         .saute(render_pass_handle, viewport);
 }
 
-pub struct PanHandle<'a>(pub wgpu::RenderPass<'a>);
+pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
 
-pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Job, &mut PanHandle<'a>)>>;
+pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Job, &mut RenderPassHandle<'a>)>>;
 
 pub trait Render {
     fn phase() -> RenderPhase;
-    fn saute<'a>(&'a self, pan_handle: &mut PanHandle<'a>, viewport: &'a Viewport);
+    fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
 
 pub(crate) fn render(stove: &mut Stove) {
@@ -68,7 +68,7 @@ pub(crate) fn render(stove: &mut Stove) {
             let depth_texture_view = viewport
                 .depth_texture
                 .create_view(&wgpu::TextureViewDescriptor::default());
-            let mut render_pass_handle = PanHandle(command_encoder.begin_render_pass(
+            let mut render_pass_handle = RenderPassHandle(command_encoder.begin_render_pass(
                 &wgpu::RenderPassDescriptor {
                     label: Some("render pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {

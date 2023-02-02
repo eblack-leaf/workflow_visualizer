@@ -322,9 +322,9 @@ impl Stove {
             attach_fn(self);
         }
     }
-    pub fn order_delivery(togo_ticket: DeliveryTicket) -> Option<DeliveryService> {
-        match togo_ticket.order() {
-            Ok(_) => Some(DeliveryService::new(togo_ticket)),
+    pub fn order_delivery(delivery_ticket: DeliveryTicket) -> Option<DeliveryService> {
+        match delivery_ticket.order() {
+            Ok(_) => Some(DeliveryService::new(delivery_ticket)),
             Err(_) => None,
         }
     }
