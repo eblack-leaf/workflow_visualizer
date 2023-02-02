@@ -159,8 +159,8 @@ impl Stove {
                     .expect("could not create inner size")
             };
             let scale_factor = ScaleFactor::new(window.scale_factor());
-            self.backend.insert_resource(scale_factor);
-            self.frontend.insert_resource(scale_factor);
+            self.backend.container.insert_resource(scale_factor);
+            self.frontend.container.insert_resource(scale_factor);
             window.set_inner_size(inner_size(scale_factor.factor));
             {
                 let w_window = window.clone();
