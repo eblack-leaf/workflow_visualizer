@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{
-    Changed, Commands, Component, Entity, EventReader, IntoSystemDescriptor, Or, Query, Res,
-    ResMut, Resource, SystemLabel,
+    Added, Changed, Commands, Component, Entity, EventReader, IntoSystemDescriptor, Or, Query, Res,
+    ResMut, Resource, SystemLabel, With, Without,
 };
 
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
@@ -82,6 +82,8 @@ pub(crate) struct SpacialHasher {
     pub(crate) alignment: f32,
     pub(crate) cached_hash_range: SpacialHashRange,
     pub(crate) entities: HashMap<SpacialHash, HashSet<Entity>>,
+    an_entity_changed: bool,
+    visible_bounds_changed: bool,
 }
 
 impl SpacialHasher {
@@ -90,6 +92,8 @@ impl SpacialHasher {
             alignment,
             cached_hash_range: SpacialHashRange::new(visible_section, alignment),
             entities: HashMap::new(),
+            an_entity_changed: false,
+            visible_bounds_changed: false,
         }
     }
     pub(crate) fn current_range(&self, visible_section: Section) -> SpacialHashRange {
@@ -106,6 +110,7 @@ pub(crate) fn update_spacial_hash(
     let mut deferred_add = HashSet::<(Entity, SpacialHash)>::new();
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
     for (entity, position, area, mut spacial_hash_cache) in changed.iter_mut() {
+        spacial_hasher.an_entity_changed = true;
         let section: Section = (*position, *area).into();
         let current_range = spacial_hasher.current_range(section);
         let hashes = current_range.hashes();
@@ -154,6 +159,24 @@ impl SpacialHashCache {
         }
     }
 }
+pub(crate) fn visibility_setup(
+    added: Query<
+        (Entity),
+        (
+            Or<(Added<Position>, Added<Area>)>,
+            With<Position>,
+            With<Area>,
+            Without<Visibility>,
+            Without<SpacialHashCache>,
+        ),
+    >,
+    mut cmd: Commands,
+) {
+    for entity in added.iter() {
+        cmd.entity(entity)
+            .insert((Visibility::new(), SpacialHashCache::new()));
+    }
+}
 pub(crate) fn calc_visible_section(
     visible_bounds: Res<VisibleBounds>,
     mut entities: Query<(
@@ -166,46 +189,55 @@ pub(crate) fn calc_visible_section(
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut cmd: Commands,
 ) {
-    let current_range = spacial_hasher.current_range(visible_bounds.section);
-    let cached_hashes = spacial_hasher.cached_hash_range.hashes();
-    let current_hashes = current_range.hashes();
-    let removed_hashes = cached_hashes.difference(&current_hashes);
-    let mut entity_remove_queue = HashSet::<Entity>::new();
-    for hash in removed_hashes {
-        if let Some(entity_set) = spacial_hasher.entities.get(hash) {
-            for entity in entity_set.iter() {
-                entity_remove_queue.insert(*entity);
+    if spacial_hasher.visible_bounds_changed || spacial_hasher.an_entity_changed {
+        spacial_hasher.visible_bounds_changed = false;
+        spacial_hasher.an_entity_changed = false;
+        let current_range = spacial_hasher.current_range(visible_bounds.section);
+        let cached_hashes = spacial_hasher.cached_hash_range.hashes();
+        let current_hashes = current_range.hashes();
+        let removed_hashes = cached_hashes.difference(&current_hashes);
+        let mut entity_remove_queue = HashSet::<Entity>::new();
+        for hash in removed_hashes {
+            if let Some(entity_set) = spacial_hasher.entities.get(hash) {
+                for entity in entity_set.iter() {
+                    entity_remove_queue.insert(*entity);
+                }
             }
         }
-    }
-    for hash in current_hashes.iter() {
-        if let Some(entity_set) = spacial_hasher.entities.get(hash) {
-            for entity in entity_set {
-                let (_entity, position, area, mut visibility, mut maybe_visible_section) =
-                    entities.get_mut(*entity).expect("no entity found");
-                if !visibility.visible() {
-                    visibility.visible = true;
-                }
-                let section: Section = (*position, *area).into();
-                let current_visible_section = section.intersection(visible_bounds.section);
-                if let Some(mut visible_section) = maybe_visible_section {
-                    if visible_section.section != current_visible_section {
-                        *visible_section = VisibleSection::new(current_visible_section);
+        for hash in current_hashes.iter() {
+            if let Some(entity_set) = spacial_hasher.entities.get(hash) {
+                for entity in entity_set {
+                    let (_entity, position, area, mut visibility, mut maybe_visible_section) =
+                        entities.get_mut(*entity).expect("no entity found");
+                    let section: Section = (*position, *area).into();
+                    if section.is_overlapping(visible_bounds.section) {
+                        if !visibility.visible() {
+                            visibility.visible = true;
+                        }
+                        let current_visible_section =
+                            section.intersection(visible_bounds.section).unwrap();
+                        if let Some(mut visible_section) = maybe_visible_section {
+                            if visible_section.section != current_visible_section {
+                                *visible_section = VisibleSection::new(current_visible_section);
+                            }
+                        } else {
+                            cmd.entity(*entity).insert(current_visible_section);
+                        }
+                        entity_remove_queue.remove(entity);
+                    } else if visibility.visible() {
+                        entity_remove_queue.insert(*entity);
                     }
-                } else {
-                    cmd.entity(*entity).insert(current_visible_section);
                 }
-                entity_remove_queue.remove(entity);
             }
         }
-    }
-    for entity in entity_remove_queue {
-        entities
-            .get_mut(entity)
-            .expect("entity not alive any longer")
-            .3
-            .visible = false;
-        cmd.entity(entity).remove::<VisibleSection>();
+        for entity in entity_remove_queue {
+            entities
+                .get_mut(entity)
+                .expect("entity not alive any longer")
+                .3
+                .visible = false;
+            cmd.entity(entity).remove::<VisibleSection>();
+        }
     }
 }
 
@@ -242,12 +274,14 @@ impl VisibleBoundsPositionAdjust {
     }
 }
 
-pub fn adjust_position(
+pub(crate) fn adjust_position(
     mut visible_bounds: ResMut<VisibleBounds>,
     mut visible_bounds_position_adjust: ResMut<VisibleBoundsPositionAdjust>,
+    mut spacial_hasher: ResMut<SpacialHasher>,
 ) {
     if let Some(adjust) = visible_bounds_position_adjust.adjust.take() {
         visible_bounds.position_adjust(adjust);
+        spacial_hasher.visible_bounds_changed = true;
     }
 }
 
@@ -274,15 +308,15 @@ pub(crate) fn viewport_read_offset(
 
 impl Extract for VisibleBounds {
     fn extract(frontend: &mut Job, backend: &mut Job) {
-        let visible_bounds = frontend
-            .container
-            .get_resource::<VisibleBounds>()
-            .expect("no visible bounds");
         let scale_factor = frontend
             .container
             .get_resource::<ScaleFactor>()
             .expect("no scale factor")
             .factor;
+        let mut visible_bounds = frontend
+            .container
+            .get_resource_mut::<VisibleBounds>()
+            .expect("no visible bounds");
         if visible_bounds.dirty {
             backend
                 .container
@@ -290,6 +324,7 @@ impl Extract for VisibleBounds {
                 .expect("no viewport offset update")
                 .update
                 .replace(visible_bounds.section.position.to_scaled(scale_factor));
+            visible_bounds.dirty = false;
         }
     }
 }
@@ -298,9 +333,11 @@ pub(crate) fn resize(
     mut resize_events: EventReader<Resize>,
     mut visible_bounds: ResMut<VisibleBounds>,
     scale_factor: Res<ScaleFactor>,
+    mut spacial_hasher: ResMut<SpacialHasher>,
 ) {
     for event in resize_events.iter() {
         visible_bounds.adjust_area(event.size.to_area(scale_factor.factor));
+        spacial_hasher.visible_bounds_changed = true;
     }
 }
 
@@ -340,6 +377,10 @@ impl Attach for Visibility {
             .frontend
             .container
             .insert_resource(VisibleBoundsPositionAdjust::new());
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::VisibilitySetup, visibility_setup);
         stove
             .backend
             .main

@@ -41,6 +41,7 @@ pub enum FrontEndStages {
     Resize,
     Process,
     CoordAdjust,
+    VisibilitySetup,
     ResolveVisibility,
 }
 
@@ -81,6 +82,8 @@ impl Stove {
                     .add_stage(FrontEndStages::Process, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
+                job.main
+                    .add_stage(FrontEndStages::VisibilitySetup, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
                 job

@@ -63,15 +63,15 @@ impl Section {
         }
         return false;
     }
-    pub fn intersection(&self, other: Self) -> Self {
+    pub fn intersection(&self, other: Self) -> Option<Self> {
         if !self.is_overlapping(other) {
-            return Self::default();
+            return None;
         }
         let top = self.top().min(other.top());
         let bottom = self.bottom().min(other.bottom());
         let left = self.left().min(other.left());
         let right = self.right().min(other.right());
-        Self::from_ltrb(left, top, right, bottom)
+        Option::from(Self::from_ltrb(left, top, right, bottom))
     }
 }
 
