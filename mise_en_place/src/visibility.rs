@@ -366,7 +366,7 @@ impl Attach for Visibility {
 }
 
 #[derive(SystemLabel)]
-pub enum VisibilitySystems {
+enum VisibilitySystems {
     AdjustPosition,
     UpdateSpacialHash,
 }
