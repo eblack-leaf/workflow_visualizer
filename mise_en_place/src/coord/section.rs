@@ -75,12 +75,9 @@ impl Section {
     }
 }
 
-impl From<((f32, f32), (f32, f32))> for Section {
-    fn from(data: ((f32, f32), (f32, f32))) -> Self {
-        Self {
-            position: data.0.into(),
-            area: data.1.into(),
-        }
+impl<P: Into<Position>, A: Into<Area>> From<(P, A)> for Section {
+    fn from(value: (P, A)) -> Self {
+        Self::new(value.0.into(), value.1.into())
     }
 }
 
@@ -149,11 +146,8 @@ impl ScaledSection {
     }
 }
 
-impl From<((f32, f32), (f32, f32))> for ScaledSection {
-    fn from(data: ((f32, f32), (f32, f32))) -> Self {
-        Self {
-            position: data.0.into(),
-            area: data.1.into(),
-        }
+impl<SP: Into<ScaledPosition>, SA: Into<ScaledArea>> From<(SP, SA)> for ScaledSection {
+    fn from(value: (SP, SA)) -> Self {
+        Self::new(value.0.into(), value.1.into())
     }
 }

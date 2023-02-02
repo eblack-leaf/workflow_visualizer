@@ -3,11 +3,11 @@ use crate::{Job, Stove};
 pub(crate) type ExtractFns = Vec<Box<fn(&mut Job, &mut Job)>>;
 
 pub trait Extract {
-    fn season(frontend: &mut Job, backend: &mut Job);
+    fn extract(frontend: &mut Job, backend: &mut Job);
 }
 
 pub(crate) fn invoke_extract<Extractor: Extract>(frontend: &mut Job, backend: &mut Job) {
-    Extractor::season(frontend, backend);
+    Extractor::extract(frontend, backend);
 }
 
 pub(crate) fn extract(stove: &mut Stove) {

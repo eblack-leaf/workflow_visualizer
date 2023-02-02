@@ -1,6 +1,8 @@
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
+use crate::coord::depth_adjust::DepthAdjust;
+
 #[repr(C)]
 #[derive(Component, Pod, Zeroable, Copy, Clone, PartialEq)]
 pub struct Depth {
@@ -13,6 +15,10 @@ impl Depth {
         Self {
             layer: layer as f32,
         }
+    }
+    pub fn adjust<Adjust: Into<DepthAdjust>>(&mut self, adjust: Adjust) {
+        let adjust = adjust.into();
+        self.layer += adjust.layer;
     }
 }
 

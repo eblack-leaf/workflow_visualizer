@@ -9,12 +9,14 @@ use winit::window::Window;
 pub use job::Job;
 pub use wasm_server::DeliveryService;
 
+use crate::coord::Coords;
 use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
 use crate::job::TaskLabel;
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
+use crate::visibility::Visibility;
 pub use crate::wasm_compiler::DeliveryTicket;
 use crate::window::{Resize, ScaleFactor};
 
@@ -27,6 +29,7 @@ mod render;
 mod theme;
 mod uniform;
 mod viewport;
+mod visibility;
 mod wasm_compiler;
 mod wasm_server;
 mod window;
@@ -35,6 +38,10 @@ mod window;
 pub enum FrontEndStages {
     Startup,
     Initialize,
+    Resize,
+    Process,
+    CoordAdjust,
+    ResolveVisibility,
 }
 
 #[derive(StageLabel)]
@@ -68,6 +75,14 @@ impl Stove {
                     .add_stage(FrontEndStages::Startup, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::Initialize, SystemStage::parallel());
+                job.main
+                    .add_stage(FrontEndStages::Resize, SystemStage::parallel());
+                job.main
+                    .add_stage(FrontEndStages::Process, SystemStage::parallel());
+                job.main
+                    .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
+                job.main
+                    .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
                 job
             },
             backend: {
@@ -144,6 +159,8 @@ impl Stove {
                     .expect("could not create inner size")
             };
             let scale_factor = ScaleFactor::new(window.scale_factor());
+            self.backend.insert_resource(scale_factor);
+            self.frontend.insert_resource(scale_factor);
             window.set_inner_size(inner_size(scale_factor.factor));
             {
                 let w_window = window.clone();
@@ -178,6 +195,10 @@ impl Stove {
             }
         });
     }
+    pub fn add_extraction<Extraction: Extract>(&mut self) {
+        self.extract_fns
+            .push(Box::new(invoke_extract::<Extraction>));
+    }
     fn resize_callback(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
         let resize_event = Resize::new((size.width, size.height).into(), scale_factor);
         self.frontend.container.send_event(resize_event);
@@ -190,9 +211,11 @@ impl Stove {
                 Event::NewEvents(start_cause) => match start_cause {
                     StartCause::Init => {
                         self.init_native_gfx(event_loop_window_target);
+                        self.invoke_attach::<Coords>();
                         self.invoke_attach::<Resize>();
                         self.invoke_attach::<Viewport>();
                         self.invoke_attach::<Theme>();
+                        self.invoke_attach::<Visibility>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
@@ -280,6 +303,9 @@ impl Stove {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let window = Rc::new(Window::new(event_loop_window_target).expect("no window"));
+            let scale_factor = ScaleFactor::new(window.scale_factor());
+            self.frontend.container.insert_resource(scale_factor);
+            self.backend.container.insert_resource(scale_factor);
             let gfx = futures::executor::block_on(GfxSurface::new(&window, GfxOptions::native()));
             self.window.replace(window);
             self.backend.container.insert_resource(gfx.0);

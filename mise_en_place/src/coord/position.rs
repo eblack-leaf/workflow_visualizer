@@ -3,6 +3,9 @@ use std::ops::Sub;
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
+use crate::coord::position_adjust::ScaledPositionAdjust;
+use crate::coord::PositionAdjust;
+
 #[repr(C)]
 #[derive(Pod, Zeroable, Component, Copy, Clone, Default, PartialEq)]
 pub struct Position {
@@ -16,6 +19,11 @@ impl Position {
     }
     pub fn to_scaled(&self, scale_factor: f64) -> ScaledPosition {
         ScaledPosition::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
+    }
+    pub(crate) fn adjust<Adjust: Into<PositionAdjust>>(&mut self, adjust: Adjust) {
+        let adjust = adjust.into();
+        self.x += adjust.x;
+        self.y += adjust.y;
     }
 }
 
@@ -62,6 +70,11 @@ impl ScaledPosition {
     }
     pub fn as_pos(&self) -> Position {
         Position::new(self.x, self.y)
+    }
+    pub(crate) fn adjust<Adjust: Into<ScaledPositionAdjust>>(&mut self, adjust: Adjust) {
+        let adjust = adjust.into();
+        self.x += adjust.x;
+        self.y += adjust.y;
     }
 }
 

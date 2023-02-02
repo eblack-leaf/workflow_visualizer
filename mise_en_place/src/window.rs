@@ -7,7 +7,7 @@ use winit::window::Window;
 use crate::coord::ScaledArea;
 use crate::{Attach, BackendStages, FrontEndStages, Stove};
 
-#[derive(Resource)]
+#[derive(Resource, Clone, Copy)]
 pub(crate) struct ScaleFactor {
     pub(crate) factor: f64,
 }
