@@ -21,7 +21,7 @@ pub(crate) fn invoke_render<'a, Ingredient: Render + Resource>(
         .container
         .get_resource::<Ingredient>()
         .expect("no render attachment")
-        .saute(render_pass_handle, viewport);
+        .render(render_pass_handle, viewport);
 }
 
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);

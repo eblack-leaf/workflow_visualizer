@@ -85,8 +85,12 @@ pub(crate) struct SpacialHasher {
 }
 
 impl SpacialHasher {
-    pub(crate) fn new() -> Self {
-        todo!()
+    pub(crate) fn new(alignment: f32, visible_section: Section) -> Self {
+        Self {
+            alignment,
+            cached_hash_range: SpacialHashRange::new(visible_section, alignment),
+            entities: HashMap::new(),
+        }
     }
     pub(crate) fn current_range(&self, visible_section: Section) -> SpacialHashRange {
         SpacialHashRange::new(visible_section, self.alignment)
@@ -105,20 +109,27 @@ pub(crate) fn update_spacial_hash(
         let section: Section = (*position, *area).into();
         let current_range = spacial_hasher.current_range(section);
         let hashes = current_range.hashes();
-        let removed = spacial_hash_cache.hashes.difference(&hashes);
-        let added = hashes.difference(&spacial_hash_cache.hashes);
+        let removed = spacial_hash_cache
+            .hashes
+            .difference(&hashes)
+            .copied()
+            .collect::<HashSet<SpacialHash>>();
         for hash in removed {
             spacial_hasher
                 .entities
-                .get_mut(hash)
+                .get_mut(&hash)
                 .expect("no entity set")
                 .remove(&entity);
-            spacial_hash_cache.hashes.remove(hash);
+            spacial_hash_cache.hashes.remove(&hash);
         }
+        let added = hashes
+            .difference(&spacial_hash_cache.hashes)
+            .copied()
+            .collect::<HashSet<SpacialHash>>();
         for hash in added {
-            deferred_add.insert((entity, *hash));
-            added_hash_regions.insert(*hash);
-            spacial_hash_cache.hashes.insert(*hash);
+            deferred_add.insert((entity, hash));
+            added_hash_regions.insert(hash);
+            spacial_hash_cache.hashes.insert(hash);
         }
     }
     for added_region in added_hash_regions {
@@ -161,32 +172,31 @@ pub(crate) fn calc_visible_section(
     let removed_hashes = cached_hashes.difference(&current_hashes);
     let mut entity_remove_queue = HashSet::<Entity>::new();
     for hash in removed_hashes {
-        for entity in spacial_hasher
-            .entities
-            .get(hash)
-            .expect("no entity set")
-            .iter()
-        {
-            entity_remove_queue.insert(*entity);
+        if let Some(entity_set) = spacial_hasher.entities.get(hash) {
+            for entity in entity_set.iter() {
+                entity_remove_queue.insert(*entity);
+            }
         }
     }
     for hash in current_hashes.iter() {
-        for entity in spacial_hasher.entities.get(hash).expect("no entity set") {
-            let (_entity, position, area, mut visibility, mut maybe_visible_section) =
-                entities.get_mut(*entity).expect("no entity found");
-            if !visibility.visible() {
-                visibility.visible = true;
-            }
-            let section: Section = (*position, *area).into();
-            let current_visible_section = section.intersection(visible_bounds.section);
-            if let Some(visible_section) = maybe_visible_section {
-                if visible_section.section != current_visible_section {
-                    *visible_section = VisibleSection::new(current_visible_section);
+        if let Some(entity_set) = spacial_hasher.entities.get(hash) {
+            for entity in entity_set {
+                let (_entity, position, area, mut visibility, mut maybe_visible_section) =
+                    entities.get_mut(*entity).expect("no entity found");
+                if !visibility.visible() {
+                    visibility.visible = true;
                 }
-            } else {
-                cmd.entity(*entity).insert(current_visible_section);
+                let section: Section = (*position, *area).into();
+                let current_visible_section = section.intersection(visible_bounds.section);
+                if let Some(mut visible_section) = maybe_visible_section {
+                    if visible_section.section != current_visible_section {
+                        *visible_section = VisibleSection::new(current_visible_section);
+                    }
+                } else {
+                    cmd.entity(*entity).insert(current_visible_section);
+                }
+                entity_remove_queue.remove(entity);
             }
-            entity_remove_queue.remove(entity);
         }
     }
     for entity in entity_remove_queue {
@@ -317,9 +327,15 @@ impl Attach for Visibility {
             gfx_surface_configuration.configuration.height,
         )
             .into();
-        stove.frontend.container.insert_resource(VisibleBounds::new(
-            ((0u32, 0u32), area.to_area(scale_factor)).into(),
-        ));
+        let visible_section = ((0u32, 0u32), area.to_area(scale_factor)).into();
+        stove
+            .frontend
+            .container
+            .insert_resource(VisibleBounds::new(visible_section));
+        stove
+            .frontend
+            .container
+            .insert_resource(SpacialHasher::new(500f32, visible_section));
         stove
             .frontend
             .container
