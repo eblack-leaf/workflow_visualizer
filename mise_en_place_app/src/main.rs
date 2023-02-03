@@ -14,10 +14,8 @@ fn main() {
         let delivery_service =
             Stove::order_delivery(delivery_ticket).expect("could not compile to wasm");
         #[cfg(not(target_arch = "wasm32"))]
-        {
-            if args.contains(&"serve".to_string()) {
-                delivery_service.deliver_to(([0, 0, 0, 0], 3030));
-            }
+        if args.contains(&"serve".to_string()) {
+            delivery_service.deliver_to(([0, 0, 0, 0], 3030));
         }
     }
     let mut stove = Stove::new();
