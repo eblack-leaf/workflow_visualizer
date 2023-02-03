@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
     Or, Query, RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
+use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 
 #[derive(Component)]
 pub(crate) struct Visibility {
@@ -42,11 +42,13 @@ pub(crate) struct SpacialHash {
     pub(crate) x: u32,
     pub(crate) y: u32,
 }
+
 impl SpacialHash {
     pub(crate) fn new(x: u32, y: u32) -> Self {
         Self { x, y }
     }
 }
+
 #[derive(Eq, Copy, Clone, PartialEq)]
 pub(crate) struct SpacialHashRange {
     pub(crate) left: u32,
@@ -54,6 +56,7 @@ pub(crate) struct SpacialHashRange {
     pub(crate) right: u32,
     pub(crate) bottom: u32,
 }
+
 impl SpacialHashRange {
     pub(crate) fn new(visible_section: Section, alignment: f32) -> Self {
         let left = (visible_section.left() / alignment).floor() as u32;
@@ -77,6 +80,7 @@ impl SpacialHashRange {
         hashes
     }
 }
+
 #[derive(Resource)]
 pub(crate) struct SpacialHasher {
     pub(crate) alignment: f32,
@@ -131,6 +135,7 @@ impl SpacialHasher {
         }
     }
 }
+
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut changed: Query<(Entity, &Position, &Area), Or<(Changed<Position>, Changed<Area>)>>,
@@ -195,10 +200,12 @@ pub(crate) fn update_spacial_hash(
             .insert(entity);
     }
 }
+
 #[derive(Component)]
 pub struct CollisionBegin {
     pub others: HashSet<Entity>,
 }
+
 impl CollisionBegin {
     pub(crate) fn new() -> Self {
         Self {
@@ -206,10 +213,12 @@ impl CollisionBegin {
         }
     }
 }
+
 #[derive(Component)]
 pub struct CollisionEnd {
     pub others: HashSet<Entity>,
 }
+
 impl CollisionEnd {
     pub(crate) fn new() -> Self {
         Self {
@@ -217,6 +226,7 @@ impl CollisionEnd {
         }
     }
 }
+
 pub(crate) fn collision_responses(
     mut spacial_hasher: ResMut<SpacialHasher>,
     entities: Query<
@@ -249,9 +259,10 @@ pub(crate) fn collision_responses(
         }
     }
     for check in checks {
-        // TODO check overlap and send responses
+        // TODO check overlap and send responses if not in current_overlaps
     }
 }
+
 pub(crate) fn clean_collision_responses(
     mut entities: Query<(&mut CollisionBegin, &mut CollisionEnd)>,
 ) {
@@ -260,9 +271,11 @@ pub(crate) fn clean_collision_responses(
         collision_end.others.clear();
     }
 }
+
 pub struct CurrentOverlaps {
     pub entities: HashSet<Entity>,
 }
+
 impl CurrentOverlaps {
     pub(crate) fn new() -> Self {
         Self {
@@ -270,6 +283,7 @@ impl CurrentOverlaps {
         }
     }
 }
+
 pub(crate) fn visibility_setup(
     added: Query<
         (Entity),
@@ -292,6 +306,7 @@ pub(crate) fn visibility_setup(
         spacial_hasher.setup(entity);
     }
 }
+
 pub(crate) fn visibility_cleanup(
     lost_position: RemovedComponents<Position>,
     lost_area: RemovedComponents<Area>,
@@ -308,6 +323,7 @@ pub(crate) fn visibility_cleanup(
         spacial_hasher.cleanup(entity);
     }
 }
+
 pub(crate) fn calc_visible_section(
     visible_bounds: Res<VisibleBounds>,
     mut entities: Query<(
