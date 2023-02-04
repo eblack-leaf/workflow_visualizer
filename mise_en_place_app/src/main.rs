@@ -46,6 +46,8 @@ fn main() {
         #[cfg(not(target_arch = "wasm32"))]
         if args.contains(&"serve".to_string()) {
             delivery_service.deliver_to(([0, 0, 0, 0], 3030));
+        } else {
+            return;
         }
     }
     let mut stove = Stove::new();
