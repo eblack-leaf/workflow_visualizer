@@ -281,21 +281,18 @@ pub(crate) fn discard_out_of_bounds(
 ) {
     for (mut placer, position, area, bound, visible_section) in text.iter_mut() {
         let bound_area = match bound {
-            Some(b) => {
-                let scaled = b.area.to_scaled(scale_factor.factor);
-                Area::new(scaled.width, scaled.height)
-            }
-            None => *area,
+            Some(b) => b.area.to_scaled(scale_factor.factor),
+            None => area.to_scaled(scale_factor.factor),
         };
         let text_section = visible_section
-            .section
-            .intersection(Section::new(*position, bound_area));
+            .section.to_scaled(scale_factor.factor)
+            .intersection(ScaledSection::new(position.to_scaled(scale_factor.factor), bound_area));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();
             for glyph in placer.unfiltered_placement().iter() {
                 let key = Key::new(glyph.byte_offset as u32);
-                let glyph_section = Section::new(
+                let glyph_section = ScaledSection::new(
                     (section.position.x + glyph.x, section.position.y + glyph.y),
                     (glyph.width, glyph.height),
                 );
