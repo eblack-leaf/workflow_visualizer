@@ -164,6 +164,7 @@ impl RenderGroup {
         scale_factor: f64,
     ) {
         // dont only check if have bounds but by visible section + bounds if there
+        // but since filtering visible letters this is fine
         if let Some(bounds) = self.bound_section {
             let scaled_bounds = bounds.to_scaled(scale_factor);
             let bounded_visible_bounds =
