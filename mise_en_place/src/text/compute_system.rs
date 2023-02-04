@@ -124,8 +124,15 @@ pub(crate) fn letter_diff(
     for (scale, mut placer, mut cache, mut difference) in text.iter_mut() {
         let mut retained_keys = HashSet::new();
         let old_keys = cache.keys.clone();
+        let mut keys_to_remove = HashSet::new();
         for placed_glyph in placer.filtered_placement().iter() {
             let key = Key::new(placed_glyph.byte_offset as u32);
+            if placed_glyph.parent.is_ascii_control() || placed_glyph.parent.is_ascii_whitespace() {
+                if cache.exists(key) {
+                    keys_to_remove.insert(key);
+                }
+                continue;
+            }
             let glyph_position = (placed_glyph.x, placed_glyph.y).into();
             let glyph_id = placed_glyph.key;
             let character = placed_glyph.parent;
@@ -146,10 +153,12 @@ pub(crate) fn letter_diff(
                 cache.add(key, glyph_id, glyph_position);
             }
         }
-        let keys_to_remove = old_keys
-            .difference(&retained_keys)
-            .copied()
-            .collect::<HashSet<Key>>();
+        keys_to_remove.extend(
+            old_keys
+                .difference(&retained_keys)
+                .copied()
+                .collect::<HashSet<Key>>()
+        );
         for key in keys_to_remove {
             difference.glyph_remove.insert(cache.get_glyph_id(key));
             difference.remove.insert(key);
@@ -174,7 +183,7 @@ pub(crate) fn calc_area(
         let line_height_advancement = 3f32;
         let area = Area::new(
             dimensions.width * max_width_letters.max(1) as f32,
-            dimensions.height + line_height_advancement * lines.max(1) as f32,
+            (dimensions.height + line_height_advancement) * lines.max(1) as f32,
         );
         cmd.entity(entity).insert(area);
     }

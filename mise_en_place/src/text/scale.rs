@@ -48,4 +48,4 @@ pub enum TextScaleAlignment {
     Large,
 }
 
-const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [16, 22, 28];
+const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [14, 20, 26];
