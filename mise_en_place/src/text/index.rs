@@ -52,7 +52,11 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
                 self.count += 1;
                 Index::new(self.count - 1)
             }
-            false => *self.holes.iter().next().unwrap(),
+            false => {
+                let index = *self.holes.iter().next().unwrap();
+                self.holes.remove(&index);
+                index
+            }
         };
         self.indices.insert(key, index);
         index

@@ -11,10 +11,10 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::TextScale;
-use crate::text::vertex::{Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex};
+use crate::TextScaleAlignment;
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::TextScaleAlignment;
 
 fn sampler_resources(
     gfx_surface: &GfxSurface,
@@ -244,7 +244,7 @@ pub(crate) fn create_render_groups(
         renderer.render_groups.remove(entity);
     }
     for (entity, (max, position, visible_section, depth, color, atlas_block, unique_glyphs)) in
-        extraction.added_render_groups.iter()
+    extraction.added_render_groups.iter()
     {
         let render_group = RenderGroup::new(
             &gfx_surface,

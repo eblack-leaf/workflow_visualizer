@@ -6,6 +6,7 @@ use bevy_ecs::prelude::{
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
+use crate::Color;
 use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::Atlas;
@@ -20,7 +21,6 @@ use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::{Visibility, VisibleSection};
-use crate::Color;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -190,11 +190,6 @@ impl RenderGroup {
         self.indexer.count()
     }
     pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph, font: &MonoSpacedFont) {
-        if let Some(glyph_id) = self.keyed_glyph_ids.get(&key) {
-            if *glyph_id == glyph.id {
-                return;
-            }
-        }
         self.keyed_glyph_ids.insert(key, glyph.id);
         self.atlas.add_glyph(glyph, font);
     }
