@@ -280,7 +280,8 @@ pub(crate) fn discard_out_of_bounds(
     >,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, position, area, bound, visible_section, mut cache, mut difference) in text.iter_mut()
+    for (mut placer, position, area, bound, visible_section, mut cache, mut difference) in
+        text.iter_mut()
     {
         let bound_area = match bound {
             Some(b) => {
@@ -289,10 +290,9 @@ pub(crate) fn discard_out_of_bounds(
             }
             None => area,
         };
-        let text_section = visible_section.section.intersection(Section::new(
-            position,
-            bound_area,
-        ));
+        let text_section = visible_section
+            .section
+            .intersection(Section::new(position, bound_area));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();

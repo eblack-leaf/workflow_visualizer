@@ -7,7 +7,7 @@ use crate::coord::position_adjust::ScaledPositionAdjust;
 use crate::coord::PositionAdjust;
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Component, Copy, Clone, Default, PartialEq)]
+#[derive(Pod, Zeroable, Component, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Position {
     pub x: f32,
     pub y: f32,

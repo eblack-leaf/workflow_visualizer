@@ -1,11 +1,14 @@
-use mise_en_place::{Cook, DeliveryTicket, Position, Recipe, Stove, Text, TextBundle, TextRenderer, TextScaleAlignment};
+use mise_en_place::{
+    Cook, DeliveryTicket, Position, Recipe, Stove, Text, TextBundle, TextRenderer,
+    TextScaleAlignment,
+};
 
 struct Meal;
 
 impl Cook for Meal {
-    fn recipe(recipe: &mut Recipe) {
+    fn prepare(recipe: &mut Recipe) {
         recipe.container.spawn(TextBundle::new(
-            "hello...",
+            "abcdefghijklmnopqrstuvwxyz",
             (10u32, 10u32),
             0u32,
             (1.0, 1.0, 1.0),

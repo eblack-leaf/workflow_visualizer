@@ -163,7 +163,7 @@ impl RenderGroup {
     ) {
         if let Some(bounds) = self.bound_section {
             let scaled_bounds = bounds.to_scaled(scale_factor);
-            let bounded_visible_bounds = scaled_bounds.intersection(self.visible_section.section);// scale here
+            let bounded_visible_bounds = scaled_bounds.intersection(self.visible_section.section); // scale here
             if let Some(section) = bounded_visible_bounds {
                 let viewport_bounded_visible_bounds = section.intersection(viewport_section);
                 if let Some(d_section) = viewport_bounded_visible_bounds {

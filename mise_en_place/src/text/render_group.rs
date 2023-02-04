@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
-use crate::Color;
 use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::Atlas;
@@ -21,6 +20,7 @@ use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::{Visibility, VisibleSection};
+use crate::Color;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -115,24 +115,26 @@ impl RenderGroup {
             bound_section: None,
             draw_section: None,
             visible_section,
-            bind_group: gfx_surface.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                label: Some("render group bind group"),
-                layout: bind_group_layout,
-                entries: &[
-                    BindGroupEntry {
-                        binding: 0,
-                        resource: text_placement_uniform.buffer.as_entire_binding(),
-                    },
-                    BindGroupEntry {
-                        binding: 1,
-                        resource: color_uniform.buffer.as_entire_binding(),
-                    },
-                    BindGroupEntry {
-                        binding: 2,
-                        resource: wgpu::BindingResource::TextureView(&atlas.texture_view),
-                    },
-                ],
-            }),
+            bind_group: gfx_surface
+                .device
+                .create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("render group bind group"),
+                    layout: bind_group_layout,
+                    entries: &[
+                        BindGroupEntry {
+                            binding: 0,
+                            resource: text_placement_uniform.buffer.as_entire_binding(),
+                        },
+                        BindGroupEntry {
+                            binding: 1,
+                            resource: color_uniform.buffer.as_entire_binding(),
+                        },
+                        BindGroupEntry {
+                            binding: 2,
+                            resource: wgpu::BindingResource::TextureView(&atlas.texture_view),
+                        },
+                    ],
+                }),
             text_placement,
             text_placement_uniform,
             position_write: None,
@@ -164,7 +166,8 @@ impl RenderGroup {
         // dont only check if have bounds but by visible section + bounds if there
         if let Some(bounds) = self.bound_section {
             let scaled_bounds = bounds.to_scaled(scale_factor);
-            let bounded_visible_bounds = scaled_bounds.intersection(self.visible_section.section.to_scaled(scale_factor));// scale here
+            let bounded_visible_bounds =
+                scaled_bounds.intersection(self.visible_section.section.to_scaled(scale_factor)); // scale here
             if let Some(section) = bounded_visible_bounds {
                 let viewport_bounded_visible_bounds = section.intersection(viewport_section);
                 if let Some(d_section) = viewport_bounded_visible_bounds {
@@ -284,9 +287,11 @@ impl RenderGroup {
         for (index, coords) in self.coords_write.iter() {
             self.coords_cpu.insert(index.value as usize, *coords);
             let offset = Self::offset::<Coords>(index);
-            gfx_surface
-                .queue
-                .write_buffer(&self.coords_gpu, offset, bytemuck::cast_slice(&[*coords]));
+            gfx_surface.queue.write_buffer(
+                &self.coords_gpu,
+                offset,
+                bytemuck::cast_slice(&[*coords]),
+            );
         }
     }
     fn write_null(&mut self, gfx_surface: &GfxSurface) {

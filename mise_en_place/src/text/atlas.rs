@@ -239,9 +239,7 @@ impl Atlas {
         logical_dimension
     }
     fn hardware_max_check(texture_width: u32, texture_height: u32) {
-        let hardware_max = GfxOptions::web()
-            .limits
-            .max_texture_dimension_2d;
+        let hardware_max = GfxOptions::web().limits.max_texture_dimension_2d;
         if texture_width > hardware_max {
             panic!("requested larger than possible texture")
         }

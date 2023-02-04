@@ -1,6 +1,5 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemLabel, SystemStage};
 
-use crate::{Attach, BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages, Stove};
 use crate::text::compute_system::{
     bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
     discard_out_of_bounds, letter_diff, manage_render_groups, place, position_diff,
@@ -11,6 +10,9 @@ use crate::text::render_system::{
     setup as backend_setup,
 };
 use crate::text::renderer::TextRenderer;
+use crate::{
+    Attach, BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, Stove,
+};
 
 #[derive(StageLabel)]
 pub enum TextStages {
@@ -36,11 +38,15 @@ impl Attach for TextRenderer {
             TextStages::CalcArea,
             SystemStage::single(calc_area),
         );
-        stove.frontend.main.add_stage_after(FrontEndStages::ResolveVisibility, TextStages::TextFrontEnd, SystemStage::parallel());
-        stove
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, manage_render_groups.before("place"));
+        stove.frontend.main.add_stage_after(
+            FrontEndStages::ResolveVisibility,
+            TextStages::TextFrontEnd,
+            SystemStage::parallel(),
+        );
+        stove.frontend.main.add_system_to_stage(
+            TextStages::TextFrontEnd,
+            manage_render_groups.before("place"),
+        );
         stove
             .frontend
             .main
@@ -78,18 +84,20 @@ impl Attach for TextRenderer {
             .backend
             .startup
             .add_system_to_stage(BackEndStartupStages::Setup, backend_setup);
-        stove
-            .backend
-            .main
-            .add_system_to_stage(BackendStages::Prepare, create_render_groups.label(TextSystems::CreateRenderGroups));
-        stove
-            .backend
-            .main
-            .add_system_to_stage(BackendStages::Prepare, render_group_differences.label(TextSystems::RenderGroupDiff).after(TextSystems::CreateRenderGroups));
-        stove
-            .backend
-            .main
-            .add_system_to_stage(BackendStages::Prepare, resize_receiver.after(TextSystems::RenderGroupDiff));
+        stove.backend.main.add_system_to_stage(
+            BackendStages::Prepare,
+            create_render_groups.label(TextSystems::CreateRenderGroups),
+        );
+        stove.backend.main.add_system_to_stage(
+            BackendStages::Prepare,
+            render_group_differences
+                .label(TextSystems::RenderGroupDiff)
+                .after(TextSystems::CreateRenderGroups),
+        );
+        stove.backend.main.add_system_to_stage(
+            BackendStages::Prepare,
+            resize_receiver.after(TextSystems::RenderGroupDiff),
+        );
         stove
             .backend
             .main

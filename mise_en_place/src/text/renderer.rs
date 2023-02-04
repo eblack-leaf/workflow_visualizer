@@ -3,12 +3,12 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Entity, Resource};
 
 use crate::extract::Extract;
-use crate::Job;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::extraction::Extraction;
 use crate::text::render_group::RenderGroup;
 use crate::text::vertex::GLYPH_AABB;
 use crate::viewport::Viewport;
+use crate::Job;
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -22,8 +22,8 @@ pub struct TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(compute: &mut Job, render: &mut Job)
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let mut extraction = compute
             .container

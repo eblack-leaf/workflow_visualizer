@@ -61,9 +61,9 @@ impl Cache {
             .glyph_positions
             .get(&key)
             .expect("no glyph position for key")
-            == glyph_position
+            != glyph_position
     }
     pub(crate) fn glyph_id_different(&self, key: Key, glyph_id: GlyphId) -> bool {
-        *self.glyph_ids.get(&key).expect("no glyph id for key") == glyph_id
+        *self.glyph_ids.get(&key).expect("no glyph id for key") != glyph_id
     }
 }
