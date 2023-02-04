@@ -6,8 +6,9 @@ use bevy_ecs::prelude::{
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
-use crate::canvas::Canvas;
+use crate::Color;
 use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
+use crate::gfx::GfxSurface;
 use crate::text::atlas::Atlas;
 use crate::text::cache::Cache;
 use crate::text::coords::Coords;
@@ -20,7 +21,6 @@ use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::{Visibility, VisibleSection};
-use crate::Color;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -97,7 +97,7 @@ impl TextPlacement {
 
 impl RenderGroup {
     pub(crate) fn new(
-        canvas: &Canvas,
+        gfx_surface: &GfxSurface,
         bind_group_layout: &wgpu::BindGroupLayout,
         max: u32,
         position: ScaledPosition,
@@ -108,14 +108,14 @@ impl RenderGroup {
         unique_glyphs: u32,
     ) -> Self {
         let text_placement = TextPlacement::new(position, depth);
-        let text_placement_uniform = Uniform::new(&canvas.device, text_placement);
-        let color_uniform = Uniform::new(&canvas.device, color);
-        let atlas = Atlas::new(canvas, atlas_block, unique_glyphs);
+        let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
+        let color_uniform = Uniform::new(&gfx_surface.device, color);
+        let atlas = Atlas::new(gfx_surface, atlas_block, unique_glyphs);
         Self {
             bound_section: None,
             draw_section: None,
             visible_section,
-            bind_group: canvas.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            bind_group: gfx_surface.device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("render group bind group"),
                 layout: bind_group_layout,
                 entries: &[
@@ -140,17 +140,17 @@ impl RenderGroup {
             color_uniform,
             color_write: None,
             indexer: Indexer::new(max),
-            null_gpu: Self::gpu_buffer::<NullBit>(canvas, max),
+            null_gpu: Self::gpu_buffer::<NullBit>(gfx_surface, max),
             null_cpu: Self::cpu_buffer(max),
             null_write: HashMap::new(),
-            coords_gpu: Self::gpu_buffer::<Coords>(canvas, max),
+            coords_gpu: Self::gpu_buffer::<Coords>(gfx_surface, max),
             coords_cpu: Self::cpu_buffer(max),
-            glyph_position_gpu: Self::gpu_buffer::<Position>(canvas, max),
+            glyph_position_gpu: Self::gpu_buffer::<Position>(gfx_surface, max),
             glyph_position_cpu: Self::cpu_buffer(max),
             coords_write: HashMap::new(),
             glyph_position_write: HashMap::new(),
             glyph_area_cpu: Self::cpu_buffer(max),
-            glyph_area_gpu: Self::gpu_buffer::<Area>(canvas, max),
+            glyph_area_gpu: Self::gpu_buffer::<Area>(gfx_surface, max),
             glyph_area_write: HashMap::new(),
             keyed_glyph_ids: HashMap::new(),
             atlas,
@@ -161,9 +161,10 @@ impl RenderGroup {
         viewport_section: ScaledSection,
         scale_factor: f64,
     ) {
+        // dont only check if have bounds but by visible section + bounds if there
         if let Some(bounds) = self.bound_section {
             let scaled_bounds = bounds.to_scaled(scale_factor);
-            let bounded_visible_bounds = scaled_bounds.intersection(self.visible_section.section);// scale here
+            let bounded_visible_bounds = scaled_bounds.intersection(self.visible_section.section.to_scaled(scale_factor));// scale here
             if let Some(section) = bounded_visible_bounds {
                 let viewport_bounded_visible_bounds = section.intersection(viewport_section);
                 if let Some(d_section) = viewport_bounded_visible_bounds {
@@ -210,14 +211,14 @@ impl RenderGroup {
         self.queue_null(key, NullBit::null());
         let _old_index = self.indexer.remove(key);
     }
-    pub(crate) fn write(&mut self, canvas: &Canvas) {
-        self.write_glyph_positions(canvas);
-        self.write_glyph_area(canvas);
-        self.write_null(canvas);
-        self.write_coords(canvas);
-        self.write_text_placement(canvas);
-        self.write_color(canvas);
-        self.atlas.write(canvas);
+    pub(crate) fn write(&mut self, gfx_surface: &GfxSurface) {
+        self.write_glyph_positions(gfx_surface);
+        self.write_glyph_area(gfx_surface);
+        self.write_null(gfx_surface);
+        self.write_coords(gfx_surface);
+        self.write_text_placement(gfx_surface);
+        self.write_color(gfx_surface);
+        self.atlas.write(gfx_surface);
         self.reset_writes();
     }
     pub(crate) fn queue_glyph_position(&mut self, key: Key, glyph_position: Position) {
@@ -242,8 +243,8 @@ impl RenderGroup {
         let index = self.get_index(key);
         self.null_write.insert(index, null_bit);
     }
-    fn gpu_buffer<T>(canvas: &Canvas, max: u32) -> Buffer {
-        canvas.device.create_buffer(&wgpu::BufferDescriptor {
+    fn gpu_buffer<T>(gfx_surface: &GfxSurface, max: u32) -> Buffer {
+        gfx_surface.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("render group gpu buffer"),
             size: (std::mem::size_of::<T>() * max as usize) as wgpu::BufferAddress,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
@@ -258,12 +259,12 @@ impl RenderGroup {
     fn get_index(&self, key: Key) -> Index {
         self.indexer.get_index(key).expect("no index for key")
     }
-    fn write_color(&mut self, canvas: &Canvas) {
+    fn write_color(&mut self, gfx_surface: &GfxSurface) {
         if let Some(color) = self.color_write.take() {
-            self.color_uniform.update(&canvas.queue, color);
+            self.color_uniform.update(&gfx_surface.queue, color);
         }
     }
-    fn write_text_placement(&mut self, canvas: &Canvas) {
+    fn write_text_placement(&mut self, gfx_surface: &GfxSurface) {
         let mut dirty = false;
         if let Some(position) = self.position_write.take() {
             self.text_placement.placement[0] = position.x;
@@ -276,45 +277,45 @@ impl RenderGroup {
         }
         if dirty {
             self.text_placement_uniform
-                .update(&canvas.queue, self.text_placement);
+                .update(&gfx_surface.queue, self.text_placement);
         }
     }
-    fn write_coords(&mut self, canvas: &Canvas) {
+    fn write_coords(&mut self, gfx_surface: &GfxSurface) {
         for (index, coords) in self.coords_write.iter() {
             self.coords_cpu.insert(index.value as usize, *coords);
             let offset = Self::offset::<Coords>(index);
-            canvas
+            gfx_surface
                 .queue
                 .write_buffer(&self.coords_gpu, offset, bytemuck::cast_slice(&[*coords]));
         }
     }
-    fn write_null(&mut self, canvas: &Canvas) {
+    fn write_null(&mut self, gfx_surface: &GfxSurface) {
         for (index, null) in self.null_write.iter() {
             self.null_cpu.insert(index.value as usize, *null);
             let offset = Self::offset::<NullBit>(index);
-            canvas
+            gfx_surface
                 .queue
                 .write_buffer(&self.null_gpu, offset, bytemuck::cast_slice(&[*null]));
         }
     }
-    fn write_glyph_positions(&mut self, canvas: &Canvas) {
+    fn write_glyph_positions(&mut self, gfx_surface: &GfxSurface) {
         for (index, glyph_position) in self.glyph_position_write.iter() {
             self.glyph_position_cpu
                 .insert(index.value as usize, *glyph_position);
             let offset = Self::offset::<Position>(index);
-            canvas.queue.write_buffer(
+            gfx_surface.queue.write_buffer(
                 &self.glyph_position_gpu,
                 offset,
                 bytemuck::cast_slice(&[*glyph_position]),
             );
         }
     }
-    fn write_glyph_area(&mut self, canvas: &Canvas) {
+    fn write_glyph_area(&mut self, gfx_surface: &GfxSurface) {
         for (index, glyph_area) in self.glyph_area_write.iter() {
             self.glyph_area_cpu
                 .insert(index.value as usize, *glyph_area);
             let offset = Self::offset::<Position>(index);
-            canvas.queue.write_buffer(
+            gfx_surface.queue.write_buffer(
                 &self.glyph_area_gpu,
                 offset,
                 bytemuck::cast_slice(&[*glyph_area]),

@@ -7,6 +7,7 @@ use bevy_ecs::prelude::{
 };
 use fontdue::layout::TextStyle;
 
+use crate::color::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
@@ -18,8 +19,8 @@ use crate::text::render_group::TextBound;
 use crate::text::scale::{TextScale, TextScaleAlignment};
 use crate::text::text::Text;
 use crate::visibility::Visibility;
-use crate::visibility::{ScaleFactor, VisibleSection};
-use crate::Color;
+use crate::visibility::VisibleSection;
+use crate::window::ScaleFactor;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -273,24 +274,22 @@ pub(crate) fn discard_out_of_bounds(
             &Area,
             Option<&TextBound>,
             &VisibleSection,
-            &mut Cache,
-            &mut Difference,
         ),
         Or<(Changed<Placer>, Changed<VisibleSection>, Changed<TextBound>)>,
     >,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, position, area, bound, visible_section, mut cache, mut difference) in text.iter_mut()
+    for (mut placer, position, area, bound, visible_section) in text.iter_mut()
     {
         let bound_area = match bound {
             Some(b) => {
                 let scaled = b.area.to_scaled(scale_factor.factor);
                 Area::new(scaled.width, scaled.height)
             }
-            None => area,
+            None => *area,
         };
         let text_section = visible_section.section.intersection(Section::new(
-            position,
+            *position,
             bound_area,
         ));
         placer.reset_filtered();

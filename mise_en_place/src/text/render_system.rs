@@ -3,21 +3,20 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut};
 use wgpu::util::DeviceExt;
 
-use crate::canvas::Canvas;
 use crate::coord::{Area, Position, ScaledPosition};
-use crate::launcher::ResizeEvent;
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::TextScale;
-use crate::text::vertex::{Vertex, GLYPH_AABB};
-use crate::viewport::Viewport;
-use crate::visibility::ScaleFactor;
+use crate::text::vertex::{GLYPH_AABB, Vertex};
 use crate::TextScaleAlignment;
+use crate::viewport::Viewport;
+use crate::window::{Resize, ScaleFactor};
 
-fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, wgpu::BindGroup) {
+fn sampler_resources(gfx_surface: &GfxSurface) -> (wgpu::BindGroupLayout, wgpu::Sampler, wgpu::BindGroup) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("sampler bind group layout"),
         entries: &[wgpu::BindGroupLayoutEntry {
@@ -27,7 +26,7 @@ fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, 
             count: None,
         }],
     };
-    let sampler_bind_group_layout = canvas
+    let sampler_bind_group_layout = gfx_surface
         .device
         .create_bind_group_layout(&sampler_bind_group_layout_descriptor);
     let sampler_descriptor = wgpu::SamplerDescriptor {
@@ -44,7 +43,7 @@ fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, 
         anisotropy_clamp: None,
         border_color: None,
     };
-    let sampler = canvas.device.create_sampler(&sampler_descriptor);
+    let sampler = gfx_surface.device.create_sampler(&sampler_descriptor);
     let sampler_bind_group_descriptor = wgpu::BindGroupDescriptor {
         label: Some("sampler bind group"),
         layout: &sampler_bind_group_layout,
@@ -53,13 +52,13 @@ fn sampler_resources(canvas: &Canvas) -> (wgpu::BindGroupLayout, wgpu::Sampler, 
             resource: wgpu::BindingResource::Sampler(&sampler),
         }],
     };
-    let sampler_bind_group = canvas
+    let sampler_bind_group = gfx_surface
         .device
         .create_bind_group(&sampler_bind_group_descriptor);
     (sampler_bind_group_layout, sampler, sampler_bind_group)
 }
 
-fn render_group_resources(canvas: &Canvas) -> wgpu::BindGroupLayout {
+fn render_group_resources(gfx_surface: &GfxSurface) -> wgpu::BindGroupLayout {
     let render_group_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("rasterization bind group"),
         entries: &[
@@ -95,14 +94,15 @@ fn render_group_resources(canvas: &Canvas) -> wgpu::BindGroupLayout {
             },
         ],
     };
-    let render_group_bind_group_layout = canvas
+    let render_group_bind_group_layout = gfx_surface
         .device
         .create_bind_group_layout(&render_group_bind_group_layout_descriptor);
     render_group_bind_group_layout
 }
 
 fn pipeline(
-    canvas: &Canvas,
+    gfx_surface: &GfxSurface,
+    gfx_surface_config: &GfxSurfaceConfiguration,
     viewport: &Viewport,
     sampler_bind_group_layout: &wgpu::BindGroupLayout,
     render_group_bind_group_layout: &wgpu::BindGroupLayout,
@@ -116,8 +116,8 @@ fn pipeline(
         ],
         push_constant_ranges: &[],
     };
-    let layout = canvas.device.create_pipeline_layout(&layout_descriptor);
-    let shader = canvas
+    let layout = gfx_surface.device.create_pipeline_layout(&layout_descriptor);
+    let shader = gfx_surface
         .device
         .create_shader_module(wgpu::include_wgsl!("padded_text.wgsl"));
     let vertex_state = wgpu::VertexState {
@@ -171,7 +171,7 @@ fn pipeline(
         module: &shader,
         entry_point: "fragment_entry",
         targets: &[Some(wgpu::ColorTargetState {
-            format: canvas.surface_configuration.format,
+            format: gfx_surface_config.configuration.format,
             blend: Some(wgpu::BlendState::ALPHA_BLENDING),
             write_mask: Default::default(),
         })],
@@ -186,12 +186,12 @@ fn pipeline(
         fragment: Some(fragment_state),
         multiview: None,
     };
-    let pipeline = canvas.device.create_render_pipeline(&descriptor);
+    let pipeline = gfx_surface.device.create_render_pipeline(&descriptor);
     pipeline
 }
 
-fn vertex_buffer(canvas: &Canvas) -> wgpu::Buffer {
-    canvas
+fn vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
+    gfx_surface
         .device
         .create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("text vertex buffer"),
@@ -201,22 +201,24 @@ fn vertex_buffer(canvas: &Canvas) -> wgpu::Buffer {
 }
 
 pub(crate) fn setup(
-    canvas: Res<Canvas>,
+    gfx_surface: Res<GfxSurface>,
+    gfx_surface_config: Res<GfxSurfaceConfiguration>,
     viewport: Res<Viewport>,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
 ) {
-    let (sampler_bind_group_layout, sampler, sampler_bind_group) = sampler_resources(&canvas);
-    let render_group_bind_group_layout = render_group_resources(&canvas);
+    let (sampler_bind_group_layout, sampler, sampler_bind_group) = sampler_resources(&gfx_surface);
+    let render_group_bind_group_layout = render_group_resources(&gfx_surface);
     let pipeline = pipeline(
-        &canvas,
+        &gfx_surface,
+        &gfx_surface_config,
         &viewport,
         &sampler_bind_group_layout,
         &render_group_bind_group_layout,
     );
     cmd.insert_resource(TextRenderer {
         pipeline,
-        vertex_buffer: vertex_buffer(&canvas),
+        vertex_buffer: vertex_buffer(&gfx_surface),
         render_groups: HashMap::new(),
         render_group_bind_group_layout,
         sampler,
@@ -231,17 +233,17 @@ pub(crate) fn setup(
 pub(crate) fn create_render_groups(
     mut extraction: ResMut<Extraction>,
     mut renderer: ResMut<TextRenderer>,
-    canvas: Res<Canvas>,
+    gfx_surface: Res<GfxSurface>,
     scale_factor: Res<ScaleFactor>,
 ) {
     for entity in extraction.removed_render_groups.iter() {
         renderer.render_groups.remove(entity);
     }
     for (entity, (max, position, visible_section, depth, color, atlas_block, unique_glyphs)) in
-        extraction.added_render_groups.iter()
+    extraction.added_render_groups.iter()
     {
         let render_group = RenderGroup::new(
-            &canvas,
+            &gfx_surface,
             &renderer.render_group_bind_group_layout,
             *max as u32,
             position.to_scaled(scale_factor.factor),
@@ -261,7 +263,7 @@ pub(crate) fn reset_extraction(mut extraction: ResMut<Extraction>) {
 
 pub(crate) fn resize_receiver(
     mut renderer: ResMut<TextRenderer>,
-    mut event_reader: EventReader<ResizeEvent>,
+    mut event_reader: EventReader<Resize>,
     viewport: Res<Viewport>,
 ) {
     for event in event_reader.iter() {
@@ -274,7 +276,7 @@ pub(crate) fn resize_receiver(
 pub(crate) fn render_group_differences(
     mut extraction: ResMut<Extraction>,
     mut renderer: ResMut<TextRenderer>,
-    canvas: Res<Canvas>,
+    gfx_surface: Res<GfxSurface>,
     font: Res<MonoSpacedFont>,
     viewport: Res<Viewport>,
     scale_factor: Res<ScaleFactor>,
@@ -322,6 +324,6 @@ pub(crate) fn render_group_differences(
             let (coords, glyph_area) = render_group.read_glyph_info(*key);
             render_group.queue_glyph_info(*key, coords, glyph_area);
         }
-        render_group.write(&canvas);
+        render_group.write(&gfx_surface);
     }
 }

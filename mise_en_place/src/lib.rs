@@ -9,11 +9,14 @@ use winit::window::Window;
 pub use job::Job;
 pub use wasm_server::DeliveryService;
 
+pub use crate::color::Color;
+pub use crate::coord::{Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section};
 use crate::coord::Coords;
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
 use crate::job::TaskLabel;
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
+pub use crate::text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
 use crate::visibility::Visibility;
@@ -33,10 +36,13 @@ mod visibility;
 mod wasm_compiler;
 mod wasm_server;
 mod window;
+mod text;
+
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {
     Startup,
 }
+
 #[derive(StageLabel)]
 pub enum FrontEndStages {
     First,
@@ -47,15 +53,20 @@ pub enum FrontEndStages {
     ResolveVisibility,
     Last,
 }
+
 #[derive(StageLabel)]
 pub enum BackEndStartupStages {
     Startup,
+    Setup,
 }
+
 #[derive(StageLabel)]
 pub enum BackendStages {
     Initialize,
     GfxSurfaceResize,
     Resize,
+    Prepare,
+    Last,
 }
 
 pub struct Stove {
@@ -101,6 +112,8 @@ impl Stove {
                 let mut job = Job::new();
                 job.startup
                     .add_stage(BackEndStartupStages::Startup, SystemStage::parallel());
+                job.startup
+                    .add_stage(BackEndStartupStages::Setup, SystemStage::parallel());
                 job.main
                     .add_stage(BackendStages::Initialize, SystemStage::parallel());
                 job.main.add_stage(
@@ -109,6 +122,8 @@ impl Stove {
                 );
                 job.main
                     .add_stage(BackendStages::Resize, SystemStage::parallel());
+                job.main.add_stage(BackendStages::Prepare, SystemStage::parallel());
+                job.main.add_stage(BackendStages::Last, SystemStage::parallel());
                 job
             },
             window: None,
@@ -141,7 +156,7 @@ impl Stove {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");

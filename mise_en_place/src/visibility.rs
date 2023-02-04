@@ -1,16 +1,18 @@
 use std::collections::{HashMap, HashSet};
 
+use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{
     Added, Changed, Commands, Component, Entity, EventReader, EventWriter, IntoSystemDescriptor,
     Or, Query, RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
+use bevy_ecs::query::QueryEntityError;
 
+use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 
 #[derive(Component)]
 pub(crate) struct Visibility {
@@ -113,7 +115,7 @@ impl SpacialHasher {
         self.spacial_hash_cache.insert(entity, HashSet::new());
         self.current_overlaps.insert(entity, CurrentOverlaps::new());
     }
-    fn cleanup(&mut self, entity: Entity) {
+    fn cleanup(&mut self, entity: Entity) -> HashSet<Entity> {
         let old = self.spacial_hash_cache.remove(&entity);
         if let Some(hashes) = old {
             for hash in hashes {
@@ -124,6 +126,7 @@ impl SpacialHasher {
             }
         }
         let old = self.current_overlaps.remove(&entity);
+        let mut response = HashSet::new();
         if let Some(overlaps) = old {
             for other in overlaps.entities {
                 self.current_overlaps
@@ -131,8 +134,10 @@ impl SpacialHasher {
                     .expect("no overlaps")
                     .entities
                     .remove(&entity);
+                response.insert(entity);
             }
         }
+        response
     }
 }
 
@@ -315,15 +320,52 @@ pub(crate) fn visibility_cleanup(
     lost_area: RemovedComponents<Area>,
     lost_visibility: RemovedComponents<Visibility>,
     mut spacial_hasher: ResMut<SpacialHasher>,
+    mut lost_contact_entities: Query<(&mut CollisionEnd)>,
+    mut cmd: Commands,
 ) {
     for entity in lost_visibility.iter() {
-        spacial_hasher.cleanup(entity);
+        let lost_contact = spacial_hasher.cleanup(entity);
+        for other in lost_contact {
+            match lost_contact_entities.get_mut(entity) {
+                Ok(mut collision_end) => {
+                    collision_end.others.insert(other);
+                }
+                Err(_) => {}
+            }
+        }
+        cmd.entity(entity).remove::<CollisionBegin>();
+        cmd.entity(entity).remove::<CollisionEnd>();
+        cmd.entity(entity).remove::<VisibleSection>();
     }
     for entity in lost_position.iter() {
-        spacial_hasher.cleanup(entity);
+        let lost_contact = spacial_hasher.cleanup(entity);
+        for other in lost_contact {
+            match lost_contact_entities.get_mut(entity) {
+                Ok(mut collision_end) => {
+                    collision_end.others.insert(other);
+                }
+                Err(_) => {}
+            }
+        }
+        cmd.entity(entity).remove::<Visibility>();
+        cmd.entity(entity).remove::<CollisionBegin>();
+        cmd.entity(entity).remove::<CollisionEnd>();
+        cmd.entity(entity).remove::<VisibleSection>();
     }
     for entity in lost_area.iter() {
-        spacial_hasher.cleanup(entity);
+        let lost_contact = spacial_hasher.cleanup(entity);
+        for other in lost_contact {
+            match lost_contact_entities.get_mut(entity) {
+                Ok(mut collision_end) => {
+                    collision_end.others.insert(other);
+                }
+                Err(_) => {}
+            }
+        }
+        cmd.entity(entity).remove::<Visibility>();
+        cmd.entity(entity).remove::<CollisionBegin>();
+        cmd.entity(entity).remove::<CollisionEnd>();
+        cmd.entity(entity).remove::<VisibleSection>();
     }
 }
 
