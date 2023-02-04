@@ -16,7 +16,7 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::render_group::TextBound;
-use crate::text::scale::{TextScale, TextScaleAlignment};
+use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
 use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
@@ -24,9 +24,7 @@ use crate::window::ScaleFactor;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
-        TextScale::from_alignment(TextScaleAlignment::Medium, scale_factor.factor).scale,
-    ));
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
 }
 
 pub(crate) fn calc_scale_from_alignment(
@@ -59,12 +57,13 @@ pub(crate) fn manage_render_groups(
             &mut Cache,
             &mut Difference,
             &Visibility,
+            &TextScaleAlignment,
         ),
         Or<(Changed<Visibility>, Added<Text>, Changed<TextScale>)>,
     >,
     removed: RemovedComponents<Text>,
     mut extraction: ResMut<Extraction>,
-    font: Res<MonoSpacedFont>,
+    font: Res<AlignedFonts>,
 ) {
     for (
         entity,
@@ -78,6 +77,7 @@ pub(crate) fn manage_render_groups(
         mut cache,
         mut difference,
         visibility,
+        text_scale_alignment,
     ) in text.iter_mut()
     {
         if visibility.visible() {
@@ -93,7 +93,11 @@ pub(crate) fn manage_render_groups(
             }
             let max = text.len();
             let unique_glyphs = text.len();
-            let atlas_block = font.character_dimensions('a', scale.px());
+            let atlas_block = font
+                .fonts
+                .get(text_scale_alignment)
+                .expect("no aligned font for")
+                .character_dimensions('a', scale.px());
             extraction.added_render_groups.insert(
                 entity,
                 (
@@ -104,6 +108,7 @@ pub(crate) fn manage_render_groups(
                     *color,
                     atlas_block,
                     unique_glyphs,
+                    *text_scale_alignment,
                 ),
             );
         } else {
@@ -157,7 +162,7 @@ pub(crate) fn letter_diff(
             old_keys
                 .difference(&retained_keys)
                 .copied()
-                .collect::<HashSet<Key>>()
+                .collect::<HashSet<Key>>(),
         );
         for key in keys_to_remove {
             difference.glyph_remove.insert(cache.get_glyph_id(key));
@@ -168,12 +173,19 @@ pub(crate) fn letter_diff(
 }
 
 pub(crate) fn calc_area(
-    text: Query<(Entity, &Text, &TextScale), (Or<(Changed<Text>, Changed<TextScale>)>)>,
+    text: Query<
+        (Entity, &Text, &TextScale, &TextScaleAlignment),
+        (Or<(Changed<Text>, Changed<TextScale>)>),
+    >,
     mut cmd: Commands,
-    font: Res<MonoSpacedFont>,
+    font: Res<AlignedFonts>,
 ) {
-    for (entity, text, text_scale) in text.iter() {
-        let dimensions = font.character_dimensions('A', text_scale.px());
+    for (entity, text, text_scale, text_scale_alignment) in text.iter() {
+        let dimensions = font
+            .fonts
+            .get(text_scale_alignment)
+            .expect("no aligned font")
+            .character_dimensions('A', text_scale.px());
         let mut max_width_letters = 0;
         let mut lines = 0;
         for line in text.string().lines() {
@@ -249,14 +261,26 @@ pub(crate) fn color_diff(
 
 pub(crate) fn place(
     mut dirty_text: Query<
-        (&Text, &TextScale, &mut Placer, &Visibility),
+        (
+            &Text,
+            &TextScale,
+            &mut Placer,
+            &Visibility,
+            &TextScaleAlignment,
+        ),
         Or<(Changed<Text>, Changed<TextScale>, Changed<Visibility>)>,
     >,
-    font: Res<MonoSpacedFont>,
+    font: Res<AlignedFonts>,
 ) {
-    for (text, scale, mut placer, visibility) in dirty_text.iter_mut() {
+    for (text, scale, mut placer, visibility, text_scale_alignment) in dirty_text.iter_mut() {
         if visibility.visible() {
-            placer.place(text, scale, &font);
+            placer.place(
+                text,
+                scale,
+                font.fonts
+                    .get(text_scale_alignment)
+                    .expect("no aligned font"),
+            );
         }
     }
 }
@@ -294,8 +318,12 @@ pub(crate) fn discard_out_of_bounds(
             None => area.to_scaled(scale_factor.factor),
         };
         let text_section = visible_section
-            .section.to_scaled(scale_factor.factor)
-            .intersection(ScaledSection::new(position.to_scaled(scale_factor.factor), bound_area));
+            .section
+            .to_scaled(scale_factor.factor)
+            .intersection(ScaledSection::new(
+                position.to_scaled(scale_factor.factor),
+                bound_area,
+            ));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();

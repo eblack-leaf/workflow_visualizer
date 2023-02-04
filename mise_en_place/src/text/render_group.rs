@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
-use crate::Color;
 use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::Atlas;
@@ -21,6 +20,7 @@ use crate::text::scale::TextScale;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::{Visibility, VisibleSection};
+use crate::{Color, TextScaleAlignment};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -79,6 +79,7 @@ pub(crate) struct RenderGroup {
     pub(crate) glyph_area_write: HashMap<Index, Area>,
     pub(crate) keyed_glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) atlas: Atlas,
+    pub(crate) text_scale_alignment: TextScaleAlignment,
 }
 
 #[repr(C)]
@@ -106,6 +107,7 @@ impl RenderGroup {
         color: Color,
         atlas_block: Area,
         unique_glyphs: u32,
+        text_scale_alignment: TextScaleAlignment,
     ) -> Self {
         let text_placement = TextPlacement::new(position, depth);
         let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
@@ -156,6 +158,7 @@ impl RenderGroup {
             glyph_area_write: HashMap::new(),
             keyed_glyph_ids: HashMap::new(),
             atlas,
+            text_scale_alignment,
         }
     }
     pub(crate) fn adjust_draw_section(

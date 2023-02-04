@@ -10,11 +10,11 @@ use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
-use crate::text::scale::TextScale;
-use crate::text::vertex::{GLYPH_AABB, Vertex};
-use crate::TextScaleAlignment;
+use crate::text::scale::{AlignedFonts, TextScale};
+use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
+use crate::TextScaleAlignment;
 
 fn sampler_resources(
     gfx_surface: &GfxSurface,
@@ -229,9 +229,7 @@ pub(crate) fn setup(
         sampler_bind_group,
     });
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
-        TextScale::from_alignment(TextScaleAlignment::Medium, scale_factor.factor).scale,
-    ));
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
 }
 
 pub(crate) fn create_render_groups(
@@ -243,8 +241,19 @@ pub(crate) fn create_render_groups(
     for entity in extraction.removed_render_groups.iter() {
         renderer.render_groups.remove(entity);
     }
-    for (entity, (max, position, visible_section, depth, color, atlas_block, unique_glyphs)) in
-    extraction.added_render_groups.iter()
+    for (
+        entity,
+        (
+            max,
+            position,
+            visible_section,
+            depth,
+            color,
+            atlas_block,
+            unique_glyphs,
+            text_scale_alignment,
+        ),
+    ) in extraction.added_render_groups.iter()
     {
         let render_group = RenderGroup::new(
             &gfx_surface,
@@ -256,6 +265,7 @@ pub(crate) fn create_render_groups(
             *color,
             *atlas_block,
             *unique_glyphs as u32,
+            *text_scale_alignment,
         );
         renderer.render_groups.insert(*entity, render_group);
     }
@@ -281,7 +291,7 @@ pub(crate) fn render_group_differences(
     mut extraction: ResMut<Extraction>,
     mut renderer: ResMut<TextRenderer>,
     gfx_surface: Res<GfxSurface>,
-    font: Res<MonoSpacedFont>,
+    font: Res<AlignedFonts>,
     viewport: Res<Viewport>,
     scale_factor: Res<ScaleFactor>,
 ) {
@@ -324,7 +334,13 @@ pub(crate) fn render_group_differences(
             render_group.remove_glyph(*glyph_id);
         }
         for (key, glyph) in difference.glyph_add.iter() {
-            render_group.add_glyph(*key, glyph.clone(), &font);
+            render_group.add_glyph(
+                *key,
+                glyph.clone(),
+                font.fonts
+                    .get(&render_group.text_scale_alignment)
+                    .expect("no aligned font"),
+            );
             let (coords, glyph_area) = render_group.read_glyph_info(*key);
             render_group.queue_glyph_info(*key, coords, glyph_area);
         }

@@ -4,7 +4,7 @@ use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
-use winit::window::Window;
+use winit::window::{Window, WindowBuilder};
 
 pub use job::Job;
 pub use wasm_server::DeliveryService;
@@ -166,7 +166,12 @@ impl Stove {
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
             let event_loop = EventLoop::new();
-            let window = Rc::new(Window::new(&event_loop).expect("could not create window"));
+            let window = Rc::new(
+                WindowBuilder::new()
+                    .with_title("web stove")
+                    .build(&event_loop)
+                    .expect("could not create window"),
+            );
             web_sys::window()
                 .and_then(|win| win.document())
                 .and_then(|doc| doc.body())
@@ -334,7 +339,12 @@ impl Stove {
     fn init_native_gfx(&mut self, event_loop_window_target: &EventLoopWindowTarget<()>) {
         #[cfg(not(target_arch = "wasm32"))]
         {
-            let window = Rc::new(Window::new(event_loop_window_target).expect("no window"));
+            let window = Rc::new(
+                WindowBuilder::new()
+                    .with_title("native stove")
+                    .build(event_loop_window_target)
+                    .expect("no window"),
+            );
             let scale_factor = ScaleFactor::new(window.scale_factor());
             self.frontend.container.insert_resource(scale_factor);
             self.backend.container.insert_resource(scale_factor);

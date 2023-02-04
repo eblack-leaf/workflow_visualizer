@@ -1,37 +1,33 @@
-use mise_en_place::{
-    Cook, DeliveryTicket, Position, Recipe, Stove, Text, TextBundle, TextRenderer,
-    TextScaleAlignment,
-};
+use bevy_ecs::prelude::{Query, ResMut, Resource};
+
+use mise_en_place::{Cook, DeliveryTicket, FrontEndStages, Position, Recipe, Stove, Text, TextBundle, TextRenderer, TextScaleAlignment};
+
+#[derive(Resource)]
+struct Counter {
+    count: u32,
+}
+
+fn update_text(mut text: Query<(&mut Text)>, mut counter: ResMut<Counter>) {
+    counter.count += 1;
+    for mut ent_text in text.iter_mut() {
+        if counter.count > 1 {
+            ent_text.update(format!("counter is: {}", counter.count));
+        }
+    }
+}
 
 struct Meal;
 
 impl Cook for Meal {
     fn prepare(recipe: &mut Recipe) {
+        recipe.container.insert_resource(Counter { count: 0 });
+        recipe.main.add_system_to_stage(FrontEndStages::Process, update_text);
         recipe.container.spawn(TextBundle::new(
-            "stove
-    .frontend
-    .startup
-    .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
-stove.frontend.main.add_stage_before(
-    FrontEndStages::VisibilityPreparation,
-    TextStages::CalcTextScale,
-    SystemStage::single(calc_scale_from_alignment),
-);
-stove.frontend.main.add_stage_after(
-    TextStages::CalcTextScale,
-    TextStages::CalcArea,
-    SystemStage::single(calc_area),
-);
-stove.frontend.main.add_stage_after(
-    FrontEndStages::ResolveVisibility,
-    TextStages::TextFrontEnd,
-    SystemStage::parallel(),
-);
-",
+            "counter is: 0123456789",
             (10u32, 10u32),
             0u32,
             (1.0, 1.0, 1.0),
-            TextScaleAlignment::Small,
+            TextScaleAlignment::Medium,
         ));
     }
 }
@@ -47,6 +43,7 @@ fn main() {
         if args.contains(&"serve".to_string()) {
             delivery_service.deliver_to(([0, 0, 0, 0], 3030));
         } else {
+            println!("order only placed, deliver at your leisure");
             return;
         }
     }

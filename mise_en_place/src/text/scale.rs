@@ -1,4 +1,9 @@
+use std::collections::HashMap;
+
 use bevy_ecs::component::Component;
+use bevy_ecs::prelude::Resource;
+
+use crate::text::font::MonoSpacedFont;
 
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
 pub(crate) struct TextScale {
@@ -41,7 +46,7 @@ impl From<u32> for TextScale {
     }
 }
 
-#[derive(Component, Copy, Clone)]
+#[derive(Component, Copy, Clone, Eq, Hash, PartialEq)]
 pub enum TextScaleAlignment {
     Small,
     Medium,
@@ -49,3 +54,40 @@ pub enum TextScaleAlignment {
 }
 
 const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [14, 18, 22];
+
+#[derive(Resource)]
+pub(crate) struct AlignedFonts {
+    pub(crate) fonts: HashMap<TextScaleAlignment, MonoSpacedFont>,
+}
+
+impl AlignedFonts {
+    pub(crate) fn new(scale_factor: f64) -> Self {
+        Self {
+            fonts: {
+                let mut fonts = HashMap::new();
+                fonts.insert(
+                    TextScaleAlignment::Small,
+                    MonoSpacedFont::jet_brains_mono(TextScale::from_alignment(
+                        TextScaleAlignment::Small,
+                        scale_factor,
+                    )),
+                );
+                fonts.insert(
+                    TextScaleAlignment::Medium,
+                    MonoSpacedFont::jet_brains_mono(TextScale::from_alignment(
+                        TextScaleAlignment::Medium,
+                        scale_factor,
+                    )),
+                );
+                fonts.insert(
+                    TextScaleAlignment::Large,
+                    MonoSpacedFont::jet_brains_mono(TextScale::from_alignment(
+                        TextScaleAlignment::Large,
+                        scale_factor,
+                    )),
+                );
+                fonts
+            },
+        }
+    }
+}

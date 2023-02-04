@@ -418,7 +418,8 @@ pub(crate) fn calc_visible_section(
                         *visible_section = VisibleSection::new(current_visible_section);
                     }
                 } else {
-                    cmd.entity(entity).insert(VisibleSection::new(current_visible_section));
+                    cmd.entity(entity)
+                        .insert(VisibleSection::new(current_visible_section));
                 }
                 entity_remove_queue.remove(&entity);
             } else if visibility.visible() {
