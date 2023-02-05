@@ -1,13 +1,15 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Commands, Entity, IntoSystemDescriptor, Res, Resource, SystemLabel};
+use bevy_ecs::prelude::{Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage};
 
+use crate::{Area, Attach, BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages, Job, Position, Stove};
 use crate::ecs_text::atlas::AtlasBindGroup;
 use crate::ecs_text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };
 use crate::ecs_text::coords::Coords;
 use crate::ecs_text::extraction::Extraction;
+use crate::ecs_text::frontend_system::{bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff, discard_out_of_bounds, letter_diff, manage_render_groups, place, position_diff, pull_differences, setup as frontend_setup};
 use crate::ecs_text::glyph::Key;
 use crate::ecs_text::gpu_buffer::GpuBuffer;
 use crate::ecs_text::index::Indexer;
@@ -15,14 +17,13 @@ use crate::ecs_text::null_bit::NullBit;
 use crate::ecs_text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::ecs_text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::ecs_text::scale::AlignedFonts;
-use crate::ecs_text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
+use crate::ecs_text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::job::{Container, Task};
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
-use crate::{Area, Attach, BackEndStartupStages, BackendStages, Job, Position, Stove};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -229,8 +230,71 @@ enum TextSystems {
     RenderGroupDiff,
 }
 
+#[derive(StageLabel)]
+enum TextStages {
+    CalcTextScale,
+    CalcArea,
+    TextFrontEnd,
+    TextBackEnd,
+}
+
 impl Attach for TextRenderer {
     fn attach(stove: &mut Stove) {
+        stove
+            .frontend
+            .startup
+            .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
+        stove.frontend.main.add_stage_before(
+            FrontEndStages::VisibilityPreparation,
+            TextStages::CalcTextScale,
+            SystemStage::single(calc_scale_from_alignment),
+        );
+        stove.frontend.main.add_stage_after(
+            TextStages::CalcTextScale,
+            TextStages::CalcArea,
+            SystemStage::single(calc_area),
+        );
+        stove.frontend.main.add_stage_after(
+            FrontEndStages::ResolveVisibility,
+            TextStages::TextFrontEnd,
+            SystemStage::parallel(),
+        );
+        stove.frontend.main.add_system_to_stage(
+            TextStages::TextFrontEnd,
+            manage_render_groups.before("place"),
+        );
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, bounds_diff);
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, color_diff);
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, depth_diff);
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, position_diff);
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, place.label("place"));
+        stove.frontend.main.add_system_to_stage(
+            TextStages::TextFrontEnd,
+            discard_out_of_bounds.label("out of bounds").after("place"),
+        );
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, letter_diff.after("out of bounds"));
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Last, pull_differences);
         stove
             .backend
             .startup
@@ -258,8 +322,8 @@ impl Attach for TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = frontend
             .container

@@ -13,7 +13,7 @@ struct Counter {
 fn update_text(mut text: Query<&mut Text>, mut counter: ResMut<Counter>) {
     counter.count += 1;
     for mut ent_text in text.iter_mut() {
-        ent_text.update(format!("counter is: {}", counter.count));
+        ent_text.string = format!("counter is: {}", counter.count);
     }
 }
 
@@ -26,7 +26,7 @@ impl Cook for Meal {
             .main
             .add_system_to_stage(FrontEndStages::Process, update_text);
         recipe.container.spawn(TextBundle::new(
-            "counter is: 0123456789",
+            Text::new("counter is: 0123456789"),
             (10u32, 10u32),
             0u32,
             (1.0, 1.0, 1.0),

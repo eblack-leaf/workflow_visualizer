@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Added, Bundle, Commands, Component, Entity, Query, Res, Resource};
 
+use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 use crate::coord::ScaledPosition;
 use crate::ecs_text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -18,7 +19,6 @@ use crate::ecs_text::text::Text;
 use crate::gfx::GfxSurface;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
-use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);
@@ -47,6 +47,7 @@ pub(crate) struct RenderGroup {
     pub(crate) visible_section: VisibleSection,
     pub(crate) depth: Depth,
     pub(crate) color: Color,
+    pub(crate) color_uniform: Uniform<Color>,
     pub(crate) atlas_block: AtlasBlock,
     pub(crate) unique_glyphs: RenderGroupUniqueGlyphs,
     pub(crate) text_scale_alignment: TextScaleAlignment,
@@ -79,6 +80,8 @@ pub(crate) struct RenderGroup {
     pub(crate) atlas_write_queue: AtlasWriteQueue,
     pub(crate) atlas_add_queue: AtlasAddQueue,
     pub(crate) atlas_glyphs: AtlasGlyphs,
+    pub(crate) text_placement: TextPlacement,
+    pub(crate) text_placement_uniform: Uniform<TextPlacement>,
 }
 
 impl RenderGroup {
@@ -88,6 +91,7 @@ impl RenderGroup {
         visible_section: VisibleSection,
         depth: Depth,
         color: Color,
+        color_uniform: Uniform<Color>,
         atlas_block: AtlasBlock,
         unique_glyphs: RenderGroupUniqueGlyphs,
         text_scale_alignment: TextScaleAlignment,
@@ -120,6 +124,8 @@ impl RenderGroup {
         atlas_write_queue: AtlasWriteQueue,
         atlas_add_queue: AtlasAddQueue,
         atlas_glyphs: AtlasGlyphs,
+        text_placement: TextPlacement,
+        text_placement_uniform: Uniform<TextPlacement>,
     ) -> Self {
         Self {
             max,
@@ -127,6 +133,7 @@ impl RenderGroup {
             visible_section,
             depth,
             color,
+            color_uniform,
             atlas_block,
             unique_glyphs,
             text_scale_alignment,
@@ -159,6 +166,8 @@ impl RenderGroup {
             atlas_write_queue,
             atlas_add_queue,
             atlas_glyphs,
+            text_placement,
+            text_placement_uniform,
         }
     }
 }

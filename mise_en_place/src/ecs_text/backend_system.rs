@@ -3,6 +3,7 @@ use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{Added, Commands, Entity, EventReader, Res, ResMut};
 
+use crate::{Area, Color, Position, ScaledSection, Section};
 use crate::ecs_text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
@@ -27,7 +28,6 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Area, Color, Position, ScaledSection, Section};
 
 pub(crate) fn create_render_groups(
     mut extraction: ResMut<Extraction>,
@@ -105,6 +105,7 @@ pub(crate) fn create_render_groups(
                 *visible_section,
                 *depth,
                 *color,
+                color_uniform,
                 *atlas_block,
                 *unique_glyphs,
                 *text_scale_alignment,
@@ -137,6 +138,8 @@ pub(crate) fn create_render_groups(
                 atlas_write_queue,
                 atlas_add_queue,
                 atlas_glyphs,
+                text_placement,
+                text_placement_uniform,
             ))
             .id();
         renderer.render_groups.insert(*entity, render_group_entity);
@@ -512,14 +515,15 @@ pub(crate) fn render_group_differences(
             .unwrap()
             .queue
             .len() as u32;
+        let mut adjusted_glyphs = HashSet::new();
         if num_new_glyphs != 0
             && num_new_glyphs
-                > renderer
-                    .container
-                    .get::<AtlasFreeLocations>(render_group)
-                    .unwrap()
-                    .free
-                    .len() as u32
+            > renderer
+            .container
+            .get::<AtlasFreeLocations>(render_group)
+            .unwrap()
+            .free
+            .len() as u32
         {
             // grow
             let current_dimension = renderer
@@ -542,7 +546,6 @@ pub(crate) fn render_group_differences(
             let atlas = Atlas::new(&gfx_surface, texture_dimensions);
             let mut free_locations = AtlasFreeLocations::new(new_dimension);
             let mut writes = Vec::<(GlyphId, AtlasLocation, Coords, Area, Bitmap)>::new();
-            let mut adjusted_glyphs = HashSet::new();
             for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in renderer
                 .container
                 .get::<AtlasGlyphs>(render_group)
@@ -588,124 +591,124 @@ pub(crate) fn render_group_differences(
                 free_locations,
                 new_dimension,
             ));
-            let add_queue = renderer
+        }
+        let add_queue = renderer
+            .container
+            .get_mut::<AtlasAddQueue>(render_group)
+            .unwrap()
+            .queue
+            .drain()
+            .collect::<HashSet<Glyph>>();
+        for add in add_queue {
+            renderer
                 .container
-                .get_mut::<AtlasAddQueue>(render_group)
+                .get_mut::<AtlasGlyphReferences>(render_group)
                 .unwrap()
-                .queue
-                .drain()
-                .collect::<HashSet<Glyph>>();
-            for add in add_queue {
-                renderer
-                    .container
-                    .get_mut::<AtlasGlyphReferences>(render_group)
-                    .unwrap()
-                    .references
-                    .insert(add.id, AtlasGlyphReference::new());
-                renderer
-                    .container
-                    .get_mut::<AtlasGlyphReferences>(render_group)
-                    .unwrap()
-                    .references
-                    .get_mut(&add.id)
-                    .unwrap()
-                    .increment();
-                let rasterization = font
-                    .fonts
-                    .get(
-                        renderer
-                            .container
-                            .get::<TextScaleAlignment>(render_group)
-                            .unwrap(),
-                    )
-                    .unwrap()
-                    .font()
-                    .rasterize(add.character, add.scale.px());
-                let glyph_area = (rasterization.0.width, rasterization.0.height).into();
-                let location = renderer
-                    .container
-                    .get_mut::<AtlasFreeLocations>(render_group)
-                    .unwrap()
-                    .next();
-                let position = AtlasPosition::new(
-                    location,
-                    *renderer.container.get::<AtlasBlock>(render_group).unwrap(),
-                );
-                let glyph_section = Section::new(position.position, glyph_area);
-                let coords = Coords::from_section(
-                    glyph_section,
-                    *renderer
+                .references
+                .insert(add.id, AtlasGlyphReference::new());
+            renderer
+                .container
+                .get_mut::<AtlasGlyphReferences>(render_group)
+                .unwrap()
+                .references
+                .get_mut(&add.id)
+                .unwrap()
+                .increment();
+            let rasterization = font
+                .fonts
+                .get(
+                    renderer
                         .container
-                        .get::<AtlasTextureDimensions>(render_group)
+                        .get::<TextScaleAlignment>(render_group)
                         .unwrap(),
-                );
-                renderer
-                    .container
-                    .get_mut::<AtlasWriteQueue>(render_group)
-                    .unwrap()
-                    .queue
-                    .insert(location, (coords, glyph_area, rasterization.1.clone()));
-                renderer
-                    .container
-                    .get_mut::<AtlasGlyphs>(render_group)
-                    .unwrap()
-                    .glyphs
-                    .insert(add.id, (coords, glyph_area, location, rasterization.1));
-            }
-            let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
-            if !adjusted_glyphs.is_empty() {
-                let atlas_bind_group = AtlasBindGroup::new(
-                    &gfx_surface,
-                    &renderer.atlas_bind_group_layout,
-                    renderer.container.get::<Atlas>(render_group).unwrap(),
-                );
+                )
+                .unwrap()
+                .font()
+                .rasterize(add.character, add.scale.px());
+            let glyph_area = (rasterization.0.width, rasterization.0.height).into();
+            let location = renderer
+                .container
+                .get_mut::<AtlasFreeLocations>(render_group)
+                .unwrap()
+                .next();
+            let position = AtlasPosition::new(
+                location,
+                *renderer.container.get::<AtlasBlock>(render_group).unwrap(),
+            );
+            let glyph_section = Section::new(position.position, glyph_area);
+            let coords = Coords::from_section(
+                glyph_section,
                 *renderer
                     .container
-                    .get_mut::<AtlasBindGroup>(render_group)
-                    .unwrap() = atlas_bind_group;
-            }
+                    .get::<AtlasTextureDimensions>(render_group)
+                    .unwrap(),
+            );
+            renderer
+                .container
+                .get_mut::<AtlasWriteQueue>(render_group)
+                .unwrap()
+                .queue
+                .insert(location, (coords, glyph_area, rasterization.1.clone()));
+            renderer
+                .container
+                .get_mut::<AtlasGlyphs>(render_group)
+                .unwrap()
+                .glyphs
+                .insert(add.id, (coords, glyph_area, location, rasterization.1));
+        }
+        let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
+        if !adjusted_glyphs.is_empty() {
+            let atlas_bind_group = AtlasBindGroup::new(
+                &gfx_surface,
+                &renderer.atlas_bind_group_layout,
+                renderer.container.get::<Atlas>(render_group).unwrap(),
+            );
+            *renderer
+                .container
+                .get_mut::<AtlasBindGroup>(render_group)
+                .unwrap() = atlas_bind_group;
+        }
 
-            for adj_glyph in adjusted_glyphs {
-                for (key, glyph_id) in renderer
-                    .container
-                    .get::<KeyedGlyphIds>(render_group)
-                    .unwrap()
-                    .ids
-                    .iter()
-                {
-                    if adj_glyph == *glyph_id {
-                        glyph_info_writes.insert((*key, *glyph_id));
-                    }
+        for adj_glyph in adjusted_glyphs {
+            for (key, glyph_id) in renderer
+                .container
+                .get::<KeyedGlyphIds>(render_group)
+                .unwrap()
+                .ids
+                .iter()
+            {
+                if adj_glyph == *glyph_id {
+                    glyph_info_writes.insert((*key, *glyph_id));
                 }
             }
-            for (key, glyph_id) in glyph_info_writes {
-                let (coords, area, _, _) = renderer
-                    .container
-                    .get::<AtlasGlyphs>(render_group)
-                    .unwrap()
-                    .glyphs
-                    .get(&glyph_id)
-                    .unwrap()
-                    .clone();
-                let index = renderer
-                    .container
-                    .get::<Indexer<Key>>(render_group)
-                    .unwrap()
-                    .get_index(key)
-                    .unwrap();
-                renderer
-                    .container
-                    .get_mut::<GlyphAreaWrite>(render_group)
-                    .unwrap()
-                    .write
-                    .insert(index, area);
-                renderer
-                    .container
-                    .get_mut::<CoordsWrite>(render_group)
-                    .unwrap()
-                    .write
-                    .insert(index, coords);
-            }
+        }
+        for (key, glyph_id) in glyph_info_writes {
+            let (coords, area, _, _) = renderer
+                .container
+                .get::<AtlasGlyphs>(render_group)
+                .unwrap()
+                .glyphs
+                .get(&glyph_id)
+                .unwrap()
+                .clone();
+            let index = renderer
+                .container
+                .get::<Indexer<Key>>(render_group)
+                .unwrap()
+                .get_index(key)
+                .unwrap();
+            renderer
+                .container
+                .get_mut::<GlyphAreaWrite>(render_group)
+                .unwrap()
+                .write
+                .insert(index, area);
+            renderer
+                .container
+                .get_mut::<CoordsWrite>(render_group)
+                .unwrap()
+                .write
+                .insert(index, coords);
         }
         for (key, glyph) in difference.glyph_add.iter() {
             let (coords, area, _, _) = renderer
@@ -893,7 +896,7 @@ pub(crate) fn render_group_differences(
                 .unwrap()
                 .update(&gfx_surface.queue, color);
         }
-        for (location, (coords, glyph_area, bitmap)) in renderer
+        for (location, (_, glyph_area, bitmap)) in renderer
             .container
             .get::<AtlasWriteQueue>(render_group)
             .unwrap()
@@ -930,30 +933,6 @@ pub(crate) fn render_group_differences(
                 extent,
             );
         }
-        renderer
-            .container
-            .get_mut::<GlyphPositionWrite>(render_group)
-            .unwrap()
-            .write
-            .clear();
-        renderer
-            .container
-            .get_mut::<NullWrite>(render_group)
-            .unwrap()
-            .write
-            .clear();
-        renderer
-            .container
-            .get_mut::<CoordsWrite>(render_group)
-            .unwrap()
-            .write
-            .clear();
-        renderer
-            .container
-            .get_mut::<GlyphAreaWrite>(render_group)
-            .unwrap()
-            .write
-            .clear();
     }
 }
 
