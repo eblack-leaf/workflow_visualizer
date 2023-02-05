@@ -1,13 +1,16 @@
 use bevy_ecs::prelude::{Query, ResMut, Resource};
 
-use mise_en_place::{Cook, DeliveryTicket, FrontEndStages, Position, Recipe, Stove, Text, TextBundle, TextRenderer, TextScaleAlignment};
+use mise_en_place::{
+    Cook, DeliveryTicket, FrontEndStages, Position, Recipe, Stove, Text, TextBundle, TextRenderer,
+    TextScaleAlignment,
+};
 
 #[derive(Resource)]
 struct Counter {
     count: u32,
 }
 
-fn update_text(mut text: Query<(&mut Text)>, mut counter: ResMut<Counter>) {
+fn update_text(mut text: Query<&mut Text>, mut counter: ResMut<Counter>) {
     counter.count += 1;
     for mut ent_text in text.iter_mut() {
         ent_text.update(format!("counter is: {}", counter.count));
@@ -19,7 +22,9 @@ struct Meal;
 impl Cook for Meal {
     fn prepare(recipe: &mut Recipe) {
         recipe.container.insert_resource(Counter { count: 0 });
-        recipe.main.add_system_to_stage(FrontEndStages::Process, update_text);
+        recipe
+            .main
+            .add_system_to_stage(FrontEndStages::Process, update_text);
         recipe.container.spawn(TextBundle::new(
             "counter is: 0123456789",
             (10u32, 10u32),

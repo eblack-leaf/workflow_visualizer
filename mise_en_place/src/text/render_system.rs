@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut};
-use wgpu::BindGroupLayoutDescriptor;
 use wgpu::util::DeviceExt;
+use wgpu::BindGroupLayoutDescriptor;
 
 use crate::coord::{Area, Position, ScaledPosition};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
@@ -12,10 +12,10 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScale};
-use crate::text::vertex::{GLYPH_AABB, Vertex};
-use crate::TextScaleAlignment;
+use crate::text::vertex::{Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
+use crate::TextScaleAlignment;
 
 fn sampler_resources(
     gfx_surface: &GfxSurface,
@@ -107,7 +107,9 @@ fn pipeline(
     sampler_bind_group_layout: &wgpu::BindGroupLayout,
     render_group_bind_group_layout_descriptor: &BindGroupLayoutDescriptor<'static>,
 ) -> wgpu::RenderPipeline {
-    let render_group_bind_group_layout = gfx_surface.device.create_bind_group_layout(render_group_bind_group_layout_descriptor);
+    let render_group_bind_group_layout = gfx_surface
+        .device
+        .create_bind_group_layout(render_group_bind_group_layout_descriptor);
     let layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("text pipeline layout descriptor"),
         bind_group_layouts: &[
@@ -334,10 +336,7 @@ pub(crate) fn render_group_differences(
             render_group.remove_glyph(*glyph_id);
         }
         for (key, glyph) in difference.glyph_add.iter() {
-            render_group.add_glyph(
-                *key,
-                glyph.clone(),
-            );
+            render_group.add_glyph(*key, glyph.clone());
         }
         render_group.prepare_atlas(&gfx_surface, &font);
         for (key, glyph) in difference.glyph_add.iter() {

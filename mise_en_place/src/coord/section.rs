@@ -1,8 +1,8 @@
 use bevy_ecs::bundle::Bundle;
 
-use crate::coord::{ScaledArea, ScaledPosition};
 use crate::coord::area::Area;
 use crate::coord::position::Position;
+use crate::coord::{ScaledArea, ScaledPosition};
 
 #[derive(Bundle, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Section {

@@ -93,7 +93,8 @@ impl Atlas {
             let rasterization = font.font().rasterize(glyph.character, glyph.scale.px());
             let glyph_area = (rasterization.0.width, rasterization.0.height).into();
             let (coords, location) = self.place(&rasterization);
-            self.glyphs.insert(glyph.id, (coords, glyph_area, location, rasterization.1));
+            self.glyphs
+                .insert(glyph.id, (coords, glyph_area, location, rasterization.1));
         }
         self.add_queue.clear();
     }
@@ -227,11 +228,17 @@ impl Atlas {
             }
             let new_dimension = self.dimension + dimension_growth;
             self.dimension = new_dimension;
-            let texture_dimensions = (new_dimension * self.block.width as u32, new_dimension * self.block.height as u32);
+            let texture_dimensions = (
+                new_dimension * self.block.width as u32,
+                new_dimension * self.block.height as u32,
+            );
             Self::hardware_max_check(texture_dimensions.0, texture_dimensions.1);
-            let texture_descriptor = Self::texture_descriptor(texture_dimensions.0, texture_dimensions.1);
+            let texture_descriptor =
+                Self::texture_descriptor(texture_dimensions.0, texture_dimensions.1);
             self.texture = gfx_surface.device.create_texture(&texture_descriptor);
-            self.texture_view = self.texture.create_view(&wgpu::TextureViewDescriptor::default());
+            self.texture_view = self
+                .texture
+                .create_view(&wgpu::TextureViewDescriptor::default());
             self.texture_width = texture_dimensions.0;
             self.texture_height = texture_dimensions.1;
             let mut total_free = Self::calc_free(new_dimension);

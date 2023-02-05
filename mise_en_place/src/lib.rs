@@ -10,11 +10,11 @@ pub use job::Job;
 pub use wasm_server::DeliveryService;
 
 pub use crate::color::Color;
+use crate::coord::Coords;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section,
 };
-use crate::coord::Coords;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
 use crate::job::TaskLabel;
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
@@ -27,6 +27,7 @@ use crate::window::{Resize, ScaleFactor};
 
 mod color;
 mod coord;
+mod ecs_text;
 mod extract;
 mod gfx;
 mod job;
@@ -161,7 +162,7 @@ impl Stove {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
