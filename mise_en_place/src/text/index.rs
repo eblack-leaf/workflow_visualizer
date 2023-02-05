@@ -1,3 +1,4 @@
+use bevy_ecs::prelude::Component;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
@@ -17,7 +18,7 @@ impl From<u32> for Index {
         Self::new(value)
     }
 }
-
+#[derive(Component)]
 pub(crate) struct Indexer<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
     pub(crate) indices: HashMap<Key, Index>,
     pub(crate) count: u32,

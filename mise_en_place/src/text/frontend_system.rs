@@ -9,13 +9,13 @@ use fontdue::layout::TextStyle;
 
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
+use crate::text::atlas::AtlasBlock;
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::extraction::Extraction;
-use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
-use crate::text::render_group::TextBound;
+use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
 use crate::text::text::Text;
 use crate::visibility::Visibility;
@@ -91,13 +91,8 @@ pub(crate) fn manage_render_groups(
                 cache.bound.replace(section);
                 difference.bounds.replace(section);
             }
-            let max = text.len();
-            let unique_glyphs = text.len();
-            let atlas_block = font
-                .fonts
-                .get(text_scale_alignment)
-                .expect("no aligned font for")
-                .character_dimensions('a', scale.px());
+            let max = RenderGroupMax(text.string.len() as u32);
+            let unique_glyphs = RenderGroupUniqueGlyphs::from_text(text);
             extraction.added_render_groups.insert(
                 entity,
                 (
@@ -106,7 +101,12 @@ pub(crate) fn manage_render_groups(
                     *visible_section,
                     *depth,
                     *color,
-                    atlas_block,
+                    AtlasBlock::new(
+                        font.fonts
+                            .get(text_scale_alignment)
+                            .expect("no aligned font for"),
+                        scale,
+                    ),
                     unique_glyphs,
                     *text_scale_alignment,
                 ),
@@ -188,7 +188,7 @@ pub(crate) fn calc_area(
             .character_dimensions('A', text_scale.px());
         let mut max_width_letters = 0;
         let mut lines = 0;
-        for line in text.string().lines() {
+        for line in text.string.lines() {
             max_width_letters = max_width_letters.max(line.len());
             lines += 1;
         }

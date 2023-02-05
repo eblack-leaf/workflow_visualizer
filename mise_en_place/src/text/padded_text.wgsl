@@ -72,8 +72,8 @@ var rasterization_sampler: sampler;
 @group(2)
 @binding(1)
 var<uniform> text_color: vec4<f32>;
-@group(2)
-@binding(2)
+@group(3)
+@binding(0)
 var rasterization_tex: texture_2d<f32>;
 @fragment
 fn fragment_entry(

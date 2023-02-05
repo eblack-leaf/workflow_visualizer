@@ -14,11 +14,11 @@ pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section,
 };
 use crate::coord::Coords;
-pub use crate::ecs_text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
 use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface, GfxSurfaceConfiguration};
 use crate::job::TaskLabel;
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
+pub use crate::text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
 use crate::visibility::Visibility;
@@ -27,7 +27,7 @@ use crate::window::{Resize, ScaleFactor};
 
 mod color;
 mod coord;
-mod ecs_text;
+mod text;
 mod extract;
 mod gfx;
 mod job;

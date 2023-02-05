@@ -1,46 +1,23 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
+use crate::Color;
 use crate::coord::{Depth, Position, ScaledSection, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
-use crate::text::scale::{TextScale, TextScaleAlignment};
+use crate::text::scale::TextScaleAlignment;
 use crate::visibility::{Visibility, VisibleSection};
-use crate::Color;
 
 #[derive(Component)]
 pub struct Text {
-    string: String,
-    dirty: bool,
+    pub string: String,
 }
 
 impl Text {
     pub fn new<T: Into<String>>(string: T) -> Self {
         Self {
             string: string.into(),
-            dirty: true,
         }
-    }
-    pub fn len(&self) -> usize {
-        self.string.len()
-    }
-    pub fn string(&self) -> String {
-        self.string.clone()
-    }
-    pub fn clean(&mut self) {
-        self.dirty = false;
-    }
-    pub fn is_dirty(&self) -> bool {
-        self.dirty
-    }
-    pub fn update(&mut self, string: String) {
-        self.string = string;
-    }
-}
-
-impl From<&'static str> for Text {
-    fn from(value: &'static str) -> Self {
-        Self::new(value.to_string())
     }
 }
 

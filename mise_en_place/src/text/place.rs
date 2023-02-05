@@ -6,7 +6,7 @@ use fontdue::layout::{CoordinateSystem, GlyphPosition, TextStyle};
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::Key;
 use crate::text::scale::TextScale;
-use crate::Text;
+use crate::text::text::Text;
 
 #[derive(Component)]
 pub(crate) struct Placer {
@@ -27,7 +27,7 @@ impl Placer {
         self.layout.clear();
         self.layout.append(
             font.font_slice(),
-            &TextStyle::new(text.string().as_str(), scale.px(), MonoSpacedFont::index()),
+            &TextStyle::new(text.string.as_str(), scale.px(), MonoSpacedFont::index()),
         );
         self.unfiltered_placement = self.layout.glyphs().clone();
         self.filtered_placement = self.unfiltered_placement.clone();

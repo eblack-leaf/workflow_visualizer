@@ -4,26 +4,26 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Added, Commands, Entity, EventReader, Res, ResMut};
 
 use crate::{Area, Color, Position, ScaledSection, Section};
-use crate::ecs_text::atlas::{
+use crate::gfx::GfxSurface;
+use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
     AtlasTextureDimensions, AtlasWriteQueue, Bitmap, GlyphArea,
 };
-use crate::ecs_text::coords::Coords;
-use crate::ecs_text::cpu_buffer::CpuBuffer;
-use crate::ecs_text::extraction::Extraction;
-use crate::ecs_text::glyph::{Glyph, GlyphId, Key};
-use crate::ecs_text::gpu_buffer::GpuBuffer;
-use crate::ecs_text::index::{Index, Indexer};
-use crate::ecs_text::null_bit::NullBit;
-use crate::ecs_text::render_group::{
+use crate::text::coords::Coords;
+use crate::text::cpu_buffer::CpuBuffer;
+use crate::text::extraction::Extraction;
+use crate::text::glyph::{Glyph, GlyphId, Key};
+use crate::text::gpu_buffer::GpuBuffer;
+use crate::text::index::{Index, Indexer};
+use crate::text::null_bit::NullBit;
+use crate::text::render_group::{
     ColorWrite, CoordsWrite, DepthWrite, DrawSection, GlyphAreaWrite, GlyphPositionWrite,
     KeyedGlyphIds, NullWrite, PositionWrite, RenderGroup, RenderGroupBindGroup, RenderGroupMax,
     RenderGroupTextBound, RenderGroupUniqueGlyphs, TextBound, TextPlacement,
 };
-use crate::ecs_text::renderer::TextRenderer;
-use crate::ecs_text::scale::{AlignedFonts, TextScaleAlignment};
-use crate::gfx::GfxSurface;
+use crate::text::renderer::TextRenderer;
+use crate::text::scale::{AlignedFonts, TextScaleAlignment};
 use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;

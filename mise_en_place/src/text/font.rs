@@ -14,11 +14,11 @@ pub(crate) struct MonoSpacedFont {
 impl MonoSpacedFont {
     pub(crate) fn jet_brains_mono<T: Into<TextScale>>(opt_scale: T) -> Self {
         Self::new(
-            include_bytes!("./JetBrainsMono-Regular.ttf").as_slice(),
+            include_bytes!("./JetBrainsMono-Medium.ttf").as_slice(),
             opt_scale,
         )
     }
-    pub(crate) fn new<Data: Deref<Target = [u8]>, T: Into<TextScale>>(
+    pub(crate) fn new<Data: Deref<Target=[u8]>, T: Into<TextScale>>(
         font_data: Data,
         opt_scale: T,
     ) -> Self {
@@ -30,7 +30,7 @@ impl MonoSpacedFont {
                     ..FontSettings::default()
                 },
             )
-            .expect("text font creation")],
+                .expect("text font creation")],
         }
     }
     pub(crate) fn font_slice(&self) -> &[fdFont] {
