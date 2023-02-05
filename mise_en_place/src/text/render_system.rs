@@ -327,6 +327,7 @@ pub(crate) fn render_group_differences(
         for (key, glyph_position) in difference.add.iter() {
             render_group.add(*key, *glyph_position);
         }
+        render_group.grow(&gfx_surface);
         for (key, glyph_position) in difference.update.iter() {
             render_group.queue_glyph_position(*key, *glyph_position);
         }
@@ -336,11 +337,11 @@ pub(crate) fn render_group_differences(
         for (key, glyph) in difference.glyph_add.iter() {
             render_group.add_glyph(
                 *key,
-                glyph.clone(),
-                font.fonts
-                    .get(&render_group.text_scale_alignment)
-                    .expect("no aligned font"),
+                glyph.clone()
             );
+        }
+        render_group.prepare_atlas(&gfx_surface, &font);
+        for (key, glyph) in difference.glyph_add.iter() {
             let (coords, glyph_area) = render_group.read_glyph_info(*key);
             render_group.queue_glyph_info(*key, coords, glyph_area);
         }

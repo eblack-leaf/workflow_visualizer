@@ -5,7 +5,7 @@ use bevy_ecs::prelude::Resource;
 
 use crate::text::font::MonoSpacedFont;
 
-#[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub(crate) struct TextScale {
     pub(crate) scale: u32,
 }

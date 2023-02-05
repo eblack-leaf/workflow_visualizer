@@ -9,7 +9,7 @@ use crate::text::coords::Coords;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, GlyphId, Key};
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone)]
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Debug)]
 pub(crate) struct Location {
     pub(crate) x: u32,
     pub(crate) y: u32,
@@ -48,9 +48,10 @@ pub(crate) struct Atlas {
     pub(crate) block: Area,
     pub(crate) dimension: u32,
     pub(crate) free: HashSet<Location>,
-    pub(crate) glyphs: HashMap<GlyphId, (Coords, Area, Location)>,
+    pub(crate) glyphs: HashMap<GlyphId, (Coords, Area, Location, Bitmap)>,
     pub(crate) references: HashMap<GlyphId, Reference>,
     pub(crate) write: HashMap<Location, (Coords, Area, Bitmap)>,
+    pub(crate) add_queue: HashSet<Glyph>,
 }
 
 impl Atlas {
@@ -72,6 +73,7 @@ impl Atlas {
             glyphs: HashMap::new(),
             references: HashMap::new(),
             write: HashMap::new(),
+            add_queue: HashSet::new(),
         }
     }
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
@@ -80,17 +82,20 @@ impl Atlas {
             .expect("no references for glyph id")
             .decrement();
     }
-    pub(crate) fn add_glyph(&mut self, glyph: Glyph, font: &MonoSpacedFont) {
-        if self.glyphs.contains_key(&glyph.id) {
+    pub(crate) fn add_glyph(&mut self, glyph: Glyph) {
+        self.add_queue.insert(glyph);
+    }
+    pub(crate) fn process_queued_adds(&mut self, font: &MonoSpacedFont) {
+        let add_queue = self.add_queue.iter().cloned().collect::<Vec<Glyph>>();
+        for glyph in add_queue {
+            self.references.insert(glyph.id, Reference::new());
             self.increment_reference(glyph.id);
-            return;
+            let rasterization = font.font().rasterize(glyph.character, glyph.scale.px());
+            let glyph_area = (rasterization.0.width, rasterization.0.height).into();
+            let (coords, location) = self.place(&rasterization);
+            self.glyphs.insert(glyph.id, (coords, glyph_area, location, rasterization.1));
         }
-        self.references.insert(glyph.id, Reference::new());
-        self.increment_reference(glyph.id);
-        let rasterization = font.font().rasterize(glyph.character, glyph.scale.px());
-        let glyph_area = (rasterization.0.width, rasterization.0.height).into();
-        let (coords, location) = self.place(rasterization);
-        self.glyphs.insert(glyph.id, (coords, glyph_area, location));
+        self.add_queue.clear();
     }
     pub(crate) fn write(&mut self, gfx_surface: &GfxSurface) {
         let mut write = self
@@ -189,27 +194,81 @@ impl Atlas {
     ) {
         self.write.insert(location, (coords, glyph_area, bitmap));
     }
-    fn place(&mut self, rasterization: (Metrics, Bitmap)) -> (Coords, Location) {
+    fn place(&mut self, rasterization: &(Metrics, Bitmap)) -> (Coords, Location) {
         let location = self.next();
         let position = self.position_from(location);
         let glyph_area: Area = (rasterization.0.width, rasterization.0.height).into();
         let section = Section::new(position, glyph_area);
         let coords = self.coords(section);
-        self.queue_write(location, coords, glyph_area, rasterization.1);
+        self.queue_write(location, coords, glyph_area, rasterization.1.clone());
         (coords, location)
     }
     fn next(&mut self) -> Location {
         let location = match self.free.is_empty() {
             true => {
-                // needs to grow
-                panic!("needs to grow texture")
+                panic!("no free locations")
             }
             false => *self.free.iter().next().expect("no free locations"),
         };
         self.free.remove(&location);
         location
     }
-    fn free(&mut self) {
+    pub(crate) fn grow(&mut self, gfx_surface: &GfxSurface) -> Option<HashSet<GlyphId>> {
+        let num_new_glyphs = self.add_queue.len() as u32;
+        if num_new_glyphs != 0 && num_new_glyphs > self.free.len() as u32 {
+            let current_total = self.dimension.pow(2);
+            let mut dimension_growth = 1;
+            let next_size_up_total = (self.dimension + dimension_growth).pow(2);
+            let diff = next_size_up_total - current_total;
+            while diff < num_new_glyphs {
+                dimension_growth += 1;
+                let next_size_up_total = (self.dimension + dimension_growth).pow(2);
+                let diff = next_size_up_total - current_total;
+            }
+            let new_dimension = self.dimension + dimension_growth;
+            self.dimension = new_dimension;
+            let texture_dimensions = (new_dimension * self.block.width as u32, new_dimension * self.block.height as u32);
+            Self::hardware_max_check(texture_dimensions.0, texture_dimensions.1);
+            let texture_descriptor = Self::texture_descriptor(texture_dimensions.0, texture_dimensions.1);
+            self.texture = gfx_surface.device.create_texture(&texture_descriptor);
+            self.texture_view = self.texture.create_view(&wgpu::TextureViewDescriptor::default());
+            self.texture_width = texture_dimensions.0;
+            self.texture_height = texture_dimensions.1;
+            let mut total_free = Self::calc_free(new_dimension);
+            let mut writes = Vec::<(GlyphId, Location, Coords, Area, Bitmap)>::new();
+            let mut adjusted_glyphs = HashSet::new();
+            for (glyph_id, (coords, area, location, bitmap)) in self.glyphs.iter() {
+                let position = self.position_from(*location);
+                let section = Section::new(position, *area);
+                let new_coords = self.coords(section);
+                writes.push((*glyph_id, *location, new_coords, *area, bitmap.clone()));
+                total_free.remove(location);
+                adjusted_glyphs.insert(*glyph_id);
+            }
+            for write in writes {
+                self.glyphs.get_mut(&write.0).expect("no glyph for id").0 = write.2;
+                self.queue_write(write.1, write.2, write.3, write.4);
+            }
+            self.free = total_free;
+            return Some(adjusted_glyphs)
+        }
+        None
+    }
+    pub(crate) fn free(&mut self) {
+        let mut add_retained_glyphs = HashSet::new();
+        let mut incremented_glyphs = HashSet::new();
+        for glyph in self.add_queue.iter() {
+            if self.glyphs.contains_key(&glyph.id) {
+                incremented_glyphs.insert(glyph.id);
+                add_retained_glyphs.insert(glyph.clone());
+            }
+        }
+        for id in incremented_glyphs {
+            self.increment_reference(id);
+        }
+        for glyph in add_retained_glyphs.iter() {
+            self.add_queue.remove(glyph);
+        }
         let mut orphaned_glyphs = HashSet::new();
         for (glyph_id, reference) in self.references.iter() {
             if reference.count == 0 {
@@ -224,7 +283,7 @@ impl Atlas {
         }
     }
     fn free_glyph(&mut self, glyph_id: GlyphId) {
-        let (_coords, _area, location) = self
+        let (_coords, _area, location, bitmap) = self
             .glyphs
             .remove(&glyph_id)
             .expect("no glyph for glyph id");

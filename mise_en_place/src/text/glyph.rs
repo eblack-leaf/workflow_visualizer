@@ -1,6 +1,6 @@
 use crate::text::scale::TextScale;
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Debug)]
 pub(crate) struct Key {
     pub(crate) offset: u32,
 }
@@ -13,7 +13,7 @@ impl Key {
 
 pub(crate) type GlyphId = fontdue::layout::GlyphRasterConfig;
 
-#[derive(Clone)]
+#[derive(Clone, Hash, Eq, PartialEq, Debug)]
 pub(crate) struct Glyph {
     pub(crate) character: char,
     pub(crate) scale: TextScale,

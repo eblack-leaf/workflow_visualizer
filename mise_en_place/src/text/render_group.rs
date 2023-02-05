@@ -16,18 +16,22 @@ use crate::text::extraction::Extraction;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::index::{Index, Indexer};
-use crate::text::scale::TextScale;
+use crate::text::scale::{AlignedFonts, TextScale};
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::{Visibility, VisibleSection};
 use crate::{Color, TextScaleAlignment};
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default)]
+#[derive(Pod, Zeroable, Copy, Clone)]
 pub(crate) struct NullBit {
     bit: u32,
 }
-
+impl Default for NullBit {
+    fn default() -> Self {
+        NullBit::null()
+    }
+}
 impl NullBit {
     pub(crate) const NOT_NULL: u32 = 0u32;
     pub(crate) const NULL: u32 = 1u32;
@@ -161,6 +165,26 @@ impl RenderGroup {
             text_scale_alignment,
         }
     }
+    pub(crate) fn grow(&mut self, gfx_surface: &GfxSurface) {
+        if self.indexer.should_grow() {
+            // grow glyph positions
+            self.glyph_position_cpu.resize(self.indexer.max as usize, Position::default());
+            self.glyph_position_gpu = Self::gpu_buffer::<Position>(gfx_surface, self.indexer.max);
+            gfx_surface.queue.write_buffer(&self.glyph_position_gpu, 0, bytemuck::cast_slice(&self.glyph_position_cpu));
+            // grow glyph areas
+            self.glyph_area_cpu.resize(self.indexer.max as usize, Area::default());
+            self.glyph_area_gpu = Self::gpu_buffer::<Area>(gfx_surface, self.indexer.max);
+            gfx_surface.queue.write_buffer(&self.glyph_area_gpu, 0, bytemuck::cast_slice(&self.glyph_area_cpu));
+            // grow null
+            self.null_cpu.resize(self.indexer.max as usize, NullBit::default());
+            self.null_gpu = Self::gpu_buffer::<NullBit>(gfx_surface, self.indexer.max);
+            gfx_surface.queue.write_buffer(&self.null_gpu, 0, bytemuck::cast_slice(&self.null_cpu));
+            // grow coords
+            self.coords_cpu.resize(self.indexer.max as usize, Coords::default());
+            self.coords_gpu = Self::gpu_buffer::<Coords>(gfx_surface, self.indexer.max);
+            gfx_surface.queue.write_buffer(&self.coords_gpu, 0, bytemuck::cast_slice(&self.coords_cpu));
+        }
+    }
     pub(crate) fn adjust_draw_section(
         &mut self,
         viewport_section: ScaledSection,
@@ -192,9 +216,29 @@ impl RenderGroup {
     pub(crate) fn count(&self) -> u32 {
         self.indexer.count()
     }
-    pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph, font: &MonoSpacedFont) {
+    pub(crate) fn add_glyph(&mut self, key: Key, glyph: Glyph) {
         self.keyed_glyph_ids.insert(key, glyph.id);
-        self.atlas.add_glyph(glyph, font);
+        self.atlas.add_glyph(glyph);
+    }
+    pub(crate) fn prepare_atlas(&mut self, gfx_surface: &GfxSurface, fonts: &AlignedFonts) {
+        self.atlas.free();
+        let adjusted= self.atlas.grow(gfx_surface);
+        self.atlas.process_queued_adds(fonts.fonts
+            .get(&self.text_scale_alignment)
+            .expect("no aligned font"));
+        let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
+        if let Some(adj) = adjusted {
+            for id in adj {
+                for (key, glyph_id) in self.keyed_glyph_ids.iter() {
+                    if id == *glyph_id { glyph_info_writes.insert((*key, *glyph_id)); }
+                }
+            }
+            for (key, glyph_id) in glyph_info_writes {
+                println!("rewriting {:?}", key);
+                let (coords, area) = self.read_glyph_info(key);
+                self.queue_glyph_info(key, coords, area);
+            }
+        }
     }
     pub(crate) fn remove_glyph(&mut self, glyph_id: GlyphId) {
         self.atlas.remove_glyph(glyph_id);
