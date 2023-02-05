@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut};
+use wgpu::BindGroupLayoutDescriptor;
 use wgpu::util::DeviceExt;
 
 use crate::coord::{Area, Position, ScaledPosition};
@@ -11,10 +12,10 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{NullBit, RenderGroup};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScale};
-use crate::text::vertex::{Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex};
+use crate::TextScaleAlignment;
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::TextScaleAlignment;
 
 fn sampler_resources(
     gfx_surface: &GfxSurface,
@@ -60,7 +61,7 @@ fn sampler_resources(
     (sampler_bind_group_layout, sampler, sampler_bind_group)
 }
 
-fn render_group_resources(gfx_surface: &GfxSurface) -> wgpu::BindGroupLayout {
+fn render_group_resources(gfx_surface: &GfxSurface) -> BindGroupLayoutDescriptor<'static> {
     let render_group_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("rasterization bind group"),
         entries: &[
@@ -96,10 +97,7 @@ fn render_group_resources(gfx_surface: &GfxSurface) -> wgpu::BindGroupLayout {
             },
         ],
     };
-    let render_group_bind_group_layout = gfx_surface
-        .device
-        .create_bind_group_layout(&render_group_bind_group_layout_descriptor);
-    render_group_bind_group_layout
+    render_group_bind_group_layout_descriptor
 }
 
 fn pipeline(
@@ -107,8 +105,9 @@ fn pipeline(
     gfx_surface_config: &GfxSurfaceConfiguration,
     viewport: &Viewport,
     sampler_bind_group_layout: &wgpu::BindGroupLayout,
-    render_group_bind_group_layout: &wgpu::BindGroupLayout,
+    render_group_bind_group_layout_descriptor: &BindGroupLayoutDescriptor<'static>,
 ) -> wgpu::RenderPipeline {
+    let render_group_bind_group_layout = gfx_surface.device.create_bind_group_layout(render_group_bind_group_layout_descriptor);
     let layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("text pipeline layout descriptor"),
         bind_group_layouts: &[
@@ -212,19 +211,19 @@ pub(crate) fn setup(
     mut cmd: Commands,
 ) {
     let (sampler_bind_group_layout, sampler, sampler_bind_group) = sampler_resources(&gfx_surface);
-    let render_group_bind_group_layout = render_group_resources(&gfx_surface);
+    let render_group_bind_group_layout_descriptor = render_group_resources(&gfx_surface);
     let pipeline = pipeline(
         &gfx_surface,
         &gfx_surface_config,
         &viewport,
         &sampler_bind_group_layout,
-        &render_group_bind_group_layout,
+        &render_group_bind_group_layout_descriptor,
     );
     cmd.insert_resource(TextRenderer {
         pipeline,
         vertex_buffer: vertex_buffer(&gfx_surface),
         render_groups: HashMap::new(),
-        render_group_bind_group_layout,
+        render_group_bind_group_layout: render_group_bind_group_layout_descriptor,
         sampler,
         sampler_bind_group,
     });
@@ -337,7 +336,7 @@ pub(crate) fn render_group_differences(
         for (key, glyph) in difference.glyph_add.iter() {
             render_group.add_glyph(
                 *key,
-                glyph.clone()
+                glyph.clone(),
             );
         }
         render_group.prepare_atlas(&gfx_surface, &font);

@@ -3,27 +3,27 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Entity, Resource};
 
 use crate::extract::Extract;
+use crate::Job;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::extraction::Extraction;
 use crate::text::render_group::RenderGroup;
 use crate::text::vertex::GLYPH_AABB;
 use crate::viewport::Viewport;
-use crate::Job;
 
 #[derive(Resource)]
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) render_groups: HashMap<Entity, RenderGroup>,
-    pub(crate) render_group_bind_group_layout: wgpu::BindGroupLayout,
+    pub(crate) render_group_bind_group_layout: wgpu::BindGroupLayoutDescriptor<'static>,
     pub(crate) sampler: wgpu::Sampler,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
 }
 
 impl Extract for TextRenderer {
     fn extract(compute: &mut Job, render: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = compute
             .container

@@ -4,7 +4,7 @@ use bytemuck::{Pod, Zeroable};
 use crate::coord::area_adjust::{AreaAdjust, ScaledAreaAdjust};
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Component, Clone, Copy, Default, PartialEq)]
+#[derive(Pod, Zeroable, Component, Clone, Copy, Default, PartialEq, Debug)]
 pub struct Area {
     pub width: f32,
     pub height: f32,

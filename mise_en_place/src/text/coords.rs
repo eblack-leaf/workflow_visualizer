@@ -1,8 +1,9 @@
-use crate::coord::Section;
 use bytemuck::{Pod, Zeroable};
 
+use crate::coord::Section;
+
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default)]
+#[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
 pub(crate) struct Coords {
     pub(crate) data: [f32; 4],
 }

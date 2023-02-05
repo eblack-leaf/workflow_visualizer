@@ -219,11 +219,11 @@ impl Atlas {
             let current_total = self.dimension.pow(2);
             let mut dimension_growth = 1;
             let next_size_up_total = (self.dimension + dimension_growth).pow(2);
-            let diff = next_size_up_total - current_total;
+            let mut diff = next_size_up_total - current_total;
             while diff < num_new_glyphs {
                 dimension_growth += 1;
                 let next_size_up_total = (self.dimension + dimension_growth).pow(2);
-                let diff = next_size_up_total - current_total;
+                diff = next_size_up_total - current_total;
             }
             let new_dimension = self.dimension + dimension_growth;
             self.dimension = new_dimension;
@@ -250,7 +250,7 @@ impl Atlas {
                 self.queue_write(write.1, write.2, write.3, write.4);
             }
             self.free = total_free;
-            return Some(adjusted_glyphs)
+            return Some(adjusted_glyphs);
         }
         None
     }

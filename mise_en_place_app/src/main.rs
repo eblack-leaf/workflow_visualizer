@@ -21,7 +21,7 @@ impl Cook for Meal {
         recipe.container.insert_resource(Counter { count: 0 });
         recipe.main.add_system_to_stage(FrontEndStages::Process, update_text);
         recipe.container.spawn(TextBundle::new(
-            "counter is:",
+            "counter is: 0123456789",
             (10u32, 10u32),
             0u32,
             (1.0, 1.0, 1.0),

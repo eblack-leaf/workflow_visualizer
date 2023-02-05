@@ -6,6 +6,7 @@ use bevy_ecs::prelude::{
 use bytemuck::{Pod, Zeroable};
 use wgpu::{BindGroupEntry, Buffer, BufferAddress, BufferUsages};
 
+use crate::{Color, TextScaleAlignment};
 use crate::coord::{Area, Depth, Position, ScaledArea, ScaledPosition, ScaledSection, Section};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::Atlas;
@@ -20,18 +21,19 @@ use crate::text::scale::{AlignedFonts, TextScale};
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::{Visibility, VisibleSection};
-use crate::{Color, TextScaleAlignment};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone)]
 pub(crate) struct NullBit {
     bit: u32,
 }
+
 impl Default for NullBit {
     fn default() -> Self {
         NullBit::null()
     }
 }
+
 impl NullBit {
     pub(crate) const NOT_NULL: u32 = 0u32;
     pub(crate) const NULL: u32 = 1u32;
@@ -84,6 +86,7 @@ pub(crate) struct RenderGroup {
     pub(crate) keyed_glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) atlas: Atlas,
     pub(crate) text_scale_alignment: TextScaleAlignment,
+    pub(crate) bind_group_layout: wgpu::BindGroupLayout,
 }
 
 #[repr(C)]
@@ -103,7 +106,7 @@ impl TextPlacement {
 impl RenderGroup {
     pub(crate) fn new(
         gfx_surface: &GfxSurface,
-        bind_group_layout: &wgpu::BindGroupLayout,
+        bind_group_layout_descriptor: &wgpu::BindGroupLayoutDescriptor,
         max: u32,
         position: ScaledPosition,
         visible_section: VisibleSection,
@@ -117,6 +120,7 @@ impl RenderGroup {
         let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
         let color_uniform = Uniform::new(&gfx_surface.device, color);
         let atlas = Atlas::new(gfx_surface, atlas_block, unique_glyphs);
+        let bind_group_layout = gfx_surface.device.create_bind_group_layout(bind_group_layout_descriptor);
         Self {
             bound_section: None,
             draw_section: None,
@@ -125,7 +129,7 @@ impl RenderGroup {
                 .device
                 .create_bind_group(&wgpu::BindGroupDescriptor {
                     label: Some("render group bind group"),
-                    layout: bind_group_layout,
+                    layout: &bind_group_layout,
                     entries: &[
                         BindGroupEntry {
                             binding: 0,
@@ -163,6 +167,7 @@ impl RenderGroup {
             keyed_glyph_ids: HashMap::new(),
             atlas,
             text_scale_alignment,
+            bind_group_layout,
         }
     }
     pub(crate) fn grow(&mut self, gfx_surface: &GfxSurface) {
@@ -222,19 +227,38 @@ impl RenderGroup {
     }
     pub(crate) fn prepare_atlas(&mut self, gfx_surface: &GfxSurface, fonts: &AlignedFonts) {
         self.atlas.free();
-        let adjusted= self.atlas.grow(gfx_surface);
+        let adjusted = self.atlas.grow(gfx_surface);
         self.atlas.process_queued_adds(fonts.fonts
             .get(&self.text_scale_alignment)
             .expect("no aligned font"));
         let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
         if let Some(adj) = adjusted {
+            self.bind_group = gfx_surface
+                .device
+                .create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("render group bind group"),
+                    layout: &self.bind_group_layout,
+                    entries: &[
+                        BindGroupEntry {
+                            binding: 0,
+                            resource: self.text_placement_uniform.buffer.as_entire_binding(),
+                        },
+                        BindGroupEntry {
+                            binding: 1,
+                            resource: self.color_uniform.buffer.as_entire_binding(),
+                        },
+                        BindGroupEntry {
+                            binding: 2,
+                            resource: wgpu::BindingResource::TextureView(&self.atlas.texture_view),
+                        },
+                    ],
+                });
             for id in adj {
                 for (key, glyph_id) in self.keyed_glyph_ids.iter() {
                     if id == *glyph_id { glyph_info_writes.insert((*key, *glyph_id)); }
                 }
             }
             for (key, glyph_id) in glyph_info_writes {
-                println!("rewriting {:?}", key);
                 let (coords, area) = self.read_glyph_info(key);
                 self.queue_glyph_info(key, coords, area);
             }
