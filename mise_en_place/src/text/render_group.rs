@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Bundle, Component};
 
+use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 use crate::coord::ScaledPosition;
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
@@ -18,7 +19,6 @@ use crate::text::scale::TextScaleAlignment;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
-use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);
@@ -327,13 +327,13 @@ impl KeyedGlyphIds {
 
 #[derive(Component)]
 pub(crate) struct RenderGroupTextBound {
-    pub(crate) text_bound_section: Option<Section>,
+    pub(crate) text_bound_area: Option<Area>,
 }
 
 impl RenderGroupTextBound {
     pub(crate) fn new() -> Self {
         Self {
-            text_bound_section: None,
+            text_bound_area: None,
         }
     }
 }

@@ -2,17 +2,17 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
+use crate::{Color, TextBound};
 use crate::coord::{Depth, Position, Section};
 use crate::text::glyph::{GlyphId, Key};
 use crate::visibility::VisibleSection;
-use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Cache {
     pub(crate) keys: HashSet<Key>,
     pub(crate) glyph_positions: HashMap<Key, Position>,
     pub(crate) glyph_ids: HashMap<Key, GlyphId>,
-    pub(crate) bound: Option<Section>,
+    pub(crate) bound: Option<TextBound>,
     pub(crate) position: Position,
     pub(crate) depth: Depth,
     pub(crate) color: Color,

@@ -22,7 +22,10 @@ fn update_text(
         if counter.count >= 400 && counter.count < 600 {
             cmd.entity(entity).insert(PositionAdjust::new(-2.0, -1.0));
         }
-        if counter.count == 600 {
+        if counter.count == 100 {
+            // bound section is not receiving position updates
+            // visible section is not being updated cause not resized
+            // make render group text_bound to area only and change based on position
             cmd.entity(entity).insert(TextBound::new((400, 300)));
         }
     }

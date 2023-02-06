@@ -86,9 +86,8 @@ pub(crate) fn manage_render_groups(
             difference.depth.replace(*depth);
             difference.color.replace(*color);
             if let Some(bounds) = maybe_bound {
-                let section = Section::new(*position, bounds.area);
-                cache.bound.replace(section);
-                difference.bounds.replace(section);
+                cache.bound.replace(*bounds);
+                difference.bounds.replace(*bounds);
             }
             let max = RenderGroupMax(text.string.len() as u32);
             let unique_glyphs = RenderGroupUniqueGlyphs::from_text(text);
@@ -202,21 +201,20 @@ pub(crate) fn calc_area(
 
 pub(crate) fn bounds_diff(
     mut text: Query<
-        (&Position, Option<&TextBound>, &mut Cache, &mut Difference),
+        (Option<&TextBound>, &mut Cache, &mut Difference),
         Changed<TextBound>,
     >,
 ) {
-    for (position, maybe_bound, mut cache, mut difference) in text.iter_mut() {
+    for (maybe_bound, mut cache, mut difference) in text.iter_mut() {
         if let Some(bound) = maybe_bound {
-            let section = Section::new(*position, bound.area);
             if let Some(cached_bound) = cache.bound {
-                if cached_bound != section {
-                    difference.bounds.replace(section);
-                    cache.bound.replace(section);
+                if cached_bound.area != bound.area {
+                    difference.bounds.replace(*bound);
+                    cache.bound.replace(*bound);
                 }
             } else {
-                difference.bounds.replace(section);
-                cache.bound.replace(section);
+                difference.bounds.replace(*bound);
+                cache.bound.replace(*bound);
             }
         } else if cache.bound.is_some() {
             difference.bounds = None;

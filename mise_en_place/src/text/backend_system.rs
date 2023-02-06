@@ -4,6 +4,7 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 
 use crate::{Area, Color, Position, ScaledSection, Section};
+use crate::coord::ScaledPosition;
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -176,10 +177,10 @@ pub(crate) fn render_group_differences(
             render_group,
             &mut draw_section_resize_needed,
         );
+        queue_position(&mut renderer, &scale_factor, difference, render_group, &mut draw_section_resize_needed);
         if draw_section_resize_needed {
             resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
         }
-        queue_position(&mut renderer, &scale_factor, difference, render_group);
         queue_depth(&mut renderer, difference, render_group);
         queue_color(&mut renderer, difference, render_group);
         queue_remove(&mut renderer, difference, render_group);
@@ -213,8 +214,8 @@ fn set_text_bound(
             .container
             .get_mut::<RenderGroupTextBound>(render_group)
             .expect("no render group text bound")
-            .text_bound_section
-            .replace(bound);
+            .text_bound_area
+            .replace(bound.area);
         *draw_section_resize_needed = true;
     }
 }
@@ -244,9 +245,10 @@ fn resolve_draw_section(
         .container
         .get::<RenderGroupTextBound>(render_group)
         .unwrap()
-        .text_bound_section
+        .text_bound_area
     {
-        let scaled_bound = bound.to_scaled(scale_factor.factor);
+        let position = *renderer.container.get::<ScaledPosition>(render_group).unwrap();
+        let scaled_bound = ScaledSection::new(position, bound.to_scaled(scale_factor.factor));
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
@@ -299,14 +301,18 @@ fn queue_position(
     scale_factor: &ScaleFactor,
     difference: &Difference,
     render_group: Entity,
+    draw_section_resize_needed: &mut bool,
 ) {
     if let Some(position) = difference.position {
+        *draw_section_resize_needed = true;
+        let scaled_position = position.to_scaled(scale_factor.factor);
+        *renderer.container.get_mut::<ScaledPosition>(render_group).unwrap() = scaled_position;
         renderer
             .container
             .get_mut::<PositionWrite>(render_group)
             .unwrap()
             .write
-            .replace(position.to_scaled(scale_factor.factor));
+            .replace(scaled_position);
     }
 }
 
