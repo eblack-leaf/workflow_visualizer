@@ -1094,52 +1094,12 @@ pub(crate) fn resize_receiver(
     mut renderer: ResMut<TextRenderer>,
     mut event_reader: EventReader<Resize>,
     viewport: Res<Viewport>,
+    scale_factor: Res<ScaleFactor>,
 ) {
-    for event in event_reader.iter() {
+    for _event in event_reader.iter() {
         let render_groups = renderer.render_groups.clone();
         for (_, render_group) in render_groups {
-            if let Some(bound) = renderer
-                .container
-                .get::<RenderGroupTextBound>(render_group)
-                .unwrap()
-                .text_bound_section
-            {
-                let scaled_bound = bound.to_scaled(event.scale_factor);
-                let visible_section = *renderer
-                    .container
-                    .get::<VisibleSection>(render_group)
-                    .unwrap();
-                let visible_bound = visible_section
-                    .section
-                    .to_scaled(event.scale_factor)
-                    .intersection(scaled_bound);
-                if let Some(v_bound) = visible_bound {
-                    let draw_bound = ScaledSection::new(
-                        v_bound.position - viewport.as_section().position,
-                        v_bound.area,
-                    );
-                    renderer
-                        .container
-                        .get_mut::<DrawSection>(render_group)
-                        .unwrap()
-                        .section
-                        .replace(draw_bound);
-                } else {
-                    renderer
-                        .container
-                        .get_mut::<DrawSection>(render_group)
-                        .unwrap()
-                        .section
-                        .take();
-                }
-            } else {
-                renderer
-                    .container
-                    .get_mut::<DrawSection>(render_group)
-                    .unwrap()
-                    .section
-                    .take();
-            }
+            resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group);
         }
     }
 }
