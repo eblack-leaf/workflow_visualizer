@@ -1,8 +1,7 @@
-use bevy_ecs::prelude::{EventReader, Res, ResMut, Resource, SystemStage};
+use bevy_ecs::prelude::{EventReader, Res, ResMut, Resource};
 use winit::window::Window;
 
 use crate::window::Resize;
-use crate::{Attach, BackendStages, Stove};
 
 #[derive(Clone)]
 pub struct GfxOptions {

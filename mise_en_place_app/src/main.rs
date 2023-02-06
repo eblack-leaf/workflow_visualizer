@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{Query, ResMut, Resource};
 
 use mise_en_place::{
-    Cook, DeliveryTicket, FrontEndStages, Position, Recipe, Stove, Text, TextBundle, TextRenderer,
-    TextScaleAlignment,
+    Cook, DeliveryTicket, Exit, FrontEndStages, Idle, Recipe, Stove, Text, TextBundle,
+    TextRenderer, TextScaleAlignment,
 };
 
 #[derive(Resource)]
@@ -10,10 +10,22 @@ struct Counter {
     count: u32,
 }
 
-fn update_text(mut text: Query<&mut Text>, mut counter: ResMut<Counter>) {
+fn update_text(
+    mut text: Query<&mut Text>,
+    mut counter: ResMut<Counter>,
+    mut idle: ResMut<Idle>,
+    mut exit: ResMut<Exit>,
+) {
     counter.count += 1;
     for mut ent_text in text.iter_mut() {
         ent_text.string = format!("counter is: {}", counter.count);
+    }
+    idle.can_idle = false;
+    if counter.count >= 1111 {
+        idle.can_idle = true;
+    }
+    if counter.count > 1115 {
+        exit.exit_requested = true;
     }
 }
 

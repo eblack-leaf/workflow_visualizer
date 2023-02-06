@@ -36,13 +36,13 @@ impl DeliveryService {
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn deliver_to<Addr: Into<SocketAddr>>(mut self, addr: Addr) {
+    pub fn deliver_to<Addr: Into<SocketAddr>>(self, addr: Addr) {
         let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET"]);
         let routes = warp::fs::dir(self.src)
             .map(cross_origin_embedder_policy)
             .map(cross_origin_opener_policy)
             .with(cors);
-        let mut rt = tokio::runtime::Runtime::new().expect("no tokio runtime");
+        let rt = tokio::runtime::Runtime::new().expect("no tokio runtime");
         rt.block_on(
             warp::serve(routes)
                 .tls()

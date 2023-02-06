@@ -1,11 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Changed, Component, Entity, Query};
+use bevy_ecs::prelude::Component;
 
-use crate::Color;
 use crate::coord::{Depth, Position, Section};
 use crate::text::glyph::{GlyphId, Key};
 use crate::visibility::VisibleSection;
+use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Cache {

@@ -1,11 +1,12 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage};
+use bevy_ecs::prelude::{
+    Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage,
+};
 
-use crate::{Area, Attach, BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages, Job, Position, Stove};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
-use crate::job::{Container, Task};
+use crate::job::Container;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::atlas::AtlasBindGroup;
 use crate::text::backend_system::{
@@ -13,7 +14,11 @@ use crate::text::backend_system::{
 };
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::frontend_system::{bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff, discard_out_of_bounds, letter_diff, manage_render_groups, place, position_diff, pull_differences, setup as frontend_setup};
+use crate::text::frontend_system::{
+    bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
+    discard_out_of_bounds, letter_diff, manage_render_groups, place, position_diff,
+    pull_differences, setup as frontend_setup, visible_area_diff,
+};
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::Indexer;
@@ -21,15 +26,18 @@ use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
+use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
+use crate::{
+    Area, Attach, BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, Job,
+    Position, Stove,
+};
 
 #[derive(Resource)]
 pub struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) vertex_buffer: wgpu::Buffer,
-    pub(crate) sampler: wgpu::Sampler,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
     pub(crate) render_groups: HashMap<Entity, Entity>,
     pub(crate) render_group_bind_group_layout: wgpu::BindGroupLayout,
@@ -209,10 +217,9 @@ pub(crate) fn setup(
         multiview: None,
     };
     let pipeline = gfx_surface.device.create_render_pipeline(&descriptor);
-    let mut renderer = TextRenderer {
+    let renderer = TextRenderer {
         pipeline,
         vertex_buffer: vertex_buffer(&gfx_surface),
-        sampler,
         sampler_bind_group,
         render_groups: HashMap::new(),
         render_group_bind_group_layout,
@@ -235,7 +242,6 @@ enum TextStages {
     CalcTextScale,
     CalcArea,
     TextFrontEnd,
-    TextBackEnd,
 }
 
 impl Attach for TextRenderer {
@@ -282,6 +288,10 @@ impl Attach for TextRenderer {
         stove
             .frontend
             .main
+            .add_system_to_stage(TextStages::TextFrontEnd, visible_area_diff);
+        stove
+            .frontend
+            .main
             .add_system_to_stage(TextStages::TextFrontEnd, place.label("place"));
         stove.frontend.main.add_system_to_stage(
             TextStages::TextFrontEnd,
@@ -322,8 +332,8 @@ impl Attach for TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let mut extraction = frontend
             .container

@@ -1,6 +1,7 @@
-use bevy_ecs::prelude::Component;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+
+use bevy_ecs::prelude::Component;
 
 #[derive(Eq, Hash, PartialEq, Copy, Clone)]
 pub(crate) struct Index {
@@ -18,6 +19,7 @@ impl From<u32> for Index {
         Self::new(value)
     }
 }
+
 #[derive(Component)]
 pub(crate) struct Indexer<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
     pub(crate) indices: HashMap<Key, Index>,
@@ -41,12 +43,6 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
     pub(crate) fn count(&self) -> u32 {
         self.count
     }
-    pub(crate) fn current_index(&self) -> Option<Index> {
-        match self.count() > 0 {
-            true => Some(Index::new(self.count - 1)),
-            false => None,
-        }
-    }
     pub(crate) fn next(&mut self, key: Key) -> Index {
         let index = match self.holes.is_empty() {
             true => {
@@ -61,9 +57,6 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
         };
         self.indices.insert(key, index);
         index
-    }
-    pub(crate) fn exists(&self, key: Key) -> bool {
-        self.indices.contains_key(&key)
     }
     pub(crate) fn remove(&mut self, key: Key) -> Option<Index> {
         if let Some(index) = self.indices.remove(&key) {

@@ -1,8 +1,4 @@
-use std::rc::Rc;
-
 use bevy_ecs::prelude::{Events, Resource};
-use winit::event_loop::EventLoopWindowTarget;
-use winit::window::Window;
 
 use crate::coord::ScaledArea;
 use crate::{Attach, BackendStages, FrontEndStages, Stove};

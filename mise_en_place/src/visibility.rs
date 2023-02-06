@@ -1,11 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{
-    Added, Changed, Commands, Component, Entity, EventReader, EventWriter, IntoSystemDescriptor,
-    Or, Query, RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
+    Added, Changed, Commands, Component, Entity, EventReader, IntoSystemDescriptor, Or, Query,
+    RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
-use bevy_ecs::query::QueryEntityError;
 
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
@@ -143,7 +141,7 @@ impl SpacialHasher {
 
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
-    mut changed: Query<(Entity, &Position, &Area), Or<(Changed<Position>, Changed<Area>)>>,
+    changed: Query<(Entity, &Position, &Area), Or<(Changed<Position>, Changed<Area>)>>,
 ) {
     let mut deferred_add = HashSet::<(Entity, SpacialHash)>::new();
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
@@ -234,14 +232,8 @@ impl CollisionEnd {
 
 pub(crate) fn collision_responses(
     mut spacial_hasher: ResMut<SpacialHasher>,
-    entities: Query<
-        (
-            Entity,
-            &Position,
-            &Area,
-            &mut CollisionBegin,
-            &mut CollisionEnd,
-        ),
+    mut entities: Query<
+        (&Position, &Area, &mut CollisionBegin, &mut CollisionEnd),
         With<Visibility>,
     >,
 ) {
@@ -263,8 +255,56 @@ pub(crate) fn collision_responses(
             checks.insert((*smaller_index_entity, *higher_index_entity));
         }
     }
-    for check in checks {
-        // TODO check overlap and send responses if not in current_overlaps
+    let mut overlap_adds = HashSet::<(Entity, Entity)>::new();
+    let mut overlap_removes = HashSet::<(Entity, Entity)>::new();
+    for (lhs, rhs) in checks {
+        let (position, area, _, _) = entities.get(lhs).expect("no entity for lhs");
+        let (other_position, other_area, _, _) = entities.get(rhs).expect("no entity for rhs");
+        let lhs_current_overlaps = spacial_hasher
+            .current_overlaps
+            .get(&lhs)
+            .expect("no current overlaps");
+        let rhs_current_overlaps = spacial_hasher
+            .current_overlaps
+            .get(&rhs)
+            .expect("no current overlaps");
+        let lhs_section = Section::new(*position, *area);
+        let rhs_section = Section::new(*other_position, *other_area);
+        if lhs_section.is_overlapping(rhs_section) {
+            if !lhs_current_overlaps.entities.contains(&rhs) {
+                overlap_adds.insert((lhs, rhs));
+            }
+            if !rhs_current_overlaps.entities.contains(&lhs) {
+                overlap_adds.insert((rhs, lhs));
+            }
+        } else {
+            if lhs_current_overlaps.entities.contains(&rhs) {
+                overlap_removes.insert((lhs, rhs));
+            }
+            if rhs_current_overlaps.entities.contains(&lhs) {
+                overlap_removes.insert((rhs, lhs));
+            }
+        }
+    }
+    for add in overlap_adds {
+        spacial_hasher
+            .current_overlaps
+            .get_mut(&add.0)
+            .expect("no current overlaps")
+            .entities
+            .insert(add.1);
+        let (_, _, mut collision_begin, _) = entities.get_mut(add.0).expect("no entity");
+        collision_begin.others.insert(add.1);
+    }
+    for remove in overlap_removes {
+        spacial_hasher
+            .current_overlaps
+            .get_mut(&remove.0)
+            .expect("no current overlaps")
+            .entities
+            .remove(&remove.1);
+        let (_, _, _, mut collision_end) = entities.get_mut(remove.0).expect("no entity");
+        collision_end.others.insert(remove.1);
     }
 }
 
@@ -294,7 +334,7 @@ impl CurrentOverlaps {
 
 pub(crate) fn visibility_setup(
     added: Query<
-        (Entity),
+        Entity,
         (
             Or<(Added<Position>, Added<Area>)>,
             With<Position>,
@@ -320,7 +360,7 @@ pub(crate) fn visibility_cleanup(
     lost_area: RemovedComponents<Area>,
     lost_visibility: RemovedComponents<Visibility>,
     mut spacial_hasher: ResMut<SpacialHasher>,
-    mut lost_contact_entities: Query<(&mut CollisionEnd)>,
+    mut lost_contact_entities: Query<&mut CollisionEnd>,
     mut cmd: Commands,
 ) {
     for entity in lost_visibility.iter() {
@@ -405,7 +445,7 @@ pub(crate) fn calc_visible_section(
             }
         }
         for entity in entities_to_check {
-            let (_entity, position, area, mut visibility, mut maybe_visible_section) =
+            let (_entity, position, area, mut visibility, maybe_visible_section) =
                 entities.get_mut(entity).expect("no entity found");
             let section: Section = (*position, *area).into();
             if section.is_overlapping(visible_bounds.section) {

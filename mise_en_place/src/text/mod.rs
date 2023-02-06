@@ -6,12 +6,12 @@ pub use crate::text::text::{Text, TextBundle};
 mod atlas;
 mod backend_system;
 mod cache;
-mod frontend_system;
 mod coords;
 mod cpu_buffer;
 mod difference;
 mod extraction;
 mod font;
+mod frontend_system;
 mod glyph;
 mod gpu_buffer;
 mod index;
@@ -22,4 +22,3 @@ mod renderer;
 mod scale;
 mod text;
 mod vertex;
-

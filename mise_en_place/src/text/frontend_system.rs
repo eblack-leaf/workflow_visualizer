@@ -5,7 +5,6 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without,
 };
-use fontdue::layout::TextStyle;
 
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
@@ -30,7 +29,7 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 pub(crate) fn calc_scale_from_alignment(
     text: Query<
         (Entity, &TextScaleAlignment),
-        (Or<(Without<TextScale>, Changed<TextScaleAlignment>)>),
+        Or<(Without<TextScale>, Changed<TextScaleAlignment>)>,
     >,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
@@ -122,11 +121,11 @@ pub(crate) fn manage_render_groups(
 
 pub(crate) fn letter_diff(
     mut text: Query<
-        (&TextScale, &mut Placer, &mut Cache, &mut Difference),
+        (&TextScale, &Placer, &mut Cache, &mut Difference),
         Or<(Changed<Placer>, Changed<TextBound>, Changed<VisibleSection>)>,
     >,
 ) {
-    for (scale, mut placer, mut cache, mut difference) in text.iter_mut() {
+    for (scale, placer, mut cache, mut difference) in text.iter_mut() {
         let mut retained_keys = HashSet::new();
         let old_keys = cache.keys.clone();
         let mut keys_to_remove = HashSet::new();
@@ -175,7 +174,7 @@ pub(crate) fn letter_diff(
 pub(crate) fn calc_area(
     text: Query<
         (Entity, &Text, &TextScale, &TextScaleAlignment),
-        (Or<(Changed<Text>, Changed<TextScale>)>),
+        Or<(Changed<Text>, Changed<TextScale>)>,
     >,
     mut cmd: Commands,
     font: Res<AlignedFonts>,
@@ -287,11 +286,11 @@ pub(crate) fn place(
 
 pub(crate) fn visible_area_diff(
     mut text: Query<
-        (Entity, &VisibleSection, &mut Difference, &mut Cache),
+        (&VisibleSection, &mut Difference, &mut Cache),
         (Changed<VisibleSection>, With<Text>),
     >,
 ) {
-    for (entity, visible_section, mut difference, mut cache) in text.iter_mut() {
+    for (visible_section, mut difference, mut cache) in text.iter_mut() {
         if cache.visible_section.section != visible_section.section {
             difference.visible_section.replace(*visible_section);
             cache.visible_section = *visible_section;

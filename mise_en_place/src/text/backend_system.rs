@@ -1,9 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::num::NonZeroU32;
 
-use bevy_ecs::prelude::{Added, Commands, Entity, EventReader, Res, ResMut};
+use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 
-use crate::{Area, Color, Position, ScaledSection, Section};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -20,8 +19,8 @@ use crate::text::index::{Index, Indexer};
 use crate::text::null_bit::NullBit;
 use crate::text::render_group::{
     ColorWrite, CoordsWrite, DepthWrite, DrawSection, GlyphAreaWrite, GlyphPositionWrite,
-    KeyedGlyphIds, NullWrite, PositionWrite, RenderGroup, RenderGroupBindGroup, RenderGroupMax,
-    RenderGroupTextBound, RenderGroupUniqueGlyphs, TextBound, TextPlacement,
+    KeyedGlyphIds, NullWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
+    RenderGroupTextBound, TextPlacement,
 };
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScaleAlignment};
@@ -29,9 +28,10 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Area, Color, Position, ScaledSection, Section};
 
 pub(crate) fn create_render_groups(
-    mut extraction: ResMut<Extraction>,
+    extraction: Res<Extraction>,
     mut renderer: ResMut<TextRenderer>,
     gfx_surface: Res<GfxSurface>,
     scale_factor: Res<ScaleFactor>,
@@ -148,7 +148,7 @@ pub(crate) fn create_render_groups(
 }
 
 pub(crate) fn render_group_differences(
-    mut extraction: ResMut<Extraction>,
+    extraction: Res<Extraction>,
     mut renderer: ResMut<TextRenderer>,
     gfx_surface: Res<GfxSurface>,
     font: Res<AlignedFonts>,
@@ -161,8 +161,18 @@ pub(crate) fn render_group_differences(
             .get(entity)
             .expect("no render group for entity");
         let mut draw_section_resize_needed = false;
-        set_text_bound(&mut renderer, difference, render_group, &mut draw_section_resize_needed);
-        set_visible_section(&mut renderer, difference, render_group, &mut draw_section_resize_needed);
+        set_text_bound(
+            &mut renderer,
+            difference,
+            render_group,
+            &mut draw_section_resize_needed,
+        );
+        set_visible_section(
+            &mut renderer,
+            difference,
+            render_group,
+            &mut draw_section_resize_needed,
+        );
         if draw_section_resize_needed {
             resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
         }
@@ -175,7 +185,7 @@ pub(crate) fn render_group_differences(
         update_glyph_positions(&mut renderer, difference, render_group);
         resolve_glyphs(&mut renderer, difference, render_group);
         resolve_atlas(&mut renderer, render_group);
-        let mut adjusted_glyphs = grow_atlas(&mut renderer, &gfx_surface, render_group);
+        let adjusted_glyphs = grow_atlas(&mut renderer, &gfx_surface, render_group);
         rasterize_add_queue(&mut renderer, &font, render_group);
         update_adjusted_glyphs(&mut renderer, &gfx_surface, render_group, adjusted_glyphs);
         read_added_glyphs(&mut renderer, difference, render_group);
@@ -189,7 +199,12 @@ pub(crate) fn render_group_differences(
     }
 }
 
-fn set_text_bound(renderer: &mut TextRenderer, difference: &Difference, render_group: Entity, mut draw_section_resize_needed: &mut bool) {
+fn set_text_bound(
+    renderer: &mut TextRenderer,
+    difference: &Difference,
+    render_group: Entity,
+    draw_section_resize_needed: &mut bool,
+) {
     if let Some(bound) = difference.bounds {
         renderer
             .container
@@ -201,7 +216,12 @@ fn set_text_bound(renderer: &mut TextRenderer, difference: &Difference, render_g
     }
 }
 
-fn set_visible_section(renderer: &mut TextRenderer, difference: &Difference, render_group: Entity, mut draw_section_resize_needed: &mut bool) {
+fn set_visible_section(
+    renderer: &mut TextRenderer,
+    difference: &Difference,
+    render_group: Entity,
+    draw_section_resize_needed: &mut bool,
+) {
     if let Some(visible_section) = difference.visible_section {
         *renderer
             .container
@@ -211,7 +231,12 @@ fn set_visible_section(renderer: &mut TextRenderer, difference: &Difference, ren
     }
 }
 
-fn resolve_draw_section(renderer: &mut TextRenderer, viewport: &Viewport, scale_factor: &ScaleFactor, render_group: Entity) {
+fn resolve_draw_section(
+    renderer: &mut TextRenderer,
+    viewport: &Viewport,
+    scale_factor: &ScaleFactor,
+    render_group: Entity,
+) {
     if let Some(bound) = renderer
         .container
         .get::<RenderGroupTextBound>(render_group)
@@ -256,7 +281,12 @@ fn resolve_draw_section(renderer: &mut TextRenderer, viewport: &Viewport, scale_
     }
 }
 
-fn queue_position(renderer: &mut TextRenderer, scale_factor: &ScaleFactor, difference: &Difference, render_group: Entity) {
+fn queue_position(
+    renderer: &mut TextRenderer,
+    scale_factor: &ScaleFactor,
+    difference: &Difference,
+    render_group: Entity,
+) {
     if let Some(position) = difference.position {
         renderer
             .container
@@ -454,7 +484,11 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
     }
 }
 
-fn update_glyph_positions(renderer: &mut TextRenderer, difference: &Difference, render_group: Entity) {
+fn update_glyph_positions(
+    renderer: &mut TextRenderer,
+    difference: &Difference,
+    render_group: Entity,
+) {
     for (key, glyph_position) in difference.update.iter() {
         let index = renderer
             .container
@@ -571,7 +605,11 @@ fn resolve_atlas(renderer: &mut TextRenderer, render_group: Entity) {
     }
 }
 
-fn grow_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) -> HashSet<GlyphId> {
+fn grow_atlas(
+    renderer: &mut TextRenderer,
+    gfx_surface: &GfxSurface,
+    render_group: Entity,
+) -> HashSet<GlyphId> {
     let mut adjusted_glyphs = HashSet::new();
     let num_new_glyphs = renderer
         .container
@@ -581,12 +619,12 @@ fn grow_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_grou
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-        > renderer
-        .container
-        .get::<AtlasFreeLocations>(render_group)
-        .unwrap()
-        .free
-        .len() as u32
+            > renderer
+                .container
+                .get::<AtlasFreeLocations>(render_group)
+                .unwrap()
+                .free
+                .len() as u32
     {
         let current_dimension = renderer
             .container
@@ -657,7 +695,7 @@ fn grow_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_grou
     adjusted_glyphs
 }
 
-fn rasterize_add_queue(mut renderer: &mut TextRenderer, font: &AlignedFonts, render_group: Entity) {
+fn rasterize_add_queue(renderer: &mut TextRenderer, font: &AlignedFonts, render_group: Entity) {
     let add_queue = renderer
         .container
         .get_mut::<AtlasAddQueue>(render_group)
@@ -724,7 +762,12 @@ fn rasterize_add_queue(mut renderer: &mut TextRenderer, font: &AlignedFonts, ren
     }
 }
 
-fn update_adjusted_glyphs(mut renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity, mut adjusted_glyphs: HashSet<GlyphId>) {
+fn update_adjusted_glyphs(
+    renderer: &mut TextRenderer,
+    gfx_surface: &GfxSurface,
+    render_group: Entity,
+    adjusted_glyphs: HashSet<GlyphId>,
+) {
     let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
     if !adjusted_glyphs.is_empty() {
         let atlas_bind_group = AtlasBindGroup::new(
@@ -812,7 +855,11 @@ fn read_added_glyphs(renderer: &mut TextRenderer, difference: &Difference, rende
     }
 }
 
-fn write_glyph_position(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
+fn write_glyph_position(
+    renderer: &mut TextRenderer,
+    gfx_surface: &GfxSurface,
+    render_group: Entity,
+) {
     let glyph_positions = renderer
         .container
         .get_mut::<GlyphPositionWrite>(render_group)
@@ -826,7 +873,8 @@ fn write_glyph_position(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, r
             .get_mut::<CpuBuffer<Position>>(render_group)
             .unwrap()
             .buffer
-            .get_mut(index.value as usize).unwrap() = position;
+            .get_mut(index.value as usize)
+            .unwrap() = position;
         let offset = offset::<Position>(&index);
         gfx_surface.queue.write_buffer(
             &renderer
@@ -854,7 +902,8 @@ fn write_glyph_area(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, rende
             .get_mut::<CpuBuffer<Area>>(render_group)
             .unwrap()
             .buffer
-            .get_mut(index.value as usize).unwrap() = area;
+            .get_mut(index.value as usize)
+            .unwrap() = area;
         let offset = offset::<Area>(&index);
         gfx_surface.queue.write_buffer(
             &renderer
@@ -882,7 +931,8 @@ fn write_null(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_grou
             .get_mut::<CpuBuffer<NullBit>>(render_group)
             .unwrap()
             .buffer
-            .get_mut(index.value as usize).unwrap() = null_bit;
+            .get_mut(index.value as usize)
+            .unwrap() = null_bit;
         let offset = offset::<NullBit>(&index);
         gfx_surface.queue.write_buffer(
             &renderer
@@ -910,7 +960,8 @@ fn write_coords(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gr
             .get_mut::<CpuBuffer<Coords>>(render_group)
             .unwrap()
             .buffer
-            .get_mut(index.value as usize).unwrap() = coords;
+            .get_mut(index.value as usize)
+            .unwrap() = coords;
         let offset = offset::<Coords>(&index);
         gfx_surface.queue.write_buffer(
             &renderer
@@ -924,7 +975,11 @@ fn write_coords(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gr
     }
 }
 
-fn write_text_placement(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
+fn write_text_placement(
+    renderer: &mut TextRenderer,
+    gfx_surface: &GfxSurface,
+    render_group: Entity,
+) {
     let mut dirty = false;
     if let Some(position) = renderer
         .container

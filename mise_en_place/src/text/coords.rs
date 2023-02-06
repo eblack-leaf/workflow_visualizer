@@ -1,8 +1,8 @@
 use bytemuck::{Pod, Zeroable};
 
-use crate::{Area, Position};
 use crate::coord::Section;
 use crate::text::atlas::AtlasTextureDimensions;
+use crate::{Area, Position};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
@@ -35,11 +35,5 @@ impl Coords {
         Self {
             data: [left, top, right, bottom],
         }
-    }
-    pub(crate) fn section(&self) -> Section {
-        Section::new(
-            (self.data[0], self.data[1]),
-            (self.data[2] - self.data[0], self.data[3] - self.data[1]),
-        )
     }
 }

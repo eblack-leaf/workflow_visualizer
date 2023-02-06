@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Added, Bundle, Commands, Component, Entity, Query, Res, Resource};
+use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 use crate::coord::ScaledPosition;
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
@@ -19,6 +18,7 @@ use crate::text::scale::TextScaleAlignment;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
+use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);
@@ -29,9 +29,6 @@ pub(crate) struct RenderGroupUniqueGlyphs {
 }
 
 impl RenderGroupUniqueGlyphs {
-    pub(crate) fn new(unique_glyphs: u32) -> Self {
-        Self { unique_glyphs }
-    }
     pub(crate) fn from_text(text: &Text) -> Self {
         Self {
             // change to actual unique glyphs

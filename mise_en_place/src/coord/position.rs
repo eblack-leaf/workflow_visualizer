@@ -71,6 +71,7 @@ impl ScaledPosition {
     pub fn as_pos(&self) -> Position {
         Position::new(self.x, self.y)
     }
+    #[allow(unused)]
     pub(crate) fn adjust<Adjust: Into<ScaledPositionAdjust>>(&mut self, adjust: Adjust) {
         let adjust = adjust.into();
         self.x += adjust.x;

@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::component::Component;
 
-use crate::Color;
 use crate::coord::{Depth, Position, Section};
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::visibility::VisibleSection;
+use crate::Color;
 
 #[derive(Component, Clone)]
 pub(crate) struct Difference {
