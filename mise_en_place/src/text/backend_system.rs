@@ -256,16 +256,26 @@ fn resolve_draw_section(
             .to_scaled(scale_factor.factor)
             .intersection(scaled_bound);
         if let Some(v_bound) = visible_bound {
-            let draw_bound = ScaledSection::new(
-                v_bound.position - viewport.as_section().position,
-                v_bound.area,
-            );
-            renderer
-                .container
-                .get_mut::<DrawSection>(render_group)
-                .unwrap()
-                .section
-                .replace(draw_bound);
+            let viewport_dimensions = v_bound.intersection(viewport.as_section());
+            if let Some(v_dim) = viewport_dimensions {
+                let draw_bound = ScaledSection::new(
+                    v_dim.position - viewport.as_section().position,
+                    v_dim.area,
+                );
+                renderer
+                    .container
+                    .get_mut::<DrawSection>(render_group)
+                    .unwrap()
+                    .section
+                    .replace(draw_bound);
+            } else {
+                renderer
+                    .container
+                    .get_mut::<DrawSection>(render_group)
+                    .unwrap()
+                    .section
+                    .take();
+            }
         } else {
             renderer
                 .container

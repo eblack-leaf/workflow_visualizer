@@ -5,15 +5,15 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
+use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 
 #[derive(Component)]
-pub(crate) struct Visibility {
+pub struct Visibility {
     visible: bool,
 }
 

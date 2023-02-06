@@ -45,6 +45,15 @@ impl From<(u32, u32)> for Area {
     }
 }
 
+impl From<(i32, i32)> for Area {
+    fn from(value: (i32, i32)) -> Self {
+        Self {
+            width: value.0 as f32,
+            height: value.1 as f32,
+        }
+    }
+}
+
 impl From<(f32, f32)> for Area {
     fn from(value: (f32, f32)) -> Self {
         Self {

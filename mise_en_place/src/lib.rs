@@ -22,7 +22,7 @@ use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
-use crate::visibility::Visibility;
+pub use crate::visibility::Visibility;
 pub use crate::wasm_compiler::DeliveryTicket;
 use crate::window::{Resize, ScaleFactor};
 
