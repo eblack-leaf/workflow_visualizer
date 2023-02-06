@@ -3,6 +3,7 @@ use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 
+use crate::{Area, Color, Position, ScaledSection, Section};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -28,7 +29,6 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Area, Color, Position, ScaledSection, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -143,7 +143,10 @@ pub(crate) fn create_render_groups(
                 text_placement_uniform,
             ))
             .id();
-        renderer.render_groups.insert(*entity, render_group_entity);
+        let old = renderer.render_groups.insert(*entity, render_group_entity);
+        if let Some(old_render_group) = old {
+            renderer.container.despawn(old_render_group);
+        }
     }
 }
 
@@ -619,12 +622,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-            > renderer
-                .container
-                .get::<AtlasFreeLocations>(render_group)
-                .unwrap()
-                .free
-                .len() as u32
+        > renderer
+        .container
+        .get::<AtlasFreeLocations>(render_group)
+        .unwrap()
+        .free
+        .len() as u32
     {
         let current_dimension = renderer
             .container
