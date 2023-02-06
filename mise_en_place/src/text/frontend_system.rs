@@ -179,31 +179,32 @@ pub(crate) fn calc_area(
     font: Res<AlignedFonts>,
 ) {
     for (entity, text, text_scale, text_scale_alignment) in text.iter() {
-        let dimensions = font
+        let aligned_font = font
             .fonts
             .get(text_scale_alignment)
-            .expect("no aligned font")
-            .character_dimensions('A', text_scale.px());
+            .expect("no aligned font");
+        let dimensions = aligned_font.character_dimensions('A', text_scale.px());
         let mut max_width_letters = 0;
         let mut lines = 0;
         for line in text.string.lines() {
             max_width_letters = max_width_letters.max(line.len());
             lines += 1;
         }
-        let line_height_advancement = 3f32;
+        let line_height_advancement = aligned_font
+            .font()
+            .horizontal_line_metrics(text_scale.px())
+            .expect("no line metrics")
+            .new_line_size;
         let area = Area::new(
             dimensions.width * max_width_letters.max(1) as f32,
-            (dimensions.height + line_height_advancement) * lines.max(1) as f32,
+            (line_height_advancement) * lines.max(1) as f32,
         );
         cmd.entity(entity).insert(area);
     }
 }
 
 pub(crate) fn bounds_diff(
-    mut text: Query<
-        (Option<&TextBound>, &mut Cache, &mut Difference),
-        Changed<TextBound>,
-    >,
+    mut text: Query<(Option<&TextBound>, &mut Cache, &mut Difference), Changed<TextBound>>,
 ) {
     for (maybe_bound, mut cache, mut difference) in text.iter_mut() {
         if let Some(bound) = maybe_bound {

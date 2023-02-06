@@ -67,9 +67,9 @@ impl Section {
         if !self.is_overlapping(other) {
             return None;
         }
-        let top = self.top().min(other.top());
+        let top = self.top().max(other.top());
         let bottom = self.bottom().min(other.bottom());
-        let left = self.left().min(other.left());
+        let left = self.left().max(other.left());
         let right = self.right().min(other.right());
         Option::from(Self::from_ltrb(left, top, right, bottom))
     }

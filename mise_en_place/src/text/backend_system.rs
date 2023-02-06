@@ -3,7 +3,6 @@ use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 
-use crate::{Area, Color, Position, ScaledSection, Section};
 use crate::coord::ScaledPosition;
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
@@ -30,6 +29,7 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Area, Color, Position, ScaledSection, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -177,10 +177,13 @@ pub(crate) fn render_group_differences(
             render_group,
             &mut draw_section_resize_needed,
         );
-        queue_position(&mut renderer, &scale_factor, difference, render_group, &mut draw_section_resize_needed);
-        if draw_section_resize_needed {
-            resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
-        }
+        queue_position(
+            &mut renderer,
+            &scale_factor,
+            difference,
+            render_group,
+            &mut draw_section_resize_needed,
+        );
         queue_depth(&mut renderer, difference, render_group);
         queue_color(&mut renderer, difference, render_group);
         queue_remove(&mut renderer, difference, render_group);
@@ -200,6 +203,9 @@ pub(crate) fn render_group_differences(
         write_text_placement(&mut renderer, &gfx_surface, render_group);
         write_color(&mut renderer, &gfx_surface, render_group);
         write_atlas(&mut renderer, &gfx_surface, render_group);
+        if draw_section_resize_needed {
+            resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
+        }
     }
 }
 
@@ -247,23 +253,29 @@ fn resolve_draw_section(
         .unwrap()
         .text_bound_area
     {
-        let position = *renderer.container.get::<ScaledPosition>(render_group).unwrap();
+        let position = *renderer
+            .container
+            .get::<ScaledPosition>(render_group)
+            .unwrap();
         let scaled_bound = ScaledSection::new(position, bound.to_scaled(scale_factor.factor));
+        println!("scaled bound: {:?}", scaled_bound);
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
             .unwrap();
+        println!("visible section {:?}", visible_section.section);
         let visible_bound = visible_section
             .section
             .to_scaled(scale_factor.factor)
             .intersection(scaled_bound);
         if let Some(v_bound) = visible_bound {
+            println!("v_bound {:?}", v_bound);
             let viewport_dimensions = v_bound.intersection(viewport.as_section());
             if let Some(v_dim) = viewport_dimensions {
-                let draw_bound = ScaledSection::new(
-                    v_dim.position - viewport.as_section().position,
-                    v_dim.area,
-                );
+                println!("v_dim {:?}", v_dim);
+                let draw_bound =
+                    ScaledSection::new(v_dim.position - viewport.as_section().position, v_dim.area);
+                println!("setting draw section {:?}", draw_bound);
                 renderer
                     .container
                     .get_mut::<DrawSection>(render_group)
@@ -306,7 +318,6 @@ fn queue_position(
     if let Some(position) = difference.position {
         *draw_section_resize_needed = true;
         let scaled_position = position.to_scaled(scale_factor.factor);
-        *renderer.container.get_mut::<ScaledPosition>(render_group).unwrap() = scaled_position;
         renderer
             .container
             .get_mut::<PositionWrite>(render_group)
@@ -638,12 +649,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-        > renderer
-        .container
-        .get::<AtlasFreeLocations>(render_group)
-        .unwrap()
-        .free
-        .len() as u32
+            > renderer
+                .container
+                .get::<AtlasFreeLocations>(render_group)
+                .unwrap()
+                .free
+                .len() as u32
     {
         let current_dimension = renderer
             .container
@@ -1007,6 +1018,10 @@ fn write_text_placement(
         .write
         .take()
     {
+        *renderer
+            .container
+            .get_mut::<ScaledPosition>(render_group)
+            .unwrap() = position;
         renderer
             .container
             .get_mut::<TextPlacement>(render_group)

@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
-use crate::{Color, TextBound};
 use crate::coord::{Depth, Position, Section};
 use crate::text::glyph::{GlyphId, Key};
 use crate::visibility::VisibleSection;
+use crate::{Color, TextBound};
 
 #[derive(Component)]
 pub(crate) struct Cache {

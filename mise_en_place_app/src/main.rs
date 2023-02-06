@@ -1,6 +1,9 @@
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove, Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment, Visibility};
+use mise_en_place::{
+    Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove,
+    Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment, Visibility,
+};
 
 #[derive(Resource)]
 struct Counter {
@@ -15,18 +18,18 @@ fn update_text(
 ) {
     counter.count += 1;
     for (entity, mut ent_text, visibility) in text.iter_mut() {
-        ent_text.string = format!("counter is: {} and there is a stress test for this \nto update and still be present", counter.count);
-        if counter.count >= 200 && counter.count < 400 {
-            cmd.entity(entity).insert(PositionAdjust::new(2.0, 1.0));
-        }
-        if counter.count >= 400 && counter.count < 600 {
-            cmd.entity(entity).insert(PositionAdjust::new(-2.0, -1.0));
-        }
+        ent_text.string = format!(
+            "counter is: {} and there is a stress test for this \nto update and still be present",
+            counter.count
+        );
+        // if counter.count >= 200 && counter.count < 400 {
+        //     cmd.entity(entity).insert(PositionAdjust::new(2.0, 1.0));
+        // }
+        // if counter.count >= 400 && counter.count < 600 {
+        //     cmd.entity(entity).insert(PositionAdjust::new(-2.0, -1.0));
+        // }
         if counter.count == 100 {
-            // bound section is not receiving position updates
-            // visible section is not being updated cause not resized
-            // make render group text_bound to area only and change based on position
-            cmd.entity(entity).insert(TextBound::new((400, 300)));
+            cmd.entity(entity).insert(TextBound::new((1200, 2200)));
         }
     }
 }

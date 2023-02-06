@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
-use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 
 #[derive(Component)]
 pub struct Visibility {
@@ -455,6 +455,7 @@ pub(crate) fn calc_visible_section(
                 let current_visible_section = section.intersection(visible_bounds.section).unwrap();
                 if let Some(mut visible_section) = maybe_visible_section {
                     if visible_section.section != current_visible_section {
+                        println!("setting visible section {:?}", current_visible_section);
                         *visible_section = VisibleSection::new(current_visible_section);
                     }
                 } else {
