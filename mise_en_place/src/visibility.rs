@@ -455,7 +455,6 @@ pub(crate) fn calc_visible_section(
                 let current_visible_section = section.intersection(visible_bounds.section).unwrap();
                 if let Some(mut visible_section) = maybe_visible_section {
                     if visible_section.section != current_visible_section {
-                        println!("setting visible section {:?}", current_visible_section);
                         *visible_section = VisibleSection::new(current_visible_section);
                     }
                 } else {

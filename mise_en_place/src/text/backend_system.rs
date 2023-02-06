@@ -258,24 +258,19 @@ fn resolve_draw_section(
             .get::<ScaledPosition>(render_group)
             .unwrap();
         let scaled_bound = ScaledSection::new(position, bound.to_scaled(scale_factor.factor));
-        println!("scaled bound: {:?}", scaled_bound);
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
             .unwrap();
-        println!("visible section {:?}", visible_section.section);
         let visible_bound = visible_section
             .section
             .to_scaled(scale_factor.factor)
             .intersection(scaled_bound);
         if let Some(v_bound) = visible_bound {
-            println!("v_bound {:?}", v_bound);
             let viewport_dimensions = v_bound.intersection(viewport.as_section());
             if let Some(v_dim) = viewport_dimensions {
-                println!("v_dim {:?}", v_dim);
                 let draw_bound =
                     ScaledSection::new(v_dim.position - viewport.as_section().position, v_dim.area);
-                println!("setting draw section {:?}", draw_bound);
                 renderer
                     .container
                     .get_mut::<DrawSection>(render_group)
