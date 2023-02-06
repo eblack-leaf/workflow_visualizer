@@ -26,7 +26,7 @@ impl Cook for Meal {
             .main
             .add_system_to_stage(FrontEndStages::Process, update_text);
         recipe.container.spawn(TextBundle::new(
-            Text::new("counter is: 0123456789"),
+            Text::new("counter is: 00"),
             (10u32, 10u32),
             0u32,
             (1.0, 1.0, 1.0),
