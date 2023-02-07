@@ -149,8 +149,8 @@ impl Stove {
         self.extract_fns
             .push(Box::new(invoke_extract::<Ingredient>));
     }
-    pub(crate) fn invoke_attach<IngredientPreparation: Attach>(&mut self) {
-        IngredientPreparation::attach(self);
+    pub(crate) fn invoke_attach<Attachment: Attach>(&mut self) {
+        Attachment::attach(self);
     }
     pub fn cook<Recipe: Cook>(mut self) {
         Recipe::prepare(&mut self.frontend);

@@ -16,8 +16,8 @@ use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::frontend_system::{
     bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
-    discard_out_of_bounds, letter_diff, manage_render_groups, place, position_diff,
-    pull_differences, setup as frontend_setup, visible_area_diff,
+    discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups, place,
+    position_diff, pull_differences, setup as frontend_setup, visible_area_diff,
 };
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
@@ -240,6 +240,7 @@ enum TextSystems {
 #[derive(StageLabel)]
 enum TextStages {
     CalcTextScale,
+    Placement,
     CalcArea,
     TextFrontEnd,
 }
@@ -251,12 +252,18 @@ impl Attach for TextRenderer {
             .startup
             .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
         stove.frontend.main.add_stage_before(
+            FrontEndStages::CoordAdjust,
+            "area_intercept",
+            SystemStage::single(intercept_area_adjust),
+        );
+        stove.frontend.main.add_stage_before(
             FrontEndStages::VisibilityPreparation,
             TextStages::CalcTextScale,
             SystemStage::single(calc_scale_from_alignment),
         );
+        stove.frontend.main.add_stage_after(TextStages::CalcTextScale, TextStages::Placement, SystemStage::single(place));
         stove.frontend.main.add_stage_after(
-            TextStages::CalcTextScale,
+            TextStages::Placement,
             TextStages::CalcArea,
             SystemStage::single(calc_area),
         );
@@ -265,10 +272,7 @@ impl Attach for TextRenderer {
             TextStages::TextFrontEnd,
             SystemStage::parallel(),
         );
-        stove.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
-            manage_render_groups.before("place"),
-        );
+        stove.frontend.main.add_system_to_stage(TextStages::TextFrontEnd, manage_render_groups.before("out of bounds"));
         stove
             .frontend
             .main
@@ -289,13 +293,9 @@ impl Attach for TextRenderer {
             .frontend
             .main
             .add_system_to_stage(TextStages::TextFrontEnd, visible_area_diff);
-        stove
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, place.label("place"));
         stove.frontend.main.add_system_to_stage(
             TextStages::TextFrontEnd,
-            discard_out_of_bounds.label("out of bounds").after("place"),
+            discard_out_of_bounds.label("out of bounds"),
         );
         stove
             .frontend

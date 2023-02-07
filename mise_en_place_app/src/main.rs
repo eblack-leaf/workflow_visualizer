@@ -19,17 +19,19 @@ fn update_text(
     counter.count += 1;
     for (entity, mut ent_text, visibility) in text.iter_mut() {
         ent_text.string = format!(
-            "counter is: {} and there is a stress test for this \nto update and still be present",
+            "counter is: {} and there is a stress test for this to update and still be present",
             counter.count
         );
-        // if counter.count >= 200 && counter.count < 400 {
-        //     cmd.entity(entity).insert(PositionAdjust::new(2.0, 1.0));
-        // }
-        // if counter.count >= 400 && counter.count < 600 {
-        //     cmd.entity(entity).insert(PositionAdjust::new(-2.0, -1.0));
-        // }
         if counter.count == 100 {
-            cmd.entity(entity).insert(TextBound::new((1200, 2200)));
+            cmd.entity(entity).insert(TextBound::new((400, 1200)));
+        }
+        // when moving spacial hasher stays at last frame in bounds
+        // need to check on move spacial hash update, and remove visible_section + visible = false if not in spacial hash current_range
+        if counter.count >= 200 && counter.count < 400 {
+            cmd.entity(entity).insert(PositionAdjust::new(-1.0, -1.0));
+        }
+        if counter.count >= 400 && counter.count < 600 {
+            cmd.entity(entity).insert(PositionAdjust::new(1.0, 1.0));
         }
     }
 }

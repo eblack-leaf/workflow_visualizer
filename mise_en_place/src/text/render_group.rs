@@ -30,9 +30,9 @@ pub(crate) struct RenderGroupUniqueGlyphs {
 
 impl RenderGroupUniqueGlyphs {
     pub(crate) fn from_text(text: &Text) -> Self {
+        let length = text.string.len() as u32;
         Self {
-            // change to actual unique glyphs
-            unique_glyphs: text.string.len() as u32,
+            unique_glyphs: length.min(1024),
         }
     }
 }

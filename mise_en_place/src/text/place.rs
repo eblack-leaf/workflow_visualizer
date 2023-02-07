@@ -1,12 +1,14 @@
 use std::collections::HashSet;
 
 use bevy_ecs::prelude::Component;
-use fontdue::layout::{CoordinateSystem, GlyphPosition, TextStyle};
+use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle};
+use winit::event::VirtualKeyCode::L;
 
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::Key;
 use crate::text::scale::TextScale;
 use crate::text::text::Text;
+use crate::TextBound;
 
 #[derive(Component)]
 pub(crate) struct Placer {
@@ -23,8 +25,22 @@ impl Placer {
             filtered_placement: vec![],
         }
     }
-    pub(crate) fn place(&mut self, text: &Text, scale: &TextScale, font: &MonoSpacedFont) {
-        self.layout.clear();
+    pub(crate) fn place(
+        &mut self,
+        text: &Text,
+        scale: &TextScale,
+        font: &MonoSpacedFont,
+        text_bound: Option<&TextBound>,
+    ) {
+        if let Some(bound) = text_bound {
+            self.layout.reset(&LayoutSettings {
+                max_width: Option::from(bound.area.width),
+                max_height: Option::from(bound.area.height),
+                ..LayoutSettings::default()
+            });
+        } else {
+            self.layout.reset(&LayoutSettings::default());
+        }
         self.layout.append(
             font.font_slice(),
             &TextStyle::new(text.string.as_str(), scale.px(), MonoSpacedFont::index()),

@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use crate::AreaAdjust;
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
@@ -25,7 +26,14 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
 }
-
+pub(crate) fn intercept_area_adjust(
+    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust>)>,
+    mut cmd: Commands,
+) {
+    for entity in attempted_area_adjust.iter() {
+        cmd.entity(entity).remove::<AreaAdjust>();
+    }
+}
 pub(crate) fn calc_scale_from_alignment(
     text: Query<
         (Entity, &TextScaleAlignment),
@@ -172,34 +180,19 @@ pub(crate) fn letter_diff(
 
 pub(crate) fn calc_area(
     text: Query<
-        (Entity, &Text, &TextScale, &TextScaleAlignment),
-        Or<(Changed<Text>, Changed<TextScale>)>,
+        (Entity, &Placer),
+        Changed<Placer>,
     >,
     mut cmd: Commands,
-    font: Res<AlignedFonts>,
 ) {
-    for (entity, text, text_scale, text_scale_alignment) in text.iter() {
-        let aligned_font = font
-            .fonts
-            .get(text_scale_alignment)
-            .expect("no aligned font");
-        let dimensions = aligned_font.character_dimensions('A', text_scale.px());
-        let mut max_width_letters = 0;
-        let mut lines = 0;
-        for line in text.string.lines() {
-            max_width_letters = max_width_letters.max(line.len());
-            lines += 1;
+    for (entity, placer) in text.iter() {
+        let mut width: f32 = 0.0;
+        let mut height: f32 = 0.0;
+        for glyph in placer.unfiltered_placement().iter() {
+            width = width.max(glyph.x + glyph.width as f32);
+            height = height.max(glyph.y + glyph.height as f32);
         }
-        let line_height_advancement = aligned_font
-            .font()
-            .horizontal_line_metrics(text_scale.px())
-            .expect("no line metrics")
-            .new_line_size;
-        let area = Area::new(
-            dimensions.width * max_width_letters.max(1) as f32,
-            (line_height_advancement) * lines.max(1) as f32,
-        );
-        cmd.entity(entity).insert(area);
+        cmd.entity(entity).insert(Area::new(width, height));
     }
 }
 
@@ -263,23 +256,29 @@ pub(crate) fn place(
             &Text,
             &TextScale,
             &mut Placer,
-            &Visibility,
             &TextScaleAlignment,
+            Option<&TextBound>,
         ),
-        Or<(Changed<Text>, Changed<TextScale>, Changed<Visibility>)>,
+        Or<(
+            Changed<Text>,
+            Changed<TextScale>,
+            Changed<Visibility>,
+            Changed<TextBound>,
+        )>,
     >,
     font: Res<AlignedFonts>,
 ) {
-    for (text, scale, mut placer, visibility, text_scale_alignment) in dirty_text.iter_mut() {
-        if visibility.visible() {
-            placer.place(
-                text,
-                scale,
-                font.fonts
-                    .get(text_scale_alignment)
-                    .expect("no aligned font"),
-            );
-        }
+    for (text, scale, mut placer, text_scale_alignment, maybe_text_bound) in
+        dirty_text.iter_mut()
+    {
+        placer.place(
+            text,
+            scale,
+            font.fonts
+                .get(text_scale_alignment)
+                .expect("no aligned font"),
+            maybe_text_bound,
+        );
     }
 }
 

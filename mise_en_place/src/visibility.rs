@@ -467,6 +467,7 @@ pub(crate) fn calc_visible_section(
             }
         }
         for entity in entity_remove_queue {
+            println!("removing from visibility");
             entities
                 .get_mut(entity)
                 .expect("entity not alive any longer")
