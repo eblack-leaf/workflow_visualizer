@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
-use crate::AreaAdjust;
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without,
 };
 
+use crate::AreaAdjust;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
 use crate::text::atlas::AtlasBlock;
@@ -26,6 +26,7 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
 }
+
 pub(crate) fn intercept_area_adjust(
     attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust>)>,
     mut cmd: Commands,
@@ -34,6 +35,7 @@ pub(crate) fn intercept_area_adjust(
         cmd.entity(entity).remove::<AreaAdjust>();
     }
 }
+
 pub(crate) fn calc_scale_from_alignment(
     text: Query<
         (Entity, &TextScaleAlignment),
@@ -269,7 +271,7 @@ pub(crate) fn place(
     font: Res<AlignedFonts>,
 ) {
     for (text, scale, mut placer, text_scale_alignment, maybe_text_bound) in
-        dirty_text.iter_mut()
+    dirty_text.iter_mut()
     {
         placer.place(
             text,

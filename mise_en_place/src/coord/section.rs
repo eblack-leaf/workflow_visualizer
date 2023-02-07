@@ -1,8 +1,8 @@
 use bevy_ecs::bundle::Bundle;
 
+use crate::coord::{ScaledArea, ScaledPosition};
 use crate::coord::area::Area;
 use crate::coord::position::Position;
-use crate::coord::{ScaledArea, ScaledPosition};
 
 #[derive(Bundle, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Section {
@@ -48,10 +48,10 @@ impl Section {
         self.position.y + self.area.height
     }
     pub fn is_overlapping(&self, other: Section) -> bool {
-        self.left() < other.right()
-            && self.right() > other.left()
-            && self.top() < other.bottom()
-            && self.bottom() > other.top()
+        self.left() <= other.right()
+            && self.right() >= other.left()
+            && self.top() <= other.bottom()
+            && self.bottom() >= other.top()
     }
     pub fn contains(&self, position: Position) -> bool {
         if position.x > self.left()
@@ -119,10 +119,10 @@ impl ScaledSection {
         self.position.y + self.area.height
     }
     pub fn is_overlapping(&self, other: ScaledSection) -> bool {
-        self.left() < other.right()
-            && self.right() > other.left()
-            && self.top() < other.bottom()
-            && self.bottom() > other.top()
+        self.left() <= other.right()
+            && self.right() >= other.left()
+            && self.top() <= other.bottom()
+            && self.bottom() >= other.top()
     }
     pub fn contains(&self, position: ScaledPosition) -> bool {
         if position.x > self.left()
