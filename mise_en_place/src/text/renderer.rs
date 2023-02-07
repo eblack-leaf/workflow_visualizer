@@ -412,8 +412,8 @@ impl Render for TextRenderer {
                     render_pass_handle.0.set_scissor_rect(
                         scissor_rect.position.x as u32,
                         scissor_rect.position.y as u32,
-                        scissor_rect.area.width as u32,
-                        scissor_rect.area.height as u32,
+                        scissor_rect.area.width.max(1.0) as u32,
+                        scissor_rect.area.height.max(1.0) as u32,
                     );
                 }
                 render_pass_handle

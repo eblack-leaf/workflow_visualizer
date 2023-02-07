@@ -18,22 +18,17 @@ fn update_text(
 ) {
     counter.count += 1;
     for (entity, mut ent_text, visibility) in text.iter_mut() {
-        ent_text.string = format!(
-            "counter is: {} and there is a stress test for this to update and still be present",
-            counter.count
-        );
-        // if counter.count == 00 {
-        //     cmd.entity(entity).insert(TextBound::new((400, 1200)));
-        // }
-        // when moving spacial hasher stays at last frame in bounds
-        // need to check on move spacial hash update, and remove visible_section + visible = false if not in spacial hash current_range
-        // also
-        // intersection doesnt handle negative values
         if counter.count >= 200 && counter.count < 400 {
-            cmd.entity(entity).insert(PositionAdjust::new(-0.25, -0.25));
+            cmd.entity(entity).insert(PositionAdjust::new(-1.25, -1.25));
         }
         if counter.count >= 400 && counter.count < 600 {
-            cmd.entity(entity).insert(PositionAdjust::new(0.25, 0.25));
+            cmd.entity(entity).insert(PositionAdjust::new(1.25, 1.25));
+        }
+        if counter.count == 600 {
+            cmd.entity(entity).remove::<TextBound>();
+        }
+        if counter.count == 800 {
+            cmd.entity(entity).insert(TextBound::new((100, 200)));
         }
     }
 }
@@ -47,7 +42,7 @@ impl Cook for Meal {
             .main
             .add_system_to_stage(FrontEndStages::Process, update_text);
         recipe.container.spawn(TextBundle::new(
-            Text::new("counter is: 00"),
+            Text::new("counter is: 0 and there is a lot to do for this but im plugging away"),
             (10u32, 10u32),
             0u32,
             (1.0, 1.0, 1.0),

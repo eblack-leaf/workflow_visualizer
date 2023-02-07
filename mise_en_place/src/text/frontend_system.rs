@@ -2,9 +2,7 @@ use std::collections::HashSet;
 
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{
-    Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without,
-};
+use bevy_ecs::prelude::{Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without};
 
 use crate::AreaAdjust;
 use crate::color::Color;
@@ -213,6 +211,14 @@ pub(crate) fn bounds_diff(
                 cache.bound.replace(*bound);
             }
         } else if cache.bound.is_some() {
+            // doesnt signify that bounds changed to None
+            // reading every frame to take away draw section
+            // need tertiary option for ChangedToNone
+            // enum CachedBound {
+            //  Present(...)
+            //  ChangedToNone,
+            //  NoChange
+            // }
             difference.bounds = None;
             cache.bound.take();
         }
@@ -253,7 +259,9 @@ pub(crate) fn color_diff(
 }
 
 pub(crate) fn place(
-    mut dirty_text: Query<
+    font: Res<AlignedFonts>,
+    removed_bounds: RemovedComponents<TextBound>,
+    mut text: ParamSet<(Query<
         (
             &Text,
             &TextScale,
@@ -267,11 +275,13 @@ pub(crate) fn place(
             Changed<Visibility>,
             Changed<TextBound>,
         )>,
-    >,
-    font: Res<AlignedFonts>,
+    >, Query<(&Text,
+                              &TextScale,
+                              &mut Placer,
+                              &TextScaleAlignment)>)>
 ) {
     for (text, scale, mut placer, text_scale_alignment, maybe_text_bound) in
-    dirty_text.iter_mut()
+    text.p0().iter_mut()
     {
         placer.place(
             text,
@@ -282,6 +292,19 @@ pub(crate) fn place(
             maybe_text_bound,
         );
     }
+    let mut query = text.p1();
+    for removed in removed_bounds.iter() {
+        let (text, scale, mut placer, text_scale_alignment) = query.get_mut(removed).expect("no text for entity");
+        placer.place(
+            text,
+            scale,
+            font.fonts
+                .get(text_scale_alignment)
+                .expect("no aligned font"),
+            None,
+        );
+    }
+
 }
 
 pub(crate) fn visible_area_diff(
@@ -329,7 +352,7 @@ pub(crate) fn discard_out_of_bounds(
             for glyph in placer.unfiltered_placement().iter() {
                 let key = Key::new(glyph.byte_offset as u32);
                 let glyph_section = ScaledSection::new(
-                    (section.position.x + glyph.x, section.position.y + glyph.y),
+                    (position.x + glyph.x, position.y + glyph.y),
                     (glyph.width, glyph.height),
                 );
                 if !section.is_overlapping(glyph_section) {

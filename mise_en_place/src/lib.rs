@@ -16,7 +16,7 @@ pub use crate::coord::{
 };
 use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
-use crate::job::TaskLabel;
+use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::text::{Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment};
@@ -109,6 +109,7 @@ impl Stove {
                     .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::Last, SystemStage::parallel());
+                job.main.add_stage_after(FrontEndStages::Last, "clear trackers", SystemStage::single(Container::clear_trackers));
                 job
             },
             backend: {
@@ -129,6 +130,7 @@ impl Stove {
                     .add_stage(BackendStages::Prepare, SystemStage::parallel());
                 job.main
                     .add_stage(BackendStages::Last, SystemStage::parallel());
+                job.main.add_stage_after(BackendStages::Last, "clear trackers", SystemStage::single(Container::clear_trackers));
                 job
             },
             window: None,

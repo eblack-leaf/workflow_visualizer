@@ -141,13 +141,21 @@ impl SpacialHasher {
 
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
-    changed: Query<(Entity, &Position, &Area), Or<(Changed<Position>, Changed<Area>)>>,
+    mut changed: Query<(Entity, &Position, &Area, &mut Visibility), Or<(Changed<Position>, Changed<Area>)>>,
+    visible_bounds: Res<VisibleBounds>,
+    mut cmd: Commands,
 ) {
     let mut deferred_add = HashSet::<(Entity, SpacialHash)>::new();
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
-    for (entity, position, area) in changed.iter() {
+    for (entity, position, area, mut visibility) in changed.iter_mut() {
         spacial_hasher.an_entity_changed = true;
         let section: Section = (*position, *area).into();
+        if !section.is_overlapping(visible_bounds.section) {
+            if visibility.visible() {
+                visibility.visible = false;
+                cmd.entity(entity).remove::<VisibleSection>();
+            }
+        }
         let current_range = spacial_hasher.current_range(section);
         let current_hashes = current_range.hashes();
         for hash in current_hashes.iter() {
@@ -467,7 +475,6 @@ pub(crate) fn calc_visible_section(
             }
         }
         for entity in entity_remove_queue {
-            println!("removing from visibility");
             entities
                 .get_mut(entity)
                 .expect("entity not alive any longer")
