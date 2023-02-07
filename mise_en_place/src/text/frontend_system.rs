@@ -2,14 +2,16 @@ use std::collections::HashSet;
 
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without};
+use bevy_ecs::prelude::{
+    Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
+};
 
 use crate::AreaAdjust;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
 use crate::text::atlas::AtlasBlock;
 use crate::text::cache::Cache;
-use crate::text::difference::Difference;
+use crate::text::difference::{Difference, TextBoundDifference};
 use crate::text::extraction::Extraction;
 use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
@@ -95,7 +97,9 @@ pub(crate) fn manage_render_groups(
             difference.color.replace(*color);
             if let Some(bounds) = maybe_bound {
                 cache.bound.replace(*bounds);
-                difference.bounds.replace(*bounds);
+                difference
+                    .bounds
+                    .replace(TextBoundDifference::Changed(*bounds));
             }
             let max = RenderGroupMax(text.string.len() as u32);
             let unique_glyphs = RenderGroupUniqueGlyphs::from_text(text);
@@ -178,13 +182,7 @@ pub(crate) fn letter_diff(
     }
 }
 
-pub(crate) fn calc_area(
-    text: Query<
-        (Entity, &Placer),
-        Changed<Placer>,
-    >,
-    mut cmd: Commands,
-) {
+pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd: Commands) {
     for (entity, placer) in text.iter() {
         let mut width: f32 = 0.0;
         let mut height: f32 = 0.0;
@@ -197,31 +195,29 @@ pub(crate) fn calc_area(
 }
 
 pub(crate) fn bounds_diff(
-    mut text: Query<(Option<&TextBound>, &mut Cache, &mut Difference), Changed<TextBound>>,
+    mut text: ParamSet<(Query<(&TextBound, &mut Cache, &mut Difference), Changed<TextBound>>, Query<(&mut Cache, &mut Difference)>)>,
+    removed: RemovedComponents<TextBound>,
 ) {
-    for (maybe_bound, mut cache, mut difference) in text.iter_mut() {
-        if let Some(bound) = maybe_bound {
-            if let Some(cached_bound) = cache.bound {
-                if cached_bound.area != bound.area {
-                    difference.bounds.replace(*bound);
-                    cache.bound.replace(*bound);
-                }
-            } else {
-                difference.bounds.replace(*bound);
+    for (bound, mut cache, mut difference) in text.p0().iter_mut() {
+        if let Some(cached_bound) = cache.bound {
+            if cached_bound.area != bound.area {
+                difference
+                    .bounds
+                    .replace(TextBoundDifference::Changed(*bound));
                 cache.bound.replace(*bound);
             }
-        } else if cache.bound.is_some() {
-            // doesnt signify that bounds changed to None
-            // reading every frame to take away draw section
-            // need tertiary option for ChangedToNone
-            // enum CachedBound {
-            //  Present(...)
-            //  ChangedToNone,
-            //  NoChange
-            // }
-            difference.bounds = None;
-            cache.bound.take();
+        } else {
+            difference
+                .bounds
+                .replace(TextBoundDifference::Changed(*bound));
+            cache.bound.replace(*bound);
         }
+    }
+    let mut query = text.p1();
+    for entity in removed.iter() {
+        let (mut cache, mut difference) = query.get_mut(entity).expect("no entity present");
+        difference.bounds = Option::from(TextBoundDifference::Removed);
+        cache.bound.take();
     }
 }
 
@@ -261,28 +257,26 @@ pub(crate) fn color_diff(
 pub(crate) fn place(
     font: Res<AlignedFonts>,
     removed_bounds: RemovedComponents<TextBound>,
-    mut text: ParamSet<(Query<
-        (
-            &Text,
-            &TextScale,
-            &mut Placer,
-            &TextScaleAlignment,
-            Option<&TextBound>,
-        ),
-        Or<(
-            Changed<Text>,
-            Changed<TextScale>,
-            Changed<Visibility>,
-            Changed<TextBound>,
-        )>,
-    >, Query<(&Text,
-                              &TextScale,
-                              &mut Placer,
-                              &TextScaleAlignment)>)>
+    mut text: ParamSet<(
+        Query<
+            (
+                &Text,
+                &TextScale,
+                &mut Placer,
+                &TextScaleAlignment,
+                Option<&TextBound>,
+            ),
+            Or<(
+                Changed<Text>,
+                Changed<TextScale>,
+                Changed<Visibility>,
+                Changed<TextBound>,
+            )>,
+        >,
+        Query<(&Text, &TextScale, &mut Placer, &TextScaleAlignment)>,
+    )>,
 ) {
-    for (text, scale, mut placer, text_scale_alignment, maybe_text_bound) in
-    text.p0().iter_mut()
-    {
+    for (text, scale, mut placer, text_scale_alignment, maybe_text_bound) in text.p0().iter_mut() {
         placer.place(
             text,
             scale,
@@ -294,7 +288,8 @@ pub(crate) fn place(
     }
     let mut query = text.p1();
     for removed in removed_bounds.iter() {
-        let (text, scale, mut placer, text_scale_alignment) = query.get_mut(removed).expect("no text for entity");
+        let (text, scale, mut placer, text_scale_alignment) =
+            query.get_mut(removed).expect("no text for entity");
         placer.place(
             text,
             scale,
@@ -304,7 +299,6 @@ pub(crate) fn place(
             None,
         );
     }
-
 }
 
 pub(crate) fn visible_area_diff(

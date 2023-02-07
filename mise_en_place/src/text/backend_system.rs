@@ -3,6 +3,7 @@ use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 
+use crate::{Area, Color, Position, ScaledSection, Section};
 use crate::coord::ScaledPosition;
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
@@ -12,7 +13,7 @@ use crate::text::atlas::{
 };
 use crate::text::coords::Coords;
 use crate::text::cpu_buffer::CpuBuffer;
-use crate::text::difference::Difference;
+use crate::text::difference::{Difference, TextBoundDifference};
 use crate::text::extraction::Extraction;
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::gpu_buffer::GpuBuffer;
@@ -29,7 +30,6 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Area, Color, Position, ScaledSection, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -215,20 +215,26 @@ fn set_text_bound(
     render_group: Entity,
     draw_section_resize_needed: &mut bool,
 ) {
-    if let Some(bound) = difference.bounds {
-        renderer
-            .container
-            .get_mut::<RenderGroupTextBound>(render_group)
-            .expect("no render group text bound")
-            .text_bound_area
-            .replace(bound.area);
+    if let Some(diff) = difference.bounds {
         *draw_section_resize_needed = true;
-    } else {
-        renderer
-            .container
-            .get_mut::<RenderGroupTextBound>(render_group)
-            .expect("no render group text bound")
-            .text_bound_area.take();
+        match diff {
+            TextBoundDifference::Changed(bound) => {
+                renderer
+                    .container
+                    .get_mut::<RenderGroupTextBound>(render_group)
+                    .expect("no render group text bound")
+                    .text_bound_area
+                    .replace(bound.area);
+            }
+            TextBoundDifference::Removed => {
+                renderer
+                    .container
+                    .get_mut::<RenderGroupTextBound>(render_group)
+                    .expect("no render group text bound")
+                    .text_bound_area
+                    .take();
+            }
+        }
     }
 }
 
@@ -650,12 +656,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-            > renderer
-                .container
-                .get::<AtlasFreeLocations>(render_group)
-                .unwrap()
-                .free
-                .len() as u32
+        > renderer
+        .container
+        .get::<AtlasFreeLocations>(render_group)
+        .unwrap()
+        .free
+        .len() as u32
     {
         let current_dimension = renderer
             .container

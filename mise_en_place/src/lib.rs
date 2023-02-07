@@ -109,7 +109,11 @@ impl Stove {
                     .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::Last, SystemStage::parallel());
-                job.main.add_stage_after(FrontEndStages::Last, "clear trackers", SystemStage::single(Container::clear_trackers));
+                job.main.add_stage_after(
+                    FrontEndStages::Last,
+                    "clear trackers",
+                    SystemStage::single(Container::clear_trackers),
+                );
                 job
             },
             backend: {
@@ -130,7 +134,11 @@ impl Stove {
                     .add_stage(BackendStages::Prepare, SystemStage::parallel());
                 job.main
                     .add_stage(BackendStages::Last, SystemStage::parallel());
-                job.main.add_stage_after(BackendStages::Last, "clear trackers", SystemStage::single(Container::clear_trackers));
+                job.main.add_stage_after(
+                    BackendStages::Last,
+                    "clear trackers",
+                    SystemStage::single(Container::clear_trackers),
+                );
                 job
             },
             window: None,

@@ -28,7 +28,7 @@ fn update_text(
             cmd.entity(entity).remove::<TextBound>();
         }
         if counter.count == 800 {
-            cmd.entity(entity).insert(TextBound::new((100, 200)));
+            cmd.entity(entity).insert(TextBound::new((600, 1200)));
         }
     }
 }
@@ -41,13 +41,23 @@ impl Cook for Meal {
         recipe
             .main
             .add_system_to_stage(FrontEndStages::Process, update_text);
-        recipe.container.spawn(TextBundle::new(
-            Text::new("counter is: 0 and there is a lot to do for this but im plugging away"),
-            (10u32, 10u32),
-            0u32,
-            (1.0, 1.0, 1.0),
-            TextScaleAlignment::Medium,
-        )).insert(TextBound::new((400, 1200)));
+        recipe
+            .container
+            .spawn(TextBundle::new(
+                Text::new(
+                    "counter is: 0 and there is a lot to do for this but im plugging away\
+            its a really long statement to check if this can handle a lot of text\
+            and it will wrap accordingly to the layout size from bound\
+            and become very easy to use in UI layouts\
+            can it do more and even some extra characters\
+            [)*[++)(]+)&[](+)&{}(&!+}()*&![(+]=*{}(=/*-",
+                ),
+                (10u32, 10u32),
+                0u32,
+                (1.0, 1.0, 1.0),
+                TextScaleAlignment::Medium,
+            ))
+            .insert(TextBound::new((400, 1200)));
     }
 }
 

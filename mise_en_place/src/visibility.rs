@@ -141,7 +141,10 @@ impl SpacialHasher {
 
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
-    mut changed: Query<(Entity, &Position, &Area, &mut Visibility), Or<(Changed<Position>, Changed<Area>)>>,
+    mut changed: Query<
+        (Entity, &Position, &Area, &mut Visibility),
+        Or<(Changed<Position>, Changed<Area>)>,
+    >,
     visible_bounds: Res<VisibleBounds>,
     mut cmd: Commands,
 ) {

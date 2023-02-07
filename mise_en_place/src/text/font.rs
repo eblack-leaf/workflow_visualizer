@@ -44,6 +44,11 @@ impl MonoSpacedFont {
     }
     pub(crate) fn character_dimensions(&self, character: char, px: f32) -> Area {
         let metrics = self.font().metrics(character, px);
-        (metrics.advance_width.ceil(), px.ceil()).into()
+        let height = self
+            .font()
+            .horizontal_line_metrics(px)
+            .expect("no metrics in font")
+            .new_line_size;
+        (metrics.advance_width.ceil(), height).into()
     }
 }

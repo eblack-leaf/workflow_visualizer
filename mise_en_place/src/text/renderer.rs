@@ -261,7 +261,11 @@ impl Attach for TextRenderer {
             TextStages::CalcTextScale,
             SystemStage::single(calc_scale_from_alignment),
         );
-        stove.frontend.main.add_stage_after(TextStages::CalcTextScale, TextStages::Placement, SystemStage::single(place));
+        stove.frontend.main.add_stage_after(
+            TextStages::CalcTextScale,
+            TextStages::Placement,
+            SystemStage::single(place),
+        );
         stove.frontend.main.add_stage_after(
             TextStages::Placement,
             TextStages::CalcArea,
@@ -272,7 +276,10 @@ impl Attach for TextRenderer {
             TextStages::TextFrontEnd,
             SystemStage::parallel(),
         );
-        stove.frontend.main.add_system_to_stage(TextStages::TextFrontEnd, manage_render_groups.before("out of bounds"));
+        stove.frontend.main.add_system_to_stage(
+            TextStages::TextFrontEnd,
+            manage_render_groups.before("out of bounds"),
+        );
         stove
             .frontend
             .main
