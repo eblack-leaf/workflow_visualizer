@@ -2,7 +2,7 @@ use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
 use mise_en_place::{
     Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove,
-    Text, TextBound, TextBundle, TextRenderer, TextScaleAlignment, Visibility,
+    Text, TextBound, TextBundle, TextOffset, TextRenderer, TextScaleAlignment, Visibility,
 };
 
 #[derive(Resource)]
@@ -11,24 +11,18 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text, &Visibility)>,
+    mut text: Query<(Entity, &mut Text, &Visibility, &mut TextOffset)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
 ) {
     counter.count += 1;
-    for (entity, mut ent_text, visibility) in text.iter_mut() {
-        if counter.count >= 200 && counter.count < 400 {
-            cmd.entity(entity).insert(PositionAdjust::new(-1.25, -1.25));
+    for (entity, mut ent_text, visibility, mut text_offset) in text.iter_mut() {
+        if counter.count >= 100 && counter.count < 200 {
+            text_offset.y -= 1.0;
         }
-        if counter.count >= 400 && counter.count < 600 {
-            cmd.entity(entity).insert(PositionAdjust::new(1.25, 1.25));
-        }
-        if counter.count == 600 {
-            cmd.entity(entity).remove::<TextBound>();
-        }
-        if counter.count == 800 {
-            cmd.entity(entity).insert(TextBound::new((600, 1200)));
+        if counter.count >= 200 && counter.count < 300 {
+            text_offset.y += 1.0;
         }
     }
 }
@@ -45,10 +39,10 @@ impl Cook for Meal {
             .container
             .spawn(TextBundle::new(
                 Text::new(
-                    "counter is: 0 and there is a lot to do for this but im plugging away\
-            its a really long statement to check if this can handle a lot of text\
-            and it will wrap accordingly to the layout size from bound\
-            and become very easy to use in UI layouts\
+                    "counter is: 0 and there is a lot to do for this but im plugging away \
+            its a really long statement to check if this can handle a lot of text \
+            and it will wrap accordingly to the layout size from bound \
+            and become very easy to use in UI layouts \
             can it do more and even some extra characters\
             [)*[++)(]+)&[](+)&{}(&!+}()*&![(+]=*{}(=/*-",
                 ),
@@ -56,8 +50,9 @@ impl Cook for Meal {
                 0u32,
                 (1.0, 1.0, 1.0),
                 TextScaleAlignment::Medium,
+                None,
             ))
-            .insert(TextBound::new((400, 1200)));
+            .insert(TextBound::new((600, 1200)));
     }
 }
 

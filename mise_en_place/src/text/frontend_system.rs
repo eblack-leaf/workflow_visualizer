@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
-use crate::AreaAdjust;
 use crate::color::Color;
 use crate::coord::{Area, Depth, Position, ScaledSection, Section};
 use crate::text::atlas::AtlasBlock;
@@ -17,10 +16,11 @@ use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
-use crate::text::text::Text;
+use crate::text::text::{Text, TextOffset};
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
+use crate::AreaAdjust;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -132,11 +132,22 @@ pub(crate) fn manage_render_groups(
 
 pub(crate) fn letter_diff(
     mut text: Query<
-        (&TextScale, &Placer, &mut Cache, &mut Difference),
-        Or<(Changed<Placer>, Changed<TextBound>, Changed<VisibleSection>)>,
+        (
+            &TextScale,
+            &Placer,
+            &mut Cache,
+            &mut Difference,
+            &TextOffset,
+        ),
+        Or<(
+            Changed<Placer>,
+            Changed<TextBound>,
+            Changed<VisibleSection>,
+            Changed<TextOffset>,
+        )>,
     >,
 ) {
-    for (scale, placer, mut cache, mut difference) in text.iter_mut() {
+    for (scale, placer, mut cache, mut difference, text_offset) in text.iter_mut() {
         let mut retained_keys = HashSet::new();
         let old_keys = cache.keys.clone();
         let mut keys_to_remove = HashSet::new();
@@ -148,7 +159,11 @@ pub(crate) fn letter_diff(
                 }
                 continue;
             }
-            let glyph_position = (placed_glyph.x, placed_glyph.y).into();
+            let glyph_position = (
+                placed_glyph.x + text_offset.x,
+                placed_glyph.y + text_offset.y,
+            )
+                .into();
             let glyph_id = placed_glyph.key;
             let character = placed_glyph.parent;
             let glyph = Glyph::new(character, *scale, glyph_id);
@@ -195,7 +210,10 @@ pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd
 }
 
 pub(crate) fn bounds_diff(
-    mut text: ParamSet<(Query<(&TextBound, &mut Cache, &mut Difference), Changed<TextBound>>, Query<(&mut Cache, &mut Difference)>)>,
+    mut text: ParamSet<(
+        Query<(&TextBound, &mut Cache, &mut Difference), Changed<TextBound>>,
+        Query<(&mut Cache, &mut Difference)>,
+    )>,
     removed: RemovedComponents<TextBound>,
 ) {
     for (bound, mut cache, mut difference) in text.p0().iter_mut() {
@@ -323,12 +341,18 @@ pub(crate) fn discard_out_of_bounds(
             &Area,
             Option<&TextBound>,
             &VisibleSection,
+            &TextOffset,
         ),
-        Or<(Changed<Placer>, Changed<VisibleSection>, Changed<TextBound>)>,
+        Or<(
+            Changed<Placer>,
+            Changed<VisibleSection>,
+            Changed<TextBound>,
+            Changed<TextOffset>,
+        )>,
     >,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, position, area, bound, visible_section) in text.iter_mut() {
+    for (mut placer, position, area, bound, visible_section, text_offset) in text.iter_mut() {
         let bound_area = match bound {
             Some(b) => b.area.to_scaled(scale_factor.factor),
             None => area.to_scaled(scale_factor.factor),
@@ -346,7 +370,10 @@ pub(crate) fn discard_out_of_bounds(
             for glyph in placer.unfiltered_placement().iter() {
                 let key = Key::new(glyph.byte_offset as u32);
                 let glyph_section = ScaledSection::new(
-                    (position.x + glyph.x, position.y + glyph.y),
+                    (
+                        position.x + glyph.x + text_offset.x,
+                        position.y + glyph.y + text_offset.y,
+                    ),
                     (glyph.width, glyph.height),
                 );
                 if !section.is_overlapping(glyph_section) {

@@ -28,6 +28,7 @@ pub struct TextBundle {
     pub depth: Depth,
     pub color: Color,
     pub scale_alignment: TextScaleAlignment,
+    pub offset: TextOffset,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
@@ -40,6 +41,7 @@ impl TextBundle {
         depth: D,
         color: C,
         scale_alignment: TextScaleAlignment,
+        offset: Option<TextOffset>,
     ) -> Self {
         let position = position.into();
         let depth = depth.into();
@@ -50,6 +52,7 @@ impl TextBundle {
             depth,
             color,
             scale_alignment,
+            offset: offset.unwrap_or_default(),
             placer: Placer::new(),
             cache: Cache::new(
                 position,
@@ -59,5 +62,18 @@ impl TextBundle {
             ),
             difference: Difference::new(),
         }
+    }
+}
+
+#[derive(Component, PartialEq, Copy, Clone, Default)]
+pub struct TextOffset {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl TextOffset {
+    pub fn new<P: Into<Position>>(position: P) -> Self {
+        let p = position.into();
+        Self { x: p.x, y: p.y }
     }
 }
