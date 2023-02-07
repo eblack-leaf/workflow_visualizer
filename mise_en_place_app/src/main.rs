@@ -27,6 +27,8 @@ fn update_text(
         // }
         // when moving spacial hasher stays at last frame in bounds
         // need to check on move spacial hash update, and remove visible_section + visible = false if not in spacial hash current_range
+        // also
+        // intersection doesnt handle negative values
         if counter.count >= 200 && counter.count < 400 {
             cmd.entity(entity).insert(PositionAdjust::new(-0.25, -0.25));
         }
