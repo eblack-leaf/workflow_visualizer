@@ -217,12 +217,27 @@ impl RenderGroupBindGroup {
 }
 
 #[derive(Component, Copy, Clone)]
-pub struct TextBound {
+pub struct TextBoundGuide {
+    pub horizontal_character_max: u32,
+    pub line_max: u32,
+}
+
+impl TextBoundGuide {
+    pub fn new(horizontal_character_max: u32, line_max: u32) -> Self {
+        Self {
+            horizontal_character_max,
+            line_max,
+        }
+    }
+}
+
+#[derive(Component, Copy, Clone)]
+pub(crate) struct TextBound {
     pub area: Area,
 }
 
 impl TextBound {
-    pub fn new<A: Into<Area>>(area: A) -> Self {
+    pub(crate) fn new<A: Into<Area>>(area: A) -> Self {
         Self { area: area.into() }
     }
 }

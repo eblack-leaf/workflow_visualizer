@@ -67,13 +67,13 @@ impl TextBundle {
 
 #[derive(Component, PartialEq, Copy, Clone, Default)]
 pub struct TextOffset {
-    pub x: f32,
-    pub y: f32,
+    pub position: Position,
 }
 
 impl TextOffset {
     pub fn new<P: Into<Position>>(position: P) -> Self {
-        let p = position.into();
-        Self { x: p.x, y: p.y }
+        Self {
+            position: position.into(),
+        }
     }
 }

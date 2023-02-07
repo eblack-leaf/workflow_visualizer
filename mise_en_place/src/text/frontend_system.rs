@@ -20,7 +20,7 @@ use crate::text::text::{Text, TextOffset};
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::AreaAdjust;
+use crate::{AreaAdjust, TextBoundGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -49,6 +49,27 @@ pub(crate) fn calc_scale_from_alignment(
             *text_scale_alignment,
             scale_factor.factor,
         ));
+    }
+}
+
+pub(crate) fn calc_bound_from_guide(
+    text: Query<
+        (Entity, &TextBoundGuide, &TextScaleAlignment),
+        Or<(Without<TextBound>, Changed<TextBoundGuide>)>,
+    >,
+    scale_factor: Res<ScaleFactor>,
+    mut cmd: Commands,
+    aligned_fonts: Res<AlignedFonts>,
+) {
+    for (entity, guide, alignment) in text.iter() {
+        let font = aligned_fonts.fonts.get(alignment).expect("no aligned font");
+        let character_dimensions = font.character_dimensions(
+            'a',
+            TextScale::from_alignment(*alignment, scale_factor.factor).px(),
+        );
+        let width = guide.horizontal_character_max as f32 * character_dimensions.width;
+        let height = guide.line_max as f32 * character_dimensions.height;
+        cmd.entity(entity).insert(TextBound::new((width, height)));
     }
 }
 
@@ -138,6 +159,7 @@ pub(crate) fn letter_diff(
             &mut Cache,
             &mut Difference,
             &TextOffset,
+            &Visibility,
         ),
         Or<(
             Changed<Placer>,
@@ -147,52 +169,56 @@ pub(crate) fn letter_diff(
         )>,
     >,
 ) {
-    for (scale, placer, mut cache, mut difference, text_offset) in text.iter_mut() {
-        let mut retained_keys = HashSet::new();
-        let old_keys = cache.keys.clone();
-        let mut keys_to_remove = HashSet::new();
-        for placed_glyph in placer.filtered_placement().iter() {
-            let key = Key::new(placed_glyph.byte_offset as u32);
-            if placed_glyph.parent.is_ascii_control() || placed_glyph.parent.is_ascii_whitespace() {
+    for (scale, placer, mut cache, mut difference, text_offset, visibility) in text.iter_mut() {
+        if visibility.visible() {
+            let mut retained_keys = HashSet::new();
+            let old_keys = cache.keys.clone();
+            let mut keys_to_remove = HashSet::new();
+            for placed_glyph in placer.filtered_placement().iter() {
+                let key = Key::new(placed_glyph.byte_offset as u32);
+                if placed_glyph.parent.is_ascii_control()
+                    || placed_glyph.parent.is_ascii_whitespace()
+                {
+                    if cache.exists(key) {
+                        keys_to_remove.insert(key);
+                    }
+                    continue;
+                }
+                let glyph_position = (
+                    placed_glyph.x + text_offset.position.x,
+                    placed_glyph.y + text_offset.position.y,
+                )
+                    .into();
+                let glyph_id = placed_glyph.key;
+                let character = placed_glyph.parent;
+                let glyph = Glyph::new(character, *scale, glyph_id);
                 if cache.exists(key) {
-                    keys_to_remove.insert(key);
-                }
-                continue;
-            }
-            let glyph_position = (
-                placed_glyph.x + text_offset.x,
-                placed_glyph.y + text_offset.y,
-            )
-                .into();
-            let glyph_id = placed_glyph.key;
-            let character = placed_glyph.parent;
-            let glyph = Glyph::new(character, *scale, glyph_id);
-            if cache.exists(key) {
-                retained_keys.insert(key);
-                if cache.glyph_position_different(key, glyph_position) {
-                    difference.update.insert(key, glyph_position);
-                    cache.glyph_positions.insert(key, glyph_position);
-                }
-                if cache.glyph_id_different(key, glyph_id) {
+                    retained_keys.insert(key);
+                    if cache.glyph_position_different(key, glyph_position) {
+                        difference.update.insert(key, glyph_position);
+                        cache.glyph_positions.insert(key, glyph_position);
+                    }
+                    if cache.glyph_id_different(key, glyph_id) {
+                        difference.glyph_add.insert(key, glyph);
+                        cache.glyph_ids.insert(key, glyph_id);
+                    }
+                } else {
+                    difference.add.insert(key, glyph_position);
                     difference.glyph_add.insert(key, glyph);
-                    cache.glyph_ids.insert(key, glyph_id);
+                    cache.add(key, glyph_id, glyph_position);
                 }
-            } else {
-                difference.add.insert(key, glyph_position);
-                difference.glyph_add.insert(key, glyph);
-                cache.add(key, glyph_id, glyph_position);
             }
-        }
-        keys_to_remove.extend(
-            old_keys
-                .difference(&retained_keys)
-                .copied()
-                .collect::<HashSet<Key>>(),
-        );
-        for key in keys_to_remove {
-            difference.glyph_remove.insert(cache.get_glyph_id(key));
-            difference.remove.insert(key);
-            cache.remove(key);
+            keys_to_remove.extend(
+                old_keys
+                    .difference(&retained_keys)
+                    .copied()
+                    .collect::<HashSet<Key>>(),
+            );
+            for key in keys_to_remove {
+                difference.glyph_remove.insert(cache.get_glyph_id(key));
+                difference.remove.insert(key);
+                cache.remove(key);
+            }
         }
     }
 }
@@ -357,13 +383,12 @@ pub(crate) fn discard_out_of_bounds(
             Some(b) => b.area.to_scaled(scale_factor.factor),
             None => area.to_scaled(scale_factor.factor),
         };
+        let scaled_position = position.to_scaled(scale_factor.factor);
+        let scaled_text_offset = text_offset.position.to_scaled(scale_factor.factor);
         let text_section = visible_section
             .section
             .to_scaled(scale_factor.factor)
-            .intersection(ScaledSection::new(
-                position.to_scaled(scale_factor.factor),
-                bound_area,
-            ));
+            .intersection(ScaledSection::new(scaled_position, bound_area));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();
@@ -371,8 +396,8 @@ pub(crate) fn discard_out_of_bounds(
                 let key = Key::new(glyph.byte_offset as u32);
                 let glyph_section = ScaledSection::new(
                     (
-                        position.x + glyph.x + text_offset.x,
-                        position.y + glyph.y + text_offset.y,
+                        scaled_position.x + glyph.x + scaled_text_offset.x,
+                        scaled_position.y + glyph.y + scaled_text_offset.y,
                     ),
                     (glyph.width, glyph.height),
                 );

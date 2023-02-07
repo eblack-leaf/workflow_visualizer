@@ -6,9 +6,9 @@ use winit::event::VirtualKeyCode::L;
 
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::Key;
+use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::Text;
-use crate::TextBound;
 
 #[derive(Component)]
 pub(crate) struct Placer {

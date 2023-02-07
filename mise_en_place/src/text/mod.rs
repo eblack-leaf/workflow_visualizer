@@ -1,4 +1,4 @@
-pub use crate::text::render_group::TextBound;
+pub use crate::text::render_group::TextBoundGuide;
 pub use crate::text::renderer::TextRenderer;
 pub use crate::text::scale::TextScaleAlignment;
 pub use crate::text::text::{Text, TextBundle, TextOffset};

@@ -4,6 +4,10 @@ use bevy_ecs::prelude::{
     Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage,
 };
 
+use crate::{
+    Area, Attach, BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages, Job,
+    Position, Stove,
+};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::job::Container;
@@ -14,11 +18,7 @@ use crate::text::backend_system::{
 };
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::frontend_system::{
-    bounds_diff, calc_area, calc_scale_from_alignment, color_diff, depth_diff,
-    discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups, place,
-    position_diff, pull_differences, setup as frontend_setup, visible_area_diff,
-};
+use crate::text::frontend_system::{bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment, color_diff, depth_diff, discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups, place, position_diff, pull_differences, setup as frontend_setup, visible_area_diff};
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::Indexer;
@@ -26,13 +26,9 @@ use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
-use crate::{
-    Area, Attach, BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, Job,
-    Position, Stove,
-};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -239,7 +235,7 @@ enum TextSystems {
 
 #[derive(StageLabel)]
 enum TextStages {
-    CalcTextScale,
+    PlacementPreparation,
     Placement,
     CalcArea,
     TextFrontEnd,
@@ -258,11 +254,11 @@ impl Attach for TextRenderer {
         );
         stove.frontend.main.add_stage_before(
             FrontEndStages::VisibilityPreparation,
-            TextStages::CalcTextScale,
-            SystemStage::single(calc_scale_from_alignment),
+            TextStages::PlacementPreparation,
+            SystemStage::parallel().with_system(calc_bound_from_guide).with_system(calc_scale_from_alignment),
         );
         stove.frontend.main.add_stage_after(
-            TextStages::CalcTextScale,
+            TextStages::PlacementPreparation,
             TextStages::Placement,
             SystemStage::single(place),
         );
@@ -339,8 +335,8 @@ impl Attach for TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = frontend
             .container
