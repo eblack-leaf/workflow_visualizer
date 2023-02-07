@@ -18,7 +18,11 @@ fn update_text(
     mut cmd: Commands,
 ) {
     counter.count += 1;
-    for (entity, mut ent_text, visibility, mut text_offset) in text.iter_mut() {}
+    for (entity, mut ent_text, visibility, mut text_offset) in text.iter_mut() {
+        // setting raw now but will interpolate with animation && guide with line_offset
+        // wrap modulo logic for frame consistency and set-intercept for animation to interpolate
+        if counter.count % 2 == 0 { text_offset.position.y -= 1.0; }// % 2 cause makes 30 frames / sec >= 24 fps for movies
+    }
 }
 
 struct Meal;
@@ -32,14 +36,14 @@ impl Cook for Meal {
         recipe
             .container
             .spawn(TextBundle::new(
-                Text::new("counter is: 0 and there is a lot to do"),
+                Text::new("counter is: \nworker-name: \nposition: \narea: "),
                 (0u32, 0u32),
                 100u32,
                 (1.0, 1.0, 1.0),
                 TextScaleAlignment::Medium,
-                None,
+                None,// could guide text offset as well
             ))
-            .insert(TextBoundGuide::new(15, 4));
+            .insert(TextBoundGuide::new(20, 2));
     }
 }
 
