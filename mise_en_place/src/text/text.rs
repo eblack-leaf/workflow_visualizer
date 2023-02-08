@@ -6,7 +6,7 @@ use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::Color;
+use crate::{Color, PositionAdjust};
 
 #[derive(Component)]
 pub struct Text {
@@ -28,7 +28,7 @@ pub struct TextBundle {
     pub depth: Depth,
     pub color: Color,
     pub scale_alignment: TextScaleAlignment,
-    pub offset: TextOffset,
+    pub(crate) offset: TextOffset,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
@@ -41,7 +41,6 @@ impl TextBundle {
         depth: D,
         color: C,
         scale_alignment: TextScaleAlignment,
-        offset: Option<TextOffset>,
     ) -> Self {
         let position = position.into();
         let depth = depth.into();
@@ -52,7 +51,7 @@ impl TextBundle {
             depth,
             color,
             scale_alignment,
-            offset: offset.unwrap_or_default(),
+            offset: TextOffset::default(),
             placer: Placer::new(),
             cache: Cache::new(
                 position,
@@ -64,14 +63,37 @@ impl TextBundle {
         }
     }
 }
-
 #[derive(Component, PartialEq, Copy, Clone, Default)]
-pub struct TextOffset {
-    pub position: Position,
+pub struct TextOffsetAdjustGuide {
+    pub characters_to_offset_x: i32,
+    pub lines_to_offset_y: i32,
+}
+impl TextOffsetAdjustGuide {
+    pub fn new(characters_to_offset_x: i32, lines_to_offset_y: i32) -> Self {
+        Self {
+            characters_to_offset_x,
+            lines_to_offset_y,
+        }
+    }
+}
+#[derive(Component, PartialEq, Copy, Clone, Default)]
+pub(crate) struct TextOffsetAdjust {
+    pub position_adjust: PositionAdjust,
+}
+impl TextOffsetAdjust {
+    pub(crate) fn new<PA: Into<PositionAdjust>>(adjust: PA) -> Self {
+        Self {
+            position_adjust: adjust.into(),
+        }
+    }
+}
+#[derive(Component, PartialEq, Copy, Clone, Default)]
+pub(crate) struct TextOffset {
+    pub(crate) position: Position,
 }
 
 impl TextOffset {
-    pub fn new<P: Into<Position>>(position: P) -> Self {
+    pub(crate) fn new<P: Into<Position>>(position: P) -> Self {
         Self {
             position: position.into(),
         }

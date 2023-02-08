@@ -16,11 +16,11 @@ use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
-use crate::text::text::{Text, TextOffset};
+use crate::text::text::{Text, TextOffset, TextOffsetAdjust};
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::{AreaAdjust, TextBoundGuide};
+use crate::{AreaAdjust, TextBoundGuide, TextOffsetAdjustGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -51,7 +51,34 @@ pub(crate) fn calc_scale_from_alignment(
         ));
     }
 }
-
+pub(crate) fn calc_text_offset_from_guide(
+    text: Query<(Entity, &TextOffsetAdjustGuide, &TextScaleAlignment), ()>,
+    mut cmd: Commands,
+    scale_factor: Res<ScaleFactor>,
+    aligned_fonts: Res<AlignedFonts>,
+) {
+    for (entity, guide, alignment) in text.iter() {
+        let font = aligned_fonts.fonts.get(alignment).expect("no aligned font");
+        let character_dimensions = font.character_dimensions(
+            'a',
+            TextScale::from_alignment(*alignment, scale_factor.factor).px(),
+        );
+        let x_adjust = guide.characters_to_offset_x as f32 * character_dimensions.width;
+        let y_adjust = guide.lines_to_offset_y as f32 * character_dimensions.height;
+        cmd.entity(entity)
+            .insert(TextOffsetAdjust::new((x_adjust, y_adjust)));
+        cmd.entity(entity).remove::<TextOffsetAdjustGuide>();
+    }
+}
+pub(crate) fn adjust_text_offset(
+    mut text: Query<(Entity, &TextOffsetAdjust, &mut TextOffset), ()>,
+    mut cmd: Commands,
+) {
+    for (entity, adjust, mut offset) in text.iter_mut() {
+        offset.position.adjust(adjust.position_adjust);
+        cmd.entity(entity).remove::<TextOffsetAdjust>();
+    }
+}
 pub(crate) fn calc_bound_from_guide(
     text: Query<
         (Entity, &TextBoundGuide, &TextScaleAlignment),

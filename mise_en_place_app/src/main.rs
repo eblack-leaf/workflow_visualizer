@@ -1,8 +1,9 @@
+use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
 use mise_en_place::{
     Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove,
-    Text, TextBoundGuide, TextBundle, TextOffset, TextRenderer, TextScaleAlignment,
+    Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextRenderer, TextScaleAlignment,
     Visibility,
 };
 
@@ -12,21 +13,18 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text, &Visibility, &mut TextOffset)>,
+    mut text: Query<(Entity, &mut Text, &Visibility)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
 ) {
     counter.count += 1;
-    for (entity, mut ent_text, visibility, mut text_offset) in text.iter_mut() {
-        // setting raw now but will interpolate with animation && guide with line_offset
-        // wrap modulo logic for frame consistency and set-intercept for animation to interpolate
-        if counter.count % 2 == 0 { text_offset.position.y -= 1.0; }// % 2 cause makes 30 frames / sec >= 24 fps for movies
+    for (entity, mut ent_text, visibility) in text.iter_mut() {
+        ent_text.string.push('!');
     }
 }
 
 struct Meal;
-
 impl Cook for Meal {
     fn prepare(recipe: &mut Recipe) {
         recipe.container.insert_resource(Counter { count: 0 });
@@ -36,14 +34,13 @@ impl Cook for Meal {
         recipe
             .container
             .spawn(TextBundle::new(
-                Text::new("counter is: \nworker-name: \nposition: \narea: "),
+                Text::new(""),
                 (0u32, 0u32),
-                100u32,
+                10u32,
                 (1.0, 1.0, 1.0),
                 TextScaleAlignment::Medium,
-                None,// could guide text offset as well
             ))
-            .insert(TextBoundGuide::new(20, 2));
+            .insert(TextBoundGuide::new(120, 112));
     }
 }
 
