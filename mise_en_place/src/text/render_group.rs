@@ -15,7 +15,7 @@ use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::{Index, Indexer};
 use crate::text::null_bit::NullBit;
 use crate::text::scale::TextScaleAlignment;
-use crate::text::text::Text;
+use crate::text::text::{TextColorAdjustments, Text};
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
 use crate::{Area, Color, Depth, Position, ScaledSection, Section};
@@ -36,15 +36,23 @@ impl RenderGroupUniqueGlyphs {
         }
     }
 }
-
+#[derive(Component)]
+pub(crate) struct GlyphColorWrite {
+    pub(crate) write: HashMap<Index, Color>,
+}
+impl GlyphColorWrite {
+    pub(crate) fn new() -> Self {
+        Self {
+            write: HashMap::new(),
+        }
+    }
+}
 #[derive(Bundle)]
 pub(crate) struct RenderGroup {
     pub(crate) max: RenderGroupMax,
     pub(crate) position: ScaledPosition,
     pub(crate) visible_section: VisibleSection,
     pub(crate) depth: Depth,
-    pub(crate) color: Color,
-    pub(crate) color_uniform: Uniform<Color>,
     pub(crate) atlas_block: AtlasBlock,
     pub(crate) unique_glyphs: RenderGroupUniqueGlyphs,
     pub(crate) text_scale_alignment: TextScaleAlignment,
@@ -67,7 +75,6 @@ pub(crate) struct RenderGroup {
     pub(crate) glyph_area_write: GlyphAreaWrite,
     pub(crate) position_write: PositionWrite,
     pub(crate) depth_write: DepthWrite,
-    pub(crate) color_write: ColorWrite,
     pub(crate) keyed_glyph_ids: KeyedGlyphIds,
     pub(crate) draw_section: DrawSection,
     pub(crate) atlas_texture_dimensions: AtlasTextureDimensions,
@@ -79,6 +86,9 @@ pub(crate) struct RenderGroup {
     pub(crate) atlas_glyphs: AtlasGlyphs,
     pub(crate) text_placement: TextPlacement,
     pub(crate) text_placement_uniform: Uniform<TextPlacement>,
+    pub(crate) glyph_color_write: GlyphColorWrite,
+    pub(crate) glyph_color_cpu: CpuBuffer<Color>,
+    pub(crate) glyph_color_gpu: GpuBuffer<Color>,
 }
 
 impl RenderGroup {
@@ -87,8 +97,6 @@ impl RenderGroup {
         position: ScaledPosition,
         visible_section: VisibleSection,
         depth: Depth,
-        color: Color,
-        color_uniform: Uniform<Color>,
         atlas_block: AtlasBlock,
         unique_glyphs: RenderGroupUniqueGlyphs,
         text_scale_alignment: TextScaleAlignment,
@@ -111,7 +119,6 @@ impl RenderGroup {
         glyph_area_write: GlyphAreaWrite,
         position_write: PositionWrite,
         depth_write: DepthWrite,
-        color_write: ColorWrite,
         keyed_glyph_ids: KeyedGlyphIds,
         draw_section: DrawSection,
         atlas_texture_dimensions: AtlasTextureDimensions,
@@ -123,14 +130,15 @@ impl RenderGroup {
         atlas_glyphs: AtlasGlyphs,
         text_placement: TextPlacement,
         text_placement_uniform: Uniform<TextPlacement>,
+        glyph_color_write: GlyphColorWrite,
+        glyph_color_cpu: CpuBuffer<Color>,
+        glyph_color_gpu: GpuBuffer<Color>,
     ) -> Self {
         Self {
             max,
             position,
             visible_section,
             depth,
-            color,
-            color_uniform,
             atlas_block,
             unique_glyphs,
             text_scale_alignment,
@@ -153,7 +161,6 @@ impl RenderGroup {
             glyph_area_write,
             position_write,
             depth_write,
-            color_write,
             keyed_glyph_ids,
             draw_section,
             atlas_texture_dimensions,
@@ -165,6 +172,9 @@ impl RenderGroup {
             atlas_glyphs,
             text_placement,
             text_placement_uniform,
+            glyph_color_write,
+            glyph_color_cpu,
+            glyph_color_gpu,
         }
     }
 }
@@ -193,7 +203,6 @@ impl RenderGroupBindGroup {
         gfx_surface: &GfxSurface,
         layout: &wgpu::BindGroupLayout,
         text_placement_uniform: &Uniform<TextPlacement>,
-        color_uniform: &Uniform<Color>,
     ) -> Self {
         Self {
             bind_group: gfx_surface
@@ -205,10 +214,6 @@ impl RenderGroupBindGroup {
                         wgpu::BindGroupEntry {
                             binding: 0,
                             resource: text_placement_uniform.buffer.as_entire_binding(),
-                        },
-                        wgpu::BindGroupEntry {
-                            binding: 1,
-                            resource: color_uniform.buffer.as_entire_binding(),
                         },
                     ],
                 }),
@@ -259,17 +264,6 @@ pub(crate) struct DepthWrite {
 }
 
 impl DepthWrite {
-    pub(crate) fn new() -> Self {
-        Self { write: None }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct ColorWrite {
-    pub(crate) write: Option<Color>,
-}
-
-impl ColorWrite {
     pub(crate) fn new() -> Self {
         Self { write: None }
     }

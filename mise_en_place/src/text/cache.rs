@@ -16,7 +16,6 @@ pub(crate) struct Cache {
     pub(crate) bound: Option<TextBound>,
     pub(crate) position: Position,
     pub(crate) depth: Depth,
-    pub(crate) color: Color,
     pub(crate) visible_section: VisibleSection,
 }
 
@@ -24,7 +23,6 @@ impl Cache {
     pub(crate) fn new(
         position: Position,
         depth: Depth,
-        color: Color,
         visible_section: VisibleSection,
     ) -> Self {
         Self {
@@ -34,7 +32,6 @@ impl Cache {
             bound: None,
             position,
             depth,
-            color,
             visible_section,
         }
     }

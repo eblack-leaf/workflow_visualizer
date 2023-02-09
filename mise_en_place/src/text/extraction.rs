@@ -19,7 +19,6 @@ pub(crate) struct Extraction {
             Position,
             VisibleSection,
             Depth,
-            Color,
             AtlasBlock,
             RenderGroupUniqueGlyphs,
             TextScaleAlignment,

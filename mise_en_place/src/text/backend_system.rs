@@ -18,11 +18,7 @@ use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::{Index, Indexer};
 use crate::text::null_bit::NullBit;
-use crate::text::render_group::{
-    ColorWrite, CoordsWrite, DepthWrite, DrawSection, GlyphAreaWrite, GlyphPositionWrite,
-    KeyedGlyphIds, NullWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
-    RenderGroupTextBound, TextPlacement,
-};
+use crate::text::render_group::{CoordsWrite, DepthWrite, DrawSection, GlyphAreaWrite, GlyphColorWrite, GlyphPositionWrite, KeyedGlyphIds, NullWrite, PositionWrite, RenderGroup, RenderGroupBindGroup, RenderGroupTextBound, TextPlacement};
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScaleAlignment};
 use crate::uniform::Uniform;
@@ -30,6 +26,7 @@ use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
 use crate::{Area, Color, Position, ScaledSection, Section};
+use crate::text::text::TextColorAdjustments;
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -52,7 +49,6 @@ pub(crate) fn create_render_groups(
             position,
             visible_section,
             depth,
-            color,
             atlas_block,
             unique_glyphs,
             text_scale_alignment,
@@ -62,12 +58,10 @@ pub(crate) fn create_render_groups(
         let position = position.to_scaled(scale_factor.factor);
         let text_placement = TextPlacement::new(position, *depth);
         let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
-        let color_uniform = Uniform::new(&gfx_surface.device, *color);
         let render_group_bind_group = RenderGroupBindGroup::new(
             &gfx_surface,
             &renderer.render_group_bind_group_layout,
             &text_placement_uniform,
-            &color_uniform,
         );
         let indexer = Indexer::<Key>::new(max.0);
         let atlas_dimension = AtlasDimension::from_unique_glyphs(*unique_glyphs);
@@ -96,9 +90,11 @@ pub(crate) fn create_render_groups(
         let glyph_area_write = GlyphAreaWrite::new();
         let position_write = PositionWrite::new();
         let depth_write = DepthWrite::new();
-        let color_write = ColorWrite::new();
         let keyed_glyph_ids = KeyedGlyphIds::new();
         let draw_section = DrawSection::new();
+        let glyph_color_write = GlyphColorWrite::new();
+        let glyph_color_cpu = CpuBuffer::<Color>::new(max.0);
+        let glyph_color_gpu = GpuBuffer::<Color>::new(&gfx_surface, max.0, "glyph color buffer");
         let render_group_entity = renderer
             .container
             .spawn(RenderGroup::new(
@@ -106,8 +102,6 @@ pub(crate) fn create_render_groups(
                 position,
                 *visible_section,
                 *depth,
-                *color,
-                color_uniform,
                 *atlas_block,
                 *unique_glyphs,
                 *text_scale_alignment,
@@ -130,7 +124,6 @@ pub(crate) fn create_render_groups(
                 glyph_area_write,
                 position_write,
                 depth_write,
-                color_write,
                 keyed_glyph_ids,
                 draw_section,
                 atlas_texture_dimensions,
@@ -142,6 +135,9 @@ pub(crate) fn create_render_groups(
                 atlas_glyphs,
                 text_placement,
                 text_placement_uniform,
+                glyph_color_write,
+                glyph_color_cpu,
+                glyph_color_gpu
             ))
             .id();
         let old = renderer.render_groups.insert(*entity, render_group_entity);
@@ -185,9 +181,9 @@ pub(crate) fn render_group_differences(
             &mut draw_section_resize_needed,
         );
         queue_depth(&mut renderer, difference, render_group);
-        queue_color(&mut renderer, difference, render_group);
         queue_remove(&mut renderer, difference, render_group);
         queue_add(&mut renderer, difference, render_group);
+        queue_glyph_color(&mut renderer, difference, render_group);
         grow_attributes(&mut renderer, &gfx_surface, render_group);
         update_glyph_positions(&mut renderer, difference, render_group);
         resolve_glyphs(&mut renderer, difference, render_group);
@@ -201,11 +197,22 @@ pub(crate) fn render_group_differences(
         write_null(&mut renderer, &gfx_surface, render_group);
         write_coords(&mut renderer, &gfx_surface, render_group);
         write_text_placement(&mut renderer, &gfx_surface, render_group);
-        write_color(&mut renderer, &gfx_surface, render_group);
+        write_glyph_color(&mut renderer, &gfx_surface, render_group);
         write_atlas(&mut renderer, &gfx_surface, render_group);
         if draw_section_resize_needed {
             resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
         }
+    }
+}
+
+fn queue_glyph_color(renderer: &mut TextRenderer, difference: &Difference, render_group: Entity) {
+    for (change, color) in difference.glyph_color_change.iter() {
+        let index = renderer
+            .container
+            .get::<Indexer<Key>>(render_group)
+            .unwrap()
+            .get_index(*change).unwrap();
+        renderer.container.get_mut::<GlyphColorWrite>(render_group).unwrap().write.insert(index, *color);
     }
 }
 
@@ -342,17 +349,6 @@ fn queue_depth(renderer: &mut TextRenderer, difference: &Difference, render_grou
             .unwrap()
             .write
             .replace(depth);
-    }
-}
-
-fn queue_color(renderer: &mut TextRenderer, difference: &Difference, render_group: Entity) {
-    if let Some(color) = difference.color {
-        renderer
-            .container
-            .get_mut::<ColorWrite>(render_group)
-            .unwrap()
-            .write
-            .replace(color);
     }
 }
 
@@ -514,6 +510,31 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
                 &renderer
                     .container
                     .get::<CpuBuffer<Coords>>(render_group)
+                    .unwrap()
+                    .buffer,
+            ),
+        );
+        renderer
+            .container
+            .get_mut::<CpuBuffer<Color>>(render_group)
+            .unwrap()
+            .buffer
+            .resize(max as usize, Color::default());
+        *renderer
+            .container
+            .get_mut::<GpuBuffer<Color>>(render_group)
+            .unwrap() = GpuBuffer::<Color>::new(&gfx_surface, max, "color buffer");
+        gfx_surface.queue.write_buffer(
+            &renderer
+                .container
+                .get::<GpuBuffer<Color>>(render_group)
+                .unwrap()
+                .buffer,
+            0,
+            bytemuck::cast_slice(
+                &renderer
+                    .container
+                    .get::<CpuBuffer<Color>>(render_group)
                     .unwrap()
                     .buffer,
             ),
@@ -1011,7 +1032,34 @@ fn write_coords(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gr
         );
     }
 }
-
+fn write_glyph_color(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
+    let colors = renderer
+        .container
+        .get_mut::<GlyphColorWrite>(render_group)
+        .unwrap()
+        .write
+        .drain()
+        .collect::<Vec<(Index, Color)>>();
+    for (index, color) in colors {
+        *renderer
+            .container
+            .get_mut::<CpuBuffer<Color>>(render_group)
+            .unwrap()
+            .buffer
+            .get_mut(index.value as usize)
+            .unwrap() = color;
+        let offset = offset::<Color>(&index);
+        gfx_surface.queue.write_buffer(
+            &renderer
+                .container
+                .get::<GpuBuffer<Color>>(render_group)
+                .unwrap()
+                .buffer,
+            offset,
+            bytemuck::cast_slice(&[color]),
+        );
+    }
+}
 fn write_text_placement(
     renderer: &mut TextRenderer,
     gfx_surface: &GfxSurface,
@@ -1065,22 +1113,6 @@ fn write_text_placement(
             .get_mut::<Uniform<TextPlacement>>(render_group)
             .unwrap()
             .update(&gfx_surface.queue, text_placement);
-    }
-}
-
-fn write_color(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
-    if let Some(color) = renderer
-        .container
-        .get_mut::<ColorWrite>(render_group)
-        .unwrap()
-        .write
-        .take()
-    {
-        renderer
-            .container
-            .get_mut::<Uniform<Color>>(render_group)
-            .unwrap()
-            .update(&gfx_surface.queue, color);
     }
 }
 

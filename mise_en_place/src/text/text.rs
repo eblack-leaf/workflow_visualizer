@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Bundle, Component};
 
 use crate::coord::{Depth, Position, Section};
@@ -7,6 +8,7 @@ use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
 use crate::{Color, PositionAdjust};
+use crate::text::glyph::Key;
 
 #[derive(Component)]
 pub struct Text {
@@ -20,7 +22,27 @@ impl Text {
         }
     }
 }
-
+#[derive(Component)]
+pub struct TextColorAdjustments {
+    pub(crate) keyed_adjustments: HashMap<Key, Color>,
+    pub(crate) add_queue: HashMap<Key, Color>,
+    pub(crate) remove_queue: HashSet<Key>,
+}
+impl TextColorAdjustments {
+    pub fn new() -> Self {
+        Self {
+            keyed_adjustments: HashMap::new(),
+            add_queue: HashMap::new(),
+            remove_queue: HashSet::new(),
+        }
+    }
+    pub fn add(&mut self, offset: u32, color: Color) {
+        self.add_queue.insert(Key::new(offset), color);
+    }
+    pub fn remove(&mut self, offset: u32) {
+        self.remove_queue.insert(Key::new(offset));
+    }
+}
 #[derive(Bundle)]
 pub struct TextBundle {
     pub text: Text,
@@ -32,6 +54,7 @@ pub struct TextBundle {
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
+    pub(crate) color_adjustments: TextColorAdjustments,
 }
 
 impl TextBundle {
@@ -56,10 +79,10 @@ impl TextBundle {
             cache: Cache::new(
                 position,
                 depth,
-                color,
                 VisibleSection::new(Section::default()),
             ),
             difference: Difference::new(),
+            color_adjustments: TextColorAdjustments::new(),
         }
     }
 }

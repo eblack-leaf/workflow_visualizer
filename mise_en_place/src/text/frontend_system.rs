@@ -16,7 +16,7 @@ use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
-use crate::text::text::{Text, TextOffset, TextOffsetAdjust};
+use crate::text::text::{TextColorAdjustments, Text, TextOffset, TextOffsetAdjust};
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
@@ -110,7 +110,6 @@ pub(crate) fn manage_render_groups(
             &VisibleSection,
             Option<&TextBound>,
             &Depth,
-            &Color,
             &mut Cache,
             &mut Difference,
             &Visibility,
@@ -130,19 +129,17 @@ pub(crate) fn manage_render_groups(
         visible_section,
         maybe_bound,
         depth,
-        color,
         mut cache,
         mut difference,
         visibility,
-        text_scale_alignment,
+        text_scale_alignment
     ) in text.iter_mut()
     {
         if visibility.visible() {
             *difference = Difference::new();
-            *cache = Cache::new(*position, *depth, *color, *visible_section);
+            *cache = Cache::new(*position, *depth, *visible_section);
             difference.position.replace(*position);
             difference.depth.replace(*depth);
-            difference.color.replace(*color);
             if let Some(bounds) = maybe_bound {
                 cache.bound.replace(*bounds);
                 difference
@@ -158,7 +155,6 @@ pub(crate) fn manage_render_groups(
                     *position,
                     *visible_section,
                     *depth,
-                    *color,
                     AtlasBlock::new(
                         font.fonts
                             .get(text_scale_alignment)
@@ -177,7 +173,20 @@ pub(crate) fn manage_render_groups(
         extraction.removed_render_groups.insert(entity);
     }
 }
-
+pub(crate) fn color_adjustments_diff(mut text: Query<(&mut TextColorAdjustments, &mut Difference, &Color), Changed<TextColorAdjustments>>) {
+    for (mut adjustments, mut difference, color) in text.iter_mut() {
+        let removals = adjustments.remove_queue.drain().collect::<Vec<Key>>();
+        for remove in removals {
+            adjustments.keyed_adjustments.remove(&remove);
+            difference.glyph_color_change.insert(remove, *color);
+        }
+        let adds = adjustments.add_queue.drain().collect::<Vec<(Key, Color)>>();
+        for (key, add_color) in adds {
+            adjustments.keyed_adjustments.insert(key, add_color);
+            difference.glyph_color_change.insert(key, add_color);
+        }
+    }
+}
 pub(crate) fn letter_diff(
     mut text: Query<
         (
@@ -187,6 +196,8 @@ pub(crate) fn letter_diff(
             &mut Difference,
             &TextOffset,
             &Visibility,
+            &mut TextColorAdjustments,
+            &Color,
         ),
         Or<(
             Changed<Placer>,
@@ -196,7 +207,7 @@ pub(crate) fn letter_diff(
         )>,
     >,
 ) {
-    for (scale, placer, mut cache, mut difference, text_offset, visibility) in text.iter_mut() {
+    for (scale, placer, mut cache, mut difference, text_offset, visibility, mut color_adjustments, color) in text.iter_mut() {
         if visibility.visible() {
             let mut retained_keys = HashSet::new();
             let old_keys = cache.keys.clone();
@@ -230,6 +241,9 @@ pub(crate) fn letter_diff(
                         cache.glyph_ids.insert(key, glyph_id);
                     }
                 } else {
+                    if !color_adjustments.keyed_adjustments.contains_key(&key) {
+                        difference.glyph_color_change.insert(key, *color);
+                    }
                     difference.add.insert(key, glyph_position);
                     difference.glyph_add.insert(key, glyph);
                     cache.add(key, glyph_id, glyph_position);
@@ -242,6 +256,7 @@ pub(crate) fn letter_diff(
                     .collect::<HashSet<Key>>(),
             );
             for key in keys_to_remove {
+                color_adjustments.keyed_adjustments.remove(&key);
                 difference.glyph_remove.insert(cache.get_glyph_id(key));
                 difference.remove.insert(key);
                 cache.remove(key);
@@ -315,12 +330,13 @@ pub(crate) fn position_diff(
 }
 
 pub(crate) fn color_diff(
-    mut text: Query<(&Color, &mut Cache, &mut Difference), (Changed<Color>, With<Text>)>,
+    mut text: Query<(&Color, &mut Cache, &mut Difference, &TextColorAdjustments), (Changed<Color>, With<Text>)>,
 ) {
-    for (color, mut cache, mut difference) in text.iter_mut() {
-        if *color != cache.color {
-            difference.color.replace(*color);
-            cache.color = *color;
+    for (color, mut cache, mut difference, color_adjustments) in text.iter_mut() {
+        for key in cache.keys.iter() {
+            if !color_adjustments.keyed_adjustments.contains_key(key) {
+                difference.glyph_color_change.insert(*key, *color);
+            }
         }
     }
 }

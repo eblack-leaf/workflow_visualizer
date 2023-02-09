@@ -20,7 +20,7 @@ use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::text::{
-    Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextRenderer, TextScaleAlignment,
+    Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextRenderer, TextScaleAlignment, TextColorAdjustments
 };
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;

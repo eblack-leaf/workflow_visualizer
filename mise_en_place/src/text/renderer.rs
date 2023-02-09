@@ -14,12 +14,7 @@ use crate::text::backend_system::{
 };
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::frontend_system::{
-    adjust_text_offset, bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment,
-    calc_text_offset_from_guide, color_diff, depth_diff, discard_out_of_bounds,
-    intercept_area_adjust, letter_diff, manage_render_groups, place, position_diff,
-    pull_differences, setup as frontend_setup, visible_area_diff,
-};
+use crate::text::frontend_system::{adjust_text_offset, bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment, calc_text_offset_from_guide, color_diff, depth_diff, discard_out_of_bounds, color_adjustments_diff, intercept_area_adjust, letter_diff, manage_render_groups, place, position_diff, pull_differences, setup as frontend_setup, visible_area_diff};
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::Indexer;
@@ -30,10 +25,7 @@ use crate::text::scale::AlignedFonts;
 use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
-use crate::{
-    Area, Attach, BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, Job,
-    Position, Stove,
-};
+use crate::{Area, Attach, BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, Job, Position, Stove, Color};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -97,16 +89,6 @@ pub(crate) fn setup(
             wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            },
-            wgpu::BindGroupLayoutEntry {
-                binding: 1,
-                visibility: wgpu::ShaderStages::FRAGMENT,
                 ty: wgpu::BindingType::Buffer {
                     ty: wgpu::BufferBindingType::Uniform,
                     has_dynamic_offset: false,
@@ -179,6 +161,11 @@ pub(crate) fn setup(
                 array_stride: std::mem::size_of::<Area>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &wgpu::vertex_attr_array![4 => Float32x2],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![5 => Float32x4],
             },
         ],
     };
@@ -286,14 +273,14 @@ impl Attach for TextRenderer {
             TextStages::TextFrontEnd,
             manage_render_groups.before("out of bounds"),
         );
+        stove.frontend.main.add_system_to_stage(
+            TextStages::TextFrontEnd,
+            color_adjustments_diff.before("letter diff")
+        );
         stove
             .frontend
             .main
             .add_system_to_stage(TextStages::TextFrontEnd, bounds_diff);
-        stove
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, color_diff);
         stove
             .frontend
             .main
@@ -313,7 +300,11 @@ impl Attach for TextRenderer {
         stove
             .frontend
             .main
-            .add_system_to_stage(TextStages::TextFrontEnd, letter_diff.after("out of bounds"));
+            .add_system_to_stage(TextStages::TextFrontEnd, letter_diff.label("letter diff").after("out of bounds"));
+        stove
+            .frontend
+            .main
+            .add_system_to_stage(TextStages::TextFrontEnd, color_diff.after("letter diff"));
         stove
             .frontend
             .main
@@ -385,13 +376,6 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(1, glyph_positions.buffer.slice(..));
-                let glyph_areas = self
-                    .container
-                    .get::<GpuBuffer<Area>>(*render_group)
-                    .expect("no glyph area buffer");
-                render_pass_handle
-                    .0
-                    .set_vertex_buffer(4, glyph_areas.buffer.slice(..));
                 let null_bits = self
                     .container
                     .get::<GpuBuffer<NullBit>>(*render_group)
@@ -406,10 +390,22 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(3, coords.buffer.slice(..));
+                let glyph_areas = self
+                    .container
+                    .get::<GpuBuffer<Area>>(*render_group)
+                    .expect("no glyph area buffer");
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(4, glyph_areas.buffer.slice(..));
+                let colors = self
+                    .container
+                    .get::<GpuBuffer<Color>>(*render_group)
+                    .expect("no color buffer");
+                render_pass_handle.0.set_vertex_buffer(5, colors.buffer.slice(..));
                 let render_group_bind_group = self
                     .container
                     .get::<RenderGroupBindGroup>(*render_group)
-                    .expect("");
+                    .expect("no render group bind group");
                 render_pass_handle
                     .0
                     .set_bind_group(2, &render_group_bind_group.bind_group, &[]);

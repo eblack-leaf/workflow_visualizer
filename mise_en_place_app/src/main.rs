@@ -1,11 +1,7 @@
 use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{
-    Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove,
-    Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextRenderer, TextScaleAlignment,
-    Visibility,
-};
+use mise_en_place::{Color, Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove, Text, TextBoundGuide, TextBundle, TextColorAdjustments, TextOffsetAdjustGuide, TextRenderer, TextScaleAlignment, Visibility};
 
 #[derive(Resource)]
 struct Counter {
@@ -13,14 +9,17 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text, &Visibility)>,
+    mut text: Query<(Entity, &mut Text, &Visibility, &mut TextColorAdjustments)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
 ) {
     counter.count += 1;
-    for (entity, mut ent_text, visibility) in text.iter_mut() {
+    for (entity, mut ent_text, visibility, mut adjustments) in text.iter_mut() {
         ent_text.string.push('!');
+        if counter.count % 4 == 0 {
+            adjustments.add((ent_text.string.len() - 1) as u32, Color::rgb(0.0, 0.9, 0.9));
+        }
     }
 }
 

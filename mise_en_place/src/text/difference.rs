@@ -26,6 +26,7 @@ pub(crate) struct Difference {
     pub(crate) add: HashMap<Key, Position>,
     pub(crate) update: HashMap<Key, Position>,
     pub(crate) remove: HashSet<Key>,
+    pub(crate) glyph_color_change: HashMap<Key, Color>,
 }
 
 impl Difference {
@@ -41,6 +42,7 @@ impl Difference {
             add: HashMap::new(),
             update: HashMap::new(),
             remove: HashSet::new(),
+            glyph_color_change: HashMap::new(),
         }
     }
     pub(crate) fn reset(&mut self) {
