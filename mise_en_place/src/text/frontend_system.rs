@@ -16,7 +16,7 @@ use crate::text::glyph::{Glyph, Key};
 use crate::text::place::Placer;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
-use crate::text::text::{TextColorAdjustments, Text, TextOffset, TextOffsetAdjust};
+use crate::text::text::{Text, TextOffset, TextOffsetAdjust};
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
@@ -51,6 +51,7 @@ pub(crate) fn calc_scale_from_alignment(
         ));
     }
 }
+
 pub(crate) fn calc_text_offset_from_guide(
     text: Query<(Entity, &TextOffsetAdjustGuide, &TextScaleAlignment), ()>,
     mut cmd: Commands,
@@ -70,6 +71,7 @@ pub(crate) fn calc_text_offset_from_guide(
         cmd.entity(entity).remove::<TextOffsetAdjustGuide>();
     }
 }
+
 pub(crate) fn adjust_text_offset(
     mut text: Query<(Entity, &TextOffsetAdjust, &mut TextOffset), ()>,
     mut cmd: Commands,
@@ -79,6 +81,7 @@ pub(crate) fn adjust_text_offset(
         cmd.entity(entity).remove::<TextOffsetAdjust>();
     }
 }
+
 pub(crate) fn calc_bound_from_guide(
     text: Query<
         (Entity, &TextBoundGuide, &TextScaleAlignment),
@@ -132,7 +135,7 @@ pub(crate) fn manage_render_groups(
         mut cache,
         mut difference,
         visibility,
-        text_scale_alignment
+        text_scale_alignment,
     ) in text.iter_mut()
     {
         if visibility.visible() {
@@ -146,7 +149,7 @@ pub(crate) fn manage_render_groups(
                     .bounds
                     .replace(TextBoundDifference::Changed(*bounds));
             }
-            let max = RenderGroupMax(text.string.len() as u32);
+            let max = RenderGroupMax(text.length());
             let unique_glyphs = RenderGroupUniqueGlyphs::from_text(text);
             extraction.added_render_groups.insert(
                 entity,
@@ -173,20 +176,7 @@ pub(crate) fn manage_render_groups(
         extraction.removed_render_groups.insert(entity);
     }
 }
-pub(crate) fn color_adjustments_diff(mut text: Query<(&mut TextColorAdjustments, &mut Difference, &Color), Changed<TextColorAdjustments>>) {
-    for (mut adjustments, mut difference, color) in text.iter_mut() {
-        let removals = adjustments.remove_queue.drain().collect::<Vec<Key>>();
-        for remove in removals {
-            adjustments.keyed_adjustments.remove(&remove);
-            difference.glyph_color_change.insert(remove, *color);
-        }
-        let adds = adjustments.add_queue.drain().collect::<Vec<(Key, Color)>>();
-        for (key, add_color) in adds {
-            adjustments.keyed_adjustments.insert(key, add_color);
-            difference.glyph_color_change.insert(key, add_color);
-        }
-    }
-}
+
 pub(crate) fn letter_diff(
     mut text: Query<
         (
@@ -196,8 +186,6 @@ pub(crate) fn letter_diff(
             &mut Difference,
             &TextOffset,
             &Visibility,
-            &mut TextColorAdjustments,
-            &Color,
         ),
         Or<(
             Changed<Placer>,
@@ -207,13 +195,15 @@ pub(crate) fn letter_diff(
         )>,
     >,
 ) {
-    for (scale, placer, mut cache, mut difference, text_offset, visibility, mut color_adjustments, color) in text.iter_mut() {
+    for (scale, placer, mut cache, mut difference, text_offset, visibility) in text.iter_mut() {
         if visibility.visible() {
             let mut retained_keys = HashSet::new();
             let old_keys = cache.keys.clone();
             let mut keys_to_remove = HashSet::new();
+            let mut key_offset = 0u32;
             for placed_glyph in placer.filtered_placement().iter() {
-                let key = Key::new(placed_glyph.byte_offset as u32);
+                let key = Key::new(key_offset);
+                key_offset += 1;
                 if placed_glyph.parent.is_ascii_control()
                     || placed_glyph.parent.is_ascii_whitespace()
                 {
@@ -240,10 +230,17 @@ pub(crate) fn letter_diff(
                         difference.glyph_add.insert(key, glyph);
                         cache.glyph_ids.insert(key, glyph_id);
                     }
-                } else {
-                    if !color_adjustments.keyed_adjustments.contains_key(&key) {
-                        difference.glyph_color_change.insert(key, *color);
+                    if cache.glyph_color_different(key, placed_glyph.user_data.color) {
+                        difference
+                            .glyph_color_change
+                            .insert(key, placed_glyph.user_data.color);
+                        cache.glyph_colors.insert(key, placed_glyph.user_data.color);
                     }
+                } else {
+                    difference
+                        .glyph_color_change
+                        .insert(key, placed_glyph.user_data.color);
+                    cache.glyph_colors.insert(key, placed_glyph.user_data.color);
                     difference.add.insert(key, glyph_position);
                     difference.glyph_add.insert(key, glyph);
                     cache.add(key, glyph_id, glyph_position);
@@ -256,7 +253,6 @@ pub(crate) fn letter_diff(
                     .collect::<HashSet<Key>>(),
             );
             for key in keys_to_remove {
-                color_adjustments.keyed_adjustments.remove(&key);
                 difference.glyph_remove.insert(cache.get_glyph_id(key));
                 difference.remove.insert(key);
                 cache.remove(key);
@@ -325,18 +321,6 @@ pub(crate) fn position_diff(
         if *position != cache.position {
             difference.position.replace(*position);
             cache.position = *position;
-        }
-    }
-}
-
-pub(crate) fn color_diff(
-    mut text: Query<(&Color, &mut Cache, &mut Difference, &TextColorAdjustments), (Changed<Color>, With<Text>)>,
-) {
-    for (color, mut cache, mut difference, color_adjustments) in text.iter_mut() {
-        for key in cache.keys.iter() {
-            if !color_adjustments.keyed_adjustments.contains_key(key) {
-                difference.glyph_color_change.insert(*key, *color);
-            }
         }
     }
 }

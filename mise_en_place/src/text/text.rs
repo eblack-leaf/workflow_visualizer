@@ -1,96 +1,88 @@
 use std::collections::{HashMap, HashSet};
+
 use bevy_ecs::prelude::{Bundle, Component};
 
 use crate::coord::{Depth, Position, Section};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
+use crate::text::glyph::Key;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
 use crate::{Color, PositionAdjust};
-use crate::text::glyph::Key;
+
+pub struct TextPartition {
+    pub characters: String,
+    pub metadata: PartitionMetadata,
+}
+
+impl TextPartition {
+    pub fn new<S: Into<String>>(characters: S, metadata: PartitionMetadata) -> Self {
+        Self {
+            characters: characters.into(),
+            metadata,
+        }
+    }
+}
 
 #[derive(Component)]
 pub struct Text {
-    pub string: String,
+    pub partitions: Vec<TextPartition>,
 }
 
 impl Text {
-    pub fn new<T: Into<String>>(string: T) -> Self {
-        Self {
-            string: string.into(),
+    pub fn new(partitions: Vec<TextPartition>) -> Self {
+        Self { partitions }
+    }
+    pub fn length(&self) -> u32 {
+        let mut len = 0;
+        for part in self.partitions.iter() {
+            len += part.characters.len();
         }
+        len as u32
     }
 }
-#[derive(Component)]
-pub struct TextColorAdjustments {
-    pub(crate) keyed_adjustments: HashMap<Key, Color>,
-    pub(crate) add_queue: HashMap<Key, Color>,
-    pub(crate) remove_queue: HashSet<Key>,
-}
-impl TextColorAdjustments {
-    pub fn new() -> Self {
-        Self {
-            keyed_adjustments: HashMap::new(),
-            add_queue: HashMap::new(),
-            remove_queue: HashSet::new(),
-        }
-    }
-    pub fn add(&mut self, offset: u32, color: Color) {
-        self.add_queue.insert(Key::new(offset), color);
-    }
-    pub fn remove(&mut self, offset: u32) {
-        self.remove_queue.insert(Key::new(offset));
-    }
-}
+
 #[derive(Bundle)]
 pub struct TextBundle {
     pub text: Text,
     pub position: Position,
     pub depth: Depth,
-    pub color: Color,
     pub scale_alignment: TextScaleAlignment,
     pub(crate) offset: TextOffset,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
-    pub(crate) color_adjustments: TextColorAdjustments,
 }
 
 impl TextBundle {
-    pub fn new<T: Into<Text>, P: Into<Position>, D: Into<Depth>, C: Into<Color>>(
+    pub fn new<T: Into<Text>, P: Into<Position>, D: Into<Depth>>(
         text: T,
         position: P,
         depth: D,
-        color: C,
         scale_alignment: TextScaleAlignment,
     ) -> Self {
         let position = position.into();
         let depth = depth.into();
-        let color = color.into();
         Self {
             text: text.into(),
             position,
             depth,
-            color,
             scale_alignment,
             offset: TextOffset::default(),
             placer: Placer::new(),
-            cache: Cache::new(
-                position,
-                depth,
-                VisibleSection::new(Section::default()),
-            ),
+            cache: Cache::new(position, depth, VisibleSection::new(Section::default())),
             difference: Difference::new(),
-            color_adjustments: TextColorAdjustments::new(),
         }
     }
 }
+
 #[derive(Component, PartialEq, Copy, Clone, Default)]
 pub struct TextOffsetAdjustGuide {
     pub characters_to_offset_x: i32,
     pub lines_to_offset_y: i32,
 }
+
 impl TextOffsetAdjustGuide {
     pub fn new(characters_to_offset_x: i32, lines_to_offset_y: i32) -> Self {
         Self {
@@ -99,10 +91,12 @@ impl TextOffsetAdjustGuide {
         }
     }
 }
+
 #[derive(Component, PartialEq, Copy, Clone, Default)]
 pub(crate) struct TextOffsetAdjust {
     pub position_adjust: PositionAdjust,
 }
+
 impl TextOffsetAdjust {
     pub(crate) fn new<PA: Into<PositionAdjust>>(adjust: PA) -> Self {
         Self {
@@ -110,6 +104,7 @@ impl TextOffsetAdjust {
         }
     }
 }
+
 #[derive(Component, PartialEq, Copy, Clone, Default)]
 pub(crate) struct TextOffset {
     pub(crate) position: Position,
@@ -119,6 +114,21 @@ impl TextOffset {
     pub(crate) fn new<P: Into<Position>>(position: P) -> Self {
         Self {
             position: position.into(),
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct PartitionMetadata {
+    pub color: Color,
+    pub mods: u32, //bit_flag for italic/bold/...
+}
+
+impl PartitionMetadata {
+    pub fn new<C: Into<Color>>(color: C, mods: u32) -> Self {
+        Self {
+            color: color.into(),
+            mods,
         }
     }
 }

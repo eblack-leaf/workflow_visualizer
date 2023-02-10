@@ -13,6 +13,7 @@ pub(crate) struct Cache {
     pub(crate) keys: HashSet<Key>,
     pub(crate) glyph_positions: HashMap<Key, Position>,
     pub(crate) glyph_ids: HashMap<Key, GlyphId>,
+    pub(crate) glyph_colors: HashMap<Key, Color>,
     pub(crate) bound: Option<TextBound>,
     pub(crate) position: Position,
     pub(crate) depth: Depth,
@@ -20,15 +21,12 @@ pub(crate) struct Cache {
 }
 
 impl Cache {
-    pub(crate) fn new(
-        position: Position,
-        depth: Depth,
-        visible_section: VisibleSection,
-    ) -> Self {
+    pub(crate) fn new(position: Position, depth: Depth, visible_section: VisibleSection) -> Self {
         Self {
             keys: HashSet::new(),
             glyph_positions: HashMap::new(),
             glyph_ids: HashMap::new(),
+            glyph_colors: HashMap::new(),
             bound: None,
             position,
             depth,
@@ -60,5 +58,8 @@ impl Cache {
     }
     pub(crate) fn glyph_id_different(&self, key: Key, glyph_id: GlyphId) -> bool {
         *self.glyph_ids.get(&key).expect("no glyph id for key") != glyph_id
+    }
+    pub(crate) fn glyph_color_different(&self, key: Key, glyph_color: Color) -> bool {
+        *self.glyph_colors.get(&key).expect("no glyph color for key") != glyph_color
     }
 }

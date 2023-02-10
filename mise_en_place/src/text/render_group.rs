@@ -15,7 +15,7 @@ use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::{Index, Indexer};
 use crate::text::null_bit::NullBit;
 use crate::text::scale::TextScaleAlignment;
-use crate::text::text::{TextColorAdjustments, Text};
+use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
 use crate::{Area, Color, Depth, Position, ScaledSection, Section};
@@ -30,16 +30,18 @@ pub(crate) struct RenderGroupUniqueGlyphs {
 
 impl RenderGroupUniqueGlyphs {
     pub(crate) fn from_text(text: &Text) -> Self {
-        let length = text.string.len() as u32;
+        let length = text.length();
         Self {
             unique_glyphs: length.min(1024),
         }
     }
 }
+
 #[derive(Component)]
 pub(crate) struct GlyphColorWrite {
     pub(crate) write: HashMap<Index, Color>,
 }
+
 impl GlyphColorWrite {
     pub(crate) fn new() -> Self {
         Self {
@@ -47,6 +49,7 @@ impl GlyphColorWrite {
         }
     }
 }
+
 #[derive(Bundle)]
 pub(crate) struct RenderGroup {
     pub(crate) max: RenderGroupMax,
@@ -210,12 +213,10 @@ impl RenderGroupBindGroup {
                 .create_bind_group(&wgpu::BindGroupDescriptor {
                     label: Some("render group bind group"),
                     layout,
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: text_placement_uniform.buffer.as_entire_binding(),
-                        },
-                    ],
+                    entries: &[wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: text_placement_uniform.buffer.as_entire_binding(),
+                    }],
                 }),
         }
     }

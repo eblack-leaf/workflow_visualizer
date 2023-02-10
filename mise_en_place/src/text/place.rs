@@ -8,13 +8,14 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::Key;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
-use crate::text::text::Text;
+use crate::text::text::{PartitionMetadata, Text};
+use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Placer {
-    layout: fontdue::layout::Layout,
-    unfiltered_placement: Vec<GlyphPosition>,
-    filtered_placement: Vec<GlyphPosition>,
+    layout: fontdue::layout::Layout<PartitionMetadata>,
+    unfiltered_placement: Vec<GlyphPosition<PartitionMetadata>>,
+    filtered_placement: Vec<GlyphPosition<PartitionMetadata>>,
 }
 
 impl Placer {
@@ -41,17 +42,24 @@ impl Placer {
         } else {
             self.layout.reset(&LayoutSettings::default());
         }
-        self.layout.append(
-            font.font_slice(),
-            &TextStyle::new(text.string.as_str(), scale.px(), MonoSpacedFont::index()),
-        );
+        for part in text.partitions.iter() {
+            self.layout.append(
+                font.font_slice(),
+                &TextStyle::with_user_data(
+                    part.characters.as_str(),
+                    scale.px(),
+                    MonoSpacedFont::index(),
+                    part.metadata,
+                ),
+            );
+        }
         self.unfiltered_placement = self.layout.glyphs().clone();
         self.filtered_placement = self.unfiltered_placement.clone();
     }
-    pub(crate) fn unfiltered_placement(&self) -> &Vec<GlyphPosition> {
+    pub(crate) fn unfiltered_placement(&self) -> &Vec<GlyphPosition<PartitionMetadata>> {
         &self.unfiltered_placement
     }
-    pub(crate) fn filtered_placement(&self) -> &Vec<GlyphPosition> {
+    pub(crate) fn filtered_placement(&self) -> &Vec<GlyphPosition<PartitionMetadata>> {
         &self.filtered_placement
     }
     pub(crate) fn filter_placement(&mut self, mut filter_queue: HashSet<Key>) {

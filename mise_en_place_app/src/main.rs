@@ -1,7 +1,12 @@
 use std::ops::Add;
+
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{Color, Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PositionAdjust, Recipe, Stove, Text, TextBoundGuide, TextBundle, TextColorAdjustments, TextOffsetAdjustGuide, TextRenderer, TextScaleAlignment, Visibility};
+use mise_en_place::{
+    Color, Cook, DeliveryTicket, DepthAdjust, Exit, FrontEndStages, Idle, PartitionMetadata,
+    PositionAdjust, Recipe, Stove, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide,
+    TextPartition, TextRenderer, TextScaleAlignment, Visibility,
+};
 
 #[derive(Resource)]
 struct Counter {
@@ -9,21 +14,27 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text, &Visibility, &mut TextColorAdjustments)>,
+    mut text: Query<(Entity, &mut Text, &Visibility)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
 ) {
     counter.count += 1;
-    for (entity, mut ent_text, visibility, mut adjustments) in text.iter_mut() {
-        ent_text.string.push('!');
-        if counter.count % 4 == 0 {
-            adjustments.add((ent_text.string.len() - 1) as u32, Color::rgb(0.0, 0.9, 0.9));
+    for (entity, mut ent_text, visibility) in text.iter_mut() {
+        if counter.count == 100 {
+            ent_text.partitions.push(TextPartition::new(
+                " ok then",
+                PartitionMetadata::new((0.5, 1.0, 0.5), 0),
+            ));
+        }
+        if counter.count == 200 {
+            ent_text.partitions.pop();
         }
     }
 }
 
 struct Meal;
+
 impl Cook for Meal {
     fn prepare(recipe: &mut Recipe) {
         recipe.container.insert_resource(Counter { count: 0 });
@@ -33,10 +44,12 @@ impl Cook for Meal {
         recipe
             .container
             .spawn(TextBundle::new(
-                Text::new(""),
+                Text::new(vec![TextPartition::new(
+                    "hello",
+                    PartitionMetadata::new((1.0, 1.0, 1.0), 0),
+                )]),
                 (0u32, 0u32),
                 10u32,
-                (1.0, 1.0, 1.0),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(120, 112));

@@ -14,7 +14,12 @@ use crate::text::backend_system::{
 };
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::frontend_system::{adjust_text_offset, bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment, calc_text_offset_from_guide, color_diff, depth_diff, discard_out_of_bounds, color_adjustments_diff, intercept_area_adjust, letter_diff, manage_render_groups, place, position_diff, pull_differences, setup as frontend_setup, visible_area_diff};
+use crate::text::frontend_system::{
+    adjust_text_offset, bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment,
+    calc_text_offset_from_guide, depth_diff, discard_out_of_bounds, intercept_area_adjust,
+    letter_diff, manage_render_groups, place, position_diff, pull_differences,
+    setup as frontend_setup, visible_area_diff,
+};
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::Indexer;
@@ -25,7 +30,10 @@ use crate::text::scale::AlignedFonts;
 use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
-use crate::{Area, Attach, BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, Job, Position, Stove, Color};
+use crate::{
+    Area, Attach, BackEndStartupStages, BackendStages, Color, FrontEndStages,
+    FrontEndStartupStages, Job, Position, Stove,
+};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -85,18 +93,16 @@ pub(crate) fn setup(
         .create_bind_group(&sampler_bind_group_descriptor);
     let render_group_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("rasterization bind group"),
-        entries: &[
-            wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
+        entries: &[wgpu::BindGroupLayoutEntry {
+            binding: 0,
+            visibility: wgpu::ShaderStages::VERTEX,
+            ty: wgpu::BindingType::Buffer {
+                ty: wgpu::BufferBindingType::Uniform,
+                has_dynamic_offset: false,
+                min_binding_size: None,
             },
-        ],
+            count: None,
+        }],
     };
     let render_group_bind_group_layout = gfx_surface
         .device
@@ -273,10 +279,6 @@ impl Attach for TextRenderer {
             TextStages::TextFrontEnd,
             manage_render_groups.before("out of bounds"),
         );
-        stove.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
-            color_adjustments_diff.before("letter diff")
-        );
         stove
             .frontend
             .main
@@ -297,14 +299,10 @@ impl Attach for TextRenderer {
             TextStages::TextFrontEnd,
             discard_out_of_bounds.label("out of bounds"),
         );
-        stove
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, letter_diff.label("letter diff").after("out of bounds"));
-        stove
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, color_diff.after("letter diff"));
+        stove.frontend.main.add_system_to_stage(
+            TextStages::TextFrontEnd,
+            letter_diff.label("letter diff").after("out of bounds"),
+        );
         stove
             .frontend
             .main
@@ -401,7 +399,9 @@ impl Render for TextRenderer {
                     .container
                     .get::<GpuBuffer<Color>>(*render_group)
                     .expect("no color buffer");
-                render_pass_handle.0.set_vertex_buffer(5, colors.buffer.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(5, colors.buffer.slice(..));
                 let render_group_bind_group = self
                     .container
                     .get::<RenderGroupBindGroup>(*render_group)
