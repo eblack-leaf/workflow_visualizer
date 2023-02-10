@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Events, Resource};
 
+use crate::{Attach, BackendStages, Engen, FrontEndStages};
 use crate::coord::ScaledArea;
-use crate::{Attach, BackendStages, FrontEndStages, Stove};
 
 #[derive(Resource, Clone, Copy)]
 pub(crate) struct ScaleFactor {
@@ -33,20 +33,20 @@ impl Resize {
 }
 
 impl Attach for Resize {
-    fn attach(stove: &mut Stove) {
-        stove
+    fn attach(engen: &mut Engen) {
+        engen
             .frontend
             .container
             .insert_resource(Events::<Resize>::default());
-        stove
+        engen
             .backend
             .container
             .insert_resource(Events::<Resize>::default());
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::First, Events::<Resize>::update_system);
-        stove
+        engen
             .backend
             .main
             .add_system_to_stage(BackendStages::Initialize, Events::<Resize>::update_system);

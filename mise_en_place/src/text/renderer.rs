@@ -4,6 +4,10 @@ use bevy_ecs::prelude::{
     Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage,
 };
 
+use crate::{
+    Area, Attach, BackendStages, BackEndStartupStages, Color, Engen,
+    FrontEndStages, FrontEndStartupStages, Job, Position,
+};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::job::Container;
@@ -27,13 +31,9 @@ use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
-use crate::{
-    Area, Attach, BackEndStartupStages, BackendStages, Color, FrontEndStages,
-    FrontEndStartupStages, Job, Position, Stove,
-};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -240,17 +240,17 @@ enum TextStages {
 }
 
 impl Attach for TextRenderer {
-    fn attach(stove: &mut Stove) {
-        stove
+    fn attach(engen: &mut Engen) {
+        engen
             .frontend
             .startup
             .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
-        stove.frontend.main.add_stage_before(
+        engen.frontend.main.add_stage_before(
             FrontEndStages::CoordAdjust,
             "area_intercept",
             SystemStage::single(intercept_area_adjust),
         );
-        stove.frontend.main.add_stage_before(
+        engen.frontend.main.add_stage_before(
             FrontEndStages::VisibilityPreparation,
             TextStages::PlacementPreparation,
             SystemStage::parallel()
@@ -258,74 +258,74 @@ impl Attach for TextRenderer {
                 .with_system(calc_scale_from_alignment)
                 .with_system(calc_text_offset_from_guide),
         );
-        stove.frontend.main.add_stage_after(
+        engen.frontend.main.add_stage_after(
             TextStages::PlacementPreparation,
             TextStages::Placement,
             SystemStage::parallel()
                 .with_system(place)
                 .with_system(adjust_text_offset),
         );
-        stove.frontend.main.add_stage_after(
+        engen.frontend.main.add_stage_after(
             TextStages::Placement,
             TextStages::CalcArea,
             SystemStage::single(calc_area),
         );
-        stove.frontend.main.add_stage_after(
+        engen.frontend.main.add_stage_after(
             FrontEndStages::ResolveVisibility,
             TextStages::TextFrontEnd,
             SystemStage::parallel(),
         );
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             TextStages::TextFrontEnd,
             manage_render_groups.before("out of bounds"),
         );
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(TextStages::TextFrontEnd, bounds_diff);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(TextStages::TextFrontEnd, depth_diff);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(TextStages::TextFrontEnd, position_diff);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(TextStages::TextFrontEnd, visible_area_diff);
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             TextStages::TextFrontEnd,
             discard_out_of_bounds.label("out of bounds"),
         );
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             TextStages::TextFrontEnd,
             letter_diff.label("letter diff").after("out of bounds"),
         );
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Last, pull_differences);
-        stove
+        engen
             .backend
             .startup
             .add_system_to_stage(BackEndStartupStages::Setup, setup);
-        stove.backend.main.add_system_to_stage(
+        engen.backend.main.add_system_to_stage(
             BackendStages::Prepare,
             create_render_groups.label(CreateRenderGroups),
         );
-        stove.backend.main.add_system_to_stage(
+        engen.backend.main.add_system_to_stage(
             BackendStages::Prepare,
             render_group_differences
                 .label(RenderGroupDiff)
                 .after(CreateRenderGroups),
         );
-        stove.backend.main.add_system_to_stage(
+        engen.backend.main.add_system_to_stage(
             BackendStages::Prepare,
             resize_receiver.after(RenderGroupDiff),
         );
-        stove
+        engen
             .backend
             .main
             .add_system_to_stage(BackendStages::Last, reset_extraction);
@@ -334,8 +334,8 @@ impl Attach for TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = frontend
             .container

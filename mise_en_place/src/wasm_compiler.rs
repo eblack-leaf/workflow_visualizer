@@ -1,12 +1,12 @@
 use std::path::Path;
 
-pub struct DeliveryTicket {
+pub struct WasmCompileDescriptor {
     pub package: String,
     pub package_options: String,
     pub destination: String,
 }
 
-impl DeliveryTicket {
+impl WasmCompileDescriptor {
     pub fn new<T: Into<String>>(package: T, package_options: T, destination: T) -> Self {
         Self {
             package: package.into(),
@@ -14,7 +14,7 @@ impl DeliveryTicket {
             destination: destination.into(),
         }
     }
-    pub(crate) fn order(&self) -> Result<(), bool> {
+    pub fn compile(&self) -> Result<(), bool> {
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let package = self.package.as_str();
         let profile = self.package_options.as_str();

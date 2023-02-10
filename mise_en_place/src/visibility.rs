@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
+use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, FrontEndStages, Job, Stove};
 
 #[derive(Component)]
 pub struct Visibility {
@@ -589,18 +589,18 @@ pub(crate) fn resize(
 }
 
 impl Attach for Visibility {
-    fn attach(stove: &mut Stove) {
-        stove
+    fn attach(engen: &mut Engen) {
+        engen
             .backend
             .container
             .insert_resource(ViewportOffsetUpdate::new());
-        stove.add_extraction::<VisibleBounds>();
-        let gfx_surface_configuration = stove
+        engen.add_extraction::<VisibleBounds>();
+        let gfx_surface_configuration = engen
             .backend
             .container
             .get_resource::<GfxSurfaceConfiguration>()
             .expect("no gfx surface config");
-        let scale_factor = stove
+        let scale_factor = engen
             .frontend
             .container
             .get_resource::<ScaleFactor>()
@@ -612,53 +612,53 @@ impl Attach for Visibility {
         )
             .into();
         let visible_section = ((0u32, 0u32), area.to_area(scale_factor)).into();
-        stove
+        engen
             .frontend
             .container
             .insert_resource(VisibleBounds::new(visible_section));
-        stove
+        engen
             .frontend
             .container
             .insert_resource(SpacialHasher::new(500f32, visible_section));
-        stove
+        engen
             .frontend
             .container
             .insert_resource(VisibleBoundsPositionAdjust::new());
-        stove
+        engen
             .backend
             .main
             .add_system_to_stage(BackendStages::Resize, viewport_read_offset);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Resize, resize);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::VisibilityPreparation, visibility_setup);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::VisibilityPreparation, visibility_cleanup);
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
             adjust_position.label(VisibilitySystems::AdjustPosition),
         );
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
             update_spacial_hash
                 .label(VisibilitySystems::UpdateSpacialHash)
                 .after(VisibilitySystems::AdjustPosition),
         );
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
             collision_responses.after(VisibilitySystems::UpdateSpacialHash),
         );
-        stove.frontend.main.add_system_to_stage(
+        engen.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
             calc_visible_section.after(VisibilitySystems::UpdateSpacialHash),
         );
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Last, clean_collision_responses);

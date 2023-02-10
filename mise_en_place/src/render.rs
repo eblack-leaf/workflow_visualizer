@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::Resource;
 
+use crate::{Engen, Job, Theme};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
-use crate::{Job, Stove, Theme};
 
 pub enum RenderPhase {
     Opaque,
@@ -33,23 +33,23 @@ pub trait Render {
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
 
-pub(crate) fn render(stove: &mut Stove) {
-    let gfx_surface = stove
+pub(crate) fn render(engen: &mut Engen) {
+    let gfx_surface = engen
         .backend
         .container
         .get_resource::<GfxSurface>()
         .expect("no gfx surface attached");
-    let gfx_surface_configuration = stove
+    let gfx_surface_configuration = engen
         .backend
         .container
         .get_resource::<GfxSurfaceConfiguration>()
         .expect("no gfx surface configuration");
-    let theme = stove
+    let theme = engen
         .backend
         .container
         .get_resource::<Theme>()
         .expect("no theme attached");
-    let viewport = stove
+    let viewport = engen
         .backend
         .container
         .get_resource::<Viewport>()
@@ -89,11 +89,11 @@ pub(crate) fn render(stove: &mut Stove) {
                     }),
                 },
             ));
-            for invoke in stove.render_fns.0.iter_mut() {
-                invoke(&stove.backend, &mut render_pass_handle);
+            for invoke in engen.render_fns.0.iter_mut() {
+                invoke(&engen.backend, &mut render_pass_handle);
             }
-            for invoke in stove.render_fns.1.iter_mut() {
-                invoke(&stove.backend, &mut render_pass_handle);
+            for invoke in engen.render_fns.1.iter_mut() {
+                invoke(&engen.backend, &mut render_pass_handle);
             }
         }
         gfx_surface

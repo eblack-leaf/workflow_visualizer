@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::Resource;
 
+use crate::{Attach, Engen};
 use crate::color::Color;
-use crate::{Attach, Stove};
 
 pub struct ThemeDescriptor {
     pub background: Option<Color>,
@@ -33,7 +33,7 @@ impl Default for Theme {
 }
 
 impl Attach for Theme {
-    fn attach(stove: &mut Stove) {
-        stove.backend.container.insert_resource(Theme::default());
+    fn attach(engen: &mut Engen) {
+        engen.backend.container.insert_resource(Theme::default());
     }
 }

@@ -1,3 +1,4 @@
+use crate::{Attach, Engen, FrontEndStages};
 pub use crate::coord::area::Area;
 pub use crate::coord::area::ScaledArea;
 pub use crate::coord::area_adjust::{AreaAdjust, ScaledAreaAdjust};
@@ -8,7 +9,6 @@ pub use crate::coord::position::ScaledPosition;
 pub use crate::coord::position_adjust::{PositionAdjust, ScaledPositionAdjust};
 pub use crate::coord::section::ScaledSection;
 pub use crate::coord::section::Section;
-use crate::{Attach, FrontEndStages, Stove};
 
 mod area;
 mod area_adjust;
@@ -21,16 +21,16 @@ mod section;
 pub(crate) struct Coords;
 
 impl Attach for Coords {
-    fn attach(stove: &mut Stove) {
-        stove.frontend.main.add_system_to_stage(
+    fn attach(engen: &mut Engen) {
+        engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,
             position_adjust::position_adjust,
         );
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::CoordAdjust, area_adjust::area_adjust);
-        stove
+        engen
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::CoordAdjust, depth_adjust::depth_adjust);

@@ -7,14 +7,14 @@ use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
 pub use job::Job;
-pub use wasm_server::DeliveryService;
+pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::Coords;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::Coords;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -26,7 +26,7 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
 pub use crate::visibility::Visibility;
-pub use crate::wasm_compiler::DeliveryTicket;
+pub use crate::wasm_compiler::WasmCompileDescriptor;
 use crate::window::{Resize, ScaleFactor};
 
 mod color;
@@ -75,9 +75,9 @@ pub enum BackendStages {
     Last,
 }
 
-pub struct Stove {
+pub struct Engen {
     event_loop: Option<EventLoop<()>>,
-    attachment_queue: Vec<Box<fn(&mut Stove)>>,
+    attachment_queue: Vec<Box<fn(&mut Engen)>>,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
     pub(crate) frontend: Job,
@@ -85,7 +85,7 @@ pub struct Stove {
     pub(crate) window: Option<Rc<Window>>,
 }
 
-impl Stove {
+impl Engen {
     pub fn new() -> Self {
         Self {
             event_loop: None,
@@ -147,42 +147,42 @@ impl Stove {
             window: None,
         }
     }
-    pub fn add_ingredient<Ingredient: Attach + Extract + Render + Resource>(&mut self) {
-        self.attachment_queue.push(Box::new(Ingredient::attach));
-        match Ingredient::phase() {
+    pub fn add_renderer<Renderer: Attach + Extract + Render + Resource>(&mut self) {
+        self.attachment_queue.push(Box::new(Renderer::attach));
+        match Renderer::phase() {
             RenderPhase::Opaque => self
                 .render_fns
                 .0
-                .push(Box::new(invoke_render::<Ingredient>)),
+                .push(Box::new(invoke_render::<Renderer>)),
             RenderPhase::Alpha => self
                 .render_fns
                 .1
-                .push(Box::new(invoke_render::<Ingredient>)),
+                .push(Box::new(invoke_render::<Renderer>)),
         }
         self.extract_fns
-            .push(Box::new(invoke_extract::<Ingredient>));
+            .push(Box::new(invoke_extract::<Renderer>));
     }
     pub(crate) fn invoke_attach<Attachment: Attach>(&mut self) {
         Attachment::attach(self);
     }
-    pub fn cook<Recipe: Cook>(mut self) {
-        Recipe::prepare(&mut self.frontend);
+    pub fn launch<Launchable: Launch>(mut self) {
+        Launchable::prepare(&mut self.frontend);
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.event_loop.replace(EventLoop::new());
-            self.apply_heat();
+            self.ignition();
         }
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
             let event_loop = EventLoop::new();
             let window = Rc::new(
                 WindowBuilder::new()
-                    .with_title("web stove")
+                    .with_title("web engen")
                     .build(&event_loop)
                     .expect("could not create window"),
             );
@@ -230,7 +230,7 @@ impl Stove {
             self.backend.container.insert_resource(gfx.0);
             self.backend.container.insert_resource(gfx.1);
             self.window.replace(window);
-            if let Err(error) = call_catch(&Closure::once_into_js(move || self.apply_heat())) {
+            if let Err(error) = call_catch(&Closure::once_into_js(move || self.ignition())) {
                 let is_control_flow_exception =
                     error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
                         e.message().includes("Using exceptions for control flow", 0)
@@ -261,7 +261,7 @@ impl Stove {
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
     }
-    fn apply_heat(mut self) {
+    fn ignition(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop");
         event_loop.run(
             move |event, event_loop_window_target, control_flow| match event {
@@ -361,7 +361,7 @@ impl Stove {
         {
             let window = Rc::new(
                 WindowBuilder::new()
-                    .with_title("native stove")
+                    .with_title("native engen")
                     .build(event_loop_window_target)
                     .expect("no window"),
             );
@@ -379,25 +379,17 @@ impl Stove {
         let attachment_queue = self
             .attachment_queue
             .drain(..)
-            .collect::<Vec<Box<fn(&mut Stove)>>>();
+            .collect::<Vec<Box<fn(&mut Engen)>>>();
         for attach_fn in attachment_queue {
             attach_fn(self);
         }
     }
-    pub fn order_delivery(delivery_ticket: DeliveryTicket) -> Option<DeliveryService> {
-        match delivery_ticket.order() {
-            Ok(_) => Some(DeliveryService::new(delivery_ticket)),
-            Err(_) => None,
-        }
-    }
 }
 
-pub type Recipe = Job;
-
-pub trait Cook {
-    fn prepare(recipe: &mut Recipe);
+pub trait Launch {
+    fn prepare(job: &mut Job);
 }
 
 pub trait Attach {
-    fn attach(stove: &mut Stove);
+    fn attach(engen: &mut Engen);
 }
