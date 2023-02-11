@@ -1,4 +1,3 @@
-use crate::{Attach, Engen, FrontEndStages};
 pub use crate::coord::area::Area;
 pub use crate::coord::area::ScaledArea;
 pub use crate::coord::area_adjust::{AreaAdjust, ScaledAreaAdjust};
@@ -9,6 +8,7 @@ pub use crate::coord::position::ScaledPosition;
 pub use crate::coord::position_adjust::{PositionAdjust, ScaledPositionAdjust};
 pub use crate::coord::section::ScaledSection;
 pub use crate::coord::section::Section;
+use crate::{Attach, Engen, FrontEndStages};
 
 mod area;
 mod area_adjust;

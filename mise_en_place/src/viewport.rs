@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
 use nalgebra::matrix;
 
-use crate::{Attach, BackendStages, BackEndStartupStages, Engen};
 use crate::coord::{Depth, ScaledArea, ScaledPosition, ScaledSection};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
+use crate::{Attach, BackEndStartupStages, BackendStages, Engen};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -81,7 +81,7 @@ impl Viewport {
                 },
             ],
         });
-        let depth_format = wgpu::TextureFormat::Depth32Float;
+        let depth_format = wgpu::TextureFormat::Depth24PlusStencil8;
         let depth_texture = depth_texture(device, area, depth_format);
         Self {
             cpu: cpu_viewport,

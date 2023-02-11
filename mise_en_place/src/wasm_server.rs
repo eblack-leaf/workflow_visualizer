@@ -1,9 +1,9 @@
 use std::net::SocketAddr;
 
 #[cfg(not(target_arch = "wasm32"))]
-use warp::Filter;
-#[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::header::HeaderName;
+#[cfg(not(target_arch = "wasm32"))]
+use warp::Filter;
 
 use crate::wasm_compiler::WasmCompileDescriptor;
 

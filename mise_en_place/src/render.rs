@@ -1,15 +1,15 @@
 use bevy_ecs::prelude::Resource;
 
-use crate::{Engen, Job, Theme};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
+use crate::{Engen, Job, Theme};
 
 pub enum RenderPhase {
     Opaque,
     Alpha,
 }
 
-pub(crate) fn invoke_render<'a, Ingredient: Render + Resource>(
+pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
     backend: &'a Job,
     render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
@@ -19,7 +19,7 @@ pub(crate) fn invoke_render<'a, Ingredient: Render + Resource>(
         .expect("no viewport attached");
     backend
         .container
-        .get_resource::<Ingredient>()
+        .get_resource::<Renderer>()
         .expect("no render attachment")
         .render(render_pass_handle, viewport);
 }
@@ -85,7 +85,10 @@ pub(crate) fn render(engen: &mut Engen) {
                             load: wgpu::LoadOp::Clear(viewport.cpu.far_layer()),
                             store: true,
                         }),
-                        stencil_ops: None,
+                        stencil_ops: Some(wgpu::Operations {
+                            load: wgpu::LoadOp::Clear(0u32),
+                            store: true,
+                        }),
                     }),
                 },
             ));

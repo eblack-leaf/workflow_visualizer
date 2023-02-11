@@ -2,7 +2,11 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextPartition, TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{
+    Color, DepthAdjust, Engen, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata,
+    PositionAdjust, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextPartition,
+    TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer,
+};
 
 #[derive(Resource)]
 struct Counter {
@@ -38,11 +42,9 @@ struct Launcher;
 impl Launch for Launcher {
     fn prepare(job: &mut Job) {
         job.container.insert_resource(Counter { count: 0 });
-        job
-            .main
+        job.main
             .add_system_to_stage(FrontEndStages::Process, update_text);
-        job
-            .container
+        job.container
             .spawn(TextBundle::new(
                 Text::new(vec![TextPartition::new(
                     "hello",
@@ -57,13 +59,19 @@ impl Launch for Launcher {
 }
 
 fn main() {
-    #[cfg(not(target_arch = "wasm32"))] {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
         let args: Vec<String> = std::env::args().collect();
-        let wasm_compile_descriptor =
-            WasmCompileDescriptor::new("mise_en_place_app", "release", "mise_en_place_app_web_build");
+        let wasm_compile_descriptor = WasmCompileDescriptor::new(
+            "mise_en_place_app",
+            "release",
+            "mise_en_place_app_web_build",
+        );
         let wasm_server = WasmServer::new(&wasm_compile_descriptor);
         if args.contains(&"build".to_string()) {
-            wasm_compile_descriptor.compile().expect("could not compile wasm");
+            wasm_compile_descriptor
+                .compile()
+                .expect("could not compile wasm");
             if !args.contains(&"serve".to_string()) {
                 return;
             }

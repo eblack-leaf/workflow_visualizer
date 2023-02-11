@@ -10,11 +10,11 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
+use crate::coord::Coords;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section,
 };
-use crate::coord::Coords;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -150,23 +150,16 @@ impl Engen {
     pub fn add_renderer<Renderer: Attach + Extract + Render + Resource>(&mut self) {
         self.attachment_queue.push(Box::new(Renderer::attach));
         match Renderer::phase() {
-            RenderPhase::Opaque => self
-                .render_fns
-                .0
-                .push(Box::new(invoke_render::<Renderer>)),
-            RenderPhase::Alpha => self
-                .render_fns
-                .1
-                .push(Box::new(invoke_render::<Renderer>)),
+            RenderPhase::Opaque => self.render_fns.0.push(Box::new(invoke_render::<Renderer>)),
+            RenderPhase::Alpha => self.render_fns.1.push(Box::new(invoke_render::<Renderer>)),
         }
-        self.extract_fns
-            .push(Box::new(invoke_extract::<Renderer>));
+        self.extract_fns.push(Box::new(invoke_extract::<Renderer>));
     }
     pub(crate) fn invoke_attach<Attachment: Attach>(&mut self) {
         Attachment::attach(self);
     }
-    pub fn launch<Launchable: Launch>(mut self) {
-        Launchable::prepare(&mut self.frontend);
+    pub fn launch<Launcher: Launch>(mut self) {
+        Launcher::prepare(&mut self.frontend);
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.event_loop.replace(EventLoop::new());
@@ -175,7 +168,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -223,6 +216,22 @@ impl Engen {
                 web_sys::window()
                     .expect("no web_sys window")
                     .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())
+                    .unwrap();
+                closure.forget();
+            }
+            {
+                let w_window = window.clone();
+                let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
+                    let scale_factor = w_window.scale_factor();
+                    let size = inner_size(scale_factor);
+                    w_window.set_inner_size(size);
+                }) as Box<dyn FnMut(_)>);
+                web_sys::window()
+                    .expect("no web_sys window")
+                    .screen()
+                    .expect("could not get screen")
+                    .orientation()
+                    .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref())
                     .unwrap();
                 closure.forget();
             }

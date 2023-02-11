@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
-use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 use crate::coord::{Area, Position, PositionAdjust, ScaledArea, ScaledPosition, Section};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 
 #[derive(Component)]
 pub struct Visibility {

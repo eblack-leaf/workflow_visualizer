@@ -4,10 +4,6 @@ use bevy_ecs::prelude::{
     Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage,
 };
 
-use crate::{
-    Area, Attach, BackendStages, BackEndStartupStages, Color, Engen,
-    FrontEndStages, FrontEndStartupStages, Job, Position,
-};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::job::Container;
@@ -31,9 +27,13 @@ use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
+use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
+use crate::{
+    Area, Attach, BackEndStartupStages, BackendStages, Color, Engen, FrontEndStages,
+    FrontEndStartupStages, Job, Position,
+};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -334,8 +334,8 @@ impl Attach for TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let mut extraction = frontend
             .container
