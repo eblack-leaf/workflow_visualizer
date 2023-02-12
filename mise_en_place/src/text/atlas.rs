@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
+use crate::{Area, Position};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::text::coords::Coords;
 use crate::text::font::MonoSpacedFont;
 use crate::text::glyph::{Glyph, GlyphId};
 use crate::text::render_group::RenderGroupUniqueGlyphs;
 use crate::text::scale::TextScale;
-use crate::{Area, Position};
 
 #[derive(Component)]
 pub(crate) struct AtlasBindGroup {
@@ -128,7 +128,7 @@ impl AtlasDimension {
                 while dimension.pow(2) < unique_glyphs.unique_glyphs {
                     dimension += 1;
                 }
-                dimension
+                dimension.max(1)
             },
         }
     }

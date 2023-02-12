@@ -5,7 +5,7 @@ use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle
 use winit::event::VirtualKeyCode::L;
 
 use crate::text::font::MonoSpacedFont;
-use crate::text::glyph::Key;
+use crate::text::glyph::{Key, KeyFactory};
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::{PartitionMetadata, Text};
@@ -14,8 +14,8 @@ use crate::Color;
 #[derive(Component)]
 pub(crate) struct Placer {
     layout: fontdue::layout::Layout<PartitionMetadata>,
-    unfiltered_placement: Vec<GlyphPosition<PartitionMetadata>>,
-    filtered_placement: Vec<GlyphPosition<PartitionMetadata>>,
+    unfiltered_placement: Vec<(Key, GlyphPosition<PartitionMetadata>)>,
+    filtered_placement: Vec<(Key, GlyphPosition<PartitionMetadata>)>,
 }
 
 impl Placer {
@@ -53,22 +53,24 @@ impl Placer {
                 ),
             );
         }
-        self.unfiltered_placement = self.layout.glyphs().clone();
+        let mut key_factory = KeyFactory::new();
+        self.unfiltered_placement = self
+            .layout
+            .glyphs()
+            .iter()
+            .map(|g| (key_factory.generate(), *g))
+            .collect::<Vec<(Key, GlyphPosition<PartitionMetadata>)>>();
         self.filtered_placement = self.unfiltered_placement.clone();
     }
-    pub(crate) fn unfiltered_placement(&self) -> &Vec<GlyphPosition<PartitionMetadata>> {
+    pub(crate) fn unfiltered_placement(&self) -> &Vec<(Key, GlyphPosition<PartitionMetadata>)> {
         &self.unfiltered_placement
     }
-    pub(crate) fn filtered_placement(&self) -> &Vec<GlyphPosition<PartitionMetadata>> {
+    pub(crate) fn filtered_placement(&self) -> &Vec<(Key, GlyphPosition<PartitionMetadata>)> {
         &self.filtered_placement
     }
     pub(crate) fn filter_placement(&mut self, mut filter_queue: HashSet<Key>) {
-        let mut queue = filter_queue.drain().collect::<Vec<Key>>();
-        queue.sort();
-        queue.reverse();
-        for remove in queue.iter() {
-            self.filtered_placement.remove(remove.offset() as usize);
-        }
+        self.filtered_placement
+            .retain(|(key, _)| !filter_queue.contains(key));
     }
     pub(crate) fn reset_filtered(&mut self) {
         self.filtered_placement = self.unfiltered_placement.clone();

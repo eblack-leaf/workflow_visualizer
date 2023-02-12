@@ -38,11 +38,11 @@ impl RenderGroupUniqueGlyphs {
 }
 
 #[derive(Component)]
-pub(crate) struct GlyphColorWrite {
-    pub(crate) write: HashMap<Index, Color>,
+pub(crate) struct AttributeWrite<Attribute> {
+    pub(crate) write: HashMap<Index, Attribute>,
 }
 
-impl GlyphColorWrite {
+impl<Attribute> AttributeWrite<Attribute> {
     pub(crate) fn new() -> Self {
         Self {
             write: HashMap::new(),
@@ -72,10 +72,10 @@ pub(crate) struct RenderGroup {
     pub(crate) coords_gpu: GpuBuffer<Coords>,
     pub(crate) glyph_position_gpu: GpuBuffer<Position>,
     pub(crate) glyph_area_gpu: GpuBuffer<Area>,
-    pub(crate) null_write: NullWrite,
-    pub(crate) coords_write: CoordsWrite,
-    pub(crate) glyph_position_write: GlyphPositionWrite,
-    pub(crate) glyph_area_write: GlyphAreaWrite,
+    pub(crate) null_write: AttributeWrite<NullBit>,
+    pub(crate) coords_write: AttributeWrite<Coords>,
+    pub(crate) glyph_position_write: AttributeWrite<Position>,
+    pub(crate) glyph_area_write: AttributeWrite<Area>,
     pub(crate) position_write: PositionWrite,
     pub(crate) depth_write: DepthWrite,
     pub(crate) keyed_glyph_ids: KeyedGlyphIds,
@@ -89,7 +89,7 @@ pub(crate) struct RenderGroup {
     pub(crate) atlas_glyphs: AtlasGlyphs,
     pub(crate) text_placement: TextPlacement,
     pub(crate) text_placement_uniform: Uniform<TextPlacement>,
-    pub(crate) glyph_color_write: GlyphColorWrite,
+    pub(crate) glyph_color_write: AttributeWrite<Color>,
     pub(crate) glyph_color_cpu: CpuBuffer<Color>,
     pub(crate) glyph_color_gpu: GpuBuffer<Color>,
 }
@@ -116,10 +116,10 @@ impl RenderGroup {
         coords_gpu: GpuBuffer<Coords>,
         glyph_position_gpu: GpuBuffer<Position>,
         glyph_area_gpu: GpuBuffer<Area>,
-        null_write: NullWrite,
-        coords_write: CoordsWrite,
-        glyph_position_write: GlyphPositionWrite,
-        glyph_area_write: GlyphAreaWrite,
+        null_write: AttributeWrite<NullBit>,
+        coords_write: AttributeWrite<Coords>,
+        glyph_position_write: AttributeWrite<Position>,
+        glyph_area_write: AttributeWrite<Area>,
         position_write: PositionWrite,
         depth_write: DepthWrite,
         keyed_glyph_ids: KeyedGlyphIds,
@@ -133,7 +133,7 @@ impl RenderGroup {
         atlas_glyphs: AtlasGlyphs,
         text_placement: TextPlacement,
         text_placement_uniform: Uniform<TextPlacement>,
-        glyph_color_write: GlyphColorWrite,
+        glyph_color_write: AttributeWrite<Color>,
         glyph_color_cpu: CpuBuffer<Color>,
         glyph_color_gpu: GpuBuffer<Color>,
     ) -> Self {
@@ -267,58 +267,6 @@ pub(crate) struct DepthWrite {
 impl DepthWrite {
     pub(crate) fn new() -> Self {
         Self { write: None }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct NullWrite {
-    pub(crate) write: HashMap<Index, NullBit>,
-}
-
-impl NullWrite {
-    pub(crate) fn new() -> Self {
-        Self {
-            write: HashMap::new(),
-        }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct CoordsWrite {
-    pub(crate) write: HashMap<Index, Coords>,
-}
-
-impl CoordsWrite {
-    pub(crate) fn new() -> Self {
-        Self {
-            write: HashMap::new(),
-        }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct GlyphPositionWrite {
-    pub(crate) write: HashMap<Index, Position>,
-}
-
-impl GlyphPositionWrite {
-    pub(crate) fn new() -> Self {
-        Self {
-            write: HashMap::new(),
-        }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct GlyphAreaWrite {
-    pub(crate) write: HashMap<Index, Area>,
-}
-
-impl GlyphAreaWrite {
-    pub(crate) fn new() -> Self {
-        Self {
-            write: HashMap::new(),
-        }
     }
 }
 

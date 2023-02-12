@@ -49,7 +49,6 @@ pub struct TextBundle {
     pub position: Position,
     pub depth: Depth,
     pub scale_alignment: TextScaleAlignment,
-    pub(crate) offset: TextOffset,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
@@ -69,51 +68,9 @@ impl TextBundle {
             position,
             depth,
             scale_alignment,
-            offset: TextOffset::default(),
             placer: Placer::new(),
             cache: Cache::new(position, depth, VisibleSection::new(Section::default())),
             difference: Difference::new(),
-        }
-    }
-}
-
-#[derive(Component, PartialEq, Copy, Clone, Default)]
-pub struct TextOffsetAdjustGuide {
-    pub characters_to_offset_x: i32,
-    pub lines_to_offset_y: i32,
-}
-
-impl TextOffsetAdjustGuide {
-    pub fn new(characters_to_offset_x: i32, lines_to_offset_y: i32) -> Self {
-        Self {
-            characters_to_offset_x,
-            lines_to_offset_y,
-        }
-    }
-}
-
-#[derive(Component, PartialEq, Copy, Clone, Default)]
-pub(crate) struct TextOffsetAdjust {
-    pub position_adjust: PositionAdjust,
-}
-
-impl TextOffsetAdjust {
-    pub(crate) fn new<PA: Into<PositionAdjust>>(adjust: PA) -> Self {
-        Self {
-            position_adjust: adjust.into(),
-        }
-    }
-}
-
-#[derive(Component, PartialEq, Copy, Clone, Default)]
-pub(crate) struct TextOffset {
-    pub(crate) position: Position,
-}
-
-impl TextOffset {
-    pub(crate) fn new<P: Into<Position>>(position: P) -> Self {
-        Self {
-            position: position.into(),
         }
     }
 }

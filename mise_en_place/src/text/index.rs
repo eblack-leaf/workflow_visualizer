@@ -3,7 +3,7 @@ use std::hash::Hash;
 
 use bevy_ecs::prelude::Component;
 
-#[derive(Eq, Hash, PartialEq, Copy, Clone)]
+#[derive(Eq, Hash, PartialEq, Copy, Clone, Debug)]
 pub(crate) struct Index {
     pub(crate) value: u32,
 }

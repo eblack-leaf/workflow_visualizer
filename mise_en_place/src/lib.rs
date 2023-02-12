@@ -1,3 +1,5 @@
+#![allow(unused, dead_code)]
+
 use std::rc::Rc;
 
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
@@ -20,8 +22,8 @@ use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::text::{
-    PartitionMetadata, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextPartition,
-    TextRenderer, TextScaleAlignment,
+    PartitionMetadata, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer,
+    TextScaleAlignment,
 };
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
@@ -74,9 +76,11 @@ pub enum BackendStages {
     Prepare,
     Last,
 }
+
 pub struct EngenOptions {
     pub native_dimensions: Option<Area>,
 }
+
 impl EngenOptions {
     pub fn new() -> Self {
         Self {
@@ -88,6 +92,7 @@ impl EngenOptions {
         self
     }
 }
+
 pub struct Engen {
     event_loop: Option<EventLoop<()>>,
     attachment_queue: Vec<Box<fn(&mut Engen)>>,
@@ -383,16 +388,14 @@ impl Engen {
     fn init_native_gfx(&mut self, event_loop_window_target: &EventLoopWindowTarget<()>) {
         #[cfg(not(target_arch = "wasm32"))]
         {
-            let mut builder = WindowBuilder::new()
-                .with_title("native engen");
+            let mut builder = WindowBuilder::new().with_title("native engen");
             if let Some(native_dimensions) = self.options.native_dimensions {
-                builder = builder.with_inner_size(PhysicalSize::new(native_dimensions.width, native_dimensions.height));
+                builder = builder.with_inner_size(PhysicalSize::new(
+                    native_dimensions.width,
+                    native_dimensions.height,
+                ));
             }
-            let window = Rc::new(
-                    builder
-                    .build(event_loop_window_target)
-                    .expect("no window"),
-            );
+            let window = Rc::new(builder.build(event_loop_window_target).expect("no window"));
             let scale_factor = ScaleFactor::new(window.scale_factor());
             self.frontend.container.insert_resource(scale_factor);
             self.backend.container.insert_resource(scale_factor);

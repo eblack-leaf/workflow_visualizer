@@ -1,8 +1,14 @@
+#![allow(unused, dead_code)]
+
 use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextPartition, TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{
+    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch,
+    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
+    TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer,
+};
 
 #[derive(Resource)]
 struct Counter {
@@ -18,18 +24,12 @@ fn update_text(
     counter.count += 1;
     _idle.can_idle = false;
     for (entity, mut ent_text, visibility) in text.iter_mut() {
-        if counter.count == 100 {
-            ent_text.partitions.push(TextPartition::new(
-                " ok then",
-                PartitionMetadata::new((0.5, 1.0, 0.5), 0),
-            ));
-        }
-        if counter.count == 200 {
-            ent_text.partitions.pop();
-        }
-        if counter.count % 30 == 0 {
-            cmd.entity(entity).insert(TextOffsetAdjustGuide::new(0, -1));
-        }
+        ent_text
+            .partitions
+            .first_mut()
+            .unwrap()
+            .characters
+            .push('!');
         if counter.count >= 250 {
             _idle.can_idle = true;
         }
@@ -46,14 +46,14 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![TextPartition::new(
-                    include_str!("stress_test.txt"),
+                    "",
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
                 (10u32, 10u32),
                 10u32,
                 TextScaleAlignment::Small,
             ))
-            .insert(TextBoundGuide::new(120, 112));
+            .insert(TextBoundGuide::new(120, 1120));
     }
 }
 

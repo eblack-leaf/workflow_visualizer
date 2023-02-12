@@ -15,10 +15,9 @@ use crate::text::backend_system::{
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::frontend_system::{
-    adjust_text_offset, bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment,
-    calc_text_offset_from_guide, depth_diff, discard_out_of_bounds, intercept_area_adjust,
-    letter_diff, manage_render_groups, place, position_diff, pull_differences,
-    setup as frontend_setup, visible_area_diff,
+    bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment, depth_diff,
+    discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups, place,
+    position_diff, pull_differences, setup as frontend_setup, visible_area_diff,
 };
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
@@ -255,15 +254,12 @@ impl Attach for TextRenderer {
             TextStages::PlacementPreparation,
             SystemStage::parallel()
                 .with_system(calc_bound_from_guide)
-                .with_system(calc_scale_from_alignment)
-                .with_system(calc_text_offset_from_guide),
+                .with_system(calc_scale_from_alignment),
         );
         engen.frontend.main.add_stage_after(
             TextStages::PlacementPreparation,
             TextStages::Placement,
-            SystemStage::parallel()
-                .with_system(place)
-                .with_system(adjust_text_offset),
+            SystemStage::parallel().with_system(place),
         );
         engen.frontend.main.add_stage_after(
             TextStages::Placement,

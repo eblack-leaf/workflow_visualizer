@@ -18,9 +18,7 @@ pub(crate) struct KeyFactory {
 }
 impl KeyFactory {
     pub(crate) fn new() -> Self {
-        Self {
-            current: 0,
-        }
+        Self { current: 0 }
     }
     pub(crate) fn generate(&mut self) -> Key {
         let key = Key::new(self.current);

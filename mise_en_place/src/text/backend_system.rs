@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
+use bytemuck::{Pod, Zeroable};
 
 use crate::coord::ScaledPosition;
 use crate::gfx::GfxSurface;
@@ -19,9 +20,8 @@ use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::{Index, Indexer};
 use crate::text::null_bit::NullBit;
 use crate::text::render_group::{
-    CoordsWrite, DepthWrite, DrawSection, GlyphAreaWrite, GlyphColorWrite, GlyphPositionWrite,
-    KeyedGlyphIds, NullWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
-    RenderGroupTextBound, TextPlacement,
+    AttributeWrite, DepthWrite, DrawSection, KeyedGlyphIds, PositionWrite, RenderGroup,
+    RenderGroupBindGroup, RenderGroupTextBound, TextPlacement,
 };
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScaleAlignment};
@@ -79,15 +79,15 @@ pub(crate) fn create_render_groups(
         let glyph_position_gpu =
             GpuBuffer::<Position>::new(&gfx_surface, max.0, "glyph position buffer");
         let glyph_area_gpu = GpuBuffer::<Area>::new(&gfx_surface, max.0, "glyph area buffer");
-        let null_write = NullWrite::new();
-        let coords_write = CoordsWrite::new();
-        let glyph_position_write = GlyphPositionWrite::new();
-        let glyph_area_write = GlyphAreaWrite::new();
+        let null_write = AttributeWrite::<NullBit>::new();
+        let coords_write = AttributeWrite::<Coords>::new();
+        let glyph_position_write = AttributeWrite::<Position>::new();
+        let glyph_area_write = AttributeWrite::<Area>::new();
         let position_write = PositionWrite::new();
         let depth_write = DepthWrite::new();
         let keyed_glyph_ids = KeyedGlyphIds::new();
         let draw_section = DrawSection::new();
-        let glyph_color_write = GlyphColorWrite::new();
+        let glyph_color_write = AttributeWrite::<Color>::new();
         let glyph_color_cpu = CpuBuffer::<Color>::new(max.0);
         let glyph_color_gpu = GpuBuffer::<Color>::new(&gfx_surface, max.0, "glyph color buffer");
         let render_group_entity = renderer
@@ -187,12 +187,12 @@ pub(crate) fn render_group_differences(
         rasterize_add_queue(&mut renderer, &font, render_group);
         update_adjusted_glyphs(&mut renderer, &gfx_surface, render_group, adjusted_glyphs);
         read_added_glyphs(&mut renderer, difference, render_group);
-        write_glyph_position(&mut renderer, &gfx_surface, render_group);
-        write_glyph_area(&mut renderer, &gfx_surface, render_group);
-        write_null(&mut renderer, &gfx_surface, render_group);
-        write_coords(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<Position>(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<Area>(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<NullBit>(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<Coords>(&mut renderer, &gfx_surface, render_group);
         write_text_placement(&mut renderer, &gfx_surface, render_group);
-        write_glyph_color(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<Color>(&mut renderer, &gfx_surface, render_group);
         write_atlas(&mut renderer, &gfx_surface, render_group);
         if draw_section_resize_needed {
             resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
@@ -210,7 +210,7 @@ fn queue_glyph_color(renderer: &mut TextRenderer, difference: &Difference, rende
             .unwrap();
         renderer
             .container
-            .get_mut::<GlyphColorWrite>(render_group)
+            .get_mut::<AttributeWrite<Color>>(render_group)
             .unwrap()
             .write
             .insert(index, *color);
@@ -369,7 +369,7 @@ fn queue_remove(renderer: &mut TextRenderer, difference: &Difference, render_gro
             .expect("no index for key");
         renderer
             .container
-            .get_mut::<NullWrite>(render_group)
+            .get_mut::<AttributeWrite<NullBit>>(render_group)
             .unwrap()
             .write
             .insert(index, NullBit::null());
@@ -390,13 +390,13 @@ fn queue_add(renderer: &mut TextRenderer, difference: &Difference, render_group:
             .next(*key);
         renderer
             .container
-            .get_mut::<GlyphPositionWrite>(render_group)
+            .get_mut::<AttributeWrite<Position>>(render_group)
             .unwrap()
             .write
             .insert(index, *glyph_position);
         renderer
             .container
-            .get_mut::<NullWrite>(render_group)
+            .get_mut::<AttributeWrite<NullBit>>(render_group)
             .unwrap()
             .write
             .insert(index, NullBit::not_null());
@@ -557,7 +557,7 @@ fn update_glyph_positions(
             .expect("no index for key");
         renderer
             .container
-            .get_mut::<GlyphPositionWrite>(render_group)
+            .get_mut::<AttributeWrite<Position>>(render_group)
             .unwrap()
             .write
             .insert(index, *glyph_position);
@@ -870,13 +870,13 @@ fn update_adjusted_glyphs(
             .unwrap();
         renderer
             .container
-            .get_mut::<GlyphAreaWrite>(render_group)
+            .get_mut::<AttributeWrite<Area>>(render_group)
             .unwrap()
             .write
             .insert(index, area);
         renderer
             .container
-            .get_mut::<CoordsWrite>(render_group)
+            .get_mut::<AttributeWrite<Coords>>(render_group)
             .unwrap()
             .write
             .insert(index, coords);
@@ -901,164 +901,71 @@ fn read_added_glyphs(renderer: &mut TextRenderer, difference: &Difference, rende
             .unwrap();
         renderer
             .container
-            .get_mut::<GlyphAreaWrite>(render_group)
+            .get_mut::<AttributeWrite<Area>>(render_group)
             .unwrap()
             .write
             .insert(index, area);
         renderer
             .container
-            .get_mut::<CoordsWrite>(render_group)
+            .get_mut::<AttributeWrite<Coords>>(render_group)
             .unwrap()
             .write
             .insert(index, coords);
     }
 }
 
-fn write_glyph_position(
+fn write_attribute<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>(
     renderer: &mut TextRenderer,
     gfx_surface: &GfxSurface,
     render_group: Entity,
 ) {
-    let glyph_positions = renderer
+    let attributes = renderer
         .container
-        .get_mut::<GlyphPositionWrite>(render_group)
+        .get_mut::<AttributeWrite<Attribute>>(render_group)
         .unwrap()
         .write
         .drain()
-        .collect::<Vec<(Index, Position)>>();
-    for (index, position) in glyph_positions {
+        .collect::<Vec<(Index, Attribute)>>();
+    let mut write_range: (Option<Index>, Option<Index>) = (None, None);
+    for (index, attr) in attributes {
         *renderer
             .container
-            .get_mut::<CpuBuffer<Position>>(render_group)
+            .get_mut::<CpuBuffer<Attribute>>(render_group)
             .unwrap()
             .buffer
             .get_mut(index.value as usize)
-            .unwrap() = position;
-        let offset = offset::<Position>(&index);
-        gfx_surface.queue.write_buffer(
-            &renderer
-                .container
-                .get::<GpuBuffer<Position>>(render_group)
-                .unwrap()
-                .buffer,
-            offset,
-            bytemuck::cast_slice(&[position]),
-        );
+            .unwrap() = attr;
+        if let Some(start) = write_range.0.as_mut() {
+            if index.value < start.value {
+                *start = index;
+            }
+        } else {
+            write_range.0.replace(index);
+        }
+        if let Some(end) = write_range.1.as_mut() {
+            if index.value > end.value {
+                *end = index;
+            }
+        } else {
+            write_range.1.replace(index);
+        }
     }
-}
-
-fn write_glyph_area(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
-    let glyph_areas = renderer
-        .container
-        .get_mut::<GlyphAreaWrite>(render_group)
-        .unwrap()
-        .write
-        .drain()
-        .collect::<Vec<(Index, Area)>>();
-    for (index, area) in glyph_areas {
-        *renderer
+    if let Some(start) = write_range.0 {
+        let mut end = write_range.1.take().unwrap();
+        let cpu_range = &renderer
             .container
-            .get_mut::<CpuBuffer<Area>>(render_group)
+            .get::<CpuBuffer<Attribute>>(render_group)
             .unwrap()
-            .buffer
-            .get_mut(index.value as usize)
-            .unwrap() = area;
-        let offset = offset::<Area>(&index);
+            .buffer[start.value as usize..end.value as usize + 1];
+        let offset = offset::<Attribute>(&start);
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<Area>>(render_group)
+                .get::<GpuBuffer<Attribute>>(render_group)
                 .unwrap()
                 .buffer,
             offset,
-            bytemuck::cast_slice(&[area]),
-        );
-    }
-}
-
-fn write_null(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
-    let nulls = renderer
-        .container
-        .get_mut::<NullWrite>(render_group)
-        .unwrap()
-        .write
-        .drain()
-        .collect::<Vec<(Index, NullBit)>>();
-    for (index, null_bit) in nulls {
-        *renderer
-            .container
-            .get_mut::<CpuBuffer<NullBit>>(render_group)
-            .unwrap()
-            .buffer
-            .get_mut(index.value as usize)
-            .unwrap() = null_bit;
-        let offset = offset::<NullBit>(&index);
-        gfx_surface.queue.write_buffer(
-            &renderer
-                .container
-                .get::<GpuBuffer<NullBit>>(render_group)
-                .unwrap()
-                .buffer,
-            offset,
-            bytemuck::cast_slice(&[null_bit]),
-        );
-    }
-}
-
-fn write_coords(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
-    let coords = renderer
-        .container
-        .get_mut::<CoordsWrite>(render_group)
-        .unwrap()
-        .write
-        .drain()
-        .collect::<Vec<(Index, Coords)>>();
-    for (index, coords) in coords {
-        *renderer
-            .container
-            .get_mut::<CpuBuffer<Coords>>(render_group)
-            .unwrap()
-            .buffer
-            .get_mut(index.value as usize)
-            .unwrap() = coords;
-        let offset = offset::<Coords>(&index);
-        gfx_surface.queue.write_buffer(
-            &renderer
-                .container
-                .get::<GpuBuffer<Coords>>(render_group)
-                .unwrap()
-                .buffer,
-            offset,
-            bytemuck::cast_slice(&[coords]),
-        );
-    }
-}
-
-fn write_glyph_color(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_group: Entity) {
-    let colors = renderer
-        .container
-        .get_mut::<GlyphColorWrite>(render_group)
-        .unwrap()
-        .write
-        .drain()
-        .collect::<Vec<(Index, Color)>>();
-    for (index, color) in colors {
-        *renderer
-            .container
-            .get_mut::<CpuBuffer<Color>>(render_group)
-            .unwrap()
-            .buffer
-            .get_mut(index.value as usize)
-            .unwrap() = color;
-        let offset = offset::<Color>(&index);
-        gfx_surface.queue.write_buffer(
-            &renderer
-                .container
-                .get::<GpuBuffer<Color>>(render_group)
-                .unwrap()
-                .buffer,
-            offset,
-            bytemuck::cast_slice(&[color]),
+            bytemuck::cast_slice(cpu_range),
         );
     }
 }
