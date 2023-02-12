@@ -16,24 +16,14 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text, &Visibility)>,
+    mut text: Query<(Entity, &mut Text)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
-    for (entity, mut ent_text, visibility) in text.iter_mut() {
-        ent_text
-            .partitions
-            .first_mut()
-            .unwrap()
-            .characters
-            .push('!');
-        if counter.count >= 250 {
-            _idle.can_idle = true;
-        }
-    }
+    for (entity, mut ent_text) in text.iter_mut() {}
 }
 
 struct Launcher;
@@ -46,7 +36,7 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![TextPartition::new(
-                    "",
+                    "initial data is wrong? ",
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
                 (10u32, 10u32),

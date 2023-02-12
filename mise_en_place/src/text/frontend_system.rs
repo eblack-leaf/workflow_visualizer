@@ -119,7 +119,7 @@ pub(crate) fn manage_render_groups(
                     .bounds
                     .replace(TextBoundDifference::Changed(*bounds));
             }
-            let max = RenderGroupMax(text.length());
+            let max = RenderGroupMax(text.length().max(1));
             let unique_glyphs = RenderGroupUniqueGlyphs::from_text(text);
             extraction.added_render_groups.insert(
                 entity,
