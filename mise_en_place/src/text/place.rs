@@ -67,7 +67,7 @@ impl Placer {
         queue.sort();
         queue.reverse();
         for remove in queue.iter() {
-            self.filtered_placement.remove(remove.offset as usize);
+            self.filtered_placement.remove(remove.offset() as usize);
         }
     }
     pub(crate) fn reset_filtered(&mut self) {

@@ -2,11 +2,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{
-    Color, DepthAdjust, Engen, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata,
-    PositionAdjust, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextPartition,
-    TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer,
-};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextOffsetAdjustGuide, TextPartition, TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer};
 
 #[derive(Resource)]
 struct Counter {
@@ -31,6 +27,9 @@ fn update_text(
         if counter.count == 200 {
             ent_text.partitions.pop();
         }
+        if counter.count % 30 == 0 {
+            cmd.entity(entity).insert(TextOffsetAdjustGuide::new(0, -1));
+        }
         if counter.count >= 250 {
             _idle.can_idle = true;
         }
@@ -47,12 +46,12 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![TextPartition::new(
-                    "hello",
+                    include_str!("stress_test.txt"),
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
-                (0u32, 0u32),
+                (10u32, 10u32),
                 10u32,
-                TextScaleAlignment::Medium,
+                TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(120, 112));
     }
@@ -81,7 +80,7 @@ fn main() {
             return;
         }
     }
-    let mut engen = Engen::new();
+    let mut engen = Engen::new(EngenOptions::new().with_native_dimensions((500, 900)));
     engen.add_renderer::<TextRenderer>();
     engen.launch::<Launcher>();
 }

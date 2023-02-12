@@ -207,6 +207,7 @@ pub(crate) fn letter_diff(
                     || placed_glyph.parent.is_ascii_whitespace()
                 {
                     if cache.exists(key) {
+                        println!("removing because whitespace {:?}", key);
                         keys_to_remove.insert(key);
                     }
                     continue;

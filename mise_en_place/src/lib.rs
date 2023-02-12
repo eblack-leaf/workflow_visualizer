@@ -74,10 +74,24 @@ pub enum BackendStages {
     Prepare,
     Last,
 }
-
+pub struct EngenOptions {
+    pub native_dimensions: Option<Area>,
+}
+impl EngenOptions {
+    pub fn new() -> Self {
+        Self {
+            native_dimensions: None,
+        }
+    }
+    pub fn with_native_dimensions<A: Into<Area>>(mut self, dimensions: A) -> Self {
+        self.native_dimensions.replace(dimensions.into());
+        self
+    }
+}
 pub struct Engen {
     event_loop: Option<EventLoop<()>>,
     attachment_queue: Vec<Box<fn(&mut Engen)>>,
+    options: EngenOptions,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
     pub(crate) frontend: Job,
@@ -86,10 +100,11 @@ pub struct Engen {
 }
 
 impl Engen {
-    pub fn new() -> Self {
+    pub fn new(options: EngenOptions) -> Self {
         Self {
             event_loop: None,
             attachment_queue: vec![],
+            options,
             render_fns: (vec![], vec![]),
             extract_fns: vec![],
             frontend: {
@@ -368,9 +383,13 @@ impl Engen {
     fn init_native_gfx(&mut self, event_loop_window_target: &EventLoopWindowTarget<()>) {
         #[cfg(not(target_arch = "wasm32"))]
         {
+            let mut builder = WindowBuilder::new()
+                .with_title("native engen");
+            if let Some(native_dimensions) = self.options.native_dimensions {
+                builder = builder.with_inner_size(PhysicalSize::new(native_dimensions.width, native_dimensions.height));
+            }
             let window = Rc::new(
-                WindowBuilder::new()
-                    .with_title("native engen")
+                    builder
                     .build(event_loop_window_target)
                     .expect("no window"),
             );
