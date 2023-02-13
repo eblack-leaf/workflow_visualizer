@@ -26,7 +26,7 @@ fn update_text(
     for (entity, mut ent_text) in text.iter_mut() {
         if counter.count == 200 {
             if entity.index() == 0 {
-                ent_text.partitions.first_mut().unwrap().characters = "ok maybe updating placement".parse().unwrap();
+                ent_text.partitions.first_mut().unwrap().characters = include_str!("stress_test.txt").parse().unwrap();
             }
             if entity.index() == 1 {
                 ent_text.partitions.first_mut().unwrap().characters = "does it matter?".parse().unwrap();
@@ -48,9 +48,9 @@ impl Launch for Launcher {
                     "initial data is wrong? ",
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
-                (10u32, 20u32),
+                (0u32, 0u32),
                 10u32,
-                TextScaleAlignment::Large,
+                TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(120, 1120));
         job.container
@@ -59,7 +59,7 @@ impl Launch for Launcher {
                     "initial data is wrong? ",
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
-                (10u32, 60u32),
+                (0u32, 40u32),
                 10u32,
                 TextScaleAlignment::Small,
             ))
