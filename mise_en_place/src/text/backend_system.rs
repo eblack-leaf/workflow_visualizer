@@ -703,6 +703,15 @@ fn grow_atlas(
             new_dimension,
         );
         let atlas = Atlas::new(&gfx_surface, texture_dimensions);
+        let atlas_bind_group = AtlasBindGroup::new(
+            &gfx_surface,
+            &renderer.atlas_bind_group_layout,
+            &atlas,
+        );
+        *renderer
+            .container
+            .get_mut::<AtlasBindGroup>(render_group)
+            .unwrap() = atlas_bind_group;
         let mut free_locations = AtlasFreeLocations::new(new_dimension);
         let mut writes = Vec::<(GlyphId, AtlasLocation, Coords, Area, Bitmap)>::new();
         for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in renderer
@@ -828,18 +837,6 @@ fn update_adjusted_glyphs(
     adjusted_glyphs: HashSet<GlyphId>,
 ) {
     let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
-    if !adjusted_glyphs.is_empty() {
-        let atlas_bind_group = AtlasBindGroup::new(
-            &gfx_surface,
-            &renderer.atlas_bind_group_layout,
-            renderer.container.get::<Atlas>(render_group).unwrap(),
-        );
-        *renderer
-            .container
-            .get_mut::<AtlasBindGroup>(render_group)
-            .unwrap() = atlas_bind_group;
-    }
-
     for adj_glyph in adjusted_glyphs {
         for (key, glyph_id) in renderer
             .container

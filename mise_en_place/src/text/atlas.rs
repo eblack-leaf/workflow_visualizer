@@ -259,8 +259,8 @@ impl AtlasPosition {
     pub(crate) fn new(atlas_location: AtlasLocation, atlas_block: AtlasBlock) -> Self {
         Self {
             position: (
-                atlas_location.x * atlas_block.block.width as u32,
-                atlas_location.y * atlas_block.block.height as u32,
+                atlas_location.x as f32 * atlas_block.block.width,
+                atlas_location.y as f32 * atlas_block.block.height,
             )
                 .into(),
         }
