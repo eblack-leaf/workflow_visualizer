@@ -20,6 +20,7 @@ fn update_text(
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
+    mut exit: ResMut<Exit>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
@@ -31,6 +32,14 @@ fn update_text(
             if entity.index() == 1 {
                 ent_text.partitions.first_mut().unwrap().characters = "does it matter?".parse().unwrap();
             }
+        }
+        if counter.count >= 200 {
+            if entity.index() == 0 {
+                cmd.entity(entity).insert(PositionAdjust::new(0.0, -3.0));
+            }
+        }
+        if counter.count == 2500 {
+            exit.exit_requested = true;
         }
     }
 }
@@ -49,7 +58,7 @@ impl Launch for Launcher {
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
                 (0u32, 0u32),
-                10u32,
+                0u32,
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(120, 1120));
