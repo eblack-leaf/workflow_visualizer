@@ -27,13 +27,16 @@ impl Visibility {
 }
 
 #[derive(Component, Copy, Clone)]
-pub(crate) struct VisibleSection {
+pub struct VisibleSection {
     pub(crate) section: Section,
 }
 
 impl VisibleSection {
     pub(crate) fn new(section: Section) -> Self {
         Self { section }
+    }
+    pub fn section(&self) -> Section {
+        self.section
     }
 }
 

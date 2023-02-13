@@ -35,7 +35,7 @@ fn update_text(
         }
         if counter.count >= 200 {
             if entity.index() == 0 {
-                cmd.entity(entity).insert(PositionAdjust::new(0.0, -3.0));
+                cmd.entity(entity).insert(PositionAdjust::new(0.0, -4.0));
             }
         }
         if counter.count == 2500 {

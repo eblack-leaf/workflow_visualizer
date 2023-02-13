@@ -12,11 +12,11 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::Coords;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::Coords;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -27,7 +27,7 @@ pub use crate::text::{
 };
 pub use crate::theme::Theme;
 use crate::viewport::Viewport;
-pub use crate::visibility::Visibility;
+pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
 use crate::window::{Resize, ScaleFactor};
 
@@ -188,7 +188,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
