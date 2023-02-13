@@ -53,7 +53,7 @@ pub enum TextScaleAlignment {
     Large,
 }
 
-const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [16, 20, 24];
+const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [15, 18, 22];
 
 #[derive(Resource)]
 pub(crate) struct AlignedFonts {

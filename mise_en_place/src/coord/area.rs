@@ -1,118 +1,94 @@
+use std::marker::PhantomData;
+
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::area_adjust::{AreaAdjust, ScaledAreaAdjust};
+use crate::coord::{CoordContext, Logical, Scaled, Unscaled};
+use crate::coord::area_adjust::AreaAdjust;
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Component, Clone, Copy, Default, PartialEq, Debug)]
-pub struct Area {
+#[derive(Pod, Zeroable, Copy, Clone, Default)]
+pub struct GpuArea {
     pub width: f32,
     pub height: f32,
 }
 
-impl Area {
+#[derive(Component, Clone, Copy, Default, PartialEq, Debug)]
+pub struct Area<Context: CoordContext> {
+    pub width: f32,
+    pub height: f32,
+    _context: PhantomData<Context>,
+}
+
+impl<Context: CoordContext> Area<Context> {
     pub fn new(width: f32, height: f32) -> Self {
-        Self { width, height }
+        Self { width, height, _context: PhantomData }
     }
-    pub fn to_scaled(&self, scale_factor: f64) -> ScaledArea {
-        ScaledArea::new(
+    pub fn adjust<Adjust: Into<AreaAdjust<Context>>>(&mut self, adjust: Adjust) {
+        let adjust = adjust.into();
+        self.width += adjust.width;
+        self.height += adjust.height;
+    }
+    pub fn as_logical(&self) -> Area::<Logical> {
+        Area::<Logical>::new(self.width, self.height)
+    }
+    pub fn to_gpu(&self) -> GpuArea {
+        GpuArea {
+            width: self.width,
+            height: self.height,
+        }
+    }
+}
+
+impl Area<Unscaled> {
+    pub fn to_scaled(&self, scale_factor: f64) -> Area<Scaled> {
+        Area::<Scaled>::new(
             self.width * scale_factor as f32,
             self.height * scale_factor as f32,
         )
     }
-    pub fn adjust<Adjust: Into<AreaAdjust>>(&mut self, adjust: Adjust) {
-        let adjust = adjust.into();
-        self.width += adjust.width;
-        self.height += adjust.height;
+}
+
+impl Area<Scaled> {
+    pub fn to_unscaled(&self, scale_factor: f64) -> Area<Unscaled> {
+        Area::<Unscaled>::new(self.width / scale_factor as f32, self.height / scale_factor as f32)
     }
 }
 
-impl From<(usize, usize)> for Area {
+impl<Context: CoordContext> From<(usize, usize)> for Area<Context> {
     fn from(value: (usize, usize)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
-    }
-}
-
-impl From<(u32, u32)> for Area {
-    fn from(value: (u32, u32)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
-    }
-}
-
-impl From<(i32, i32)> for Area {
-    fn from(value: (i32, i32)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
-    }
-}
-
-impl From<(f32, f32)> for Area {
-    fn from(value: (f32, f32)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Component, Pod, Zeroable, Clone, Copy, Default, PartialEq, Debug)]
-pub struct ScaledArea {
-    pub width: f32,
-    pub height: f32,
-}
-
-impl ScaledArea {
-    pub fn to_area(&self, scale_factor: f64) -> Area {
-        Area::new(
-            self.width / scale_factor as f32,
-            self.height / scale_factor as f32,
+        Self::new(
+            value.0 as f32,
+            value.1 as f32,
         )
     }
-    pub fn as_area(&self) -> Area {
-        Area::new(self.width, self.height)
-    }
-    pub fn new(width: f32, height: f32) -> Self {
-        Self { width, height }
-    }
-    pub fn adjust<Adjust: Into<ScaledAreaAdjust>>(&mut self, adjust: Adjust) {
-        let adjust = adjust.into();
-        self.width += adjust.width;
-        self.height += adjust.height;
+}
+
+impl<Context: CoordContext> From<(i32, i32)> for Area<Context> {
+    fn from(value: (i32, i32)) -> Self {
+        Self::new(
+            value.0 as f32,
+            value.1 as f32,
+        )
     }
 }
 
-impl From<(usize, usize)> for ScaledArea {
-    fn from(value: (usize, usize)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
-    }
-}
-
-impl From<(u32, u32)> for ScaledArea {
-    fn from(value: (u32, u32)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
-    }
-}
-
-impl From<(f32, f32)> for ScaledArea {
+impl<Context: CoordContext> From<(f32, f32)> for Area<Context> {
     fn from(value: (f32, f32)) -> Self {
-        Self {
-            width: value.0 as f32,
-            height: value.1 as f32,
-        }
+        Self::new(
+            value.0 as f32,
+            value.1 as f32,
+        )
     }
 }
+
+impl<Context: CoordContext> From<(u32, u32)> for Area<Context> {
+    fn from(value: (u32, u32)) -> Self {
+        Self::new(
+            value.0 as f32,
+            value.1 as f32,
+        )
+    }
+}
+
+

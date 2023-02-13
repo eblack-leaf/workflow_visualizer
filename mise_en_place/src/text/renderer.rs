@@ -4,6 +4,11 @@ use bevy_ecs::prelude::{
     Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage,
 };
 
+use crate::{
+    Area, Attach, BackendStages, BackEndStartupStages, Color, Engen, FrontEndStages,
+    FrontEndStartupStages, Job, Position,
+};
+use crate::coord::{GpuArea, GpuPosition};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::job::Container;
@@ -26,13 +31,9 @@ use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
 use crate::viewport::Viewport;
 use crate::window::ScaleFactor;
-use crate::{
-    Area, Attach, BackEndStartupStages, BackendStages, Color, Engen, FrontEndStages,
-    FrontEndStartupStages, Job, Position,
-};
 
 #[derive(Resource)]
 pub struct TextRenderer {
@@ -148,7 +149,7 @@ pub(crate) fn setup(
                 attributes: &wgpu::vertex_attr_array![0 => Float32x2],
             },
             wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<Position>() as wgpu::BufferAddress,
+                array_stride: std::mem::size_of::<GpuPosition>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &wgpu::vertex_attr_array![1 => Float32x2],
             },
@@ -163,7 +164,7 @@ pub(crate) fn setup(
                 attributes: &wgpu::vertex_attr_array![3 => Float32x4],
             },
             wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<Area>() as wgpu::BufferAddress,
+                array_stride: std::mem::size_of::<GpuArea>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &wgpu::vertex_attr_array![4 => Float32x2],
             },
@@ -330,8 +331,8 @@ impl Attach for TextRenderer {
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = frontend
             .container
@@ -365,7 +366,7 @@ impl Render for TextRenderer {
             if indexer.count() > 0 {
                 let glyph_positions = self
                     .container
-                    .get::<GpuBuffer<Position>>(*render_group)
+                    .get::<GpuBuffer<GpuPosition>>(*render_group)
                     .expect("no glyph position buffer");
                 render_pass_handle
                     .0
@@ -386,7 +387,7 @@ impl Render for TextRenderer {
                     .set_vertex_buffer(3, coords.buffer.slice(..));
                 let glyph_areas = self
                     .container
-                    .get::<GpuBuffer<Area>>(*render_group)
+                    .get::<GpuBuffer<GpuArea>>(*render_group)
                     .expect("no glyph area buffer");
                 render_pass_handle
                     .0

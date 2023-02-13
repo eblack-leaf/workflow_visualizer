@@ -4,11 +4,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{
-    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch,
-    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextRenderer, TextScaleAlignment, Visibility, WasmCompileDescriptor, WasmServer,
-};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer, TextScaleAlignment, Unscaled, Visibility, WasmCompileDescriptor, WasmServer};
 
 #[derive(Resource)]
 struct Counter {
@@ -16,7 +12,7 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text)>,
+    mut text: Query<(Entity, &mut Text, Option<&Visibility>)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
@@ -24,22 +20,22 @@ fn update_text(
 ) {
     counter.count += 1;
     _idle.can_idle = false;
-    for (entity, mut ent_text) in text.iter_mut() {
-        if counter.count == 200 {
-            if entity.index() == 0 {
-                ent_text.partitions.first_mut().unwrap().characters = include_str!("stress_test.txt").parse().unwrap();
+    for (entity, mut ent_text, visibility) in text.iter_mut() {
+        if counter.count > 0 {
+            if counter.count % 1 == 0 {
+                if entity.index() == 0 {
+                    ent_text.partitions.first_mut().unwrap().characters =
+                        format!("counter is: {:?}", counter.count);
+                }
+                if entity.index() == 1 {
+                    if let Some(vis) = visibility {
+                        println!("vis: {:?}", vis.visible());
+                    } else {
+                        println!("no visibility");
+                    }
+                    cmd.entity(entity).insert(PositionAdjust::<Unscaled>::new(1.0, 0.0));
+                }
             }
-            if entity.index() == 1 {
-                ent_text.partitions.first_mut().unwrap().characters = "does it matter?".parse().unwrap();
-            }
-        }
-        if counter.count >= 200 {
-            if entity.index() == 0 {
-                cmd.entity(entity).insert(PositionAdjust::new(0.0, -4.0));
-            }
-        }
-        if counter.count == 2500 {
-            exit.exit_requested = true;
         }
     }
 }
@@ -53,26 +49,18 @@ impl Launch for Launcher {
             .add_system_to_stage(FrontEndStages::Process, update_text);
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![TextPartition::new(
-                    "initial data is wrong? ",
-                    PartitionMetadata::new((1.0, 1.0, 1.0), 0),
-                )]),
-                (0u32, 0u32),
-                0u32,
+                Text::new(vec![("", ((1.0, 1.0, 1.0), 0))]),
+                (Unscaled {}, (0u32, 0u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
-            .insert(TextBoundGuide::new(120, 1120));
+            .insert(TextBoundGuide::new(120, 1));
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![TextPartition::new(
-                    "initial data is wrong? ",
-                    PartitionMetadata::new((1.0, 1.0, 1.0), 0),
-                )]),
-                (0u32, 40u32),
-                10u32,
+                Text::new(vec![("abcdefghijklmnopqrstuvwxyz", ((1.0, 1.0, 1.0), 0))]),
+                (Unscaled {}, (0u32, 40u32), 10u32),
                 TextScaleAlignment::Small,
             ))
-            .insert(TextBoundGuide::new(120, 1120));
+            .insert(TextBoundGuide::new(120, 1));
     }
 }
 

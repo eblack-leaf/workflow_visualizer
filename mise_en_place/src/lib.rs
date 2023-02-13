@@ -13,7 +13,8 @@ pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    Area, AreaAdjust, Depth, DepthAdjust, Position, PositionAdjust, ScaledSection, Section,
+    Area, AreaAdjust, Depth, DepthAdjust, Location, Logical, Position,
+    PositionAdjust, Scaled, Section, Unscaled,
 };
 use crate::coord::Coords;
 use crate::extract::{Extract, ExtractFns, invoke_extract};
@@ -78,7 +79,7 @@ pub enum BackendStages {
 }
 
 pub struct EngenOptions {
-    pub native_dimensions: Option<Area>,
+    pub native_dimensions: Option<Area<Scaled>>,
 }
 
 impl EngenOptions {
@@ -87,7 +88,7 @@ impl EngenOptions {
             native_dimensions: None,
         }
     }
-    pub fn with_native_dimensions<A: Into<Area>>(mut self, dimensions: A) -> Self {
+    pub fn with_native_dimensions<A: Into<Area<Scaled>>>(mut self, dimensions: A) -> Self {
         self.native_dimensions.replace(dimensions.into());
         self
     }

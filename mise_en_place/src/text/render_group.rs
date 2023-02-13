@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::coord::ScaledPosition;
+use crate::{Area, Color, Depth, Position, Section};
+use crate::coord::{GpuArea, GpuPosition, Scaled, Unscaled};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -18,7 +19,6 @@ use crate::text::scale::TextScaleAlignment;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
-use crate::{Area, Color, Depth, Position, ScaledSection, Section};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);
@@ -53,7 +53,7 @@ impl<Attribute> AttributeWrite<Attribute> {
 #[derive(Bundle)]
 pub(crate) struct RenderGroup {
     pub(crate) max: RenderGroupMax,
-    pub(crate) position: ScaledPosition,
+    pub(crate) position: Position<Scaled>,
     pub(crate) visible_section: VisibleSection,
     pub(crate) depth: Depth,
     pub(crate) atlas_block: AtlasBlock,
@@ -66,16 +66,16 @@ pub(crate) struct RenderGroup {
     pub(crate) text_bound: RenderGroupTextBound,
     pub(crate) null_cpu: CpuBuffer<NullBit>,
     pub(crate) coords_cpu: CpuBuffer<Coords>,
-    pub(crate) glyph_position_cpu: CpuBuffer<Position>,
-    pub(crate) glyph_area_cpu: CpuBuffer<Area>,
+    pub(crate) glyph_position_cpu: CpuBuffer<GpuPosition>,
+    pub(crate) glyph_area_cpu: CpuBuffer<GpuArea>,
     pub(crate) null_gpu: GpuBuffer<NullBit>,
     pub(crate) coords_gpu: GpuBuffer<Coords>,
-    pub(crate) glyph_position_gpu: GpuBuffer<Position>,
-    pub(crate) glyph_area_gpu: GpuBuffer<Area>,
+    pub(crate) glyph_position_gpu: GpuBuffer<GpuPosition>,
+    pub(crate) glyph_area_gpu: GpuBuffer<GpuArea>,
     pub(crate) null_write: AttributeWrite<NullBit>,
     pub(crate) coords_write: AttributeWrite<Coords>,
-    pub(crate) glyph_position_write: AttributeWrite<Position>,
-    pub(crate) glyph_area_write: AttributeWrite<Area>,
+    pub(crate) glyph_position_write: AttributeWrite<GpuPosition>,
+    pub(crate) glyph_area_write: AttributeWrite<GpuArea>,
     pub(crate) position_write: PositionWrite,
     pub(crate) depth_write: DepthWrite,
     pub(crate) keyed_glyph_ids: KeyedGlyphIds,
@@ -97,7 +97,7 @@ pub(crate) struct RenderGroup {
 impl RenderGroup {
     pub(crate) fn new(
         max: RenderGroupMax,
-        position: ScaledPosition,
+        position: Position<Scaled>,
         visible_section: VisibleSection,
         depth: Depth,
         atlas_block: AtlasBlock,
@@ -110,16 +110,16 @@ impl RenderGroup {
         text_bound: RenderGroupTextBound,
         null_cpu: CpuBuffer<NullBit>,
         coords_cpu: CpuBuffer<Coords>,
-        glyph_position_cpu: CpuBuffer<Position>,
-        glyph_area_cpu: CpuBuffer<Area>,
+        glyph_position_cpu: CpuBuffer<GpuPosition>,
+        glyph_area_cpu: CpuBuffer<GpuArea>,
         null_gpu: GpuBuffer<NullBit>,
         coords_gpu: GpuBuffer<Coords>,
-        glyph_position_gpu: GpuBuffer<Position>,
-        glyph_area_gpu: GpuBuffer<Area>,
+        glyph_position_gpu: GpuBuffer<GpuPosition>,
+        glyph_area_gpu: GpuBuffer<GpuArea>,
         null_write: AttributeWrite<NullBit>,
         coords_write: AttributeWrite<Coords>,
-        glyph_position_write: AttributeWrite<Position>,
-        glyph_area_write: AttributeWrite<Area>,
+        glyph_position_write: AttributeWrite<GpuPosition>,
+        glyph_area_write: AttributeWrite<GpuArea>,
         position_write: PositionWrite,
         depth_write: DepthWrite,
         keyed_glyph_ids: KeyedGlyphIds,
@@ -189,7 +189,7 @@ pub(crate) struct TextPlacement {
 }
 
 impl TextPlacement {
-    pub(crate) fn new(position: ScaledPosition, depth: Depth) -> Self {
+    pub(crate) fn new(position: Position<Scaled>, depth: Depth) -> Self {
         Self {
             placement: [position.x, position.y, depth.layer, 0.0],
         }
@@ -239,18 +239,18 @@ impl TextBoundGuide {
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct TextBound {
-    pub area: Area,
+    pub area: Area<Unscaled>,
 }
 
 impl TextBound {
-    pub(crate) fn new<A: Into<Area>>(area: A) -> Self {
+    pub(crate) fn new<A: Into<Area<Unscaled>>>(area: A) -> Self {
         Self { area: area.into() }
     }
 }
 
 #[derive(Component)]
 pub(crate) struct PositionWrite {
-    pub(crate) write: Option<ScaledPosition>,
+    pub(crate) write: Option<Position<Scaled>>,
 }
 
 impl PositionWrite {
@@ -285,7 +285,7 @@ impl KeyedGlyphIds {
 
 #[derive(Component)]
 pub(crate) struct RenderGroupTextBound {
-    pub(crate) text_bound_area: Option<Area>,
+    pub(crate) text_bound_area: Option<Area<Unscaled>>,
 }
 
 impl RenderGroupTextBound {
@@ -298,7 +298,7 @@ impl RenderGroupTextBound {
 
 #[derive(Component)]
 pub(crate) struct DrawSection {
-    pub(crate) section: Option<ScaledSection>,
+    pub(crate) section: Option<Section<Scaled>>,
 }
 
 impl DrawSection {

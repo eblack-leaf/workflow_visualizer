@@ -1,24 +1,25 @@
-use crate::coord::Position;
-use crate::gfx::GfxSurface;
 use wgpu::util::DeviceExt;
 
+use crate::coord::{GpuPosition, Position};
+use crate::gfx::GfxSurface;
+
 pub(crate) const GLYPH_AABB: [Vertex; 6] = [
-    Vertex::new(Position { x: 0.0, y: 0.0 }),
-    Vertex::new(Position { x: 0.0, y: 1.0 }),
-    Vertex::new(Position { x: 1.0, y: 0.0 }),
-    Vertex::new(Position { x: 1.0, y: 0.0 }),
-    Vertex::new(Position { x: 0.0, y: 1.0 }),
-    Vertex::new(Position { x: 1.0, y: 1.0 }),
+    Vertex::new(GpuPosition { x: 0.0, y: 0.0 }),
+    Vertex::new(GpuPosition { x: 0.0, y: 1.0 }),
+    Vertex::new(GpuPosition { x: 1.0, y: 0.0 }),
+    Vertex::new(GpuPosition { x: 1.0, y: 0.0 }),
+    Vertex::new(GpuPosition { x: 0.0, y: 1.0 }),
+    Vertex::new(GpuPosition { x: 1.0, y: 1.0 }),
 ];
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 pub(crate) struct Vertex {
-    pub position: Position,
+    pub position: GpuPosition,
 }
 
 impl Vertex {
-    pub const fn new(position: Position) -> Self {
+    pub const fn new(position: GpuPosition) -> Self {
         Self { position }
     }
 }

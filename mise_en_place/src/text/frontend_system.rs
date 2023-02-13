@@ -8,7 +8,7 @@ use bevy_ecs::prelude::{
 
 use crate::{AreaAdjust, TextBoundGuide};
 use crate::color::Color;
-use crate::coord::{Area, Depth, Position, ScaledSection, Section};
+use crate::coord::{Area, Depth, Position, Scaled, Section, Unscaled};
 use crate::text::atlas::AtlasBlock;
 use crate::text::cache::Cache;
 use crate::text::difference::{Difference, TextBoundDifference};
@@ -28,11 +28,11 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 }
 
 pub(crate) fn intercept_area_adjust(
-    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust>)>,
+    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust<Unscaled>>)>,
     mut cmd: Commands,
 ) {
     for entity in attempted_area_adjust.iter() {
-        cmd.entity(entity).remove::<AreaAdjust>();
+        cmd.entity(entity).remove::<AreaAdjust<Unscaled>>();
     }
 }
 
@@ -79,7 +79,7 @@ pub(crate) fn manage_render_groups(
             Entity,
             &Text,
             &TextScale,
-            &Position,
+            &Position<Unscaled>,
             &VisibleSection,
             Option<&TextBound>,
             &Depth,
@@ -230,7 +230,9 @@ pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd
             width = width.max(glyph.x + glyph.width as f32);
             height = height.max(glyph.y + glyph.height as f32);
         }
-        if width != 0.0 && height != 0.0 { cmd.entity(entity).insert(Area::new(width, height)); }
+        if width != 0.0 && height != 0.0 {
+            cmd.entity(entity).insert(Area::<Unscaled>::new(width, height));
+        }
     }
 }
 
@@ -276,7 +278,7 @@ pub(crate) fn depth_diff(
 }
 
 pub(crate) fn position_diff(
-    mut text: Query<(&Position, &mut Cache, &mut Difference), (Changed<Position>, With<Text>)>,
+    mut text: Query<(&Position<Unscaled>, &mut Cache, &mut Difference), (Changed<Position<Unscaled>>, With<Text>)>,
 ) {
     for (position, mut cache, mut difference) in text.iter_mut() {
         if *position != cache.position {
@@ -351,8 +353,8 @@ pub(crate) fn discard_out_of_bounds(
     mut text: Query<
         (
             &mut Placer,
-            &Position,
-            &Area,
+            &Position<Unscaled>,
+            &Area<Unscaled>,
             Option<&TextBound>,
             &VisibleSection,
         ),
@@ -360,7 +362,7 @@ pub(crate) fn discard_out_of_bounds(
             Changed<Placer>,
             Changed<VisibleSection>,
             Changed<TextBound>,
-            Changed<Position>,
+            Changed<Position<Unscaled>>,
         )>,
     >,
     scale_factor: Res<ScaleFactor>,
@@ -374,12 +376,12 @@ pub(crate) fn discard_out_of_bounds(
         let text_section = visible_section
             .section
             .to_scaled(scale_factor.factor)
-            .intersection(ScaledSection::new(scaled_position, bound_area));
+            .intersection(Section::<Scaled>::new(scaled_position, bound_area));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();
             for (key, glyph) in placer.unfiltered_placement().iter() {
-                let glyph_section = ScaledSection::new(
+                let glyph_section = Section::<Scaled>::new(
                     (scaled_position.x + glyph.x, scaled_position.y + glyph.y),
                     (glyph.width, glyph.height),
                 );

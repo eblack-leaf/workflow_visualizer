@@ -2,14 +2,14 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::coord::{Depth, Position, Section};
+use crate::{Color, Location, PositionAdjust};
+use crate::coord::{Depth, Position, Section, Unscaled};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::glyph::Key;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::{Color, PositionAdjust};
 
 pub struct TextPartition {
     pub characters: String,
@@ -17,11 +17,17 @@ pub struct TextPartition {
 }
 
 impl TextPartition {
-    pub fn new<S: Into<String>>(characters: S, metadata: PartitionMetadata) -> Self {
+    pub fn new<S: Into<String>, PM: Into<PartitionMetadata>>(characters: S, metadata: PM) -> Self {
         Self {
             characters: characters.into(),
-            metadata,
+            metadata: metadata.into(),
         }
+    }
+}
+
+impl<S: Into<String>, PM: Into<PartitionMetadata>> From<(S, PM)> for TextPartition {
+    fn from(value: (S, PM)) -> Self {
+        Self::new(value.0, value.1)
     }
 }
 
@@ -31,8 +37,13 @@ pub struct Text {
 }
 
 impl Text {
-    pub fn new(partitions: Vec<TextPartition>) -> Self {
-        Self { partitions }
+    pub fn new<TP: Into<TextPartition>>(mut partitions: Vec<TP>) -> Self {
+        Self {
+            partitions: partitions
+                .drain(..)
+                .map(|tp| tp.into())
+                .collect::<Vec<TextPartition>>(),
+        }
     }
     pub fn length(&self) -> u32 {
         let mut len = 0;
@@ -46,8 +57,8 @@ impl Text {
 #[derive(Bundle)]
 pub struct TextBundle {
     pub text: Text,
-    pub position: Position,
-    pub depth: Depth,
+    #[bundle]
+    pub location: Location<Unscaled>,
     pub scale_alignment: TextScaleAlignment,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
@@ -55,21 +66,22 @@ pub struct TextBundle {
 }
 
 impl TextBundle {
-    pub fn new<T: Into<Text>, P: Into<Position>, D: Into<Depth>>(
+    pub fn new<T: Into<Text>, L: Into<Location<Unscaled>>>(
         text: T,
-        position: P,
-        depth: D,
+        location: L,
         scale_alignment: TextScaleAlignment,
     ) -> Self {
-        let position = position.into();
-        let depth = depth.into();
+        let location = location.into();
         Self {
             text: text.into(),
-            position,
-            depth,
+            location,
             scale_alignment,
             placer: Placer::new(),
-            cache: Cache::new(position, depth, VisibleSection::new(Section::default())),
+            cache: Cache::new(
+                location.position,
+                location.depth,
+                VisibleSection::new(Section::default()),
+            ),
             difference: Difference::new(),
         }
     }
@@ -87,5 +99,11 @@ impl PartitionMetadata {
             color: color.into(),
             mods,
         }
+    }
+}
+
+impl<C: Into<Color>> From<(C, u32)> for PartitionMetadata {
+    fn from(value: (C, u32)) -> Self {
+        Self::new(value.0, value.1)
     }
 }

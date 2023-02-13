@@ -4,13 +4,13 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 use bytemuck::{Pod, Zeroable};
 
-use crate::{Area, Color, Position, ScaledSection, Section};
-use crate::coord::ScaledPosition;
+use crate::{Area, Color, Position, Section};
+use crate::coord::{GpuArea, GpuPosition, Logical, Scaled};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
-    AtlasTextureDimensions, AtlasWriteQueue, Bitmap, GlyphArea,
+    AtlasTextureDimensions, AtlasWriteQueue, Bitmap,
 };
 use crate::text::coords::Coords;
 use crate::text::cpu_buffer::CpuBuffer;
@@ -72,17 +72,17 @@ pub(crate) fn create_render_groups(
         let text_bound = RenderGroupTextBound::new();
         let null_cpu = CpuBuffer::<NullBit>::new(max.0);
         let coords_cpu = CpuBuffer::<Coords>::new(max.0);
-        let glyph_position_cpu = CpuBuffer::<Position>::new(max.0);
-        let glyph_area_cpu = CpuBuffer::<Area>::new(max.0);
+        let glyph_position_cpu = CpuBuffer::<GpuPosition>::new(max.0);
+        let glyph_area_cpu = CpuBuffer::<GpuArea>::new(max.0);
         let null_gpu = GpuBuffer::<NullBit>::new(&gfx_surface, max.0, "null bit buffer");
         let coords_gpu = GpuBuffer::<Coords>::new(&gfx_surface, max.0, "coords buffer");
         let glyph_position_gpu =
-            GpuBuffer::<Position>::new(&gfx_surface, max.0, "glyph position buffer");
-        let glyph_area_gpu = GpuBuffer::<Area>::new(&gfx_surface, max.0, "glyph area buffer");
+            GpuBuffer::<GpuPosition>::new(&gfx_surface, max.0, "glyph position buffer");
+        let glyph_area_gpu = GpuBuffer::<GpuArea>::new(&gfx_surface, max.0, "glyph area buffer");
         let null_write = AttributeWrite::<NullBit>::new();
         let coords_write = AttributeWrite::<Coords>::new();
-        let glyph_position_write = AttributeWrite::<Position>::new();
-        let glyph_area_write = AttributeWrite::<Area>::new();
+        let glyph_position_write = AttributeWrite::<GpuPosition>::new();
+        let glyph_area_write = AttributeWrite::<GpuArea>::new();
         let position_write = PositionWrite::new();
         let depth_write = DepthWrite::new();
         let keyed_glyph_ids = KeyedGlyphIds::new();
@@ -187,8 +187,8 @@ pub(crate) fn render_group_differences(
         rasterize_add_queue(&mut renderer, &font, render_group);
         update_adjusted_glyphs(&mut renderer, &gfx_surface, render_group, adjusted_glyphs);
         read_added_glyphs(&mut renderer, difference, render_group);
-        write_attribute::<Position>(&mut renderer, &gfx_surface, render_group);
-        write_attribute::<Area>(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<GpuPosition>(&mut renderer, &gfx_surface, render_group);
+        write_attribute::<GpuArea>(&mut renderer, &gfx_surface, render_group);
         write_attribute::<NullBit>(&mut renderer, &gfx_surface, render_group);
         write_attribute::<Coords>(&mut renderer, &gfx_surface, render_group);
         write_text_placement(&mut renderer, &gfx_surface, render_group);
@@ -275,9 +275,9 @@ fn resolve_draw_section(
     {
         let position = *renderer
             .container
-            .get::<ScaledPosition>(render_group)
+            .get::<Position<Scaled>>(render_group)
             .unwrap();
-        let scaled_bound = ScaledSection::new(position, bound.to_scaled(scale_factor.factor));
+        let scaled_bound = Section::<Scaled>::new(position, bound.to_scaled(scale_factor.factor));
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
@@ -290,7 +290,7 @@ fn resolve_draw_section(
             let viewport_dimensions = v_bound.intersection(viewport.as_section());
             if let Some(v_dim) = viewport_dimensions {
                 let draw_bound =
-                    ScaledSection::new(v_dim.position - viewport.as_section().position, v_dim.area);
+                    Section::<Scaled>::new(v_dim.position - viewport.as_section().position, v_dim.area);
                 renderer
                     .container
                     .get_mut::<DrawSection>(render_group)
@@ -390,10 +390,10 @@ fn queue_add(renderer: &mut TextRenderer, difference: &Difference, render_group:
             .next(*key);
         renderer
             .container
-            .get_mut::<AttributeWrite<Position>>(render_group)
+            .get_mut::<AttributeWrite<GpuPosition>>(render_group)
             .unwrap()
             .write
-            .insert(index, *glyph_position);
+            .insert(index, glyph_position.to_gpu());
         renderer
             .container
             .get_mut::<AttributeWrite<NullBit>>(render_group)
@@ -417,50 +417,50 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
             .max();
         renderer
             .container
-            .get_mut::<CpuBuffer<Position>>(render_group)
+            .get_mut::<CpuBuffer<GpuPosition>>(render_group)
             .unwrap()
             .buffer
-            .resize(max as usize, Position::default());
+            .resize(max as usize, GpuPosition::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<Position>>(render_group)
-            .unwrap() = GpuBuffer::<Position>::new(&gfx_surface, max, "glyph position buffer");
+            .get_mut::<GpuBuffer<GpuPosition>>(render_group)
+            .unwrap() = GpuBuffer::<GpuPosition>::new(&gfx_surface, max, "glyph position buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<Position>>(render_group)
+                .get::<GpuBuffer<GpuPosition>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<Position>>(render_group)
+                    .get::<CpuBuffer<GpuPosition>>(render_group)
                     .unwrap()
                     .buffer,
             ),
         );
         renderer
             .container
-            .get_mut::<CpuBuffer<GlyphArea>>(render_group)
+            .get_mut::<CpuBuffer<GpuArea>>(render_group)
             .unwrap()
             .buffer
-            .resize(max as usize, GlyphArea::default());
+            .resize(max as usize, GpuArea::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<GlyphArea>>(render_group)
-            .unwrap() = GpuBuffer::<GlyphArea>::new(&gfx_surface, max, "glyph area buffer");
+            .get_mut::<GpuBuffer<GpuArea>>(render_group)
+            .unwrap() = GpuBuffer::<GpuArea>::new(&gfx_surface, max, "glyph area buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<GlyphArea>>(render_group)
+                .get::<GpuBuffer<GpuArea>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<GlyphArea>>(render_group)
+                    .get::<CpuBuffer<GpuArea>>(render_group)
                     .unwrap()
                     .buffer,
             ),
@@ -557,10 +557,10 @@ fn update_glyph_positions(
             .expect("no index for key");
         renderer
             .container
-            .get_mut::<AttributeWrite<Position>>(render_group)
+            .get_mut::<AttributeWrite<GpuPosition>>(render_group)
             .unwrap()
             .write
-            .insert(index, *glyph_position);
+            .insert(index, glyph_position.to_gpu());
     }
 }
 
@@ -703,17 +703,14 @@ fn grow_atlas(
             new_dimension,
         );
         let atlas = Atlas::new(&gfx_surface, texture_dimensions);
-        let atlas_bind_group = AtlasBindGroup::new(
-            &gfx_surface,
-            &renderer.atlas_bind_group_layout,
-            &atlas,
-        );
+        let atlas_bind_group =
+            AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
         *renderer
             .container
             .get_mut::<AtlasBindGroup>(render_group)
             .unwrap() = atlas_bind_group;
         let mut free_locations = AtlasFreeLocations::new(new_dimension);
-        let mut writes = Vec::<(GlyphId, AtlasLocation, Coords, Area, Bitmap)>::new();
+        let mut writes = Vec::<(GlyphId, AtlasLocation, Coords, Area<Logical>, Bitmap)>::new();
         for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in renderer
             .container
             .get::<AtlasGlyphs>(render_group)
@@ -867,10 +864,10 @@ fn update_adjusted_glyphs(
             .unwrap();
         renderer
             .container
-            .get_mut::<AttributeWrite<Area>>(render_group)
+            .get_mut::<AttributeWrite<GpuArea>>(render_group)
             .unwrap()
             .write
-            .insert(index, area);
+            .insert(index, area.to_gpu());
         renderer
             .container
             .get_mut::<AttributeWrite<Coords>>(render_group)
@@ -898,10 +895,10 @@ fn read_added_glyphs(renderer: &mut TextRenderer, difference: &Difference, rende
             .unwrap();
         renderer
             .container
-            .get_mut::<AttributeWrite<Area>>(render_group)
+            .get_mut::<AttributeWrite<GpuArea>>(render_group)
             .unwrap()
             .write
-            .insert(index, area);
+            .insert(index, area.to_gpu());
         renderer
             .container
             .get_mut::<AttributeWrite<Coords>>(render_group)
@@ -982,7 +979,7 @@ fn write_text_placement(
     {
         *renderer
             .container
-            .get_mut::<ScaledPosition>(render_group)
+            .get_mut::<Position<Scaled>>(render_group)
             .unwrap() = position;
         renderer
             .container
