@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Events, Resource};
 
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages};
 use crate::coord::Scaled;
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages};
 
 #[derive(Resource, Clone, Copy)]
 pub(crate) struct ScaleFactor {

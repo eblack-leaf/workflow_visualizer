@@ -29,14 +29,18 @@ impl<Context: CoordContext> Sub for Position<Context> {
 
 impl<Context: CoordContext> Position<Context> {
     pub fn new(x: f32, y: f32) -> Self {
-        Self { x, y, _coord_context: PhantomData }
+        Self {
+            x,
+            y,
+            _coord_context: PhantomData,
+        }
     }
     pub(crate) fn adjust<Adjust: Into<PositionAdjust<Context>>>(&mut self, adjust: Adjust) {
         let adjust = adjust.into();
         self.x += adjust.x;
         self.y += adjust.y;
     }
-    pub fn as_logical(&self) -> Position::<Logical> {
+    pub fn as_logical(&self) -> Position<Logical> {
         Position::<Logical>::new(self.x, self.y)
     }
     pub fn to_gpu(&self) -> GpuPosition {

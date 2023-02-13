@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::Bundle;
 use bytemuck::{Pod, Zeroable};
 
-use crate::{Depth, Position};
 use crate::coord::CoordContext;
+use crate::{Depth, Position};
 
 #[derive(Bundle, Copy, Clone, PartialEq)]
 pub struct Location<Context: CoordContext> {
@@ -19,7 +19,9 @@ impl<Context: CoordContext> Location<Context> {
     }
 }
 
-impl<Context: CoordContext, P: Into<Position<Context>>, D: Into<Depth>> From<(Context, P, D)> for Location<Context> {
+impl<Context: CoordContext, P: Into<Position<Context>>, D: Into<Depth>> From<(Context, P, D)>
+    for Location<Context>
+{
     fn from(value: (Context, P, D)) -> Self {
         Self::new(value.1, value.2)
     }

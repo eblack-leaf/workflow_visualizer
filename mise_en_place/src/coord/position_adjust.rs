@@ -14,7 +14,11 @@ pub struct PositionAdjust<Context: CoordContext> {
 
 impl<Context: CoordContext> PositionAdjust<Context> {
     pub fn new(x: f32, y: f32) -> Self {
-        Self { x, y, _context: PhantomData }
+        Self {
+            x,
+            y,
+            _context: PhantomData,
+        }
     }
 }
 

@@ -2,7 +2,6 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::{Color, Location, PositionAdjust};
 use crate::coord::{Depth, Position, Section, Unscaled};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
@@ -10,6 +9,7 @@ use crate::text::glyph::Key;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
+use crate::{Color, Location, PositionAdjust};
 
 pub struct TextPartition {
     pub characters: String,

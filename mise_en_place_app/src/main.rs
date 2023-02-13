@@ -4,7 +4,11 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer, TextScaleAlignment, Unscaled, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{
+    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch,
+    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
+    TextRenderer, TextScaleAlignment, Unscaled, Visibility, WasmCompileDescriptor, WasmServer,
+};
 
 #[derive(Resource)]
 struct Counter {
@@ -28,12 +32,8 @@ fn update_text(
                         format!("counter is: {:?}", counter.count);
                 }
                 if entity.index() == 1 {
-                    if let Some(vis) = visibility {
-                        println!("vis: {:?}", vis.visible());
-                    } else {
-                        println!("no visibility");
-                    }
-                    cmd.entity(entity).insert(PositionAdjust::<Unscaled>::new(1.0, 0.0));
+                    cmd.entity(entity)
+                        .insert(PositionAdjust::<Unscaled>::new(0.0, 1.0));
                 }
             }
         }

@@ -14,7 +14,11 @@ pub struct AreaAdjust<Context: CoordContext> {
 
 impl<Context: CoordContext> AreaAdjust<Context> {
     pub fn new(width: f32, height: f32) -> Self {
-        Self { width, height, _context: PhantomData }
+        Self {
+            width,
+            height,
+            _context: PhantomData,
+        }
     }
 }
 
@@ -33,4 +37,3 @@ pub(crate) fn area_adjust<Context: CoordContext>(
         cmd.entity(entity).remove::<AreaAdjust<Context>>();
     }
 }
-
