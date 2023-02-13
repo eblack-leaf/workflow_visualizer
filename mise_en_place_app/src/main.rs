@@ -23,7 +23,11 @@ fn update_text(
 ) {
     counter.count += 1;
     _idle.can_idle = false;
-    for (entity, mut ent_text) in text.iter_mut() {}
+    for (entity, mut ent_text) in text.iter_mut() {
+        if entity.index() == 0 {
+            ent_text.partitions.first_mut().unwrap().characters = "ok maybe updating placement".parse().unwrap();
+        }
+    }
 }
 
 struct Launcher;
@@ -39,8 +43,19 @@ impl Launch for Launcher {
                     "initial data is wrong? ",
                     PartitionMetadata::new((1.0, 1.0, 1.0), 0),
                 )]),
-                (10u32, 10u32),
+                (10u32, 20u32),
                 10u32,
+                TextScaleAlignment::Small,
+            ))
+            .insert(TextBoundGuide::new(120, 1120));
+        job.container
+            .spawn(TextBundle::new(
+                Text::new(vec![TextPartition::new(
+                    "initial data is wrong? ",
+                    PartitionMetadata::new((1.0, 1.0, 1.0), 0),
+                )]),
+                (0u32, 0u32),
+                1u32,
                 TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(120, 1120));
