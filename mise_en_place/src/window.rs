@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Events, Resource};
 
-use crate::coord::Scaled;
 use crate::{Area, Attach, BackendStages, Engen, FrontEndStages};
+use crate::coord::Device;
 
 #[derive(Resource, Clone, Copy)]
 pub(crate) struct ScaleFactor {
@@ -22,12 +22,12 @@ impl From<f64> for ScaleFactor {
 
 #[derive(Clone, Copy)]
 pub(crate) struct Resize {
-    pub(crate) size: Area<Scaled>,
+    pub(crate) size: Area<Device>,
     pub(crate) scale_factor: f64,
 }
 
 impl Resize {
-    pub(crate) fn new(size: Area<Scaled>, scale_factor: f64) -> Self {
+    pub(crate) fn new(size: Area<Device>, scale_factor: f64) -> Self {
         Self { size, scale_factor }
     }
 }

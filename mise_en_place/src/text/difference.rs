@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::component::Component;
 
-use crate::coord::{Depth, Logical, Position, Section, Unscaled};
+use crate::{Area, Color};
+use crate::coord::{Depth, Logical, Position, Section, View};
 use crate::text::glyph::{Glyph, GlyphId, Key};
 use crate::text::render_group::TextBound;
 use crate::visibility::VisibleSection;
-use crate::{Area, Color};
 
 #[derive(Copy, Clone)]
 pub(crate) enum TextBoundDifference {
@@ -17,7 +17,7 @@ pub(crate) enum TextBoundDifference {
 #[derive(Component, Clone)]
 pub(crate) struct Difference {
     pub(crate) bounds: Option<TextBoundDifference>,
-    pub(crate) position: Option<Position<Unscaled>>,
+    pub(crate) position: Option<Position<View>>,
     pub(crate) visible_section: Option<VisibleSection>,
     pub(crate) depth: Option<Depth>,
     pub(crate) glyph_add: HashMap<Key, Glyph>,

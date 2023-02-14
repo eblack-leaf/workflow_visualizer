@@ -1,3 +1,4 @@
+use crate::{Attach, Engen, FrontEndStages};
 pub use crate::coord::area::Area;
 pub(crate) use crate::coord::area::GpuArea;
 pub use crate::coord::area_adjust::AreaAdjust;
@@ -8,7 +9,6 @@ pub(crate) use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::PositionAdjust;
 pub use crate::coord::section::Section;
-use crate::{Attach, Engen, FrontEndStages};
 
 mod area;
 mod area_adjust;
@@ -23,10 +23,9 @@ mod section;
 pub(crate) struct Coords;
 
 pub trait CoordContext
-where
-    Self: Copy + Clone + Send + Sync + 'static,
-{
-}
+    where
+        Self: Copy + Clone + Send + Sync + 'static,
+{}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Logical {}
@@ -34,24 +33,24 @@ pub struct Logical {}
 impl CoordContext for Logical {}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
-pub struct Unscaled {}
+pub struct View {}
 
-impl CoordContext for Unscaled {}
+impl CoordContext for View {}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
-pub struct Scaled {}
+pub struct Device {}
 
-impl CoordContext for Scaled {}
+impl CoordContext for Device {}
 
 impl Attach for Coords {
     fn attach(engen: &mut Engen) {
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,
-            position_adjust::position_adjust::<Unscaled>,
+            position_adjust::position_adjust::<View>,
         );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,
-            area_adjust::area_adjust::<Unscaled>,
+            area_adjust::area_adjust::<View>,
         );
         engen
             .frontend

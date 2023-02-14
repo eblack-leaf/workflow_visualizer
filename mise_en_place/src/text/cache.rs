@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
-use crate::coord::{Depth, Logical, Position, Section, Unscaled};
+use crate::Color;
+use crate::coord::{Depth, Logical, Position, Section, View};
 use crate::text::glyph::{GlyphId, Key};
 use crate::text::render_group::TextBound;
 use crate::visibility::VisibleSection;
-use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Cache {
@@ -15,14 +15,14 @@ pub(crate) struct Cache {
     pub(crate) glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) glyph_colors: HashMap<Key, Color>,
     pub(crate) bound: Option<TextBound>,
-    pub(crate) position: Position<Unscaled>,
+    pub(crate) position: Position<View>,
     pub(crate) depth: Depth,
     pub(crate) visible_section: VisibleSection,
 }
 
 impl Cache {
     pub(crate) fn new(
-        position: Position<Unscaled>,
+        position: Position<View>,
         depth: Depth,
         visible_section: VisibleSection,
     ) -> Self {

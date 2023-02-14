@@ -7,7 +7,7 @@ use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
 use mise_en_place::{
     Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch,
     PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextRenderer, TextScaleAlignment, Unscaled, Visibility, WasmCompileDescriptor, WasmServer,
+    TextRenderer, TextScaleAlignment, View, Visibility, WasmCompileDescriptor, WasmServer,
 };
 
 #[derive(Resource)]
@@ -26,16 +26,16 @@ fn update_text(
     _idle.can_idle = false;
     for (entity, mut ent_text, visibility) in text.iter_mut() {
         if counter.count > 0 {
-            if counter.count % 1 == 0 {
-                if entity.index() == 0 {
-                    ent_text.partitions.first_mut().unwrap().characters =
-                        format!("counter is: {:?}", counter.count);
-                }
-                if entity.index() == 1 {
-                    cmd.entity(entity)
-                        .insert(PositionAdjust::<Unscaled>::new(0.0, 1.0));
-                }
-            }
+            // if counter.count % 1 == 0 {
+            //     if entity.index() == 0 {
+            //         ent_text.partitions.first_mut().unwrap().characters =
+            //             format!("counter is: {:?}", counter.count);
+            //     }
+            //     if entity.index() == 1 {
+            //         cmd.entity(entity)
+            //             .insert(PositionAdjust::<View>::new(0.0, 1.0));
+            //     }
+            // }
         }
     }
 }
@@ -49,18 +49,18 @@ impl Launch for Launcher {
             .add_system_to_stage(FrontEndStages::Process, update_text);
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("", ((1.0, 1.0, 1.0), 0))]),
-                (Unscaled {}, (0u32, 0u32), 0u32),
+                Text::new(vec![("let's play mario", ((1.0, 1.0, 1.0), 0))]),
+                (View {}, (0u32, 0u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
-            .insert(TextBoundGuide::new(120, 1));
+            .insert(TextBoundGuide::new(120, 0));
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("abcdefghijklmnopqrstuvwxyz", ((1.0, 1.0, 1.0), 0))]),
-                (Unscaled {}, (0u32, 40u32), 10u32),
+                Text::new(vec![(" is this too small?", ((1.0, 1.0, 1.0), 0))]),
+                (View {}, (0u32, 40u32), 10u32),
                 TextScaleAlignment::Small,
             ))
-            .insert(TextBoundGuide::new(120, 1));
+            .insert(TextBoundGuide::new(120, 10));
     }
 }
 

@@ -12,12 +12,12 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::Coords;
 pub use crate::coord::{
-    Area, AreaAdjust, Depth, DepthAdjust, Location, Logical, Position, PositionAdjust, Scaled,
-    Section, Unscaled,
+    Area, AreaAdjust, Depth, DepthAdjust, Device, Location, Logical, Position, PositionAdjust,
+    Section, View,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::Coords;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -79,7 +79,7 @@ pub enum BackendStages {
 }
 
 pub struct EngenOptions {
-    pub native_dimensions: Option<Area<Scaled>>,
+    pub native_dimensions: Option<Area<Device>>,
 }
 
 impl EngenOptions {
@@ -88,7 +88,7 @@ impl EngenOptions {
             native_dimensions: None,
         }
     }
-    pub fn with_native_dimensions<A: Into<Area<Scaled>>>(mut self, dimensions: A) -> Self {
+    pub fn with_native_dimensions<A: Into<Area<Device>>>(mut self, dimensions: A) -> Self {
         self.native_dimensions.replace(dimensions.into());
         self
     }
@@ -189,7 +189,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");

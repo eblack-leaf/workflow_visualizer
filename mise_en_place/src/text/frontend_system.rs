@@ -6,8 +6,9 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
+use crate::{AreaAdjust, TextBoundGuide};
 use crate::color::Color;
-use crate::coord::{Area, Depth, Position, Scaled, Section, Unscaled};
+use crate::coord::{Area, Depth, Device, Position, Section, View};
 use crate::text::atlas::AtlasBlock;
 use crate::text::cache::Cache;
 use crate::text::difference::{Difference, TextBoundDifference};
@@ -20,7 +21,6 @@ use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::{AreaAdjust, TextBoundGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -28,11 +28,11 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 }
 
 pub(crate) fn intercept_area_adjust(
-    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust<Unscaled>>)>,
+    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust<View>>)>,
     mut cmd: Commands,
 ) {
     for entity in attempted_area_adjust.iter() {
-        cmd.entity(entity).remove::<AreaAdjust<Unscaled>>();
+        cmd.entity(entity).remove::<AreaAdjust<View>>();
     }
 }
 
@@ -79,7 +79,7 @@ pub(crate) fn manage_render_groups(
             Entity,
             &Text,
             &TextScale,
-            &Position<Unscaled>,
+            &Position<View>,
             &VisibleSection,
             Option<&TextBound>,
             &Depth,
@@ -232,7 +232,7 @@ pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd
         }
         if width != 0.0 && height != 0.0 {
             cmd.entity(entity)
-                .insert(Area::<Unscaled>::new(width, height));
+                .insert(Area::<View>::new(width, height));
         }
     }
 }
@@ -280,8 +280,8 @@ pub(crate) fn depth_diff(
 
 pub(crate) fn position_diff(
     mut text: Query<
-        (&Position<Unscaled>, &mut Cache, &mut Difference),
-        (Changed<Position<Unscaled>>, With<Text>),
+        (&Position<View>, &mut Cache, &mut Difference),
+        (Changed<Position<View>>, With<Text>),
     >,
 ) {
     for (position, mut cache, mut difference) in text.iter_mut() {
@@ -357,8 +357,8 @@ pub(crate) fn discard_out_of_bounds(
     mut text: Query<
         (
             &mut Placer,
-            &Position<Unscaled>,
-            &Area<Unscaled>,
+            &Position<View>,
+            &Area<View>,
             Option<&TextBound>,
             &VisibleSection,
         ),
@@ -366,26 +366,26 @@ pub(crate) fn discard_out_of_bounds(
             Changed<Placer>,
             Changed<VisibleSection>,
             Changed<TextBound>,
-            Changed<Position<Unscaled>>,
+            Changed<Position<View>>,
         )>,
     >,
     scale_factor: Res<ScaleFactor>,
 ) {
     for (mut placer, position, area, bound, visible_section) in text.iter_mut() {
         let bound_area = match bound {
-            Some(b) => b.area.to_scaled(scale_factor.factor),
-            None => area.to_scaled(scale_factor.factor),
+            Some(b) => b.area.to_device(scale_factor.factor),
+            None => area.to_device(scale_factor.factor),
         };
-        let scaled_position = position.to_scaled(scale_factor.factor);
+        let scaled_position = position.to_device(scale_factor.factor);
         let text_section = visible_section
             .section
             .to_scaled(scale_factor.factor)
-            .intersection(Section::<Scaled>::new(scaled_position, bound_area));
+            .intersection(Section::<Device>::new(scaled_position, bound_area));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();
             for (key, glyph) in placer.unfiltered_placement().iter() {
-                let glyph_section = Section::<Scaled>::new(
+                let glyph_section = Section::<Device>::new(
                     (scaled_position.x + glyph.x, scaled_position.y + glyph.y),
                     (glyph.width, glyph.height),
                 );

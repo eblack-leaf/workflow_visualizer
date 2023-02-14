@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
+use crate::coord::{CoordContext, Device, Logical, View};
 use crate::coord::area_adjust::AreaAdjust;
-use crate::coord::{CoordContext, Logical, Scaled, Unscaled};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -44,18 +44,18 @@ impl<Context: CoordContext> Area<Context> {
     }
 }
 
-impl Area<Unscaled> {
-    pub fn to_scaled(&self, scale_factor: f64) -> Area<Scaled> {
-        Area::<Scaled>::new(
+impl Area<View> {
+    pub fn to_device(&self, scale_factor: f64) -> Area<Device> {
+        Area::<Device>::new(
             self.width * scale_factor as f32,
             self.height * scale_factor as f32,
         )
     }
 }
 
-impl Area<Scaled> {
-    pub fn to_unscaled(&self, scale_factor: f64) -> Area<Unscaled> {
-        Area::<Unscaled>::new(
+impl Area<Device> {
+    pub fn to_view(&self, scale_factor: f64) -> Area<View> {
+        Area::<View>::new(
             self.width / scale_factor as f32,
             self.height / scale_factor as f32,
         )

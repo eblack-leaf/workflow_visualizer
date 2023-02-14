@@ -4,7 +4,7 @@ use std::ops::Sub;
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{CoordContext, Logical, PositionAdjust, Scaled, Unscaled};
+use crate::coord::{CoordContext, Device, Logical, PositionAdjust, View};
 
 #[derive(Component, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Position<Context: CoordContext> {
@@ -51,15 +51,15 @@ impl<Context: CoordContext> Position<Context> {
     }
 }
 
-impl Position<Unscaled> {
-    pub fn to_scaled(&self, scale_factor: f64) -> Position<Scaled> {
-        Position::<Scaled>::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
+impl Position<View> {
+    pub fn to_device(&self, scale_factor: f64) -> Position<Device> {
+        Position::<Device>::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
     }
 }
 
-impl Position<Scaled> {
-    pub fn to_unscaled(&self, scale_factor: f64) -> Position<Unscaled> {
-        Position::<Unscaled>::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
+impl Position<Device> {
+    pub fn to_view(&self, scale_factor: f64) -> Position<View> {
+        Position::<View>::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
     }
 }
 

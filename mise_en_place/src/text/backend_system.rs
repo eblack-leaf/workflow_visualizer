@@ -4,7 +4,8 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{GpuArea, GpuPosition, Logical, Scaled};
+use crate::{Area, Color, Position, Section};
+use crate::coord::{Device, GpuArea, GpuPosition, Logical};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -29,7 +30,6 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Area, Color, Position, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -50,7 +50,7 @@ pub(crate) fn create_render_groups(
         (max, position, visible_section, depth, atlas_block, unique_glyphs, text_scale_alignment),
     ) in extraction.added_render_groups.iter()
     {
-        let position = position.to_scaled(scale_factor.factor);
+        let position = position.to_device(scale_factor.factor);
         let text_placement = TextPlacement::new(position, *depth);
         let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
         let render_group_bind_group = RenderGroupBindGroup::new(
@@ -191,8 +191,8 @@ pub(crate) fn render_group_differences(
         write_attribute::<GpuArea>(&mut renderer, &gfx_surface, render_group);
         write_attribute::<NullBit>(&mut renderer, &gfx_surface, render_group);
         write_attribute::<Coords>(&mut renderer, &gfx_surface, render_group);
-        write_text_placement(&mut renderer, &gfx_surface, render_group);
         write_attribute::<Color>(&mut renderer, &gfx_surface, render_group);
+        write_text_placement(&mut renderer, &gfx_surface, render_group);
         write_atlas(&mut renderer, &gfx_surface, render_group);
         if draw_section_resize_needed {
             resolve_draw_section(&mut renderer, &viewport, &scale_factor, render_group)
@@ -275,9 +275,9 @@ fn resolve_draw_section(
     {
         let position = *renderer
             .container
-            .get::<Position<Scaled>>(render_group)
+            .get::<Position<Device>>(render_group)
             .unwrap();
-        let scaled_bound = Section::<Scaled>::new(position, bound.to_scaled(scale_factor.factor));
+        let scaled_bound = Section::<Device>::new(position, bound.to_device(scale_factor.factor));
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
@@ -289,7 +289,7 @@ fn resolve_draw_section(
         if let Some(v_bound) = visible_bound {
             let viewport_dimensions = v_bound.intersection(viewport.as_section());
             if let Some(v_dim) = viewport_dimensions {
-                let draw_bound = Section::<Scaled>::new(
+                let draw_bound = Section::<Device>::new(
                     v_dim.position - viewport.as_section().position,
                     v_dim.area,
                 );
@@ -334,7 +334,7 @@ fn queue_position(
 ) {
     if let Some(position) = difference.position {
         *draw_section_resize_needed = true;
-        let scaled_position = position.to_scaled(scale_factor.factor);
+        let scaled_position = position.to_device(scale_factor.factor);
         renderer
             .container
             .get_mut::<PositionWrite>(render_group)
@@ -680,12 +680,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-            > renderer
-                .container
-                .get::<AtlasFreeLocations>(render_group)
-                .unwrap()
-                .free
-                .len() as u32
+        > renderer
+        .container
+        .get::<AtlasFreeLocations>(render_group)
+        .unwrap()
+        .free
+        .len() as u32
     {
         let current_dimension = renderer
             .container
@@ -981,7 +981,7 @@ fn write_text_placement(
     {
         *renderer
             .container
-            .get_mut::<Position<Scaled>>(render_group)
+            .get_mut::<Position<Device>>(render_group)
             .unwrap() = position;
         renderer
             .container

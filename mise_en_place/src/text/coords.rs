@@ -1,8 +1,8 @@
 use bytemuck::{Pod, Zeroable};
 
+use crate::{Area, Position};
 use crate::coord::{Logical, Section};
 use crate::text::atlas::AtlasTextureDimensions;
-use crate::{Area, Position};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]

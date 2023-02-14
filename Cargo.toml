@@ -5,5 +5,5 @@ members = ["mise_en_place", "mise_en_place_app"]
 #opt-level = 1
 [profile.release]
 #debug = true
-#lto = true
-#opt-level = "s"
+lto = true
+opt-level = "s"

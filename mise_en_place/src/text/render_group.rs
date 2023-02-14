@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::coord::{GpuArea, GpuPosition, Scaled, Unscaled};
+use crate::{Area, Color, Depth, Position, Section};
+use crate::coord::{Device, GpuArea, GpuPosition, View};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -18,7 +19,6 @@ use crate::text::scale::TextScaleAlignment;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
-use crate::{Area, Color, Depth, Position, Section};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);
@@ -53,7 +53,7 @@ impl<Attribute> AttributeWrite<Attribute> {
 #[derive(Bundle)]
 pub(crate) struct RenderGroup {
     pub(crate) max: RenderGroupMax,
-    pub(crate) position: Position<Scaled>,
+    pub(crate) position: Position<Device>,
     pub(crate) visible_section: VisibleSection,
     pub(crate) depth: Depth,
     pub(crate) atlas_block: AtlasBlock,
@@ -97,7 +97,7 @@ pub(crate) struct RenderGroup {
 impl RenderGroup {
     pub(crate) fn new(
         max: RenderGroupMax,
-        position: Position<Scaled>,
+        position: Position<Device>,
         visible_section: VisibleSection,
         depth: Depth,
         atlas_block: AtlasBlock,
@@ -189,7 +189,7 @@ pub(crate) struct TextPlacement {
 }
 
 impl TextPlacement {
-    pub(crate) fn new(position: Position<Scaled>, depth: Depth) -> Self {
+    pub(crate) fn new(position: Position<Device>, depth: Depth) -> Self {
         Self {
             placement: [position.x, position.y, depth.layer, 0.0],
         }
@@ -239,18 +239,18 @@ impl TextBoundGuide {
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct TextBound {
-    pub area: Area<Unscaled>,
+    pub area: Area<View>,
 }
 
 impl TextBound {
-    pub(crate) fn new<A: Into<Area<Unscaled>>>(area: A) -> Self {
+    pub(crate) fn new<A: Into<Area<View>>>(area: A) -> Self {
         Self { area: area.into() }
     }
 }
 
 #[derive(Component)]
 pub(crate) struct PositionWrite {
-    pub(crate) write: Option<Position<Scaled>>,
+    pub(crate) write: Option<Position<Device>>,
 }
 
 impl PositionWrite {
@@ -285,7 +285,7 @@ impl KeyedGlyphIds {
 
 #[derive(Component)]
 pub(crate) struct RenderGroupTextBound {
-    pub(crate) text_bound_area: Option<Area<Unscaled>>,
+    pub(crate) text_bound_area: Option<Area<View>>,
 }
 
 impl RenderGroupTextBound {
@@ -298,7 +298,7 @@ impl RenderGroupTextBound {
 
 #[derive(Component)]
 pub(crate) struct DrawSection {
-    pub(crate) section: Option<Section<Scaled>>,
+    pub(crate) section: Option<Section<Device>>,
 }
 
 impl DrawSection {
