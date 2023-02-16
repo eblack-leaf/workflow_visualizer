@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
-use crate::{AreaAdjust, TextBoundGuide};
 use crate::color::Color;
 use crate::coord::{Area, Depth, Device, Position, Section, View};
 use crate::text::atlas::AtlasBlock;
@@ -21,6 +20,7 @@ use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
+use crate::{AreaAdjust, TextBoundGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -231,8 +231,7 @@ pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd
             height = height.max(glyph.y + glyph.height as f32);
         }
         if width != 0.0 && height != 0.0 {
-            cmd.entity(entity)
-                .insert(Area::<View>::new(width, height));
+            cmd.entity(entity).insert(Area::<View>::new(width, height));
         }
     }
 }

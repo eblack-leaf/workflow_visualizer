@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Entity, Resource};
 
-use crate::Color;
 use crate::coord::{Depth, Position, View};
 use crate::text::atlas::AtlasBlock;
 use crate::text::difference::Difference;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs};
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
+use crate::Color;
 
 #[derive(Resource, Clone)]
 pub(crate) struct Extraction {

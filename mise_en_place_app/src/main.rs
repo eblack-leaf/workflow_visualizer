@@ -2,13 +2,9 @@
 
 use std::ops::Add;
 
-use bevy_ecs::prelude::{Commands, Entity, Query, ResMut, Resource};
+use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{
-    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch,
-    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextRenderer, TextScaleAlignment, View, Visibility, WasmCompileDescriptor, WasmServer,
-};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer, TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor, WasmServer};
 
 #[derive(Resource)]
 struct Counter {
@@ -16,26 +12,24 @@ struct Counter {
 }
 
 fn update_text(
-    mut text: Query<(Entity, &mut Text, Option<&Visibility>)>,
+    mut text: Query<(Entity, &mut Text)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
     mut exit: ResMut<Exit>,
+    touch_adapter: Res<TouchAdapter>,
+    mouse_adapter: Res<MouseAdapter>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
-    for (entity, mut ent_text, visibility) in text.iter_mut() {
-        if counter.count > 0 {
-            // if counter.count % 1 == 0 {
-            //     if entity.index() == 0 {
-            //         ent_text.partitions.first_mut().unwrap().characters =
-            //             format!("counter is: {:?}", counter.count);
-            //     }
-            //     if entity.index() == 1 {
-            //         cmd.entity(entity)
-            //             .insert(PositionAdjust::<View>::new(0.0, 1.0));
-            //     }
-            // }
+    for (entity, mut ent_text) in text.iter_mut() {
+        if let Some(touch) = touch_adapter.current_touch {
+            ent_text.partitions.first_mut().unwrap().characters =
+                format!("touch location: {:?}", touch.location);
+        }
+        if let Some(location) = mouse_adapter.location {
+            ent_text.partitions.first_mut().unwrap().characters =
+                format!("mouse location: {:?}", location);
         }
     }
 }
@@ -49,18 +43,11 @@ impl Launch for Launcher {
             .add_system_to_stage(FrontEndStages::Process, update_text);
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("let's play mario", ((1.0, 1.0, 1.0), 0))]),
+                Text::new(vec![("", ((1.0, 1.0, 1.0), 0))]),
                 (View {}, (0u32, 0u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
-            .insert(TextBoundGuide::new(120, 0));
-        job.container
-            .spawn(TextBundle::new(
-                Text::new(vec![(" is this too small?", ((1.0, 1.0, 1.0), 0))]),
-                (View {}, (0u32, 40u32), 10u32),
-                TextScaleAlignment::Small,
-            ))
-            .insert(TextBoundGuide::new(120, 10));
+            .insert(TextBoundGuide::new(37, 10));
     }
 }
 

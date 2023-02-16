@@ -1,4 +1,3 @@
-use crate::{Attach, Engen, FrontEndStages};
 pub use crate::coord::area::Area;
 pub(crate) use crate::coord::area::GpuArea;
 pub use crate::coord::area_adjust::AreaAdjust;
@@ -9,6 +8,7 @@ pub(crate) use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::PositionAdjust;
 pub use crate::coord::section::Section;
+use crate::{Attach, Engen, FrontEndStages};
 
 mod area;
 mod area_adjust;
@@ -23,9 +23,10 @@ mod section;
 pub(crate) struct Coords;
 
 pub trait CoordContext
-    where
-        Self: Copy + Clone + Send + Sync + 'static,
-{}
+where
+    Self: Copy + Clone + Send + Sync + 'static,
+{
+}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Logical {}

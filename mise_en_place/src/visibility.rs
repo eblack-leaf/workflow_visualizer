@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
-use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 use crate::coord::{Area, Device, Position, PositionAdjust, Section, View};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 
 #[derive(Component)]
 pub struct Visibility {
@@ -145,12 +145,7 @@ impl SpacialHasher {
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut changed: Query<
-        (
-            Entity,
-            &Position<View>,
-            &Area<View>,
-            &mut Visibility,
-        ),
+        (Entity, &Position<View>, &Area<View>, &mut Visibility),
         Or<(Changed<Position<View>>, Changed<Area<View>>)>,
     >,
     visible_bounds: Res<VisibleBounds>,
@@ -627,12 +622,7 @@ impl Attach for Visibility {
             gfx_surface_configuration.configuration.height,
         )
             .into();
-        let visible_section = (
-            View {},
-            (0u32, 0u32),
-            surface_area.to_view(scale_factor),
-        )
-            .into();
+        let visible_section = (View {}, (0u32, 0u32), surface_area.to_view(scale_factor)).into();
         engen
             .frontend
             .container

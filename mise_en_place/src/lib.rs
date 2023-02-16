@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
-use winit::event::{Event, StartCause, WindowEvent};
+use winit::event::{Event, StartCause, TouchPhase, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
@@ -12,12 +12,12 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
+use crate::coord::Coords;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Device, Location, Logical, Position, PositionAdjust,
     Section, View,
 };
-use crate::coord::Coords;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -30,7 +30,8 @@ pub use crate::theme::Theme;
 use crate::viewport::Viewport;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
-use crate::window::{Resize, ScaleFactor};
+use crate::window::Resize;
+pub use crate::window::{MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
 
 mod color;
 mod coord;
@@ -189,7 +190,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -238,15 +239,6 @@ impl Engen {
                     .expect("no web_sys window")
                     .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())
                     .unwrap();
-                closure.forget();
-            }
-            {
-                let w_window = window.clone();
-                let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
-                    let scale_factor = w_window.scale_factor();
-                    let size = inner_size(scale_factor);
-                    w_window.set_inner_size(size);
-                }) as Box<dyn FnMut(_)>);
                 web_sys::window()
                     .expect("no web_sys window")
                     .screen()
@@ -325,6 +317,64 @@ impl Engen {
                     }
                     WindowEvent::CloseRequested => {
                         control_flow.set_exit();
+                    }
+                    WindowEvent::Touch(touch) => {
+                        let mut touch_adapter = self
+                            .frontend
+                            .container
+                            .get_resource_mut::<TouchAdapter>()
+                            .expect("no touch adapter slot");
+                        match touch.phase {
+                            TouchPhase::Started => {
+                                if touch_adapter.current_touch.is_none() {
+                                    touch_adapter.current_touch.replace(touch);
+                                }
+                            }
+                            TouchPhase::Moved => {
+                                if touch.id == touch_adapter.current_touch.unwrap().id {
+                                    touch_adapter.current_touch.replace(touch);
+                                }
+                            }
+                            TouchPhase::Ended => {
+                                if touch.id == touch_adapter.current_touch.unwrap().id {
+                                    touch_adapter.current_touch.take();
+                                    touch_adapter.end_touch.replace(touch);
+                                }
+                            }
+                            TouchPhase::Cancelled => {
+                                if touch.id == touch_adapter.current_touch.unwrap().id {
+                                    touch_adapter.current_touch.take();
+                                }
+                            }
+                        }
+                    }
+                    WindowEvent::CursorMoved {
+                        device_id,
+                        position,
+                        ..
+                    } => {
+                        let mut mouse_adapter = self
+                            .frontend
+                            .container
+                            .get_resource_mut::<MouseAdapter>()
+                            .expect("no mouse adapter");
+                        mouse_adapter.location.replace(Position::<Device>::new(
+                            position.x as f32,
+                            position.y as f32,
+                        ));
+                    }
+                    WindowEvent::MouseInput {
+                        device_id,
+                        state,
+                        button,
+                        ..
+                    } => {
+                        let mut mouse_adapter = self
+                            .frontend
+                            .container
+                            .get_resource_mut::<MouseAdapter>()
+                            .expect("no mouse adapter");
+                        mouse_adapter.button_state.insert(button, state);
                     }
                     _ => {}
                 },

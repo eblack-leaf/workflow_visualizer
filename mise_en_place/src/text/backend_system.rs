@@ -4,7 +4,6 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 use bytemuck::{Pod, Zeroable};
 
-use crate::{Area, Color, Position, Section};
 use crate::coord::{Device, GpuArea, GpuPosition, Logical};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
@@ -30,6 +29,7 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Area, Color, Position, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -680,12 +680,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-        > renderer
-        .container
-        .get::<AtlasFreeLocations>(render_group)
-        .unwrap()
-        .free
-        .len() as u32
+            > renderer
+                .container
+                .get::<AtlasFreeLocations>(render_group)
+                .unwrap()
+                .free
+                .len() as u32
     {
         let current_dimension = renderer
             .container
