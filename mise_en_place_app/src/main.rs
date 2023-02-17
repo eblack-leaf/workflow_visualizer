@@ -4,7 +4,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer, TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MotionAdapter, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer, TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor, WasmServer};
 
 #[derive(Resource)]
 struct Counter {
@@ -19,6 +19,7 @@ fn update_text(
     mut exit: ResMut<Exit>,
     touch_adapter: Res<TouchAdapter>,
     mouse_adapter: Res<MouseAdapter>,
+    motion_adapter: Res<MotionAdapter>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
@@ -30,6 +31,13 @@ fn update_text(
         if let Some(location) = mouse_adapter.location {
             ent_text.partitions.first_mut().unwrap().characters =
                 format!("mouse location: {:?}", location);
+        }
+        for (button, state) in mouse_adapter.button_state.iter() {
+            ent_text.partitions.first_mut().unwrap().characters = format!("button: {:?}, state: {:?}", button, state);
+        }
+        for (axis, value) in motion_adapter.mapping.iter() {
+            ent_text.partitions.first_mut().unwrap().characters =
+                format!("motion axis: {:?}, value: {:?}", axis, value);
         }
     }
 }

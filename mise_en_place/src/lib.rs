@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
-use winit::event::{Event, StartCause, TouchPhase, WindowEvent};
+use winit::event::{DeviceEvent, Event, StartCause, TouchPhase, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
@@ -12,12 +12,12 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::Coords;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Device, Location, Logical, Position, PositionAdjust,
     Section, View,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::Coords;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -30,8 +30,8 @@ pub use crate::theme::Theme;
 use crate::viewport::Viewport;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
+pub use crate::window::{MotionAdapter, MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
 use crate::window::Resize;
-pub use crate::window::{MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
 
 mod color;
 mod coord;
@@ -190,7 +190,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -376,8 +376,25 @@ impl Engen {
                             .expect("no mouse adapter");
                         mouse_adapter.button_state.insert(button, state);
                     }
+                    WindowEvent::AxisMotion { device_id, axis, value } => {
+                        self.frontend.container.get_resource_mut::<MotionAdapter>().expect("").mapping.insert(axis, value);
+                    }
                     _ => {}
                 },
+                Event::DeviceEvent { device_id, event } => {
+                    match event {
+                        DeviceEvent::Added => {}
+                        DeviceEvent::Removed => {}
+                        DeviceEvent::MouseMotion { .. } => {}
+                        DeviceEvent::MouseWheel { .. } => {}
+                        DeviceEvent::Motion { axis, value } => {
+                            self.frontend.container.get_resource_mut::<MotionAdapter>().expect("no motion adapter").mapping.insert(axis, value);
+                        }
+                        DeviceEvent::Button { .. } => {}
+                        DeviceEvent::Key(_) => {}
+                        DeviceEvent::Text { .. } => {}
+                    }
+                }
                 Event::Suspended => {
                     if self.frontend.active() {
                         #[cfg(target_os = "android")]

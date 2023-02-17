@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Events, Resource};
-use winit::event::{ElementState, MouseButton, Touch};
+use winit::event::{AxisId, ElementState, MouseButton, Touch};
 
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::Device;
 use crate::window::Orientation::{Landscape, Portrait};
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource, Copy, Clone)]
 pub struct TouchAdapter {
@@ -18,6 +18,19 @@ impl TouchAdapter {
         Self {
             current_touch: None,
             end_touch: None,
+        }
+    }
+}
+
+#[derive(Resource)]
+pub struct MotionAdapter {
+    pub mapping: HashMap<AxisId, f64>,
+}
+
+impl MotionAdapter {
+    pub fn new() -> Self {
+        Self {
+            mapping: HashMap::new(),
         }
     }
 }
@@ -109,5 +122,6 @@ impl Attach for Resize {
             .frontend
             .container
             .insert_resource(MouseAdapter::new());
+        engen.frontend.container.insert_resource(MotionAdapter::new());
     }
 }
