@@ -43,7 +43,7 @@ impl Launch for Launcher {
             .add_system_to_stage(FrontEndStages::Process, update_text);
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("", ((1.0, 1.0, 1.0), 0))]),
+                Text::new(vec![("touch location: ", ((1.0, 1.0, 1.0), 0))]),
                 (View {}, (0u32, 0u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
