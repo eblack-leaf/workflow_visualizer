@@ -1,27 +1,34 @@
 use bevy_ecs::prelude::Resource;
 
 use crate::color::Color;
+use crate::window::Click;
 use crate::{Attach, Engen};
 
 pub struct ThemeDescriptor {
     pub background: Option<Color>,
+    pub primary: Option<Color>,
 }
 
 impl ThemeDescriptor {
     pub fn new() -> Self {
-        Self { background: None }
+        Self {
+            background: None,
+            primary: None,
+        }
     }
 }
 
 #[derive(Resource, Clone)]
 pub struct Theme {
     pub background: Color,
+    pub primary: Color,
 }
 
 impl Theme {
     pub fn new(descriptor: ThemeDescriptor) -> Self {
         Self {
             background: descriptor.background.unwrap_or(Color::rgb(0.0, 0.0, 0.0)),
+            primary: descriptor.primary.unwrap_or(Color::rgb(0.8, 0.8, 0.8)),
         }
     }
 }
@@ -31,8 +38,8 @@ impl Default for Theme {
         Theme::new(ThemeDescriptor::new())
     }
 }
-
-impl Attach for Theme {
+pub struct ThemePlugin;
+impl Attach for ThemePlugin {
     fn attach(engen: &mut Engen) {
         engen.backend.container.insert_resource(Theme::default());
     }

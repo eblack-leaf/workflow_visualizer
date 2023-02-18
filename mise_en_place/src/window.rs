@@ -1,36 +1,45 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Events, Resource};
-use winit::event::{AxisId, ElementState, MouseButton, Touch};
+use bevy_ecs::prelude::{Events, ResMut, Resource};
+use winit::event::{AxisId, ElementState, MouseButton};
 
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::Device;
 use crate::window::Orientation::{Landscape, Portrait};
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
-#[derive(Resource, Copy, Clone)]
+#[derive(Copy, Clone)]
+pub struct Click {
+    pub origin: Position<Device>,
+    pub current: Option<Position<Device>>,
+    pub end: Option<Position<Device>>,
+}
+
+impl Click {
+    pub fn new<PD: Into<Position<Device>>>(origin: PD) -> Self {
+        let position = origin.into();
+        Self {
+            origin: position,
+            current: Some(position),
+            end: None,
+        }
+    }
+}
+
+pub type Finger = u32;
+
+#[derive(Resource)]
 pub struct TouchAdapter {
-    pub current_touch: Option<Touch>,
-    pub end_touch: Option<Touch>,
+    pub primary: Option<Finger>,
+    pub tracked: HashMap<Finger, Click>,
+    pub primary_end_event: Option<(Finger, Click)>,
 }
 
 impl TouchAdapter {
     pub fn new() -> Self {
         Self {
-            current_touch: None,
-            end_touch: None,
-        }
-    }
-}
-
-#[derive(Resource)]
-pub struct MotionAdapter {
-    pub mapping: HashMap<AxisId, f64>,
-}
-
-impl MotionAdapter {
-    pub fn new() -> Self {
-        Self {
-            mapping: HashMap::new(),
+            primary: None,
+            tracked: HashMap::new(),
+            primary_end_event: None,
         }
     }
 }
@@ -38,16 +47,26 @@ impl MotionAdapter {
 #[derive(Resource)]
 pub struct MouseAdapter {
     pub location: Option<Position<Device>>,
-    pub button_state: HashMap<MouseButton, ElementState>,
+    pub tracked_buttons: HashMap<MouseButton, Click>,
+    pub valid_releases: HashMap<MouseButton, Click>,
 }
 
 impl MouseAdapter {
     pub fn new() -> Self {
         Self {
             location: None,
-            button_state: HashMap::new(),
+            tracked_buttons: HashMap::new(),
+            valid_releases: HashMap::new(),
         }
     }
+}
+
+pub(crate) fn reset_adapters(
+    mut touch_adapter: ResMut<TouchAdapter>,
+    mut mouse_adapter: ResMut<MouseAdapter>,
+) {
+    touch_adapter.primary_end_event.take();
+    mouse_adapter.valid_releases.clear();
 }
 
 #[derive(Resource, Copy, Clone)]
@@ -96,7 +115,9 @@ impl Resize {
     }
 }
 
-impl Attach for Resize {
+pub struct WindowPlugin;
+
+impl Attach for WindowPlugin {
     fn attach(engen: &mut Engen) {
         engen
             .frontend
@@ -111,6 +132,10 @@ impl Attach for Resize {
             .main
             .add_system_to_stage(FrontEndStages::First, Events::<Resize>::update_system);
         engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Last, reset_adapters);
+        engen
             .backend
             .main
             .add_system_to_stage(BackendStages::Initialize, Events::<Resize>::update_system);
@@ -122,6 +147,5 @@ impl Attach for Resize {
             .frontend
             .container
             .insert_resource(MouseAdapter::new());
-        engen.frontend.container.insert_resource(MotionAdapter::new());
     }
 }

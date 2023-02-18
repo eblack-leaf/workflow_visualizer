@@ -20,7 +20,7 @@ mod position;
 mod position_adjust;
 mod section;
 
-pub(crate) struct Coords;
+pub(crate) struct CoordPlugin;
 
 pub trait CoordContext
 where
@@ -43,7 +43,7 @@ pub struct Device {}
 
 impl CoordContext for Device {}
 
-impl Attach for Coords {
+impl Attach for CoordPlugin {
     fn attach(engen: &mut Engen) {
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,

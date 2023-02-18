@@ -4,7 +4,12 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MotionAdapter, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer, TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{
+    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MouseAdapter,
+    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
+    TextRenderer, TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor,
+    WasmServer,
+};
 
 #[derive(Resource)]
 struct Counter {
@@ -19,25 +24,38 @@ fn update_text(
     mut exit: ResMut<Exit>,
     touch_adapter: Res<TouchAdapter>,
     mouse_adapter: Res<MouseAdapter>,
-    motion_adapter: Res<MotionAdapter>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
     for (entity, mut ent_text) in text.iter_mut() {
-        if let Some(touch) = touch_adapter.current_touch {
-            ent_text.partitions.first_mut().unwrap().characters =
-                format!("touch location: {:?}", touch.location);
+        if let Some(finger) = touch_adapter.primary.as_ref() {
+            if entity.index() == 0 {
+                let current = touch_adapter
+                    .tracked
+                    .get(finger)
+                    .expect("no tracked click")
+                    .current;
+                if let Some(curr) = current {
+                    ent_text.partitions.first_mut().unwrap().characters = format!(
+                        "touch location: {:.2}, {:.2}",
+                        curr.x, curr.y
+                    );
+                }
+            }
         }
         if let Some(location) = mouse_adapter.location {
-            ent_text.partitions.first_mut().unwrap().characters =
-                format!("mouse location: {:?}", location);
+            if entity.index() == 1 {
+                ent_text.partitions.first_mut().unwrap().characters =
+                    format!("mouse location: {:.2}, {:.2}", location.x, location.y);
+            }
         }
-        for (button, state) in mouse_adapter.button_state.iter() {
-            ent_text.partitions.first_mut().unwrap().characters = format!("button: {:?}, state: {:?}", button, state);
+        let mut button_click_text = String::new();
+        for (button, click) in mouse_adapter.tracked_buttons.iter() {
+            button_click_text = button_click_text
+                .add(format!("button: {:?}, state: {:?}\n", button, click.current).as_str());
         }
-        for (axis, value) in motion_adapter.mapping.iter() {
-            ent_text.partitions.first_mut().unwrap().characters =
-                format!("motion axis: {:?}, value: {:?}", axis, value);
+        if entity.index() == 2 {
+            ent_text.partitions.first_mut().unwrap().characters = button_click_text;
         }
     }
 }
@@ -53,9 +71,23 @@ impl Launch for Launcher {
             .spawn(TextBundle::new(
                 Text::new(vec![("touch location: ", ((1.0, 1.0, 1.0), 0))]),
                 (View {}, (0u32, 0u32), 0u32),
-                TextScaleAlignment::Medium,
+                TextScaleAlignment::Small,
             ))
-            .insert(TextBoundGuide::new(37, 10));
+            .insert(TextBoundGuide::new(44, 3));
+        job.container
+            .spawn(TextBundle::new(
+                Text::new(vec![("mouse location: ", ((1.0, 1.0, 1.0), 0))]),
+                (View {}, (0u32, 60u32), 0u32),
+                TextScaleAlignment::Small,
+            ))
+            .insert(TextBoundGuide::new(44, 3));
+        job.container
+            .spawn(TextBundle::new(
+                Text::new(vec![("mouse buttons: ", ((1.0, 1.0, 1.0), 0))]),
+                (View {}, (0u32, 100u32), 0u32),
+                TextScaleAlignment::Small,
+            ))
+            .insert(TextBoundGuide::new(44, 10));
     }
 }
 

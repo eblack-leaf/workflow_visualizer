@@ -84,8 +84,14 @@ impl GfxSurface {
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: window.inner_size().width.min(options.limits.max_texture_dimension_2d),
-            height: window.inner_size().height.min(options.limits.max_texture_dimension_2d),
+            width: window
+                .inner_size()
+                .width
+                .min(options.limits.max_texture_dimension_2d),
+            height: window
+                .inner_size()
+                .height
+                .min(options.limits.max_texture_dimension_2d),
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![surface_format],
@@ -153,8 +159,10 @@ pub(crate) fn resize(
     mut resize_events: EventReader<Resize>,
 ) {
     for resize in resize_events.iter() {
-        gfx_surface_configuration.configuration.width = (resize.size.width as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
-        gfx_surface_configuration.configuration.height = (resize.size.height as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
+        gfx_surface_configuration.configuration.width =
+            (resize.size.width as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
+        gfx_surface_configuration.configuration.height =
+            (resize.size.height as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
         gfx_surface.surface.configure(
             &gfx_surface.device,
             &gfx_surface_configuration.configuration,

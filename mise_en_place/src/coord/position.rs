@@ -66,6 +66,16 @@ impl Position<Device> {
 impl<Context: CoordContext> From<(f32, f32)> for Position<Context> {
     fn from(value: (f32, f32)) -> Self {
         Self {
+            x: value.0,
+            y: value.1,
+            _coord_context: PhantomData,
+        }
+    }
+}
+
+impl<Context: CoordContext> From<(f64, f64)> for Position<Context> {
+    fn from(value: (f64, f64)) -> Self {
+        Self {
             x: value.0 as f32,
             y: value.1 as f32,
             _coord_context: PhantomData,

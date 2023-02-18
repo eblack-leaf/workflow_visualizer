@@ -1,10 +1,11 @@
 #![allow(unused, dead_code)]
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
-use winit::event::{DeviceEvent, Event, StartCause, TouchPhase, WindowEvent};
+use winit::event::{DeviceEvent, ElementState, Event, StartCause, TouchPhase, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
@@ -12,12 +13,12 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
+use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Device, Location, Logical, Position, PositionAdjust,
     Section, View,
 };
-use crate::coord::Coords;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -27,12 +28,15 @@ pub use crate::text::{
     TextScaleAlignment,
 };
 pub use crate::theme::Theme;
-use crate::viewport::Viewport;
+use crate::theme::ThemePlugin;
+use crate::viewport::{Viewport, ViewportPlugin};
+use crate::visibility::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
-pub use crate::window::{MotionAdapter, MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
-use crate::window::Resize;
+use crate::window::{Click, Finger, Resize, WindowPlugin};
+pub use crate::window::{MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
 
+mod button;
 mod color;
 mod coord;
 mod extract;
@@ -190,7 +194,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -290,11 +294,11 @@ impl Engen {
                 Event::NewEvents(start_cause) => match start_cause {
                     StartCause::Init => {
                         self.init_native_gfx(event_loop_window_target);
-                        self.invoke_attach::<Coords>();
-                        self.invoke_attach::<Resize>();
-                        self.invoke_attach::<Viewport>();
-                        self.invoke_attach::<Theme>();
-                        self.invoke_attach::<Visibility>();
+                        self.invoke_attach::<CoordPlugin>();
+                        self.invoke_attach::<WindowPlugin>();
+                        self.invoke_attach::<ViewportPlugin>();
+                        self.invoke_attach::<ThemePlugin>();
+                        self.invoke_attach::<VisibilityPlugin>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
@@ -326,25 +330,49 @@ impl Engen {
                             .expect("no touch adapter slot");
                         match touch.phase {
                             TouchPhase::Started => {
-                                if touch_adapter.current_touch.is_none() {
-                                    touch_adapter.current_touch.replace(touch);
+                                if touch_adapter.primary.is_none() {
+                                    touch_adapter.primary.replace(touch.id as Finger);
                                 }
+                                touch_adapter.tracked.insert(
+                                    touch.id as Finger,
+                                    Click::new((touch.location.x, touch.location.y)),
+                                );
                             }
                             TouchPhase::Moved => {
-                                if touch.id == touch_adapter.current_touch.unwrap().id {
-                                    touch_adapter.current_touch.replace(touch);
+                                if let Some(click) =
+                                    touch_adapter.tracked.get_mut(&(touch.id as Finger))
+                                {
+                                    click
+                                        .current
+                                        .replace((touch.location.x, touch.location.y).into());
                                 }
                             }
                             TouchPhase::Ended => {
-                                if touch.id == touch_adapter.current_touch.unwrap().id {
-                                    touch_adapter.current_touch.take();
-                                    touch_adapter.end_touch.replace(touch);
+                                if let Some(click) =
+                                    touch_adapter.tracked.get_mut(&(touch.id as Finger))
+                                {
+                                    click
+                                        .end
+                                        .replace((touch.location.x, touch.location.y).into());
+                                }
+                                if let Some(finger) = touch_adapter.primary {
+                                    if finger == touch.id as Finger {
+                                        touch_adapter.primary.take();
+                                        let click = *touch_adapter
+                                            .tracked
+                                            .get(&finger)
+                                            .expect("no tracked finger");
+                                        touch_adapter.primary_end_event.replace((finger, click));
+                                    }
                                 }
                             }
                             TouchPhase::Cancelled => {
-                                if touch.id == touch_adapter.current_touch.unwrap().id {
-                                    touch_adapter.current_touch.take();
+                                if let Some(finger) = touch_adapter.primary {
+                                    if finger == touch.id as Finger {
+                                        touch_adapter.primary.take();
+                                    }
                                 }
+                                touch_adapter.tracked.remove(&(touch.id as Finger));
                             }
                         }
                     }
@@ -374,6 +402,34 @@ impl Engen {
                             .container
                             .get_resource_mut::<MouseAdapter>()
                             .expect("no mouse adapter");
+                        let mouse_location = mouse_adapter.location;
+                        let mut valid_releases = HashMap::new();
+                        match state {
+                            ElementState::Pressed => {
+                                if let Some(click) = mouse_adapter.tracked_buttons.get_mut(&button)
+                                {
+                                    click.current = mouse_location;
+                                } else {
+                                    if let Some(location) = mouse_location {
+                                        mouse_adapter
+                                            .tracked_buttons
+                                            .insert(button, Click::new(location));
+                                    }
+                                }
+                            }
+                            ElementState::Released => {
+                                if let Some(click) = mouse_adapter.tracked_buttons.get_mut(&button)
+                                {
+                                    click.end = mouse_location;
+                                    if let Some(location) = mouse_location {
+                                        valid_releases.insert(button, *click);
+                                    }
+                                }
+                            }
+                        }
+                        for (button, click) in valid_releases {
+                            mouse_adapter.valid_releases.insert(button, click);
+                        }
                     }
                     _ => {}
                 },

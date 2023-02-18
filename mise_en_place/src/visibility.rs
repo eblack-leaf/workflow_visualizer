@@ -599,7 +599,9 @@ pub(crate) fn resize(
     }
 }
 
-impl Attach for Visibility {
+pub struct VisibilityPlugin;
+
+impl Attach for VisibilityPlugin {
     fn attach(engen: &mut Engen) {
         engen
             .backend

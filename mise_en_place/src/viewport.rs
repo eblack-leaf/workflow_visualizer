@@ -200,7 +200,9 @@ pub(crate) fn adjust_area(
     }
 }
 
-impl Attach for Viewport {
+pub struct ViewportPlugin;
+
+impl Attach for ViewportPlugin {
     fn attach(engen: &mut Engen) {
         engen
             .backend
