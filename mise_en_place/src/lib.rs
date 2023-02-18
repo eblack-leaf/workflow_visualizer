@@ -374,27 +374,9 @@ impl Engen {
                             .container
                             .get_resource_mut::<MouseAdapter>()
                             .expect("no mouse adapter");
-                        mouse_adapter.button_state.insert(button, state);
-                    }
-                    WindowEvent::AxisMotion { device_id, axis, value } => {
-                        self.frontend.container.get_resource_mut::<MotionAdapter>().expect("").mapping.insert(axis, value);
                     }
                     _ => {}
                 },
-                Event::DeviceEvent { device_id, event } => {
-                    match event {
-                        DeviceEvent::Added => {}
-                        DeviceEvent::Removed => {}
-                        DeviceEvent::MouseMotion { .. } => {}
-                        DeviceEvent::MouseWheel { .. } => {}
-                        DeviceEvent::Motion { axis, value } => {
-                            self.frontend.container.get_resource_mut::<MotionAdapter>().expect("no motion adapter").mapping.insert(axis, value);
-                        }
-                        DeviceEvent::Button { .. } => {}
-                        DeviceEvent::Key(_) => {}
-                        DeviceEvent::Text { .. } => {}
-                    }
-                }
                 Event::Suspended => {
                     if self.frontend.active() {
                         #[cfg(target_os = "android")]
