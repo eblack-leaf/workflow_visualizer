@@ -1,12 +1,12 @@
 use crate::{Attach, Engen, FrontEndStages};
 pub use crate::coord::area::Area;
-pub(crate) use crate::coord::area::GpuArea;
+pub use crate::coord::area::GpuArea;
 pub use crate::coord::area_adjust::AreaAdjust;
 pub use crate::coord::depth::Depth;
 pub use crate::coord::depth_adjust::DepthAdjust;
 pub use crate::coord::location::Location;
 pub use crate::coord::panel::Panel;
-pub(crate) use crate::coord::position::GpuPosition;
+pub use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::PositionAdjust;
 pub use crate::coord::section::Section;

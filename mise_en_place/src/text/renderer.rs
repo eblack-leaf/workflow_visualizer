@@ -2,23 +2,23 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
-use crate::{Color, Job, ScaleFactor};
 use crate::coord::{GpuArea, GpuPosition};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::index::Indexer;
 use crate::instance_tools::GpuAttributeBuffer;
+use crate::instance_tools::NullBit;
 use crate::job::Container;
 use crate::key::Key;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::atlas::AtlasBindGroup;
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
+use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
+use crate::{Color, Job, ScaleFactor};
 
 #[derive(Resource)]
 pub(crate) struct TextRenderer {
@@ -212,8 +212,8 @@ pub(crate) fn setup(
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let mut extraction = frontend
             .container

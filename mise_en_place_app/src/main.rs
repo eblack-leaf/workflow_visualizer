@@ -4,7 +4,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, IconKey, IconMesh, IconMeshAddRequest, Idle, Job, Launch, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconPlugin, IconSize, IconVertex, Idle, Job, Launch, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer};
 
 #[derive(Resource)]
 struct Counter {
@@ -81,10 +81,31 @@ impl Launch for Launcher {
                 TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(44, 10));
-        let mesh = Vec::new();
-        job.container.spawn(IconMeshAddRequest::new(IconKey("mesh name"), IconMesh::new(mesh), 10));
+        job.container.spawn(IconMeshAddRequest::new(
+            IconKey("mesh name"),
+            IconMesh::new(ICON_MESH.iter().map(|v| *v).collect::<Vec<IconVertex>>()),
+            10,
+        ));
+        job.container.spawn(
+            IconBundle::new(
+                Icon {},
+                IconSize::Medium,
+                IconKey("mesh name"),
+                (UIView {}, (10u32, 10u32), 0u32),
+                (1.0, 1.0, 1.0),
+            )
+        );
     }
 }
+
+pub(crate) const ICON_MESH: [IconVertex; 6] = [
+    IconVertex::new(GpuPosition { x: 0.0, y: 0.0 }),
+    IconVertex::new(GpuPosition { x: 0.0, y: 1.0 }),
+    IconVertex::new(GpuPosition { x: 1.0, y: 0.0 }),
+    IconVertex::new(GpuPosition { x: 1.0, y: 0.0 }),
+    IconVertex::new(GpuPosition { x: 0.0, y: 1.0 }),
+    IconVertex::new(GpuPosition { x: 1.0, y: 1.0 }),
+];
 
 fn main() {
     #[cfg(not(target_arch = "wasm32"))]
@@ -111,5 +132,6 @@ fn main() {
     }
     let mut engen = Engen::new(EngenOptions::new().with_native_dimensions((500, 900)));
     engen.add_plugin::<TextPlugin>();
+    engen.add_plugin::<IconPlugin>();
     engen.launch::<Launcher>();
 }

@@ -4,12 +4,12 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 use bytemuck::{Pod, Zeroable};
 
-use crate::{Area, Color, Position, Section};
 use crate::coord::{DeviceView, GpuArea, GpuPosition, Numerical};
 use crate::gfx::GfxSurface;
 use crate::index::{Index, Indexer};
-use crate::instance_tools::{AttributeWrite, CpuAttributeBuffer, offset};
 use crate::instance_tools::GpuAttributeBuffer;
+use crate::instance_tools::NullBit;
+use crate::instance_tools::{offset, AttributeWrite, CpuAttributeBuffer};
 use crate::key::Key;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
@@ -20,10 +20,9 @@ use crate::text::coords::Coords;
 use crate::text::difference::{Difference, TextBoundDifference};
 use crate::text::extraction::Extraction;
 use crate::text::glyph::{Glyph, GlyphId};
-use crate::text::null_bit::NullBit;
 use crate::text::render_group::{
-    DepthWrite, DrawSection, KeyedGlyphIds, PositionWrite, RenderGroup,
-    RenderGroupBindGroup, RenderGroupTextBound, TextPlacement,
+    DepthWrite, DrawSection, KeyedGlyphIds, PositionWrite, RenderGroup, RenderGroupBindGroup,
+    RenderGroupTextBound, TextPlacement,
 };
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScaleAlignment};
@@ -31,6 +30,7 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
+use crate::{Area, Color, Position, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -79,7 +79,8 @@ pub(crate) fn create_render_groups(
         let coords_gpu = GpuAttributeBuffer::<Coords>::new(&gfx_surface, max.0, "coords buffer");
         let glyph_position_gpu =
             GpuAttributeBuffer::<GpuPosition>::new(&gfx_surface, max.0, "glyph position buffer");
-        let glyph_area_gpu = GpuAttributeBuffer::<GpuArea>::new(&gfx_surface, max.0, "glyph area buffer");
+        let glyph_area_gpu =
+            GpuAttributeBuffer::<GpuArea>::new(&gfx_surface, max.0, "glyph area buffer");
         let null_write = AttributeWrite::<NullBit>::new();
         let coords_write = AttributeWrite::<Coords>::new();
         let glyph_position_write = AttributeWrite::<GpuPosition>::new();
@@ -90,7 +91,8 @@ pub(crate) fn create_render_groups(
         let draw_section = DrawSection::new();
         let glyph_color_write = AttributeWrite::<Color>::new();
         let glyph_color_cpu = CpuAttributeBuffer::<Color>::new(max.0);
-        let glyph_color_gpu = GpuAttributeBuffer::<Color>::new(&gfx_surface, max.0, "glyph color buffer");
+        let glyph_color_gpu =
+            GpuAttributeBuffer::<Color>::new(&gfx_surface, max.0, "glyph color buffer");
         let render_group_entity = renderer
             .container
             .spawn(RenderGroup::new(
@@ -278,7 +280,8 @@ fn resolve_draw_section(
             .container
             .get::<Position<DeviceView>>(render_group)
             .unwrap();
-        let scaled_bound = Section::<DeviceView>::new(position, bound.to_device(scale_factor.factor));
+        let scaled_bound =
+            Section::<DeviceView>::new(position, bound.to_device(scale_factor.factor));
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
@@ -427,7 +430,8 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
         *renderer
             .container
             .get_mut::<GpuAttributeBuffer<GpuPosition>>(render_group)
-            .unwrap() = GpuAttributeBuffer::<GpuPosition>::new(&gfx_surface, max, "glyph position buffer");
+            .unwrap() =
+            GpuAttributeBuffer::<GpuPosition>::new(&gfx_surface, max, "glyph position buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
@@ -681,12 +685,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-        > renderer
-        .container
-        .get::<AtlasFreeLocations>(render_group)
-        .unwrap()
-        .free
-        .len() as u32
+            > renderer
+                .container
+                .get::<AtlasFreeLocations>(render_group)
+                .unwrap()
+                .free
+                .len() as u32
     {
         let current_dimension = renderer
             .container
@@ -1062,7 +1066,6 @@ fn write_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gro
         );
     }
 }
-
 
 pub(crate) fn resize_receiver(
     mut renderer: ResMut<TextRenderer>,

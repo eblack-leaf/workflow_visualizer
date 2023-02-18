@@ -72,34 +72,21 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static> Instan
         }
     }
     pub fn grow(&mut self, gfx_surface: &GfxSurface, max: u32) {
-        self.cpu
-            .buffer
-            .resize(max as usize, Attribute::default());
-        *self.gpu = GpuAttributeBuffer::<Attribute>::new(&gfx_surface, max, "attribute buffer");
-        gfx_surface.queue.write_buffer(
-            &self.gpu
-                .buffer,
-            0,
-            bytemuck::cast_slice(
-                &self.cpu
-                    .buffer,
-            ),
-        );
+        self.cpu.buffer.resize(max as usize, Attribute::default());
+        self.gpu = GpuAttributeBuffer::<Attribute>::new(&gfx_surface, max, "attribute buffer");
+        gfx_surface
+            .queue
+            .write_buffer(&self.gpu.buffer, 0, bytemuck::cast_slice(&self.cpu.buffer));
     }
-    pub fn write_attribute(
-        &mut self,
-        gfx_surface: &GfxSurface,
-    ) {
+    pub fn write_attribute(&mut self, gfx_surface: &GfxSurface) {
         let attributes = self
-            .write.write
+            .write
+            .write
             .drain()
             .collect::<Vec<(Index, Attribute)>>();
         let mut write_range: (Option<Index>, Option<Index>) = (None, None);
         for (index, attr) in attributes {
-            *self
-                .cpu.buffer
-                .get_mut(index.value as usize)
-                .unwrap() = attr;
+            *self.cpu.buffer.get_mut(index.value as usize).unwrap() = attr;
             if let Some(start) = write_range.0.as_mut() {
                 if index.value < start.value {
                     *start = index;
@@ -117,14 +104,10 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static> Instan
         }
         if let Some(start) = write_range.0 {
             let mut end = write_range.1.take().unwrap();
-            let cpu_range = &self
-                .cpu
-                .buffer[start.value as usize..end.value as usize + 1];
+            let cpu_range = &self.cpu.buffer[start.value as usize..end.value as usize + 1];
             let offset = offset::<Attribute>(&start);
             gfx_surface.queue.write_buffer(
-                &self
-                    .gpu
-                    .buffer,
+                &self.gpu.buffer,
                 offset,
                 bytemuck::cast_slice(cpu_range),
             );
@@ -134,4 +117,30 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static> Instan
 
 pub fn offset<T>(index: &Index) -> wgpu::BufferAddress {
     (std::mem::size_of::<T>() * index.value as usize) as wgpu::BufferAddress
+}
+
+#[repr(C)]
+#[derive(Pod, Zeroable, Copy, Clone)]
+pub(crate) struct NullBit {
+    bit: u32,
+}
+
+impl Default for NullBit {
+    fn default() -> Self {
+        NullBit::null()
+    }
+}
+
+impl NullBit {
+    pub(crate) const NOT_NULL: u32 = 0u32;
+    pub(crate) const NULL: u32 = 1u32;
+    fn new(bit: u32) -> Self {
+        Self { bit }
+    }
+    pub(crate) fn not_null() -> NullBit {
+        Self::new(Self::NOT_NULL)
+    }
+    pub(crate) fn null() -> Self {
+        Self::new(Self::NULL)
+    }
 }

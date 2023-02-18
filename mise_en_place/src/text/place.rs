@@ -4,12 +4,12 @@ use bevy_ecs::prelude::Component;
 use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle};
 use winit::event::VirtualKeyCode::L;
 
-use crate::Color;
 use crate::key::{Key, KeyFactory};
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::{PartitionMetadata, Text};
+use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Placer {

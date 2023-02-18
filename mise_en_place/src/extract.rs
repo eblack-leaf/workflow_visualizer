@@ -11,7 +11,7 @@ pub(crate) fn invoke_extract<Extractor: Extract>(frontend: &mut Job, backend: &m
 }
 
 pub(crate) fn extract(engen: &mut Engen) {
-    for seasoning in engen.extract_fns.iter_mut() {
-        seasoning(&mut engen.frontend, &mut engen.backend);
+    for extract_invoker in engen.extract_fns.iter_mut() {
+        extract_invoker(&mut engen.frontend, &mut engen.backend);
     }
 }

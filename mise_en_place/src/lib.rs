@@ -14,13 +14,13 @@ pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    Area, AreaAdjust, Depth, DepthAdjust, DeviceView, Location, Numerical, Position, PositionAdjust,
-    Section, UIView,
+    Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location,
+    Numerical, Position, PositionAdjust, Section, UIView,
 };
 use crate::coord::CoordPlugin;
 use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
-pub use crate::icon::{IconKey, IconMesh, IconMeshAddRequest, IconPlugin};
+pub use crate::icon::{Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconPlugin, IconSize, IconVertex};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
@@ -43,7 +43,10 @@ mod coord;
 mod extract;
 mod gfx;
 mod icon;
+mod index;
+mod instance_tools;
 mod job;
+mod key;
 mod render;
 mod text;
 mod theme;
@@ -53,9 +56,6 @@ mod visibility;
 mod wasm_compiler;
 mod wasm_server;
 mod window;
-mod instance_tools;
-mod index;
-mod key;
 
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {
@@ -71,6 +71,7 @@ pub enum FrontEndStages {
     CoordAdjust,
     VisibilityPreparation,
     ResolveVisibility,
+    PostProcess,
     Last,
 }
 
@@ -78,6 +79,7 @@ pub enum FrontEndStages {
 pub enum BackEndStartupStages {
     Startup,
     Setup,
+    PostSetup,
 }
 
 #[derive(StageLabel)]
@@ -153,6 +155,8 @@ impl Engen {
                 job.main
                     .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
                 job.main
+                    .add_stage(FrontEndStages::PostProcess, SystemStage::parallel());
+                job.main
                     .add_stage(FrontEndStages::Last, SystemStage::parallel());
                 job.main.add_stage_after(
                     FrontEndStages::Last,
@@ -167,6 +171,8 @@ impl Engen {
                     .add_stage(BackEndStartupStages::Startup, SystemStage::parallel());
                 job.startup
                     .add_stage(BackEndStartupStages::Setup, SystemStage::parallel());
+                job.startup
+                    .add_stage(BackEndStartupStages::PostSetup, SystemStage::parallel());
                 job.main
                     .add_stage(BackendStages::Initialize, SystemStage::parallel());
                 job.main.add_stage(

@@ -12,7 +12,6 @@ mod extraction;
 mod font;
 mod frontend_system;
 mod glyph;
-mod null_bit;
 mod place;
 mod plugin;
 mod render_group;
