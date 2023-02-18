@@ -6,9 +6,8 @@ use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
     Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MouseAdapter,
-    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextRenderer, TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor,
-    WasmServer,
+    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
+    TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor, WasmServer,
 };
 
 #[derive(Resource)]
@@ -36,10 +35,8 @@ fn update_text(
                     .expect("no tracked click")
                     .current;
                 if let Some(curr) = current {
-                    ent_text.partitions.first_mut().unwrap().characters = format!(
-                        "touch location: {:.2}, {:.2}",
-                        curr.x, curr.y
-                    );
+                    ent_text.partitions.first_mut().unwrap().characters =
+                        format!("touch location: {:.2}, {:.2}", curr.x, curr.y);
                 }
             }
         }
@@ -115,6 +112,6 @@ fn main() {
         }
     }
     let mut engen = Engen::new(EngenOptions::new().with_native_dimensions((500, 900)));
-    engen.add_renderer::<TextRenderer>();
+    engen.add_plugin::<TextPlugin>();
     engen.launch::<Launcher>();
 }

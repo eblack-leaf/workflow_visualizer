@@ -1,5 +1,5 @@
+pub use crate::text::plugin::TextPlugin;
 pub use crate::text::render_group::TextBoundGuide;
-pub use crate::text::renderer::TextRenderer;
 pub use crate::text::scale::TextScaleAlignment;
 pub use crate::text::text::{PartitionMetadata, Text, TextBundle, TextPartition};
 
@@ -17,6 +17,7 @@ mod gpu_buffer;
 mod index;
 mod null_bit;
 mod place;
+mod plugin;
 mod render_group;
 mod renderer;
 mod scale;

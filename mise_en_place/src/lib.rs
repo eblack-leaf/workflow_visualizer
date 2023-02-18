@@ -13,25 +13,25 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, Device, Location, Logical, Position, PositionAdjust,
     Section, View,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::CoordPlugin;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::text::{
-    PartitionMetadata, Text, TextBoundGuide, TextBundle, TextPartition, TextRenderer,
+    PartitionMetadata, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
     TextScaleAlignment,
 };
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-use crate::visibility::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
+use crate::visibility::VisibilityPlugin;
 pub use crate::wasm_compiler::WasmCompileDescriptor;
 use crate::window::{Click, Finger, Resize, WindowPlugin};
 pub use crate::window::{MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
@@ -51,10 +51,12 @@ mod visibility;
 mod wasm_compiler;
 mod wasm_server;
 mod window;
+mod icon;
 
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {
     Startup,
+    Initialization,
 }
 
 #[derive(StageLabel)]
@@ -85,16 +87,22 @@ pub enum BackendStages {
 
 pub struct EngenOptions {
     pub native_dimensions: Option<Area<Device>>,
+    pub theme: Theme,
 }
 
 impl EngenOptions {
     pub fn new() -> Self {
         Self {
             native_dimensions: None,
+            theme: Theme::default(),
         }
     }
     pub fn with_native_dimensions<A: Into<Area<Device>>>(mut self, dimensions: A) -> Self {
         self.native_dimensions.replace(dimensions.into());
+        self
+    }
+    pub fn with_theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
         self
     }
 }
@@ -122,6 +130,10 @@ impl Engen {
                 let mut job = Job::new();
                 job.startup
                     .add_stage(FrontEndStartupStages::Startup, SystemStage::parallel());
+                job.startup.add_stage(
+                    FrontEndStartupStages::Initialization,
+                    SystemStage::parallel(),
+                );
                 job.main
                     .add_stage(FrontEndStages::First, SystemStage::parallel());
                 job.main
@@ -173,8 +185,10 @@ impl Engen {
             window: None,
         }
     }
-    pub fn add_renderer<Renderer: Attach + Extract + Render + Resource>(&mut self) {
-        self.attachment_queue.push(Box::new(Renderer::attach));
+    pub fn add_plugin<Plugin: Attach>(&mut self) {
+        self.attachment_queue.push(Box::new(Plugin::attach));
+    }
+    pub fn add_renderer<Renderer: Extract + Render + Resource>(&mut self) {
         match Renderer::phase() {
             RenderPhase::Opaque => self.render_fns.0.push(Box::new(invoke_render::<Renderer>)),
             RenderPhase::Alpha => self.render_fns.1.push(Box::new(invoke_render::<Renderer>)),
@@ -194,7 +208,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");

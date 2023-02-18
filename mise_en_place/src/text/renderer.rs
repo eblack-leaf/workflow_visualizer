@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{
-    Commands, Entity, IntoSystemDescriptor, Res, Resource, StageLabel, SystemLabel, SystemStage,
-};
+use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
 use crate::coord::{GpuArea, GpuPosition};
 use crate::extract::Extract;
@@ -10,33 +8,20 @@ use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::job::Container;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::atlas::AtlasBindGroup;
-use crate::text::backend_system::{
-    create_render_groups, render_group_differences, reset_extraction, resize_receiver,
-};
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::frontend_system::{
-    bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment, depth_diff,
-    discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups, place,
-    position_diff, pull_differences, setup as frontend_setup, visible_area_diff,
-};
 use crate::text::glyph::Key;
 use crate::text::gpu_buffer::GpuBuffer;
 use crate::text::index::Indexer;
 use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
-use crate::text::renderer::TextSystems::{CreateRenderGroups, RenderGroupDiff};
 use crate::text::scale::AlignedFonts;
 use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
 use crate::viewport::Viewport;
-use crate::window::ScaleFactor;
-use crate::{
-    Area, Attach, BackEndStartupStages, BackendStages, Color, Engen, FrontEndStages,
-    FrontEndStartupStages, Job, Position,
-};
+use crate::{Color, Job, ScaleFactor};
 
 #[derive(Resource)]
-pub struct TextRenderer {
+pub(crate) struct TextRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
@@ -223,110 +208,6 @@ pub(crate) fn setup(
     cmd.insert_resource(renderer);
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
-}
-
-#[derive(SystemLabel)]
-enum TextSystems {
-    CreateRenderGroups,
-    RenderGroupDiff,
-}
-
-#[derive(StageLabel)]
-enum TextStages {
-    PlacementPreparation,
-    Placement,
-    CalcArea,
-    TextFrontEnd,
-}
-
-impl Attach for TextRenderer {
-    fn attach(engen: &mut Engen) {
-        engen
-            .frontend
-            .startup
-            .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
-        engen.frontend.main.add_stage_before(
-            FrontEndStages::CoordAdjust,
-            "area_intercept",
-            SystemStage::single(intercept_area_adjust),
-        );
-        engen.frontend.main.add_stage_before(
-            FrontEndStages::VisibilityPreparation,
-            TextStages::PlacementPreparation,
-            SystemStage::parallel()
-                .with_system(calc_bound_from_guide)
-                .with_system(calc_scale_from_alignment),
-        );
-        engen.frontend.main.add_stage_after(
-            TextStages::PlacementPreparation,
-            TextStages::Placement,
-            SystemStage::parallel().with_system(place),
-        );
-        engen.frontend.main.add_stage_after(
-            TextStages::Placement,
-            TextStages::CalcArea,
-            SystemStage::single(calc_area),
-        );
-        engen.frontend.main.add_stage_after(
-            FrontEndStages::ResolveVisibility,
-            TextStages::TextFrontEnd,
-            SystemStage::parallel(),
-        );
-        engen.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
-            manage_render_groups.before("out of bounds"),
-        );
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, bounds_diff);
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, depth_diff);
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, position_diff);
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(TextStages::TextFrontEnd, visible_area_diff);
-        engen.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
-            discard_out_of_bounds.label("out of bounds"),
-        );
-        engen.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
-            letter_diff.label("letter diff").after("out of bounds"),
-        );
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::Last, pull_differences);
-        engen
-            .backend
-            .startup
-            .add_system_to_stage(BackEndStartupStages::Setup, setup);
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Prepare,
-            create_render_groups.label(CreateRenderGroups),
-        );
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Prepare,
-            render_group_differences
-                .label(RenderGroupDiff)
-                .after(CreateRenderGroups),
-        );
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Prepare,
-            resize_receiver.after(RenderGroupDiff),
-        );
-        engen
-            .backend
-            .main
-            .add_system_to_stage(BackendStages::Last, reset_extraction);
-    }
 }
 
 impl Extract for TextRenderer {
