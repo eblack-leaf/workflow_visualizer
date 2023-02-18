@@ -44,8 +44,10 @@ fn update_text(
         }
         let mut button_click_text = String::new();
         for (button, click) in mouse_adapter.tracked_buttons.iter() {
-            button_click_text = button_click_text
-                .add(format!("button: {:?}, state: {:?}\n", button, click.current).as_str());
+            if let Some(current) = click.current {
+                button_click_text = button_click_text
+                    .add(format!("button: {:?}, state: {:.2}, {:.2}\n", button, current.x, current.y).as_str());
+            }
         }
         if entity.index() == 2 {
             ent_text.partitions.first_mut().unwrap().characters = button_click_text;
@@ -63,21 +65,21 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("touch location: ", ((1.0, 1.0, 1.0), 0))]),
-                (UIView {}, (0u32, 0u32), 0u32),
-                TextScaleAlignment::Small,
+                (UIView {}, (35u32, 10u32), 0u32),
+                TextScaleAlignment::Large,
             ))
             .insert(TextBoundGuide::new(44, 3));
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("mouse location: ", ((1.0, 1.0, 1.0), 0))]),
-                (UIView {}, (0u32, 60u32), 0u32),
-                TextScaleAlignment::Small,
+                (UIView {}, (35u32, 60u32), 0u32),
+                TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(44, 3));
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("mouse buttons: ", ((1.0, 1.0, 1.0), 0))]),
-                (UIView {}, (0u32, 100u32), 0u32),
+                (UIView {}, (35u32, 100u32), 0u32),
                 TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(44, 10));
@@ -89,9 +91,27 @@ impl Launch for Launcher {
         job.container.spawn(
             IconBundle::new(
                 Icon {},
+                IconSize::Large,
+                IconKey("mesh name"),
+                (UIView {}, (10u32, 17u32), 0u32),
+                (1.0, 1.0, 1.0),
+            )
+        );
+        job.container.spawn(
+            IconBundle::new(
+                Icon {},
                 IconSize::Medium,
                 IconKey("mesh name"),
-                (UIView {}, (10u32, 10u32), 0u32),
+                (UIView {}, (10u32, 65u32), 0u32),
+                (1.0, 1.0, 1.0),
+            )
+        );
+        job.container.spawn(
+            IconBundle::new(
+                Icon {},
+                IconSize::Small,
+                IconKey("mesh name"),
+                (UIView {}, (10u32, 105u32), 0u32),
                 (1.0, 1.0, 1.0),
             )
         );

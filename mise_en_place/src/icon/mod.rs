@@ -45,9 +45,9 @@ impl IconAreaGuide {
 impl Default for IconAreaGuide {
     fn default() -> Self {
         let mut guide = Self::new();
-        guide.guide.insert(IconSize::Small, 15);
-        guide.guide.insert(IconSize::Medium, 20);
-        guide.guide.insert(IconSize::Large, 25);
+        guide.guide.insert(IconSize::Small, 12);
+        guide.guide.insert(IconSize::Medium, 15);
+        guide.guide.insert(IconSize::Large, 18);
         guide
     }
 }
