@@ -101,6 +101,11 @@ pub(crate) fn calc_area() {
     // run after text + icon area calcs
 }
 
+pub(crate) fn disable_invisible_buttons() {
+    // to avoid clicks offscreen for any reason
+    // run before register_click
+}
+
 // specific typed listeners need to be added to give functionality to click
 // they read click and do what is needed
 pub(crate) fn register_click() {
