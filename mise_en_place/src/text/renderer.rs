@@ -2,23 +2,23 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
+use crate::{Color, Job, ScaleFactor};
 use crate::coord::{GpuArea, GpuPosition};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
+use crate::index::Indexer;
+use crate::instance_tools::GpuAttributeBuffer;
 use crate::job::Container;
+use crate::key::Key;
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::atlas::AtlasBindGroup;
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
-use crate::text::glyph::Key;
-use crate::text::gpu_buffer::GpuBuffer;
-use crate::text::index::Indexer;
 use crate::text::null_bit::NullBit;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
+use crate::text::vertex::{GLYPH_AABB, Vertex, vertex_buffer};
 use crate::viewport::Viewport;
-use crate::{Color, Job, ScaleFactor};
 
 #[derive(Resource)]
 pub(crate) struct TextRenderer {
@@ -212,8 +212,8 @@ pub(crate) fn setup(
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = frontend
             .container
@@ -247,35 +247,35 @@ impl Render for TextRenderer {
             if indexer.count() > 0 {
                 let glyph_positions = self
                     .container
-                    .get::<GpuBuffer<GpuPosition>>(*render_group)
+                    .get::<GpuAttributeBuffer<GpuPosition>>(*render_group)
                     .expect("no glyph position buffer");
                 render_pass_handle
                     .0
                     .set_vertex_buffer(1, glyph_positions.buffer.slice(..));
                 let null_bits = self
                     .container
-                    .get::<GpuBuffer<NullBit>>(*render_group)
+                    .get::<GpuAttributeBuffer<NullBit>>(*render_group)
                     .expect("no null bits buffer");
                 render_pass_handle
                     .0
                     .set_vertex_buffer(2, null_bits.buffer.slice(..));
                 let coords = self
                     .container
-                    .get::<GpuBuffer<Coords>>(*render_group)
+                    .get::<GpuAttributeBuffer<Coords>>(*render_group)
                     .expect("no coords buffer");
                 render_pass_handle
                     .0
                     .set_vertex_buffer(3, coords.buffer.slice(..));
                 let glyph_areas = self
                     .container
-                    .get::<GpuBuffer<GpuArea>>(*render_group)
+                    .get::<GpuAttributeBuffer<GpuArea>>(*render_group)
                     .expect("no glyph area buffer");
                 render_pass_handle
                     .0
                     .set_vertex_buffer(4, glyph_areas.buffer.slice(..));
                 let colors = self
                     .container
-                    .get::<GpuBuffer<Color>>(*render_group)
+                    .get::<GpuAttributeBuffer<Color>>(*render_group)
                     .expect("no color buffer");
                 render_pass_handle
                     .0

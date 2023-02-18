@@ -3,7 +3,7 @@ use std::ops::Deref;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
-use crate::coord::{Area, Logical};
+use crate::coord::{Area, Numerical};
 use crate::text::scale::TextScale;
 
 #[derive(Resource)]
@@ -42,7 +42,7 @@ impl MonoSpacedFont {
     pub(crate) fn index() -> usize {
         0
     }
-    pub(crate) fn character_dimensions(&self, character: char, px: f32) -> Area<Logical> {
+    pub(crate) fn character_dimensions(&self, character: char, px: f32) -> Area<Numerical> {
         let metrics = self.font().metrics(character, px);
         let height = self
             .font()

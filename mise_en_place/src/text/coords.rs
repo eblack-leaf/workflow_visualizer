@@ -1,6 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{Logical, Section};
+use crate::coord::{Numerical, Section};
 use crate::text::atlas::AtlasTextureDimensions;
 use crate::{Area, Position};
 
@@ -12,14 +12,14 @@ pub(crate) struct Coords {
 
 impl Coords {
     pub(crate) fn from_section(
-        glyph_section: Section<Logical>,
+        glyph_section: Section<Numerical>,
         texture_dimensions: AtlasTextureDimensions,
     ) -> Self {
-        let normalized_position = Position::<Logical>::new(
+        let normalized_position = Position::<Numerical>::new(
             glyph_section.position.x / texture_dimensions.dimensions.width as f32,
             glyph_section.position.y / texture_dimensions.dimensions.height as f32,
         );
-        let normalized_area = Area::<Logical>::new(
+        let normalized_area = Area::<Numerical>::new(
             glyph_section.width() / texture_dimensions.dimensions.width as f32,
             glyph_section.height() / texture_dimensions.dimensions.height as f32,
         );

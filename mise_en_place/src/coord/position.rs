@@ -4,7 +4,7 @@ use std::ops::Sub;
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{CoordContext, Device, Logical, PositionAdjust, View};
+use crate::coord::{CoordContext, DeviceView, Numerical, PositionAdjust, UIView};
 
 #[derive(Component, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Position<Context: CoordContext> {
@@ -40,8 +40,8 @@ impl<Context: CoordContext> Position<Context> {
         self.x += adjust.x;
         self.y += adjust.y;
     }
-    pub fn as_logical(&self) -> Position<Logical> {
-        Position::<Logical>::new(self.x, self.y)
+    pub fn as_numerical(&self) -> Position<Numerical> {
+        Position::<Numerical>::new(self.x, self.y)
     }
     pub fn to_gpu(&self) -> GpuPosition {
         GpuPosition {
@@ -51,15 +51,15 @@ impl<Context: CoordContext> Position<Context> {
     }
 }
 
-impl Position<View> {
-    pub fn to_device(&self, scale_factor: f64) -> Position<Device> {
-        Position::<Device>::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
+impl Position<UIView> {
+    pub fn to_device(&self, scale_factor: f64) -> Position<DeviceView> {
+        Position::<DeviceView>::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
     }
 }
 
-impl Position<Device> {
-    pub fn to_view(&self, scale_factor: f64) -> Position<View> {
-        Position::<View>::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
+impl Position<DeviceView> {
+    pub fn to_ui(&self, scale_factor: f64) -> Position<UIView> {
+        Position::<UIView>::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
     }
 }
 

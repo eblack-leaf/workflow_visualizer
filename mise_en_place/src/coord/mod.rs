@@ -1,14 +1,15 @@
+use crate::{Attach, Engen, FrontEndStages};
 pub use crate::coord::area::Area;
 pub(crate) use crate::coord::area::GpuArea;
 pub use crate::coord::area_adjust::AreaAdjust;
 pub use crate::coord::depth::Depth;
 pub use crate::coord::depth_adjust::DepthAdjust;
 pub use crate::coord::location::Location;
+pub use crate::coord::panel::Panel;
 pub(crate) use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::PositionAdjust;
 pub use crate::coord::section::Section;
-use crate::{Attach, Engen, FrontEndStages};
 
 mod area;
 mod area_adjust;
@@ -23,35 +24,34 @@ mod section;
 pub(crate) struct CoordPlugin;
 
 pub trait CoordContext
-where
-    Self: Copy + Clone + Send + Sync + 'static,
-{
-}
+    where
+        Self: Copy + Clone + Send + Sync + 'static,
+{}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
-pub struct Logical {}
+pub struct Numerical {}
 
-impl CoordContext for Logical {}
-
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
-pub struct View {}
-
-impl CoordContext for View {}
+impl CoordContext for Numerical {}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
-pub struct Device {}
+pub struct UIView {}
 
-impl CoordContext for Device {}
+impl CoordContext for UIView {}
+
+#[derive(Copy, Clone, PartialEq, Default, Debug)]
+pub struct DeviceView {}
+
+impl CoordContext for DeviceView {}
 
 impl Attach for CoordPlugin {
     fn attach(engen: &mut Engen) {
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,
-            position_adjust::position_adjust::<View>,
+            position_adjust::position_adjust::<UIView>,
         );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,
-            area_adjust::area_adjust::<View>,
+            area_adjust::area_adjust::<UIView>,
         );
         engen
             .frontend

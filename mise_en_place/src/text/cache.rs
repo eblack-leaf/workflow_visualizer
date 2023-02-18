@@ -2,27 +2,28 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
-use crate::coord::{Depth, Logical, Position, Section, View};
-use crate::text::glyph::{GlyphId, Key};
+use crate::Color;
+use crate::coord::{Depth, Numerical, Position, Section, UIView};
+use crate::key::Key;
+use crate::text::glyph::GlyphId;
 use crate::text::render_group::TextBound;
 use crate::visibility::VisibleSection;
-use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Cache {
     pub(crate) keys: HashSet<Key>,
-    pub(crate) glyph_positions: HashMap<Key, Position<Logical>>,
+    pub(crate) glyph_positions: HashMap<Key, Position<Numerical>>,
     pub(crate) glyph_ids: HashMap<Key, GlyphId>,
     pub(crate) glyph_colors: HashMap<Key, Color>,
     pub(crate) bound: Option<TextBound>,
-    pub(crate) position: Position<View>,
+    pub(crate) position: Position<UIView>,
     pub(crate) depth: Depth,
     pub(crate) visible_section: VisibleSection,
 }
 
 impl Cache {
     pub(crate) fn new(
-        position: Position<View>,
+        position: Position<UIView>,
         depth: Depth,
         visible_section: VisibleSection,
     ) -> Self {
@@ -48,7 +49,7 @@ impl Cache {
         self.glyph_ids.remove(&key);
         self.glyph_positions.remove(&key);
     }
-    pub(crate) fn add(&mut self, key: Key, glyph_id: GlyphId, glyph_position: Position<Logical>) {
+    pub(crate) fn add(&mut self, key: Key, glyph_id: GlyphId, glyph_position: Position<Numerical>) {
         self.keys.insert(key);
         self.glyph_ids.insert(key, glyph_id);
         self.glyph_positions.insert(key, glyph_position);
@@ -56,7 +57,7 @@ impl Cache {
     pub(crate) fn glyph_position_different(
         &self,
         key: Key,
-        glyph_position: Position<Logical>,
+        glyph_position: Position<Numerical>,
     ) -> bool {
         *self
             .glyph_positions

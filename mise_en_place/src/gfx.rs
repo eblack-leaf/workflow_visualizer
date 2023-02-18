@@ -35,11 +35,11 @@ impl GfxOptions {
 }
 
 #[derive(Resource)]
-pub(crate) struct GfxSurface {
-    pub(crate) surface: wgpu::Surface,
-    pub(crate) device: wgpu::Device,
-    pub(crate) queue: wgpu::Queue,
-    pub(crate) options: GfxOptions,
+pub struct GfxSurface {
+    pub surface: wgpu::Surface,
+    pub device: wgpu::Device,
+    pub queue: wgpu::Queue,
+    pub options: GfxOptions,
 }
 
 impl GfxSurface {

@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
-use crate::coord::{Device, Logical};
+use crate::coord::{DeviceView, Numerical};
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::text::coords::Coords;
 use crate::text::font::MonoSpacedFont;
@@ -85,7 +85,7 @@ impl Atlas {
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct AtlasBlock {
-    pub(crate) block: Area<Logical>,
+    pub(crate) block: Area<Numerical>,
 }
 
 impl AtlasBlock {
@@ -98,7 +98,7 @@ impl AtlasBlock {
 
 #[derive(Component, Clone, Copy)]
 pub(crate) struct AtlasTextureDimensions {
-    pub(crate) dimensions: Area<Logical>,
+    pub(crate) dimensions: Area<Numerical>,
 }
 
 impl AtlasTextureDimensions {
@@ -213,7 +213,7 @@ impl AtlasGlyphReferences {
 
 #[derive(Component)]
 pub(crate) struct AtlasWriteQueue {
-    pub(crate) queue: HashMap<AtlasLocation, (Coords, Area<Logical>, Bitmap)>,
+    pub(crate) queue: HashMap<AtlasLocation, (Coords, Area<Numerical>, Bitmap)>,
 }
 
 impl AtlasWriteQueue {
@@ -239,7 +239,7 @@ impl AtlasAddQueue {
 
 #[derive(Component)]
 pub(crate) struct AtlasGlyphs {
-    pub(crate) glyphs: HashMap<GlyphId, (Coords, Area<Logical>, AtlasLocation, Bitmap)>,
+    pub(crate) glyphs: HashMap<GlyphId, (Coords, Area<Numerical>, AtlasLocation, Bitmap)>,
 }
 
 impl AtlasGlyphs {
@@ -251,7 +251,7 @@ impl AtlasGlyphs {
 }
 
 pub(crate) struct AtlasPosition {
-    pub(crate) position: Position<Logical>,
+    pub(crate) position: Position<Numerical>,
 }
 
 impl AtlasPosition {

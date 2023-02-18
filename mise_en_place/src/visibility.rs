@@ -5,7 +5,7 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
-use crate::coord::{Area, Device, Position, PositionAdjust, Section, View};
+use crate::coord::{Area, DeviceView, Position, PositionAdjust, Section, UIView};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
@@ -28,14 +28,14 @@ impl Visibility {
 
 #[derive(Component, Copy, Clone)]
 pub struct VisibleSection {
-    pub(crate) section: Section<View>,
+    pub(crate) section: Section<UIView>,
 }
 
 impl VisibleSection {
-    pub(crate) fn new(section: Section<View>) -> Self {
+    pub(crate) fn new(section: Section<UIView>) -> Self {
         Self { section }
     }
-    pub fn section(&self) -> Section<View> {
+    pub fn section(&self) -> Section<UIView> {
         self.section
     }
 }
@@ -61,7 +61,7 @@ pub(crate) struct SpacialHashRange {
 }
 
 impl SpacialHashRange {
-    pub(crate) fn new(visible_section: Section<View>, alignment: f32) -> Self {
+    pub(crate) fn new(visible_section: Section<UIView>, alignment: f32) -> Self {
         let left = (visible_section.left() / alignment).floor() as u32;
         let top = (visible_section.top() / alignment).floor() as u32;
         let right = (visible_section.right() / alignment).ceil() as u32;
@@ -97,7 +97,7 @@ pub(crate) struct SpacialHasher {
 }
 
 impl SpacialHasher {
-    pub(crate) fn new(alignment: f32, visible_section: Section<View>) -> Self {
+    pub(crate) fn new(alignment: f32, visible_section: Section<UIView>) -> Self {
         Self {
             alignment,
             cached_hash_range: SpacialHashRange::new(visible_section, alignment),
@@ -109,7 +109,7 @@ impl SpacialHasher {
             visible_bounds_changed: false,
         }
     }
-    pub(crate) fn current_range(&self, visible_section: Section<View>) -> SpacialHashRange {
+    pub(crate) fn current_range(&self, visible_section: Section<UIView>) -> SpacialHashRange {
         SpacialHashRange::new(visible_section, self.alignment)
     }
     fn setup(&mut self, entity: Entity) {
@@ -145,8 +145,8 @@ impl SpacialHasher {
 pub(crate) fn update_spacial_hash(
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut changed: Query<
-        (Entity, &Position<View>, &Area<View>, &mut Visibility),
-        Or<(Changed<Position<View>>, Changed<Area<View>>)>,
+        (Entity, &Position<UIView>, &Area<UIView>, &mut Visibility),
+        Or<(Changed<Position<UIView>>, Changed<Area<UIView>>)>,
     >,
     visible_bounds: Res<VisibleBounds>,
     mut cmd: Commands,
@@ -155,7 +155,7 @@ pub(crate) fn update_spacial_hash(
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
     for (entity, position, area, mut visibility) in changed.iter_mut() {
         spacial_hasher.an_entity_changed = true;
-        let section: Section<View> = (View {}, *position, *area).into();
+        let section: Section<UIView> = (UIView {}, *position, *area).into();
         if !section.is_overlapping(visible_bounds.section) {
             if visibility.visible() {
                 visibility.visible = false;
@@ -251,8 +251,8 @@ pub(crate) fn collision_responses(
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut entities: Query<
         (
-            &Position<View>,
-            &Area<View>,
+            &Position<UIView>,
+            &Area<UIView>,
             &mut CollisionBegin,
             &mut CollisionEnd,
         ),
@@ -358,9 +358,9 @@ pub(crate) fn visibility_setup(
     added: Query<
         Entity,
         (
-            Or<(Added<Position<View>>, Added<Area<View>>)>,
-            With<Position<View>>,
-            With<Area<View>>,
+            Or<(Added<Position<UIView>>, Added<Area<UIView>>)>,
+            With<Position<UIView>>,
+            With<Area<UIView>>,
             Without<Visibility>,
         ),
     >,
@@ -378,8 +378,8 @@ pub(crate) fn visibility_setup(
 }
 
 pub(crate) fn visibility_cleanup(
-    lost_position: RemovedComponents<Position<View>>,
-    lost_area: RemovedComponents<Area<View>>,
+    lost_position: RemovedComponents<Position<UIView>>,
+    lost_area: RemovedComponents<Area<UIView>>,
     lost_visibility: RemovedComponents<Visibility>,
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut lost_contact_entities: Query<&mut CollisionEnd>,
@@ -435,8 +435,8 @@ pub(crate) fn calc_visible_section(
     visible_bounds: Res<VisibleBounds>,
     mut entities: Query<(
         Entity,
-        &Position<View>,
-        &Area<View>,
+        &Position<UIView>,
+        &Area<UIView>,
         &mut Visibility,
         Option<&mut VisibleSection>,
     )>,
@@ -469,7 +469,7 @@ pub(crate) fn calc_visible_section(
         for entity in entities_to_check {
             let (_entity, position, area, mut visibility, maybe_visible_section) =
                 entities.get_mut(entity).expect("no entity found");
-            let section: Section<View> = (View {}, *position, *area).into();
+            let section: Section<UIView> = (UIView {}, *position, *area).into();
             if section.is_overlapping(visible_bounds.section) {
                 if !visibility.visible() {
                     visibility.visible = true;
@@ -501,29 +501,29 @@ pub(crate) fn calc_visible_section(
 
 #[derive(Resource)]
 pub struct VisibleBounds {
-    pub(crate) section: Section<View>,
+    pub(crate) section: Section<UIView>,
     dirty: bool,
 }
 
 impl VisibleBounds {
-    pub(crate) fn new(section: Section<View>) -> Self {
+    pub(crate) fn new(section: Section<UIView>) -> Self {
         Self {
             section,
             dirty: false,
         }
     }
-    pub fn position_adjust(&mut self, adjust: PositionAdjust<View>) {
+    pub fn position_adjust(&mut self, adjust: PositionAdjust<UIView>) {
         self.section.position.adjust(adjust);
         self.dirty = true;
     }
-    pub fn adjust_area(&mut self, area: Area<View>) {
+    pub fn adjust_area(&mut self, area: Area<UIView>) {
         self.section.area = area;
     }
 }
 
 #[derive(Resource)]
 pub struct VisibleBoundsPositionAdjust {
-    pub adjust: Option<PositionAdjust<View>>,
+    pub adjust: Option<PositionAdjust<UIView>>,
 }
 
 impl VisibleBoundsPositionAdjust {
@@ -545,7 +545,7 @@ pub(crate) fn adjust_position(
 
 #[derive(Resource)]
 pub(crate) struct ViewportOffsetUpdate {
-    pub(crate) update: Option<Position<Device>>,
+    pub(crate) update: Option<Position<DeviceView>>,
 }
 
 impl ViewportOffsetUpdate {
@@ -594,7 +594,7 @@ pub(crate) fn resize(
     mut spacial_hasher: ResMut<SpacialHasher>,
 ) {
     for event in resize_events.iter() {
-        visible_bounds.adjust_area(event.size.to_view(scale_factor.factor));
+        visible_bounds.adjust_area(event.size.to_ui(scale_factor.factor));
         spacial_hasher.visible_bounds_changed = true;
     }
 }
@@ -619,12 +619,12 @@ impl Attach for VisibilityPlugin {
             .get_resource::<ScaleFactor>()
             .expect("no scale factor")
             .factor;
-        let surface_area: Area<Device> = (
+        let surface_area: Area<DeviceView> = (
             gfx_surface_configuration.configuration.width,
             gfx_surface_configuration.configuration.height,
         )
             .into();
-        let visible_section = (View {}, (0u32, 0u32), surface_area.to_view(scale_factor)).into();
+        let visible_section = (UIView {}, (0u32, 0u32), surface_area.to_ui(scale_factor)).into();
         engen
             .frontend
             .container

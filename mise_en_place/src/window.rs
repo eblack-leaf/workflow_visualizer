@@ -3,19 +3,19 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Events, ResMut, Resource};
 use winit::event::{AxisId, ElementState, MouseButton};
 
-use crate::coord::Device;
+use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
 use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Copy, Clone)]
 pub struct Click {
-    pub origin: Position<Device>,
-    pub current: Option<Position<Device>>,
-    pub end: Option<Position<Device>>,
+    pub origin: Position<DeviceView>,
+    pub current: Option<Position<DeviceView>>,
+    pub end: Option<Position<DeviceView>>,
 }
 
 impl Click {
-    pub fn new<PD: Into<Position<Device>>>(origin: PD) -> Self {
+    pub fn new<PD: Into<Position<DeviceView>>>(origin: PD) -> Self {
         let position = origin.into();
         Self {
             origin: position,
@@ -46,7 +46,7 @@ impl TouchAdapter {
 
 #[derive(Resource)]
 pub struct MouseAdapter {
-    pub location: Option<Position<Device>>,
+    pub location: Option<Position<DeviceView>>,
     pub tracked_buttons: HashMap<MouseButton, Click>,
     pub valid_releases: HashMap<MouseButton, Click>,
 }
@@ -76,7 +76,7 @@ pub enum Orientation {
 }
 
 impl Orientation {
-    pub fn new<A: Into<Area<Device>>>(window_size: A) -> Self {
+    pub fn new<A: Into<Area<DeviceView>>>(window_size: A) -> Self {
         let window_size = window_size.into();
         let aspect_ratio = window_size.width / window_size.height;
         match aspect_ratio >= 1.0 {
@@ -105,12 +105,12 @@ impl From<f64> for ScaleFactor {
 
 #[derive(Clone, Copy)]
 pub(crate) struct Resize {
-    pub(crate) size: Area<Device>,
+    pub(crate) size: Area<DeviceView>,
     pub(crate) scale_factor: f64,
 }
 
 impl Resize {
-    pub(crate) fn new(size: Area<Device>, scale_factor: f64) -> Self {
+    pub(crate) fn new(size: Area<DeviceView>, scale_factor: f64) -> Self {
         Self { size, scale_factor }
     }
 }

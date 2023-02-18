@@ -4,11 +4,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{
-    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, Idle, Job, Launch, MouseAdapter,
-    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
-    TextScaleAlignment, TouchAdapter, View, Visibility, WasmCompileDescriptor, WasmServer,
-};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, IconKey, IconMesh, IconMeshAddRequest, Idle, Job, Launch, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer};
 
 #[derive(Resource)]
 struct Counter {
@@ -67,24 +63,26 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("touch location: ", ((1.0, 1.0, 1.0), 0))]),
-                (View {}, (0u32, 0u32), 0u32),
+                (UIView {}, (0u32, 0u32), 0u32),
                 TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(44, 3));
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("mouse location: ", ((1.0, 1.0, 1.0), 0))]),
-                (View {}, (0u32, 60u32), 0u32),
+                (UIView {}, (0u32, 60u32), 0u32),
                 TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(44, 3));
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("mouse buttons: ", ((1.0, 1.0, 1.0), 0))]),
-                (View {}, (0u32, 100u32), 0u32),
+                (UIView {}, (0u32, 100u32), 0u32),
                 TextScaleAlignment::Small,
             ))
             .insert(TextBoundGuide::new(44, 10));
+        let mesh = Vec::new();
+        job.container.spawn(IconMeshAddRequest::new(IconKey("mesh name"), IconMesh::new(mesh), 10));
     }
 }
 

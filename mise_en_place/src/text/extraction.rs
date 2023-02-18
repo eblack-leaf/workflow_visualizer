@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Entity, Resource};
 
-use crate::coord::{Depth, Position, View};
+use crate::coord::{Depth, Position, UIView};
 use crate::text::atlas::AtlasBlock;
 use crate::text::difference::Difference;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs};
@@ -16,7 +16,7 @@ pub(crate) struct Extraction {
         Entity,
         (
             RenderGroupMax,
-            Position<View>,
+            Position<UIView>,
             VisibleSection,
             Depth,
             AtlasBlock,

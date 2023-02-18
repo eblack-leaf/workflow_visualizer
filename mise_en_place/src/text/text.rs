@@ -2,14 +2,14 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::coord::{Depth, Position, Section, View};
+use crate::{Color, Location, PositionAdjust};
+use crate::coord::{Depth, Position, Section, UIView};
+use crate::key::Key;
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
-use crate::text::glyph::Key;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::{Color, Location, PositionAdjust};
 
 pub struct TextPartition {
     pub characters: String,
@@ -58,7 +58,7 @@ impl Text {
 pub struct TextBundle {
     pub text: Text,
     #[bundle]
-    pub location: Location<View>,
+    pub location: Location<UIView>,
     pub scale_alignment: TextScaleAlignment,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
@@ -66,7 +66,7 @@ pub struct TextBundle {
 }
 
 impl TextBundle {
-    pub fn new<T: Into<Text>, L: Into<Location<View>>>(
+    pub fn new<T: Into<Text>, L: Into<Location<UIView>>>(
         text: T,
         location: L,
         scale_alignment: TextScaleAlignment,

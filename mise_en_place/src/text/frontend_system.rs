@@ -6,13 +6,15 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
+use crate::{AreaAdjust, TextBoundGuide};
 use crate::color::Color;
-use crate::coord::{Area, Depth, Device, Position, Section, View};
+use crate::coord::{Area, Depth, DeviceView, Position, Section, UIView};
+use crate::key::{Key, KeyFactory};
 use crate::text::atlas::AtlasBlock;
 use crate::text::cache::Cache;
 use crate::text::difference::{Difference, TextBoundDifference};
 use crate::text::extraction::Extraction;
-use crate::text::glyph::{Glyph, Key, KeyFactory};
+use crate::text::glyph::Glyph;
 use crate::text::place::Placer;
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
@@ -20,7 +22,6 @@ use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::{AreaAdjust, TextBoundGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -28,11 +29,11 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 }
 
 pub(crate) fn intercept_area_adjust(
-    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust<View>>)>,
+    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust<UIView>>)>,
     mut cmd: Commands,
 ) {
     for entity in attempted_area_adjust.iter() {
-        cmd.entity(entity).remove::<AreaAdjust<View>>();
+        cmd.entity(entity).remove::<AreaAdjust<UIView>>();
     }
 }
 
@@ -79,7 +80,7 @@ pub(crate) fn manage_render_groups(
             Entity,
             &Text,
             &TextScale,
-            &Position<View>,
+            &Position<UIView>,
             &VisibleSection,
             Option<&TextBound>,
             &Depth,
@@ -231,7 +232,7 @@ pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd
             height = height.max(glyph.y + glyph.height as f32);
         }
         if width != 0.0 && height != 0.0 {
-            cmd.entity(entity).insert(Area::<View>::new(width, height));
+            cmd.entity(entity).insert(Area::<UIView>::new(width, height));
         }
     }
 }
@@ -279,8 +280,8 @@ pub(crate) fn depth_diff(
 
 pub(crate) fn position_diff(
     mut text: Query<
-        (&Position<View>, &mut Cache, &mut Difference),
-        (Changed<Position<View>>, With<Text>),
+        (&Position<UIView>, &mut Cache, &mut Difference),
+        (Changed<Position<UIView>>, With<Text>),
     >,
 ) {
     for (position, mut cache, mut difference) in text.iter_mut() {
@@ -356,8 +357,8 @@ pub(crate) fn discard_out_of_bounds(
     mut text: Query<
         (
             &mut Placer,
-            &Position<View>,
-            &Area<View>,
+            &Position<UIView>,
+            &Area<UIView>,
             Option<&TextBound>,
             &VisibleSection,
         ),
@@ -365,7 +366,7 @@ pub(crate) fn discard_out_of_bounds(
             Changed<Placer>,
             Changed<VisibleSection>,
             Changed<TextBound>,
-            Changed<Position<View>>,
+            Changed<Position<UIView>>,
         )>,
     >,
     scale_factor: Res<ScaleFactor>,
@@ -379,12 +380,12 @@ pub(crate) fn discard_out_of_bounds(
         let text_section = visible_section
             .section
             .to_scaled(scale_factor.factor)
-            .intersection(Section::<Device>::new(scaled_position, bound_area));
+            .intersection(Section::<DeviceView>::new(scaled_position, bound_area));
         placer.reset_filtered();
         if let Some(section) = text_section {
             let mut filter_queue = HashSet::new();
             for (key, glyph) in placer.unfiltered_placement().iter() {
-                let glyph_section = Section::<Device>::new(
+                let glyph_section = Section::<DeviceView>::new(
                     (scaled_position.x + glyph.x, scaled_position.y + glyph.y),
                     (glyph.width, glyph.height),
                 );

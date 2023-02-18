@@ -2,7 +2,7 @@ use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, Res, ResMut,
 
 use crate::{
     Attach, Depth, Engen, FrontEndStartupStages, Location, Position, ScaleFactor,
-    TextScaleAlignment, Theme, View,
+    TextScaleAlignment, Theme, UIView,
 };
 
 #[derive(Component)]
@@ -33,7 +33,7 @@ impl ButtonIcon {
 
 #[derive(Bundle)]
 pub struct ButtonBundle {
-    pub location: Location<View>,
+    pub location: Location<UIView>,
     pub text: ButtonText,
     pub icon: ButtonIcon,
     // comps for storing primary/secondary colors (together cause comp overwrite if insert 2 Color)
@@ -41,7 +41,7 @@ pub struct ButtonBundle {
 }
 
 impl ButtonBundle {
-    pub fn new(location: Location<View>) -> Self {
+    pub fn new(location: Location<UIView>) -> Self {
         Self {
             location,
             text: ButtonText::new(),
@@ -80,7 +80,7 @@ pub(crate) fn general_setup(mut cmd: Commands) {
 pub(crate) fn bundle_insert(
     theme: Res<Theme>,
     mut mesh_guide: ResMut<ButtonMeshGuide>,
-    button_bundles: Query<(Entity, &Position<View>, &Depth, &ButtonText, &ButtonIcon), ()>,
+    button_bundles: Query<(Entity, &Position<UIView>, &Depth, &ButtonText, &ButtonIcon), ()>,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
 ) {

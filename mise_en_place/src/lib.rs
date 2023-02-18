@@ -13,13 +13,14 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::CoordPlugin;
 pub use crate::coord::{
-    Area, AreaAdjust, Depth, DepthAdjust, Device, Location, Logical, Position, PositionAdjust,
-    Section, View,
+    Area, AreaAdjust, Depth, DepthAdjust, DeviceView, Location, Numerical, Position, PositionAdjust,
+    Section, UIView,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::CoordPlugin;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
+pub use crate::icon::{IconKey, IconMesh, IconMeshAddRequest, IconPlugin};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
@@ -30,8 +31,8 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-use crate::visibility::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
+use crate::visibility::VisibilityPlugin;
 pub use crate::wasm_compiler::WasmCompileDescriptor;
 use crate::window::{Click, Finger, Resize, WindowPlugin};
 pub use crate::window::{MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
@@ -52,6 +53,9 @@ mod visibility;
 mod wasm_compiler;
 mod wasm_server;
 mod window;
+mod instance_tools;
+mod index;
+mod key;
 
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {
@@ -86,7 +90,7 @@ pub enum BackendStages {
 }
 
 pub struct EngenOptions {
-    pub native_dimensions: Option<Area<Device>>,
+    pub native_dimensions: Option<Area<DeviceView>>,
     pub theme: Theme,
 }
 
@@ -97,7 +101,7 @@ impl EngenOptions {
             theme: Theme::default(),
         }
     }
-    pub fn with_native_dimensions<A: Into<Area<Device>>>(mut self, dimensions: A) -> Self {
+    pub fn with_native_dimensions<A: Into<Area<DeviceView>>>(mut self, dimensions: A) -> Self {
         self.native_dimensions.replace(dimensions.into());
         self
     }
@@ -208,7 +212,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -400,7 +404,7 @@ impl Engen {
                             .container
                             .get_resource_mut::<MouseAdapter>()
                             .expect("no mouse adapter");
-                        mouse_adapter.location.replace(Position::<Device>::new(
+                        mouse_adapter.location.replace(Position::<DeviceView>::new(
                             position.x as f32,
                             position.y as f32,
                         ));

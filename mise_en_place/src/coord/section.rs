@@ -2,7 +2,7 @@ use bevy_ecs::bundle::Bundle;
 
 use crate::coord::area::Area;
 use crate::coord::position::Position;
-use crate::coord::{CoordContext, Device, View};
+use crate::coord::{CoordContext, DeviceView, UIView};
 
 #[derive(Bundle, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Section<Context: CoordContext> {
@@ -75,9 +75,9 @@ impl<Context: CoordContext> Section<Context> {
     }
 }
 
-impl Section<View> {
-    pub(crate) fn to_scaled(&self, scale_factor: f64) -> Section<Device> {
-        Section::<Device>::new(
+impl Section<UIView> {
+    pub(crate) fn to_scaled(&self, scale_factor: f64) -> Section<DeviceView> {
+        Section::<DeviceView>::new(
             self.position.to_device(scale_factor),
             self.area.to_device(scale_factor),
         )

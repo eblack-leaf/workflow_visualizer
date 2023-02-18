@@ -4,23 +4,25 @@ use std::num::NonZeroU32;
 use bevy_ecs::prelude::{Entity, EventReader, Res, ResMut};
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{Device, GpuArea, GpuPosition, Logical};
+use crate::{Area, Color, Position, Section};
+use crate::coord::{DeviceView, GpuArea, GpuPosition, Numerical};
 use crate::gfx::GfxSurface;
+use crate::index::{Index, Indexer};
+use crate::instance_tools::{AttributeWrite, CpuAttributeBuffer, offset};
+use crate::instance_tools::GpuAttributeBuffer;
+use crate::key::Key;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
     AtlasTextureDimensions, AtlasWriteQueue, Bitmap,
 };
 use crate::text::coords::Coords;
-use crate::text::cpu_buffer::CpuBuffer;
 use crate::text::difference::{Difference, TextBoundDifference};
 use crate::text::extraction::Extraction;
-use crate::text::glyph::{Glyph, GlyphId, Key};
-use crate::text::gpu_buffer::GpuBuffer;
-use crate::text::index::{Index, Indexer};
+use crate::text::glyph::{Glyph, GlyphId};
 use crate::text::null_bit::NullBit;
 use crate::text::render_group::{
-    AttributeWrite, DepthWrite, DrawSection, KeyedGlyphIds, PositionWrite, RenderGroup,
+    DepthWrite, DrawSection, KeyedGlyphIds, PositionWrite, RenderGroup,
     RenderGroupBindGroup, RenderGroupTextBound, TextPlacement,
 };
 use crate::text::renderer::TextRenderer;
@@ -29,7 +31,6 @@ use crate::uniform::Uniform;
 use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Area, Color, Position, Section};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
@@ -70,15 +71,15 @@ pub(crate) fn create_render_groups(
         let atlas_add_queue = AtlasAddQueue::new();
         let atlas_glyph_references = AtlasGlyphReferences::new();
         let text_bound = RenderGroupTextBound::new();
-        let null_cpu = CpuBuffer::<NullBit>::new(max.0);
-        let coords_cpu = CpuBuffer::<Coords>::new(max.0);
-        let glyph_position_cpu = CpuBuffer::<GpuPosition>::new(max.0);
-        let glyph_area_cpu = CpuBuffer::<GpuArea>::new(max.0);
-        let null_gpu = GpuBuffer::<NullBit>::new(&gfx_surface, max.0, "null bit buffer");
-        let coords_gpu = GpuBuffer::<Coords>::new(&gfx_surface, max.0, "coords buffer");
+        let null_cpu = CpuAttributeBuffer::<NullBit>::new(max.0);
+        let coords_cpu = CpuAttributeBuffer::<Coords>::new(max.0);
+        let glyph_position_cpu = CpuAttributeBuffer::<GpuPosition>::new(max.0);
+        let glyph_area_cpu = CpuAttributeBuffer::<GpuArea>::new(max.0);
+        let null_gpu = GpuAttributeBuffer::<NullBit>::new(&gfx_surface, max.0, "null bit buffer");
+        let coords_gpu = GpuAttributeBuffer::<Coords>::new(&gfx_surface, max.0, "coords buffer");
         let glyph_position_gpu =
-            GpuBuffer::<GpuPosition>::new(&gfx_surface, max.0, "glyph position buffer");
-        let glyph_area_gpu = GpuBuffer::<GpuArea>::new(&gfx_surface, max.0, "glyph area buffer");
+            GpuAttributeBuffer::<GpuPosition>::new(&gfx_surface, max.0, "glyph position buffer");
+        let glyph_area_gpu = GpuAttributeBuffer::<GpuArea>::new(&gfx_surface, max.0, "glyph area buffer");
         let null_write = AttributeWrite::<NullBit>::new();
         let coords_write = AttributeWrite::<Coords>::new();
         let glyph_position_write = AttributeWrite::<GpuPosition>::new();
@@ -88,8 +89,8 @@ pub(crate) fn create_render_groups(
         let keyed_glyph_ids = KeyedGlyphIds::new();
         let draw_section = DrawSection::new();
         let glyph_color_write = AttributeWrite::<Color>::new();
-        let glyph_color_cpu = CpuBuffer::<Color>::new(max.0);
-        let glyph_color_gpu = GpuBuffer::<Color>::new(&gfx_surface, max.0, "glyph color buffer");
+        let glyph_color_cpu = CpuAttributeBuffer::<Color>::new(max.0);
+        let glyph_color_gpu = GpuAttributeBuffer::<Color>::new(&gfx_surface, max.0, "glyph color buffer");
         let render_group_entity = renderer
             .container
             .spawn(RenderGroup::new(
@@ -275,9 +276,9 @@ fn resolve_draw_section(
     {
         let position = *renderer
             .container
-            .get::<Position<Device>>(render_group)
+            .get::<Position<DeviceView>>(render_group)
             .unwrap();
-        let scaled_bound = Section::<Device>::new(position, bound.to_device(scale_factor.factor));
+        let scaled_bound = Section::<DeviceView>::new(position, bound.to_device(scale_factor.factor));
         let visible_section = renderer
             .container
             .get::<VisibleSection>(render_group)
@@ -289,7 +290,7 @@ fn resolve_draw_section(
         if let Some(v_bound) = visible_bound {
             let viewport_dimensions = v_bound.intersection(viewport.as_section());
             if let Some(v_dim) = viewport_dimensions {
-                let draw_bound = Section::<Device>::new(
+                let draw_bound = Section::<DeviceView>::new(
                     v_dim.position - viewport.as_section().position,
                     v_dim.area,
                 );
@@ -419,125 +420,125 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
             .max();
         renderer
             .container
-            .get_mut::<CpuBuffer<GpuPosition>>(render_group)
+            .get_mut::<CpuAttributeBuffer<GpuPosition>>(render_group)
             .unwrap()
             .buffer
             .resize(max as usize, GpuPosition::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<GpuPosition>>(render_group)
-            .unwrap() = GpuBuffer::<GpuPosition>::new(&gfx_surface, max, "glyph position buffer");
+            .get_mut::<GpuAttributeBuffer<GpuPosition>>(render_group)
+            .unwrap() = GpuAttributeBuffer::<GpuPosition>::new(&gfx_surface, max, "glyph position buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<GpuPosition>>(render_group)
+                .get::<GpuAttributeBuffer<GpuPosition>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<GpuPosition>>(render_group)
+                    .get::<CpuAttributeBuffer<GpuPosition>>(render_group)
                     .unwrap()
                     .buffer,
             ),
         );
         renderer
             .container
-            .get_mut::<CpuBuffer<GpuArea>>(render_group)
+            .get_mut::<CpuAttributeBuffer<GpuArea>>(render_group)
             .unwrap()
             .buffer
             .resize(max as usize, GpuArea::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<GpuArea>>(render_group)
-            .unwrap() = GpuBuffer::<GpuArea>::new(&gfx_surface, max, "glyph area buffer");
+            .get_mut::<GpuAttributeBuffer<GpuArea>>(render_group)
+            .unwrap() = GpuAttributeBuffer::<GpuArea>::new(&gfx_surface, max, "glyph area buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<GpuArea>>(render_group)
+                .get::<GpuAttributeBuffer<GpuArea>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<GpuArea>>(render_group)
+                    .get::<CpuAttributeBuffer<GpuArea>>(render_group)
                     .unwrap()
                     .buffer,
             ),
         );
         renderer
             .container
-            .get_mut::<CpuBuffer<NullBit>>(render_group)
+            .get_mut::<CpuAttributeBuffer<NullBit>>(render_group)
             .unwrap()
             .buffer
             .resize(max as usize, NullBit::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<NullBit>>(render_group)
-            .unwrap() = GpuBuffer::<NullBit>::new(&gfx_surface, max, "null bit buffer");
+            .get_mut::<GpuAttributeBuffer<NullBit>>(render_group)
+            .unwrap() = GpuAttributeBuffer::<NullBit>::new(&gfx_surface, max, "null bit buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<NullBit>>(render_group)
+                .get::<GpuAttributeBuffer<NullBit>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<NullBit>>(render_group)
+                    .get::<CpuAttributeBuffer<NullBit>>(render_group)
                     .unwrap()
                     .buffer,
             ),
         );
         renderer
             .container
-            .get_mut::<CpuBuffer<Coords>>(render_group)
+            .get_mut::<CpuAttributeBuffer<Coords>>(render_group)
             .unwrap()
             .buffer
             .resize(max as usize, Coords::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<Coords>>(render_group)
-            .unwrap() = GpuBuffer::<Coords>::new(&gfx_surface, max, "coords buffer");
+            .get_mut::<GpuAttributeBuffer<Coords>>(render_group)
+            .unwrap() = GpuAttributeBuffer::<Coords>::new(&gfx_surface, max, "coords buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<Coords>>(render_group)
+                .get::<GpuAttributeBuffer<Coords>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<Coords>>(render_group)
+                    .get::<CpuAttributeBuffer<Coords>>(render_group)
                     .unwrap()
                     .buffer,
             ),
         );
         renderer
             .container
-            .get_mut::<CpuBuffer<Color>>(render_group)
+            .get_mut::<CpuAttributeBuffer<Color>>(render_group)
             .unwrap()
             .buffer
             .resize(max as usize, Color::default());
         *renderer
             .container
-            .get_mut::<GpuBuffer<Color>>(render_group)
-            .unwrap() = GpuBuffer::<Color>::new(&gfx_surface, max, "color buffer");
+            .get_mut::<GpuAttributeBuffer<Color>>(render_group)
+            .unwrap() = GpuAttributeBuffer::<Color>::new(&gfx_surface, max, "color buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<Color>>(render_group)
+                .get::<GpuAttributeBuffer<Color>>(render_group)
                 .unwrap()
                 .buffer,
             0,
             bytemuck::cast_slice(
                 &renderer
                     .container
-                    .get::<CpuBuffer<Color>>(render_group)
+                    .get::<CpuAttributeBuffer<Color>>(render_group)
                     .unwrap()
                     .buffer,
             ),
@@ -680,12 +681,12 @@ fn grow_atlas(
         .len() as u32;
     if num_new_glyphs != 0
         && num_new_glyphs
-            > renderer
-                .container
-                .get::<AtlasFreeLocations>(render_group)
-                .unwrap()
-                .free
-                .len() as u32
+        > renderer
+        .container
+        .get::<AtlasFreeLocations>(render_group)
+        .unwrap()
+        .free
+        .len() as u32
     {
         let current_dimension = renderer
             .container
@@ -712,7 +713,7 @@ fn grow_atlas(
             .get_mut::<AtlasBindGroup>(render_group)
             .unwrap() = atlas_bind_group;
         let mut free_locations = AtlasFreeLocations::new(new_dimension);
-        let mut writes = Vec::<(GlyphId, AtlasLocation, Coords, Area<Logical>, Bitmap)>::new();
+        let mut writes = Vec::<(GlyphId, AtlasLocation, Coords, Area<Numerical>, Bitmap)>::new();
         for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in renderer
             .container
             .get::<AtlasGlyphs>(render_group)
@@ -926,7 +927,7 @@ fn write_attribute<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + '
     for (index, attr) in attributes {
         *renderer
             .container
-            .get_mut::<CpuBuffer<Attribute>>(render_group)
+            .get_mut::<CpuAttributeBuffer<Attribute>>(render_group)
             .unwrap()
             .buffer
             .get_mut(index.value as usize)
@@ -950,14 +951,14 @@ fn write_attribute<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + '
         let mut end = write_range.1.take().unwrap();
         let cpu_range = &renderer
             .container
-            .get::<CpuBuffer<Attribute>>(render_group)
+            .get::<CpuAttributeBuffer<Attribute>>(render_group)
             .unwrap()
             .buffer[start.value as usize..end.value as usize + 1];
         let offset = offset::<Attribute>(&start);
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
-                .get::<GpuBuffer<Attribute>>(render_group)
+                .get::<GpuAttributeBuffer<Attribute>>(render_group)
                 .unwrap()
                 .buffer,
             offset,
@@ -981,7 +982,7 @@ fn write_text_placement(
     {
         *renderer
             .container
-            .get_mut::<Position<Device>>(render_group)
+            .get_mut::<Position<DeviceView>>(render_group)
             .unwrap() = position;
         renderer
             .container
@@ -1062,9 +1063,6 @@ fn write_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gro
     }
 }
 
-fn offset<T>(index: &Index) -> wgpu::BufferAddress {
-    (std::mem::size_of::<T>() * index.value as usize) as wgpu::BufferAddress
-}
 
 pub(crate) fn resize_receiver(
     mut renderer: ResMut<TextRenderer>,
