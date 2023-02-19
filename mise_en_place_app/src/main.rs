@@ -5,7 +5,7 @@ use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
-    Color, ColorHooks, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
+    Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
     IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
     PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
     TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer,
@@ -54,24 +54,12 @@ fn update_text(
         }
         let mut button_click_text = String::new();
         for (button, click) in mouse_adapter.valid_releases.iter() {
-            if let Some(ent) = limiter.0.take() {
+            if let Some(ent) = limiter.0 {
                 if *button == MouseButtonExpt::Left {
-                    println!("despawning {:?}", ent);
-                    cmd.entity(ent).despawn();
+                    cmd.entity(ent).insert(ColorInvert::off());
                 }
-            } else {
                 if *button == MouseButtonExpt::Right {
-                    let ent = cmd
-                        .spawn(IconBundle::new(
-                            Icon {},
-                            IconSize::Large,
-                            IconKey("mesh name"),
-                            (UIView {}, (10u32, 17u32), 0u32),
-                            (1.0, 1.0, 1.0),
-                        ))
-                        .id();
-                    println!("spawned {:?}", ent);
-                    limiter.0.replace(ent);
+                    cmd.entity(ent).insert(ColorInvert::on());
                 }
             }
             if let Some(current) = click.end {
@@ -80,7 +68,7 @@ fn update_text(
                         "button: {:?}, state: {:.2}, {:.2}\n",
                         button, current.x, current.y
                     )
-                    .as_str(),
+                        .as_str(),
                 );
             }
         }
@@ -166,15 +154,15 @@ pub(crate) const ICON_MESH: [IconVertex; 6] = [
     ),
     IconVertex::new(
         GpuPosition { x: 1.0, y: 0.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ),
     IconVertex::new(
         GpuPosition { x: 0.0, y: 1.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ),
     IconVertex::new(
         GpuPosition { x: 1.0, y: 1.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ),
 ];
 

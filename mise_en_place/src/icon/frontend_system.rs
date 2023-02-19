@@ -4,12 +4,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
 
-use crate::icon::cache::{Cache, DifferenceHolder};
-use crate::icon::interface::IconAreaGuide;
-use crate::icon::mesh::ColorInvert;
 use crate::{
     Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
 };
+use crate::icon::cache::{Cache, DifferenceHolder};
+use crate::icon::interface::IconAreaGuide;
+use crate::icon::mesh::ColorInvert;
 
 pub(crate) fn initialization(
     icons: Query<
@@ -64,6 +64,7 @@ pub(crate) fn initialization(
         let icon_key = cache.icon_key.remove(&removed).unwrap();
     }
 }
+
 pub(crate) fn color_invert_cache_check(
     icons: Query<(Entity, &ColorInvert), Changed<ColorInvert>>,
     mut cache: ResMut<Cache>,
@@ -79,10 +80,12 @@ pub(crate) fn color_invert_cache_check(
                     .unwrap()
                     .color_invert
                     .insert(entity, *color_invert);
+                cache.color_invert.insert(entity, *color_invert);
             }
         }
     }
 }
+
 pub(crate) fn position_cache_check(
     icons: Query<(Entity, &Position<UIView>), (Changed<Position<UIView>>)>,
     mut cache: ResMut<Cache>,
