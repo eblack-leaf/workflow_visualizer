@@ -32,16 +32,50 @@ pub(crate) struct GpuIconMesh {
     pub(crate) mesh: wgpu::Buffer,
     pub(crate) length: u32,
 }
-
+#[repr(C)]
+#[derive(Component, Copy, Clone, Pod, Zeroable, Default)]
+pub struct ColorInvert {
+    pub signal: u32,
+}
+impl ColorInvert {
+    pub fn on() -> Self {
+        Self { signal: 1 }
+    }
+    pub fn off() -> Self {
+        Self { signal: 0 }
+    }
+}
+#[repr(C)]
+#[derive(Pod, Zeroable, Copy, Clone)]
+pub struct ColorHooks {
+    pub is_negative_space: f32,
+    pub is_hookable: f32,
+}
+impl ColorHooks {
+    pub const NEGATIVE_SPACE: f32 = 1f32;
+    pub const HOOKABLE: f32 = 1f32;
+    pub const CONSTANT: f32 = 0f32;
+    pub const POSITIVE_SPACE: f32 = 0f32;
+    pub const fn new(negative_space: f32, hookable: f32) -> Self {
+        Self {
+            is_negative_space: negative_space,
+            is_hookable: hookable,
+        }
+    }
+}
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone)]
 pub struct IconVertex {
     pub position: GpuPosition,
+    pub color_hooks: ColorHooks,
 }
 
 impl IconVertex {
-    pub const fn new(position: GpuPosition) -> Self {
-        Self { position }
+    pub const fn new(position: GpuPosition, color_hooks: ColorHooks) -> Self {
+        Self {
+            position,
+            color_hooks,
+        }
     }
 }
 

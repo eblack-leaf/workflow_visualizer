@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Resource;
 
+use crate::icon::mesh::ColorInvert;
 use crate::{Area, Color, Depth, IconKey, Position, UIView};
 
 #[derive(Resource)]
@@ -12,6 +13,7 @@ pub(crate) struct Cache {
     pub(crate) position: HashMap<Entity, Position<UIView>>,
     pub(crate) area: HashMap<Entity, Area<UIView>>,
     pub(crate) color: HashMap<Entity, Color>,
+    pub(crate) color_invert: HashMap<Entity, ColorInvert>,
 }
 
 impl Cache {
@@ -22,6 +24,7 @@ impl Cache {
             position: HashMap::new(),
             area: HashMap::new(),
             color: HashMap::new(),
+            color_invert: HashMap::new(),
         }
     }
 }
@@ -41,12 +44,23 @@ impl DifferenceHolder {
 
 #[derive(Resource)]
 pub(crate) struct Differences {
-    pub(crate) icon_adds: HashMap<Entity, (IconKey, Position<UIView>, Area<UIView>, Depth, Color)>,
+    pub(crate) icon_adds: HashMap<
+        Entity,
+        (
+            IconKey,
+            Position<UIView>,
+            Area<UIView>,
+            Depth,
+            Color,
+            ColorInvert,
+        ),
+    >,
     pub(crate) icon_removes: HashSet<Entity>,
     pub(crate) depth: HashMap<Entity, Depth>,
     pub(crate) position: HashMap<Entity, Position<UIView>>,
     pub(crate) area: HashMap<Entity, Area<UIView>>,
     pub(crate) color: HashMap<Entity, Color>,
+    pub(crate) color_invert: HashMap<Entity, ColorInvert>,
 }
 
 impl Differences {
@@ -58,6 +72,7 @@ impl Differences {
             position: HashMap::new(),
             area: HashMap::new(),
             color: HashMap::new(),
+            color_invert: HashMap::new(),
         }
     }
     pub(crate) fn clean(&mut self) {
@@ -67,6 +82,7 @@ impl Differences {
             self.area.remove(&entity);
             self.depth.remove(&entity);
             self.color.remove(&entity);
+            self.color_invert.remove(&entity);
         }
         let added_entities = self
             .icon_adds
@@ -78,6 +94,7 @@ impl Differences {
             self.area.remove(&entity);
             self.depth.remove(&entity);
             self.color.remove(&entity);
+            self.color_invert.remove(&entity);
         }
     }
 }

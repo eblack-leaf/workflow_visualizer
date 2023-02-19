@@ -6,6 +6,7 @@ use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, 
 
 use crate::icon::cache::{Cache, DifferenceHolder};
 use crate::icon::interface::IconAreaGuide;
+use crate::icon::mesh::ColorInvert;
 use crate::{
     Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
 };
@@ -19,6 +20,7 @@ pub(crate) fn initialization(
             &Area<UIView>,
             &Depth,
             &Color,
+            &ColorInvert,
             &Visibility,
         ),
         Or<(Added<Icon>, Changed<Visibility>)>,
@@ -31,19 +33,23 @@ pub(crate) fn initialization(
     for entity in removed_icons.iter() {
         removals.insert(entity);
     }
-    for (entity, icon_key, position, area, depth, color, visibility) in icons.iter() {
+    for (entity, icon_key, position, area, depth, color, color_invert, visibility) in icons.iter() {
         if visibility.visible() {
             difference_holder
                 .differences
                 .as_mut()
                 .unwrap()
                 .icon_adds
-                .insert(entity, (*icon_key, *position, *area, *depth, *color));
+                .insert(
+                    entity,
+                    (*icon_key, *position, *area, *depth, *color, *color_invert),
+                );
             cache.icon_key.insert(entity, *icon_key);
             cache.position.insert(entity, *position);
             cache.area.insert(entity, *area);
             cache.depth.insert(entity, *depth);
             cache.color.insert(entity, *color);
+            cache.color_invert.insert(entity, *color_invert);
         } else {
             removals.insert(entity);
         }
@@ -58,7 +64,25 @@ pub(crate) fn initialization(
         let icon_key = cache.icon_key.remove(&removed).unwrap();
     }
 }
-
+pub(crate) fn color_invert_cache_check(
+    icons: Query<(Entity, &ColorInvert), Changed<ColorInvert>>,
+    mut cache: ResMut<Cache>,
+    mut difference_holder: ResMut<DifferenceHolder>,
+) {
+    for (entity, color_invert) in icons.iter() {
+        let cached_value = cache.color_invert.get(&entity);
+        if let Some(val) = cached_value {
+            if color_invert.signal != val.signal {
+                difference_holder
+                    .differences
+                    .as_mut()
+                    .unwrap()
+                    .color_invert
+                    .insert(entity, *color_invert);
+            }
+        }
+    }
+}
 pub(crate) fn position_cache_check(
     icons: Query<(Entity, &Position<UIView>), (Changed<Position<UIView>>)>,
     mut cache: ResMut<Cache>,
@@ -152,13 +176,14 @@ pub(crate) fn icon_key_cache_check(
             &Area<UIView>,
             &Depth,
             &Color,
+            &ColorInvert,
         ),
         (Changed<IconKey>),
     >,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, icon_key, position, area, depth, color) in icons.iter() {
+    for (entity, icon_key, position, area, depth, color, color_invert) in icons.iter() {
         let cached_value = cache.icon_key.get(&entity);
         if let Some(val) = cached_value {
             if icon_key != val {
@@ -173,7 +198,10 @@ pub(crate) fn icon_key_cache_check(
                     .as_mut()
                     .unwrap()
                     .icon_adds
-                    .insert(entity, (*icon_key, *position, *area, *depth, *color));
+                    .insert(
+                        entity,
+                        (*icon_key, *position, *area, *depth, *color, *color_invert),
+                    );
                 cache.icon_key.insert(entity, *icon_key);
             }
         }

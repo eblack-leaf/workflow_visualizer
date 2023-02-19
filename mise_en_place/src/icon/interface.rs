@@ -5,7 +5,7 @@ use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
 use crate::coord::Panel;
-use crate::icon::mesh::IconKey;
+use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::{Color, Location, UIView};
 
 #[derive(Component)]
@@ -19,6 +19,7 @@ pub struct IconBundle {
     #[bundle]
     pub location: Location<UIView>,
     pub color: Color,
+    pub(crate) color_invert: ColorInvert,
 }
 
 impl IconBundle {
@@ -35,6 +36,7 @@ impl IconBundle {
             key,
             location: location.into(),
             color: color.into(),
+            color_invert: ColorInvert::off(),
         }
     }
 }

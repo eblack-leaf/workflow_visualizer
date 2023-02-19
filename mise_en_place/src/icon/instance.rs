@@ -1,10 +1,12 @@
 use crate::coord::Panel;
+use crate::icon::mesh::ColorInvert;
 use crate::{Area, Color, Depth, DeviceView, IconKey, Position, Section, UIView};
 
 pub(crate) struct IconAdd {
     pub(crate) key: IconKey,
     pub(crate) panel: Panel<DeviceView>,
     pub(crate) color: Color,
+    pub(crate) color_invert: ColorInvert,
 }
 
 impl IconAdd {
@@ -14,6 +16,7 @@ impl IconAdd {
         area: Area<UIView>,
         depth: Depth,
         color: Color,
+        color_invert: ColorInvert,
         scale_factor: f64,
     ) -> Self {
         Self {
@@ -26,6 +29,7 @@ impl IconAdd {
                 depth,
             ),
             color,
+            color_invert,
         }
     }
 }

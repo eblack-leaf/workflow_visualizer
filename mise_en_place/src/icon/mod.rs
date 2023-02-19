@@ -13,12 +13,13 @@ pub(crate) use cache::{Cache, DifferenceHolder, Differences};
 pub(crate) use instance::IconAdd;
 pub use interface::IconAreaGuide;
 pub(crate) use mesh::GpuIconMesh;
-pub use mesh::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
+pub use mesh::{ColorHooks, IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 use crate::coord::{GpuArea, GpuPosition, Panel};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 pub use crate::icon::interface::{Icon, IconBundle, IconSize};
+use crate::icon::mesh::ColorInvert;
 pub use crate::icon::plugin::IconPlugin;
 use crate::index::Indexer;
 use crate::instance_tools::GpuAttributeBuffer;
@@ -51,6 +52,7 @@ pub(crate) struct IconRenderer {
     pub(crate) area: HashMap<IconKey, InstanceTools<GpuArea>>,
     pub(crate) depth: HashMap<IconKey, InstanceTools<Depth>>,
     pub(crate) color: HashMap<IconKey, InstanceTools<Color>>,
+    pub(crate) color_invert: HashMap<IconKey, InstanceTools<ColorInvert>>,
     pub(crate) null_bit: HashMap<IconKey, InstanceTools<NullBit>>,
     pub(crate) key_factory: HashMap<IconKey, KeyFactory>,
     pub(crate) indexer: HashMap<IconKey, Indexer<Key>>,
@@ -73,6 +75,8 @@ impl IconRenderer {
         self.depth
             .insert(icon_key, InstanceTools::new(gfx_surface, max));
         self.color
+            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+        self.color_invert
             .insert(icon_key, InstanceTools::new(gfx_surface, max));
         self.null_bit
             .insert(icon_key, InstanceTools::new(gfx_surface, max));
@@ -116,6 +120,12 @@ impl IconRenderer {
             .write
             .write
             .insert(index, icon.color);
+        self.color_invert
+            .get_mut(&icon.key)
+            .unwrap()
+            .write
+            .write
+            .insert(index, icon.color_invert);
         self.null_bit
             .get_mut(&icon.key)
             .unwrap()
@@ -132,10 +142,20 @@ impl IconRenderer {
         for entity in differences.icon_removes.iter() {
             self.remove_icon(*entity);
         }
-        for (entity, (key, position, area, depth, color)) in differences.icon_adds.iter() {
+        for (entity, (key, position, area, depth, color, color_invert)) in
+            differences.icon_adds.iter()
+        {
             self.add_icon(
                 *entity,
-                IconAdd::new(*key, *position, *area, *depth, *color, scale_factor),
+                IconAdd::new(
+                    *key,
+                    *position,
+                    *area,
+                    *depth,
+                    *color,
+                    *color_invert,
+                    scale_factor,
+                ),
             );
         }
         for (entity, pos) in differences.position.iter() {
@@ -220,6 +240,27 @@ impl IconRenderer {
                 .write
                 .insert(index, *color);
         }
+        for (entity, color_invert) in differences.color_invert.iter() {
+            let icon_key = self.entity_icons.get(entity).unwrap();
+            let key = self
+                .entity_keys
+                .get(&icon_key)
+                .unwrap()
+                .get(entity)
+                .unwrap();
+            let index = self
+                .indexer
+                .get(&icon_key)
+                .unwrap()
+                .get_index(*key)
+                .unwrap();
+            self.color_invert
+                .get_mut(&icon_key)
+                .unwrap()
+                .write
+                .write
+                .insert(index, *color_invert);
+        }
         self.grow(&gfx_surface);
         self.write(&gfx_surface);
     }
@@ -248,6 +289,10 @@ impl IconRenderer {
                 .get_mut(&icon_key)
                 .unwrap()
                 .grow(gfx_surface, new_max);
+            self.color_invert
+                .get_mut(&icon_key)
+                .unwrap()
+                .grow(gfx_surface, new_max);
             self.null_bit
                 .get_mut(&icon_key)
                 .unwrap()
@@ -273,6 +318,10 @@ impl IconRenderer {
                 .unwrap()
                 .write_attribute(&gfx_surface);
             self.color
+                .get_mut(&key)
+                .unwrap()
+                .write_attribute(&gfx_surface);
+            self.color_invert
                 .get_mut(&key)
                 .unwrap()
                 .write_attribute(&gfx_surface);
@@ -366,6 +415,12 @@ impl IconRenderer {
                                 step_mode: wgpu::VertexStepMode::Instance,
                                 attributes: &wgpu::vertex_attr_array![5 => Uint32],
                             },
+                            wgpu::VertexBufferLayout {
+                                array_stride: std::mem::size_of::<ColorInvert>()
+                                    as wgpu::BufferAddress,
+                                step_mode: wgpu::VertexStepMode::Instance,
+                                attributes: &wgpu::vertex_attr_array![6 => Uint32],
+                            },
                         ],
                     },
                     primitive: wgpu::PrimitiveState {
@@ -404,6 +459,7 @@ impl IconRenderer {
             key_factory: HashMap::new(),
             indexer: HashMap::new(),
             null_bit: HashMap::new(),
+            color_invert: HashMap::new(),
         }
     }
 }
@@ -437,7 +493,7 @@ impl Extract for IconRenderer {
 
 impl Render for IconRenderer {
     fn phase() -> RenderPhase {
-        RenderPhase::Opaque
+        RenderPhase::Alpha
     }
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
         for (icon_key, entities) in self.icon_entities.iter() {
@@ -449,6 +505,7 @@ impl Render for IconRenderer {
                 let depth = self.depth.get(icon_key).unwrap();
                 let color = self.color.get(icon_key).unwrap();
                 let null_bit = self.null_bit.get(icon_key).unwrap();
+                let color_invert = self.color_invert.get(icon_key).unwrap();
                 render_pass_handle.0.set_pipeline(&self.pipeline);
                 render_pass_handle
                     .0
@@ -471,6 +528,9 @@ impl Render for IconRenderer {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(5, null_bit.gpu.buffer.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(6, color_invert.gpu.buffer.slice(..));
                 render_pass_handle
                     .0
                     .draw(0..mesh.length, 0..indexer.count());

@@ -5,9 +5,9 @@ use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
-    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle,
-    IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata,
-    PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
+    Color, ColorHooks, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
+    IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
+    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
     TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer,
 };
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
@@ -152,12 +152,30 @@ impl Launch for Launcher {
 }
 
 pub(crate) const ICON_MESH: [IconVertex; 6] = [
-    IconVertex::new(GpuPosition { x: 0.0, y: 0.0 }),
-    IconVertex::new(GpuPosition { x: 0.0, y: 1.0 }),
-    IconVertex::new(GpuPosition { x: 1.0, y: 0.0 }),
-    IconVertex::new(GpuPosition { x: 1.0, y: 0.0 }),
-    IconVertex::new(GpuPosition { x: 0.0, y: 1.0 }),
-    IconVertex::new(GpuPosition { x: 1.0, y: 1.0 }),
+    IconVertex::new(
+        GpuPosition { x: 0.0, y: 0.0 },
+        ColorHooks::new(ColorHooks::NEGATIVE_SPACE, ColorHooks::CONSTANT),
+    ),
+    IconVertex::new(
+        GpuPosition { x: 0.0, y: 1.0 },
+        ColorHooks::new(ColorHooks::NEGATIVE_SPACE, ColorHooks::CONSTANT),
+    ),
+    IconVertex::new(
+        GpuPosition { x: 1.0, y: 0.0 },
+        ColorHooks::new(ColorHooks::NEGATIVE_SPACE, ColorHooks::CONSTANT),
+    ),
+    IconVertex::new(
+        GpuPosition { x: 1.0, y: 0.0 },
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ),
+    IconVertex::new(
+        GpuPosition { x: 0.0, y: 1.0 },
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ),
+    IconVertex::new(
+        GpuPosition { x: 1.0, y: 1.0 },
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ),
 ];
 
 fn main() {

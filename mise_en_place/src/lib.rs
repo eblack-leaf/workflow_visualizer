@@ -12,7 +12,6 @@ use winit::window::{Window, WindowBuilder};
 pub use icon::IconKey;
 pub use icon::IconMesh;
 pub use icon::IconMeshAddRequest;
-pub use icon::IconVertex;
 pub use job::Job;
 pub use wasm_server::WasmServer;
 
@@ -24,7 +23,7 @@ pub use crate::coord::{
 };
 use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
-pub use crate::icon::{Icon, IconBundle, IconPlugin, IconSize};
+pub use crate::icon::{ColorHooks, Icon, IconBundle, IconPlugin, IconSize, IconVertex};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
