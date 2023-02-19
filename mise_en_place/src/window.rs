@@ -3,9 +3,9 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Events, ResMut, Resource};
 use winit::event::{AxisId, ElementState, MouseButton};
 
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Copy, Clone)]
 pub struct Click {
@@ -50,6 +50,8 @@ pub struct MouseAdapter {
     pub tracked_buttons: HashMap<MouseButton, Click>,
     pub valid_releases: HashMap<MouseButton, Click>,
 }
+
+pub type MouseButtonExpt = MouseButton;
 
 impl MouseAdapter {
     pub fn new() -> Self {

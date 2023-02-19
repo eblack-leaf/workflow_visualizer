@@ -4,12 +4,16 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconPlugin, IconSize, IconVertex, Idle, Job, Launch, MouseAdapter, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
 struct Counter {
     count: u32,
 }
+
+#[derive(Resource)]
+struct Limiter(Option<Entity>);
 
 fn update_text(
     mut text: Query<(Entity, &mut Text)>,
@@ -19,6 +23,7 @@ fn update_text(
     mut exit: ResMut<Exit>,
     touch_adapter: Res<TouchAdapter>,
     mouse_adapter: Res<MouseAdapter>,
+    mut limiter: ResMut<Limiter>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
@@ -43,10 +48,33 @@ fn update_text(
             }
         }
         let mut button_click_text = String::new();
-        for (button, click) in mouse_adapter.tracked_buttons.iter() {
-            if let Some(current) = click.current {
-                button_click_text = button_click_text
-                    .add(format!("button: {:?}, state: {:.2}, {:.2}\n", button, current.x, current.y).as_str());
+        for (button, click) in mouse_adapter.valid_releases.iter() {
+            if let Some(ent) = limiter.0.take() {
+                if *button == MouseButtonExpt::Left {
+                    println!("despawning {:?}", ent);
+                    cmd.entity(ent).despawn();
+                }
+            } else {
+                if *button == MouseButtonExpt::Right {
+                    let ent = cmd.spawn(IconBundle::new(
+                        Icon {},
+                        IconSize::Large,
+                        IconKey("mesh name"),
+                        (UIView {}, (10u32, 17u32), 0u32),
+                        (1.0, 1.0, 1.0),
+                    )).id();
+                    println!("spawned {:?}", ent);
+                    limiter.0.replace(ent);
+                }
+            }
+            if let Some(current) = click.end {
+                button_click_text = button_click_text.add(
+                    format!(
+                        "button: {:?}, state: {:.2}, {:.2}\n",
+                        button, current.x, current.y
+                    )
+                        .as_str(),
+                );
             }
         }
         if entity.index() == 2 {
@@ -88,33 +116,28 @@ impl Launch for Launcher {
             IconMesh::new(ICON_MESH.iter().map(|v| *v).collect::<Vec<IconVertex>>()),
             10,
         ));
-        job.container.spawn(
-            IconBundle::new(
-                Icon {},
-                IconSize::Large,
-                IconKey("mesh name"),
-                (UIView {}, (10u32, 17u32), 0u32),
-                (1.0, 1.0, 1.0),
-            )
-        );
-        job.container.spawn(
-            IconBundle::new(
-                Icon {},
-                IconSize::Medium,
-                IconKey("mesh name"),
-                (UIView {}, (10u32, 65u32), 0u32),
-                (1.0, 1.0, 1.0),
-            )
-        );
-        job.container.spawn(
-            IconBundle::new(
-                Icon {},
-                IconSize::Small,
-                IconKey("mesh name"),
-                (UIView {}, (10u32, 105u32), 0u32),
-                (1.0, 1.0, 1.0),
-            )
-        );
+        let id = job.container.spawn(IconBundle::new(
+            Icon {},
+            IconSize::Large,
+            IconKey("mesh name"),
+            (UIView {}, (10u32, 17u32), 0u32),
+            (1.0, 1.0, 1.0),
+        )).id();
+        job.container.insert_resource(Limiter(Some(id)));
+        job.container.spawn(IconBundle::new(
+            Icon {},
+            IconSize::Medium,
+            IconKey("mesh name"),
+            (UIView {}, (10u32, 65u32), 0u32),
+            (1.0, 1.0, 1.0),
+        ));
+        job.container.spawn(IconBundle::new(
+            Icon {},
+            IconSize::Small,
+            IconKey("mesh name"),
+            (UIView {}, (10u32, 105u32), 0u32),
+            (1.0, 1.0, 1.0),
+        ));
     }
 }
 

@@ -1,12 +1,13 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemStage};
 
-use crate::{
-    Attach, BackendStages, BackEndStartupStages, Engen, FrontEndStages, FrontEndStartupStages,
-};
-use crate::icon::{
+use crate::icon::backend_system::{process_differences, read_add_requests, setup};
+use crate::icon::frontend_system::{
     area_cache_check, calc_area, color_cache_check, depth_cache_check, frontend_setup,
-    icon_key_cache_check, IconRenderer, initialization, position_cache_check,
-    process_differences, read_add_requests, setup,
+    icon_key_cache_check, initialization, position_cache_check,
+};
+use crate::icon::IconRenderer;
+use crate::{
+    Attach, BackEndStartupStages, BackendStages, Engen, FrontEndStages, FrontEndStartupStages,
 };
 
 pub struct IconPlugin;
@@ -27,10 +28,10 @@ impl Attach for IconPlugin {
             .backend
             .main
             .add_system_to_stage(BackendStages::Prepare, read_add_requests.label("add mesh"));
-        engen
-            .backend
-            .main
-            .add_system_to_stage(BackendStages::Prepare, process_differences.after("add mesh"));
+        engen.backend.main.add_system_to_stage(
+            BackendStages::Prepare,
+            process_differences.after("add mesh"),
+        );
         engen
             .frontend
             .startup

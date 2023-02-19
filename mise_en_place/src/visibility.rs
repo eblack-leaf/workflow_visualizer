@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
     RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
 };
 
+use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 use crate::coord::{Area, DeviceView, Position, PositionAdjust, Section, UIView};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
 
 #[derive(Component)]
 pub struct Visibility {
@@ -117,6 +117,7 @@ impl SpacialHasher {
         self.current_overlaps.insert(entity, CurrentOverlaps::new());
     }
     fn cleanup(&mut self, entity: Entity) -> HashSet<Entity> {
+        self.overlap_check_queue.retain(|oc| oc.0 != entity);
         let old = self.spacial_hash_cache.remove(&entity);
         if let Some(hashes) = old {
             for hash in hashes {
@@ -263,18 +264,20 @@ pub(crate) fn collision_responses(
     for (entity, hash) in spacial_hasher.overlap_check_queue.iter() {
         let others = spacial_hasher.entities.get(hash).expect("no entity set");
         for other in others {
-            let mut smaller_index_entity = entity;
-            let mut higher_index_entity = other;
-            if entity.index() > other.index() {
-                smaller_index_entity = other;
-                higher_index_entity = entity;
-            } else if entity.index() == other.index() {
-                if entity.generation() > other.generation() {
+            if *entity != *other {
+                let mut smaller_index_entity = entity;
+                let mut higher_index_entity = other;
+                if entity.index() > other.index() {
                     smaller_index_entity = other;
                     higher_index_entity = entity;
+                } else if entity.index() == other.index() {
+                    if entity.generation() > other.generation() {
+                        smaller_index_entity = other;
+                        higher_index_entity = entity;
+                    }
                 }
+                checks.insert((*smaller_index_entity, *higher_index_entity));
             }
-            checks.insert((*smaller_index_entity, *higher_index_entity));
         }
     }
     let mut overlap_adds = HashSet::<(Entity, Entity)>::new();
@@ -385,49 +388,30 @@ pub(crate) fn visibility_cleanup(
     mut lost_contact_entities: Query<&mut CollisionEnd>,
     mut cmd: Commands,
 ) {
+    let mut other_removal = HashSet::new();
+    let mut lost = HashSet::new();
     for entity in lost_visibility.iter() {
-        let lost_contact = spacial_hasher.cleanup(entity);
-        for other in lost_contact {
-            match lost_contact_entities.get_mut(entity) {
-                Ok(mut collision_end) => {
-                    collision_end.others.insert(other);
-                }
-                Err(_) => {}
-            }
-        }
-        cmd.entity(entity).remove::<CollisionBegin>();
-        cmd.entity(entity).remove::<CollisionEnd>();
-        cmd.entity(entity).remove::<VisibleSection>();
+        lost.insert(entity);
     }
     for entity in lost_position.iter() {
-        let lost_contact = spacial_hasher.cleanup(entity);
-        for other in lost_contact {
-            match lost_contact_entities.get_mut(entity) {
-                Ok(mut collision_end) => {
-                    collision_end.others.insert(other);
-                }
-                Err(_) => {}
-            }
-        }
-        cmd.entity(entity).remove::<Visibility>();
-        cmd.entity(entity).remove::<CollisionBegin>();
-        cmd.entity(entity).remove::<CollisionEnd>();
-        cmd.entity(entity).remove::<VisibleSection>();
+        lost.insert(entity);
     }
     for entity in lost_area.iter() {
-        let lost_contact = spacial_hasher.cleanup(entity);
+        lost.insert(entity);
+    }
+    for lost_entity in lost {
+        let lost_contact = spacial_hasher.cleanup(lost_entity);
         for other in lost_contact {
-            match lost_contact_entities.get_mut(entity) {
-                Ok(mut collision_end) => {
-                    collision_end.others.insert(other);
-                }
-                Err(_) => {}
-            }
+            other_removal.insert((lost_entity, other));
         }
-        cmd.entity(entity).remove::<Visibility>();
-        cmd.entity(entity).remove::<CollisionBegin>();
-        cmd.entity(entity).remove::<CollisionEnd>();
-        cmd.entity(entity).remove::<VisibleSection>();
+    }
+    for (entity, other) in other_removal {
+        match lost_contact_entities.get_mut(entity) {
+            Ok(mut collision_end) => {
+                collision_end.others.insert(other);
+            }
+            Err(_) => {}
+        }
     }
 }
 

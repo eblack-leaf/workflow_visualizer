@@ -9,18 +9,22 @@ use winit::event::{DeviceEvent, ElementState, Event, StartCause, TouchPhase, Win
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
+pub use icon::IconKey;
+pub use icon::IconMesh;
+pub use icon::IconMeshAddRequest;
+pub use icon::IconVertex;
 pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location,
-    Numerical, Position, PositionAdjust, Section, UIView,
+    Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
+    Position, PositionAdjust, Section, UIView,
 };
 use crate::coord::CoordPlugin;
 use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
-pub use crate::icon::{Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconPlugin, IconSize, IconVertex};
+pub use crate::icon::{Icon, IconBundle, IconPlugin, IconSize};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
@@ -35,7 +39,7 @@ pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 use crate::visibility::VisibilityPlugin;
 pub use crate::wasm_compiler::WasmCompileDescriptor;
 use crate::window::{Click, Finger, Resize, WindowPlugin};
-pub use crate::window::{MouseAdapter, Orientation, ScaleFactor, TouchAdapter};
+pub use crate::window::{MouseAdapter, MouseButtonExpt, Orientation, ScaleFactor, TouchAdapter};
 
 mod button;
 mod color;
@@ -444,6 +448,7 @@ impl Engen {
                             ElementState::Released => {
                                 if let Some(click) = mouse_adapter.tracked_buttons.get_mut(&button)
                                 {
+                                    /* need limiter here to only track if was pressed - cache */
                                     click.end = mouse_location;
                                     if let Some(location) = mouse_location {
                                         valid_releases.insert(button, *click);
