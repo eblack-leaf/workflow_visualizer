@@ -4,7 +4,12 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
-use mise_en_place::{Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer};
+use mise_en_place::{
+    Color, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle,
+    IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata,
+    PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
+    TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer,
+};
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
@@ -56,13 +61,15 @@ fn update_text(
                 }
             } else {
                 if *button == MouseButtonExpt::Right {
-                    let ent = cmd.spawn(IconBundle::new(
-                        Icon {},
-                        IconSize::Large,
-                        IconKey("mesh name"),
-                        (UIView {}, (10u32, 17u32), 0u32),
-                        (1.0, 1.0, 1.0),
-                    )).id();
+                    let ent = cmd
+                        .spawn(IconBundle::new(
+                            Icon {},
+                            IconSize::Large,
+                            IconKey("mesh name"),
+                            (UIView {}, (10u32, 17u32), 0u32),
+                            (1.0, 1.0, 1.0),
+                        ))
+                        .id();
                     println!("spawned {:?}", ent);
                     limiter.0.replace(ent);
                 }
@@ -73,7 +80,7 @@ fn update_text(
                         "button: {:?}, state: {:.2}, {:.2}\n",
                         button, current.x, current.y
                     )
-                        .as_str(),
+                    .as_str(),
                 );
             }
         }
@@ -116,13 +123,16 @@ impl Launch for Launcher {
             IconMesh::new(ICON_MESH.iter().map(|v| *v).collect::<Vec<IconVertex>>()),
             10,
         ));
-        let id = job.container.spawn(IconBundle::new(
-            Icon {},
-            IconSize::Large,
-            IconKey("mesh name"),
-            (UIView {}, (10u32, 17u32), 0u32),
-            (1.0, 1.0, 1.0),
-        )).id();
+        let id = job
+            .container
+            .spawn(IconBundle::new(
+                Icon {},
+                IconSize::Large,
+                IconKey("mesh name"),
+                (UIView {}, (10u32, 17u32), 0u32),
+                (1.0, 1.0, 1.0),
+            ))
+            .id();
         job.container.insert_resource(Limiter(Some(id)));
         job.container.spawn(IconBundle::new(
             Icon {},

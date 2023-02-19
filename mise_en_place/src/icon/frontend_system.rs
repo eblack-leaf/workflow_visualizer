@@ -4,11 +4,11 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
 
+use crate::icon::cache::{Cache, DifferenceHolder};
+use crate::icon::interface::IconAreaGuide;
 use crate::{
     Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
 };
-use crate::icon::cache::{Cache, DifferenceHolder};
-use crate::icon::interface::IconAreaGuide;
 
 pub(crate) fn initialization(
     icons: Query<
