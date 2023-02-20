@@ -16,12 +16,12 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
-use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::CoordPlugin;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::icon::{
     ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
@@ -36,8 +36,8 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-use crate::visibility::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
+use crate::visibility::VisibilityPlugin;
 pub use crate::wasm_compiler::WasmCompileDescriptor;
 use crate::window::{Click, Finger, Resize, VirtualKeyboardAdapter, WindowPlugin};
 pub use crate::window::{MouseAdapter, MouseButtonExpt, Orientation, ScaleFactor, TouchAdapter};
@@ -223,7 +223,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -243,44 +243,9 @@ impl Engen {
                 })
                 .expect("couldn't append canvas to document body");
             self.event_loop.replace(event_loop);
-            let inner_size = |scale_factor: f64| {
-                web_sys::window()
-                    .and_then(|win| win.document())
-                    .and_then(|doc| doc.body())
-                    .and_then(|body: web_sys::HtmlElement| -> Option<PhysicalSize<u32>> {
-                        let width: u32 = body.client_width().try_into().unwrap();
-                        let height: u32 = body.client_height().try_into().unwrap();
-                        Some(PhysicalSize::new(
-                            (width as f64 * scale_factor) as u32,
-                            (height as f64 * scale_factor) as u32,
-                        ))
-                    })
-                    .expect("could not create inner size")
-            };
-            let scale_factor = ScaleFactor::new(window.scale_factor());
-            self.backend.container.insert_resource(scale_factor);
-            self.frontend.container.insert_resource(scale_factor);
-            window.set_inner_size(inner_size(scale_factor.factor));
-            {
-                let w_window = window.clone();
-                let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
-                    let scale_factor = w_window.scale_factor();
-                    let size = inner_size(scale_factor);
-                    w_window.set_inner_size(size);
-                }) as Box<dyn FnMut(_)>);
-                web_sys::window()
-                    .expect("no web_sys window")
-                    .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())
-                    .unwrap();
-                web_sys::window()
-                    .expect("no web_sys window")
-                    .screen()
-                    .expect("could not get screen")
-                    .orientation()
-                    .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref())
-                    .unwrap();
-                closure.forget();
-            }
+            self.attach_scale_factor(window.scale_factor());
+            window.set_inner_size(Self::window_dimensions(window.scale_factor()));
+            Self::web_resizing(&window);
             let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
             self.backend.container.insert_resource(gfx.0);
             self.backend.container.insert_resource(gfx.1);
@@ -301,6 +266,48 @@ impl Engen {
             }
         });
     }
+    fn attach_scale_factor(&mut self, scale_factor: f64) {
+        let scale_factor = ScaleFactor::new(scale_factor);
+        self.backend.container.insert_resource(scale_factor);
+        self.frontend.container.insert_resource(scale_factor);
+    }
+    #[cfg(target_arch = "wasm32")]
+    fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
+        web_sys::window()
+            .and_then(|win| win.document())
+            .and_then(|doc| doc.body())
+            .and_then(|body: web_sys::HtmlElement| -> Option<PhysicalSize<u32>> {
+                let width: u32 = body.client_width().try_into().unwrap();
+                let height: u32 = body.client_height().try_into().unwrap();
+                Some(PhysicalSize::new(
+                    (width as f64 * scale_factor) as u32,
+                    (height as f64 * scale_factor) as u32,
+                ))
+            })
+            .expect("could not create inner size")
+    }
+    #[cfg(target_arch = "wasm32")]
+    fn web_resizing(window: &Rc<Window>) {
+        use wasm_bindgen::{JsCast, prelude::*};
+        let w_window = window.clone();
+        let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
+            let scale_factor = w_window.scale_factor();
+            let size = Self::window_dimensions(scale_factor);
+            w_window.set_inner_size(size);
+        }) as Box<dyn FnMut(_)>);
+        web_sys::window()
+            .expect("no web_sys window")
+            .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())
+            .unwrap();
+        web_sys::window()
+            .expect("no web_sys window")
+            .screen()
+            .expect("could not get screen")
+            .orientation()
+            .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref())
+            .unwrap();
+        closure.forget();
+    }
     pub fn add_extraction<Extraction: Extract>(&mut self) {
         self.extract_fns
             .push(Box::new(invoke_extract::<Extraction>));
@@ -309,12 +316,7 @@ impl Engen {
         let resize_event = Resize::new((size.width, size.height).into(), scale_factor);
         self.frontend.container.send_event(resize_event);
         self.backend.container.send_event(resize_event);
-        self.frontend
-            .container
-            .insert_resource(ScaleFactor::new(scale_factor));
-        self.backend
-            .container
-            .insert_resource(ScaleFactor::new(scale_factor));
+        self.attach_scale_factor(scale_factor);
     }
     fn ignition(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop");
@@ -549,9 +551,7 @@ impl Engen {
                 ));
             }
             let window = Rc::new(builder.build(event_loop_window_target).expect("no window"));
-            let scale_factor = ScaleFactor::new(window.scale_factor());
-            self.frontend.container.insert_resource(scale_factor);
-            self.backend.container.insert_resource(scale_factor);
+            self.attach_scale_factor(window.scale_factor());
             let gfx = futures::executor::block_on(GfxSurface::new(&window, GfxOptions::native()));
             self.window.replace(window);
             self.backend.container.insert_resource(gfx.0);

@@ -143,15 +143,15 @@ impl Launch for Launcher {
 pub(crate) const ICON_MESH: [IconVertex; 6] = [
     IconVertex::new(
         GpuPosition { x: 0.0, y: 0.0 },
-        ColorHooks::new(ColorHooks::NEGATIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
     ),
     IconVertex::new(
         GpuPosition { x: 0.0, y: 1.0 },
-        ColorHooks::new(ColorHooks::NEGATIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
     ),
     IconVertex::new(
         GpuPosition { x: 1.0, y: 0.0 },
-        ColorHooks::new(ColorHooks::NEGATIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
     ),
     IconVertex::new(
         GpuPosition { x: 1.0, y: 0.0 },

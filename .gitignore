@@ -2,5 +2,5 @@
 /wasm_rebuild_avoidance_target/
 /android_rebuild_avoidance_target/
 /wgpu_traces/
-/mise_en_place_app_web_build/
 /.idea/
+/mise_en_place_app_web_build/

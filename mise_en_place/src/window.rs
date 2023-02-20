@@ -3,13 +3,15 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Events, ResMut, Resource};
 use winit::event::{AxisId, ElementState, MouseButton};
 
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
+
 #[derive(Resource)]
 pub(crate) struct VirtualKeyboardAdapter {
     pub(crate) open: bool,
 }
+
 impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
         Self { open: false }
@@ -20,7 +22,7 @@ impl VirtualKeyboardAdapter {
     pub(crate) fn open(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("urlpad_trigger")
@@ -30,7 +32,7 @@ impl VirtualKeyboardAdapter {
                 .blur()
                 .unwrap();
             document
-                .get_element_by_id("urlpad_trigger")
+                .get_element_by_id("keyboard_trigger")
                 .unwrap()
                 .dyn_into::<web_sys::HtmlElement>()
                 .unwrap()
@@ -42,7 +44,7 @@ impl VirtualKeyboardAdapter {
     pub fn close(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
@@ -55,6 +57,7 @@ impl VirtualKeyboardAdapter {
         }
     }
 }
+
 #[derive(Copy, Clone)]
 pub struct Click {
     pub origin: Position<DeviceView>,
