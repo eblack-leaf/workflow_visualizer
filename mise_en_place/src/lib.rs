@@ -358,6 +358,11 @@ impl Engen {
                         match touch.phase {
                             TouchPhase::Started => {
                                 if touch_adapter.primary.is_none() {
+                                    #[cfg(target_arch = "wasm32")] {
+                                        use wasm_bindgen::{prelude::*, JsCast};
+                                        let document = web_sys::window().unwrap().document().unwrap();
+                                        document.get_element_by_id("keyboard_trigger").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap().focus().unwrap();
+                                    }
                                     touch_adapter.primary.replace(touch.id as Finger);
                                 }
                                 touch_adapter.tracked.insert(

@@ -70,7 +70,7 @@ impl GfxSurface {
                 &wgpu::DeviceDescriptor {
                     label: Some("device/queue"),
                     features: options.features,
-                    limits: options.limits.clone(),
+                    limits: options.limits.clone().using_resolution(adapter.limits()),
                 },
                 None,
             )
