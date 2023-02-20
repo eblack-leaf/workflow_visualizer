@@ -1,14 +1,11 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemStage};
 
-use crate::icon::backend_system::{process_differences, read_add_requests, setup};
-use crate::icon::frontend_system::{
-    area_cache_check, calc_area, color_cache_check, depth_cache_check, frontend_setup,
-    icon_key_cache_check, initialization, position_cache_check,
-};
-use crate::icon::IconRenderer;
 use crate::{
-    Attach, BackEndStartupStages, BackendStages, Engen, FrontEndStages, FrontEndStartupStages,
+    Attach, BackendStages, BackEndStartupStages, Engen, FrontEndStages, FrontEndStartupStages,
 };
+use crate::icon::backend_system::{process_differences, read_add_requests, setup};
+use crate::icon::frontend_system::{area_cache_check, calc_area, color_cache_check, color_invert_cache_check, depth_cache_check, frontend_setup, icon_key_cache_check, initialization, position_cache_check};
+use crate::icon::IconRenderer;
 
 pub struct IconPlugin;
 
@@ -49,6 +46,10 @@ impl Attach for IconPlugin {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::PostProcess, position_cache_check);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::PostProcess, color_invert_cache_check);
         engen
             .frontend
             .main
