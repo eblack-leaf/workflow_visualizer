@@ -16,14 +16,16 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
+use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::coord::CoordPlugin;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
-pub use crate::icon::{ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex};
+pub use crate::icon::{
+    ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
+};
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
 use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
@@ -34,10 +36,10 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 use crate::visibility::VisibilityPlugin;
+pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
-use crate::window::{Click, Finger, Resize, WindowPlugin};
+use crate::window::{Click, Finger, Resize, VirtualKeyboardAdapter, WindowPlugin};
 pub use crate::window::{MouseAdapter, MouseButtonExpt, Orientation, ScaleFactor, TouchAdapter};
 
 mod button;
@@ -221,7 +223,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -350,6 +352,23 @@ impl Engen {
                         control_flow.set_exit();
                     }
                     WindowEvent::Touch(touch) => {
+                        match touch.phase {
+                            TouchPhase::Started => {
+                                let mut vkey = self
+                                    .frontend
+                                    .container
+                                    .get_resource_mut::<VirtualKeyboardAdapter>()
+                                    .expect("no vkeyboard");
+                                if vkey.is_open() {
+                                    vkey.close();
+                                } else {
+                                    vkey.open();
+                                }
+                            }
+                            TouchPhase::Moved => {}
+                            TouchPhase::Ended => {}
+                            TouchPhase::Cancelled => {}
+                        }
                         let mut touch_adapter = self
                             .frontend
                             .container
@@ -358,11 +377,6 @@ impl Engen {
                         match touch.phase {
                             TouchPhase::Started => {
                                 if touch_adapter.primary.is_none() {
-                                    #[cfg(target_arch = "wasm32")] {
-                                        use wasm_bindgen::{prelude::*, JsCast};
-                                        let document = web_sys::window().unwrap().document().unwrap();
-                                        document.get_element_by_id("keyboard_trigger").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap().focus().unwrap();
-                                    }
                                     touch_adapter.primary.replace(touch.id as Finger);
                                 }
                                 touch_adapter.tracked.insert(

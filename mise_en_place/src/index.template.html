@@ -20,11 +20,12 @@
 <script>eruda.init();</script>
 <script type="module">
     import init from "./{{name}}.js";
-
     window.addEventListener("load", () => {
         init();
     });
 </script>
-<input id="keyboard_trigger">
+<input type="url" maxlength="0" id="urlpad_trigger" style="position: absolute;left: -1000px;top: -1000px">
+<input type="tel" maxlength="0" id="numpad_trigger" style="position: absolute;left: -1000px;top: -1000px">
+<input type="text" maxlength="0" id="keyboard_trigger" style="position: absolute;left: -1000px;top: -1000px">
 </body>
 </html>

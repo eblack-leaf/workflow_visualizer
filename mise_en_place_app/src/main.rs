@@ -5,10 +5,11 @@ use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
-    Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
-    IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
-    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
-    TextScaleAlignment, TouchAdapter, UIView, Visibility, WasmCompileDescriptor, WasmServer,
+    Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages,
+    GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter,
+    MouseButtonExpt, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle,
+    TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility,
+    WasmCompileDescriptor, WasmServer,
 };
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
@@ -68,7 +69,7 @@ fn update_text(
                         "button: {:?}, state: {:.2}, {:.2}\n",
                         button, current.x, current.y
                     )
-                        .as_str(),
+                    .as_str(),
                 );
             }
         }

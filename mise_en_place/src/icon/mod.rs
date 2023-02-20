@@ -6,31 +6,31 @@ use bevy_ecs::prelude::{
     Resource,
 };
 use bytemuck::{Pod, Zeroable};
-use wgpu::{include_wgsl, VertexState};
 use wgpu::util::DeviceExt;
+use wgpu::{include_wgsl, VertexState};
 
 pub(crate) use cache::{Cache, DifferenceHolder, Differences};
 pub(crate) use instance::IconAdd;
 pub use interface::IconAreaGuide;
-pub use mesh::{ColorHooks, ColorInvert, IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 pub(crate) use mesh::GpuIconMesh;
+pub use mesh::{ColorHooks, ColorInvert, IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
-use crate::{
-    Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView,
-    Visibility,
-};
 use crate::coord::{GpuArea, GpuPosition, Panel};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 pub use crate::icon::interface::{Icon, IconBundle, IconSize};
 pub use crate::icon::plugin::IconPlugin;
 use crate::index::Indexer;
-use crate::instance_tools::{AttributeWrite, CpuAttributeBuffer, InstanceTools};
 use crate::instance_tools::GpuAttributeBuffer;
 use crate::instance_tools::NullBit;
+use crate::instance_tools::{AttributeWrite, CpuAttributeBuffer, InstanceTools};
 use crate::key::{Key, KeyFactory};
 use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::viewport::Viewport;
+use crate::{
+    Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView,
+    Visibility,
+};
 
 mod backend_system;
 mod cache;
@@ -142,7 +142,7 @@ impl IconRenderer {
             self.remove_icon(*entity);
         }
         for (entity, (key, position, area, depth, color, color_invert)) in
-        differences.icon_adds.iter()
+            differences.icon_adds.iter()
         {
             self.add_icon(
                 *entity,

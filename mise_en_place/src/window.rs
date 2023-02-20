@@ -6,7 +6,55 @@ use winit::event::{AxisId, ElementState, MouseButton};
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
 use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
-
+#[derive(Resource)]
+pub(crate) struct VirtualKeyboardAdapter {
+    pub(crate) open: bool,
+}
+impl VirtualKeyboardAdapter {
+    pub(crate) fn new() -> Self {
+        Self { open: false }
+    }
+    pub fn is_open(&self) -> bool {
+        self.open
+    }
+    pub(crate) fn open(&mut self) {
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::{prelude::*, JsCast};
+            let document = web_sys::window().unwrap().document().unwrap();
+            document
+                .get_element_by_id("urlpad_trigger")
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .blur()
+                .unwrap();
+            document
+                .get_element_by_id("urlpad_trigger")
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .focus()
+                .unwrap();
+            self.open = true;
+        }
+    }
+    pub fn close(&mut self) {
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::{prelude::*, JsCast};
+            let document = web_sys::window().unwrap().document().unwrap();
+            document
+                .get_element_by_id("keyboard_trigger")
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .blur()
+                .unwrap();
+            self.open = false;
+        }
+    }
+}
 #[derive(Copy, Clone)]
 pub struct Click {
     pub origin: Position<DeviceView>,
@@ -149,5 +197,9 @@ impl Attach for WindowPlugin {
             .frontend
             .container
             .insert_resource(MouseAdapter::new());
+        engen
+            .frontend
+            .container
+            .insert_resource(VirtualKeyboardAdapter::new());
     }
 }
