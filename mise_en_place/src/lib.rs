@@ -5,7 +5,9 @@ use std::rc::Rc;
 
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::PhysicalSize;
-use winit::event::{DeviceEvent, ElementState, Event, StartCause, TouchPhase, WindowEvent};
+use winit::event::{
+    DeviceEvent, ElementState, Event, MouseButton, StartCause, TouchPhase, WindowEvent,
+};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
@@ -16,12 +18,12 @@ pub use job::Job;
 pub use wasm_server::WasmServer;
 
 pub use crate::color::Color;
+use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::coord::CoordPlugin;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::icon::{
     ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
@@ -36,13 +38,17 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 use crate::visibility::VisibilityPlugin;
+pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
-use crate::window::{Click, Finger, Resize, VirtualKeyboardAdapter, WindowPlugin};
-pub use crate::window::{MouseAdapter, MouseButtonExpt, Orientation, ScaleFactor, TouchAdapter};
+pub use crate::window::{
+    Click, ClickEvent, ClickEventType, Finger, MouseButtonExpt, Orientation, Resize, ScaleFactor,
+    VirtualKeyboardAdapter,
+};
+use crate::window::{MouseAdapter, TouchAdapter, WindowPlugin};
 
 mod button;
+mod clickable;
 mod color;
 mod coord;
 mod extract;
@@ -72,6 +78,7 @@ pub enum FrontEndStartupStages {
 pub enum FrontEndStages {
     First,
     Resize,
+    PreProcess,
     Process,
     CoordAdjust,
     VisibilityPreparation,
@@ -150,6 +157,8 @@ impl Engen {
                 job.main
                     .add_stage(FrontEndStages::Resize, SystemStage::parallel());
                 job.main
+                    .add_stage(FrontEndStages::PreProcess, SystemStage::parallel());
+                job.main
                     .add_stage(FrontEndStages::Process, SystemStage::parallel());
                 job.main
                     .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
@@ -223,7 +232,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -288,7 +297,7 @@ impl Engen {
     }
     #[cfg(target_arch = "wasm32")]
     fn web_resizing(window: &Rc<Window>) {
-        use wasm_bindgen::{JsCast, prelude::*};
+        use wasm_bindgen::{prelude::*, JsCast};
         let w_window = window.clone();
         let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
             let scale_factor = w_window.scale_factor();
@@ -320,8 +329,8 @@ impl Engen {
     }
     fn ignition(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop");
-        event_loop.run(
-            move |event, event_loop_window_target, control_flow| match event {
+        event_loop.run(move |event, event_loop_window_target, control_flow| {
+            match event {
                 Event::NewEvents(start_cause) => match start_cause {
                     StartCause::Init => {
                         self.init_native_gfx(event_loop_window_target);
@@ -354,37 +363,21 @@ impl Engen {
                         control_flow.set_exit();
                     }
                     WindowEvent::Touch(touch) => {
-                        match touch.phase {
-                            TouchPhase::Started => {
-                                let mut vkey = self
-                                    .frontend
-                                    .container
-                                    .get_resource_mut::<VirtualKeyboardAdapter>()
-                                    .expect("no vkeyboard");
-                                if vkey.is_open() {
-                                    vkey.close();
-                                } else {
-                                    vkey.open();
-                                }
-                            }
-                            TouchPhase::Moved => {}
-                            TouchPhase::Ended => {}
-                            TouchPhase::Cancelled => {}
-                        }
                         let mut touch_adapter = self
                             .frontend
                             .container
                             .get_resource_mut::<TouchAdapter>()
                             .expect("no touch adapter slot");
+                        let mut click_events = Vec::new();
                         match touch.phase {
                             TouchPhase::Started => {
+                                let click = Click::new((touch.location.x, touch.location.y));
                                 if touch_adapter.primary.is_none() {
                                     touch_adapter.primary.replace(touch.id as Finger);
+                                    click_events
+                                        .push(ClickEvent::new(ClickEventType::OnPress, click));
                                 }
-                                touch_adapter.tracked.insert(
-                                    touch.id as Finger,
-                                    Click::new((touch.location.x, touch.location.y)),
-                                );
+                                touch_adapter.tracked.insert(touch.id as Finger, click);
                             }
                             TouchPhase::Moved => {
                                 if let Some(click) =
@@ -393,6 +386,14 @@ impl Engen {
                                     click
                                         .current
                                         .replace((touch.location.x, touch.location.y).into());
+                                }
+                                let primary = touch_adapter.primary.clone();
+                                if let Some(prime) = primary {
+                                    if prime == touch.id as Finger {
+                                        let click = touch_adapter.tracked.get_mut(&prime).unwrap();
+                                        click_events
+                                            .push(ClickEvent::new(ClickEventType::OnMove, *click));
+                                    }
                                 }
                             }
                             TouchPhase::Ended => {
@@ -410,7 +411,10 @@ impl Engen {
                                             .tracked
                                             .get(&finger)
                                             .expect("no tracked finger");
-                                        touch_adapter.primary_end_event.replace((finger, click));
+                                        click_events.push(ClickEvent::new(
+                                            ClickEventType::OnRelease,
+                                            click,
+                                        ));
                                     }
                                 }
                             }
@@ -418,10 +422,17 @@ impl Engen {
                                 if let Some(finger) = touch_adapter.primary {
                                     if finger == touch.id as Finger {
                                         touch_adapter.primary.take();
+                                        click_events.push(ClickEvent::new(
+                                            ClickEventType::Cancelled,
+                                            Click::default(),
+                                        ));
                                     }
                                 }
                                 touch_adapter.tracked.remove(&(touch.id as Finger));
                             }
+                        }
+                        for event in click_events {
+                            self.frontend.container.send_event(event);
                         }
                     }
                     WindowEvent::CursorMoved {
@@ -434,10 +445,17 @@ impl Engen {
                             .container
                             .get_resource_mut::<MouseAdapter>()
                             .expect("no mouse adapter");
-                        mouse_adapter.location.replace(Position::<DeviceView>::new(
-                            position.x as f32,
-                            position.y as f32,
-                        ));
+                        let mouse_position =
+                            Position::<DeviceView>::new(position.x as f32, position.y as f32);
+                        mouse_adapter.location.replace(mouse_position);
+                        let mut click_events = Vec::new();
+                        for click in mouse_adapter.clicks.iter_mut() {
+                            click.1.current.replace(mouse_position);
+                            if *click.0 == MouseButton::Left {
+                                click_events
+                                    .push(ClickEvent::new(ClickEventType::OnMove, *click.1));
+                            }
+                        }
                     }
                     WindowEvent::MouseInput {
                         device_id,
@@ -450,34 +468,39 @@ impl Engen {
                             .container
                             .get_resource_mut::<MouseAdapter>()
                             .expect("no mouse adapter");
-                        let mouse_location = mouse_adapter.location;
-                        let mut valid_releases = HashMap::new();
-                        match state {
-                            ElementState::Pressed => {
-                                if let Some(click) = mouse_adapter.tracked_buttons.get_mut(&button)
-                                {
-                                    click.current = mouse_location;
-                                } else {
-                                    if let Some(location) = mouse_location {
-                                        mouse_adapter
-                                            .tracked_buttons
-                                            .insert(button, Click::new(location));
+                        let cached = mouse_adapter
+                            .button_cache
+                            .get(&button)
+                            .cloned()
+                            .unwrap_or(ElementState::Released);
+                        let mut click_events = Vec::new();
+                        let mouse_location = mouse_adapter.location.unwrap_or_default();
+                        if cached != state {
+                            match cached {
+                                ElementState::Pressed => {
+                                    let click = mouse_adapter.clicks.get_mut(&button).unwrap();
+                                    click.end.replace(mouse_location);
+                                    if button == MouseButton::Left {
+                                        // could cancel offscreen releases by filtering here by visible bounds
+                                        click_events.push(ClickEvent::new(
+                                            ClickEventType::OnRelease,
+                                            *click,
+                                        ));
                                     }
                                 }
-                            }
-                            ElementState::Released => {
-                                if let Some(click) = mouse_adapter.tracked_buttons.get_mut(&button)
-                                {
-                                    /* need limiter here to only track if was pressed - cache */
-                                    click.end = mouse_location;
-                                    if let Some(location) = mouse_location {
-                                        valid_releases.insert(button, *click);
+                                ElementState::Released => {
+                                    let click = Click::new(mouse_location);
+                                    mouse_adapter.clicks.insert(button, click);
+                                    if button == MouseButton::Left {
+                                        click_events
+                                            .push(ClickEvent::new(ClickEventType::OnPress, click));
                                     }
                                 }
                             }
                         }
-                        for (button, click) in valid_releases {
-                            mouse_adapter.valid_releases.insert(button, click);
+                        mouse_adapter.button_cache.insert(button, state);
+                        for event in click_events {
+                            self.frontend.container.send_event(event);
                         }
                     }
                     _ => {}
@@ -536,8 +559,8 @@ impl Engen {
                     self.backend.exec(TaskLabel::Teardown);
                 }
                 _ => {}
-            },
-        );
+            }
+        });
     }
 
     fn init_native_gfx(&mut self, event_loop_window_target: &EventLoopWindowTarget<()>) {

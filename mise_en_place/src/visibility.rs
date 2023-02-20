@@ -117,7 +117,7 @@ impl SpacialHasher {
         self.current_overlaps.insert(entity, CurrentOverlaps::new());
     }
     fn cleanup(&mut self, entity: Entity) -> HashSet<Entity> {
-        self.overlap_check_queue.retain(|oc| oc.0 != entity);
+        // self.overlap_check_queue.retain(|oc| oc.0 != entity); // elided but here until tested
         let old = self.spacial_hash_cache.remove(&entity);
         if let Some(hashes) = old {
             for hash in hashes {
@@ -280,6 +280,7 @@ pub(crate) fn collision_responses(
             }
         }
     }
+    spacial_hasher.overlap_check_queue.clear();
     let mut overlap_adds = HashSet::<(Entity, Entity)>::new();
     let mut overlap_removes = HashSet::<(Entity, Entity)>::new();
     for (lhs, rhs) in checks {
@@ -358,31 +359,18 @@ impl CurrentOverlaps {
 }
 
 pub(crate) fn visibility_setup(
-    added: Query<
-        Entity,
-        (
-            Or<(Added<Position<UIView>>, Added<Area<UIView>>)>,
-            With<Position<UIView>>,
-            With<Area<UIView>>,
-            Without<Visibility>,
-        ),
-    >,
+    added: Query<Entity, (Added<Visibility>,)>,
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut cmd: Commands,
 ) {
     for entity in added.iter() {
-        cmd.entity(entity).insert((
-            Visibility::new(),
-            CollisionBegin::new(),
-            CollisionEnd::new(),
-        ));
+        cmd.entity(entity)
+            .insert((CollisionBegin::new(), CollisionEnd::new()));
         spacial_hasher.setup(entity);
     }
 }
 
 pub(crate) fn visibility_cleanup(
-    lost_position: RemovedComponents<Position<UIView>>,
-    lost_area: RemovedComponents<Area<UIView>>,
     lost_visibility: RemovedComponents<Visibility>,
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut lost_contact_entities: Query<&mut CollisionEnd>,
@@ -391,12 +379,6 @@ pub(crate) fn visibility_cleanup(
     let mut other_removal = HashSet::new();
     let mut lost = HashSet::new();
     for entity in lost_visibility.iter() {
-        lost.insert(entity);
-    }
-    for entity in lost_position.iter() {
-        lost.insert(entity);
-    }
-    for entity in lost_area.iter() {
         lost.insert(entity);
     }
     for lost_entity in lost {

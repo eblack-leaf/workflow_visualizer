@@ -2,14 +2,14 @@
 
 use std::ops::Add;
 
-use bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
+use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
     Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages,
-    GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter,
-    MouseButtonExpt, PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle,
-    TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, Visibility,
-    WasmCompileDescriptor, WasmServer,
+    GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseButtonExpt,
+    PartitionMetadata, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
+    TextScaleAlignment, UIView, VirtualKeyboardAdapter, Visibility, WasmCompileDescriptor,
+    WasmServer,
 };
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
@@ -18,65 +18,15 @@ struct Counter {
     count: u32,
 }
 
-#[derive(Resource)]
-struct Limiter(Option<Entity>);
-
 fn update_text(
     mut text: Query<(Entity, &mut Text)>,
     mut counter: ResMut<Counter>,
     mut _idle: ResMut<Idle>,
     mut cmd: Commands,
     mut exit: ResMut<Exit>,
-    touch_adapter: Res<TouchAdapter>,
-    mouse_adapter: Res<MouseAdapter>,
-    mut limiter: ResMut<Limiter>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
-    for (entity, mut ent_text) in text.iter_mut() {
-        if let Some(finger) = touch_adapter.primary.as_ref() {
-            if entity.index() == 0 {
-                let current = touch_adapter
-                    .tracked
-                    .get(finger)
-                    .expect("no tracked click")
-                    .current;
-                if let Some(curr) = current {
-                    ent_text.partitions.first_mut().unwrap().characters =
-                        format!("touch location: {:.2}, {:.2}", curr.x, curr.y);
-                }
-            }
-        }
-        if let Some(location) = mouse_adapter.location {
-            if entity.index() == 1 {
-                ent_text.partitions.first_mut().unwrap().characters =
-                    format!("mouse location: {:.2}, {:.2}", location.x, location.y);
-            }
-        }
-        let mut button_click_text = String::new();
-        for (button, click) in mouse_adapter.valid_releases.iter() {
-            if let Some(ent) = limiter.0 {
-                if *button == MouseButtonExpt::Left {
-                    cmd.entity(ent).insert(ColorInvert::off());
-                }
-                if *button == MouseButtonExpt::Right {
-                    cmd.entity(ent).insert(ColorInvert::on());
-                }
-            }
-            if let Some(current) = click.end {
-                button_click_text = button_click_text.add(
-                    format!(
-                        "button: {:?}, state: {:.2}, {:.2}\n",
-                        button, current.x, current.y
-                    )
-                    .as_str(),
-                );
-            }
-        }
-        if entity.index() == 2 {
-            ent_text.partitions.first_mut().unwrap().characters = button_click_text;
-        }
-    }
 }
 
 struct Launcher;
@@ -122,7 +72,6 @@ impl Launch for Launcher {
                 (1.0, 1.0, 1.0),
             ))
             .id();
-        job.container.insert_resource(Limiter(Some(id)));
         job.container.spawn(IconBundle::new(
             Icon {},
             IconSize::Medium,

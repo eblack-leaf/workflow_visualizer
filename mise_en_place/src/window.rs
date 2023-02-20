@@ -3,12 +3,12 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Events, ResMut, Resource};
 use winit::event::{AxisId, ElementState, MouseButton};
 
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource)]
-pub(crate) struct VirtualKeyboardAdapter {
+pub struct VirtualKeyboardAdapter {
     pub(crate) open: bool,
 }
 
@@ -19,13 +19,13 @@ impl VirtualKeyboardAdapter {
     pub fn is_open(&self) -> bool {
         self.open
     }
-    pub(crate) fn open(&mut self) {
+    pub fn open(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             let document = web_sys::window().unwrap().document().unwrap();
             document
-                .get_element_by_id("urlpad_trigger")
+                .get_element_by_id("keyboard_trigger")
                 .unwrap()
                 .dyn_into::<web_sys::HtmlElement>()
                 .unwrap()
@@ -44,7 +44,7 @@ impl VirtualKeyboardAdapter {
     pub fn close(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
@@ -58,7 +58,7 @@ impl VirtualKeyboardAdapter {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Click {
     pub origin: Position<DeviceView>,
     pub current: Option<Position<DeviceView>>,
@@ -79,10 +79,9 @@ impl Click {
 pub type Finger = u32;
 
 #[derive(Resource)]
-pub struct TouchAdapter {
+pub(crate) struct TouchAdapter {
     pub primary: Option<Finger>,
     pub tracked: HashMap<Finger, Click>,
-    pub primary_end_event: Option<(Finger, Click)>,
 }
 
 impl TouchAdapter {
@@ -90,36 +89,47 @@ impl TouchAdapter {
         Self {
             primary: None,
             tracked: HashMap::new(),
-            primary_end_event: None,
         }
+    }
+}
+
+#[derive(Eq, PartialEq, Copy, Clone)]
+pub enum ClickEventType {
+    OnPress,
+    OnMove,
+    OnRelease,
+    Cancelled,
+}
+
+pub struct ClickEvent {
+    pub ty: ClickEventType,
+    pub click: Click,
+}
+
+impl ClickEvent {
+    pub fn new(ty: ClickEventType, click: Click) -> Self {
+        Self { ty, click }
     }
 }
 
 #[derive(Resource)]
-pub struct MouseAdapter {
+pub(crate) struct MouseAdapter {
     pub location: Option<Position<DeviceView>>,
-    pub tracked_buttons: HashMap<MouseButton, Click>,
-    pub valid_releases: HashMap<MouseButton, Click>,
+    pub button_cache: HashMap<MouseButton, ElementState>,
+    pub clicks: HashMap<MouseButton, Click>,
 }
 
+pub type ElementStateExpt = ElementState;
 pub type MouseButtonExpt = MouseButton;
 
 impl MouseAdapter {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             location: None,
-            tracked_buttons: HashMap::new(),
-            valid_releases: HashMap::new(),
+            button_cache: HashMap::new(),
+            clicks: HashMap::new(),
         }
     }
-}
-
-pub(crate) fn reset_adapters(
-    mut touch_adapter: ResMut<TouchAdapter>,
-    mut mouse_adapter: ResMut<MouseAdapter>,
-) {
-    touch_adapter.primary_end_event.take();
-    mouse_adapter.valid_releases.clear();
 }
 
 #[derive(Resource, Copy, Clone)]
@@ -157,9 +167,9 @@ impl From<f64> for ScaleFactor {
 }
 
 #[derive(Clone, Copy)]
-pub(crate) struct Resize {
-    pub(crate) size: Area<DeviceView>,
-    pub(crate) scale_factor: f64,
+pub struct Resize {
+    pub size: Area<DeviceView>,
+    pub scale_factor: f64,
 }
 
 impl Resize {
@@ -182,12 +192,16 @@ impl Attach for WindowPlugin {
             .insert_resource(Events::<Resize>::default());
         engen
             .frontend
+            .container
+            .insert_resource(Events::<ClickEvent>::default());
+        engen
+            .frontend
             .main
             .add_system_to_stage(FrontEndStages::First, Events::<Resize>::update_system);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Last, reset_adapters);
+            .add_system_to_stage(FrontEndStages::First, Events::<ClickEvent>::update_system);
         engen
             .backend
             .main

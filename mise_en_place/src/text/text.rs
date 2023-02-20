@@ -9,7 +9,7 @@ use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::{Color, Location, PositionAdjust};
+use crate::{Color, Location, PositionAdjust, Visibility};
 
 pub struct TextPartition {
     pub characters: String,
@@ -63,6 +63,7 @@ pub struct TextBundle {
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
+    pub(crate) visibility: Visibility,
 }
 
 impl TextBundle {
@@ -83,6 +84,7 @@ impl TextBundle {
                 VisibleSection::new(Section::default()),
             ),
             difference: Difference::new(),
+            visibility: Visibility::new(),
         }
     }
 }
