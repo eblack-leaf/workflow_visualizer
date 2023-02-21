@@ -26,7 +26,7 @@ impl IconMesh {
         Self {
             mesh: match icon_key {
                 BundledIconKeys::Box => {
-                    read_mesh_bytes(include_bytes!("../../icons/box.icon_mesh")).unwrap()
+                    read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap()
                 }
             },
         }
