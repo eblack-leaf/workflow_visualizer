@@ -5,7 +5,7 @@ use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
-    Area, Clickable, ClickListener, ClickState, Color, ColorHooks, ColorInvert, DepthAdjust, Engen,
+    Area, ClickListener, ClickState, Clickable, Color, ColorHooks, ColorInvert, DepthAdjust, Engen,
     EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle,
     Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, Text,
     TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter,
@@ -40,7 +40,8 @@ fn update_text(
         if let Some(touch) = touch_position {
             text.partitions.first_mut().unwrap().characters = format!(
                 "touch location x:{:.2}, y:{:.2}",
-                touch.current.unwrap().x, touch.current.unwrap().y
+                touch.current.unwrap().x,
+                touch.current.unwrap().y
             );
         }
     }

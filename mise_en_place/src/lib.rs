@@ -17,15 +17,15 @@ pub use icon::IconMeshAddRequest;
 pub use job::Job;
 pub use wasm_server::WasmServer;
 
-pub use crate::clickable::{Clickable, ClickListener, ClickState};
 use crate::clickable::ClickablePlugin;
+pub use crate::clickable::{ClickListener, ClickState, Clickable};
 pub use crate::color::Color;
+use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::coord::CoordPlugin;
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::extract::{invoke_extract, Extract, ExtractFns};
 use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::icon::{
     ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
@@ -40,14 +40,14 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 use crate::visibility::VisibilityPlugin;
+pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
 pub use crate::wasm_compiler::WasmCompileDescriptor;
+use crate::window::WindowPlugin;
 pub use crate::window::{
     Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,
     ScaleFactor, TouchAdapter, VirtualKeyboardAdapter,
 };
-use crate::window::WindowPlugin;
 
 mod button;
 mod clickable;
@@ -60,6 +60,7 @@ mod index;
 mod instance_tools;
 mod job;
 mod key;
+mod r_button;
 mod render;
 mod text;
 mod theme;
@@ -234,7 +235,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -299,7 +300,7 @@ impl Engen {
     }
     #[cfg(target_arch = "wasm32")]
     fn web_resizing(window: &Rc<Window>) {
-        use wasm_bindgen::{JsCast, prelude::*};
+        use wasm_bindgen::{prelude::*, JsCast};
         let w_window = window.clone();
         let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
             let scale_factor = w_window.scale_factor();
@@ -310,11 +311,10 @@ impl Engen {
             .expect("no web_sys window")
             .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())
             .unwrap();
-        match web_sys::window()
-            .expect("no web_sys window")
-            .screen() {
+        match web_sys::window().expect("no web_sys window").screen() {
             Ok(screen) => {
-                screen.orientation()
+                screen
+                    .orientation()
                     .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref())
                     .unwrap();
             }

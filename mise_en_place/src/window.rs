@@ -3,9 +3,9 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Events, ResMut, Resource};
 use winit::event::{AxisId, ElementState, MouseButton};
 
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {
@@ -22,7 +22,7 @@ impl VirtualKeyboardAdapter {
     pub fn open(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
@@ -44,7 +44,7 @@ impl VirtualKeyboardAdapter {
     pub fn close(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
@@ -99,12 +99,8 @@ impl TouchAdapter {
     }
     pub fn primary_touch(&self) -> Option<Click> {
         match self.primary {
-            None => {
-                None
-            }
-            Some(prime) => {
-                Some(*self.tracked.get(&prime).unwrap())
-            }
+            None => None,
+            Some(prime) => Some(*self.tracked.get(&prime).unwrap()),
         }
     }
 }
