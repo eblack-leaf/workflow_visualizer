@@ -6,11 +6,12 @@ use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
-    Area, ClickListener, ClickState, Clickable, Color, ColorHooks, ColorInvert, DepthAdjust, Engen,
-    EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle,
-    Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, Text,
-    TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter,
-    UIView, VirtualKeyboardAdapter, Visibility, WasmCompileDescriptor, WasmServer,
+    read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color, ColorHooks,
+    ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
+    IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
+    PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
+    TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, Visibility,
+    WasmCompileDescriptor, WasmServer,
 };
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
@@ -86,21 +87,21 @@ impl Launch for Launcher {
             .add_system_to_stage(FrontEndStages::Process, update_text);
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("mouse location: ", ((1.0, 1.0, 1.0), 0))]),
+                Text::new(vec![("mouse location: ", (Color::OFF_WHITE, 0))]),
                 (UIView::tag(), (35u32, 10u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
-            .insert(TextBoundGuide::new(44, 3));
+            .insert(TextBoundGuide::new(18, 6));
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("click info: ", ((1.0, 1.0, 1.0), 0))]),
-                (UIView::tag(), (35u32, 60u32), 0u32),
+                Text::new(vec![("click info: ", (Color::OFF_WHITE, 0))]),
+                (UIView::tag(), (35u32, 160u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(44, 3));
         job.container.spawn(IconMeshAddRequest::new(
-            IconKey("mesh name"),
-            IconMesh::new(ICON_MESH.iter().map(|v| *v).collect::<Vec<IconVertex>>()),
+            IconKey("bundled box"),
+            IconMesh::bundled(BundledIconKeys::Box),
             10,
         ));
         let id = job
@@ -108,41 +109,14 @@ impl Launch for Launcher {
             .spawn(IconBundle::new(
                 Icon {},
                 IconSize::Large,
-                IconKey("mesh name"),
+                IconKey("bundled box"),
                 (UIView::tag(), (10u32, 17u32), 0u32),
-                (1.0, 1.0, 1.0),
+                Color::OFF_WHITE,
             ))
-            .insert(Clickable::new(ClickListener::on_press(), true))
+            .insert(Clickable::new(ClickListener::on_release(), false))
             .id();
     }
 }
-
-pub(crate) const ICON_MESH: [IconVertex; 6] = [
-    IconVertex::new(
-        GpuPosition { x: 0.0, y: 0.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
-    ),
-    IconVertex::new(
-        GpuPosition { x: 0.0, y: 1.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
-    ),
-    IconVertex::new(
-        GpuPosition { x: 1.0, y: 0.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
-    ),
-    IconVertex::new(
-        GpuPosition { x: 1.0, y: 0.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ),
-    IconVertex::new(
-        GpuPosition { x: 0.0, y: 1.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ),
-    IconVertex::new(
-        GpuPosition { x: 1.0, y: 1.0 },
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ),
-];
 
 fn main() {
     #[cfg(not(target_arch = "wasm32"))]

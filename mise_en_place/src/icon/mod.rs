@@ -13,7 +13,10 @@ pub(crate) use cache::{Cache, DifferenceHolder, Differences};
 pub(crate) use instance::IconAdd;
 pub use interface::IconAreaGuide;
 pub(crate) use mesh::GpuIconMesh;
-pub use mesh::{ColorHooks, ColorInvert, IconKey, IconMesh, IconMeshAddRequest, IconVertex};
+pub use mesh::{
+    read_mesh, write_mesh, BundledIconKeys, ColorHooks, ColorInvert, IconKey, IconMesh,
+    IconMeshAddRequest, IconVertex,
+};
 
 use crate::coord::{GpuArea, GpuPosition, Panel};
 use crate::extract::Extract;

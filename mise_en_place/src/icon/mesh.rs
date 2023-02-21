@@ -1,3 +1,6 @@
+use std::ops::Deref;
+use std::path::Path;
+
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
@@ -11,9 +14,22 @@ pub struct IconMesh {
     pub mesh: Vec<IconVertex>,
 }
 
+pub enum BundledIconKeys {
+    Box,
+}
+
 impl IconMesh {
     pub fn new(mesh: Vec<IconVertex>) -> Self {
         Self { mesh }
+    }
+    pub fn bundled(icon_key: BundledIconKeys) -> Self {
+        Self {
+            mesh: match icon_key {
+                BundledIconKeys::Box => {
+                    read_mesh_bytes(include_bytes!("../../icons/box.icon_mesh")).unwrap()
+                }
+            },
+        }
     }
     pub(crate) fn to_gpu(&self, gfx_surface: &GfxSurface) -> GpuIconMesh {
         GpuIconMesh {
@@ -102,5 +118,26 @@ impl IconMeshAddRequest {
             icon_mesh,
             max,
         }
+    }
+}
+
+pub fn read_mesh<P: AsRef<Path>>(path: P) -> Option<Vec<IconVertex>> {
+    if let Ok(vec) = rmp_serde::from_slice(std::fs::read(path).unwrap().as_slice()) {
+        return Some(vec);
+    }
+    None
+}
+
+pub fn read_mesh_bytes(data: &'static [u8]) -> Option<Vec<IconVertex>> {
+    if let Ok(vec) = rmp_serde::from_slice(data) {
+        return Some(vec);
+    }
+    None
+}
+
+pub fn write_mesh<P: AsRef<Path>>(mesh: &Vec<IconVertex>, path: P) {
+    if let Ok(data) = rmp_serde::to_vec(mesh) {
+        println!("writing {:?}", data);
+        std::fs::write(path, data);
     }
 }

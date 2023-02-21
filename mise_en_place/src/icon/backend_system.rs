@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Commands, Query, Res};
@@ -6,7 +8,7 @@ use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::icon::cache::Differences;
 use crate::icon::IconRenderer;
 use crate::viewport::Viewport;
-use crate::{IconMeshAddRequest, ScaleFactor};
+use crate::{IconMeshAddRequest, IconVertex, ScaleFactor};
 
 pub(crate) fn read_add_requests(
     mut renderer: ResMut<IconRenderer>,
