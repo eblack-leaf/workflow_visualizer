@@ -12,6 +12,19 @@ pub struct VirtualKeyboardAdapter {}
 
 impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::{prelude::*, JsCast};
+            let document = web_sys::window().unwrap().document().unwrap();
+            let node = document.create_element("div").unwrap();
+            node.set_inner_html(
+                "<input type='text' maxlength='0' width=0 height=0 \
+            id='keyboard_trigger' style='position: absolute;left: -1000px;top: -1000px;opacity: 0;\
+            padding: 0;min-width: 0; min-height: 0;width: 0; height: 0;border: 0'>",
+            );
+            let body = document.body().unwrap();
+            body.append_child(&node);
+        }
         Self {}
     }
     pub fn open(&self) {
@@ -33,6 +46,12 @@ impl VirtualKeyboardAdapter {
                 .unwrap()
                 .focus()
                 .unwrap();
+            // document
+            //     .get_element_by_id("keyboard_trigger")
+            //     .unwrap()
+            //     .dyn_into::<web_sys::HtmlElement>()
+            //     .unwrap()
+            //     .click();
         }
     }
     pub fn close(&self) {
