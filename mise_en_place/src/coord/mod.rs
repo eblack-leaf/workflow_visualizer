@@ -32,15 +32,33 @@ where
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Numerical {}
 
+impl Numerical {
+    pub fn tag() -> Self {
+        Self {}
+    }
+}
+
 impl CoordContext for Numerical {}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct UIView {}
 
+impl UIView {
+    pub fn tag() -> Self {
+        Self {}
+    }
+}
+
 impl CoordContext for UIView {}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct DeviceView {}
+
+impl DeviceView {
+    pub fn tag() -> Self {
+        Self {}
+    }
+}
 
 impl CoordContext for DeviceView {}
 

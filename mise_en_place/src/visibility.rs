@@ -156,7 +156,7 @@ pub(crate) fn update_spacial_hash(
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
     for (entity, position, area, mut visibility) in changed.iter_mut() {
         spacial_hasher.an_entity_changed = true;
-        let section: Section<UIView> = (UIView {}, *position, *area).into();
+        let section: Section<UIView> = (UIView::tag(), *position, *area).into();
         if !section.is_overlapping(visible_bounds.section) {
             if visibility.visible() {
                 visibility.visible = false;

@@ -6,7 +6,7 @@ use std::ops::Add;
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
 use mise_en_place::{
-    Area, Clickable, ClickListener, ClickState, Color, ColorHooks, ColorInvert, DepthAdjust, Engen,
+    Area, ClickListener, ClickState, Clickable, Color, ColorHooks, ColorInvert, DepthAdjust, Engen,
     EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle,
     Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, Text,
     TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter,
@@ -36,7 +36,7 @@ fn update_text(
     let mut click_info = String::new();
     for (entity, icon, click_state, position, area) in click_icon.iter() {
         if click_state.clicked() {
-            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
+            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
             let current = counter.count;
             counter.state.replace(current);
             virtual_keyboard.open();
@@ -44,7 +44,7 @@ fn update_text(
             if let Some(state) = counter.state {
                 if counter.count >= state + 100 {
                     click_info +=
-                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
+                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
                     counter.state.take();
                 }
             }
@@ -87,14 +87,14 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("mouse location: ", ((1.0, 1.0, 1.0), 0))]),
-                (UIView {}, (35u32, 10u32), 0u32),
+                (UIView::tag(), (35u32, 10u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(44, 3));
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("click info: ", ((1.0, 1.0, 1.0), 0))]),
-                (UIView {}, (35u32, 60u32), 0u32),
+                (UIView::tag(), (35u32, 60u32), 0u32),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(44, 3));
@@ -109,7 +109,7 @@ impl Launch for Launcher {
                 Icon {},
                 IconSize::Large,
                 IconKey("mesh name"),
-                (UIView {}, (10u32, 17u32), 0u32),
+                (UIView::tag(), (10u32, 17u32), 0u32),
                 (1.0, 1.0, 1.0),
             ))
             .insert(Clickable::new(ClickListener::on_press(), true))
