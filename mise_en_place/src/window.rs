@@ -8,18 +8,13 @@ use crate::window::Orientation::{Landscape, Portrait};
 use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource)]
-pub struct VirtualKeyboardAdapter {
-    pub(crate) open: bool,
-}
+pub struct VirtualKeyboardAdapter {}
 
 impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
-        Self { open: false }
+        Self {}
     }
-    pub fn is_open(&self) -> bool {
-        self.open
-    }
-    pub fn open(&mut self) {
+    pub fn open(&self) {
         #[cfg(target_arch = "wasm32")]
         {
             use wasm_bindgen::{prelude::*, JsCast};
@@ -38,10 +33,9 @@ impl VirtualKeyboardAdapter {
                 .unwrap()
                 .focus()
                 .unwrap();
-            self.open = true;
         }
     }
-    pub fn close(&mut self) {
+    pub fn close(&self) {
         #[cfg(target_arch = "wasm32")]
         {
             use wasm_bindgen::{prelude::*, JsCast};
@@ -53,7 +47,6 @@ impl VirtualKeyboardAdapter {
                 .unwrap()
                 .blur()
                 .unwrap();
-            self.open = false;
         }
     }
 }

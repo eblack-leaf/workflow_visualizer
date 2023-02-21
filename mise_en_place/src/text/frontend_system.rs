@@ -223,7 +223,11 @@ pub(crate) fn letter_diff(
     }
 }
 
-pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd: Commands) {
+pub(crate) fn calc_area(
+    text: Query<(Entity, &Placer), Changed<Placer>>,
+    mut cmd: Commands,
+    scale_factor: Res<ScaleFactor>,
+) {
     for (entity, placer) in text.iter() {
         let mut width: f32 = 0.0;
         let mut height: f32 = 0.0;
@@ -233,7 +237,7 @@ pub(crate) fn calc_area(text: Query<(Entity, &Placer), Changed<Placer>>, mut cmd
         }
         if width != 0.0 && height != 0.0 {
             cmd.entity(entity)
-                .insert(Area::<UIView>::new(width, height));
+                .insert(Area::<DeviceView>::new(width, height).to_ui(scale_factor.factor));
         }
     }
 }

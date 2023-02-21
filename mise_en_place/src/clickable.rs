@@ -12,9 +12,9 @@ pub struct Clickable {
 }
 
 impl Clickable {
-    pub fn new(listener: ClickListener) -> Self {
+    pub fn new(listener: ClickListener, initial_toggle: bool) -> Self {
         Self {
-            click_state: ClickState::new(),
+            click_state: ClickState::new(initial_toggle),
             click_listener: listener,
         }
     }
@@ -23,14 +23,21 @@ impl Clickable {
 #[derive(Component)]
 pub struct ClickState {
     pub(crate) clicked: bool,
+    pub(crate) toggle: bool,
 }
 
 impl ClickState {
-    pub fn new() -> Self {
-        Self { clicked: false }
+    pub fn new(initial_toggle: bool) -> Self {
+        Self {
+            clicked: false,
+            toggle: initial_toggle,
+        }
     }
     pub fn clicked(&self) -> bool {
         self.clicked
+    }
+    pub fn toggled(&self) -> bool {
+        self.toggle
     }
 }
 
@@ -84,6 +91,7 @@ pub(crate) fn register_click(
                                 .contains(click.click.origin.to_ui(scale_factor.factor))
                             {
                                 click_state.clicked = true;
+                                click_state.toggle = !click_state.toggle;
                             }
                         }
                         ClickEventType::OnMove => {}
@@ -96,6 +104,7 @@ pub(crate) fn register_click(
                                     .contains(click.click.end.unwrap().to_ui(scale_factor.factor))
                             {
                                 click_state.clicked = true;
+                                click_state.toggle = !click_state.toggle;
                             }
                         }
                         ClickEventType::Cancelled => {}
