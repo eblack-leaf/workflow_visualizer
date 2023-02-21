@@ -17,13 +17,15 @@ pub use icon::IconMeshAddRequest;
 pub use job::Job;
 pub use wasm_server::WasmServer;
 
+pub use crate::clickable::{Clickable, ClickListener, ClickState};
+use crate::clickable::ClickablePlugin;
 pub use crate::color::Color;
-use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::coord::CoordPlugin;
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::icon::{
     ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
@@ -38,14 +40,14 @@ pub use crate::text::{
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
 use crate::viewport::{Viewport, ViewportPlugin};
-use crate::visibility::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
+use crate::visibility::VisibilityPlugin;
 pub use crate::wasm_compiler::WasmCompileDescriptor;
 pub use crate::window::{
-    Click, ClickEvent, ClickEventType, Finger, MouseButtonExpt, Orientation, Resize, ScaleFactor,
-    VirtualKeyboardAdapter,
+    Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,
+    ScaleFactor, TouchAdapter, VirtualKeyboardAdapter,
 };
-use crate::window::{MouseAdapter, TouchAdapter, WindowPlugin};
+use crate::window::WindowPlugin;
 
 mod button;
 mod clickable;
@@ -232,7 +234,7 @@ impl Engen {
 
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             use winit::platform::web::WindowExtWebSys;
             std::panic::set_hook(Box::new(console_error_panic_hook::hook));
             console_log::init().expect("could not initialize logger");
@@ -297,7 +299,7 @@ impl Engen {
     }
     #[cfg(target_arch = "wasm32")]
     fn web_resizing(window: &Rc<Window>) {
-        use wasm_bindgen::{prelude::*, JsCast};
+        use wasm_bindgen::{JsCast, prelude::*};
         let w_window = window.clone();
         let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
             let scale_factor = w_window.scale_factor();
@@ -308,13 +310,16 @@ impl Engen {
             .expect("no web_sys window")
             .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())
             .unwrap();
-        web_sys::window()
+        match web_sys::window()
             .expect("no web_sys window")
-            .screen()
-            .expect("could not get screen")
-            .orientation()
-            .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref())
-            .unwrap();
+            .screen() {
+            Ok(screen) => {
+                screen.orientation()
+                    .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref())
+                    .unwrap();
+            }
+            Err(_) => {}
+        }
         closure.forget();
     }
     pub fn add_extraction<Extraction: Extract>(&mut self) {
@@ -329,8 +334,8 @@ impl Engen {
     }
     fn ignition(mut self) {
         let event_loop = self.event_loop.take().expect("no event loop");
-        event_loop.run(move |event, event_loop_window_target, control_flow| {
-            match event {
+        event_loop.run(
+            move |event, event_loop_window_target, control_flow| match event {
                 Event::NewEvents(start_cause) => match start_cause {
                     StartCause::Init => {
                         self.init_native_gfx(event_loop_window_target);
@@ -339,6 +344,7 @@ impl Engen {
                         self.invoke_attach::<ViewportPlugin>();
                         self.invoke_attach::<ThemePlugin>();
                         self.invoke_attach::<VisibilityPlugin>();
+                        self.invoke_attach::<ClickablePlugin>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
@@ -463,6 +469,18 @@ impl Engen {
                         button,
                         ..
                     } => {
+                        let visible_bounds_section = self
+                            .frontend
+                            .container
+                            .get_resource::<VisibleBounds>()
+                            .expect("no visible bounds")
+                            .section;
+                        let scale_factor = self
+                            .frontend
+                            .container
+                            .get_resource::<ScaleFactor>()
+                            .expect("no scale factor")
+                            .factor;
                         let mut mouse_adapter = self
                             .frontend
                             .container
@@ -475,25 +493,39 @@ impl Engen {
                             .unwrap_or(ElementState::Released);
                         let mut click_events = Vec::new();
                         let mouse_location = mouse_adapter.location.unwrap_or_default();
+                        let in_bounds =
+                            visible_bounds_section.contains(mouse_location.to_ui(scale_factor));
                         if cached != state {
                             match cached {
                                 ElementState::Pressed => {
-                                    let click = mouse_adapter.clicks.get_mut(&button).unwrap();
-                                    click.end.replace(mouse_location);
-                                    if button == MouseButton::Left {
-                                        // could cancel offscreen releases by filtering here by visible bounds
-                                        click_events.push(ClickEvent::new(
-                                            ClickEventType::OnRelease,
-                                            *click,
-                                        ));
+                                    if in_bounds {
+                                        let click = mouse_adapter.clicks.get_mut(&button).unwrap();
+                                        click.end.replace(mouse_location);
+                                        if button == MouseButton::Left {
+                                            click_events.push(ClickEvent::new(
+                                                ClickEventType::OnRelease,
+                                                *click,
+                                            ));
+                                        }
+                                    } else {
+                                        if button == MouseButton::Left {
+                                            click_events.push(ClickEvent::new(
+                                                ClickEventType::Cancelled,
+                                                Click::default(),
+                                            ));
+                                        }
                                     }
                                 }
                                 ElementState::Released => {
-                                    let click = Click::new(mouse_location);
-                                    mouse_adapter.clicks.insert(button, click);
-                                    if button == MouseButton::Left {
-                                        click_events
-                                            .push(ClickEvent::new(ClickEventType::OnPress, click));
+                                    if in_bounds {
+                                        let click = Click::new(mouse_location);
+                                        mouse_adapter.clicks.insert(button, click);
+                                        if button == MouseButton::Left {
+                                            click_events.push(ClickEvent::new(
+                                                ClickEventType::OnPress,
+                                                click,
+                                            ));
+                                        }
                                     }
                                 }
                             }
@@ -559,8 +591,8 @@ impl Engen {
                     self.backend.exec(TaskLabel::Teardown);
                 }
                 _ => {}
-            }
-        });
+            },
+        );
     }
 
     fn init_native_gfx(&mut self, event_loop_window_target: &EventLoopWindowTarget<()>) {

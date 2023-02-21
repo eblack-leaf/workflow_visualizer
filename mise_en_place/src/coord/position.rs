@@ -3,6 +3,7 @@ use std::ops::Sub;
 
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
+use serde::{Deserialize, Serialize};
 
 use crate::coord::{CoordContext, DeviceView, Numerical, PositionAdjust, UIView};
 
@@ -14,7 +15,7 @@ pub struct Position<Context: CoordContext> {
 }
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default)]
+#[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize)]
 pub struct GpuPosition {
     pub x: f32,
     pub y: f32,

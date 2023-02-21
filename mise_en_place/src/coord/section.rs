@@ -54,10 +54,10 @@ impl<Context: CoordContext> Section<Context> {
             && self.bottom() > other.top()
     }
     pub fn contains(&self, position: Position<Context>) -> bool {
-        if position.x > self.left()
-            && position.x < self.right()
-            && position.y > self.top()
-            && position.y < self.bottom()
+        if position.x >= self.left()
+            && position.x <= self.right()
+            && position.y >= self.top()
+            && position.y <= self.bottom()
         {
             return true;
         }

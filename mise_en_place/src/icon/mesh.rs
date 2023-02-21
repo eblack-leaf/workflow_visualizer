@@ -1,5 +1,6 @@
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
+use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
 use crate::gfx::GfxSurface;
@@ -32,11 +33,13 @@ pub(crate) struct GpuIconMesh {
     pub(crate) mesh: wgpu::Buffer,
     pub(crate) length: u32,
 }
+
 #[repr(C)]
 #[derive(Component, Copy, Clone, Pod, Zeroable, Default)]
 pub struct ColorInvert {
     pub signal: u32,
 }
+
 impl ColorInvert {
     pub fn on() -> Self {
         Self { signal: 1 }
@@ -45,12 +48,14 @@ impl ColorInvert {
         Self { signal: 0 }
     }
 }
+
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone)]
+#[derive(Pod, Zeroable, Copy, Clone, Serialize, Deserialize)]
 pub struct ColorHooks {
     pub is_negative_space: f32,
     pub is_hookable: f32,
 }
+
 impl ColorHooks {
     pub const NEGATIVE_SPACE: f32 = 1f32;
     pub const HOOKABLE: f32 = 1f32;
@@ -63,8 +68,9 @@ impl ColorHooks {
         }
     }
 }
+
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone)]
+#[derive(Pod, Zeroable, Copy, Clone, Serialize, Deserialize)]
 pub struct IconVertex {
     pub position: GpuPosition,
     pub color_hooks: ColorHooks,

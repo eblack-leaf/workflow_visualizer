@@ -3,9 +3,9 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Events, ResMut, Resource};
 use winit::event::{AxisId, ElementState, MouseButton};
 
+use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {
@@ -22,7 +22,7 @@ impl VirtualKeyboardAdapter {
     pub fn open(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
@@ -44,7 +44,7 @@ impl VirtualKeyboardAdapter {
     pub fn close(&mut self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
@@ -79,16 +79,32 @@ impl Click {
 pub type Finger = u32;
 
 #[derive(Resource)]
-pub(crate) struct TouchAdapter {
-    pub primary: Option<Finger>,
-    pub tracked: HashMap<Finger, Click>,
+pub struct TouchAdapter {
+    pub(crate) primary: Option<Finger>,
+    pub(crate) tracked: HashMap<Finger, Click>,
 }
 
 impl TouchAdapter {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             primary: None,
             tracked: HashMap::new(),
+        }
+    }
+    pub fn primary(&self) -> Option<Finger> {
+        self.primary.clone()
+    }
+    pub fn touches(&self) -> &HashMap<Finger, Click> {
+        &self.tracked
+    }
+    pub fn primary_touch(&self) -> Option<Click> {
+        match self.primary {
+            None => {
+                None
+            }
+            Some(prime) => {
+                Some(*self.tracked.get(&prime).unwrap())
+            }
         }
     }
 }
@@ -113,10 +129,10 @@ impl ClickEvent {
 }
 
 #[derive(Resource)]
-pub(crate) struct MouseAdapter {
-    pub location: Option<Position<DeviceView>>,
-    pub button_cache: HashMap<MouseButton, ElementState>,
-    pub clicks: HashMap<MouseButton, Click>,
+pub struct MouseAdapter {
+    pub(crate) location: Option<Position<DeviceView>>,
+    pub(crate) button_cache: HashMap<MouseButton, ElementState>,
+    pub(crate) clicks: HashMap<MouseButton, Click>,
 }
 
 pub type ElementStateExpt = ElementState;
@@ -129,6 +145,12 @@ impl MouseAdapter {
             button_cache: HashMap::new(),
             clicks: HashMap::new(),
         }
+    }
+    pub fn location(&self) -> Option<Position<DeviceView>> {
+        self.location.clone()
+    }
+    pub fn clicks(&self) -> &HashMap<MouseButton, Click> {
+        &self.clicks
     }
 }
 
