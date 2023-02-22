@@ -19,17 +19,20 @@ pub use mesh::{
 };
 
 use crate::coord::{GpuArea, GpuPosition, Panel};
-use crate::extract::Extract;
+use crate::gfx::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
+use crate::gfx::{Render, RenderPassHandle, RenderPhase};
 pub use crate::icon::interface::{Icon, IconBundle, IconSize};
 pub use crate::icon::plugin::IconPlugin;
 use crate::instance::index::Indexer;
+use crate::instance::key::{Key, KeyFactory};
 use crate::instance::GpuAttributeBuffer;
 use crate::instance::NullBit;
 use crate::instance::{AttributeWrite, CpuAttributeBuffer, InstanceAttributeManager};
-use crate::instance::key::{Key, KeyFactory};
-use crate::render::{Render, RenderPassHandle, RenderPhase};
-use crate::{Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView, Viewport, Visibility};
+use crate::{
+    Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView,
+    Viewport, Visibility,
+};
 
 mod backend_system;
 mod cache;

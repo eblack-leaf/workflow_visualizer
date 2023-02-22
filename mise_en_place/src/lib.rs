@@ -1,4 +1,4 @@
-#![allow(unused, dead_code)]
+// #![allow(unused, dead_code)]
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -15,51 +15,50 @@ pub use icon::IconKey;
 pub use icon::IconMesh;
 pub use icon::IconMeshAddRequest;
 pub use job::Job;
+pub use visibility::VisibleBounds;
 
 use crate::clickable::ClickablePlugin;
-pub use crate::clickable::{Clickable, ClickListener, ClickState};
+pub use crate::clickable::{ClickListener, ClickState, Clickable};
 pub use crate::color::Color;
 use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::extract::{Extract, ExtractFns, invoke_extract};
+use crate::gfx::{invoke_extract, Extract, ExtractFns};
+use crate::gfx::{invoke_render, Render, RenderFns, RenderPhase};
 use crate::gfx::{GfxOptions, GfxSurface};
+pub use crate::gfx::{Viewport, ViewportPlugin};
 pub use crate::icon::{
-    BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
-    read_mesh, write_mesh,
+    read_mesh, write_mesh, BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin,
+    IconSize, IconVertex,
 };
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
-use crate::render::{invoke_render, Render, RenderFns, RenderPhase};
 pub use crate::text::{
     PartitionMetadata, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
     TextScaleAlignment,
 };
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
-pub use crate::gfx::{Viewport, ViewportPlugin};
-use crate::visibility::VisibilityPlugin;
-pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
+use visibility::plugin::VisibilityPlugin;
+pub use crate::visibility::{Visibility, VisibleSection};
 pub use crate::wasm::{WasmCompiler, WasmServer};
 use crate::window::WindowPlugin;
 pub use crate::window::{
     Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,
-    ScaleFactor, TouchAdapter, VirtualKeyboardAdapter, VirtualKeyboardType
+    ScaleFactor, TouchAdapter, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
 
 mod button;
 mod clickable;
 mod color;
 mod coord;
-mod extract;
 mod gfx;
 mod icon;
 mod instance;
 mod job;
 mod r_button;
-mod render;
 mod text;
 mod theme;
 mod uniform;
@@ -409,9 +408,9 @@ impl Engen {
                 }
                 Event::RedrawRequested(_) => {
                     if self.backend.active() {
-                        extract::extract(&mut self);
+                        gfx::extract(&mut self);
                         self.backend.exec(TaskLabel::Main);
-                        render::render(&mut self);
+                        gfx::render(&mut self);
                     }
                 }
                 Event::RedrawEventsCleared => {

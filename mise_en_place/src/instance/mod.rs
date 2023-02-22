@@ -60,13 +60,17 @@ impl<T> GpuAttributeBuffer<T> {
     }
 }
 
-pub struct InstanceAttributeManager<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static> {
+pub struct InstanceAttributeManager<
+    Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static,
+> {
     pub cpu: CpuAttributeBuffer<Attribute>,
     pub gpu: GpuAttributeBuffer<Attribute>,
     pub write: AttributeWrite<Attribute>,
 }
 
-impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static> InstanceAttributeManager<Attribute> {
+impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
+    InstanceAttributeManager<Attribute>
+{
     pub fn new(gfx_surface: &GfxSurface, max: u32) -> Self {
         Self {
             cpu: CpuAttributeBuffer::new(max),

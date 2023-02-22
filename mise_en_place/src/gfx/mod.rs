@@ -3,9 +3,15 @@ use winit::window::Window;
 
 use crate::window::Resize;
 
+mod extract;
+mod render;
 mod viewport;
+pub use extract::Extract;
+pub(crate) use extract::{extract, invoke_extract, ExtractFns};
+pub(crate) use render::{invoke_render, render, RenderFns};
+pub use render::{Render, RenderPassHandle, RenderPhase};
+pub(crate) use viewport::ViewportOffset;
 pub use viewport::{Viewport, ViewportPlugin};
-pub(crate) use viewport::{ViewportOffset};
 #[derive(Clone)]
 pub struct GfxOptions {
     pub backends: wgpu::Backends,

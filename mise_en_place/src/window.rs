@@ -12,7 +12,7 @@ pub struct VirtualKeyboardAdapter {}
 pub enum VirtualKeyboardType {
     Keyboard,
     TelephonePad,
-    NumberPad
+    NumberPad,
 }
 impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
@@ -57,14 +57,10 @@ impl VirtualKeyboardAdapter {
                     .get_element_by_id("numpad_trigger")
                     .unwrap()
                     .dyn_into::<web_sys::HtmlElement>()
-                    .unwrap()
+                    .unwrap(),
             };
-            trigger_element
-                .blur()
-                .unwrap();
-            trigger_element
-                .focus()
-                .unwrap();
+            trigger_element.blur().unwrap();
+            trigger_element.focus().unwrap();
         }
     }
     pub fn close(&self) {

@@ -3,14 +3,14 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
 use crate::coord::{GpuArea, GpuPosition};
-use crate::extract::Extract;
+use crate::gfx::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
+use crate::gfx::{Render, RenderPassHandle, RenderPhase};
 use crate::instance::index::Indexer;
+use crate::instance::key::Key;
 use crate::instance::GpuAttributeBuffer;
 use crate::instance::NullBit;
 use crate::job::Container;
-use crate::instance::key::Key;
-use crate::render::{Render, RenderPassHandle, RenderPhase};
 use crate::text::atlas::AtlasBindGroup;
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;

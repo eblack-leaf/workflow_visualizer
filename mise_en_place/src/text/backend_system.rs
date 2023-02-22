@@ -7,10 +7,10 @@ use bytemuck::{Pod, Zeroable};
 use crate::coord::{DeviceView, GpuArea, GpuPosition, Numerical};
 use crate::gfx::GfxSurface;
 use crate::instance::index::{Index, Indexer};
+use crate::instance::key::Key;
 use crate::instance::GpuAttributeBuffer;
 use crate::instance::NullBit;
 use crate::instance::{offset, AttributeWrite, CpuAttributeBuffer};
-use crate::instance::key::Key;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,

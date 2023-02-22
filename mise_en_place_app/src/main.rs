@@ -5,7 +5,14 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
-use mise_en_place::{read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, Visibility, WasmCompiler, WasmServer, VirtualKeyboardType};
+use mise_en_place::{
+    read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color, ColorHooks,
+    ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
+    IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
+    PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
+    TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter,
+    VirtualKeyboardType, Visibility, WasmCompiler, WasmServer,
+};
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
