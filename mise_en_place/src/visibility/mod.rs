@@ -1,25 +1,17 @@
-use std::collections::{HashMap, HashSet};
+use bevy_ecs::prelude::Component;
 
-use bevy_ecs::prelude::{
-    Added, Changed, Commands, Component, Entity, EventReader, IntoSystemDescriptor, Or, Query,
-    RemovedComponents, Res, ResMut, Resource, SystemLabel, With, Without,
-};
 pub use collision::{Collision, CollisionBegin, CollisionEnd};
-use spacial_hasher::SpacialHasher;
+pub(crate) use plugin::VisibilityPlugin;
 pub(crate) use visible_bounds::ViewportOffsetUpdate;
 pub use visible_bounds::{VisibleBounds, VisibleBoundsPositionAdjust};
-pub(crate) use plugin::VisibilityPlugin;
-use crate::coord::{Area, DeviceView, Position, PositionAdjust, Section, UIView};
-use crate::gfx::Extract;
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
-use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, Engen, FrontEndStages, Job, Viewport};
+
+use crate::coord::{Section, UIView};
 
 mod collision;
-mod spacial_hasher;
-mod visible_bounds;
 mod plugin;
+mod spacial_hasher;
 mod system;
+mod visible_bounds;
 
 #[derive(Component)]
 pub struct Visibility {

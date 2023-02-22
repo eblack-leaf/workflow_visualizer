@@ -4,7 +4,6 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
-use crate::coord::Panel;
 use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::{Color, Location, UIView, Visibility};
 

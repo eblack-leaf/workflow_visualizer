@@ -1,6 +1,6 @@
 use wgpu::util::DeviceExt;
 
-use crate::coord::{GpuPosition, Position};
+use crate::coord::GpuPosition;
 use crate::gfx::GfxSurface;
 
 pub(crate) const GLYPH_AABB: [Vertex; 6] = [

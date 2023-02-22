@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::Component;
 
-use crate::coord::{DeviceView, Numerical};
+use crate::coord::Numerical;
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::text::coords::Coords;
 use crate::text::font::MonoSpacedFont;

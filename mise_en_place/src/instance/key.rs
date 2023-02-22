@@ -7,6 +7,7 @@ impl Key {
     pub(crate) fn new(identifier: u32) -> Self {
         Self { identifier }
     }
+    #[allow(unused)]
     fn identifier(&self) -> u32 {
         self.identifier
     }

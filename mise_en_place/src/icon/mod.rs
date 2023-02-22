@@ -1,15 +1,9 @@
 use std::collections::{HashMap, HashSet};
-use std::ptr::null;
 
-use bevy_ecs::prelude::{
-    Added, Bundle, Changed, Commands, Component, Entity, Or, Query, RemovedComponents, Res, ResMut,
-    Resource,
-};
-use bytemuck::{Pod, Zeroable};
-use wgpu::util::DeviceExt;
+use bevy_ecs::prelude::{Entity, Resource};
 use wgpu::{include_wgsl, VertexState};
 
-pub(crate) use cache::{Cache, DifferenceHolder, Differences};
+pub(crate) use cache::{DifferenceHolder, Differences};
 pub(crate) use instance::IconAdd;
 pub use interface::IconAreaGuide;
 pub(crate) use mesh::GpuIconMesh;
@@ -18,7 +12,7 @@ pub use mesh::{
     IconMeshAddRequest, IconVertex,
 };
 
-use crate::coord::{GpuArea, GpuPosition, Panel};
+use crate::coord::{GpuArea, GpuPosition};
 use crate::gfx::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::gfx::{Render, RenderPassHandle, RenderPhase};
@@ -26,13 +20,9 @@ pub use crate::icon::interface::{Icon, IconBundle, IconSize};
 pub use crate::icon::plugin::IconPlugin;
 use crate::instance::index::Indexer;
 use crate::instance::key::{Key, KeyFactory};
-use crate::instance::GpuAttributeBuffer;
+use crate::instance::InstanceAttributeManager;
 use crate::instance::NullBit;
-use crate::instance::{AttributeWrite, CpuAttributeBuffer, InstanceAttributeManager};
-use crate::{
-    Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView,
-    Viewport, Visibility,
-};
+use crate::{Area, Color, Depth, DeviceView, Job, Viewport};
 
 mod backend_system;
 mod cache;
@@ -497,7 +487,7 @@ impl Render for IconRenderer {
         RenderPhase::Alpha
     }
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
-        for (icon_key, entities) in self.icon_entities.iter() {
+        for (icon_key, _) in self.icon_entities.iter() {
             let indexer = self.indexer.get(icon_key).unwrap();
             if indexer.count() > 0 {
                 let mesh = self.meshes.get(icon_key).unwrap();

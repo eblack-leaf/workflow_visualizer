@@ -61,7 +61,7 @@ pub(crate) fn initialization(
             .unwrap()
             .icon_removes
             .insert(removed);
-        let icon_key = cache.icon_key.remove(&removed).unwrap();
+        let _icon_key = cache.icon_key.remove(&removed).unwrap();
     }
 }
 
@@ -87,7 +87,7 @@ pub(crate) fn color_invert_cache_check(
 }
 
 pub(crate) fn position_cache_check(
-    icons: Query<(Entity, &Position<UIView>), (Changed<Position<UIView>>)>,
+    icons: Query<(Entity, &Position<UIView>), Changed<Position<UIView>>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
@@ -108,7 +108,7 @@ pub(crate) fn position_cache_check(
 }
 
 pub(crate) fn area_cache_check(
-    icons: Query<(Entity, &Area<UIView>), (Changed<Area<UIView>>)>,
+    icons: Query<(Entity, &Area<UIView>), Changed<Area<UIView>>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
@@ -129,7 +129,7 @@ pub(crate) fn area_cache_check(
 }
 
 pub(crate) fn depth_cache_check(
-    icons: Query<(Entity, &Depth), (Changed<Depth>)>,
+    icons: Query<(Entity, &Depth), Changed<Depth>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
@@ -150,7 +150,7 @@ pub(crate) fn depth_cache_check(
 }
 
 pub(crate) fn color_cache_check(
-    icons: Query<(Entity, &Color), (Changed<Color>)>,
+    icons: Query<(Entity, &Color), Changed<Color>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
@@ -181,7 +181,7 @@ pub(crate) fn icon_key_cache_check(
             &Color,
             &ColorInvert,
         ),
-        (Changed<IconKey>),
+        Changed<IconKey>,
     >,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
@@ -220,7 +220,7 @@ pub(crate) fn frontend_setup(mut cmd: Commands) {
 pub(crate) fn calc_area(
     icon_area_guide: Res<IconAreaGuide>,
     scale_factor: Res<ScaleFactor>,
-    icons: Query<(Entity, &IconSize), (Changed<IconSize>)>,
+    icons: Query<(Entity, &IconSize), Changed<IconSize>>,
     mut cmd: Commands,
 ) {
     for (entity, size) in icons.iter() {

@@ -1,11 +1,15 @@
-use bevy_ecs::event::EventReader;
-use bevy_ecs::change_detection::ResMut;
-use bevy_ecs::prelude::{Added, Commands, Query, RemovedComponents, Res};
 use std::collections::HashSet;
+
+use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use crate::{Area, Position, Resize, ScaleFactor, Section, UIView, Visibility, VisibleBounds, VisibleSection};
-use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
+use bevy_ecs::event::EventReader;
+use bevy_ecs::prelude::{Added, Commands, Query, RemovedComponents, Res};
+
 use crate::visibility::spacial_hasher::SpacialHasher;
+use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
+use crate::{
+    Area, Position, Resize, ScaleFactor, Section, UIView, Visibility, VisibleBounds, VisibleSection,
+};
 
 pub(crate) fn visibility_setup(
     added: Query<Entity, Added<Visibility>>,
@@ -26,7 +30,6 @@ pub(crate) fn visibility_cleanup(
     lost_visibility: RemovedComponents<Visibility>,
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut lost_contact_entities: Query<&mut CollisionEnd>,
-    mut cmd: Commands,
 ) {
     let mut other_removal = HashSet::new();
     let mut lost = HashSet::new();

@@ -6,9 +6,8 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
-use crate::color::Color;
 use crate::coord::{Area, Depth, DeviceView, Position, Section, UIView};
-use crate::instance::key::{Key, KeyFactory};
+use crate::instance::key::Key;
 use crate::text::atlas::AtlasBlock;
 use crate::text::cache::Cache;
 use crate::text::difference::{Difference, TextBoundDifference};

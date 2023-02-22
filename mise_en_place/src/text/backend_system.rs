@@ -187,7 +187,7 @@ pub(crate) fn render_group_differences(
         resolve_atlas(&mut renderer, render_group);
         let adjusted_glyphs = grow_atlas(&mut renderer, &gfx_surface, render_group);
         rasterize_add_queue(&mut renderer, &font, render_group);
-        update_adjusted_glyphs(&mut renderer, &gfx_surface, render_group, adjusted_glyphs);
+        update_adjusted_glyphs(&mut renderer, render_group, adjusted_glyphs);
         read_added_glyphs(&mut renderer, difference, render_group);
         write_attribute::<GpuPosition>(&mut renderer, &gfx_surface, render_group);
         write_attribute::<GpuArea>(&mut renderer, &gfx_surface, render_group);
@@ -835,7 +835,6 @@ fn rasterize_add_queue(renderer: &mut TextRenderer, font: &AlignedFonts, render_
 
 fn update_adjusted_glyphs(
     renderer: &mut TextRenderer,
-    gfx_surface: &GfxSurface,
     render_group: Entity,
     adjusted_glyphs: HashSet<GlyphId>,
 ) {
@@ -951,7 +950,7 @@ fn write_attribute<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + '
         }
     }
     if let Some(start) = write_range.0 {
-        let mut end = write_range.1.take().unwrap();
+        let end = write_range.1.take().unwrap();
         let cpu_range = &renderer
             .container
             .get::<CpuAttributeBuffer<Attribute>>(render_group)

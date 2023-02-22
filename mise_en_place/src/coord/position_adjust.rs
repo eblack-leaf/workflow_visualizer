@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Commands, Component, Entity, Query};
-use bytemuck::{Pod, Zeroable};
 
 use crate::coord::{CoordContext, Position};
 

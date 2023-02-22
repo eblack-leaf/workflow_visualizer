@@ -1,8 +1,8 @@
-use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, Without};
+use bevy_ecs::prelude::{Bundle, Component, EventReader, Query, Res, Without};
 
 use crate::{
-    Area, Attach, ClickEvent, ClickEventType, Engen, FrontEndStages, Position, ScaleFactor, UIView,
-    Visibility, VisibleSection,
+    Attach, ClickEvent, ClickEventType, Engen, FrontEndStages, ScaleFactor, Visibility,
+    VisibleSection,
 };
 
 #[derive(Bundle)]
@@ -65,10 +65,7 @@ pub(crate) struct DisableClick {}
 pub(crate) fn register_click(
     mut clickables: Query<
         (
-            Entity,
             &mut ClickState,
-            &Position<UIView>,
-            &Area<UIView>,
             &ClickListener,
             &Visibility,
             &VisibleSection,
@@ -78,9 +75,7 @@ pub(crate) fn register_click(
     mut clicks: EventReader<ClickEvent>,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (entity, mut click_state, position, area, listener, visibility, visible_section) in
-        clickables.iter_mut()
-    {
+    for (mut click_state, listener, visibility, visible_section) in clickables.iter_mut() {
         if visibility.visible() {
             for click in clicks.iter() {
                 if listener.ty == click.ty {
@@ -115,7 +110,7 @@ pub(crate) fn register_click(
     }
 }
 
-pub(crate) fn reset_click(mut clickables: Query<(&mut ClickState)>) {
+pub(crate) fn reset_click(mut clickables: Query<&mut ClickState>) {
     for mut click_state in clickables.iter_mut() {
         click_state.clicked = false;
     }

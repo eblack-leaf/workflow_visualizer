@@ -1,17 +1,20 @@
 use bevy_ecs::prelude::{EventReader, Res, ResMut, Resource};
 use winit::window::Window;
 
+pub use extract::Extract;
+pub(crate) use extract::{extract, invoke_extract, ExtractFns};
+pub(crate) use render::{invoke_render, render, RenderFns};
+pub use render::{Render, RenderPassHandle, RenderPhase};
+#[allow(unused)]
+pub(crate) use viewport::ViewportOffset;
+pub use viewport::{Viewport, ViewportPlugin};
+
 use crate::window::Resize;
 
 mod extract;
 mod render;
 mod viewport;
-pub use extract::Extract;
-pub(crate) use extract::{extract, invoke_extract, ExtractFns};
-pub(crate) use render::{invoke_render, render, RenderFns};
-pub use render::{Render, RenderPassHandle, RenderPhase};
-pub(crate) use viewport::ViewportOffset;
-pub use viewport::{Viewport, ViewportPlugin};
+
 #[derive(Clone)]
 pub struct GfxOptions {
     pub backends: wgpu::Backends,

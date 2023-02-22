@@ -1,13 +1,9 @@
 // #![allow(unused, dead_code)]
-
-use std::collections::HashMap;
 use std::rc::Rc;
 
 use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{
-    DeviceEvent, ElementState, Event, MouseButton, StartCause, Touch, TouchPhase, WindowEvent,
-};
+use winit::event::{ElementState, Event, MouseButton, StartCause, Touch, TouchPhase, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
@@ -15,6 +11,7 @@ pub use icon::IconKey;
 pub use icon::IconMesh;
 pub use icon::IconMeshAddRequest;
 pub use job::Job;
+use visibility::VisibilityPlugin;
 pub use visibility::VisibleBounds;
 
 use crate::clickable::ClickablePlugin;
@@ -41,7 +38,6 @@ pub use crate::text::{
 };
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
-use visibility::plugin::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleSection};
 pub use crate::wasm::{WasmCompiler, WasmServer};
 use crate::window::WindowPlugin;
@@ -50,6 +46,7 @@ pub use crate::window::{
     ScaleFactor, TouchAdapter, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
 
+#[allow(unused)]
 mod button;
 mod clickable;
 mod color;
@@ -356,14 +353,14 @@ impl Engen {
                         self.register_touch(touch);
                     }
                     WindowEvent::CursorMoved {
-                        device_id,
+                        device_id: _device_id,
                         position,
                         ..
                     } => {
                         self.set_mouse_location(position);
                     }
                     WindowEvent::MouseInput {
-                        device_id,
+                        device_id: _device_id,
                         state,
                         button,
                         ..

@@ -79,7 +79,7 @@ pub(crate) fn general_setup(mut cmd: Commands) {
 
 pub(crate) fn bundle_insert(
     theme: Res<Theme>,
-    mut mesh_guide: ResMut<ButtonMeshGuide>,
+    mesh_guide: ResMut<ButtonMeshGuide>,
     button_bundles: Query<(Entity, &Position<UIView>, &Depth, &ButtonText, &ButtonIcon), ()>,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,

@@ -4,8 +4,9 @@ use std::marker::PhantomData;
 use bevy_ecs::prelude::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::gfx::GfxSurface;
 use index::Index;
+
+use crate::gfx::GfxSurface;
 
 pub mod index;
 pub mod key;
@@ -110,7 +111,7 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
             }
         }
         if let Some(start) = write_range.0 {
-            let mut end = write_range.1.take().unwrap();
+            let end = write_range.1.take().unwrap();
             let cpu_range = &self.cpu.buffer[start.value as usize..end.value as usize + 1];
             let offset = offset::<Attribute>(&start);
             gfx_surface.queue.write_buffer(

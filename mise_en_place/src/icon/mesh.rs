@@ -1,4 +1,3 @@
-use std::ops::Deref;
 use std::path::Path;
 
 use bevy_ecs::component::Component;
@@ -138,6 +137,6 @@ pub fn read_mesh_bytes(data: &'static [u8]) -> Option<Vec<IconVertex>> {
 pub fn write_mesh<P: AsRef<Path>>(mesh: &Vec<IconVertex>, path: P) {
     if let Ok(data) = rmp_serde::to_vec(mesh) {
         println!("writing {:?}", data);
-        std::fs::write(path, data);
+        let _ = std::fs::write(path, data);
     }
 }

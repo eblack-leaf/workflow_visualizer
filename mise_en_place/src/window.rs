@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Events, ResMut, Resource};
-use winit::event::{AxisId, ElementState, MouseButton};
+use bevy_ecs::prelude::{Events, Resource};
+use winit::event::{ElementState, MouseButton};
 
 use crate::coord::DeviceView;
 use crate::window::Orientation::{Landscape, Portrait};
@@ -9,11 +9,13 @@ use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {}
+
 pub enum VirtualKeyboardType {
     Keyboard,
     TelephonePad,
     NumberPad,
 }
+
 impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
         #[cfg(target_arch = "wasm32")]
@@ -37,6 +39,7 @@ impl VirtualKeyboardAdapter {
         }
         Self {}
     }
+    #[allow(unused)]
     pub fn open(&self, ty: VirtualKeyboardType) {
         #[cfg(target_arch = "wasm32")]
         {
@@ -166,7 +169,9 @@ pub struct MouseAdapter {
     pub(crate) clicks: HashMap<MouseButton, Click>,
 }
 
+#[allow(unused)]
 pub type ElementStateExpt = ElementState;
+#[allow(unused)]
 pub type MouseButtonExpt = MouseButton;
 
 impl MouseAdapter {

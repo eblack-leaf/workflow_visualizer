@@ -1,5 +1,4 @@
 use bevy_ecs::prelude::Bundle;
-use bytemuck::{Pod, Zeroable};
 
 use crate::coord::CoordContext;
 use crate::{Depth, Position};

@@ -1,8 +1,15 @@
-use bevy_ecs::prelude::SystemLabel;
-use crate::{Area, Attach, BackendStages, DeviceView, Engen, FrontEndStages, ScaleFactor, UIView, visibility, VisibleBounds};
+use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
+
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::visibility::{collision, spacial_hasher, system, ViewportOffsetUpdate, visible_bounds, VisibleBoundsPositionAdjust};
+use crate::visibility::{
+    collision, spacial_hasher, system, visible_bounds, ViewportOffsetUpdate,
+    VisibleBoundsPositionAdjust,
+};
+use crate::{
+    Area, Attach, BackendStages, DeviceView, Engen, FrontEndStages, ScaleFactor, UIView,
+    VisibleBounds,
+};
 
 pub struct VisibilityPlugin;
 
@@ -50,14 +57,14 @@ impl Attach for VisibilityPlugin {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Resize, system::resize);
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::VisibilityPreparation, system::visibility_setup);
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::VisibilityPreparation, system::visibility_cleanup);
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::VisibilityPreparation,
+            system::visibility_setup,
+        );
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::VisibilityPreparation,
+            system::visibility_cleanup,
+        );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::ResolveVisibility,
             visible_bounds::adjust_position.label(VisibilitySystems::AdjustPosition),

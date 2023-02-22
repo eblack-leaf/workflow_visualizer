@@ -2,14 +2,12 @@ use std::collections::HashSet;
 
 use bevy_ecs::prelude::Component;
 use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle};
-use winit::event::VirtualKeyCode::L;
 
 use crate::instance::key::{Key, KeyFactory};
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::{PartitionMetadata, Text};
-use crate::Color;
 
 #[derive(Component)]
 pub(crate) struct Placer {
@@ -68,7 +66,7 @@ impl Placer {
     pub(crate) fn filtered_placement(&self) -> &Vec<(Key, GlyphPosition<PartitionMetadata>)> {
         &self.filtered_placement
     }
-    pub(crate) fn filter_placement(&mut self, mut filter_queue: HashSet<Key>) {
+    pub(crate) fn filter_placement(&mut self, filter_queue: HashSet<Key>) {
         self.filtered_placement
             .retain(|(key, _)| !filter_queue.contains(key));
     }
