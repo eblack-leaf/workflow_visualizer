@@ -1,8 +1,8 @@
 use bevy_ecs::bundle::Bundle;
 
+use crate::coord::{CoordContext, DeviceView, UIView};
 use crate::coord::area::Area;
 use crate::coord::position::Position;
-use crate::coord::{CoordContext, DeviceView, UIView};
 
 #[derive(Bundle, Copy, Clone, Default, PartialEq, Debug)]
 pub struct Section<Context: CoordContext> {
@@ -85,9 +85,9 @@ impl Section<UIView> {
 }
 
 impl<Context: CoordContext, P: Into<Position<Context>>, A: Into<Area<Context>>>
-    From<(Context, P, A)> for Section<Context>
+From<(P, A)> for Section<Context>
 {
-    fn from(value: (Context, P, A)) -> Self {
-        Self::new(value.1.into(), value.2.into())
+    fn from(value: (P, A)) -> Self {
+        Self::new(value.0.into(), value.1.into())
     }
 }

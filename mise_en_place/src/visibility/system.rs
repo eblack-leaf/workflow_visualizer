@@ -5,11 +5,11 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Added, Commands, Query, RemovedComponents, Res};
 
-use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
 use crate::{
     Area, Position, Resize, ScaleFactor, Section, UIView, Visibility, VisibleBounds, VisibleSection,
 };
+use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
+use crate::visibility::spacial_hasher::SpacialHasher;
 
 pub(crate) fn visibility_setup(
     added: Query<Entity, Added<Visibility>>,
@@ -90,7 +90,7 @@ pub(crate) fn calc_visible_section(
         for entity in entities_to_check {
             let (_entity, position, area, mut visibility, maybe_visible_section) =
                 entities.get_mut(entity).expect("no entity found");
-            let section: Section<UIView> = (UIView {}, *position, *area).into();
+            let section: Section<UIView> = (*position, *area).into();
             if section.is_overlapping(visible_bounds.section) {
                 if !visibility.visible() {
                     visibility.visible = true;

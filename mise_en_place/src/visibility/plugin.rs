@@ -1,15 +1,15 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
 
-use crate::gfx::GfxSurfaceConfiguration;
-use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::visibility::{
-    collision, spacial_hasher, system, visible_bounds, ViewportOffsetUpdate,
-    VisibleBoundsPositionAdjust,
-};
 use crate::{
-    Area, Attach, BackendStages, DeviceView, Engen, FrontEndStages, ScaleFactor, UIView,
+    Area, Attach, BackendStages, DeviceView, Engen, FrontEndStages, ScaleFactor,
     VisibleBounds,
 };
+use crate::gfx::GfxSurfaceConfiguration;
+use crate::visibility::{
+    collision, spacial_hasher, system, ViewportOffsetUpdate, visible_bounds,
+    VisibleBoundsPositionAdjust,
+};
+use crate::visibility::spacial_hasher::SpacialHasher;
 
 pub struct VisibilityPlugin;
 
@@ -36,7 +36,7 @@ impl Attach for VisibilityPlugin {
             gfx_surface_configuration.configuration.height,
         )
             .into();
-        let visible_section = (UIView {}, (0u32, 0u32), surface_area.to_ui(scale_factor)).into();
+        let visible_section = ((0u32, 0u32), surface_area.to_ui(scale_factor)).into();
         engen
             .frontend
             .container

@@ -5,14 +5,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
-use mise_en_place::{
-    read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color, ColorHooks,
-    ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
-    IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
-    PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter,
-    VirtualKeyboardType, Visibility, WasmCompiler, WasmServer,
-};
+use mise_en_place::{Area, BundledIconKeys, Clickable, ClickListener, ClickState, Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, Location, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, read_mesh, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility, WasmCompiler, WasmServer};
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
@@ -37,7 +30,7 @@ fn update_text(
     let mut click_info = String::new();
     for (entity, icon, click_state, position, area) in click_icon.iter() {
         if click_state.clicked() {
-            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
+            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
             let current = counter.count;
             counter.state.replace(current);
             virtual_keyboard.open(VirtualKeyboardType::Keyboard);
@@ -45,7 +38,7 @@ fn update_text(
             if let Some(state) = counter.state {
                 if counter.count >= state + 100 {
                     click_info +=
-                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
+                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
                     counter.state.take();
                 }
             }
@@ -88,14 +81,14 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("mouse location: ", (Color::OFF_WHITE, 0))]),
-                (UIView::tag(), (35u32, 10u32), 0u32),
+                Location::from(((35u32, 10u32), 0u32)),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(18, 6));
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![("click info: ", (Color::OFF_WHITE, 0))]),
-                (UIView::tag(), (35u32, 160u32), 0u32),
+                Location::from(((35u32, 160u32), 0u32)),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(44, 3));
@@ -110,7 +103,7 @@ impl Launch for Launcher {
                 Icon {},
                 IconSize::Large,
                 IconKey("bundled box"),
-                (UIView::tag(), (10u32, 17u32), 0u32),
+                Location::from(((10u32, 17u32), 0u32)),
                 Color::OFF_WHITE,
             ))
             .insert(Clickable::new(ClickListener::on_release(), false))
@@ -122,14 +115,14 @@ fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let args: Vec<String> = std::env::args().collect();
-        let wasm_compile_descriptor = WasmCompiler::new(
+        let wasm_compiler = WasmCompiler::new(
             "mise_en_place_app",
             "release",
             "mise_en_place_app_web_build",
         );
-        let wasm_server = WasmServer::new(&wasm_compile_descriptor);
+        let wasm_server = WasmServer::new(&wasm_compiler);
         if args.contains(&"build".to_string()) {
-            wasm_compile_descriptor
+            wasm_compiler
                 .compile()
                 .expect("could not compile wasm");
             if !args.contains(&"serve".to_string()) {

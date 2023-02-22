@@ -1,10 +1,12 @@
-use crate::visibility::collision::{Collision, CurrentOverlaps};
-use crate::visibility::visible_bounds::VisibleBounds;
-use crate::{Area, Position, Section, UIView, Visibility, VisibleSection};
+use std::collections::{HashMap, HashSet};
+
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Resource};
-use std::collections::{HashMap, HashSet};
+
+use crate::{Area, Position, Section, UIView, Visibility, VisibleSection};
+use crate::visibility::collision::{Collision, CurrentOverlaps};
+use crate::visibility::visible_bounds::VisibleBounds;
 
 #[derive(Resource)]
 pub(crate) struct SpacialHasher {
@@ -84,7 +86,7 @@ pub(crate) fn update_spacial_hash(
     let mut added_hash_regions = HashSet::<SpacialHash>::new();
     for (entity, position, area, mut visibility, maybe_collision) in changed.iter_mut() {
         spacial_hasher.an_entity_changed = true;
-        let section: Section<UIView> = (UIView::tag(), *position, *area).into();
+        let section: Section<UIView> = (*position, *area).into();
         if !section.is_overlapping(visible_bounds.section) {
             if visibility.visible() {
                 visibility.visible = false;
