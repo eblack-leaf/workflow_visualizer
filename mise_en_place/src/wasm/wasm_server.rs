@@ -2,9 +2,9 @@
 use std::net::SocketAddr;
 
 #[cfg(not(target_arch = "wasm32"))]
-use warp::hyper::header::HeaderName;
-#[cfg(not(target_arch = "wasm32"))]
 use warp::Filter;
+#[cfg(not(target_arch = "wasm32"))]
+use warp::hyper::header::HeaderName;
 
 use crate::wasm::WasmCompiler;
 
@@ -43,10 +43,10 @@ impl WasmServer {
         let post = warp::post()
             .and(warp::path("save"))
             .and(warp::body::bytes())
-            .and(warp::body::content_length_limit(1024 * 5))
+            .and(warp::body::content_length_limit(1024 * 16))
             .map(|e| {
                 println!("post received {:?}", e);
-                warp::reply()
+                warp::reply::with_header(warp::reply(), "content-type", "text/plain")
             });
         let site = warp::fs::dir(self.src)
             .with(warp::compression::gzip())

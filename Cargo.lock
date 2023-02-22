@@ -1456,7 +1456,6 @@ dependencies = [
 name = "mise_en_place_app"
 version = "0.1.0"
 dependencies = [
- "bevy_ecs",
  "mise_en_place",
 ]
 
