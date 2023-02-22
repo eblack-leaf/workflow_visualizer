@@ -26,10 +26,8 @@ pub struct Theme {
 impl Theme {
     pub fn new(descriptor: ThemeDescriptor) -> Self {
         Self {
-            background: descriptor.background.unwrap_or(Color::rgb(0.0, 0.0, 0.0)),
-            primary: descriptor.primary.unwrap_or(Color::from(
-                Color::OFF_WHITE
-            )),
+            background: descriptor.background.unwrap_or(Color::from(Color::OFF_BLACK)),
+            primary: descriptor.primary.unwrap_or(Color::from(Color::OFF_WHITE)),
         }
     }
 }

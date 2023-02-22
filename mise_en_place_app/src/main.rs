@@ -5,7 +5,14 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
-use mise_en_place::{Area, BundledIconKeys, Clickable, ClickListener, ClickState, Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, Location, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, read_mesh, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility, WasmCompiler, WasmServer};
+use mise_en_place::{
+    Area, BundledIconKeys, Clickable, ClickListener, ClickState, Color, ColorHooks, ColorInvert,
+    DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle,
+    IconPlugin, IconSize, Idle, Job, Launch, Location, MouseAdapter, MouseButtonExpt, PartitionMetadata,
+    Position, PositionAdjust, read_mesh, Text, TextBoundGuide, TextBundle, TextPartition,
+    TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter,
+    VirtualKeyboardType, Visibility, WasmCompiler, WasmServer,
+};
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
@@ -106,7 +113,7 @@ impl Launch for Launcher {
                 Location::from(((10u32, 17u32), 0u32)),
                 Color::OFF_WHITE,
             ))
-            .insert(Clickable::new(ClickListener::on_release(), false))
+            .insert(Clickable::new(ClickListener::on_press(), false))
             .id();
     }
 }
@@ -122,9 +129,7 @@ fn main() {
         );
         let wasm_server = WasmServer::new(&wasm_compiler);
         if args.contains(&"build".to_string()) {
-            wasm_compiler
-                .compile()
-                .expect("could not compile wasm");
+            wasm_compiler.compile().expect("could not compile wasm");
             if !args.contains(&"serve".to_string()) {
                 return;
             }
