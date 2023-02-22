@@ -15,21 +15,20 @@ pub use icon::IconKey;
 pub use icon::IconMesh;
 pub use icon::IconMeshAddRequest;
 pub use job::Job;
-pub use wasm_server::WasmServer;
 
 use crate::clickable::ClickablePlugin;
-pub use crate::clickable::{ClickListener, ClickState, Clickable};
+pub use crate::clickable::{Clickable, ClickListener, ClickState};
 pub use crate::color::Color;
 use crate::coord::CoordPlugin;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
     Position, PositionAdjust, Section, UIView,
 };
-use crate::extract::{invoke_extract, Extract, ExtractFns};
+use crate::extract::{Extract, ExtractFns, invoke_extract};
 use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::icon::{
-    read_mesh, write_mesh, BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin,
-    IconSize, IconVertex,
+    BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconPlugin, IconSize, IconVertex,
+    read_mesh, write_mesh,
 };
 use crate::job::{Container, TaskLabel};
 pub use crate::job::{Exit, Idle};
@@ -40,14 +39,14 @@ pub use crate::text::{
 };
 pub use crate::theme::Theme;
 use crate::theme::ThemePlugin;
-use crate::viewport::{Viewport, ViewportPlugin};
+pub use crate::gfx::{Viewport, ViewportPlugin};
 use crate::visibility::VisibilityPlugin;
 pub use crate::visibility::{Visibility, VisibleBounds, VisibleSection};
-pub use crate::wasm_compiler::WasmCompileDescriptor;
+pub use crate::wasm::{WasmCompiler, WasmServer};
 use crate::window::WindowPlugin;
 pub use crate::window::{
     Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,
-    ScaleFactor, TouchAdapter, VirtualKeyboardAdapter,
+    ScaleFactor, TouchAdapter, VirtualKeyboardAdapter, VirtualKeyboardType
 };
 
 mod button;
@@ -57,19 +56,15 @@ mod coord;
 mod extract;
 mod gfx;
 mod icon;
-mod index;
-mod instance_tools;
+mod instance;
 mod job;
-mod key;
 mod r_button;
 mod render;
 mod text;
 mod theme;
 mod uniform;
-mod viewport;
 mod visibility;
-mod wasm_compiler;
-mod wasm_server;
+mod wasm;
 mod window;
 
 #[derive(StageLabel)]

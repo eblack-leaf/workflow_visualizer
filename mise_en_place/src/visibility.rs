@@ -8,9 +8,8 @@ use bevy_ecs::prelude::{
 use crate::coord::{Area, DeviceView, Position, PositionAdjust, Section, UIView};
 use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
-use crate::viewport::Viewport;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Attach, BackendStages, Engen, FrontEndStages, Job};
+use crate::{Attach, BackendStages, Engen, FrontEndStages, Job, Viewport};
 
 #[derive(Component)]
 pub struct Visibility {
@@ -257,7 +256,7 @@ pub(crate) fn collision_responses(
             &mut CollisionBegin,
             &mut CollisionEnd,
         ),
-        With<Visibility>,
+        (With<Visibility>, With<Collision>)
     >,
 ) {
     let mut checks = HashSet::new();
@@ -357,15 +356,21 @@ impl CurrentOverlaps {
         }
     }
 }
+#[derive(Component, Copy, Clone)]
+pub struct Collision {
 
+}
 pub(crate) fn visibility_setup(
-    added: Query<Entity, (Added<Visibility>,)>,
+    added: Query<Entity, Added<Visibility>>,
+    added_collision: Query<Entity, Added<Collision>>,
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut cmd: Commands,
 ) {
-    for entity in added.iter() {
+    for entity in added_collision.iter() {
         cmd.entity(entity)
             .insert((CollisionBegin::new(), CollisionEnd::new()));
+    }
+    for entity in added.iter() {
         spacial_hasher.setup(entity);
     }
 }

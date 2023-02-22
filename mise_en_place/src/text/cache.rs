@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::Component;
 
 use crate::coord::{Depth, Numerical, Position, Section, UIView};
-use crate::key::Key;
+use crate::instance::key::Key;
 use crate::text::glyph::GlyphId;
 use crate::text::render_group::TextBound;
 use crate::visibility::VisibleSection;

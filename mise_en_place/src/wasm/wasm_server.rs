@@ -5,7 +5,7 @@ use warp::hyper::header::HeaderName;
 #[cfg(not(target_arch = "wasm32"))]
 use warp::Filter;
 
-use crate::wasm_compiler::WasmCompileDescriptor;
+use crate::wasm::WasmCompiler;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
@@ -30,7 +30,7 @@ pub struct WasmServer {
 }
 
 impl WasmServer {
-    pub fn new(wasm_compile_descriptor: &WasmCompileDescriptor) -> Self {
+    pub fn new(wasm_compile_descriptor: &WasmCompiler) -> Self {
         Self {
             src: wasm_compile_descriptor.destination.clone(),
         }

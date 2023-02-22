@@ -3,6 +3,9 @@ use winit::window::Window;
 
 use crate::window::Resize;
 
+mod viewport;
+pub use viewport::{Viewport, ViewportPlugin};
+pub(crate) use viewport::{ViewportOffset};
 #[derive(Clone)]
 pub struct GfxOptions {
     pub backends: wgpu::Backends,

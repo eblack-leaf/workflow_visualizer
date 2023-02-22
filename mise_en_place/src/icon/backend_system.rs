@@ -7,8 +7,7 @@ use bevy_ecs::prelude::{Commands, Query, Res};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::icon::cache::Differences;
 use crate::icon::IconRenderer;
-use crate::viewport::Viewport;
-use crate::{IconMeshAddRequest, IconVertex, ScaleFactor};
+use crate::{IconMeshAddRequest, IconVertex, ScaleFactor, Viewport};
 
 pub(crate) fn read_add_requests(
     mut renderer: ResMut<IconRenderer>,

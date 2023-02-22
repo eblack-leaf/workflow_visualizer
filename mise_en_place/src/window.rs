@@ -9,7 +9,11 @@ use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {}
-
+pub enum VirtualKeyboardType {
+    Keyboard,
+    TelephonePad,
+    NumberPad
+}
 impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
         #[cfg(target_arch = "wasm32")]
@@ -20,6 +24,12 @@ impl VirtualKeyboardAdapter {
             node.set_inner_html(
                 "<input type='text' maxlength='0' width=0 height=0 \
             id='keyboard_trigger' style='position: absolute;left: -1000px;top: -1000px;opacity: 0;\
+            padding: 0;min-width: 0; min-height: 0;width: 0; height: 0;border: 0'>\
+            <input type='tel' maxlength='0' width=0 height=0 \
+            id='telephone_pad_trigger' style='position: absolute;left: -1000px;top: -1000px;opacity: 0;\
+            padding: 0;min-width: 0; min-height: 0;width: 0; height: 0;border: 0'>\
+            <input type='number' maxlength='0' width=0 height=0 \
+            id='numpad_trigger' style='position: absolute;left: -1000px;top: -1000px;opacity: 0;\
             padding: 0;min-width: 0; min-height: 0;width: 0; height: 0;border: 0'>",
             );
             let body = document.body().unwrap();
@@ -27,7 +37,37 @@ impl VirtualKeyboardAdapter {
         }
         Self {}
     }
-    pub fn open(&self) {
+    pub fn open(&self, ty: VirtualKeyboardType) {
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::{prelude::*, JsCast};
+            let document = web_sys::window().unwrap().document().unwrap();
+            let trigger_element = match ty {
+                VirtualKeyboardType::Keyboard => document
+                    .get_element_by_id("keyboard_trigger")
+                    .unwrap()
+                    .dyn_into::<web_sys::HtmlElement>()
+                    .unwrap(),
+                VirtualKeyboardType::TelephonePad => document
+                    .get_element_by_id("telephone_pad_trigger")
+                    .unwrap()
+                    .dyn_into::<web_sys::HtmlElement>()
+                    .unwrap(),
+                VirtualKeyboardType::NumberPad => document
+                    .get_element_by_id("numpad_trigger")
+                    .unwrap()
+                    .dyn_into::<web_sys::HtmlElement>()
+                    .unwrap()
+            };
+            trigger_element
+                .blur()
+                .unwrap();
+            trigger_element
+                .focus()
+                .unwrap();
+        }
+    }
+    pub fn close(&self) {
         #[cfg(target_arch = "wasm32")]
         {
             use wasm_bindgen::{prelude::*, JsCast};
@@ -40,27 +80,14 @@ impl VirtualKeyboardAdapter {
                 .blur()
                 .unwrap();
             document
-                .get_element_by_id("keyboard_trigger")
+                .get_element_by_id("telephone_pad_trigger")
                 .unwrap()
                 .dyn_into::<web_sys::HtmlElement>()
                 .unwrap()
-                .focus()
+                .blur()
                 .unwrap();
-            // document
-            //     .get_element_by_id("keyboard_trigger")
-            //     .unwrap()
-            //     .dyn_into::<web_sys::HtmlElement>()
-            //     .unwrap()
-            //     .click();
-        }
-    }
-    pub fn close(&self) {
-        #[cfg(target_arch = "wasm32")]
-        {
-            use wasm_bindgen::{prelude::*, JsCast};
-            let document = web_sys::window().unwrap().document().unwrap();
             document
-                .get_element_by_id("keyboard_trigger")
+                .get_element_by_id("numpad_trigger")
                 .unwrap()
                 .dyn_into::<web_sys::HtmlElement>()
                 .unwrap()

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Bundle, Component};
 
 use crate::coord::{Depth, Position, Section, UIView};
-use crate::key::Key;
+use crate::instance::key::Key;
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;

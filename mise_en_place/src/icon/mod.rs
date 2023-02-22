@@ -23,17 +23,13 @@ use crate::extract::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 pub use crate::icon::interface::{Icon, IconBundle, IconSize};
 pub use crate::icon::plugin::IconPlugin;
-use crate::index::Indexer;
-use crate::instance_tools::GpuAttributeBuffer;
-use crate::instance_tools::NullBit;
-use crate::instance_tools::{AttributeWrite, CpuAttributeBuffer, InstanceTools};
-use crate::key::{Key, KeyFactory};
+use crate::instance::index::Indexer;
+use crate::instance::GpuAttributeBuffer;
+use crate::instance::NullBit;
+use crate::instance::{AttributeWrite, CpuAttributeBuffer, InstanceAttributeManager};
+use crate::instance::key::{Key, KeyFactory};
 use crate::render::{Render, RenderPassHandle, RenderPhase};
-use crate::viewport::Viewport;
-use crate::{
-    Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView,
-    Visibility,
-};
+use crate::{Area, Attach, Color, Depth, DeviceView, Engen, Job, Position, ScaleFactor, Section, UIView, Viewport, Visibility};
 
 mod backend_system;
 mod cache;
@@ -50,12 +46,12 @@ pub(crate) struct IconRenderer {
     pub(crate) entity_icons: HashMap<Entity, IconKey>,
     pub(crate) entity_keys: HashMap<IconKey, HashMap<Entity, Key>>,
     pub(crate) meshes: HashMap<IconKey, GpuIconMesh>,
-    pub(crate) position: HashMap<IconKey, InstanceTools<GpuPosition>>,
-    pub(crate) area: HashMap<IconKey, InstanceTools<GpuArea>>,
-    pub(crate) depth: HashMap<IconKey, InstanceTools<Depth>>,
-    pub(crate) color: HashMap<IconKey, InstanceTools<Color>>,
-    pub(crate) color_invert: HashMap<IconKey, InstanceTools<ColorInvert>>,
-    pub(crate) null_bit: HashMap<IconKey, InstanceTools<NullBit>>,
+    pub(crate) position: HashMap<IconKey, InstanceAttributeManager<GpuPosition>>,
+    pub(crate) area: HashMap<IconKey, InstanceAttributeManager<GpuArea>>,
+    pub(crate) depth: HashMap<IconKey, InstanceAttributeManager<Depth>>,
+    pub(crate) color: HashMap<IconKey, InstanceAttributeManager<Color>>,
+    pub(crate) color_invert: HashMap<IconKey, InstanceAttributeManager<ColorInvert>>,
+    pub(crate) null_bit: HashMap<IconKey, InstanceAttributeManager<NullBit>>,
     pub(crate) key_factory: HashMap<IconKey, KeyFactory>,
     pub(crate) indexer: HashMap<IconKey, Indexer<Key>>,
 }
@@ -71,17 +67,17 @@ impl IconRenderer {
         self.meshes.insert(icon_key, mesh);
         self.icon_entities.insert(icon_key, HashSet::new());
         self.position
-            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.area
-            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.depth
-            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.color
-            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.color_invert
-            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.null_bit
-            .insert(icon_key, InstanceTools::new(gfx_surface, max));
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.key_factory.insert(icon_key, KeyFactory::new());
         self.indexer.insert(icon_key, Indexer::new(max));
         self.entity_keys.insert(icon_key, HashMap::new());

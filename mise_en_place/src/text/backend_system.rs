@@ -6,11 +6,11 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::coord::{DeviceView, GpuArea, GpuPosition, Numerical};
 use crate::gfx::GfxSurface;
-use crate::index::{Index, Indexer};
-use crate::instance_tools::GpuAttributeBuffer;
-use crate::instance_tools::NullBit;
-use crate::instance_tools::{offset, AttributeWrite, CpuAttributeBuffer};
-use crate::key::Key;
+use crate::instance::index::{Index, Indexer};
+use crate::instance::GpuAttributeBuffer;
+use crate::instance::NullBit;
+use crate::instance::{offset, AttributeWrite, CpuAttributeBuffer};
+use crate::instance::key::Key;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
@@ -27,10 +27,9 @@ use crate::text::render_group::{
 use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScaleAlignment};
 use crate::uniform::Uniform;
-use crate::viewport::Viewport;
 use crate::visibility::VisibleSection;
 use crate::window::{Resize, ScaleFactor};
-use crate::{Area, Color, Position, Section};
+use crate::{Area, Color, Position, Section, Viewport};
 
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,

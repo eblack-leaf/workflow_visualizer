@@ -1,12 +1,13 @@
 use std::path::Path;
-
-pub struct WasmCompileDescriptor {
+mod wasm_server;
+pub use wasm_server::WasmServer;
+pub struct WasmCompiler {
     pub package: String,
     pub package_options: String,
     pub destination: String,
 }
 
-impl WasmCompileDescriptor {
+impl WasmCompiler {
     pub fn new<T: Into<String>>(package: T, package_options: T, destination: T) -> Self {
         Self {
             package: package.into(),

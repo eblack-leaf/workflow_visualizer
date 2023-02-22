@@ -1,8 +1,7 @@
 use bevy_ecs::prelude::Resource;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
-use crate::viewport::Viewport;
-use crate::{Engen, Job, Theme};
+use crate::{Engen, Job, Theme, Viewport};
 
 pub enum RenderPhase {
     Opaque,

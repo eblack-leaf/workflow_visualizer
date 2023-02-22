@@ -5,14 +5,7 @@ use std::ops::Add;
 
 use bevy_ecs::prelude::{Commands, Entity, EventReader, Query, Res, ResMut, Resource};
 
-use mise_en_place::{
-    read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color, ColorHooks,
-    ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon,
-    IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt,
-    PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, Visibility,
-    WasmCompileDescriptor, WasmServer,
-};
+use mise_en_place::{read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color, ColorHooks, ColorInvert, DepthAdjust, Engen, EngenOptions, Exit, FrontEndStages, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Launch, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, Visibility, WasmCompiler, WasmServer, VirtualKeyboardType};
 use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
@@ -40,7 +33,7 @@ fn update_text(
             click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
             let current = counter.count;
             counter.state.replace(current);
-            virtual_keyboard.open();
+            virtual_keyboard.open(VirtualKeyboardType::Keyboard);
         } else {
             if let Some(state) = counter.state {
                 if counter.count >= state + 100 {
@@ -122,7 +115,7 @@ fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let args: Vec<String> = std::env::args().collect();
-        let wasm_compile_descriptor = WasmCompileDescriptor::new(
+        let wasm_compile_descriptor = WasmCompiler::new(
             "mise_en_place_app",
             "release",
             "mise_en_place_app_web_build",
