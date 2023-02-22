@@ -2,10 +2,11 @@ use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
 use nalgebra::matrix;
 
 use crate::coord::{Depth, DeviceView};
+use crate::engen::{Attach, BackEndStartupStages, BackendStages, Engen};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
-use crate::{Area, Attach, BackEndStartupStages, BackendStages, Engen, Position, Section};
+use crate::{Area, Position, Section};
 
 #[derive(Resource)]
 pub struct Viewport {

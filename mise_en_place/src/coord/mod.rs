@@ -9,7 +9,7 @@ pub use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::PositionAdjust;
 pub use crate::coord::section::Section;
-use crate::{Attach, Engen, FrontEndStages};
+use crate::engen::{Attach, Engen, FrontEndStages};
 
 mod area;
 mod area_adjust;

@@ -19,8 +19,9 @@ rmp-serde = "1.1.1"
 warp = { version = "0.3.3", features = ["tls", "compression"] }
 futures = "0.3.25"
 tokio = { version = "1.24.2", features = ["full"] }
+env_logger = "0.10.0"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { version = "0.3.59", features = ["Window", "Screen", "ScreenOrientation"] }
+web-sys = { version = "0.3.59", features = ["Window", "Screen", "ScreenOrientation", "Location", "XmlHttpRequest"] }
 wasm-bindgen-futures = "0.4.33"
 console_error_panic_hook = "0.1.7"
 console_log = "0.2.0"

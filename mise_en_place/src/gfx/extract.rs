@@ -1,4 +1,5 @@
-use crate::{Engen, Job};
+use crate::engen::Engen;
+use crate::Job;
 
 pub(crate) type ExtractFns = Vec<Box<fn(&mut Job, &mut Job)>>;
 

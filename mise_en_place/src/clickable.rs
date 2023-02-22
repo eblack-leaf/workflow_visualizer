@@ -1,9 +1,7 @@
 use bevy_ecs::prelude::{Bundle, Component, EventReader, Query, Res, Without};
 
-use crate::{
-    Attach, ClickEvent, ClickEventType, Engen, FrontEndStages, ScaleFactor, Visibility,
-    VisibleSection,
-};
+use crate::engen::{Attach, Engen, FrontEndStages};
+use crate::{ClickEvent, ClickEventType, ScaleFactor, Visibility, VisibleSection};
 
 #[derive(Bundle)]
 pub struct Clickable {

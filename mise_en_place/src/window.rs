@@ -4,8 +4,9 @@ use bevy_ecs::prelude::{Events, Resource};
 use winit::event::{ElementState, MouseButton};
 
 use crate::coord::DeviceView;
+use crate::engen::{Attach, BackendStages, Engen, FrontEndStages};
 use crate::window::Orientation::{Landscape, Portrait};
-use crate::{Area, Attach, BackendStages, Engen, FrontEndStages, Position};
+use crate::{Area, Position};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {}
@@ -20,7 +21,6 @@ impl VirtualKeyboardAdapter {
     pub(crate) fn new() -> Self {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
             let document = web_sys::window().unwrap().document().unwrap();
             let node = document.create_element("div").unwrap();
             node.set_inner_html(
@@ -35,7 +35,7 @@ impl VirtualKeyboardAdapter {
             padding: 0;min-width: 0; min-height: 0;width: 0; height: 0;border: 0'>",
             );
             let body = document.body().unwrap();
-            body.append_child(&node);
+            body.append_child(&node).unwrap();
         }
         Self {}
     }
@@ -69,7 +69,7 @@ impl VirtualKeyboardAdapter {
     pub fn close(&self) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::JsCast;
             let document = web_sys::window().unwrap().document().unwrap();
             document
                 .get_element_by_id("keyboard_trigger")
