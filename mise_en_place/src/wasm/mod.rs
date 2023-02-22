@@ -1,8 +1,8 @@
 use std::path::Path;
 
-pub use wasm_server::{post_server, WasmServer};
+pub use server::{post_server, MessageHandler, WasmServer};
 
-mod wasm_server;
+mod server;
 
 pub struct WasmCompiler {
     pub package: String,
