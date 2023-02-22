@@ -1,10 +1,12 @@
-use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::{Area, Position, Section, UIView, Visibility};
+use std::collections::HashSet;
+
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, With};
-use std::collections::HashSet;
+
+use crate::{Area, Position, Section, UIView, Visibility};
+use crate::visibility::spacial_hasher::SpacialHasher;
 
 pub(crate) fn collision_responses(
     mut spacial_hasher: ResMut<SpacialHasher>,

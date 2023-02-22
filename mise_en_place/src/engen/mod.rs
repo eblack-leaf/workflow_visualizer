@@ -1,82 +1,31 @@
 use std::rc::Rc;
 
-use bevy_ecs::prelude::{Resource, StageLabel, SystemStage};
+use bevy_ecs::prelude::Resource;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{ElementState, Event, MouseButton, StartCause, Touch, TouchPhase, WindowEvent};
+use winit::event::{ElementState, MouseButton, Touch, TouchPhase};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
-use winit::window::{Window, WindowBuilder};
+use winit::window::Window;
+#[cfg(not(target_arch = "wasm32"))]
+use winit::window::WindowBuilder;
+
+pub use options::EngenOptions;
+pub use stages::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
 
 use crate::{
-    Area, Click, ClickEvent, ClickEventType, DeviceView, Finger, gfx, Job, MouseAdapter, Position,
-    Resize, ScaleFactor, Theme, TouchAdapter, ViewportPlugin, VisibleBounds,
+    Click, ClickEvent, ClickEventType, DeviceView, Finger, Job, MouseAdapter, Position,
+    Resize, ScaleFactor, TouchAdapter, VisibleBounds,
 };
-use crate::clickable::ClickablePlugin;
-use crate::coord::CoordPlugin;
 use crate::gfx::{
-    Extract, ExtractFns, GfxOptions, GfxSurface, invoke_extract, invoke_render, Render, RenderFns,
+    Extract, ExtractFns, invoke_extract, invoke_render, Render, RenderFns,
     RenderPhase,
 };
-use crate::job::{Container, TaskLabel};
-use crate::theme::ThemePlugin;
-use crate::visibility::VisibilityPlugin;
-use crate::window::WindowPlugin;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::gfx::{GfxOptions, GfxSurface};
 
-#[derive(StageLabel)]
-pub enum FrontEndStartupStages {
-    Startup,
-    Initialization,
-}
-
-#[derive(StageLabel)]
-pub enum FrontEndStages {
-    First,
-    Resize,
-    PreProcess,
-    Process,
-    CoordAdjust,
-    VisibilityPreparation,
-    ResolveVisibility,
-    PostProcess,
-    Last,
-}
-
-#[derive(StageLabel)]
-pub enum BackEndStartupStages {
-    Startup,
-    Setup,
-    PostSetup,
-}
-
-#[derive(StageLabel)]
-pub enum BackendStages {
-    Initialize,
-    GfxSurfaceResize,
-    Resize,
-    Prepare,
-    Last,
-}
-
-pub struct EngenOptions {
-    pub native_dimensions: Option<Area<DeviceView>>,
-    pub theme: Theme,
-}
-
-impl EngenOptions {
-    pub fn new() -> Self {
-        Self {
-            native_dimensions: None,
-            theme: Theme::default(),
-        }
-    }
-    pub fn with_native_dimensions<A: Into<Area<DeviceView>>>(mut self, dimensions: A) -> Self {
-        self.native_dimensions.replace(dimensions.into());
-        self
-    }
-    pub fn with_theme(mut self, theme: Theme) -> Self {
-        self.theme = theme;
-        self
-    }
-}
+mod ignite;
+mod options;
+mod stages;
+mod wasm;
 
 pub struct Engen {
     event_loop: Option<EventLoop<()>>,
@@ -98,68 +47,8 @@ impl Engen {
             options,
             render_fns: (vec![], vec![]),
             extract_fns: vec![],
-            frontend: {
-                let mut job = Job::new();
-                job.startup
-                    .add_stage(FrontEndStartupStages::Startup, SystemStage::parallel());
-                job.startup.add_stage(
-                    FrontEndStartupStages::Initialization,
-                    SystemStage::parallel(),
-                );
-                job.main
-                    .add_stage(FrontEndStages::First, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::Resize, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::PreProcess, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::Process, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
-                job.main.add_stage(
-                    FrontEndStages::VisibilityPreparation,
-                    SystemStage::parallel(),
-                );
-                job.main
-                    .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::PostProcess, SystemStage::parallel());
-                job.main
-                    .add_stage(FrontEndStages::Last, SystemStage::parallel());
-                job.main.add_stage_after(
-                    FrontEndStages::Last,
-                    "clear trackers",
-                    SystemStage::single(Container::clear_trackers),
-                );
-                job
-            },
-            backend: {
-                let mut job = Job::new();
-                job.startup
-                    .add_stage(BackEndStartupStages::Startup, SystemStage::parallel());
-                job.startup
-                    .add_stage(BackEndStartupStages::Setup, SystemStage::parallel());
-                job.startup
-                    .add_stage(BackEndStartupStages::PostSetup, SystemStage::parallel());
-                job.main
-                    .add_stage(BackendStages::Initialize, SystemStage::parallel());
-                job.main.add_stage(
-                    BackendStages::GfxSurfaceResize,
-                    SystemStage::single(gfx::resize),
-                );
-                job.main
-                    .add_stage(BackendStages::Resize, SystemStage::parallel());
-                job.main
-                    .add_stage(BackendStages::Prepare, SystemStage::parallel());
-                job.main
-                    .add_stage(BackendStages::Last, SystemStage::parallel());
-                job.main.add_stage_after(
-                    BackendStages::Last,
-                    "clear trackers",
-                    SystemStage::single(Container::clear_trackers),
-                );
-                job
-            },
+            frontend: stages::staged_frontend(),
+            backend: stages::staged_backend(),
             window: None,
         }
     }
@@ -185,203 +74,11 @@ impl Engen {
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.event_loop.replace(EventLoop::new());
-            self.ignition();
+            ignite::ignite(self);
         }
 
         #[cfg(target_arch = "wasm32")]
-        wasm_bindgen_futures::spawn_local(async {
-            use wasm_bindgen::{JsCast, prelude::*};
-            use winit::platform::web::WindowExtWebSys;
-            std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-            console_log::init().expect("could not initialize logger");
-            let event_loop = EventLoop::new();
-            let window = Rc::new(
-                WindowBuilder::new()
-                    .with_title("web engen")
-                    .build(&event_loop)
-                    .expect("could not create window"),
-            );
-            web_sys::window()
-                .and_then(|win| win.document())
-                .and_then(|doc| doc.body())
-                .and_then(|body| {
-                    body.append_child(&web_sys::Element::from(window.canvas()))
-                        .ok()
-                })
-                .expect("couldn't append canvas to document body");
-            self.event_loop.replace(event_loop);
-            self.attach_scale_factor(window.scale_factor());
-            window.set_inner_size(Self::window_dimensions(window.scale_factor()));
-            Self::web_resizing(&window);
-            let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
-            self.backend.container.insert_resource(gfx.0);
-            self.backend.container.insert_resource(gfx.1);
-            self.window.replace(window);
-            if let Err(error) = call_catch(&Closure::once_into_js(move || self.ignition())) {
-                let is_control_flow_exception =
-                    error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
-                        e.message().includes("Using exceptions for control flow", 0)
-                    });
-                if !is_control_flow_exception {
-                    web_sys::console::error_1(&error);
-                }
-            }
-            #[wasm_bindgen]
-            extern "C" {
-                #[wasm_bindgen(catch, js_namespace = Function, js_name = "prototype.call.call")]
-                fn call_catch(this: &JsValue) -> Result<(), JsValue>;
-            }
-        });
-    }
-    #[cfg(target_arch = "wasm32")]
-    fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
-        web_sys::window()
-            .and_then(|win| win.document())
-            .and_then(|doc| doc.body())
-            .and_then(|body: web_sys::HtmlElement| -> Option<PhysicalSize<u32>> {
-                let width: u32 = body.client_width().try_into().unwrap();
-                let height: u32 = body.client_height().try_into().unwrap();
-                Some(PhysicalSize::new(
-                    (width as f64 * scale_factor) as u32,
-                    (height as f64 * scale_factor) as u32,
-                ))
-            })
-            .expect("could not create inner size")
-    }
-    #[cfg(target_arch = "wasm32")]
-    fn web_resizing(window: &Rc<Window>) {
-        use wasm_bindgen::{JsCast, prelude::*};
-        let w_window = window.clone();
-        let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
-            let scale_factor = w_window.scale_factor();
-            let size = Self::window_dimensions(scale_factor);
-            w_window.set_inner_size(size);
-        }) as Box<dyn FnMut(_)>);
-        let _ = web_sys::window()
-            .expect("no web_sys window")
-            .add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
-        match web_sys::window().expect("no web_sys window").screen() {
-            Ok(screen) => {
-                let _ = screen
-                    .orientation()
-                    .add_event_listener_with_callback("onchange", closure.as_ref().unchecked_ref());
-            }
-            Err(_) => {}
-        }
-        closure.forget();
-    }
-    fn ignition(mut self) {
-        let event_loop = self.event_loop.take().expect("no event loop");
-        event_loop.run(
-            move |event, event_loop_window_target, control_flow| match event {
-                Event::NewEvents(start_cause) => match start_cause {
-                    StartCause::Init => {
-                        self.init_native_gfx(event_loop_window_target);
-                        self.invoke_attach::<CoordPlugin>();
-                        self.invoke_attach::<WindowPlugin>();
-                        self.invoke_attach::<ViewportPlugin>();
-                        self.invoke_attach::<ThemePlugin>();
-                        self.invoke_attach::<VisibilityPlugin>();
-                        self.invoke_attach::<ClickablePlugin>();
-                        self.attach_from_queue();
-                        self.frontend.exec(TaskLabel::Startup);
-                        self.backend.exec(TaskLabel::Startup);
-                    }
-                    _ => {}
-                },
-                Event::WindowEvent {
-                    window_id: _window_id,
-                    event: w_event,
-                } => match w_event {
-                    WindowEvent::Resized(size) => {
-                        let scale_factor = self.window.as_ref().expect("no window").scale_factor();
-                        self.resize_callback(size, scale_factor);
-                    }
-                    WindowEvent::ScaleFactorChanged {
-                        new_inner_size,
-                        scale_factor,
-                    } => {
-                        self.resize_callback(*new_inner_size, scale_factor);
-                    }
-                    WindowEvent::CloseRequested => {
-                        control_flow.set_exit();
-                    }
-                    WindowEvent::Touch(touch) => {
-                        self.register_touch(touch);
-                    }
-                    WindowEvent::CursorMoved {
-                        device_id: _device_id,
-                        position,
-                        ..
-                    } => {
-                        self.set_mouse_location(position);
-                    }
-                    WindowEvent::MouseInput {
-                        device_id: _device_id,
-                        state,
-                        button,
-                        ..
-                    } => {
-                        self.register_mouse_click(state, button);
-                    }
-                    _ => {}
-                },
-                Event::Suspended => {
-                    if self.frontend.active() {
-                        #[cfg(target_os = "android")]
-                        {
-                            let _ = self.backend.container.remove_resource::<GfxSurface>();
-                        }
-                        self.frontend.suspend();
-                        self.backend.suspend();
-                    }
-                }
-                Event::Resumed => {
-                    if self.frontend.suspended() {
-                        #[cfg(target_os = "android")]
-                        {
-                            let window = self.window.as_ref().expect("no window");
-                            let gfx = futures::executor::block_on(GfxSurface::new(
-                                &window,
-                                GfxOptions::native(),
-                            ));
-                            self.backend.container.insert_resource(gfx.0);
-                            self.backend.container.insert_resource(gfx.1);
-                        }
-                        self.frontend.activate();
-                        self.backend.activate();
-                    }
-                }
-                Event::MainEventsCleared => {
-                    if self.frontend.active() {
-                        self.frontend.exec(TaskLabel::Main);
-                    }
-                    if self.frontend.should_exit() {
-                        control_flow.set_exit();
-                    }
-                }
-                Event::RedrawRequested(_) => {
-                    if self.backend.active() {
-                        gfx::extract(&mut self);
-                        self.backend.exec(TaskLabel::Main);
-                        gfx::render(&mut self);
-                    }
-                }
-                Event::RedrawEventsCleared => {
-                    if self.backend.active() {
-                        self.window.as_ref().expect("no window").request_redraw();
-                    }
-                    if self.frontend.can_idle() && self.backend.can_idle() {
-                        control_flow.set_wait();
-                    }
-                }
-                Event::LoopDestroyed => {
-                    self.frontend.exec(TaskLabel::Teardown);
-                    self.backend.exec(TaskLabel::Teardown);
-                }
-                _ => {}
-            },
-        );
+        wasm_bindgen_futures::spawn_local(wasm::web_ignite(self));
     }
     fn attach_scale_factor(&mut self, scale_factor: f64) {
         let scale_factor = ScaleFactor::new(scale_factor);

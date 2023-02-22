@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Resource;
 
-use crate::icon::mesh::ColorInvert;
 use crate::{Area, Color, Depth, IconKey, Position, UIView};
+use crate::icon::mesh::ColorInvert;
 
 #[derive(Resource)]
 pub(crate) struct Cache {

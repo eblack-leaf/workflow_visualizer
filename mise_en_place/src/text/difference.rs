@@ -2,12 +2,12 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::component::Component;
 
+use crate::Color;
 use crate::coord::{Depth, Numerical, Position, UIView};
 use crate::instance::key::Key;
 use crate::text::glyph::{Glyph, GlyphId};
 use crate::text::render_group::TextBound;
 use crate::visibility::VisibleSection;
-use crate::Color;
 
 #[derive(Copy, Clone)]
 pub(crate) enum TextBoundDifference {

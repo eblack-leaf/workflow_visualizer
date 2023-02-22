@@ -4,9 +4,9 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Resource};
 
+use crate::{Area, Position, Section, UIView, Visibility, VisibleSection};
 use crate::visibility::collision::{Collision, CurrentOverlaps};
 use crate::visibility::visible_bounds::VisibleBounds;
-use crate::{Area, Position, Section, UIView, Visibility, VisibleSection};
 
 #[derive(Resource)]
 pub(crate) struct SpacialHasher {

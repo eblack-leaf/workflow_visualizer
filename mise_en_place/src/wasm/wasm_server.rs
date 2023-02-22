@@ -43,10 +43,11 @@ impl WasmServer {
         let post = warp::post()
             .and(warp::path("save"))
             .and(warp::body::bytes())
-            .and(warp::body::content_length_limit(1024 * 5)).map(|e| {
-            println!("post received {:?}", e);
-            warp::reply()
-        });
+            .and(warp::body::content_length_limit(1024 * 5))
+            .map(|e| {
+                println!("post received {:?}", e);
+                warp::reply()
+            });
         let site = warp::fs::dir(self.src)
             .with(warp::compression::gzip())
             .map(cross_origin_embedder_policy)
@@ -67,13 +68,17 @@ impl WasmServer {
 #[tokio::test]
 async fn post_test() {
     let route = warp::post().map(warp::reply);
-    let res = warp::test::request().method(warp::hyper::Method::POST.as_str()).reply(&route).await;
+    let res = warp::test::request()
+        .method(warp::hyper::Method::POST.as_str())
+        .reply(&route)
+        .await;
     assert_eq!(res.status(), 200);
 }
 
 pub fn post_server(string: &mut String) {
     *string = "Ok then".to_string();
-    #[cfg(target_arch = "wasm32")] {
+    #[cfg(target_arch = "wasm32")]
+    {
         let window = web_sys::window().expect("no web window");
         let location = window.location();
         let request = web_sys::XmlHttpRequest::new().unwrap();

@@ -1,12 +1,15 @@
-use bevy_ecs::prelude::{Component, Resource};
 use std::marker::PhantomData;
-use wgpu::util::DeviceExt;
+
+use bevy_ecs::prelude::{Component, Resource};
 use wgpu::Buffer;
+use wgpu::util::DeviceExt;
+
 #[derive(Component, Resource)]
 pub struct Uniform<Data: bytemuck::Pod + bytemuck::Zeroable> {
     pub buffer: Buffer,
     _data: PhantomData<Data>,
 }
+
 impl<Data: bytemuck::Pod + bytemuck::Zeroable> Uniform<Data> {
     pub fn new(device: &wgpu::Device, data: Data) -> Self {
         return Self {

@@ -1,7 +1,8 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, Res, ResMut, Resource};
 
-use crate::engen::{Attach, Engen, FrontEndStartupStages};
 use crate::{Depth, Location, Position, ScaleFactor, TextScaleAlignment, Theme, UIView};
+use crate::engen::{Attach, Engen};
+use crate::engen::FrontEndStartupStages;
 
 #[derive(Component)]
 pub struct ButtonText {
