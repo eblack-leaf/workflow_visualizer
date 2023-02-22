@@ -1,11 +1,11 @@
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::prelude::{Res, Resource};
 
+use crate::gfx::{Extract, GfxSurface};
+use crate::visibility::spacial_hasher::SpacialHasher;
 use crate::{
     Area, DeviceView, Job, Position, PositionAdjust, ScaleFactor, Section, UIView, Viewport,
 };
-use crate::gfx::{Extract, GfxSurface};
-use crate::visibility::spacial_hasher::SpacialHasher;
 
 #[derive(Resource)]
 pub struct VisibleBounds {

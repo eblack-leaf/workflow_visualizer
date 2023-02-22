@@ -1,14 +1,14 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
 
-use crate::{Area, DeviceView, ScaleFactor, VisibleBounds};
 use crate::engen::{Attach, Engen};
 use crate::engen::{BackendStages, FrontEndStages};
 use crate::gfx::GfxSurfaceConfiguration;
+use crate::visibility::spacial_hasher::SpacialHasher;
 use crate::visibility::{
-    collision, spacial_hasher, system, ViewportOffsetUpdate, visible_bounds,
+    collision, spacial_hasher, system, visible_bounds, ViewportOffsetUpdate,
     VisibleBoundsPositionAdjust,
 };
-use crate::visibility::spacial_hasher::SpacialHasher;
+use crate::{Area, DeviceView, ScaleFactor, VisibleBounds};
 
 pub struct VisibilityPlugin;
 

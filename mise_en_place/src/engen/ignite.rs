@@ -1,12 +1,12 @@
 use winit::event::{Event, StartCause, WindowEvent};
 
-use crate::{Engen, gfx, ViewportPlugin};
 use crate::clickable::ClickablePlugin;
 use crate::coord::CoordPlugin;
-use crate::job::TaskLabel;
+use crate::engen::TaskLabel;
 use crate::theme::ThemePlugin;
 use crate::visibility::VisibilityPlugin;
 use crate::window::WindowPlugin;
+use crate::{gfx, Engen, ViewportPlugin};
 
 pub(crate) fn ignite(mut engen: Engen) {
     let event_loop = engen.event_loop.take().expect("no event loop");

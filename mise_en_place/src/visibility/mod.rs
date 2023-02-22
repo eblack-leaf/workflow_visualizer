@@ -2,8 +2,8 @@ use bevy_ecs::prelude::Component;
 
 pub use collision::{Collision, CollisionBegin, CollisionEnd};
 pub(crate) use plugin::VisibilityPlugin;
-pub use visible_bounds::{VisibleBounds, VisibleBoundsPositionAdjust};
 pub(crate) use visible_bounds::ViewportOffsetUpdate;
+pub use visible_bounds::{VisibleBounds, VisibleBoundsPositionAdjust};
 
 use crate::coord::{Section, UIView};
 

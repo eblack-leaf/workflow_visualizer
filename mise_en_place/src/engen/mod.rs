@@ -8,21 +8,23 @@ use winit::window::Window;
 #[cfg(not(target_arch = "wasm32"))]
 use winit::window::WindowBuilder;
 
+pub(crate) use job::TaskLabel;
+pub use job::{Container, ExecutionState, Exit, Idle, Job, Task};
 pub use options::EngenOptions;
-pub use stages::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
+pub use stages::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
 
-use crate::{
-    Click, ClickEvent, ClickEventType, DeviceView, Finger, Job, MouseAdapter, Position,
-    Resize, ScaleFactor, TouchAdapter, VisibleBounds,
-};
 use crate::gfx::{
-    Extract, ExtractFns, invoke_extract, invoke_render, Render, RenderFns,
-    RenderPhase,
+    invoke_extract, invoke_render, Extract, ExtractFns, Render, RenderFns, RenderPhase,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use crate::gfx::{GfxOptions, GfxSurface};
+use crate::{
+    Click, ClickEvent, ClickEventType, DeviceView, Finger, MouseAdapter, Position, Resize,
+    ScaleFactor, TouchAdapter, VisibleBounds,
+};
 
 mod ignite;
+mod job;
 mod options;
 mod stages;
 mod wasm;

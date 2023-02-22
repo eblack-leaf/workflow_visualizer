@@ -2,14 +2,13 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::{Area, Color, Depth, Position, Section};
 use crate::coord::{DeviceView, GpuArea, GpuPosition, UIView};
 use crate::gfx::GfxSurface;
-use crate::instance::{AttributeWrite, CpuAttributeBuffer};
-use crate::instance::GpuAttributeBuffer;
 use crate::instance::index::Indexer;
 use crate::instance::key::Key;
+use crate::instance::GpuAttributeBuffer;
 use crate::instance::NullBit;
+use crate::instance::{AttributeWrite, CpuAttributeBuffer};
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReferences, AtlasGlyphs, AtlasTextureDimensions, AtlasWriteQueue,
@@ -20,6 +19,7 @@ use crate::text::scale::TextScaleAlignment;
 use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
+use crate::{Area, Color, Depth, Position, Section};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);

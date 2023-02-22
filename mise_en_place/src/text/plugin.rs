@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemLabel, SystemStage};
 
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
 use crate::text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };

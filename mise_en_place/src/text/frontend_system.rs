@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
-use crate::{AreaAdjust, TextBoundGuide};
 use crate::coord::{Area, Depth, DeviceView, Position, Section, UIView};
 use crate::instance::key::Key;
 use crate::text::atlas::AtlasBlock;
@@ -21,6 +20,7 @@ use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
+use crate::{AreaAdjust, TextBoundGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());

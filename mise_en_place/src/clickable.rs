@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{Bundle, Component, EventReader, Query, Res, Without};
 
-use crate::{ClickEvent, ClickEventType, ScaleFactor, Visibility, VisibleSection};
-use crate::engen::{Attach, Engen};
 use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
+use crate::{ClickEvent, ClickEventType, ScaleFactor, Visibility, VisibleSection};
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -94,8 +94,8 @@ pub(crate) fn register_click(
                                 .section
                                 .contains(click.click.origin.to_ui(scale_factor.factor))
                                 && visible_section
-                                .section
-                                .contains(click.click.end.unwrap().to_ui(scale_factor.factor))
+                                    .section
+                                    .contains(click.click.end.unwrap().to_ui(scale_factor.factor))
                             {
                                 click_state.clicked = true;
                                 click_state.toggle = !click_state.toggle;

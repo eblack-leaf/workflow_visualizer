@@ -1,13 +1,13 @@
-pub use engen::{Attach, Engen, Launch};
-pub use engen::BackendStages;
 pub use engen::BackEndStartupStages;
+pub use engen::BackendStages;
 pub use engen::EngenOptions;
 pub use engen::FrontEndStages;
 pub use engen::FrontEndStartupStages;
-pub use job::Job;
+pub use engen::{Attach, Engen, Launch};
+pub use engen::{ExecutionState, Exit, Idle, Job, Task};
 pub use visibility::VisibleBounds;
 
-pub use crate::clickable::{Clickable, ClickListener, ClickState};
+pub use crate::clickable::{ClickListener, ClickState, Clickable};
 pub use crate::color::Color;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
@@ -15,10 +15,9 @@ pub use crate::coord::{
 };
 pub use crate::gfx::{Viewport, ViewportPlugin};
 pub use crate::icon::{
-    BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest,
-    IconPlugin, IconSize, IconVertex, read_mesh, write_mesh,
+    read_mesh, write_mesh, BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconKey,
+    IconMesh, IconMeshAddRequest, IconPlugin, IconSize, IconVertex,
 };
-pub use crate::job::{Exit, Idle};
 pub use crate::text::{
     PartitionMetadata, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
     TextScaleAlignment,
@@ -40,7 +39,6 @@ mod engen;
 mod gfx;
 mod icon;
 mod instance;
-mod job;
 mod r_button;
 mod text;
 mod theme;

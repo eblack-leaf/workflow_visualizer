@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::Bundle;
 
-use crate::{Depth, Section};
 use crate::coord::CoordContext;
+use crate::{Depth, Section};
 
 #[derive(Bundle, Copy, Clone, Default, Debug)]
 pub struct Panel<Context: CoordContext> {
@@ -20,7 +20,7 @@ impl<Context: CoordContext> Panel<Context> {
 }
 
 impl<Context: CoordContext, S: Into<Section<Context>>, D: Into<Depth>> From<(S, D)>
-for Panel<Context>
+    for Panel<Context>
 {
     fn from(value: (S, D)) -> Self {
         Panel::new(value.0.into(), value.1.into())
