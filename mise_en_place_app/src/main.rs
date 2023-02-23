@@ -1,19 +1,12 @@
 #![allow(unused, dead_code)]
 
+use mise_en_place::{Area, BundledIconKeys, Clickable, ClickListener, ClickState, Color, ColorHooks, ColorInvert, DepthAdjust, Exit, GpuPosition, Icon, IconBundle, IconPlugin, IconSize, Idle, Job, Location, MessageHandler, MessageReceiverHandler, MouseAdapter, MouseButtonExpt, PartitionMetadata, Position, PositionAdjust, post_server, read_mesh, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility, WasmCompiler, WasmServer};
+use mise_en_place::{Engen, Launch};
+use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 use mise_en_place::bevy_ecs;
 use mise_en_place::bevy_ecs::prelude::{Commands, Entity, Query, Res, ResMut, Resource};
 use mise_en_place::EngenOptions;
 use mise_en_place::FrontEndStages;
-use mise_en_place::{
-    post_server, read_mesh, Area, BundledIconKeys, ClickListener, ClickState, Clickable, Color,
-    ColorHooks, ColorInvert, DepthAdjust, Exit, GpuPosition, Icon, IconBundle, IconPlugin,
-    IconSize, Idle, Job, Location, MessageHandler, MouseAdapter, MouseButtonExpt,
-    PartitionMetadata, Position, PositionAdjust, Text, TextBoundGuide, TextBundle, TextPartition,
-    TextPlugin, TextScaleAlignment, TouchAdapter, UIView, VirtualKeyboardAdapter,
-    VirtualKeyboardType, Visibility, WasmCompiler, WasmServer,
-};
-use mise_en_place::{Engen, Launch};
-use mise_en_place::{IconKey, IconMesh, IconMeshAddRequest, IconVertex};
 
 #[derive(Resource)]
 struct Counter {
@@ -31,26 +24,28 @@ fn update_text(
     mouse_adapter: Res<MouseAdapter>,
     touch_adapter: Res<TouchAdapter>,
     virtual_keyboard: Res<VirtualKeyboardAdapter>,
+    message_receiver_handler: Res<MessageReceiverHandler>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
     let mut click_info = String::new();
     for (entity, icon, click_state, position, area) in click_icon.iter() {
         if click_state.clicked() {
-            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
+            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
             let current = counter.count;
             counter.state.replace(current);
             virtual_keyboard.open(VirtualKeyboardType::Keyboard);
             post_server(
-                "cornelius fudge".parse().unwrap(),
+                "cornelius_fudge".to_string(),
                 "yomi".to_string(),
                 "password-easy".to_string(),
+                &message_receiver_handler,
             );
         } else {
             if let Some(state) = counter.state {
                 if counter.count >= state + 100 {
                     click_info +=
-                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
+                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
                     counter.state.take();
                 }
             }

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-pub use server::{post_server, MessageHandler, WasmServer};
+pub use server::{MessageHandler, MessageReceiverHandler, post_server, WasmServer};
 
 mod server;
 
