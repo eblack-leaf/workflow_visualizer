@@ -5,14 +5,14 @@ use std::sync::{Arc, Mutex};
 
 use bevy_ecs::prelude::Resource;
 #[cfg(not(target_arch = "wasm32"))]
+use warp::Filter;
+#[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::header::HeaderName;
 #[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::StatusCode;
-#[cfg(not(target_arch = "wasm32"))]
-use warp::Filter;
 
-use crate::wasm::WasmCompiler;
 use crate::{Attach, Engen};
+use crate::wasm::WasmCompiler;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
@@ -98,10 +98,10 @@ impl WasmServer {
                     .map(cross_origin_opener_policy)
                     .with(cors),
             )
-            .tls()
-            .key(include_bytes!("key.pem"))
-            .cert(include_bytes!("cert.pem"))
-            .bind(addr),
+                .tls()
+                .key(include_bytes!("key.pem"))
+                .cert(include_bytes!("cert.pem"))
+                .bind(addr),
         );
     }
 }
@@ -140,6 +140,9 @@ impl MessageReceiverHandler {
     pub fn generate_handle(&self) -> Arc<Mutex<MessageReceiver>> {
         self.handle.clone()
     }
+    pub fn messages(&self) -> HashMap<Username, Message> {
+        self.handle.lock().as_ref().unwrap().messages.clone()
+    }
 }
 
 impl Attach for MessageReceiverHandler {
@@ -159,7 +162,7 @@ pub fn post_server(
 ) {
     #[cfg(target_arch = "wasm32")]
     {
-        use wasm_bindgen::{prelude::*, JsCast};
+        use wasm_bindgen::{JsCast, prelude::*};
         let handle = _message_receiver_handle.generate_handle();
         let window = web_sys::window().expect("no web window");
         let location = window.location();
