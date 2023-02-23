@@ -5,14 +5,14 @@ use std::sync::{Arc, Mutex};
 
 use bevy_ecs::prelude::Resource;
 #[cfg(not(target_arch = "wasm32"))]
-use warp::Filter;
-#[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::header::HeaderName;
 #[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::StatusCode;
+#[cfg(not(target_arch = "wasm32"))]
+use warp::Filter;
 
-use crate::{Attach, Engen};
 use crate::wasm::WasmCompiler;
+use crate::{Attach, Engen};
 
 #[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
@@ -74,10 +74,11 @@ impl WasmServer {
             .and(warp::body::bytes())
             .and(warp::body::content_length_limit(content_max))
             .map(move |user, pass, message: warp::hyper::body::Bytes| {
-                let (status, body) = m_handle
-                    .lock()
-                    .expect("could not lock")
-                    .handle(user, pass, std::str::from_utf8(message.as_ref()).unwrap().to_string());
+                let (status, body) = m_handle.lock().expect("could not lock").handle(
+                    user,
+                    pass,
+                    std::str::from_utf8(message.as_ref()).unwrap().to_string(),
+                );
                 warp::reply::with_status(
                     warp::reply::with_header(
                         warp::reply::Response::new(warp::hyper::Body::from(body)),
@@ -97,10 +98,10 @@ impl WasmServer {
                     .map(cross_origin_opener_policy)
                     .with(cors),
             )
-                .tls()
-                .key(include_bytes!("key.pem"))
-                .cert(include_bytes!("cert.pem"))
-                .bind(addr),
+            .tls()
+            .key(include_bytes!("key.pem"))
+            .cert(include_bytes!("cert.pem"))
+            .bind(addr),
         );
     }
 }
@@ -133,7 +134,7 @@ pub struct MessageReceiverHandler {
 impl MessageReceiverHandler {
     pub(crate) fn new() -> Self {
         Self {
-            handle: Arc::new(Mutex::new(MessageReceiver::new()))
+            handle: Arc::new(Mutex::new(MessageReceiver::new())),
         }
     }
     pub fn generate_handle(&self) -> Arc<Mutex<MessageReceiver>> {
@@ -143,7 +144,10 @@ impl MessageReceiverHandler {
 
 impl Attach for MessageReceiverHandler {
     fn attach(engen: &mut Engen) {
-        engen.frontend.container.insert_resource(MessageReceiverHandler::new());
+        engen
+            .frontend
+            .container
+            .insert_resource(MessageReceiverHandler::new());
     }
 }
 
@@ -155,7 +159,7 @@ pub fn post_server(
 ) {
     #[cfg(target_arch = "wasm32")]
     {
-        use wasm_bindgen::{JsCast, prelude::*};
+        use wasm_bindgen::{prelude::*, JsCast};
         let handle = _message_receiver_handle.generate_handle();
         let window = web_sys::window().expect("no web window");
         let location = window.location();
@@ -165,7 +169,10 @@ pub fn post_server(
         let user_cloned = _user.clone();
         let closure = Closure::wrap(Box::new(move |xhr: web_sys::XmlHttpRequest| {
             if xhr.ready_state() == web_sys::XmlHttpRequest::DONE && xhr.status().unwrap() == 200 {
-                handle.lock().unwrap().receive(&user_cloned, xhr.response_text().unwrap().unwrap());
+                handle
+                    .lock()
+                    .unwrap()
+                    .receive(&user_cloned, xhr.response_text().unwrap().unwrap());
             }
         }) as Box<dyn Fn(_)>);
         let _ = request.set_onreadystatechange(Some(closure.as_ref().unchecked_ref()));
