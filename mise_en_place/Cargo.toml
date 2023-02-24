@@ -16,7 +16,6 @@ fontdue = "0.7.2"
 serde = { version = "1.0.152", features = ["derive"] }
 rmp-serde = "1.1.1"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-#warp = { version = "0.3.3", features = ["tls", "compression"] }
 axum-sessions = "0.4.1"
 tower = "0.4.13"
 tower-http = { version = "0.3.4", features = ["fs", "compression-gzip", "cors", "set-header"] }

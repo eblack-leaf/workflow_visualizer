@@ -5,21 +5,21 @@ use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use axum::{Extension, Json, Router, ServiceExt};
 use axum::debug_handler;
 use axum::extract::Path;
 use axum::headers::HeaderName;
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::response::{Html, IntoResponse};
-use axum::routing::{get, get_service};
 use axum::routing::post;
+use axum::routing::{get, get_service};
+use axum::{Extension, Json, Router, ServiceExt};
 use axum_extra::routing::SpaRouter;
 use axum_server::tls_rustls::RustlsConfig;
-use axum_sessions::{SameSite, SessionLayer};
 use axum_sessions::async_session::log::{debug, info};
 use axum_sessions::async_session::MemoryStore;
 use axum_sessions::extractors::WritableSession;
-use rand::{Rng, thread_rng};
+use axum_sessions::{SameSite, SessionLayer};
+use rand::{thread_rng, Rng};
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -28,11 +28,11 @@ use tower_http::services::ServeDir;
 use tower_http::set_header::SetResponseHeaderLayer;
 use url::Url;
 use uuid::Uuid;
-use webauthn_rs::{Webauthn, WebauthnBuilder};
 use webauthn_rs::prelude::{
     CreationChallengeResponse, Passkey, PasskeyAuthentication, PasskeyRegistration,
     PublicKeyCredential, RegisterPublicKeyCredential, WebauthnError,
 };
+use webauthn_rs::{Webauthn, WebauthnBuilder};
 
 mod webauth_glue;
 
@@ -75,12 +75,9 @@ impl WasmServer {
     pub fn serve_at<P: Into<PathBuf>, Addr: Into<SocketAddr>>(src: P, rp_id: String, addr: Addr) {
         let src = src.into();
         let rt = tokio::runtime::Runtime::new().unwrap();
-        let html_content = std::fs::read_to_string(src.join("index.html"))
-            .unwrap();
-        let js_content = std::fs::read_to_string(src.join("app.js"))
-            .unwrap();
-        let wasm_content = std::fs::read(src.join("app_bg.wasm"))
-            .unwrap();
+        let html_content = std::fs::read_to_string(src.join("index.html")).unwrap();
+        let js_content = std::fs::read_to_string(src.join("app.js")).unwrap();
+        let wasm_content = std::fs::read(src.join("app_bg.wasm")).unwrap();
         rt.block_on(async {
             let address = addr.into();
             let url = "https://".to_string() + rp_id.as_str();
@@ -91,8 +88,8 @@ impl WasmServer {
                 "mise_en_place/src/wasm_server/cert.pem",
                 "mise_en_place/src/wasm_server/key.pem",
             )
-                .await
-                .unwrap();
+            .await
+            .unwrap();
             let store = MemoryStore::new();
             let secret = thread_rng().gen::<[u8; 128]>(); // MUST be at least 64 bytes!
             let session_layer = SessionLayer::new(store, &secret)
@@ -106,7 +103,7 @@ impl WasmServer {
                     get(|| async {
                         let mut response = js_content.into_response();
                         response.headers_mut().insert(
-                            "Content-Type",
+                            "content-type",
                             HeaderValue::from_static("application/javascript"),
                         );
                         response
@@ -114,18 +111,17 @@ impl WasmServer {
                 )
                 .route(
                     "/app/app.wasm",
-                    get(
-                        || async move {
-                            let mut response = wasm_content.into_response();
-                            response.headers_mut().insert(
-                                "content-type",
-                                HeaderValue::from_static("application/wasm"),
-                            );
-                            response
-                        }
-                    ),
+                    get(|| async move {
+                        let mut response = wasm_content.into_response();
+                        response
+                            .headers_mut()
+                            .insert("content-type", HeaderValue::from_static("application/wasm"));
+                        response
+                    }),
                 )
-                .fallback(get_service(ServeDir::new(src)).handle_error(Self::internal_server_error));
+                .fallback(
+                    get_service(ServeDir::new(src)).handle_error(Self::internal_server_error),
+                );
             let router = Router::new()
                 .route("/register_start/:username", post(start_register))
                 .route("/register_finish", post(finish_register))
@@ -160,7 +156,8 @@ impl WasmServer {
 
     async fn internal_server_error(e: std::io::Error) -> impl IntoResponse {
         (
-            StatusCode::INTERNAL_SERVER_ERROR, format!("unhandled internal error: {}", e)
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("unhandled internal error: {}", e),
         )
     }
 }
