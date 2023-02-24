@@ -1,4 +1,4 @@
-use mise_en_place::{resolve_message, to_message, MessageRepr, StatusCodeExpt};
+use mise_en_place::{MessageRepr, resolve_message, StatusCodeExpt, to_message, WasmCompiler, WasmServer};
 use mise_en_place::{Message, MessageHandler, MessageType};
 
 use crate::logic::IntMessage;
@@ -30,5 +30,25 @@ impl MessageHandler for ServerMessageHandler {
             }
         }
         (StatusCodeExpt::OK, (1, vec![]))
+    }
+}
+
+pub fn compile_and_serve() {
+    let args: Vec<String> = std::env::args().collect();
+    let wasm_compiler =
+        WasmCompiler::new("mise_en_place_app", "debug", "mise_en_place_app_web_build");
+    let wasm_server = WasmServer::new(&wasm_compiler);
+    if args.contains(&"build".to_string()) {
+        wasm_compiler.compile().expect("could not compile wasm");
+        if !args.contains(&"serve".to_string()) {
+            return;
+        }
+    }
+    if args.contains(&"serve".to_string()) {
+        wasm_server.serve_at(
+            ([0, 0, 0, 0], 3030),
+            ServerMessageHandler::new(),
+        );
+        return;
     }
 }
