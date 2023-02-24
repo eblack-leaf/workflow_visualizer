@@ -104,8 +104,8 @@ impl WasmServer {
                     .with(cors),
             )
                 .tls()
-                .key(include_bytes!("key.pem"))
-                .cert(include_bytes!("cert.pem"))
+                .key(include_bytes!("../axum_server/key.pem"))
+                .cert(include_bytes!("../axum_server/cert.pem"))
                 .bind(addr),
         );
     }

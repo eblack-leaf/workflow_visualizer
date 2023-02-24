@@ -8,6 +8,9 @@ pub use engen::FrontEndStartupStages;
 pub use engen::{Attach, Engen, Launch};
 pub use engen::{ExecutionState, Exit, Idle, Job, Task};
 pub use visibility::VisibleBounds;
+pub use wasm_compiler::WasmCompiler;
+#[cfg(not(target_arch = "wasm32"))]
+pub use wasm_server::WasmServer;
 
 pub use crate::clickable::{ClickListener, ClickState, Clickable};
 pub use crate::color::Color;
@@ -26,12 +29,6 @@ pub use crate::text::{
 };
 pub use crate::theme::Theme;
 pub use crate::visibility::{Visibility, VisibleSection};
-#[cfg(not(target_arch = "wasm32"))]
-pub use crate::wasm::StatusCodeExpt;
-pub use crate::wasm::{
-    resolve_message, to_message, Message, MessageHandler, MessageReceiver, MessageRepr,
-    MessageType, Password, Username, WasmCompiler, WasmServer,
-};
 pub use crate::window::{
     Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,
     ScaleFactor, TouchAdapter, VirtualKeyboardAdapter, VirtualKeyboardType,
@@ -53,3 +50,8 @@ mod uniform;
 mod visibility;
 mod wasm;
 mod window;
+// mod server;
+mod wasm_compiler;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(unused)]
+mod wasm_server;
