@@ -1,13 +1,14 @@
 use std::path::Path;
 
+pub use server::{
+    Message, MessageHandler, MessageReceiver, MessageRepr, MessageType, Password,
+    resolve_message, to_message, Username, WasmServer,
+};
 #[cfg(not(target_arch = "wasm32"))]
 pub use server::StatusCodeExpt;
-pub use server::{
-    resolve_message, to_message, Message, MessageHandler, MessageReceiver, MessageRepr,
-    MessageType, Password, Username, WasmServer,
-};
 
 mod server;
+mod axum_server;
 
 pub struct WasmCompiler {
     pub package: String,

@@ -53,9 +53,7 @@ pub trait MessageHandler {
         ty: MessageType,
         message: Message,
     ) -> (StatusCodeExpt, (MessageType, Message));
-    fn content_length_max(&self) -> u64 {
-        1024 * 16
-    }
+    fn content_length_max(&self) -> u64;
 }
 
 impl WasmServer {
