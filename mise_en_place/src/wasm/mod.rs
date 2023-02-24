@@ -3,7 +3,8 @@ use std::path::Path;
 #[cfg(not(target_arch = "wasm32"))]
 pub use server::StatusCodeExpt;
 pub use server::{
-    Message, MessageHandler, MessageReceiver, MessageType, Password, Username, WasmServer,
+    resolve_message, to_message, Message, MessageHandler, MessageReceiver, MessageRepr,
+    MessageType, Password, Username, WasmServer,
 };
 
 mod server;

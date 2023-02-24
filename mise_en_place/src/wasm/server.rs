@@ -6,16 +6,16 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use bevy_ecs::prelude::Resource;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+#[cfg(not(target_arch = "wasm32"))]
+use warp::Filter;
 #[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::header::HeaderName;
 #[cfg(not(target_arch = "wasm32"))]
 use warp::hyper::StatusCode;
-#[cfg(not(target_arch = "wasm32"))]
-use warp::Filter;
 
-use crate::wasm::WasmCompiler;
 use crate::{Attach, Engen};
+use crate::wasm::WasmCompiler;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn cross_origin_embedder_policy(reply: impl warp::Reply) -> impl warp::Reply {
@@ -105,10 +105,10 @@ impl WasmServer {
                     .map(cross_origin_opener_policy)
                     .with(cors),
             )
-            .tls()
-            .key(include_bytes!("key.pem"))
-            .cert(include_bytes!("cert.pem"))
-            .bind(addr),
+                .tls()
+                .key(include_bytes!("key.pem"))
+                .cert(include_bytes!("cert.pem"))
+                .bind(addr),
         );
     }
 }
@@ -116,6 +116,20 @@ impl WasmServer {
 pub type Username = String;
 pub type Password = String;
 pub type Message = Vec<u8>;
+
+pub fn to_message<T: Serialize>(t: &T) -> Option<Message> {
+    match rmp_serde::to_vec(t) {
+        Ok(data) => Some(data),
+        Err(_) => None,
+    }
+}
+
+pub fn resolve_message<T: for<'a> Deserialize<'a>>(message: Message) -> Option<T> {
+    match rmp_serde::from_slice::<T>(&*message) {
+        Ok(t) => Some(t),
+        _ => None,
+    }
+}
 
 #[derive(Resource)]
 pub struct MessageReceiver {
@@ -125,7 +139,7 @@ pub struct MessageReceiver {
 pub type MessageType = u8;
 
 pub struct Messages {
-    pub data: HashMap<Username, (MessageType, Message)>,
+    pub data: HashMap<Username, Vec<(MessageType, Message)>>,
 }
 
 impl Messages {
@@ -136,7 +150,21 @@ impl Messages {
     }
     #[cfg(target_arch = "wasm32")]
     pub(crate) fn receive(&mut self, user: Username, response: (MessageType, Message)) {
-        self.data.insert(user, response);
+        if let Some(message_buffer) = self.data.get_mut(&user) {
+            message_buffer.push(response);
+        } else {
+            self.data.insert(user, vec![response]);
+        }
+    }
+}
+
+pub trait MessageRepr
+    where
+        Self: Serialize + Sized,
+{
+    fn message_type() -> MessageType;
+    fn to_message(&self) -> Option<Message> {
+        to_message(self)
     }
 }
 
@@ -146,16 +174,10 @@ impl MessageReceiver {
             messages: Arc::new(Mutex::new(Messages::new())),
         }
     }
-    pub fn post_message<T: Serialize>(
-        &self,
-        _ty: MessageType,
-        _message: T,
-        _user: Username,
-        _password: Password,
-    ) {
+    pub fn post_message<M: MessageRepr>(&self, _message: M, _user: Username, _password: Password) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let window = web_sys::window().expect("no web window");
             let location = window.location();
             let request = Rc::new(web_sys::XmlHttpRequest::new().unwrap());
@@ -185,18 +207,18 @@ impl MessageReceiver {
             let _ = request.set_request_header("username", _user.as_str());
             let _ = request.set_request_header("password", _password.as_str());
             let mut data = rmp_serde::to_vec(&_message).unwrap();
-            data.insert(0, _ty);
+            data.insert(0, M::message_type());
             let _ = request.send_with_opt_u8_array(Some(data.as_slice()));
             closure.forget();
         }
     }
-    pub fn messages(&self) -> Vec<(Username, (MessageType, Message))> {
+    pub fn messages(&self) -> Vec<(Username, Vec<(MessageType, Message)>)> {
         self.messages
             .lock()
             .unwrap()
             .data
             .drain()
-            .collect::<Vec<(Username, (MessageType, Message))>>()
+            .collect::<Vec<(Username, Vec<(MessageType, Message)>)>>()
     }
 }
 

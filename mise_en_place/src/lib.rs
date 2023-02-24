@@ -29,8 +29,8 @@ pub use crate::visibility::{Visibility, VisibleSection};
 #[cfg(not(target_arch = "wasm32"))]
 pub use crate::wasm::StatusCodeExpt;
 pub use crate::wasm::{
-    Message, MessageHandler, MessageReceiver, MessageType, Password, Username, WasmCompiler,
-    WasmServer,
+    resolve_message, to_message, Message, MessageHandler, MessageReceiver, MessageRepr,
+    MessageType, Password, Username, WasmCompiler, WasmServer,
 };
 pub use crate::window::{
     Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,

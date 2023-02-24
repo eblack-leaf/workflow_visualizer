@@ -1,5 +1,7 @@
-use mise_en_place::StatusCodeExpt;
+use mise_en_place::{resolve_message, to_message, MessageRepr, StatusCodeExpt};
 use mise_en_place::{Message, MessageHandler, MessageType};
+
+use crate::logic::IntMessage;
 
 pub(crate) struct ServerMessageHandler {}
 
@@ -19,6 +21,14 @@ impl MessageHandler for ServerMessageHandler {
         message: Message,
     ) -> (StatusCodeExpt, (MessageType, Message)) {
         println!("received type: {:?}, message: {:?}", ty, message);
-        (StatusCodeExpt::OK, (0, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+        if ty == IntMessage::message_type() {
+            let mut resolved = resolve_message::<IntMessage>(message).unwrap();
+            resolved.0 += 5;
+            let encoded = resolved.to_message();
+            if let Some(mes) = encoded {
+                return (StatusCodeExpt::OK, (IntMessage::message_type(), mes));
+            }
+        }
+        (StatusCodeExpt::OK, (1, vec![]))
     }
 }

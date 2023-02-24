@@ -1,16 +1,32 @@
+use serde::{Deserialize, Serialize};
+
 use mise_en_place::bevy_ecs;
 use mise_en_place::bevy_ecs::change_detection::ResMut;
 use mise_en_place::bevy_ecs::entity::Entity;
 use mise_en_place::bevy_ecs::prelude::{Commands, Query, Res, Resource};
 use mise_en_place::{
-    Area, ClickState, Exit, Icon, Idle, MessageReceiver, MouseAdapter, Position, Text,
-    TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
+    Area, ClickState, Exit, Icon, Idle, MessageReceiver, MessageRepr, MessageType, MouseAdapter,
+    Position, Text, TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
 
 #[derive(Resource)]
 pub struct Counter {
     pub(crate) count: u32,
     pub(crate) state: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct IntMessage(pub(crate) i32);
+
+#[repr(u8)]
+pub(crate) enum MessageTypes {
+    IntMessage,
+}
+
+impl MessageRepr for IntMessage {
+    fn message_type() -> MessageType {
+        MessageTypes::IntMessage as u8
+    }
 }
 
 pub fn update_text(
@@ -35,8 +51,7 @@ pub fn update_text(
             counter.state.replace(current);
             virtual_keyboard.open(VirtualKeyboardType::Keyboard);
             receiver.post_message(
-                0,
-                "cornelius_fudge".to_string(),
+                IntMessage(10),
                 "yomi".to_string(),
                 "password-easy".to_string(),
             );
@@ -73,9 +88,9 @@ pub fn update_text(
         }
         if entity.index() == 4 {
             let messages = receiver.messages();
-            for (user, (ty, mes)) in messages {
+            for (user, messages) in messages {
                 text.partitions.first_mut().unwrap().characters +=
-                    format!("message-ty: {:?}, message: {:?}", ty, mes).as_str();
+                    format!("message-ty: {:?}", messages).as_str();
             }
         }
     }
