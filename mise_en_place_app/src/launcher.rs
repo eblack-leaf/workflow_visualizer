@@ -1,4 +1,8 @@
-use mise_en_place::{BundledIconKeys, Clickable, ClickListener, Color, FrontEndStages, Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconSize, Job, Launch, Location, Text, TextBoundGuide, TextBundle, TextScaleAlignment};
+use mise_en_place::{
+    BundledIconKeys, ClickListener, Clickable, Color, FrontEndStages, Icon, IconBundle, IconKey,
+    IconMesh, IconMeshAddRequest, IconSize, Job, Launch, Location, Text, TextBoundGuide,
+    TextBundle, TextScaleAlignment,
+};
 
 use crate::logic::Counter;
 
@@ -44,7 +48,7 @@ impl Launch for Launcher {
             .id();
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("messages: ", (Color::OFF_WHITE, 0))]),
+                Text::new(vec![("", (Color::OFF_WHITE, 0))]),
                 Location::from(((35u32, 260u32), 0u32)),
                 TextScaleAlignment::Medium,
             ))

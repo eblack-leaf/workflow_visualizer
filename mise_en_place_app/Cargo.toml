@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 mise_en_place = { path = "../mise_en_place" }
+rmp-serde = "1.1.1"
+serde = { version = "1.0.152", features = ["derive"] }

@@ -1,8 +1,11 @@
-use mise_en_place::{Area, ClickState, Exit, Icon, Idle, MessageReceiver, MouseAdapter, Position, Text, TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType};
 use mise_en_place::bevy_ecs;
 use mise_en_place::bevy_ecs::change_detection::ResMut;
 use mise_en_place::bevy_ecs::entity::Entity;
 use mise_en_place::bevy_ecs::prelude::{Commands, Query, Res, Resource};
+use mise_en_place::{
+    Area, ClickState, Exit, Icon, Idle, MessageReceiver, MouseAdapter, Position, Text,
+    TouchAdapter, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
+};
 
 #[derive(Resource)]
 pub struct Counter {
@@ -27,11 +30,12 @@ pub fn update_text(
     let mut click_info = String::new();
     for (entity, icon, click_state, position, area) in click_icon.iter() {
         if click_state.clicked() {
-            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
+            click_info += &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
             let current = counter.count;
             counter.state.replace(current);
             virtual_keyboard.open(VirtualKeyboardType::Keyboard);
             receiver.post_message(
+                0,
                 "cornelius_fudge".to_string(),
                 "yomi".to_string(),
                 "password-easy".to_string(),
@@ -40,7 +44,7 @@ pub fn update_text(
             if let Some(state) = counter.state {
                 if counter.count >= state + 100 {
                     click_info +=
-                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(), );
+                        &*format!("entity: {:?}, clicked: {:?}", entity, click_state.clicked(),);
                     counter.state.take();
                 }
             }
@@ -69,8 +73,9 @@ pub fn update_text(
         }
         if entity.index() == 4 {
             let messages = receiver.messages();
-            if let Some(mes) = messages.get("yomi").take() {
-                text.partitions.first_mut().unwrap().characters += mes;
+            for (user, (ty, mes)) in messages {
+                text.partitions.first_mut().unwrap().characters +=
+                    format!("message-ty: {:?}, message: {:?}", ty, mes).as_str();
             }
         }
     }

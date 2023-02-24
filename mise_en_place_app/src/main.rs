@@ -1,12 +1,14 @@
 #![allow(unused, dead_code)]
 
 use launcher::Launcher;
-use mise_en_place::{Engen, EngenOptions, IconPlugin, MessageReceiver, TextPlugin, WasmCompiler, WasmServer};
+use mise_en_place::{
+    Engen, EngenOptions, IconPlugin, MessageReceiver, TextPlugin, WasmCompiler, WasmServer,
+};
 
-#[cfg(not(target_arch = "wasm32"))]
-mod server_messaging;
 mod launcher;
 mod logic;
+#[cfg(not(target_arch = "wasm32"))]
+mod server_messaging;
 
 fn main() {
     #[cfg(not(target_arch = "wasm32"))]
@@ -22,7 +24,10 @@ fn main() {
             }
         }
         if args.contains(&"serve".to_string()) {
-            wasm_server.serve_at(([0, 0, 0, 0], 3030), server_messaging::ServerMessageHandler::new());
+            wasm_server.serve_at(
+                ([0, 0, 0, 0], 3030),
+                server_messaging::ServerMessageHandler::new(),
+            );
             return;
         }
     }
