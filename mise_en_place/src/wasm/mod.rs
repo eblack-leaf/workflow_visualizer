@@ -1,6 +1,10 @@
 use std::path::Path;
 
-pub use server::{post_server, MessageHandler, MessageReceiverHandler, WasmServer};
+pub use server::{
+    Message, MessageHandler, MessageReceiver, Password, Username, WasmServer,
+};
+#[cfg(not(target_arch = "wasm32"))]
+pub use server::StatusCodeExpt;
 
 mod server;
 

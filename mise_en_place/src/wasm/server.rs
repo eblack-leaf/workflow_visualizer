@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 #[cfg(not(target_arch = "wasm32"))]
 use std::net::SocketAddr;
+#[cfg(target_arch = "wasm32")]
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use bevy_ecs::prelude::Resource;
@@ -37,14 +39,14 @@ pub struct WasmServer {
     src: String,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+pub type StatusCodeExpt = StatusCode;
+
 pub trait MessageHandler {
     #[cfg(not(target_arch = "wasm32"))]
-    fn handle(&mut self, user: String, pass: String, message: String) -> (StatusCode, String) {
-        println!(
-            "post received user: {}, pass: {}, message: {}",
-            user, pass, message
-        );
-        (StatusCode::OK, "body text".to_string())
+    #[allow(unused)]
+    fn handle(&mut self, user: String, pass: String, message: String) -> (StatusCodeExpt, String) {
+        (StatusCodeExpt::OK, "".to_string())
     }
     fn content_length_max(&self) -> u64 {
         1024 * 16
@@ -66,7 +68,6 @@ impl WasmServer {
         let cors = warp::cors().build();
         let content_max = message_handler.content_length_max();
         let m_handler = Arc::new(Mutex::new(message_handler));
-        let m_handle = m_handler.clone();
         let post = warp::post()
             .and(warp::path("message"))
             .and(warp::header::header::<String>("username"))
@@ -74,7 +75,7 @@ impl WasmServer {
             .and(warp::body::bytes())
             .and(warp::body::content_length_limit(content_max))
             .map(move |user, pass, message: warp::hyper::body::Bytes| {
-                let (status, body) = m_handle.lock().expect("could not lock").handle(
+                let (status, body) = m_handler.lock().unwrap().handle(
                     user,
                     pass,
                     std::str::from_utf8(message.as_ref()).unwrap().to_string(),
@@ -110,78 +111,57 @@ pub type Username = String;
 pub type Password = String;
 pub type Message = String;
 
+#[derive(Resource)]
 pub struct MessageReceiver {
-    pub messages: HashMap<Username, Message>,
+    pub(crate) messages: Arc<Mutex<HashMap<Username, Message>>>,
 }
 
 impl MessageReceiver {
     pub(crate) fn new() -> Self {
         Self {
-            messages: HashMap::new(),
+            messages: Arc::new(Mutex::new(HashMap::new())),
         }
     }
-    #[cfg(target_arch = "wasm32")]
-    pub(crate) fn receive(&mut self, user: &Username, message: Message) {
-        self.messages.insert(user.clone(), message);
-    }
-}
-
-#[derive(Resource)]
-pub struct MessageReceiverHandler {
-    pub(crate) handle: Arc<Mutex<MessageReceiver>>,
-}
-
-impl MessageReceiverHandler {
-    pub(crate) fn new() -> Self {
-        Self {
-            handle: Arc::new(Mutex::new(MessageReceiver::new())),
+    pub fn post_message(&self, _message: Message, _user: Username, _password: Password) {
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::{JsCast, prelude::*};
+            let window = web_sys::window().expect("no web window");
+            let location = window.location();
+            let request = Rc::new(web_sys::XmlHttpRequest::new().unwrap());
+            let request_location = location.origin().unwrap() + "/message";
+            let _ = request.open("POST", request_location.as_str());
+            let request_handle = request.clone();
+            let message_receiver_handle = self.messages.clone();
+            let user_clone = _user.clone();
+            let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
+                if request_handle.ready_state() == web_sys::XmlHttpRequest::DONE
+                    && request_handle.status().unwrap() == 200
+                {
+                    let response = request_handle.response_text().unwrap().unwrap();
+                    message_receiver_handle
+                        .lock()
+                        .unwrap()
+                        .insert(user_clone.clone(), response.clone());
+                }
+            }) as Box<dyn Fn(_)>);
+            let _ = request.set_onreadystatechange(Some(closure.as_ref().unchecked_ref()));
+            let _ = request.set_request_header("username", _user.as_str());
+            let _ = request.set_request_header("password", _password.as_str());
+            let _ = request.send_with_opt_str(Some(_message.as_str()));
+            closure.forget();
         }
-    }
-    pub fn generate_handle(&self) -> Arc<Mutex<MessageReceiver>> {
-        self.handle.clone()
     }
     pub fn messages(&self) -> HashMap<Username, Message> {
-        self.handle.lock().as_ref().unwrap().messages.clone()
+        self.messages.lock().unwrap().drain().collect()
     }
 }
 
-impl Attach for MessageReceiverHandler {
+impl Attach for MessageReceiver {
     fn attach(engen: &mut Engen) {
         engen
             .frontend
             .container
-            .insert_resource(MessageReceiverHandler::new());
-    }
-}
-
-pub fn post_server(
-    _message: Message,
-    _user: Username,
-    _password: Password,
-    _message_receiver_handle: &MessageReceiverHandler,
-) {
-    #[cfg(target_arch = "wasm32")]
-    {
-        use wasm_bindgen::{JsCast, prelude::*};
-        let handle = _message_receiver_handle.generate_handle();
-        let window = web_sys::window().expect("no web window");
-        let location = window.location();
-        let request = web_sys::XmlHttpRequest::new().unwrap();
-        let request_location = location.origin().unwrap() + "/message";
-        let _ = request.open("POST", request_location.as_str());
-        let user_cloned = _user.clone();
-        let closure = Closure::wrap(Box::new(move |xhr: web_sys::XmlHttpRequest| {
-            if xhr.ready_state() == web_sys::XmlHttpRequest::DONE && xhr.status().unwrap() == 200 {
-                handle
-                    .lock()
-                    .unwrap()
-                    .receive(&user_cloned, xhr.response_text().unwrap().unwrap());
-            }
-        }) as Box<dyn Fn(_)>);
-        let _ = request.set_onreadystatechange(Some(closure.as_ref().unchecked_ref()));
-        let _ = request.set_request_header("username", _user.as_str());
-        let _ = request.set_request_header("password", _password.as_str());
-        let _ = request.send_with_opt_str(Some(_message.as_str()));
-        closure.forget();
+            .insert_resource(MessageReceiver::new());
     }
 }
