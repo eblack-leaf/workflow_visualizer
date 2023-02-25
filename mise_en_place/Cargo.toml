@@ -15,26 +15,43 @@ wasm-bindgen-cli-support = "0.2.83"
 fontdue = "0.7.2"
 serde = { version = "1.0.152", features = ["derive"] }
 rmp-serde = "1.1.1"
+wasm-bindgen = "0.2.84"
+wasm-bindgen-futures = "0.4.33"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 axum-sessions = "0.4.1"
 tower = "0.4.13"
-tower-http = { version = "0.3.4", features = ["fs", "compression-gzip", "cors", "set-header"] }
+tower-http = { version = "0.4.0", features = ["fs", "compression-gzip", "cors", "set-header", "trace"] }
 axum = { version = "0.6.7", features = ["http2", "macros"] }
 axum-server = { version = "0.4.6", features = ["tls-rustls"] }
-axum-extra = { version = "0.5.0", features = ["spa"] }
-anyhow = "1.0"
 uuid = { version = "1.1.2", features = ["v4"] }
 url = "2.2.2"
 rand = { version = "0.8", features = ["min_const_gen"] }
 webauthn-rs = { version = "0.4.8", features = ["danger-allow-state-serialisation"] }
 futures = "0.3.25"
 tokio = { version = "1.24.2", features = ["full"] }
+tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
+tracing = "0.1.37"
 env_logger = "0.10.0"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { version = "0.3.59", features = ["Window", "Screen", "ScreenOrientation", "Location", "XmlHttpRequest", "XmlHttpRequestResponseType"] }
-wasm-bindgen-futures = "0.4.33"
+tracing-subscriber-wasm = "0.1.0"
+web-sys = { version = "0.3.59", features = [
+    "Window",
+    "Screen",
+    "ScreenOrientation",
+    "Location",
+    "Request",
+    "RequestInit",
+    "CredentialCreationOptions",
+    "CredentialRequestOptions",
+    "CredentialsContainer",
+    "Navigator",
+    "PublicKeyCredential",
+    "PublicKeyCredentialCreationOptions"
+] }
+serde-wasm-bindgen = "0.4"
+gloo = "0.8.0"
+webauthn-rs-proto = { version = "0.4.9", default-features = false, features = ["wasm"] }
 console_error_panic_hook = "0.1.7"
 console_log = "0.2.0"
 js-sys = "0.3.60"
-wasm-bindgen = "0.2.83"
 

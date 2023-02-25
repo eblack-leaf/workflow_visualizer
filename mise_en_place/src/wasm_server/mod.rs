@@ -1,38 +1,37 @@
 use std::collections::HashMap;
-use std::fmt::format;
-use std::io::Error;
-use std::net::{IpAddr, SocketAddr};
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use axum::{Extension, Json, Router, ServiceExt};
 use axum::debug_handler;
 use axum::extract::Path;
 use axum::headers::HeaderName;
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::response::{Html, IntoResponse};
-use axum::routing::post;
-use axum::routing::{get, get_service};
-use axum::{Extension, Json, Router, ServiceExt};
-use axum_extra::routing::SpaRouter;
+use axum::routing::{get, post};
+use axum_server::service::SendService;
 use axum_server::tls_rustls::RustlsConfig;
-use axum_sessions::async_session::log::{debug, info};
+use axum_sessions::{SameSite, SessionLayer};
 use axum_sessions::async_session::MemoryStore;
 use axum_sessions::extractors::WritableSession;
-use axum_sessions::{SameSite, SessionLayer};
-use rand::{thread_rng, Rng};
+use rand::{Rng, thread_rng};
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::set_header::SetResponseHeaderLayer;
+use tower_http::trace::TraceLayer;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 use url::Url;
 use uuid::Uuid;
+use webauthn_rs::{Webauthn, WebauthnBuilder};
 use webauthn_rs::prelude::{
     CreationChallengeResponse, Passkey, PasskeyAuthentication, PasskeyRegistration,
-    PublicKeyCredential, RegisterPublicKeyCredential, WebauthnError,
+    PublicKeyCredential, RegisterPublicKeyCredential,
 };
-use webauthn_rs::{Webauthn, WebauthnBuilder};
 
 mod webauth_glue;
 
@@ -78,18 +77,24 @@ impl WasmServer {
         let html_content = std::fs::read_to_string(src.join("index.html")).unwrap();
         let js_content = std::fs::read_to_string(src.join("app.js")).unwrap();
         let wasm_content = std::fs::read(src.join("app_bg.wasm")).unwrap();
+        tracing_subscriber::registry()
+            .with(
+                tracing_subscriber::EnvFilter::try_from_default_env()
+                    .unwrap_or_else(|_| "mise_en_place=debug,tower_http=debug".into()),
+            )
+            .with(tracing_subscriber::fmt::layer())
+            .init();
         rt.block_on(async {
             let address = addr.into();
             let url = "https://".to_string() + rp_id.as_str();
-            println!("url: {:?}", url);
             let rp_origin = Url::parse(url.as_str()).expect("Invalid URL");
             let server_data = ServerData::new("localhost".to_string(), &rp_origin);
             let tls_config = RustlsConfig::from_pem_file(
                 "mise_en_place/src/wasm_server/cert.pem",
                 "mise_en_place/src/wasm_server/key.pem",
             )
-            .await
-            .unwrap();
+                .await
+                .unwrap();
             let store = MemoryStore::new();
             let secret = thread_rng().gen::<[u8; 128]>(); // MUST be at least 64 bytes!
             let session_layer = SessionLayer::new(store, &secret)
@@ -97,31 +102,34 @@ impl WasmServer {
                 .with_same_site_policy(SameSite::Strict)
                 .with_secure(true);
             let site_router = Router::new()
-                .route("/app", get(move || async { Html(html_content) }))
+                .route("/app", get(move || async {
+                    tracing::debug!("serving html");
+                    Html(html_content)
+                }))
                 .route(
-                    "/app/app.js",
+                    "/app.js",
                     get(|| async {
                         let mut response = js_content.into_response();
                         response.headers_mut().insert(
                             "content-type",
                             HeaderValue::from_static("application/javascript"),
                         );
+                        tracing::debug!("serving js");
                         response
                     }),
                 )
                 .route(
-                    "/app/app.wasm",
+                    "/app_bg.wasm",
                     get(|| async move {
                         let mut response = wasm_content.into_response();
                         response
                             .headers_mut()
                             .insert("content-type", HeaderValue::from_static("application/wasm"));
+                        tracing::debug!("serving wasm");
                         response
                     }),
                 )
-                .fallback(
-                    get_service(ServeDir::new(src)).handle_error(Self::internal_server_error),
-                );
+                .fallback_service(ServeDir::new(src));
             let router = Router::new()
                 .route("/register_start/:username", post(start_register))
                 .route("/register_finish", post(finish_register))
@@ -131,6 +139,7 @@ impl WasmServer {
                 .layer(
                     ServiceBuilder::new()
                         .layer(CompressionLayer::new().gzip(true))
+                        .layer(TraceLayer::new_for_http())
                         .layer(SetResponseHeaderLayer::if_not_present(
                             HeaderName::from_static("cross-origin-opener-policy"),
                             HeaderValue::from_static("same-origin"),
@@ -153,16 +162,16 @@ impl WasmServer {
                 .unwrap();
         });
     }
-
-    async fn internal_server_error(e: std::io::Error) -> impl IntoResponse {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("unhandled internal error: {}", e),
-        )
-    }
 }
 
 #[debug_handler]
+async fn internal_server_error(e: std::io::Error) -> impl IntoResponse {
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        format!("unhandled internal error: {}", e),
+    )
+}
+
 async fn start_register(
     Extension(server_data): Extension<ServerData>,
     mut session: WritableSession,
@@ -197,11 +206,11 @@ async fn start_register(
             session
                 .insert("reg_state", (username, unique_user_id, reg_state))
                 .expect("Failed to insert");
-            info!("Registration Successful!");
+            tracing::info!("Registration Successful!");
             Json(ccr)
         }
         Err(e) => {
-            debug!("challenge_register -> {:?}", e);
+            tracing::debug!("challenge_register -> {:?}", e);
             return Err("Unknown");
         }
     };
@@ -237,7 +246,7 @@ async fn finish_register(
             StatusCode::OK
         }
         Err(e) => {
-            debug!("challenge_register -> {:?}", e);
+            tracing::debug!("challenge_register -> {:?}", e);
             StatusCode::BAD_REQUEST
         }
     };
@@ -249,7 +258,7 @@ async fn start_authentication(
     mut session: WritableSession,
     Path(username): Path<String>,
 ) -> Result<impl IntoResponse, &'static str> {
-    info!("Start Authentication");
+    tracing::info!("Start Authentication");
     // We get the username from the URL, but you could get this via form submission or
     // some other process.
 
@@ -288,7 +297,7 @@ async fn start_authentication(
             Json(rcr)
         }
         Err(e) => {
-            debug!("challenge_authenticate -> {:?}", e);
+            tracing::debug!("challenge_authenticate -> {:?}", e);
             return Err("Unknown");
         }
     };
@@ -328,10 +337,10 @@ async fn finish_authentication(
             StatusCode::OK
         }
         Err(e) => {
-            debug!("challenge_register -> {:?}", e);
+            tracing::debug!("challenge_register -> {:?}", e);
             StatusCode::BAD_REQUEST
         }
     };
-    info!("Authentication Successful!");
+    tracing::info!("Authentication Successful!");
     Ok(res)
 }
