@@ -4,8 +4,8 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
-use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::{Color, Location, UIView, Visibility};
+use crate::icon::mesh::{ColorInvert, IconKey};
 
 #[derive(Component)]
 pub struct Icon {}
@@ -67,7 +67,7 @@ impl Default for IconAreaGuide {
         let mut guide = Self::new();
         guide.guide.insert(IconSize::Small, 12);
         guide.guide.insert(IconSize::Medium, 15);
-        guide.guide.insert(IconSize::Large, 18);
+        guide.guide.insert(IconSize::Large, 22);
         guide
     }
 }

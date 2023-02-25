@@ -4,12 +4,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
 
-use crate::icon::cache::{Cache, DifferenceHolder};
-use crate::icon::interface::IconAreaGuide;
-use crate::icon::mesh::ColorInvert;
 use crate::{
     Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
 };
+use crate::icon::cache::{Cache, DifferenceHolder};
+use crate::icon::interface::IconAreaGuide;
+use crate::icon::mesh::ColorInvert;
 
 pub(crate) fn initialization(
     icons: Query<
@@ -61,7 +61,7 @@ pub(crate) fn initialization(
             .unwrap()
             .icon_removes
             .insert(removed);
-        let _icon_key = cache.icon_key.remove(&removed).unwrap();
+        let _icon_key = cache.icon_key.remove(&removed);
     }
 }
 
