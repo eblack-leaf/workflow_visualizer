@@ -1,8 +1,8 @@
-use bevy_ecs::prelude::{Bundle, Component, EventReader, Query, Res, Without};
+use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, Without};
 
-use crate::{ClickEvent, ClickEventType, ScaleFactor, Visibility, VisibleSection};
-use crate::engen::{Attach, Engen};
 use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
+use crate::{ClickEvent, ClickEventType, ScaleFactor, Visibility, VisibleSection};
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -64,6 +64,7 @@ pub(crate) struct DisableClick {}
 pub(crate) fn register_click(
     mut clickables: Query<
         (
+            Entity,
             &mut ClickState,
             &ClickListener,
             &Visibility,
@@ -74,9 +75,10 @@ pub(crate) fn register_click(
     mut clicks: EventReader<ClickEvent>,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut click_state, listener, visibility, visible_section) in clickables.iter_mut() {
+    let new_clicks = clicks.iter().collect::<Vec<&ClickEvent>>();
+    for (_entity, mut click_state, listener, visibility, visible_section) in clickables.iter_mut() {
         if visibility.visible() {
-            for click in clicks.iter() {
+            for click in new_clicks.iter() {
                 if listener.ty == click.ty {
                     match click.ty {
                         ClickEventType::OnPress => {
@@ -90,13 +92,11 @@ pub(crate) fn register_click(
                         }
                         ClickEventType::OnMove => {}
                         ClickEventType::OnRelease => {
-                            if visible_section
-                                .section
-                                .contains(click.click.origin.to_ui(scale_factor.factor))
-                                && visible_section
-                                .section
-                                .contains(click.click.end.unwrap().to_ui(scale_factor.factor))
-                            {
+                            let origin = click.click.origin.to_ui(scale_factor.factor);
+                            let end = click.click.end.unwrap().to_ui(scale_factor.factor);
+                            let contains_origin = visible_section.section.contains(origin);
+                            let contains_end = visible_section.section.contains(end);
+                            if contains_origin && contains_end {
                                 click_state.clicked = true;
                                 click_state.toggle = !click_state.toggle;
                             }

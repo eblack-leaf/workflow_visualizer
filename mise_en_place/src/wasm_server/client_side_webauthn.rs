@@ -54,4 +54,3 @@ impl From<FetchError> for AppMsg {
         AppMsg::Error(fe.as_string())
     }
 }
-

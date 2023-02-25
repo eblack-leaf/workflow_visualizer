@@ -1,7 +1,8 @@
-use serde::{Deserialize, Serialize};
-
+use mise_en_place::bevy_ecs::change_detection::ResMut;
+use mise_en_place::bevy_ecs::entity::Entity;
+use mise_en_place::bevy_ecs::prelude::{Commands, Query, Res, Resource};
 use mise_en_place::{
-    bevy_ecs, BundledIconKeys, Clickable, ClickListener, Color, FrontEndStages, IconBundle,
+    bevy_ecs, BundledIconKeys, ClickListener, Clickable, Color, FrontEndStages, IconBundle,
     IconKey, IconMesh, IconMeshAddRequest, IconSize, Job, Launch, Location, TextBoundGuide,
     TextBundle, TextScaleAlignment,
 };
@@ -9,9 +10,6 @@ use mise_en_place::{
     Area, ClickState, Exit, Icon, Idle, MouseAdapter, Position, Text, TouchAdapter, UIView,
     VirtualKeyboardAdapter, VirtualKeyboardType,
 };
-use mise_en_place::bevy_ecs::change_detection::ResMut;
-use mise_en_place::bevy_ecs::entity::Entity;
-use mise_en_place::bevy_ecs::prelude::{Commands, Query, Res, Resource};
 
 #[derive(Resource)]
 pub struct Counter {
@@ -33,6 +31,7 @@ pub fn update_text(
     counter.count += 1;
     _idle.can_idle = false;
     let mut click_info = String::new();
+    let mut second_info = String::new();
     for (entity, icon, click_state, position, area) in click_icon.iter() {
         if entity.index() == 3 {
             if click_state.clicked() {
@@ -43,8 +42,7 @@ pub fn update_text(
             } else {
                 if let Some(state) = counter.state {
                     if counter.count >= state + 100 {
-                        click_info +=
-                            &*format!("jimblack@example.com (copied)");
+                        click_info += &*format!("jimblack@example.com (copied)");
                         counter.state.take();
                     }
                 }
@@ -53,6 +51,7 @@ pub fn update_text(
         if entity.index() == 5 {
             if click_state.clicked() {
                 virtual_keyboard.open(VirtualKeyboardType::Keyboard);
+                second_info += &*format!("other button pushed at counter: {:?}", counter.count);
             }
         }
     }
@@ -78,7 +77,11 @@ pub fn update_text(
                 text.partitions.first_mut().unwrap().characters = click_info.clone();
             }
         }
-        if entity.index() == 4 {}
+        if entity.index() == 4 {
+            if !second_info.is_empty() {
+                text.partitions.first_mut().unwrap().characters = second_info.clone();
+            }
+        }
     }
 }
 
@@ -94,14 +97,14 @@ impl Launch for Launcher {
             .add_system_to_stage(FrontEndStages::Process, update_text);
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("Jim Black - Richmond Artist", (Color::OFF_WHITE, 0))]),
+                Text::new(vec![("Lorem ipsum dolor sit amet", (Color::OFF_WHITE, 0))]),
                 Location::from(((10u32, 10u32), 0u32)),
                 TextScaleAlignment::Large,
             ))
             .insert(TextBoundGuide::new(18, 6));
         job.container
             .spawn(TextBundle::new(
-                Text::new(vec![("jimblack@example.com", (Color::OFF_WHITE, 0))]),
+                Text::new(vec![("someone@example.com", (Color::OFF_WHITE, 0))]),
                 Location::from(((40u32, 600u32), 0u32)),
                 TextScaleAlignment::Medium,
             ))
@@ -125,22 +128,20 @@ impl Launch for Launcher {
         job.container
             .spawn(TextBundle::new(
                 Text::new(vec![(
-                    "atoeh aoneco oceceon ubsa onetas u hotena netu\
-                    aset ececn osanote otecu ou onecu onteecuho anec\
-                    ocunon ancenohu nocenosa uceocna uceocnau ehucuo \
-                    ocauhnc enou ononotctjwmq'v' 'nwj jwm qvj ktqvj k\
-                    jwv qjtktqvwjk qtjv kqtjw teecor .roll,.l. .co  t\
-                    aset ececn osanote otecu ou onecu onteecuho anec\
-                    ocunon ancenohu nocenosa uceocna uceocnau ehucuo \
-                    ocauhnc enou ononotctjwmq'v' 'nwj jwm qvj ktqvj k\
-                    et anen cis 'vq 'ut' conrec ateno ocetu utet ucano",
-                    (Color::OFF_WHITE, 0))]),
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. \
+                    Pellentesque odio dui, cursus vel commodo id, sollicitudin \
+                    nec ipsum. Aenean nec ante ac arcu interdum porttitor. \
+                    Praesent suscipit quis libero sed pellentesque. \
+                    Suspendisse feugiat egestas nulla sed semper.\
+                     Ut id quam volutpat, mollis mauris quis, cursus enim. \
+                     Curabitur ultrices id metus. ",
+                    (Color::OFF_WHITE, 0),
+                )]),
                 Location::from(((10u32, 100u32), 0u32)),
                 TextScaleAlignment::Medium,
             ))
             .insert(TextBoundGuide::new(38, 20));
-        job
-            .container
+        job.container
             .spawn(IconBundle::new(
                 Icon {},
                 IconSize::Large,

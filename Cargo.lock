@@ -2108,8 +2108,6 @@ name = "mise_en_place_app"
 version = "0.1.0"
 dependencies = [
  "mise_en_place",
- "rmp-serde",
- "serde",
 ]
 
 [[package]]
