@@ -10,12 +10,14 @@ use axum::http::{HeaderValue, Method, StatusCode};
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post};
 use axum::{Extension, Json, Router, ServiceExt};
+use axum_extra::middleware::option_layer;
 use axum_server::service::SendService;
 use axum_server::tls_rustls::RustlsConfig;
 use axum_sessions::async_session::MemoryStore;
 use axum_sessions::extractors::WritableSession;
 use axum_sessions::{SameSite, SessionLayer};
 use rand::{thread_rng, Rng};
+use tokio::signal;
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -72,7 +74,12 @@ impl ServerData {
 }
 
 impl WasmServer {
-    pub fn serve_at<P: Into<PathBuf>, Addr: Into<SocketAddr>>(src: P, rp_id: String, addr: Addr) {
+    pub fn serve_at<P: Into<PathBuf>, Addr: Into<SocketAddr>>(
+        src: P,
+        rp_id: String,
+        addr: Addr,
+        authentication: bool,
+    ) {
         let src = src.into();
         let rt = tokio::runtime::Runtime::new().unwrap();
         let html_content = std::fs::read_to_string(src.join("index.html")).unwrap();
@@ -87,22 +94,49 @@ impl WasmServer {
             .init();
         rt.block_on(async {
             let address = addr.into();
-            let url = "https://".to_string() + rp_id.as_str();
-            let rp_origin = Url::parse(url.as_str()).expect("Invalid URL");
-            let server_data = ServerData::new("localhost".to_string(), &rp_origin);
+            let (server_data, session_layer, web_authn_router) = match authentication {
+                true => {
+                    let url = "https://".to_string() + rp_id.as_str();
+                    let rp_origin = Url::parse(url.as_str()).expect("Invalid URL");
+                    let server_data = ServerData::new("localhost".to_string(), &rp_origin);
+                    let store = MemoryStore::new();
+                    let secret = thread_rng().gen::<[u8; 128]>(); // MUST be at least 64 bytes!
+                    let session_layer = SessionLayer::new(store, &secret)
+                        .with_cookie_name("webauthnrs")
+                        .with_same_site_policy(SameSite::Strict)
+                        .with_secure(true);
+                    let web_authn_router = Router::new()
+                        .route(
+                            "/register_start/:username",
+                            post(server_side_webauthn::start_register),
+                        )
+                        .route(
+                            "/register_finish",
+                            post(server_side_webauthn::finish_register),
+                        )
+                        .route(
+                            "/login_start/:username",
+                            post(server_side_webauthn::start_authentication),
+                        )
+                        .route(
+                            "/login_finish",
+                            post(server_side_webauthn::finish_authentication),
+                        );
+                    (
+                        Some(Extension(server_data)),
+                        Some(session_layer),
+                        Some(web_authn_router),
+                    )
+                }
+                false => (None, None, None),
+            };
             let tls_config = RustlsConfig::from_pem_file(
                 "mise_en_place/src/wasm_server/self_signed_certs/cert.pem",
                 "mise_en_place/src/wasm_server/self_signed_certs/key.pem",
             )
             .await
             .unwrap();
-            let store = MemoryStore::new();
-            let secret = thread_rng().gen::<[u8; 128]>(); // MUST be at least 64 bytes!
-            let session_layer = SessionLayer::new(store, &secret)
-                .with_cookie_name("webauthnrs")
-                .with_same_site_policy(SameSite::Strict)
-                .with_secure(true);
-            let site_router = Router::new()
+            let mut site_router = Router::new()
                 .route(
                     "/",
                     get(move || async {
@@ -134,46 +168,31 @@ impl WasmServer {
                     }),
                 )
                 .fallback_service(ServeDir::new(src));
-            let router = Router::new()
-                .route(
-                    "/register_start/:username",
-                    post(server_side_webauthn::start_register),
-                )
-                .route(
-                    "/register_finish",
-                    post(server_side_webauthn::finish_register),
-                )
-                .route(
-                    "/login_start/:username",
-                    post(server_side_webauthn::start_authentication),
-                )
-                .route(
-                    "/login_finish",
-                    post(server_side_webauthn::finish_authentication),
-                )
-                .merge(site_router)
-                .layer(
-                    ServiceBuilder::new()
-                        .layer(CompressionLayer::new().gzip(true))
-                        .layer(TraceLayer::new_for_http())
-                        .layer(SetResponseHeaderLayer::if_not_present(
-                            HeaderName::from_static("cross-origin-opener-policy"),
-                            HeaderValue::from_static("same-origin"),
-                        ))
-                        .layer(SetResponseHeaderLayer::if_not_present(
-                            HeaderName::from_static("cross-origin-embedder-policy"),
-                            HeaderValue::from_static("require-corp"),
-                        ))
-                        .layer(
-                            CorsLayer::new()
-                                .allow_methods([Method::GET, Method::POST])
-                                .allow_origin(address.to_string().parse::<HeaderValue>().unwrap()),
-                        )
-                        .layer(Extension(server_data))
-                        .layer(session_layer),
-                );
+            if authentication {
+                site_router = site_router.merge(web_authn_router.unwrap());
+            }
+            site_router = site_router.layer(
+                ServiceBuilder::new()
+                    .layer(CompressionLayer::new().gzip(true))
+                    .layer(TraceLayer::new_for_http())
+                    .layer(SetResponseHeaderLayer::if_not_present(
+                        HeaderName::from_static("cross-origin-opener-policy"),
+                        HeaderValue::from_static("same-origin"),
+                    ))
+                    .layer(SetResponseHeaderLayer::if_not_present(
+                        HeaderName::from_static("cross-origin-embedder-policy"),
+                        HeaderValue::from_static("require-corp"),
+                    ))
+                    .layer(
+                        CorsLayer::new()
+                            .allow_methods([Method::GET, Method::POST])
+                            .allow_origin(address.to_string().parse::<HeaderValue>().unwrap()),
+                    )
+                    .layer(option_layer(server_data))
+                    .layer(option_layer(session_layer)),
+            );
             axum_server::bind_rustls(address, tls_config)
-                .serve(router.into_make_service())
+                .serve(site_router.into_make_service())
                 .await
                 .unwrap();
         });

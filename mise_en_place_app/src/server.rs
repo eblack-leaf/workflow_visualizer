@@ -19,6 +19,7 @@ pub fn compile_and_serve() {
             "mise_en_place_app_web_build",
             "localhost".to_string(),
             ([0, 0, 0, 0], 3030),
+            false,
         );
         return;
     }

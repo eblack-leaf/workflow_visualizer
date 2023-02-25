@@ -72,7 +72,7 @@ impl Engen {
         Attachment::attach(self);
     }
     pub fn launch<Launcher: Launch>(mut self) {
-        Launcher::prepare(&mut self.frontend);
+        Launcher::prepare(&mut self.frontend); // if need to change stuff defer like mesh_add_request
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.event_loop.replace(EventLoop::new());
