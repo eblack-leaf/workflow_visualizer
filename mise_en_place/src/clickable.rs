@@ -1,10 +1,10 @@
 use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, ResMut, Without};
 
-use crate::{ClickEvent, ClickEventType, Depth, ScaleFactor, Visibility, VisibleSection};
-use crate::engen::{Attach, Engen};
 use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
 use crate::focus::FocusedEntity;
 use crate::signal::Signal;
+use crate::{ClickEvent, ClickEventType, Depth, ScaleFactor, Visibility, VisibleSection};
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -93,7 +93,10 @@ pub(crate) fn register_click(
     scale_factor: Res<ScaleFactor>,
     mut focused_entity: ResMut<Signal<FocusedEntity>>,
 ) {
-    let mut new_clicks = clicks.iter().map(|ce| TrackedClick::new(*ce)).collect::<Vec<TrackedClick>>();
+    let mut new_clicks = clicks
+        .iter()
+        .map(|ce| TrackedClick::new(*ce))
+        .collect::<Vec<TrackedClick>>();
     for (entity, _, listener, visibility, visible_section, depth) in clickables.iter() {
         if visibility.visible() {
             for click in new_clicks.iter_mut() {
@@ -117,7 +120,12 @@ pub(crate) fn register_click(
                         ClickEventType::OnMove => {}
                         ClickEventType::OnRelease => {
                             let origin = click.click_event.click.origin.to_ui(scale_factor.factor);
-                            let end = click.click_event.click.end.unwrap().to_ui(scale_factor.factor);
+                            let end = click
+                                .click_event
+                                .click
+                                .end
+                                .unwrap()
+                                .to_ui(scale_factor.factor);
                             let contains_origin = visible_section.section.contains(origin);
                             let contains_end = visible_section.section.contains(end);
                             if contains_origin && contains_end {

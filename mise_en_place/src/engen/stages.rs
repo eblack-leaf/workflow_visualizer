@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{StageLabel, SystemStage};
 
-use crate::{gfx, Job};
 use crate::engen::Container;
+use crate::{gfx, Job};
 
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {

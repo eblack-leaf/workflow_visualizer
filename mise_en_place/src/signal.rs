@@ -7,9 +7,7 @@ pub struct Signal<T: Resource> {
 
 impl<T: Resource> Signal<T> {
     pub fn new() -> Self {
-        Self {
-            emission: None
-        }
+        Self { emission: None }
     }
     pub fn emit(&mut self, emit_value: T) {
         self.emission.replace(emit_value);

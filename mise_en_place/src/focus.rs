@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Component, Entity, Query, ResMut, Resource};
 
-use crate::{Attach, Engen, FrontEndStages};
 use crate::signal::Signal;
+use crate::{Attach, Engen, FrontEndStages};
 
 #[derive(Component)]
 pub struct Focus {
@@ -30,9 +30,7 @@ pub struct FocusedEntity {
 
 impl FocusedEntity {
     pub(crate) fn new(entity: Option<Entity>) -> Self {
-        Self {
-            entity,
-        }
+        Self { entity }
     }
 }
 
@@ -46,14 +44,20 @@ pub(crate) fn set_focused(
         if let Some(ent) = f_entity.entity {
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if ent == entity {
-                    if !listener.focused() { listener.focus(); }
+                    if !listener.focused() {
+                        listener.focus();
+                    }
                 } else {
-                    if listener.focused() { listener.blur(); }
+                    if listener.focused() {
+                        listener.blur();
+                    }
                 }
             }
         } else {
             for (_, mut listener) in focus_listeners.iter_mut() {
-                if listener.focused() { listener.blur(); }
+                if listener.focused() {
+                    listener.blur();
+                }
             }
         }
     }
@@ -63,7 +67,13 @@ pub struct FocusPlugin;
 
 impl Attach for FocusPlugin {
     fn attach(engen: &mut Engen) {
-        engen.frontend.container.insert_resource(Signal::<FocusedEntity>::new());
-        engen.frontend.main.add_system_to_stage(FrontEndStages::PreProcessResolve, set_focused);
+        engen
+            .frontend
+            .container
+            .insert_resource(Signal::<FocusedEntity>::new());
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::PreProcessResolve, set_focused);
     }
 }

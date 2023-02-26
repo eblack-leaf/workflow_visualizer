@@ -1,10 +1,14 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, ResMut, SystemStage};
 use bevy_ecs::query::Changed;
 
-use crate::{Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Text, TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::engen::Container;
 use crate::focus::Focus;
 use crate::text::{TextBound, TextStages};
+use crate::{
+    Attach, ClickListener, Clickable, Color, Engen, FrontEndStages, Location, Text, TextBoundGuide,
+    TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
+    VirtualKeyboardType,
+};
 
 #[derive(Bundle)]
 pub struct TextInput {
@@ -71,7 +75,9 @@ impl TextInput {
             bound_guide,
             location,
             clickable: Clickable::new(ClickListener::on_press(), false),
-            max_characters: MaxCharacters(bound_guide.horizontal_character_max * bound_guide.line_max),
+            max_characters: MaxCharacters(
+                bound_guide.horizontal_character_max * bound_guide.line_max,
+            ),
             focus: Focus::new(),
             keyboard_type: VirtualKeyboardType::Keyboard,
         }
@@ -108,7 +114,15 @@ pub struct TextInputPlugin;
 
 impl Attach for TextInputPlugin {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_stage_after(TextStages::PlacementPreparation, "read_bound", SystemStage::single(read_area_from_text_bound));
-        engen.frontend.main.add_stage_after(FrontEndStages::PreProcessResolve, "open_keyboard", SystemStage::single(open_virtual_keyboard));
+        engen.frontend.main.add_stage_after(
+            TextStages::PlacementPreparation,
+            "read_bound",
+            SystemStage::single(read_area_from_text_bound),
+        );
+        engen.frontend.main.add_stage_after(
+            FrontEndStages::PreProcessResolve,
+            "open_keyboard",
+            SystemStage::single(open_virtual_keyboard),
+        );
     }
 }
