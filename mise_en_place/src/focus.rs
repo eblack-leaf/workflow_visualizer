@@ -44,9 +44,7 @@ pub(crate) fn set_focused(
         if let Some(ent) = f_entity.entity {
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if ent == entity {
-                    if !listener.focused() {
-                        listener.focus();
-                    }
+                    listener.focus();
                 } else {
                     if listener.focused() {
                         listener.blur();

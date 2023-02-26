@@ -37,10 +37,18 @@ pub(crate) fn open_virtual_keyboard(
     mut virtual_keyboard: ResMut<VirtualKeyboardAdapter>,
     focus_changed: Query<(&Focus, &VirtualKeyboardType), Changed<Focus>>,
 ) {
+    let mut should_close = true;
+    let mut keyboard = VirtualKeyboardType::Keyboard;
     for (focus, v_key_type) in focus_changed.iter() {
         if focus.focused() {
-            virtual_keyboard.open(*v_key_type);
+            should_close = false;
+            keyboard = *v_key_type;
         }
+    }
+    if should_close {
+        virtual_keyboard.close();
+    } else {
+        virtual_keyboard.open(keyboard);
     }
 }
 
