@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Component, Entity, Query, ResMut, Resource};
 
-use crate::signal::Signal;
 use crate::{Attach, Engen, FrontEndStages};
+use crate::signal::Signal;
 
 #[derive(Component)]
 pub struct Focus {
@@ -34,7 +34,6 @@ impl FocusedEntity {
     }
 }
 
-// post process after setters have been run in clickables
 pub(crate) fn set_focused(
     mut focused_entity: ResMut<Signal<FocusedEntity>>,
     mut focus_listeners: Query<(Entity, &mut Focus)>,

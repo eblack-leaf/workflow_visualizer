@@ -1,15 +1,16 @@
 use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, ResMut, Without};
 
-use crate::engen::FrontEndStages;
+use crate::{ClickEvent, ClickEventType, Depth, ScaleFactor, Visibility, VisibleSection};
 use crate::engen::{Attach, Engen};
+use crate::engen::FrontEndStages;
 use crate::focus::FocusedEntity;
 use crate::signal::Signal;
-use crate::{ClickEvent, ClickEventType, Depth, ScaleFactor, Visibility, VisibleSection};
 
 #[derive(Bundle)]
 pub struct Clickable {
     pub(crate) click_state: ClickState,
     pub(crate) click_listener: ClickListener,
+    // add mesh to clickable so it has bounds for interacting
 }
 
 impl Clickable {
