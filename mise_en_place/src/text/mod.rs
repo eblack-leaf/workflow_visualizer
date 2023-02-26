@@ -1,4 +1,8 @@
+pub(crate) use render_group::TextBound;
+
+pub use crate::text::place::{WrapStyleComponent, WrapStyleExpt};
 pub use crate::text::plugin::TextPlugin;
+pub use crate::text::plugin::TextStages;
 pub use crate::text::render_group::TextBoundGuide;
 pub use crate::text::scale::TextScaleAlignment;
 pub use crate::text::text::{PartitionMetadata, Text, TextBundle, TextPartition};

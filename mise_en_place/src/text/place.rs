@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use bevy_ecs::prelude::Component;
-use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle};
+use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle, WrapStyle};
 
 use crate::instance::key::{Key, KeyFactory};
 use crate::text::font::MonoSpacedFont;
@@ -16,6 +16,11 @@ pub(crate) struct Placer {
     filtered_placement: Vec<(Key, GlyphPosition<PartitionMetadata>)>,
 }
 
+pub type WrapStyleExpt = WrapStyle;
+
+#[derive(Component)]
+pub struct WrapStyleComponent(pub WrapStyle);
+
 impl Placer {
     pub(crate) fn new() -> Self {
         Self {
@@ -29,16 +34,21 @@ impl Placer {
         text: &Text,
         scale: &TextScale,
         font: &MonoSpacedFont,
+        wrap_style: &WrapStyleComponent,
         text_bound: Option<&TextBound>,
     ) {
         if let Some(bound) = text_bound {
             self.layout.reset(&LayoutSettings {
                 max_width: Option::from(bound.area.width),
                 max_height: Option::from(bound.area.height),
+                wrap_style: wrap_style.0,
                 ..LayoutSettings::default()
             });
         } else {
-            self.layout.reset(&LayoutSettings::default());
+            self.layout.reset(&LayoutSettings {
+                wrap_style: wrap_style.0,
+                ..LayoutSettings::default()
+            });
         }
         for part in text.partitions.iter() {
             self.layout.append(

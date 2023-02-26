@@ -4,7 +4,7 @@ use bytemuck::{Pod, Zeroable};
 use crate::coord::depth_adjust::DepthAdjust;
 
 #[repr(C)]
-#[derive(Component, Pod, Zeroable, Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Component, Pod, Zeroable, Copy, Clone, PartialEq, PartialOrd, Default, Debug)]
 pub struct Depth {
     pub layer: f32,
 }

@@ -23,10 +23,12 @@ pub use crate::icon::{
     BundledIconKeys, ColorHooks, ColorInvert, Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest,
     IconPlugin, IconSize, IconVertex, read_mesh, write_mesh,
 };
+pub use crate::signal::Signal;
 pub use crate::text::{
     PartitionMetadata, Text, TextBoundGuide, TextBundle, TextPartition, TextPlugin,
-    TextScaleAlignment,
+    TextScaleAlignment, WrapStyleComponent, WrapStyleExpt,
 };
+pub use crate::text_input::{TextInput, TextInputPlugin};
 pub use crate::theme::Theme;
 pub use crate::visibility::{Visibility, VisibleSection};
 pub use crate::window::{
@@ -40,11 +42,14 @@ mod clickable;
 mod color;
 mod coord;
 mod engen;
+mod focus;
 mod gfx;
 mod icon;
 mod instance;
 mod r_button;
+mod signal;
 mod text;
+mod text_input;
 mod theme;
 mod uniform;
 mod visibility;

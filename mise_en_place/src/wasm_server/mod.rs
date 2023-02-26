@@ -3,21 +3,17 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use axum::debug_handler;
-use axum::extract::Path;
 use axum::headers::HeaderName;
-use axum::http::{HeaderValue, Method, StatusCode};
+use axum::http::{HeaderValue, Method};
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post};
-use axum::{Extension, Json, Router, ServiceExt};
+use axum::{Extension, Router, ServiceExt};
 use axum_extra::middleware::option_layer;
 use axum_server::service::SendService;
 use axum_server::tls_rustls::RustlsConfig;
 use axum_sessions::async_session::MemoryStore;
-use axum_sessions::extractors::WritableSession;
 use axum_sessions::{SameSite, SessionLayer};
 use rand::{thread_rng, Rng};
-use tokio::signal;
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -29,10 +25,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use url::Url;
 use uuid::Uuid;
-use webauthn_rs::prelude::{
-    CreationChallengeResponse, Passkey, PasskeyAuthentication, PasskeyRegistration,
-    PublicKeyCredential, RegisterPublicKeyCredential,
-};
+use webauthn_rs::prelude::Passkey;
 use webauthn_rs::{Webauthn, WebauthnBuilder};
 
 mod client_side_webauthn;
@@ -130,9 +123,9 @@ impl WasmServer {
                 }
                 false => (None, None, None),
             };
-            let tls_config = RustlsConfig::from_pem_file(
-                "mise_en_place/src/wasm_server/self_signed_certs/cert.pem",
-                "mise_en_place/src/wasm_server/self_signed_certs/key.pem",
+            let tls_config = RustlsConfig::from_pem(
+                include_bytes!("self_signed_certs/cert.pem").to_vec(),
+                include_bytes!("self_signed_certs/key.pem").to_vec(),
             )
             .await
             .unwrap();

@@ -20,7 +20,7 @@ pub enum TextSystems {
 }
 
 #[derive(StageLabel)]
-enum TextStages {
+pub enum TextStages {
     PlacementPreparation,
     Placement,
     CalcArea,

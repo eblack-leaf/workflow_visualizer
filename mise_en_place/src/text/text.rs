@@ -1,12 +1,13 @@
 use bevy_ecs::prelude::{Bundle, Component};
+use fontdue::layout::WrapStyle;
 
+use crate::{Color, Location, Visibility, WrapStyleComponent};
 use crate::coord::{Section, UIView};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::{Color, Location, Visibility};
 
 pub struct TextPartition {
     pub characters: String,
@@ -61,6 +62,7 @@ pub struct TextBundle {
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
     pub(crate) visibility: Visibility,
+    pub(crate) wrap_style: WrapStyleComponent,
 }
 
 impl TextBundle {
@@ -82,6 +84,7 @@ impl TextBundle {
             ),
             difference: Difference::new(),
             visibility: Visibility::new(),
+            wrap_style: WrapStyleComponent(WrapStyle::Letter),
         }
     }
 }
