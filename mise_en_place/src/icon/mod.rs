@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Entity, Resource};
+use bevy_ecs::prelude::{Component, Entity, Resource};
 use wgpu::{include_wgsl, VertexState};
 
 pub(crate) use cache::{DifferenceHolder, Differences};
@@ -43,6 +43,7 @@ pub(crate) struct IconRenderer {
     pub(crate) area: HashMap<IconKey, InstanceAttributeManager<GpuArea>>,
     pub(crate) depth: HashMap<IconKey, InstanceAttributeManager<Depth>>,
     pub(crate) color: HashMap<IconKey, InstanceAttributeManager<Color>>,
+    pub(crate) secondary_color: HashMap<IconKey, InstanceAttributeManager<Color>>,
     pub(crate) color_invert: HashMap<IconKey, InstanceAttributeManager<ColorInvert>>,
     pub(crate) null_bit: HashMap<IconKey, InstanceAttributeManager<NullBit>>,
     pub(crate) key_factory: HashMap<IconKey, KeyFactory>,
@@ -66,6 +67,8 @@ impl IconRenderer {
         self.depth
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.color
+            .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
+        self.secondary_color
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.color_invert
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
@@ -111,6 +114,12 @@ impl IconRenderer {
             .write
             .write
             .insert(index, icon.color);
+        self.secondary_color
+            .get_mut(&icon.key)
+            .unwrap()
+            .write
+            .write
+            .insert(index, icon.secondary_color);
         self.color_invert
             .get_mut(&icon.key)
             .unwrap()
@@ -133,7 +142,7 @@ impl IconRenderer {
         for entity in differences.icon_removes.iter() {
             self.remove_icon(*entity);
         }
-        for (entity, (key, position, area, depth, color, color_invert)) in
+        for (entity, (key, position, area, depth, color, secondary_color, color_invert)) in
             differences.icon_adds.iter()
         {
             self.add_icon(
@@ -144,6 +153,7 @@ impl IconRenderer {
                     *area,
                     *depth,
                     *color,
+                    *secondary_color,
                     *color_invert,
                     scale_factor,
                 ),
@@ -231,6 +241,27 @@ impl IconRenderer {
                 .write
                 .insert(index, *color);
         }
+        for (entity, color) in differences.secondary_color.iter() {
+            let icon_key = self.entity_icons.get(entity).unwrap();
+            let key = self
+                .entity_keys
+                .get(&icon_key)
+                .unwrap()
+                .get(entity)
+                .unwrap();
+            let index = self
+                .indexer
+                .get(&icon_key)
+                .unwrap()
+                .get_index(*key)
+                .unwrap();
+            self.secondary_color
+                .get_mut(&icon_key)
+                .unwrap()
+                .write
+                .write
+                .insert(index, *color);
+        }
         for (entity, color_invert) in differences.color_invert.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
@@ -280,6 +311,10 @@ impl IconRenderer {
                 .get_mut(&icon_key)
                 .unwrap()
                 .grow(gfx_surface, new_max);
+            self.secondary_color
+                .get_mut(&icon_key)
+                .unwrap()
+                .grow(gfx_surface, new_max);
             self.color_invert
                 .get_mut(&icon_key)
                 .unwrap()
@@ -309,6 +344,10 @@ impl IconRenderer {
                 .unwrap()
                 .write_attribute(&gfx_surface);
             self.color
+                .get_mut(&key)
+                .unwrap()
+                .write_attribute(&gfx_surface);
+            self.secondary_color
                 .get_mut(&key)
                 .unwrap()
                 .write_attribute(&gfx_surface);
@@ -412,6 +451,11 @@ impl IconRenderer {
                                 step_mode: wgpu::VertexStepMode::Instance,
                                 attributes: &wgpu::vertex_attr_array![6 => Uint32],
                             },
+                            wgpu::VertexBufferLayout {
+                                array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
+                                step_mode: wgpu::VertexStepMode::Instance,
+                                attributes: &wgpu::vertex_attr_array![7 => Float32x4],
+                            },
                         ],
                     },
                     primitive: wgpu::PrimitiveState {
@@ -445,6 +489,7 @@ impl IconRenderer {
             meshes: HashMap::new(),
             position: HashMap::new(),
             color: HashMap::new(),
+            secondary_color: HashMap::new(),
             area: HashMap::new(),
             depth: HashMap::new(),
             key_factory: HashMap::new(),
@@ -495,6 +540,7 @@ impl Render for IconRenderer {
                 let area = self.area.get(icon_key).unwrap();
                 let depth = self.depth.get(icon_key).unwrap();
                 let color = self.color.get(icon_key).unwrap();
+                let secondary_color = self.secondary_color.get(icon_key).unwrap();
                 let null_bit = self.null_bit.get(icon_key).unwrap();
                 let color_invert = self.color_invert.get(icon_key).unwrap();
                 render_pass_handle.0.set_pipeline(&self.pipeline);
@@ -522,6 +568,9 @@ impl Render for IconRenderer {
                 render_pass_handle
                     .0
                     .set_vertex_buffer(6, color_invert.gpu.buffer.slice(..));
+                render_pass_handle
+                    .0
+                    .set_vertex_buffer(7, secondary_color.gpu.buffer.slice(..));
                 render_pass_handle
                     .0
                     .draw(0..mesh.length, 0..indexer.count());

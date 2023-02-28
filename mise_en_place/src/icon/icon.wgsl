@@ -15,6 +15,7 @@ struct VertexInput {
     @location(4) color: vec4<f32>,
     @location(5) null_bit: u32,
     @location(6) color_invert: u32,
+    @location(7) secondary_color: vec4<f32>,
 };
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -42,18 +43,18 @@ fn vertex_entry(vertex_input: VertexInput) -> VertexOutput {
             if (negative_space(vertex_input.vertex_data)) {
                 resolved_color = vertex_input.color;
             } else {
-                resolved_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                resolved_color = vertex_input.secondary_color;
             }
         } else {
             if (negative_space(vertex_input.vertex_data)) {
-                resolved_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                resolved_color = vertex_input.secondary_color;
             } else {
                 resolved_color = vertex_input.color;
             }
         }
     } else {
         if (negative_space(vertex_input.vertex_data)) {
-            resolved_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            resolved_color = vertex_input.secondary_color;
         } else {
             resolved_color = vertex_input.color;
         }

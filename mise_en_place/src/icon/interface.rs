@@ -8,7 +8,17 @@ use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::{Color, Location, UIView, Visibility};
 
 #[derive(Component)]
-pub struct Icon {}
+pub struct Icon {
+    pub secondary_color: Color,
+}
+
+impl Icon {
+    pub fn new<C: Into<Color>>(secondary_color: C) -> Self {
+        Self {
+            secondary_color: secondary_color.into(),
+        }
+    }
+}
 
 #[derive(Bundle)]
 pub struct IconBundle {

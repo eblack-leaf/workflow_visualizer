@@ -1,16 +1,17 @@
 use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, ResMut, Without};
 
-use crate::{ClickEvent, ClickEventType, Depth, ScaleFactor, Visibility, VisibleSection};
-use crate::engen::{Attach, Engen};
 use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
 use crate::focus::FocusedEntity;
 use crate::signal::Signal;
+use crate::{
+    ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
+};
 
 #[derive(Bundle)]
 pub struct Clickable {
     pub(crate) click_state: ClickState,
     pub(crate) click_listener: ClickListener,
-    // add mesh to clickable so it has bounds for interacting
 }
 
 impl Clickable {
@@ -26,6 +27,7 @@ impl Clickable {
 pub struct ClickState {
     pub(crate) clicked: bool,
     pub(crate) toggle: bool,
+    pub(crate) click_location: Option<Position<UIView>>,
 }
 
 impl ClickState {
@@ -33,6 +35,7 @@ impl ClickState {
         Self {
             clicked: false,
             toggle: initial_toggle,
+            click_location: None,
         }
     }
     pub fn clicked(&self) -> bool {
@@ -92,7 +95,7 @@ pub(crate) fn register_click(
     >,
     mut clicks: EventReader<ClickEvent>,
     scale_factor: Res<ScaleFactor>,
-    mut focused_entity: ResMut<Signal<FocusedEntity>>,
+    mut focused_entity: ResMut<FocusedEntity>,
 ) {
     let mut new_clicks = clicks
         .iter()
@@ -102,42 +105,34 @@ pub(crate) fn register_click(
         if visibility.visible() {
             for click in new_clicks.iter_mut() {
                 if listener.ty == click.click_event.ty {
+                    let ui_click_origin = click.click_event.click.origin.to_ui(scale_factor.factor);
                     match click.click_event.ty {
                         ClickEventType::OnPress => {
-                            if visible_section
-                                .section
-                                .contains(click.click_event.click.origin.to_ui(scale_factor.factor))
-                            {
-                                if let Some((g_ent, g_depth)) = click.grabbed.as_mut() {
-                                    if *depth < *g_depth {
-                                        *g_ent = entity;
-                                        *g_depth = *depth;
-                                    }
-                                } else {
-                                    click.grabbed.replace((entity, *depth));
-                                }
+                            if visible_section.section.contains(ui_click_origin) {
+                                set_grabbed(entity, depth, click);
                             }
                         }
-                        ClickEventType::OnMove => {}
+                        ClickEventType::OnMove => {
+                            // need to beef up click semantics to handle multiple listeners and detach clicks that
+                            // coincidentally start in bounds but only grabbed after moving off previous grabber
+                            // need bucket to detach click from to record relative and buffer on move click setting focus entity
+                            // let contains_origin = visible_section.section.contains(ui_click_origin);
+                            // let contains_current = visible_section.section.contains(click.click_event.click.current.unwrap().to_ui(scale_factor.factor));
+                            // if contains_current && contains_origin {
+                            //     set_grabbed(entity, depth, click);
+                            // }
+                        }
                         ClickEventType::OnRelease => {
-                            let origin = click.click_event.click.origin.to_ui(scale_factor.factor);
                             let end = click
                                 .click_event
                                 .click
                                 .end
                                 .unwrap()
                                 .to_ui(scale_factor.factor);
-                            let contains_origin = visible_section.section.contains(origin);
+                            let contains_origin = visible_section.section.contains(ui_click_origin);
                             let contains_end = visible_section.section.contains(end);
                             if contains_origin && contains_end {
-                                if let Some((g_ent, g_depth)) = click.grabbed.as_mut() {
-                                    if depth < g_depth {
-                                        *g_ent = entity;
-                                        *g_depth = *depth;
-                                    }
-                                } else {
-                                    click.grabbed.replace((entity, *depth));
-                                }
+                                set_grabbed(entity, depth, click);
                             }
                         }
                         ClickEventType::Cancelled => {}
@@ -149,12 +144,53 @@ pub(crate) fn register_click(
     for resolved_click in new_clicks {
         if let Some(grab) = resolved_click.grabbed {
             let (_, mut click_state, _, _, _, _) = clickables.get_mut(grab.0).expect("not there");
+            let click_location = match resolved_click.click_event.ty {
+                ClickEventType::OnPress => resolved_click
+                    .click_event
+                    .click
+                    .origin
+                    .to_ui(scale_factor.factor),
+                ClickEventType::OnMove => {
+                    // currently not getting events as semantics for moving needs buffer + detach
+                    resolved_click
+                        .click_event
+                        .click
+                        .current
+                        .unwrap()
+                        .to_ui(scale_factor.factor)
+                }
+                ClickEventType::OnRelease => resolved_click
+                    .click_event
+                    .click
+                    .end
+                    .unwrap()
+                    .to_ui(scale_factor.factor),
+                _ => Position::default(),
+            };
+            click_state.click_location.replace(click_location);
             click_state.clicked = true;
             click_state.toggle = !click_state.toggle;
-            focused_entity.emit(FocusedEntity::new(Some(grab.0)));
+            match resolved_click.click_event.ty {
+                ClickEventType::OnPress | ClickEventType::OnRelease => {
+                    focused_entity.entity.replace(grab.0);
+                }
+                ClickEventType::OnMove => {}
+                ClickEventType::Cancelled => {}
+            }
         } else {
-            focused_entity.emit(FocusedEntity::new(None));
+            focused_entity.entity.take();
         }
+    }
+}
+
+fn set_grabbed(entity: Entity, depth: &Depth, click: &mut TrackedClick) {
+    if let Some((g_ent, g_depth)) = click.grabbed.as_mut() {
+        if *depth < *g_depth {
+            *g_ent = entity;
+            *g_depth = *depth;
+        }
+    } else {
+        click.grabbed.replace((entity, *depth));
     }
 }
 

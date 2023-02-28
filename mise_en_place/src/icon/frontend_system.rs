@@ -15,6 +15,7 @@ pub(crate) fn initialization(
     icons: Query<
         (
             Entity,
+            &Icon,
             &IconKey,
             &Position<UIView>,
             &Area<UIView>,
@@ -33,7 +34,9 @@ pub(crate) fn initialization(
     for entity in removed_icons.iter() {
         removals.insert(entity);
     }
-    for (entity, icon_key, position, area, depth, color, color_invert, visibility) in icons.iter() {
+    for (entity, icon, icon_key, position, area, depth, color, color_invert, visibility) in
+        icons.iter()
+    {
         if visibility.visible() {
             difference_holder
                 .differences
@@ -42,13 +45,22 @@ pub(crate) fn initialization(
                 .icon_adds
                 .insert(
                     entity,
-                    (*icon_key, *position, *area, *depth, *color, *color_invert),
+                    (
+                        *icon_key,
+                        *position,
+                        *area,
+                        *depth,
+                        *color,
+                        icon.secondary_color,
+                        *color_invert,
+                    ),
                 );
             cache.icon_key.insert(entity, *icon_key);
             cache.position.insert(entity, *position);
             cache.area.insert(entity, *area);
             cache.depth.insert(entity, *depth);
             cache.color.insert(entity, *color);
+            cache.secondary_color.insert(entity, icon.secondary_color);
             cache.color_invert.insert(entity, *color_invert);
         } else {
             removals.insert(entity);
@@ -170,10 +182,32 @@ pub(crate) fn color_cache_check(
     }
 }
 
+pub(crate) fn secondary_color_cache_check(
+    icons: Query<(Entity, &Icon), Changed<Icon>>,
+    mut cache: ResMut<Cache>,
+    mut difference_holder: ResMut<DifferenceHolder>,
+) {
+    for (entity, color) in icons.iter() {
+        let cached_value = cache.secondary_color.get(&entity);
+        if let Some(val) = cached_value {
+            if color.secondary_color != *val {
+                difference_holder
+                    .differences
+                    .as_mut()
+                    .unwrap()
+                    .secondary_color
+                    .insert(entity, color.secondary_color);
+                cache.color.insert(entity, color.secondary_color);
+            }
+        }
+    }
+}
+
 pub(crate) fn icon_key_cache_check(
     icons: Query<
         (
             Entity,
+            &Icon,
             &IconKey,
             &Position<UIView>,
             &Area<UIView>,
@@ -186,7 +220,7 @@ pub(crate) fn icon_key_cache_check(
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, icon_key, position, area, depth, color, color_invert) in icons.iter() {
+    for (entity, icon, icon_key, position, area, depth, color, color_invert) in icons.iter() {
         let cached_value = cache.icon_key.get(&entity);
         if let Some(val) = cached_value {
             if icon_key != val {
@@ -203,7 +237,15 @@ pub(crate) fn icon_key_cache_check(
                     .icon_adds
                     .insert(
                         entity,
-                        (*icon_key, *position, *area, *depth, *color, *color_invert),
+                        (
+                            *icon_key,
+                            *position,
+                            *area,
+                            *depth,
+                            *color,
+                            icon.secondary_color,
+                            *color_invert,
+                        ),
                     );
                 cache.icon_key.insert(entity, *icon_key);
             }

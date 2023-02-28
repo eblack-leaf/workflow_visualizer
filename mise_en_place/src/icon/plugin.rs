@@ -6,6 +6,7 @@ use crate::icon::backend_system::{process_differences, read_add_requests, setup}
 use crate::icon::frontend_system::{
     area_cache_check, calc_area, color_cache_check, color_invert_cache_check, depth_cache_check,
     frontend_setup, icon_key_cache_check, initialization, position_cache_check,
+    secondary_color_cache_check,
 };
 use crate::icon::IconRenderer;
 
@@ -64,6 +65,10 @@ impl Attach for IconPlugin {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::PostProcess, color_cache_check);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::PostProcess, secondary_color_cache_check);
         engen
             .frontend
             .main

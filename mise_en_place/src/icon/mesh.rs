@@ -25,7 +25,8 @@ impl IconMesh {
         Self {
             mesh: match icon_key {
                 BundledIconKeys::Box => {
-                    read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap()
+                    let data = read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap();
+                    data
                 }
             },
         }
@@ -65,7 +66,7 @@ impl ColorInvert {
 }
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Serialize, Deserialize)]
+#[derive(Pod, Zeroable, Copy, Clone, Serialize, Deserialize, Debug)]
 pub struct ColorHooks {
     pub is_negative_space: f32,
     pub is_hookable: f32,
@@ -85,7 +86,7 @@ impl ColorHooks {
 }
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Serialize, Deserialize)]
+#[derive(Pod, Zeroable, Copy, Clone, Serialize, Deserialize, Debug)]
 pub struct IconVertex {
     pub position: GpuPosition,
     pub color_hooks: ColorHooks,
@@ -121,13 +122,11 @@ impl IconMeshAddRequest {
 }
 
 pub fn read_mesh<P: AsRef<Path>>(path: P) -> Option<Vec<IconVertex>> {
-    if let Ok(vec) = rmp_serde::from_slice(std::fs::read(path).unwrap().as_slice()) {
-        return Some(vec);
-    }
-    None
+    let data = std::fs::read(path).unwrap();
+    read_mesh_bytes(data.as_slice())
 }
 
-pub fn read_mesh_bytes(data: &'static [u8]) -> Option<Vec<IconVertex>> {
+pub fn read_mesh_bytes(data: &[u8]) -> Option<Vec<IconVertex>> {
     if let Ok(vec) = rmp_serde::from_slice(data) {
         return Some(vec);
     }

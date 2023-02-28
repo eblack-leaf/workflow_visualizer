@@ -15,7 +15,7 @@ pub struct Position<Context: CoordContext> {
 }
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize)]
+#[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize, Debug)]
 pub struct GpuPosition {
     pub x: f32,
     pub y: f32,

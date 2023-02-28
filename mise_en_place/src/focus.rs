@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Component, Entity, Query, ResMut, Resource};
+use bevy_ecs::prelude::{Component, DetectChanges, Entity, Query, ResMut, Resource};
 
 use crate::{Attach, Engen, FrontEndStages};
 use crate::signal::Signal;
@@ -35,14 +35,13 @@ impl FocusedEntity {
 }
 
 pub(crate) fn set_focused(
-    mut focused_entity: ResMut<Signal<FocusedEntity>>,
     mut focus_listeners: Query<(Entity, &mut Focus)>,
+    mut focused_entity_res: ResMut<FocusedEntity>,
 ) {
-    let focused = focused_entity.receive();
-    if let Some(f_entity) = focused {
-        if let Some(ent) = f_entity.entity {
+    if focused_entity_res.is_changed() {
+        if let Some(f_entity) = focused_entity_res.entity {
             for (entity, mut listener) in focus_listeners.iter_mut() {
-                if ent == entity {
+                if f_entity == entity {
                     listener.focus();
                 } else {
                     if listener.focused() {
@@ -67,7 +66,7 @@ impl Attach for FocusPlugin {
         engen
             .frontend
             .container
-            .insert_resource(Signal::<FocusedEntity>::new());
+            .insert_resource(FocusedEntity::new(None));
         engen
             .frontend
             .main

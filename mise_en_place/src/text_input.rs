@@ -1,14 +1,14 @@
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, ResMut, SystemStage};
+use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, Res, ResMut, SystemStage};
 use bevy_ecs::query::Changed;
 
-use crate::engen::Container;
-use crate::focus::Focus;
-use crate::text::{TextBound, TextStages};
 use crate::{
-    Attach, ClickListener, Clickable, Color, Engen, FrontEndStages, Location, Text, TextBoundGuide,
-    TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
+    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Signal, Text,
+    TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
+use crate::engen::Container;
+use crate::focus::{Focus, FocusedEntity};
+use crate::text::{TextBound, TextStages};
 
 #[derive(Bundle)]
 pub struct TextInput {
@@ -52,8 +52,11 @@ pub(crate) fn open_virtual_keyboard(
     }
 }
 
-pub(crate) fn read_input_if_focused() {
-    // limit text input by max characters here
+pub(crate) fn read_input_if_focused(focused: Query<&Focus>, focused_entity: Res<FocusedEntity>) {
+    if let Some(entity) = focused_entity.entity {
+        let input_listener = focused.get(entity).unwrap();
+        // limit text input by max characters here
+    }
 }
 
 #[derive(Component)]
@@ -99,6 +102,7 @@ impl TextInput {
     ) -> Entity {
         let text_color = text_color.into();
         let location = location.into();
+        // make text grid to place cursor at locations easier for editing
         let text = container
             .spawn(TextBundle::new(
                 Text::new(vec![TextPartition::from(("", (text_color, 0)))]),

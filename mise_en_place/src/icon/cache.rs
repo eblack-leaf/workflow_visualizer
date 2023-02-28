@@ -13,6 +13,7 @@ pub(crate) struct Cache {
     pub(crate) position: HashMap<Entity, Position<UIView>>,
     pub(crate) area: HashMap<Entity, Area<UIView>>,
     pub(crate) color: HashMap<Entity, Color>,
+    pub(crate) secondary_color: HashMap<Entity, Color>,
     pub(crate) color_invert: HashMap<Entity, ColorInvert>,
 }
 
@@ -24,6 +25,7 @@ impl Cache {
             position: HashMap::new(),
             area: HashMap::new(),
             color: HashMap::new(),
+            secondary_color: HashMap::new(),
             color_invert: HashMap::new(),
         }
     }
@@ -52,6 +54,7 @@ pub(crate) struct Differences {
             Area<UIView>,
             Depth,
             Color,
+            Color,
             ColorInvert,
         ),
     >,
@@ -60,6 +63,7 @@ pub(crate) struct Differences {
     pub(crate) position: HashMap<Entity, Position<UIView>>,
     pub(crate) area: HashMap<Entity, Area<UIView>>,
     pub(crate) color: HashMap<Entity, Color>,
+    pub(crate) secondary_color: HashMap<Entity, Color>,
     pub(crate) color_invert: HashMap<Entity, ColorInvert>,
 }
 
@@ -72,6 +76,7 @@ impl Differences {
             position: HashMap::new(),
             area: HashMap::new(),
             color: HashMap::new(),
+            secondary_color: HashMap::new(),
             color_invert: HashMap::new(),
         }
     }
@@ -82,6 +87,7 @@ impl Differences {
             self.area.remove(&entity);
             self.depth.remove(&entity);
             self.color.remove(&entity);
+            self.secondary_color.remove(&entity);
             self.color_invert.remove(&entity);
         }
         let added_entities = self
@@ -94,6 +100,7 @@ impl Differences {
             self.area.remove(&entity);
             self.depth.remove(&entity);
             self.color.remove(&entity);
+            self.secondary_color.remove(&entity);
             self.color_invert.remove(&entity);
         }
     }

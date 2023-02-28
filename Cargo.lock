@@ -2096,6 +2096,7 @@ dependencies = [
  "console_error_panic_hook",
  "console_log",
  "env_logger",
+ "flate2",
  "fontdue",
  "futures",
  "gloo",

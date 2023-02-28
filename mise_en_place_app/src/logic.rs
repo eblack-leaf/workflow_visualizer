@@ -26,7 +26,6 @@ pub fn update_text(
     mut exit: ResMut<Exit>,
     mouse_adapter: Res<MouseAdapter>,
     touch_adapter: Res<TouchAdapter>,
-    virtual_keyboard: Res<VirtualKeyboardAdapter>,
 ) {
     counter.count += 1;
     _idle.can_idle = false;
@@ -35,14 +34,13 @@ pub fn update_text(
     for (entity, icon, click_state, position, area) in click_icon.iter() {
         if entity.index() == 3 {
             if click_state.clicked() {
-                click_info += &*format!("email copied to clipboard:\n{:?}", "jimblack@example.com");
+                click_info += &*format!("email copied to clipboard: {:?}", "someone@example.com");
                 let current = counter.count;
                 counter.state.replace(current);
-                // virtual_keyboard.open(VirtualKeyboardType::Keyboard);
             } else {
                 if let Some(state) = counter.state {
                     if counter.count >= state + 100 {
-                        click_info += &*format!("jimblack@example.com (copied)");
+                        click_info += &*format!("someone@example.com (copied)");
                         counter.state.take();
                     }
                 }
@@ -50,7 +48,6 @@ pub fn update_text(
         }
         if entity.index() == 5 {
             if click_state.clicked() {
-                virtual_keyboard.open(VirtualKeyboardType::Keyboard);
                 second_info += &*format!("other button pushed at counter: {:?}", counter.count);
             }
         }
@@ -108,7 +105,7 @@ impl Launch for Launcher {
                 Location::from(((40u32, 600u32), 0u32)),
                 TextScaleAlignment::Medium,
             ))
-            .insert(TextBoundGuide::new(44, 3));
+            .insert(TextBoundGuide::new(38, 3));
         job.container.spawn(IconMeshAddRequest::new(
             IconKey("bundled box"),
             IconMesh::bundled(BundledIconKeys::Box),
@@ -117,7 +114,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(IconBundle::new(
-                Icon {},
+                Icon::new(Color::OFF_BLACK),
                 IconSize::Large,
                 IconKey("bundled box"),
                 Location::from(((10u32, 600u32), 0u32)),
@@ -143,7 +140,7 @@ impl Launch for Launcher {
             .insert(TextBoundGuide::new(38, 20));
         job.container
             .spawn(IconBundle::new(
-                Icon {},
+                Icon::new(Color::OFF_BLACK),
                 IconSize::Large,
                 IconKey("bundled box"),
                 Location::from(((350u32, 10u32), 0u32)),
