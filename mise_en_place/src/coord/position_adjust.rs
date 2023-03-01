@@ -85,11 +85,11 @@ pub(crate) fn animate_position_adjust(
         if done {
             cmd.entity(entity)
                 .remove::<Animation<PositionAdjustAnimator>>();
-            if pos.x + x_change != animation.animator.end.x {
-                // TODO semantics review necessary
-                position_change.x = pos.x + animation.animator.end.x - pos.x;
-            }
-            // same for y
+            // if pos.x + x_change != animation.animator.end.x {
+            //     // TODO semantics review necessary
+            //     position_change.x = pos.x + animation.animator.end.x - pos.x;
+            // }
+            // // same for y
         }
         cmd.entity(entity).insert(position_change);
     }

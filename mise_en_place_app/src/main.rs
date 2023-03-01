@@ -31,7 +31,7 @@ impl Launch for Launcher {
                 Location::new((0, 0), 0),
                 TextScaleAlignment::Medium,
             )
-        ).insert(PositionAdjust::<UIView>::new(100.0, 0.0).animate(2.0));
+        ).insert(PositionAdjust::<UIView>::new(200.0, 0.0).animate(3.0));
     }
 }
 
