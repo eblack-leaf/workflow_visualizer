@@ -1,14 +1,14 @@
 use bevy_ecs::prelude::Component;
 
+pub(crate) use attachment::VisibilityAttachment;
 pub use collision::{Collision, CollisionBegin, CollisionEnd};
-pub(crate) use plugin::VisibilityPlugin;
-pub(crate) use visible_bounds::ViewportOffsetUpdate;
 pub use visible_bounds::{VisibleBounds, VisibleBoundsPositionAdjust};
+pub(crate) use visible_bounds::ViewportOffsetUpdate;
 
 use crate::coord::{Section, UIView};
 
 mod collision;
-mod plugin;
+mod attachment;
 mod spacial_hasher;
 mod system;
 mod visible_bounds;

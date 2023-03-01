@@ -7,10 +7,10 @@ pub use crate::coord::location::Location;
 pub use crate::coord::panel::Panel;
 pub use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
-pub use crate::coord::position_adjust::PositionAdjust;
+pub use crate::coord::position_adjust::{PositionAdjust, PositionAdjustAnimator};
 pub use crate::coord::section::Section;
-use crate::engen::FrontEndStages;
 use crate::engen::{Attach, Engen};
+use crate::engen::FrontEndStages;
 
 mod area;
 mod area_adjust;
@@ -22,13 +22,12 @@ mod position;
 mod position_adjust;
 mod section;
 
-pub(crate) struct CoordPlugin;
+pub(crate) struct CoordAttachment;
 
 pub trait CoordContext
-where
-    Self: Copy + Clone + Send + Sync + 'static,
-{
-}
+    where
+        Self: Copy + Clone + Send + Sync + 'static,
+{}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Numerical;
@@ -45,7 +44,7 @@ pub struct DeviceView;
 
 impl CoordContext for DeviceView {}
 
-impl Attach for CoordPlugin {
+impl Attach for CoordAttachment {
     fn attach(engen: &mut Engen) {
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::CoordAdjust,

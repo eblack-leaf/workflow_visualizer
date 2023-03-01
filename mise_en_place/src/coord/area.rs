@@ -33,6 +33,10 @@ impl<Context: CoordContext> Area<Context> {
         self.width += adjust.width;
         self.height += adjust.height;
     }
+    pub fn adjusted<Adjust: Into<AreaAdjust<Context>>>(&self, adjust: Adjust) -> Self {
+        let adjust = adjust.into();
+        Self::new(self.width + adjust.width, self.height + adjust.height)
+    }
     pub fn as_numerical(&self) -> Area<Numerical> {
         Area::<Numerical>::new(self.width, self.height)
     }

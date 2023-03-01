@@ -41,6 +41,10 @@ impl<Context: CoordContext> Position<Context> {
         self.x += adjust.x;
         self.y += adjust.y;
     }
+    pub fn adjusted<Adjust: Into<PositionAdjust<Context>>>(&self, adjust: Adjust) -> Self {
+        let adjust = adjust.into();
+        Self::new(self.x + adjust.x, self.y + adjust.y)
+    }
     pub fn as_numerical(&self) -> Position<Numerical> {
         Position::<Numerical>::new(self.x, self.y)
     }

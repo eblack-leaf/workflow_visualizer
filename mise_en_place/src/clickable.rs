@@ -1,12 +1,11 @@
 use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, ResMut, Without};
 
-use crate::engen::FrontEndStages;
-use crate::engen::{Attach, Engen};
-use crate::focus::FocusedEntity;
-use crate::signal::Signal;
 use crate::{
     ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
 };
+use crate::engen::{Attach, Engen};
+use crate::engen::FrontEndStages;
+use crate::focus::FocusedEntity;
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -152,12 +151,13 @@ pub(crate) fn register_click(
                     .to_ui(scale_factor.factor),
                 ClickEventType::OnMove => {
                     // currently not getting events as semantics for moving needs buffer + detach
-                    resolved_click
-                        .click_event
-                        .click
-                        .current
-                        .unwrap()
-                        .to_ui(scale_factor.factor)
+                    // resolved_click
+                    //     .click_event
+                    //     .click
+                    //     .current
+                    //     .unwrap()
+                    //     .to_ui(scale_factor.factor)
+                    Position::default()
                 }
                 ClickEventType::OnRelease => resolved_click
                     .click_event
@@ -200,9 +200,9 @@ pub(crate) fn reset_click(mut clickables: Query<&mut ClickState>) {
     }
 }
 
-pub struct ClickablePlugin;
+pub struct ClickableAttachment;
 
-impl Attach for ClickablePlugin {
+impl Attach for ClickableAttachment {
     fn attach(engen: &mut Engen) {
         engen
             .frontend

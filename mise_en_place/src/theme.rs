@@ -40,9 +40,9 @@ impl Default for Theme {
     }
 }
 
-pub struct ThemePlugin;
+pub struct ThemeAttachment;
 
-impl Attach for ThemePlugin {
+impl Attach for ThemeAttachment {
     fn attach(engen: &mut Engen) {
         engen.backend.container.insert_resource(Theme::default());
     }

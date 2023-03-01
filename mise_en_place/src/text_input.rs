@@ -2,7 +2,7 @@ use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, Res, ResMut,
 use bevy_ecs::query::Changed;
 
 use crate::{
-    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Signal, Text,
+    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Text,
     TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
@@ -34,7 +34,7 @@ pub(crate) fn read_area_from_text_bound(
 }
 
 pub(crate) fn open_virtual_keyboard(
-    mut virtual_keyboard: ResMut<VirtualKeyboardAdapter>,
+    virtual_keyboard: Res<VirtualKeyboardAdapter>,
     focus_changed: Query<(&Focus, &VirtualKeyboardType), Changed<Focus>>,
 ) {
     let mut should_close = true;
@@ -54,8 +54,9 @@ pub(crate) fn open_virtual_keyboard(
 
 pub(crate) fn read_input_if_focused(focused: Query<&Focus>, focused_entity: Res<FocusedEntity>) {
     if let Some(entity) = focused_entity.entity {
-        let input_listener = focused.get(entity).unwrap();
-        // limit text input by max characters here
+        if let Ok(focus) = focused.get(entity) {
+            // limit text input by max characters here
+        }
     }
 }
 

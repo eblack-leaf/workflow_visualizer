@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{Component, Events, Resource};
 use winit::event::{ElementState, MouseButton};
 
+use crate::{Area, Position};
 use crate::coord::DeviceView;
 use crate::engen::{Attach, Engen};
 use crate::engen::{BackendStages, FrontEndStages};
 use crate::window::Orientation::{Landscape, Portrait};
-use crate::{Area, Position};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {}
@@ -45,7 +45,7 @@ impl VirtualKeyboardAdapter {
     pub fn open(&self, ty: VirtualKeyboardType) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             let trigger_element = match ty {
                 VirtualKeyboardType::Keyboard => document
@@ -239,9 +239,9 @@ impl Resize {
     }
 }
 
-pub struct WindowPlugin;
+pub struct WindowAttachment;
 
-impl Attach for WindowPlugin {
+impl Attach for WindowAttachment {
     fn attach(engen: &mut Engen) {
         engen
             .frontend

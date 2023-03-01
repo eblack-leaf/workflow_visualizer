@@ -20,6 +20,10 @@ impl Depth {
         let adjust = adjust.into();
         self.layer += adjust.layer;
     }
+    pub fn adjusted<Adjust: Into<DepthAdjust>>(&self, adjust: Adjust) -> Self {
+        let adjust = adjust.into();
+        Self::new((self.layer + adjust.layer) as u32)
+    }
 }
 
 impl From<u32> for Depth {

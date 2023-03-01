@@ -1,13 +1,13 @@
 use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
 use nalgebra::matrix;
 
+use crate::{Area, Position, Section};
 use crate::coord::{Depth, DeviceView};
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages};
+use crate::engen::{BackendStages, BackEndStartupStages};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::Resize;
-use crate::{Area, Position, Section};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -202,9 +202,9 @@ pub(crate) fn adjust_area(
     }
 }
 
-pub struct ViewportPlugin;
+pub struct ViewportAttachment;
 
-impl Attach for ViewportPlugin {
+impl Attach for ViewportAttachment {
     fn attach(engen: &mut Engen) {
         engen
             .backend

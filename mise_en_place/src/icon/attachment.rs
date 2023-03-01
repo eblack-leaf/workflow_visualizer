@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemStage};
 
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
 use crate::icon::backend_system::{process_differences, read_add_requests, setup};
 use crate::icon::frontend_system::{
     area_cache_check, calc_area, color_cache_check, color_invert_cache_check, depth_cache_check,
@@ -10,14 +10,14 @@ use crate::icon::frontend_system::{
 };
 use crate::icon::IconRenderer;
 
-pub struct IconPlugin;
+pub struct IconAttachment;
 
 #[derive(StageLabel)]
 pub enum IconStages {
     CalcArea,
 }
 
-impl Attach for IconPlugin {
+impl Attach for IconAttachment {
     fn attach(engen: &mut Engen) {
         engen.add_renderer::<IconRenderer>();
         engen
@@ -44,34 +44,34 @@ impl Attach for IconPlugin {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, initialization);
+            .add_system_to_stage(FrontEndStages::Resolve, initialization);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, position_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, position_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, color_invert_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, color_invert_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, area_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, area_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, depth_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, depth_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, color_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, color_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, secondary_color_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, secondary_color_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcess, icon_key_cache_check);
+            .add_system_to_stage(FrontEndStages::Resolve, icon_key_cache_check);
     }
 }

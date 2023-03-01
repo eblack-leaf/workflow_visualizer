@@ -31,7 +31,7 @@ mod wasm;
 
 pub struct Engen {
     event_loop: Option<EventLoop<()>>,
-    attachment_queue: Vec<Box<fn(&mut Engen)>>,
+    attachment_queue: Vec<Attachment>,
     #[allow(dead_code)]
     options: EngenOptions,
     pub(crate) render_fns: (RenderFns, RenderFns),
@@ -42,7 +42,7 @@ pub struct Engen {
 }
 
 impl Engen {
-    pub fn new(options: EngenOptions) -> Self {
+    pub(crate) fn new(options: EngenOptions) -> Self {
         Self {
             event_loop: None,
             attachment_queue: vec![],
@@ -54,8 +54,8 @@ impl Engen {
             window: None,
         }
     }
-    pub fn add_plugin<Plugin: Attach>(&mut self) {
-        self.attachment_queue.push(Box::new(Plugin::attach));
+    pub fn add_attachment<Attached: Attach>(&mut self) {
+        self.attachment_queue.push(Attachment::using::<Attached>());
     }
     pub fn add_renderer<Renderer: Extract + Render + Resource>(&mut self) {
         match Renderer::phase() {
@@ -71,16 +71,18 @@ impl Engen {
     pub(crate) fn invoke_attach<Attachment: Attach>(&mut self) {
         Attachment::attach(self);
     }
-    pub fn launch<Launcher: Launch>(mut self) {
-        Launcher::prepare(&mut self.frontend); // if need to change stuff defer like mesh_add_request
+    pub fn launch<Launcher: Launch>() {
+        let mut engen = Engen::new(Launcher::options());
+        engen.attachment_queue = Launcher::attachments();
+        Launcher::prepare(&mut engen.frontend);
         #[cfg(not(target_arch = "wasm32"))]
         {
-            self.event_loop.replace(EventLoop::new());
-            ignite::ignite(self);
+            engen.event_loop.replace(EventLoop::new());
+            ignite::ignite(engen);
         }
 
         #[cfg(target_arch = "wasm32")]
-        wasm_bindgen_futures::spawn_local(wasm::web_ignite(self));
+        wasm_bindgen_futures::spawn_local(wasm::web_ignite(engen));
     }
     fn attach_scale_factor(&mut self, scale_factor: f64) {
         let scale_factor = ScaleFactor::new(scale_factor);
@@ -248,17 +250,24 @@ impl Engen {
         }
     }
     fn attach_from_queue(&mut self) {
-        let attachment_queue = self
-            .attachment_queue
-            .drain(..)
-            .collect::<Vec<Box<fn(&mut Engen)>>>();
+        let attachment_queue = self.attachment_queue.drain(..).collect::<Vec<Attachment>>();
         for attach_fn in attachment_queue {
-            attach_fn(self);
+            attach_fn.0(self);
         }
     }
 }
 
+pub struct Attachment(pub Box<fn(&mut Engen)>);
+
+impl Attachment {
+    pub fn using<T: Attach>() -> Self {
+        Self(Box::new(T::attach))
+    }
+}
+
 pub trait Launch {
+    fn options() -> EngenOptions;
+    fn attachments() -> Vec<Attachment>;
     fn prepare(job: &mut Job);
 }
 

@@ -27,9 +27,9 @@ pub enum TextStages {
     TextFrontEnd,
 }
 
-pub struct TextPlugin;
+pub struct TextAttachment;
 
-impl Attach for TextPlugin {
+impl Attach for TextAttachment {
     fn attach(engen: &mut Engen) {
         engen.add_renderer::<TextRenderer>();
         engen

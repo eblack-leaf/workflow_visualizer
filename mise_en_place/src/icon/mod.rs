@@ -1,28 +1,28 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Component, Entity, Resource};
+use bevy_ecs::prelude::{Entity, Resource};
 use wgpu::{include_wgsl, VertexState};
 
 pub(crate) use cache::{DifferenceHolder, Differences};
 pub(crate) use instance::IconAdd;
 pub use interface::IconAreaGuide;
-pub(crate) use mesh::GpuIconMesh;
 pub use mesh::{
-    read_mesh, write_mesh, BundledIconKeys, ColorHooks, ColorInvert, IconKey, IconMesh,
-    IconMeshAddRequest, IconVertex,
+    BundledIconKeys, ColorHooks, ColorInvert, IconKey, IconMesh, IconMeshAddRequest, IconVertex,
+    read_mesh, write_mesh,
 };
+pub(crate) use mesh::GpuIconMesh;
 
+use crate::{Area, Color, Depth, DeviceView, Job, Viewport};
 use crate::coord::{GpuArea, GpuPosition};
-use crate::gfx::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::gfx::{Render, RenderPassHandle, RenderPhase};
+use crate::gfx::Extract;
+pub use crate::icon::attachment::IconAttachment;
 pub use crate::icon::interface::{Icon, IconBundle, IconSize};
-pub use crate::icon::plugin::IconPlugin;
 use crate::instance::index::Indexer;
-use crate::instance::key::{Key, KeyFactory};
 use crate::instance::InstanceAttributeManager;
+use crate::instance::key::{Key, KeyFactory};
 use crate::instance::NullBit;
-use crate::{Area, Color, Depth, DeviceView, Job, Viewport};
 
 mod backend_system;
 mod cache;
@@ -30,7 +30,7 @@ mod frontend_system;
 mod instance;
 mod interface;
 mod mesh;
-mod plugin;
+mod attachment;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {
@@ -143,7 +143,7 @@ impl IconRenderer {
             self.remove_icon(*entity);
         }
         for (entity, (key, position, area, depth, color, secondary_color, color_invert)) in
-            differences.icon_adds.iter()
+        differences.icon_adds.iter()
         {
             self.add_icon(
                 *entity,

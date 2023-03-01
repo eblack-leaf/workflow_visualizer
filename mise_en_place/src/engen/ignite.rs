@@ -1,13 +1,14 @@
 use winit::event::{Event, StartCause, WindowEvent};
 
-use crate::clickable::ClickablePlugin;
-use crate::coord::CoordPlugin;
+use crate::{Engen, gfx, ViewportAttachment};
+use crate::clickable::ClickableAttachment;
+use crate::coord::CoordAttachment;
 use crate::engen::TaskLabel;
-use crate::focus::FocusPlugin;
-use crate::theme::ThemePlugin;
-use crate::visibility::VisibilityPlugin;
-use crate::window::WindowPlugin;
-use crate::{gfx, Engen, ViewportPlugin};
+use crate::focus::FocusAttachment;
+use crate::theme::ThemeAttachment;
+use crate::time::Timer;
+use crate::visibility::VisibilityAttachment;
+use crate::window::WindowAttachment;
 
 pub(crate) fn ignite(mut engen: Engen) {
     let event_loop = engen.event_loop.take().expect("no event loop");
@@ -16,13 +17,14 @@ pub(crate) fn ignite(mut engen: Engen) {
             Event::NewEvents(start_cause) => match start_cause {
                 StartCause::Init => {
                     engen.init_native_gfx(event_loop_window_target);
-                    engen.invoke_attach::<CoordPlugin>();
-                    engen.invoke_attach::<WindowPlugin>();
-                    engen.invoke_attach::<ViewportPlugin>();
-                    engen.invoke_attach::<ThemePlugin>();
-                    engen.invoke_attach::<VisibilityPlugin>();
-                    engen.invoke_attach::<ClickablePlugin>();
-                    engen.invoke_attach::<FocusPlugin>();
+                    engen.invoke_attach::<Timer>();
+                    engen.invoke_attach::<CoordAttachment>();
+                    engen.invoke_attach::<WindowAttachment>();
+                    engen.invoke_attach::<ViewportAttachment>();
+                    engen.invoke_attach::<ThemeAttachment>();
+                    engen.invoke_attach::<VisibilityAttachment>();
+                    engen.invoke_attach::<ClickableAttachment>();
+                    engen.invoke_attach::<FocusAttachment>();
                     engen.attach_from_queue();
                     engen.frontend.exec(TaskLabel::Startup);
                     engen.backend.exec(TaskLabel::Startup);
