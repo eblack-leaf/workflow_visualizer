@@ -1,8 +1,3 @@
-use bevy_ecs::prelude::{
-    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res, ResMut, SystemStage,
-};
-use bevy_ecs::query::Changed;
-
 use crate::engen::Container;
 use crate::focus::{Focus, FocusSystems, FocusedEntity};
 use crate::text::{TextBound, TextStages};
@@ -11,6 +6,10 @@ use crate::{
     TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
+use bevy_ecs::prelude::{
+    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res, ResMut, SystemStage,
+};
+use bevy_ecs::query::Changed;
 
 #[derive(Bundle)]
 pub struct TextInput {
@@ -129,10 +128,9 @@ pub struct TextInputPlugin;
 
 impl Attach for TextInputPlugin {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_stage_after(
-            TextStages::PlacementPreparation,
-            "read_bound",
-            SystemStage::single(read_area_from_text_bound),
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::PostProcessPreparation,
+            read_area_from_text_bound,
         );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
