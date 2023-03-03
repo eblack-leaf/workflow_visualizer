@@ -7,6 +7,7 @@ use crate::engen::Container;
 pub enum FrontEndStartupStages {
     Startup,
     Initialization,
+    Last,
 }
 
 #[derive(StageLabel)]
@@ -15,7 +16,7 @@ pub enum FrontEndStages {
     Resize,
     PreProcess,
     PreProcessResolve,
-    Process,
+    ProcessAndSpawn,
     AnimationStart,
     AnimationUpdate,
     CoordAdjust,
@@ -49,6 +50,10 @@ pub(crate) fn staged_frontend() -> Job {
         FrontEndStartupStages::Initialization,
         SystemStage::parallel(),
     );
+    job.startup.add_stage(
+        FrontEndStartupStages::Last,
+        SystemStage::parallel(),
+    );
     job.main
         .add_stage(FrontEndStages::First, SystemStage::parallel());
     job.main
@@ -58,7 +63,7 @@ pub(crate) fn staged_frontend() -> Job {
     job.main
         .add_stage(FrontEndStages::PreProcessResolve, SystemStage::parallel());
     job.main
-        .add_stage(FrontEndStages::Process, SystemStage::parallel());
+        .add_stage(FrontEndStages::ProcessAndSpawn, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::AnimationStart, SystemStage::parallel());
     job.main

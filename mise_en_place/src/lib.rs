@@ -31,6 +31,7 @@ pub use crate::text::{
 };
 pub use crate::text_input::{TextInput, TextInputPlugin};
 pub use crate::theme::Theme;
+pub use crate::time::{TimeDelta, TimeMarker, Timer};
 pub use crate::visibility::{Visibility, VisibleSection};
 pub use crate::window::{
     Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,

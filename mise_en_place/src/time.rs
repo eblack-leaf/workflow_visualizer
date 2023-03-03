@@ -4,7 +4,7 @@ use bevy_ecs::prelude::{ResMut, Resource};
 #[cfg(not(target_arch = "wasm32"))]
 use tokio::time::Instant;
 
-use crate::{Attach, Engen, FrontEndStages};
+use crate::{Attach, Engen, FrontEndStages, FrontEndStartupStages};
 
 #[derive(Resource)]
 pub struct Timer {
@@ -34,6 +34,11 @@ impl Timer {
     }
     pub(crate) fn read(&mut self) -> TimeDelta {
         self.last = self.current;
+        self.set_to_now();
+        self.frame_diff()
+    }
+
+    fn set_to_now(&mut self) {
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.current = Instant::now().duration_since(self.beginning).as_secs_f64();
@@ -45,12 +50,15 @@ impl Timer {
                 None => self.last,
             }
         }
-        self.frame_diff()
     }
 }
 
 pub(crate) fn read_time(mut timer: ResMut<Timer>) {
     let _delta = timer.read();
+}
+
+pub(crate) fn start_time(mut timer: ResMut<Timer>) {
+    timer.set_to_now();
 }
 
 impl Attach for Timer {
@@ -60,6 +68,7 @@ impl Attach for Timer {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::First, read_time);
+        engen.frontend.startup.add_system_to_stage(FrontEndStartupStages::Last, start_time);
     }
 }
 
