@@ -81,14 +81,15 @@ pub(crate) fn animate_position_adjust(
         let (delta, done) = animation.calc_delta_factor(&timer);
         let x_change = animation.animator.total_adjust.x * delta;
         let y_change = animation.animator.total_adjust.y * delta;
+
         let mut position_change = PositionAdjust::<UIView>::new(x_change, y_change);
         if done {
             cmd.entity(entity)
                 .remove::<Animation<PositionAdjustAnimator>>();
-            // if pos.x + x_change != animation.animator.end.x {
-            //     // TODO semantics review necessary
-            //     position_change.x = pos.x + animation.animator.end.x - pos.x;
-            // }
+            if pos.x + x_change != animation.animator.end.x {
+                // TODO semantics review necessary
+                position_change.x = animation.animator.end.x - pos.x;
+            }
             // // same for y
         }
         cmd.entity(entity).insert(position_change);

@@ -1,4 +1,6 @@
-use bevy_ecs::prelude::{ResMut, Resource, Schedule, SystemStage, World};
+use std::collections::HashMap;
+
+use bevy_ecs::prelude::{Entity, ResMut, Resource, Schedule, SystemStage, World};
 
 pub type Container = World;
 pub type Task = Schedule;
@@ -47,6 +49,19 @@ impl Exit {
     }
 }
 
+#[derive(Resource)]
+pub struct EntityStore {
+    pub store: HashMap<&'static str, Entity>,
+}
+
+impl EntityStore {
+    pub fn new() -> Self {
+        Self {
+            store: HashMap::new(),
+        }
+    }
+}
+
 pub struct Job {
     pub execution_state: ExecutionState,
     pub container: Container,
@@ -56,6 +71,9 @@ pub struct Job {
 }
 
 impl Job {
+    pub fn store_entity(&mut self, id: &'static str, entity: Entity) {
+        self.container.get_resource_mut::<EntityStore>().expect("no entity store").store.insert(id, entity);
+    }
     pub(crate) fn new() -> Self {
         Self {
             execution_state: ExecutionState::Active,
@@ -63,6 +81,7 @@ impl Job {
                 let mut container = Container::new();
                 container.insert_resource(Exit::new());
                 container.insert_resource(Idle::new());
+                container.insert_resource(EntityStore::new());
                 container
             },
             startup: Task::default(),

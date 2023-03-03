@@ -2,7 +2,7 @@ pub use bevy_ecs;
 
 pub use animate::{Animate, Animation, start_animations};
 pub use engen::{Attach, Engen, Launch};
-pub use engen::{Attachment, ExecutionState, Exit, Idle, Job, Task};
+pub use engen::{Attachment, EntityStore, ExecutionState, Exit, Idle, Job, Task};
 pub use engen::BackendStages;
 pub use engen::BackEndStartupStages;
 pub use engen::EngenOptions;
