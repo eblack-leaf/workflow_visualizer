@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Component, Events, Resource};
+use bevy_ecs::prelude::{Commands, Component, EventReader, Events, Res, ResMut, Resource};
 use winit::event::{ElementState, MouseButton};
 
-use crate::{Area, Position};
 use crate::coord::DeviceView;
 use crate::engen::{Attach, Engen};
 use crate::engen::{BackendStages, FrontEndStages};
 use crate::window::Orientation::{Landscape, Portrait};
+use crate::{Area, FrontEndStartupStages, Position, VisibleBounds};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {}
@@ -45,7 +45,7 @@ impl VirtualKeyboardAdapter {
     pub fn open(&self, ty: VirtualKeyboardType) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{JsCast, prelude::*};
+            use wasm_bindgen::{prelude::*, JsCast};
             let document = web_sys::window().unwrap().document().unwrap();
             let trigger_element = match ty {
                 VirtualKeyboardType::Keyboard => document
@@ -210,6 +210,25 @@ impl Orientation {
     }
 }
 
+pub(crate) fn setup_orientation(
+    mut cmd: Commands,
+    visible_bounds: Res<VisibleBounds>,
+    scale_factor: Res<ScaleFactor>,
+) {
+    cmd.insert_resource(Orientation::new(
+        visible_bounds.section.area.to_device(scale_factor.factor),
+    ));
+}
+
+pub(crate) fn calc_orientation(
+    mut events: EventReader<Resize>,
+    mut orientation: ResMut<Orientation>,
+) {
+    for event in events.iter() {
+        *orientation = Orientation::new(event.size);
+    }
+}
+
 #[derive(Resource, Clone, Copy)]
 pub struct ScaleFactor {
     pub(crate) factor: f64,
@@ -255,6 +274,14 @@ impl Attach for WindowAttachment {
             .frontend
             .container
             .insert_resource(Events::<ClickEvent>::default());
+        engen
+            .frontend
+            .startup
+            .add_system_to_stage(FrontEndStartupStages::Initialization, setup_orientation);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Resize, calc_orientation);
         engen
             .frontend
             .main

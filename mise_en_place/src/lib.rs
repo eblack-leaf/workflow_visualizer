@@ -1,19 +1,19 @@
 pub use bevy_ecs;
 
-pub use animate::{Animate, Animation, start_animations};
-pub use engen::{Attach, Engen, Launch};
-pub use engen::{Attachment, EntityStore, ExecutionState, Exit, Idle, Job, Task};
-pub use engen::BackendStages;
+pub use animate::{start_animations, Animate, Animation};
 pub use engen::BackEndStartupStages;
+pub use engen::BackendStages;
 pub use engen::EngenOptions;
 pub use engen::FrontEndStages;
 pub use engen::FrontEndStartupStages;
+pub use engen::{Attach, Engen, Launch};
+pub use engen::{Attachment, EntityStore, ExecutionState, Exit, Idle, Job, Task};
 pub use visibility::VisibleBounds;
 pub use wasm_compiler::WasmCompiler;
 #[cfg(not(target_arch = "wasm32"))]
 pub use wasm_server::WasmServer;
 
-pub use crate::clickable::{Clickable, ClickListener, ClickState};
+pub use crate::clickable::{ClickListener, ClickState, Clickable};
 pub use crate::color::Color;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
@@ -21,8 +21,8 @@ pub use crate::coord::{
 };
 pub use crate::gfx::{Viewport, ViewportAttachment};
 pub use crate::icon::{
-    BundledIconKeys, ColorHooks, ColorInvert, Icon, IconAttachment, IconBundle, IconKey,
-    IconMesh, IconMeshAddRequest, IconSize, IconVertex, read_mesh, write_mesh,
+    read_mesh, write_mesh, BundledIconKeys, ColorHooks, ColorInvert, Icon, IconAttachment,
+    IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconSize, IconVertex,
 };
 pub use crate::signal::Signal;
 pub use crate::text::{

@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{StageLabel, SystemStage};
 
-use crate::{gfx, Job};
 use crate::engen::Container;
+use crate::{gfx, Job};
 
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {
@@ -19,6 +19,7 @@ pub enum FrontEndStages {
     ProcessAndSpawn,
     AnimationStart,
     AnimationUpdate,
+    AnimationResolved,
     CoordAdjust,
     VisibilityPreparation,
     ResolveVisibility,
@@ -50,10 +51,8 @@ pub(crate) fn staged_frontend() -> Job {
         FrontEndStartupStages::Initialization,
         SystemStage::parallel(),
     );
-    job.startup.add_stage(
-        FrontEndStartupStages::Last,
-        SystemStage::parallel(),
-    );
+    job.startup
+        .add_stage(FrontEndStartupStages::Last, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::First, SystemStage::parallel());
     job.main
@@ -68,6 +67,8 @@ pub(crate) fn staged_frontend() -> Job {
         .add_stage(FrontEndStages::AnimationStart, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::AnimationUpdate, SystemStage::parallel());
+    job.main
+        .add_stage(FrontEndStages::AnimationResolved, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
     job.main.add_stage(

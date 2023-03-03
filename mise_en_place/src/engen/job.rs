@@ -72,7 +72,11 @@ pub struct Job {
 
 impl Job {
     pub fn store_entity(&mut self, id: &'static str, entity: Entity) {
-        self.container.get_resource_mut::<EntityStore>().expect("no entity store").store.insert(id, entity);
+        self.container
+            .get_resource_mut::<EntityStore>()
+            .expect("no entity store")
+            .store
+            .insert(id, entity);
     }
     pub(crate) fn new() -> Self {
         Self {

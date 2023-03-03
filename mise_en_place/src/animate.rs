@@ -41,7 +41,6 @@ pub fn start_animations<T: Component>(
 ) {
     for mut anim in uninitialized_animations.iter_mut() {
         let mark = timer.mark();
-        println!("starting anim: {:.2}", mark.0);
         anim.start.replace(mark);
     }
 }
@@ -82,7 +81,6 @@ impl Interpolator {
         let mut extract = segment;
         let mut done = false;
         if let Some(over) = overage {
-            println!("over: {}", over);
             extract += over;
             done = true;
         }

@@ -10,8 +10,14 @@ use crate::{Attach, Engen, FrontEndStages, FrontEndStartupStages};
 pub struct Timer {
     #[cfg(not(target_arch = "wasm32"))]
     pub(crate) beginning: Instant,
+    #[cfg(target_arch = "wasm32")]
+    pub(crate) beginning: f64,
     pub current: f64,
     pub last: f64,
+}
+
+fn millisecond_to_sec(ms: f64) -> f64 {
+    ms / 1000.0
 }
 
 impl Timer {
@@ -19,6 +25,13 @@ impl Timer {
         Self {
             #[cfg(not(target_arch = "wasm32"))]
             beginning: Instant::now(),
+            #[cfg(target_arch = "wasm32")]
+            beginning: millisecond_to_sec(
+                match web_sys::window().expect("no window").performance() {
+                    Some(perf) => perf.now(),
+                    None => 0.0,
+                },
+            ),
             current: 0.0,
             last: 0.0,
         }
@@ -45,10 +58,11 @@ impl Timer {
         }
         #[cfg(target_arch = "wasm32")]
         {
-            self.current = match web_sys::window().expect("no window").performance() {
+            let now = match web_sys::window().expect("no window").performance() {
                 Some(perf) => perf.now(),
                 None => self.last,
-            }
+            };
+            self.current = millisecond_to_sec(now) - self.beginning;
         }
     }
 }
@@ -68,7 +82,10 @@ impl Attach for Timer {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::First, read_time);
-        engen.frontend.startup.add_system_to_stage(FrontEndStartupStages::Last, start_time);
+        engen
+            .frontend
+            .startup
+            .add_system_to_stage(FrontEndStartupStages::Last, start_time);
     }
 }
 

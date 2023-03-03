@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, ResMut, Without};
 
+use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
+use crate::focus::FocusedEntity;
 use crate::{
     ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
 };
-use crate::engen::{Attach, Engen};
-use crate::engen::FrontEndStages;
-use crate::focus::FocusedEntity;
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -165,7 +165,7 @@ pub(crate) fn register_click(
                     .end
                     .unwrap()
                     .to_ui(scale_factor.factor),
-                _ => Position::default(),
+                ClickEventType::Cancelled => Position::default(),
             };
             click_state.click_location.replace(click_location);
             click_state.clicked = true;

@@ -8,6 +8,7 @@ pub use crate::text::scale::TextScaleAlignment;
 pub use crate::text::text::{PartitionMetadata, Text, TextBundle, TextPartition};
 
 mod atlas;
+mod attachment;
 mod backend_system;
 mod cache;
 mod coords;
@@ -17,7 +18,6 @@ mod font;
 mod frontend_system;
 mod glyph;
 mod place;
-mod attachment;
 mod render_group;
 mod renderer;
 mod scale;

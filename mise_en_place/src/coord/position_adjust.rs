@@ -2,10 +2,10 @@ use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res};
 
-use crate::{animate, Attach, Engen, FrontEndStages, UIView};
 use crate::animate::{Animate, Animation, Interpolator};
 use crate::coord::{CoordContext, Position};
 use crate::time::{TimeDelta, Timer};
+use crate::{animate, Attach, Engen, FrontEndStages, UIView};
 
 #[derive(Component, Copy, Clone, Default, PartialEq, Debug)]
 pub struct PositionAdjust<Context: CoordContext> {
@@ -40,7 +40,6 @@ pub(crate) fn position_adjust<Context: CoordContext>(
     }
 }
 
-// IMPL TEST
 #[derive(Component)]
 pub struct PositionAdjustAnimator {
     pub x_interpolator: Interpolator,
@@ -57,24 +56,16 @@ impl PositionAdjustAnimator {
 }
 
 pub(crate) fn animate_position_adjust(
-    mut animators: Query<(
-        Entity,
-        &Position<UIView>,
-        &mut Animation<PositionAdjustAnimator>,
-    )>,
+    mut animators: Query<(Entity, &mut Animation<PositionAdjustAnimator>)>,
     mut cmd: Commands,
     timer: Res<Timer>,
 ) {
-    for (entity, pos, mut animation) in animators.iter_mut() {
+    for (entity, mut animation) in animators.iter_mut() {
         let (delta, anim_done) = animation.calc_delta_factor(&timer);
-        if anim_done {
-            println!("ending anim: {:.2}", timer.mark().0);
-        }
         let (x_change, x_done) = animation.animator.x_interpolator.extract(delta);
         let (y_change, y_done) = animation.animator.y_interpolator.extract(delta);
         let mut position_change = PositionAdjust::<UIView>::new(x_change, y_change);
         if anim_done || (x_done && y_done) {
-            println!("removing at: {:.2}", timer.mark().0);
             cmd.entity(entity)
                 .remove::<Animation<PositionAdjustAnimator>>();
         }
@@ -91,7 +82,13 @@ impl Animate for PositionAdjust<UIView> {
 
 impl Attach for PositionAdjustAnimator {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_system_to_stage(FrontEndStages::AnimationStart, animate::start_animations::<PositionAdjustAnimator>);
-        engen.frontend.main.add_system_to_stage(FrontEndStages::AnimationUpdate, animate_position_adjust);
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::AnimationStart,
+            animate::start_animations::<PositionAdjustAnimator>,
+        );
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::AnimationUpdate, animate_position_adjust);
     }
 }
