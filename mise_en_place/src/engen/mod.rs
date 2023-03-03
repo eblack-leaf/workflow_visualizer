@@ -11,7 +11,7 @@ use winit::window::WindowBuilder;
 pub(crate) use job::TaskLabel;
 pub use job::{Container, EntityStore, ExecutionState, Exit, Idle, Job, Task};
 pub use options::EngenOptions;
-pub use stages::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+pub use stages::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, FrontEndSystems};
 
 use crate::gfx::{
     invoke_extract, invoke_render, Extract, ExtractFns, Render, RenderFns, RenderPhase,

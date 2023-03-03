@@ -1,12 +1,12 @@
 #![allow(unused, dead_code)]
 
-use mise_en_place::bevy_ecs::prelude::{Query, RemovedComponents, Res, ResMut};
 use mise_en_place::{
     Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
     IconAttachment, Idle, Job, Launch, Location, Position, PositionAdjust, PositionAdjustAnimator,
     Text, TextAttachment, TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, Timer,
     UIView,
 };
+use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod server;
@@ -32,11 +32,16 @@ fn logic(
 fn post_anim_logic(
     removed: RemovedComponents<Animation<PositionAdjustAnimator>>,
     entity_store: Res<EntityStore>,
+    anim_start: Query<Entity, Added<Animation<PositionAdjustAnimator>>>,
     mut text_query: Query<(&mut Text, &Position<UIView>)>,
     timer: Res<Timer>,
 ) {
+    for _added in anim_start.iter() {
+        let text_entity = *entity_store.store.get("start_text").unwrap();
+        let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
+        text.partitions.first_mut().unwrap().characters = format!("start at: {:.2}", timer.mark().0);
+    }
     for _remove in removed.iter() {
-        println!("removing from logic");
         let text_entity = *entity_store.store.get("done_text").unwrap();
         let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
         text.partitions.first_mut().unwrap().characters = format!("done at: {:.2}", timer.mark().0);
@@ -49,11 +54,7 @@ impl Launch for Launcher {
     }
 
     fn attachments() -> Vec<Attachment> {
-        vec![
-            Attachment::using::<TextAttachment>(),
-            Attachment::using::<IconAttachment>(),
-            Attachment::using::<PositionAdjustAnimator>(),
-        ]
+        vec![]
     }
 
     fn prepare(job: &mut Job) {
@@ -67,11 +68,11 @@ impl Launch for Launcher {
                 Location::new((0.0, 0.0), 0),
                 TextScaleAlignment::Medium,
             ))
-            .insert(PositionAdjust::<UIView>::new(200.0, 0.0).animate(1.25))
+            .insert(PositionAdjust::<UIView>::new(212.30, 500.0).animate(1.75))
             .id();
         job.store_entity("animated_text", id);
         job.main
-            .add_system_to_stage(FrontEndStages::ProcessAndSpawn, logic);
+            .add_system_to_stage(FrontEndStages::Process, logic);
         job.main
             .add_system_to_stage(FrontEndStages::AnimationResolved, post_anim_logic);
         let id = job
@@ -87,10 +88,22 @@ impl Launch for Launcher {
             .container
             .spawn(TextBundle::new(
                 Text::new(vec![TextPartition::new(
-                    "not done yet:",
+                    "start at:",
                     (Color::OFF_WHITE, 0),
                 )]),
                 Location::new((0.0, 80.0), 0),
+                TextScaleAlignment::Medium,
+            ))
+            .id();
+        job.store_entity("start_text", id);
+        let id = job
+            .container
+            .spawn(TextBundle::new(
+                Text::new(vec![TextPartition::new(
+                    "done at:",
+                    (Color::OFF_WHITE, 0),
+                )]),
+                Location::new((0.0, 120.0), 0),
                 TextScaleAlignment::Medium,
             ))
             .id();

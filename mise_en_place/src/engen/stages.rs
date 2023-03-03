@@ -1,7 +1,7 @@
-use bevy_ecs::prelude::{StageLabel, SystemStage};
+use bevy_ecs::prelude::{StageLabel, SystemLabel, SystemStage};
 
-use crate::engen::Container;
 use crate::{gfx, Job};
+use crate::engen::Container;
 
 #[derive(StageLabel)]
 pub enum FrontEndStartupStages {
@@ -10,20 +10,28 @@ pub enum FrontEndStartupStages {
     Last,
 }
 
+#[derive(SystemLabel)]
+pub enum FrontEndSystems {
+    UpdateVisibleBounds,
+}
+
 #[derive(StageLabel)]
 pub enum FrontEndStages {
     First,
     Resize,
-    PreProcess,
-    PreProcessResolve,
-    ProcessAndSpawn,
+    Prepare,
+    Process,
+    Spawn,
     AnimationStart,
     AnimationUpdate,
     AnimationResolved,
+    CoordHook,
     CoordAdjust,
+    PostProcessPreparation,
     VisibilityPreparation,
     ResolveVisibility,
     Resolve,
+    Finish,
     Last,
 }
 
@@ -58,11 +66,11 @@ pub(crate) fn staged_frontend() -> Job {
     job.main
         .add_stage(FrontEndStages::Resize, SystemStage::parallel());
     job.main
-        .add_stage(FrontEndStages::PreProcess, SystemStage::parallel());
+        .add_stage(FrontEndStages::Prepare, SystemStage::parallel());
     job.main
-        .add_stage(FrontEndStages::PreProcessResolve, SystemStage::parallel());
+        .add_stage(FrontEndStages::Process, SystemStage::parallel());
     job.main
-        .add_stage(FrontEndStages::ProcessAndSpawn, SystemStage::parallel());
+        .add_stage(FrontEndStages::Spawn, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::AnimationStart, SystemStage::parallel());
     job.main
@@ -70,7 +78,11 @@ pub(crate) fn staged_frontend() -> Job {
     job.main
         .add_stage(FrontEndStages::AnimationResolved, SystemStage::parallel());
     job.main
+        .add_stage(FrontEndStages::CoordHook, SystemStage::parallel());
+    job.main
         .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
+    job.main
+        .add_stage(FrontEndStages::PostProcessPreparation, SystemStage::parallel());
     job.main.add_stage(
         FrontEndStages::VisibilityPreparation,
         SystemStage::parallel(),
@@ -79,6 +91,8 @@ pub(crate) fn staged_frontend() -> Job {
         .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::Resolve, SystemStage::parallel());
+    job.main
+        .add_stage(FrontEndStages::Finish, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::Last, SystemStage::parallel());
     job.main.add_stage_after(

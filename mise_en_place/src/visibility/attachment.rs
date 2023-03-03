@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
 
-use crate::engen::{Attach, Engen};
+use crate::engen::{Attach, Engen, FrontEndSystems};
 use crate::engen::{BackendStages, FrontEndStages};
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::visibility::spacial_hasher::SpacialHasher;
@@ -9,6 +9,7 @@ use crate::visibility::{
     VisibleBoundsPositionAdjust,
 };
 use crate::{Area, DeviceView, ScaleFactor, VisibleBounds};
+use crate::visibility::system::calc_visible_section;
 
 pub struct VisibilityAttachment;
 
@@ -55,7 +56,8 @@ impl Attach for VisibilityAttachment {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resize, system::resize);
+            .add_system_to_stage(FrontEndStages::Resize, system::resize.label(FrontEndSystems::UpdateVisibleBounds));
+        engen.frontend.main.add_system_to_stage(FrontEndStages::Resize, calc_visible_section.after(FrontEndSystems::UpdateVisibleBounds));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::VisibilityPreparation,
             system::visibility_setup,

@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemLabel, SystemStage};
 
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
 use crate::text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };
@@ -22,9 +22,6 @@ pub enum TextSystems {
 #[derive(StageLabel)]
 pub enum TextStages {
     PlacementPreparation,
-    Placement,
-    CalcArea,
-    TextFrontEnd,
 }
 
 pub struct TextAttachment;
@@ -36,65 +33,55 @@ impl Attach for TextAttachment {
             .frontend
             .startup
             .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
-        engen.frontend.main.add_stage_before(
-            FrontEndStages::CoordAdjust,
-            "area_intercept",
-            SystemStage::single(intercept_area_adjust),
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::CoordHook, intercept_area_adjust,
         );
         engen.frontend.main.add_stage_before(
-            FrontEndStages::VisibilityPreparation,
+            FrontEndStages::PostProcessPreparation,
             TextStages::PlacementPreparation,
             SystemStage::parallel()
                 .with_system(calc_bound_from_guide)
                 .with_system(calc_scale_from_alignment),
         );
-        engen.frontend.main.add_stage_after(
-            TextStages::PlacementPreparation,
-            TextStages::Placement,
-            SystemStage::parallel().with_system(place),
-        );
-        engen.frontend.main.add_stage_after(
-            TextStages::Placement,
-            TextStages::CalcArea,
-            SystemStage::single(calc_area),
-        );
-        engen.frontend.main.add_stage_after(
-            FrontEndStages::ResolveVisibility,
-            TextStages::TextFrontEnd,
-            SystemStage::parallel(),
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::PostProcessPreparation,
+            place.label("place"),
         );
         engen.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
+            FrontEndStages::PostProcessPreparation, calc_area.after("place"),
+        );
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::Resolve,
             manage_render_groups.before("out of bounds"),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(TextStages::TextFrontEnd, bounds_diff);
+            .add_system_to_stage(FrontEndStages::Resolve, bounds_diff);
         engen
             .frontend
             .main
-            .add_system_to_stage(TextStages::TextFrontEnd, depth_diff);
+            .add_system_to_stage(FrontEndStages::Resolve, depth_diff);
         engen
             .frontend
             .main
-            .add_system_to_stage(TextStages::TextFrontEnd, position_diff);
+            .add_system_to_stage(FrontEndStages::Resolve, position_diff);
         engen
             .frontend
             .main
-            .add_system_to_stage(TextStages::TextFrontEnd, visible_area_diff);
+            .add_system_to_stage(FrontEndStages::Resolve, visible_area_diff);
         engen.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
+            FrontEndStages::Resolve,
             discard_out_of_bounds.label("out of bounds"),
         );
         engen.frontend.main.add_system_to_stage(
-            TextStages::TextFrontEnd,
+            FrontEndStages::Resolve,
             letter_diff.label("letter diff").after("out of bounds"),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Last, pull_differences);
+            .add_system_to_stage(FrontEndStages::Finish, pull_differences);
         engen
             .backend
             .startup

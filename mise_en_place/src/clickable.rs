@@ -1,11 +1,11 @@
-use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, Query, Res, ResMut, Without};
+use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, IntoSystemDescriptor, Query, Res, ResMut, SystemLabel, Without};
 
-use crate::engen::FrontEndStages;
-use crate::engen::{Attach, Engen};
-use crate::focus::FocusedEntity;
 use crate::{
     ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
 };
+use crate::engen::{Attach, Engen};
+use crate::engen::FrontEndStages;
+use crate::focus::FocusedEntity;
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -25,6 +25,7 @@ impl Clickable {
 #[derive(Component)]
 pub struct ClickState {
     pub(crate) clicked: bool,
+    pub(crate) currently_pressed: bool,
     pub(crate) toggle: bool,
     pub(crate) click_location: Option<Position<UIView>>,
 }
@@ -33,6 +34,7 @@ impl ClickState {
     pub fn new(initial_toggle: bool) -> Self {
         Self {
             clicked: false,
+            currently_pressed: false,
             toggle: initial_toggle,
             click_location: None,
         }
@@ -42,6 +44,9 @@ impl ClickState {
     }
     pub fn toggled(&self) -> bool {
         self.toggle
+    }
+    pub fn currently_pressed(&self) -> bool {
+        self.currently_pressed
     }
 }
 
@@ -100,42 +105,46 @@ pub(crate) fn register_click(
         .iter()
         .map(|ce| TrackedClick::new(*ce))
         .collect::<Vec<TrackedClick>>();
-    for (entity, _, listener, visibility, visible_section, depth) in clickables.iter() {
+    for (entity, mut click_state, listener, visibility, visible_section, depth) in
+    clickables.iter_mut()
+    {
         if visibility.visible() {
             for click in new_clicks.iter_mut() {
-                if listener.ty == click.click_event.ty {
-                    let ui_click_origin = click.click_event.click.origin.to_ui(scale_factor.factor);
-                    match click.click_event.ty {
-                        ClickEventType::OnPress => {
-                            if visible_section.section.contains(ui_click_origin) {
+                let ui_click_origin = click.click_event.click.origin.to_ui(scale_factor.factor);
+                match click.click_event.ty {
+                    ClickEventType::OnPress => {
+                        if visible_section.section.contains(ui_click_origin) {
+                            click_state.currently_pressed = true;
+                            if listener.ty == click.click_event.ty {
                                 set_grabbed(entity, depth, click);
                             }
                         }
-                        ClickEventType::OnMove => {
-                            // need to beef up click semantics to handle multiple listeners and detach clicks that
-                            // coincidentally start in bounds but only grabbed after moving off previous grabber
-                            // need bucket to detach click from to record relative and buffer on move click setting focus entity
-                            // let contains_origin = visible_section.section.contains(ui_click_origin);
-                            // let contains_current = visible_section.section.contains(click.click_event.click.current.unwrap().to_ui(scale_factor.factor));
-                            // if contains_current && contains_origin {
-                            //     set_grabbed(entity, depth, click);
-                            // }
-                        }
-                        ClickEventType::OnRelease => {
-                            let end = click
-                                .click_event
-                                .click
-                                .end
-                                .unwrap()
-                                .to_ui(scale_factor.factor);
-                            let contains_origin = visible_section.section.contains(ui_click_origin);
-                            let contains_end = visible_section.section.contains(end);
-                            if contains_origin && contains_end {
-                                set_grabbed(entity, depth, click);
-                            }
-                        }
-                        ClickEventType::Cancelled => {}
                     }
+                    ClickEventType::OnMove => {
+                        // need to beef up click semantics to handle multiple listeners and detach clicks that
+                        // coincidentally start in bounds but only grabbed after moving off previous grabber
+                        // need bucket to detach click from to record relative and buffer on move click setting focus entity
+                        // let contains_origin = visible_section.section.contains(ui_click_origin);
+                        // let contains_current = visible_section.section.contains(click.click_event.click.current.unwrap().to_ui(scale_factor.factor));
+                        // if contains_current && contains_origin {
+                        //     set_grabbed(entity, depth, click);
+                        // }
+                    }
+                    ClickEventType::OnRelease => {
+                        click_state.currently_pressed = false;
+                        let end = click
+                            .click_event
+                            .click
+                            .end
+                            .unwrap()
+                            .to_ui(scale_factor.factor);
+                        let contains_origin = visible_section.section.contains(ui_click_origin);
+                        let contains_end = visible_section.section.contains(end);
+                        if contains_origin && contains_end {
+                            if listener.ty == click.click_event.ty { set_grabbed(entity, depth, click); }
+                        }
+                    }
+                    ClickEventType::Cancelled => {}
                 }
             }
         }
@@ -202,12 +211,17 @@ pub(crate) fn reset_click(mut clickables: Query<&mut ClickState>) {
 
 pub struct ClickableAttachment;
 
+#[derive(SystemLabel)]
+pub enum ClickSystems {
+    RegisterClick,
+}
+
 impl Attach for ClickableAttachment {
     fn attach(engen: &mut Engen) {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PreProcess, register_click);
+            .add_system_to_stage(FrontEndStages::Prepare, register_click.label(ClickSystems::RegisterClick));
         engen
             .frontend
             .main
