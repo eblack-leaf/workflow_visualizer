@@ -1,15 +1,15 @@
 #![allow(unused, dead_code)]
 
+use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 use mise_en_place::{
     Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
     IconAttachment, Idle, Job, Launch, Location, Position, PositionAdjust, PositionAdjustAnimator,
     Text, TextAttachment, TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, Timer,
     UIView,
 };
-use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 
 #[cfg(not(target_arch = "wasm32"))]
-mod server;
+mod serve;
 
 struct Launcher;
 
@@ -39,7 +39,8 @@ fn post_anim_logic(
     for _added in anim_start.iter() {
         let text_entity = *entity_store.store.get("start_text").unwrap();
         let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
-        text.partitions.first_mut().unwrap().characters = format!("start at: {:.2}", timer.mark().0);
+        text.partitions.first_mut().unwrap().characters =
+            format!("start at: {:.2}", timer.mark().0);
     }
     for _remove in removed.iter() {
         let text_entity = *entity_store.store.get("done_text").unwrap();
@@ -71,8 +72,7 @@ impl Launch for Launcher {
             .insert(PositionAdjust::<UIView>::new(212.30, 500.0).animate(1.75))
             .id();
         job.store_entity("animated_text", id);
-        job.main
-            .add_system_to_stage(FrontEndStages::Process, logic);
+        job.main.add_system_to_stage(FrontEndStages::Process, logic);
         job.main
             .add_system_to_stage(FrontEndStages::AnimationResolved, post_anim_logic);
         let id = job
@@ -87,10 +87,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(TextBundle::new(
-                Text::new(vec![TextPartition::new(
-                    "start at:",
-                    (Color::OFF_WHITE, 0),
-                )]),
+                Text::new(vec![TextPartition::new("start at:", (Color::OFF_WHITE, 0))]),
                 Location::new((0.0, 80.0), 0),
                 TextScaleAlignment::Medium,
             ))
@@ -99,10 +96,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(TextBundle::new(
-                Text::new(vec![TextPartition::new(
-                    "done at:",
-                    (Color::OFF_WHITE, 0),
-                )]),
+                Text::new(vec![TextPartition::new("done at:", (Color::OFF_WHITE, 0))]),
                 Location::new((0.0, 120.0), 0),
                 TextScaleAlignment::Medium,
             ))
@@ -114,7 +108,7 @@ impl Launch for Launcher {
 fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        server::compile_and_serve();
+        serve::compile_and_serve();
     }
     Engen::launch::<Launcher>();
 }

@@ -1,11 +1,14 @@
-use bevy_ecs::prelude::{Bundle, Component, Entity, EventReader, IntoSystemDescriptor, Query, Res, ResMut, SystemLabel, Without};
+use bevy_ecs::prelude::{
+    Bundle, Component, Entity, EventReader, IntoSystemDescriptor, Query, Res, ResMut, SystemLabel,
+    Without,
+};
 
+use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
+use crate::focus::FocusedEntity;
 use crate::{
     ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
 };
-use crate::engen::{Attach, Engen};
-use crate::engen::FrontEndStages;
-use crate::focus::FocusedEntity;
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -106,7 +109,7 @@ pub(crate) fn register_click(
         .map(|ce| TrackedClick::new(*ce))
         .collect::<Vec<TrackedClick>>();
     for (entity, mut click_state, listener, visibility, visible_section, depth) in
-    clickables.iter_mut()
+        clickables.iter_mut()
     {
         if visibility.visible() {
             for click in new_clicks.iter_mut() {
@@ -141,7 +144,9 @@ pub(crate) fn register_click(
                         let contains_origin = visible_section.section.contains(ui_click_origin);
                         let contains_end = visible_section.section.contains(end);
                         if contains_origin && contains_end {
-                            if listener.ty == click.click_event.ty { set_grabbed(entity, depth, click); }
+                            if listener.ty == click.click_event.ty {
+                                set_grabbed(entity, depth, click);
+                            }
                         }
                     }
                     ClickEventType::Cancelled => {}
@@ -218,10 +223,10 @@ pub enum ClickSystems {
 
 impl Attach for ClickableAttachment {
     fn attach(engen: &mut Engen) {
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::Prepare, register_click.label(ClickSystems::RegisterClick));
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::Prepare,
+            register_click.label(ClickSystems::RegisterClick),
+        );
         engen
             .frontend
             .main

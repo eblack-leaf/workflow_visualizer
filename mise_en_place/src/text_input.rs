@@ -1,14 +1,16 @@
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res, ResMut, SystemStage};
+use bevy_ecs::prelude::{
+    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res, ResMut, SystemStage,
+};
 use bevy_ecs::query::Changed;
 
+use crate::engen::Container;
+use crate::focus::{Focus, FocusSystems, FocusedEntity};
+use crate::text::{TextBound, TextStages};
 use crate::{
-    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Text, TextBoundGuide,
+    Attach, ClickListener, Clickable, Color, Engen, FrontEndStages, Location, Text, TextBoundGuide,
     TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
-use crate::engen::Container;
-use crate::focus::{Focus, FocusedEntity, FocusSystems};
-use crate::text::{TextBound, TextStages};
 
 #[derive(Bundle)]
 pub struct TextInput {

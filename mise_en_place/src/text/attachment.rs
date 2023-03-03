@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemLabel, SystemStage};
 
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
 use crate::text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };
@@ -33,9 +33,10 @@ impl Attach for TextAttachment {
             .frontend
             .startup
             .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::CoordHook, intercept_area_adjust,
-        );
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::CoordHook, intercept_area_adjust);
         engen.frontend.main.add_stage_before(
             FrontEndStages::PostProcessPreparation,
             TextStages::PlacementPreparation,
@@ -43,12 +44,13 @@ impl Attach for TextAttachment {
                 .with_system(calc_bound_from_guide)
                 .with_system(calc_scale_from_alignment),
         );
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::PostProcessPreparation, place.label("place"));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::PostProcessPreparation,
-            place.label("place"),
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::PostProcessPreparation, calc_area.after("place"),
+            calc_area.after("place"),
         );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Resolve,

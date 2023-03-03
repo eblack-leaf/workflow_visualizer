@@ -1,6 +1,5 @@
 use winit::event::{Event, StartCause, WindowEvent};
 
-use crate::{Engen, gfx, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment};
 use crate::clickable::ClickableAttachment;
 use crate::coord::CoordAttachment;
 use crate::engen::TaskLabel;
@@ -9,6 +8,9 @@ use crate::theme::ThemeAttachment;
 use crate::time::Timer;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
+use crate::{
+    gfx, Engen, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
+};
 
 pub(crate) fn ignite(mut engen: Engen) {
     let event_loop = engen.event_loop.take().expect("no event loop");

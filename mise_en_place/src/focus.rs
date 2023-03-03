@@ -1,7 +1,10 @@
-use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemDescriptor, Query, Res, ResMut, Resource, SystemLabel};
+use bevy_ecs::prelude::{
+    Component, DetectChanges, Entity, IntoSystemDescriptor, Query, Res, ResMut, Resource,
+    SystemLabel,
+};
 
-use crate::{Attach, Engen, FrontEndStages};
 use crate::clickable::ClickSystems;
+use crate::{Attach, Engen, FrontEndStages};
 
 #[derive(Component)]
 pub struct Focus {
@@ -72,9 +75,11 @@ impl Attach for FocusAttachment {
             .frontend
             .container
             .insert_resource(FocusedEntity::new(None));
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::Prepare, set_focused.label(FocusSystems::SetFocused).after(ClickSystems::RegisterClick));
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::Prepare,
+            set_focused
+                .label(FocusSystems::SetFocused)
+                .after(ClickSystems::RegisterClick),
+        );
     }
 }
