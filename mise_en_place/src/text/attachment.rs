@@ -12,6 +12,7 @@ use crate::text::frontend_system::{
 };
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
+use crate::{spawn, TextBundle};
 
 #[derive(SystemLabel)]
 pub enum TextSystems {
@@ -33,6 +34,10 @@ impl Attach for TextAttachment {
             .frontend
             .startup
             .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Spawn, spawn::<TextBundle>);
         engen
             .frontend
             .main

@@ -9,6 +9,7 @@ use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
 use crate::{Color, Location, Visibility, WrapStyleComponent};
 
+#[derive(Clone)]
 pub struct TextPartition {
     pub characters: String,
     pub metadata: PartitionMetadata,
@@ -29,7 +30,7 @@ impl<S: Into<String>, PM: Into<PartitionMetadata>> From<(S, PM)> for TextPartiti
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Text {
     pub partitions: Vec<TextPartition>,
 }

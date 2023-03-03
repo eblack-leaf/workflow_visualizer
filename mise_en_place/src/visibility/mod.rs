@@ -13,7 +13,7 @@ mod spacial_hasher;
 mod system;
 mod visible_bounds;
 
-#[derive(Component)]
+#[derive(Component, Copy, Clone)]
 pub struct Visibility {
     visible: bool,
 }

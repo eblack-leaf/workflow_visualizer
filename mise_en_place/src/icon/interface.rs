@@ -7,7 +7,7 @@ use bevy_ecs::prelude::Resource;
 use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::{Color, Location, UIView, Visibility};
 
-#[derive(Component)]
+#[derive(Component, Copy, Clone)]
 pub struct Icon {
     pub secondary_color: Color,
 }
@@ -20,7 +20,7 @@ impl Icon {
     }
 }
 
-#[derive(Bundle)]
+#[derive(Bundle, Clone)]
 pub struct IconBundle {
     pub icon: Icon,
     pub size: IconSize,
@@ -52,7 +52,7 @@ impl IconBundle {
     }
 }
 
-#[derive(Component, Hash, Eq, PartialEq)]
+#[derive(Component, Hash, Eq, PartialEq, Copy, Clone)]
 pub enum IconSize {
     Small,
     Medium,

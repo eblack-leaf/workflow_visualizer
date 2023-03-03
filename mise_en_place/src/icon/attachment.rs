@@ -9,6 +9,7 @@ use crate::icon::frontend_system::{
     secondary_color_cache_check,
 };
 use crate::icon::IconRenderer;
+use crate::{spawn, IconBundle};
 
 pub struct IconAttachment;
 
@@ -36,6 +37,10 @@ impl Attach for IconAttachment {
             .frontend
             .startup
             .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Spawn, spawn::<IconBundle>);
         engen
             .frontend
             .main

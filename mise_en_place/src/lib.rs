@@ -8,6 +8,7 @@ pub use engen::FrontEndStages;
 pub use engen::FrontEndStartupStages;
 pub use engen::{Attach, Engen, Launch};
 pub use engen::{Attachment, EntityStore, ExecutionState, Exit, Idle, Job, Task};
+pub use request::{spawn, Request};
 pub use visibility::VisibleBounds;
 pub use wasm_compiler::WasmCompiler;
 #[cfg(not(target_arch = "wasm32"))]
@@ -48,6 +49,7 @@ mod gfx;
 mod icon;
 mod instance;
 mod r_button;
+mod request;
 mod signal;
 mod text;
 mod text_input;
