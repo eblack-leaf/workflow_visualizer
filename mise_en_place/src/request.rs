@@ -1,15 +1,13 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query};
 
 #[derive(Component)]
-pub struct Request<B: Bundle> {
+pub struct Request<B> {
     pub req: Option<B>,
 }
 
-impl<B: Bundle> Request<B> {
+impl<B> Request<B> {
     pub fn new(bi: B) -> Self {
-        Self {
-            req: Some(bi.into()),
-        }
+        Self { req: Some(bi) }
     }
 }
 

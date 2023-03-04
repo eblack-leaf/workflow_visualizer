@@ -1,15 +1,63 @@
-use crate::engen::Container;
-use crate::focus::{Focus, FocusSystems, FocusedEntity};
-use crate::text::{TextBound, TextStages};
+use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res};
+use bevy_ecs::query::Changed;
+
 use crate::{
-    Attach, ClickListener, Clickable, Color, Engen, FrontEndStages, Location, Text, TextBoundGuide,
-    TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
+    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Request, Text,
+    TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
-use bevy_ecs::prelude::{
-    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res, ResMut, SystemStage,
-};
-use bevy_ecs::query::Changed;
+use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::text::TextBound;
+
+pub struct TextInputRequest {
+    pub hint_text: String,
+    pub alignment: TextScaleAlignment,
+    pub bound_guide: TextBoundGuide,
+    pub location: Location<UIView>,
+    pub text_color: Color,
+}
+
+impl TextInputRequest {
+    pub fn new<L: Into<Location<UIView>>, C: Into<Color>>(
+        hint_text: String,
+        alignment: TextScaleAlignment,
+        bound_guide: TextBoundGuide,
+        location: L,
+        color: C,
+    ) -> Self {
+        Self {
+            hint_text,
+            alignment,
+            bound_guide,
+            location: location.into(),
+            text_color: color.into(),
+        }
+    }
+}
+
+pub(crate) fn spawn(
+    mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
+    mut cmd: Commands,
+) {
+    for (entity, mut request) in requests.iter_mut() {
+        let inner_req = request.req.take().unwrap();
+        let text = cmd
+            .spawn(TextBundle::new(
+                Text::new(vec![TextPartition::from((inner_req.hint_text, (inner_req.text_color, 0)))]),
+                inner_req.location,
+                inner_req.alignment,
+            ))
+            .insert(inner_req.bound_guide)
+            .id();
+        cmd.entity(entity).insert(TextInput::new(
+            TextInputText::new(text),
+            inner_req.alignment,
+            inner_req.bound_guide,
+            inner_req.location,
+        ));
+        cmd.entity(entity).remove::<Request<TextInputRequest>>();
+    }
+}
 
 #[derive(Bundle)]
 pub struct TextInput {
@@ -95,33 +143,6 @@ impl TextInput {
             keyboard_type: VirtualKeyboardType::Keyboard,
         }
     }
-    pub fn spawn_with<C: Into<Color>, L: Into<Location<UIView>>>(
-        container: &mut Container,
-        text_color: C,
-        location: L,
-        alignment: TextScaleAlignment,
-        text_bound_guide: TextBoundGuide,
-    ) -> Entity {
-        let text_color = text_color.into();
-        let location = location.into();
-        // make text grid to place cursor at locations easier for editing
-        let text = container
-            .spawn(TextBundle::new(
-                Text::new(vec![TextPartition::from(("", (text_color, 0)))]),
-                location,
-                alignment,
-            ))
-            .insert(text_bound_guide)
-            .id();
-        container
-            .spawn(TextInput::new(
-                TextInputText::new(text),
-                alignment,
-                text_bound_guide,
-                location,
-            ))
-            .id()
-    }
 }
 
 pub struct TextInputPlugin;
@@ -136,5 +157,6 @@ impl Attach for TextInputPlugin {
             FrontEndStages::Prepare,
             open_virtual_keyboard.after(FocusSystems::SetFocused),
         );
+        engen.frontend.main.add_system_to_stage(FrontEndStages::Spawn, spawn);
     }
 }
