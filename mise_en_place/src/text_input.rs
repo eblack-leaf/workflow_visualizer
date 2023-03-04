@@ -1,13 +1,13 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res};
 use bevy_ecs::query::Changed;
 
+use crate::focus::{Focus, FocusSystems, FocusedEntity};
+use crate::text::TextBound;
 use crate::{
-    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Request, Text,
+    Attach, ClickListener, Clickable, Color, Engen, FrontEndStages, Location, Request, Text,
     TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
-use crate::focus::{Focus, FocusedEntity, FocusSystems};
-use crate::text::TextBound;
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -43,7 +43,10 @@ pub(crate) fn spawn(
         let inner_req = request.req.take().unwrap();
         let text = cmd
             .spawn(TextBundle::new(
-                Text::new(vec![TextPartition::from((inner_req.hint_text, (inner_req.text_color, 0)))]),
+                Text::new(vec![TextPartition::from((
+                    inner_req.hint_text,
+                    (inner_req.text_color, 0),
+                ))]),
                 inner_req.location,
                 inner_req.alignment,
             ))
@@ -157,6 +160,9 @@ impl Attach for TextInputPlugin {
             FrontEndStages::Prepare,
             open_virtual_keyboard.after(FocusSystems::SetFocused),
         );
-        engen.frontend.main.add_system_to_stage(FrontEndStages::Spawn, spawn);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Spawn, spawn);
     }
 }
