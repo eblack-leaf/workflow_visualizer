@@ -1,7 +1,8 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemStage};
+use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel};
 
+use crate::{IconBundle, spawn};
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
 use crate::icon::backend_system::{process_differences, read_add_requests, setup};
 use crate::icon::frontend_system::{
     area_cache_check, calc_area, color_cache_check, color_invert_cache_check, depth_cache_check,
@@ -9,7 +10,6 @@ use crate::icon::frontend_system::{
     secondary_color_cache_check,
 };
 use crate::icon::IconRenderer;
-use crate::{spawn, IconBundle};
 
 pub struct IconAttachment;
 
@@ -44,38 +44,38 @@ impl Attach for IconAttachment {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PostProcessPreparation, calc_area);
+            .add_system_to_stage(FrontEndStages::Resolve, calc_area);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, initialization);
+            .add_system_to_stage(FrontEndStages::PushDiffs, initialization);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, position_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, position_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, color_invert_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, color_invert_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, area_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, area_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, depth_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, depth_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, color_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, color_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, secondary_color_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, secondary_color_cache_check);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, icon_key_cache_check);
+            .add_system_to_stage(FrontEndStages::PushDiffs, icon_key_cache_check);
     }
 }

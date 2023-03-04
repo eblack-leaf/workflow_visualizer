@@ -1,13 +1,13 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res};
 use bevy_ecs::query::Changed;
 
-use crate::focus::{Focus, FocusSystems, FocusedEntity};
-use crate::text::TextBound;
 use crate::{
-    Attach, ClickListener, Clickable, Color, Engen, FrontEndStages, Location, Request, Text,
+    Attach, Clickable, ClickListener, Color, Engen, FrontEndStages, Location, Request, Text,
     TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType,
 };
+use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::text::TextBound;
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -62,18 +62,17 @@ pub(crate) fn spawn(
     }
 }
 
-#[derive(Bundle)]
-pub struct TextInput {
-    pub(crate) text_input_text: TextInputText,
-    pub(crate) alignment: TextScaleAlignment,
-    pub(crate) bound_guide: TextBoundGuide,
-    #[bundle]
-    pub(crate) location: Location<UIView>,
-    #[bundle]
-    pub(crate) clickable: Clickable,
-    pub(crate) max_characters: MaxCharacters,
-    pub(crate) focus: Focus,
-    pub(crate) keyboard_type: VirtualKeyboardType,
+#[derive(Component)]
+pub struct Cursor {
+    pub location: TextGridLocation,
+}
+
+impl Cursor {
+    pub(crate) fn new() -> Self {
+        Self {
+            location: TextGridLocation::new(0, 0),
+        }
+    }
 }
 
 pub(crate) fn read_area_from_text_bound(
@@ -126,6 +125,21 @@ impl TextInputText {
 #[derive(Component)]
 pub(crate) struct MaxCharacters(pub(crate) u32);
 
+#[derive(Bundle)]
+pub struct TextInput {
+    pub(crate) text_input_text: TextInputText,
+    pub(crate) alignment: TextScaleAlignment,
+    pub(crate) bound_guide: TextBoundGuide,
+    #[bundle]
+    pub(crate) location: Location<UIView>,
+    #[bundle]
+    pub(crate) clickable: Clickable,
+    pub(crate) max_characters: MaxCharacters,
+    pub(crate) focus: Focus,
+    pub(crate) keyboard_type: VirtualKeyboardType,
+    pub(crate) cursor: Cursor,
+}
+
 impl TextInput {
     pub(crate) fn new(
         text_input_text: TextInputText,
@@ -144,6 +158,7 @@ impl TextInput {
             ),
             focus: Focus::new(),
             keyboard_type: VirtualKeyboardType::Keyboard,
+            cursor: Cursor::new(),
         }
     }
 }
@@ -153,7 +168,7 @@ pub struct TextInputPlugin;
 impl Attach for TextInputPlugin {
     fn attach(engen: &mut Engen) {
         engen.frontend.main.add_system_to_stage(
-            FrontEndStages::PostProcessPreparation,
+            FrontEndStages::Resolve,
             read_area_from_text_bound,
         );
         engen.frontend.main.add_system_to_stage(
