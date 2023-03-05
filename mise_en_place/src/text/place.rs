@@ -3,12 +3,12 @@ use std::collections::HashSet;
 use bevy_ecs::prelude::Component;
 use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle, WrapStyle};
 
-use crate::{Color, LetterStyle};
 use crate::instance::key::{Key, KeyFactory};
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::{LetterMetadata, Text};
+use crate::{Color, LetterStyle};
 
 #[derive(Component)]
 pub(crate) struct Placer {

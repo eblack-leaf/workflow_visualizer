@@ -16,6 +16,7 @@ pub struct Timer {
     pub last: f64,
 }
 
+#[cfg(target_arch = "wasm32")]
 fn millisecond_to_sec(ms: f64) -> f64 {
     ms / 1000.0
 }

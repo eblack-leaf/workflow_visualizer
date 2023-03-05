@@ -1,10 +1,9 @@
 use bevy_ecs::prelude::{
-    Component, DetectChanges, Entity, IntoSystemDescriptor, Query, Res, Resource,
-    SystemLabel,
+    Component, DetectChanges, Entity, IntoSystemDescriptor, Query, Res, Resource, SystemLabel,
 };
 
-use crate::{Attach, Engen, FrontEndStages};
 use crate::clickable::ClickSystems;
+use crate::{Attach, Engen, FrontEndStages};
 
 #[derive(Component)]
 pub struct Focus {

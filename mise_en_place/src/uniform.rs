@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Component, Resource};
-use wgpu::Buffer;
 use wgpu::util::DeviceExt;
+use wgpu::Buffer;
 
 #[derive(Component, Resource)]
 pub struct Uniform<Data: bytemuck::Pod + bytemuck::Zeroable> {

@@ -2,10 +2,10 @@ use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res};
 
-use crate::{animate, Attach, Engen, FrontEndStages, UIView};
 use crate::animate::{Animate, Animation, Interpolator};
 use crate::coord::{CoordContext, Position};
 use crate::time::{TimeDelta, Timer};
+use crate::{animate, Attach, Engen, FrontEndStages, UIView};
 
 #[derive(Component, Copy, Clone, Default, PartialEq, Debug)]
 pub struct PositionAdjust<Context: CoordContext> {
@@ -64,7 +64,7 @@ pub(crate) fn animate_position_adjust(
         let (delta, anim_done) = animation.calc_delta_factor(&timer);
         let (x_change, x_done) = animation.animator.x_interpolator.extract(delta);
         let (y_change, y_done) = animation.animator.y_interpolator.extract(delta);
-        let mut position_change = PositionAdjust::<UIView>::new(x_change, y_change);
+        let position_change = PositionAdjust::<UIView>::new(x_change, y_change);
         if anim_done || (x_done && y_done) {
             cmd.entity(entity)
                 .remove::<Animation<PositionAdjustAnimator>>();

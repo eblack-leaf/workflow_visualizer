@@ -9,8 +9,8 @@ pub use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::{PositionAdjust, PositionAdjustAnimator};
 pub use crate::coord::section::Section;
-use crate::engen::{Attach, Engen};
 use crate::engen::FrontEndStages;
+use crate::engen::{Attach, Engen};
 
 mod area;
 mod area_adjust;
@@ -25,9 +25,10 @@ mod section;
 pub(crate) struct CoordAttachment;
 
 pub trait CoordContext
-    where
-        Self: Copy + Clone + Send + Sync + 'static,
-{}
+where
+    Self: Copy + Clone + Send + Sync + 'static,
+{
+}
 
 #[derive(Copy, Clone, PartialEq, Default, Debug)]
 pub struct Numerical;

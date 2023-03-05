@@ -3,17 +3,17 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use axum::{Extension, Router, ServiceExt};
 use axum::headers::HeaderName;
 use axum::http::{HeaderValue, Method};
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, post};
+use axum::{Extension, Router, ServiceExt};
 use axum_extra::middleware::option_layer;
 use axum_server::service::SendService;
 use axum_server::tls_rustls::RustlsConfig;
-use axum_sessions::{SameSite, SessionLayer};
 use axum_sessions::async_session::MemoryStore;
-use rand::{Rng, thread_rng};
+use axum_sessions::{SameSite, SessionLayer};
+use rand::{thread_rng, Rng};
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -25,8 +25,8 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use url::Url;
 use uuid::Uuid;
-use webauthn_rs::{Webauthn, WebauthnBuilder};
 use webauthn_rs::prelude::Passkey;
+use webauthn_rs::{Webauthn, WebauthnBuilder};
 
 mod client_side_webauthn;
 mod server_side_webauthn;
@@ -127,8 +127,8 @@ impl WasmServer {
                 include_bytes!("self_signed_certs/cert.pem").to_vec(),
                 include_bytes!("self_signed_certs/key.pem").to_vec(),
             )
-                .await
-                .unwrap();
+            .await
+            .unwrap();
             let mut site_router = Router::new()
                 .route(
                     "/",

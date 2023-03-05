@@ -1,10 +1,15 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res};
 use bevy_ecs::query::Changed;
 
-use crate::{Attach, Clickable, ClickListener, ClickState, Color, Engen, FrontEndStages, Icon, IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::clickable::ClickSystems;
-use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::focus::{Focus, FocusSystems, FocusedEntity};
 use crate::text::{AlignedFonts, TextBound, TextScale};
+use crate::{
+    Attach, ClickListener, ClickState, Clickable, Color, ColorInvert, Engen, FrontEndStages, Icon,
+    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, LetterStyle, Location, Position,
+    Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment,
+    TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
+};
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -33,14 +38,20 @@ impl TextInputRequest {
 }
 
 pub(crate) fn spawn(
-    mut requests: Query<(Entity, &mut Request<TextInputRequest>, &TextScaleLetterDimensions)>,
+    mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
     mut cmd: Commands,
     fonts: Res<AlignedFonts>,
     scale_factor: Res<ScaleFactor>,
+    theme: Res<Theme>,
 ) {
-    for (entity, mut request, character_dimensions) in requests.iter_mut() {
+    for (entity, mut request) in requests.iter_mut() {
         let inner_req = request.req.take().unwrap();
         let text_scale = TextScale::from_alignment(inner_req.alignment, scale_factor.factor);
+        let character_dimensions = fonts
+            .fonts
+            .get(&inner_req.alignment)
+            .unwrap()
+            .character_dimensions('a', text_scale.px());
         let text = cmd
             .spawn(TextBundle::new(
                 Text::new(vec![TextLine::from((
@@ -55,10 +66,10 @@ pub(crate) fn spawn(
             .id();
         let cursor_icon = cmd
             .spawn(IconBundle::new(
-                Icon::new(Color::OFF_BLACK),
+                Icon::new(theme.background),
                 IconSize::Custom((
-                    character_dimensions.dimensions.width as u32,
-                    character_dimensions.dimensions.height as u32,
+                    character_dimensions.width as u32,
+                    character_dimensions.height as u32,
                 )),
                 IconDescriptors::Cursor.key(),
                 Location::from((
@@ -67,6 +78,7 @@ pub(crate) fn spawn(
                 )),
                 inner_req.text_color,
             ))
+            .insert(ColorInvert::on())
             .id();
         cmd.entity(entity).insert(TextInput::new(
             TextInputText::new(text),
@@ -146,28 +158,25 @@ pub(crate) fn read_input_if_focused(focused: Query<&Focus>, focused_entity: Res<
 
 pub(crate) fn set_cursor_location(
     mut clicked: Query<(
-        Entity,
         &ClickState,
         &CursorIcon,
         &mut Cursor,
         &mut Text,
-        &TextScaleAlignment,
-        &TextScale,
         &TextScaleLetterDimensions,
     )>,
-    fonts: Res<AlignedFonts>,
     theme: Res<Theme>,
     mut cmd: Commands,
 ) {
-    for (entity, click_state, cursor_icon, mut cursor, mut text, alignment, scale, character_dimensions) in
-    clicked.iter_mut()
+    for (click_state, cursor_icon, mut cursor, mut text, character_dimensions) in clicked.iter_mut()
     {
         if click_state.clicked() {
-            let line_clicked = (click_state.click_location.unwrap().y / character_dimensions.dimensions.height)
+            let line_clicked = (click_state.click_location.unwrap().y
+                / character_dimensions.dimensions.height)
                 .floor() as usize;
-            let mut line = text.lines.get_mut(line_clicked).unwrap();
+            let line = text.lines.get_mut(line_clicked).unwrap();
             let click_x = click_state.click_location.unwrap().x;
-            let x_letter_location = (click_x / character_dimensions.dimensions.width).floor() as u32;
+            let x_letter_location =
+                (click_x / character_dimensions.dimensions.width).floor() as u32;
             let x_letter_location = x_letter_location.max(line.letters.len() as u32);
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
             if location != cursor.cached_location {
@@ -273,10 +282,10 @@ impl Attach for TextInputPlugin {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Resolve, read_area_from_text_bound);
-        engen.frontend.container.spawn(IconMeshAddRequest::new(
-            IconDescriptors::Cursor,
-            5,
-        ));
+        engen
+            .frontend
+            .container
+            .spawn(IconMeshAddRequest::new(IconDescriptors::Cursor, 5));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
             set_cursor_location.after(ClickSystems::RegisterClick),

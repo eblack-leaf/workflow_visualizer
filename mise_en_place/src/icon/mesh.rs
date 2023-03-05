@@ -5,8 +5,8 @@ use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
-use crate::{DeviceView, GpuPosition, Position};
 use crate::gfx::GfxSurface;
+use crate::{DeviceView, GpuPosition, Position};
 
 #[derive(Clone)]
 pub struct IconMesh {
@@ -22,23 +22,15 @@ pub enum IconDescriptors {
 impl IconDescriptors {
     pub(crate) fn key(&self) -> IconKey {
         match self {
-            IconDescriptors::Box => {
-                IconKey("engen::Box")
-            }
-            IconDescriptors::Cursor => {
-                IconKey("engen::Cursor")
-            }
-            IconDescriptors::User(key, _) => {
-                IconKey(key)
-            }
+            IconDescriptors::Box => IconKey("engen::Box"),
+            IconDescriptors::Cursor => IconKey("engen::Cursor"),
+            IconDescriptors::User(key, _) => IconKey(key),
         }
     }
     pub(crate) fn mesh(self) -> IconMesh {
         match self {
-            IconDescriptors::User(_, mesh) => {
-                mesh
-            }
-            _ => IconMesh::bundled(self).unwrap()
+            IconDescriptors::User(_, mesh) => mesh,
+            _ => IconMesh::bundled(self).unwrap(),
         }
     }
 }
@@ -49,27 +41,27 @@ fn generate_cursor_mesh() {
     let mut mesh = Vec::<IconVertex>::new();
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(0.0, 0.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ));
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(0.0, 1.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ));
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(1.0, 0.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ));
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(1.0, 0.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ));
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(0.0, 1.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ));
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(1.0, 1.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
     ));
     write_mesh(
         &mesh,
@@ -87,10 +79,10 @@ impl IconMesh {
                 let data = read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap();
                 Some(Self::new(data))
             }
-            IconDescriptors::Cursor => {
-                Some(Self::new(read_mesh_bytes(include_bytes!("icons/cursor.icon_mesh")).unwrap()))
-            }
-            _ => None
+            IconDescriptors::Cursor => Some(Self::new(
+                read_mesh_bytes(include_bytes!("icons/cursor.icon_mesh")).unwrap(),
+            )),
+            _ => None,
         }
     }
     pub(crate) fn to_gpu(&self, gfx_surface: &GfxSurface) -> GpuIconMesh {

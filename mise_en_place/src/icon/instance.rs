@@ -1,6 +1,6 @@
-use crate::{Area, Color, Depth, DeviceView, IconKey, Position, Section, UIView};
 use crate::coord::Panel;
 use crate::icon::mesh::ColorInvert;
+use crate::{Area, Color, Depth, DeviceView, IconKey, Position, Section, UIView};
 
 pub(crate) struct IconAdd {
     pub(crate) key: IconKey,

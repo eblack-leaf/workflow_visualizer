@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
-use crate::{Area, Numerical};
 use crate::text::font::MonoSpacedFont;
+use crate::{Area, Numerical};
 
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub(crate) struct TextScale {

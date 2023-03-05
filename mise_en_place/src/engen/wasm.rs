@@ -9,15 +9,15 @@ use winit::event_loop::EventLoop;
 use winit::window::{Window, WindowBuilder};
 
 #[cfg(target_arch = "wasm32")]
-use crate::Engen;
-#[cfg(target_arch = "wasm32")]
 use crate::engen::ignite::ignite;
 #[cfg(target_arch = "wasm32")]
 use crate::gfx::{GfxOptions, GfxSurface};
+#[cfg(target_arch = "wasm32")]
+use crate::Engen;
 
 #[cfg(target_arch = "wasm32")]
 pub(crate) async fn web_ignite(mut engen: Engen) {
-    use wasm_bindgen::{JsCast, prelude::*};
+    use wasm_bindgen::{prelude::*, JsCast};
     use winit::platform::web::WindowExtWebSys;
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
     console_log::init().expect("could not initialize logger");
@@ -77,7 +77,7 @@ fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
 
 #[cfg(target_arch = "wasm32")]
 fn web_resizing(window: &Rc<Window>) {
-    use wasm_bindgen::{JsCast, prelude::*};
+    use wasm_bindgen::{prelude::*, JsCast};
     let w_window = window.clone();
     let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
         let scale_factor = w_window.scale_factor();

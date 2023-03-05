@@ -14,6 +14,7 @@ mod atlas;
 mod attachment;
 mod backend_system;
 mod cache;
+mod content_scroll;
 mod coords;
 mod difference;
 mod extraction;
