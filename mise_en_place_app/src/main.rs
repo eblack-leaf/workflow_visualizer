@@ -1,12 +1,12 @@
 #![allow(unused, dead_code)]
 
-use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 use mise_en_place::{
     Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
     IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust,
     PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide, TextLine,
-    TextPartition, TextScaleAlignment, Timer, UIView,
+    TextScaleAlignment, Timer, UIView,
 };
+use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod serve;
