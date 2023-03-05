@@ -17,7 +17,7 @@ impl ThemeDescriptor {
     }
 }
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Copy, Clone)]
 pub struct Theme {
     pub background: Color,
     pub primary: Color,
@@ -44,6 +44,8 @@ pub struct ThemeAttachment;
 
 impl Attach for ThemeAttachment {
     fn attach(engen: &mut Engen) {
-        engen.backend.container.insert_resource(Theme::default());
+        let theme = engen.options.theme;
+        engen.frontend.container.insert_resource(theme);
+        engen.backend.container.insert_resource(theme);
     }
 }

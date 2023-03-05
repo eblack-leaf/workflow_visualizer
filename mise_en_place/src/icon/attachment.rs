@@ -1,7 +1,8 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel};
 
+use crate::{IconBundle, spawn};
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
 use crate::icon::backend_system::{process_differences, read_add_requests, setup};
 use crate::icon::frontend_system::{
     area_cache_check, calc_area, color_cache_check, color_invert_cache_check, depth_cache_check,
@@ -9,7 +10,6 @@ use crate::icon::frontend_system::{
     secondary_color_cache_check,
 };
 use crate::icon::IconRenderer;
-use crate::{spawn, IconBundle};
 
 pub struct IconAttachment;
 

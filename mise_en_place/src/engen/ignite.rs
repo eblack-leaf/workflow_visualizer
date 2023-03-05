@@ -1,16 +1,15 @@
 use winit::event::{Event, StartCause, WindowEvent};
 
+use crate::{
+    Engen, gfx, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
+};
 use crate::clickable::ClickableAttachment;
 use crate::coord::CoordAttachment;
 use crate::engen::TaskLabel;
 use crate::focus::FocusAttachment;
-use crate::theme::ThemeAttachment;
 use crate::time::Timer;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    gfx, Engen, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
-};
 
 pub(crate) fn ignite(mut engen: Engen) {
     let event_loop = engen.event_loop.take().expect("no event loop");
@@ -23,7 +22,6 @@ pub(crate) fn ignite(mut engen: Engen) {
                     engen.invoke_attach::<CoordAttachment>();
                     engen.invoke_attach::<WindowAttachment>();
                     engen.invoke_attach::<ViewportAttachment>();
-                    engen.invoke_attach::<ThemeAttachment>();
                     engen.invoke_attach::<VisibilityAttachment>();
                     engen.invoke_attach::<ClickableAttachment>();
                     engen.invoke_attach::<FocusAttachment>();

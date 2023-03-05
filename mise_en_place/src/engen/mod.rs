@@ -8,22 +8,23 @@ use winit::window::Window;
 #[cfg(not(target_arch = "wasm32"))]
 use winit::window::WindowBuilder;
 
-pub(crate) use job::TaskLabel;
 pub use job::{Container, EntityStore, ExecutionState, Exit, Idle, Job, Task};
+pub(crate) use job::TaskLabel;
 pub use options::EngenOptions;
 pub use stages::{
-    BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, FrontEndSystems,
+    BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages, FrontEndSystems,
 };
 
-use crate::gfx::{
-    invoke_extract, invoke_render, Extract, ExtractFns, Render, RenderFns, RenderPhase,
-};
-#[cfg(not(target_arch = "wasm32"))]
-use crate::gfx::{GfxOptions, GfxSurface};
 use crate::{
     Click, ClickEvent, ClickEventType, DeviceView, Finger, MouseAdapter, Position, Resize,
     ScaleFactor, TouchAdapter, VisibleBounds,
 };
+use crate::gfx::{
+    Extract, ExtractFns, invoke_extract, invoke_render, Render, RenderFns, RenderPhase,
+};
+#[cfg(not(target_arch = "wasm32"))]
+use crate::gfx::{GfxOptions, GfxSurface};
+use crate::theme::ThemeAttachment;
 
 mod ignite;
 mod job;
@@ -35,7 +36,7 @@ pub struct Engen {
     event_loop: Option<EventLoop<()>>,
     attachment_queue: Vec<Attachment>,
     #[allow(dead_code)]
-    options: EngenOptions,
+    pub(crate) options: EngenOptions,
     pub(crate) render_fns: (RenderFns, RenderFns),
     pub(crate) extract_fns: ExtractFns,
     pub(crate) frontend: Job,
@@ -74,8 +75,10 @@ impl Engen {
         Attachment::attach(self);
     }
     pub fn launch<Launcher: Launch>() {
-        let mut engen = Engen::new(Launcher::options());
+        let options = Launcher::options();
+        let mut engen = Engen::new(options);
         engen.attachment_queue = Launcher::attachments();
+        engen.invoke_attach::<ThemeAttachment>();
         Launcher::prepare(&mut engen.frontend);
         #[cfg(not(target_arch = "wasm32"))]
         {

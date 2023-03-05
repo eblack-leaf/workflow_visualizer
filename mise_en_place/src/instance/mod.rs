@@ -70,7 +70,7 @@ pub struct InstanceAttributeManager<
 }
 
 impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
-    InstanceAttributeManager<Attribute>
+InstanceAttributeManager<Attribute>
 {
     pub fn new(gfx_surface: &GfxSurface, max: u32) -> Self {
         Self {

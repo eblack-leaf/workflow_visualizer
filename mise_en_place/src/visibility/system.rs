@@ -5,11 +5,11 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Added, Commands, Query, RemovedComponents, Res};
 
-use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
 use crate::{
     Area, Position, Resize, ScaleFactor, Section, UIView, Visibility, VisibleBounds, VisibleSection,
 };
+use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
+use crate::visibility::spacial_hasher::SpacialHasher;
 
 pub(crate) fn visibility_setup(
     added: Query<Entity, Added<Visibility>>,

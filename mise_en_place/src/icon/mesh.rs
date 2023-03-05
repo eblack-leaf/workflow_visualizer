@@ -5,17 +5,42 @@ use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
-use crate::gfx::GfxSurface;
 use crate::{DeviceView, GpuPosition, Position};
+use crate::gfx::GfxSurface;
 
 #[derive(Clone)]
 pub struct IconMesh {
     pub mesh: Vec<IconVertex>,
 }
 
-pub enum BundledIconKeys {
+pub enum IconDescriptors {
     Box,
     Cursor,
+    User(&'static str, IconMesh),
+}
+
+impl IconDescriptors {
+    pub(crate) fn key(&self) -> IconKey {
+        match self {
+            IconDescriptors::Box => {
+                IconKey("engen::Box")
+            }
+            IconDescriptors::Cursor => {
+                IconKey("engen::Cursor")
+            }
+            IconDescriptors::User(key, _) => {
+                IconKey(key)
+            }
+        }
+    }
+    pub(crate) fn mesh(self) -> IconMesh {
+        match self {
+            IconDescriptors::User(_, mesh) => {
+                mesh
+            }
+            _ => IconMesh::bundled(self).unwrap()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -56,17 +81,16 @@ impl IconMesh {
     pub fn new(mesh: Vec<IconVertex>) -> Self {
         Self { mesh }
     }
-    pub fn bundled(icon_key: BundledIconKeys) -> Self {
-        Self {
-            mesh: match icon_key {
-                BundledIconKeys::Box => {
-                    let data = read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap();
-                    data
-                }
-                BundledIconKeys::Cursor => {
-                    read_mesh_bytes(include_bytes!("icons/cursor.icon_mesh")).unwrap()
-                }
-            },
+    pub(crate) fn bundled(icon_descriptor: IconDescriptors) -> Option<Self> {
+        match icon_descriptor {
+            IconDescriptors::Box => {
+                let data = read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap();
+                Some(Self::new(data))
+            }
+            IconDescriptors::Cursor => {
+                Some(Self::new(read_mesh_bytes(include_bytes!("icons/cursor.icon_mesh")).unwrap()))
+            }
+            _ => None
         }
     }
     pub(crate) fn to_gpu(&self, gfx_surface: &GfxSurface) -> GpuIconMesh {
@@ -150,10 +174,10 @@ pub struct IconMeshAddRequest {
 }
 
 impl IconMeshAddRequest {
-    pub fn new(icon_key: IconKey, icon_mesh: IconMesh, max: u32) -> Self {
+    pub fn new(icon_descriptor: IconDescriptors, max: u32) -> Self {
         Self {
-            icon_key,
-            icon_mesh,
+            icon_key: icon_descriptor.key(),
+            icon_mesh: icon_descriptor.mesh(),
             max,
         }
     }

@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::area_adjust::AreaAdjust;
 use crate::coord::{CoordContext, DeviceView, Numerical, UIView};
+use crate::coord::area_adjust::AreaAdjust;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]

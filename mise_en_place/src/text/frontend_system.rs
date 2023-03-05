@@ -6,6 +6,7 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
+use crate::{AreaAdjust, TextGridGuide};
 use crate::coord::{Area, Depth, DeviceView, Position, Section, UIView};
 use crate::instance::key::Key;
 use crate::text::atlas::AtlasBlock;
@@ -15,12 +16,11 @@ use crate::text::extraction::Extraction;
 use crate::text::glyph::Glyph;
 use crate::text::place::{Placer, WrapStyleComponent};
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
-use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment};
+use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment, TextScaleLetterDimensions};
 use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::{AreaAdjust, TextGridGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -42,13 +42,16 @@ pub(crate) fn calc_scale_from_alignment(
         Or<(Without<TextScale>, Changed<TextScaleAlignment>)>,
     >,
     scale_factor: Res<ScaleFactor>,
+    fonts: Res<AlignedFonts>,
     mut cmd: Commands,
 ) {
     for (entity, text_scale_alignment) in text.iter() {
-        cmd.entity(entity).insert(TextScale::from_alignment(
+        let scale = TextScale::from_alignment(
             *text_scale_alignment,
             scale_factor.factor,
-        ));
+        );
+        let dimensions = fonts.fonts.get(text_scale_alignment).unwrap().character_dimensions('a', scale.px());
+        cmd.entity(entity).insert((scale, TextScaleLetterDimensions::new(dimensions)));
     }
 }
 
@@ -326,7 +329,7 @@ pub(crate) fn place(
     )>,
 ) {
     for (text, scale, mut placer, text_scale_alignment, wrap_style, maybe_text_bound) in
-        text.p0().iter_mut()
+    text.p0().iter_mut()
     {
         placer.place(
             text,

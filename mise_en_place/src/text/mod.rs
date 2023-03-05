@@ -7,6 +7,7 @@ pub use crate::text::render_group::TextGridGuide;
 pub(crate) use crate::text::scale::AlignedFonts;
 pub(crate) use crate::text::scale::TextScale;
 pub use crate::text::scale::TextScaleAlignment;
+pub use crate::text::scale::TextScaleLetterDimensions;
 pub use crate::text::text::{Letter, LetterStyle, Text, TextBundle, TextLine};
 
 mod atlas;

@@ -1,7 +1,7 @@
+use axum::{Extension, Json};
 use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{Extension, Json};
 use axum_sessions::extractors::WritableSession;
 use uuid::Uuid;
 use webauthn_rs::prelude::{

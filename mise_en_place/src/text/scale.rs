@@ -3,11 +3,25 @@ use std::collections::HashMap;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
+use crate::{Area, Numerical};
 use crate::text::font::MonoSpacedFont;
 
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub(crate) struct TextScale {
     pub(crate) scale: u32,
+}
+
+#[derive(Component)]
+pub struct TextScaleLetterDimensions {
+    pub(crate) dimensions: Area<Numerical>,
+}
+
+impl TextScaleLetterDimensions {
+    pub(crate) fn new<A: Into<Area<Numerical>>>(area: A) -> Self {
+        Self {
+            dimensions: area.into(),
+        }
+    }
 }
 
 impl TextScale {

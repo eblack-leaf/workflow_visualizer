@@ -1,7 +1,8 @@
 use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel, SystemLabel, SystemStage};
 
+use crate::{spawn, TextBundle};
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{BackendStages, BackEndStartupStages, FrontEndStages, FrontEndStartupStages};
 use crate::text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };
@@ -12,7 +13,6 @@ use crate::text::frontend_system::{
 };
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
-use crate::{spawn, TextBundle};
 
 #[derive(SystemLabel)]
 pub enum TextSystems {
