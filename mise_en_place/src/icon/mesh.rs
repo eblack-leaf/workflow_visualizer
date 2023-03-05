@@ -5,8 +5,8 @@ use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
-use crate::{DeviceView, GpuPosition, Position};
 use crate::gfx::GfxSurface;
+use crate::{DeviceView, GpuPosition, Position};
 
 #[derive(Clone)]
 pub struct IconMesh {
@@ -22,13 +22,34 @@ pub enum BundledIconKeys {
 #[test]
 fn generate_cursor_mesh() {
     let mut mesh = Vec::<IconVertex>::new();
-    mesh.push(IconVertex::new(Position::<DeviceView>::new(0.0, 0.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
-    mesh.push(IconVertex::new(Position::<DeviceView>::new(0.0, 1.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
-    mesh.push(IconVertex::new(Position::<DeviceView>::new(1.0, 0.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
-    mesh.push(IconVertex::new(Position::<DeviceView>::new(1.0, 0.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
-    mesh.push(IconVertex::new(Position::<DeviceView>::new(0.0, 1.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
-    mesh.push(IconVertex::new(Position::<DeviceView>::new(1.0, 1.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
-    write_mesh(&mesh, "/home/omi-voshuli/Desktop/note-ifications/mise_en_place/src/icon/icons/cursor.icon_mesh");
+    mesh.push(IconVertex::new(
+        Position::<DeviceView>::new(0.0, 0.0).to_gpu(),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ));
+    mesh.push(IconVertex::new(
+        Position::<DeviceView>::new(0.0, 1.0).to_gpu(),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ));
+    mesh.push(IconVertex::new(
+        Position::<DeviceView>::new(1.0, 0.0).to_gpu(),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ));
+    mesh.push(IconVertex::new(
+        Position::<DeviceView>::new(1.0, 0.0).to_gpu(),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ));
+    mesh.push(IconVertex::new(
+        Position::<DeviceView>::new(0.0, 1.0).to_gpu(),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ));
+    mesh.push(IconVertex::new(
+        Position::<DeviceView>::new(1.0, 1.0).to_gpu(),
+        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT),
+    ));
+    write_mesh(
+        &mesh,
+        "/home/omi-voshuli/Desktop/note-ifications/mise_en_place/src/icon/icons/cursor.icon_mesh",
+    );
 }
 
 impl IconMesh {

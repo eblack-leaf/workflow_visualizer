@@ -4,12 +4,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
 
-use crate::{
-    Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
-};
 use crate::icon::cache::{Cache, DifferenceHolder};
 use crate::icon::interface::IconAreaGuide;
 use crate::icon::mesh::ColorInvert;
+use crate::{
+    Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
+};
 
 pub(crate) fn initialization(
     icons: Query<
@@ -35,7 +35,7 @@ pub(crate) fn initialization(
         removals.insert(entity);
     }
     for (entity, icon, icon_key, position, area, depth, color, color_invert, visibility) in
-    icons.iter()
+        icons.iter()
     {
         if visibility.visible() {
             difference_holder
@@ -274,7 +274,8 @@ pub(crate) fn calc_area(
                     .insert(Area::<UIView>::new(scaled as f32, scaled as f32));
             }
             IconSize::Custom((w, h)) => {
-                cmd.entity(entity).insert(Area::<UIView>::new(*w as f32, *h as f32));
+                cmd.entity(entity)
+                    .insert(Area::<UIView>::new(*w as f32, *h as f32));
             }
         }
     }

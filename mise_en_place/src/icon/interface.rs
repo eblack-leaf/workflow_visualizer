@@ -4,8 +4,8 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
-use crate::{Color, Location, UIView, Visibility};
 use crate::icon::mesh::{ColorInvert, IconKey};
+use crate::{Color, Location, UIView, Visibility};
 
 #[derive(Component, Copy, Clone)]
 pub struct Icon {
