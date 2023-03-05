@@ -3,17 +3,18 @@ use std::collections::HashSet;
 use bevy_ecs::prelude::Component;
 use fontdue::layout::{CoordinateSystem, GlyphPosition, LayoutSettings, TextStyle, WrapStyle};
 
+use crate::{Color, LetterStyle};
 use crate::instance::key::{Key, KeyFactory};
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
-use crate::text::text::{PartitionMetadata, Text};
+use crate::text::text::{LetterMetadata, Text};
 
 #[derive(Component)]
 pub(crate) struct Placer {
-    layout: fontdue::layout::Layout<PartitionMetadata>,
-    unfiltered_placement: Vec<(Key, GlyphPosition<PartitionMetadata>)>,
-    filtered_placement: Vec<(Key, GlyphPosition<PartitionMetadata>)>,
+    layout: fontdue::layout::Layout<LetterMetadata>,
+    unfiltered_placement: Vec<(Key, GlyphPosition<LetterMetadata>)>,
+    filtered_placement: Vec<(Key, GlyphPosition<LetterMetadata>)>,
 }
 
 pub type WrapStyleExpt = WrapStyle;
@@ -50,14 +51,26 @@ impl Placer {
                 ..LayoutSettings::default()
             });
         }
-        for part in text.partitions.iter() {
+        for text_line in text.lines.iter() {
+            for letter in text_line.letters {
+                let mut tmp = [0u8; 4];
+                self.layout.append(
+                    font.font_slice(),
+                    &TextStyle::with_user_data(
+                        letter.character.encode_utf8(&mut tmp),
+                        scale.px(),
+                        MonoSpacedFont::index(),
+                        letter.metadata,
+                    ),
+                );
+            }
             self.layout.append(
                 font.font_slice(),
                 &TextStyle::with_user_data(
-                    part.characters.as_str(),
+                    "\n",
                     scale.px(),
                     MonoSpacedFont::index(),
-                    part.metadata,
+                    LetterMetadata::new(Color::OFF_WHITE, LetterStyle::REGULAR),
                 ),
             );
         }
@@ -67,13 +80,13 @@ impl Placer {
             .glyphs()
             .iter()
             .map(|g| (key_factory.generate(), *g))
-            .collect::<Vec<(Key, GlyphPosition<PartitionMetadata>)>>();
+            .collect::<Vec<(Key, GlyphPosition<LetterMetadata>)>>();
         self.filtered_placement = self.unfiltered_placement.clone();
     }
-    pub(crate) fn unfiltered_placement(&self) -> &Vec<(Key, GlyphPosition<PartitionMetadata>)> {
+    pub(crate) fn unfiltered_placement(&self) -> &Vec<(Key, GlyphPosition<LetterMetadata>)> {
         &self.unfiltered_placement
     }
-    pub(crate) fn filtered_placement(&self) -> &Vec<(Key, GlyphPosition<PartitionMetadata>)> {
+    pub(crate) fn filtered_placement(&self) -> &Vec<(Key, GlyphPosition<LetterMetadata>)> {
         &self.filtered_placement
     }
     pub(crate) fn filter_placement(&mut self, filter_queue: HashSet<Key>) {

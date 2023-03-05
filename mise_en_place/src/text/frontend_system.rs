@@ -20,7 +20,7 @@ use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::{AreaAdjust, TextBoundGuide};
+use crate::{AreaAdjust, TextGridGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -54,8 +54,8 @@ pub(crate) fn calc_scale_from_alignment(
 
 pub(crate) fn calc_bound_from_guide(
     text: Query<
-        (Entity, &TextBoundGuide, &TextScaleAlignment),
-        Or<(Without<TextBound>, Changed<TextBoundGuide>)>,
+        (Entity, &TextGridGuide, &TextScaleAlignment),
+        Or<(Without<TextBound>, Changed<TextGridGuide>)>,
     >,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,

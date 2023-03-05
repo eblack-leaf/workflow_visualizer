@@ -211,12 +211,12 @@ impl RenderGroupBindGroup {
 }
 
 #[derive(Component, Copy, Clone)]
-pub struct TextBoundGuide {
+pub struct TextGridGuide {
     pub horizontal_character_max: u32,
     pub line_max: u32,
 }
 
-impl TextBoundGuide {
+impl TextGridGuide {
     pub fn new(horizontal_character_max: u32, line_max: u32) -> Self {
         Self {
             horizontal_character_max,

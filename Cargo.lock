@@ -2092,6 +2092,7 @@ dependencies = [
  "axum-server",
  "axum-sessions",
  "bevy_ecs",
+ "bitflags",
  "bytemuck",
  "console_error_panic_hook",
  "console_log",

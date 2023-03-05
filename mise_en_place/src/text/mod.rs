@@ -3,9 +3,11 @@ pub(crate) use render_group::TextBound;
 pub use crate::text::attachment::TextAttachment;
 pub use crate::text::attachment::TextStages;
 pub use crate::text::place::{WrapStyleComponent, WrapStyleExpt};
-pub use crate::text::render_group::TextBoundGuide;
+pub use crate::text::render_group::TextGridGuide;
 pub use crate::text::scale::TextScaleAlignment;
-pub use crate::text::text::{PartitionMetadata, Text, TextBundle, TextPartition};
+pub(crate) use crate::text::scale::AlignedFonts;
+pub(crate) use crate::text::scale::TextScale;
+pub use crate::text::text::{Letter, LetterStyle, Text, TextBundle, TextLine};
 
 mod atlas;
 mod attachment;

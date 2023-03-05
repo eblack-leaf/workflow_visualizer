@@ -1,53 +1,100 @@
 use bevy_ecs::prelude::{Bundle, Component};
+use bitflags::bitflags;
 use fontdue::layout::WrapStyle;
 
+use crate::{Color, Location, Visibility, WrapStyleComponent};
 use crate::coord::{Section, UIView};
 use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::{Color, Location, Visibility, WrapStyleComponent};
 
-#[derive(Clone)]
-pub struct TextPartition {
-    pub characters: String,
-    pub metadata: PartitionMetadata,
+bitflags! {
+    #[derive(Copy, Clone)]
+    pub struct LetterStyle: u32 {
+        const REGULAR = 0b00000001;
+        const BOLD = 0b00000010;
+        const ITALIC = 0b00000100;
+        const UNDERLINE = 0b00001000;
+    }
+}
+#[derive(Copy, Clone)]
+pub struct LetterMetadata {
+    pub color: Color,
+    pub style: LetterStyle,
 }
 
-impl TextPartition {
-    pub fn new<S: Into<String>, PM: Into<PartitionMetadata>>(characters: S, metadata: PM) -> Self {
+impl LetterMetadata {
+    pub fn new<C: Into<Color>, LS: Into<LetterStyle>>(color: C, style: LS) -> Self {
         Self {
-            characters: characters.into(),
-            metadata: metadata.into(),
+            color: color.into(),
+            style: style.into(),
         }
     }
 }
 
-impl<S: Into<String>, PM: Into<PartitionMetadata>> From<(S, PM)> for TextPartition {
-    fn from(value: (S, PM)) -> Self {
-        Self::new(value.0, value.1)
+pub struct Letter {
+    pub character: char,
+    pub metadata: LetterMetadata,
+}
+
+impl Letter {
+    pub fn new<Ch: Into<char>, C: Into<Color>, LS: Into<LetterStyle>>(
+        character: Ch,
+        color: C,
+        style: LS,
+    ) -> Self {
+        Self {
+            character: character.into(),
+            metadata: LetterMetadata::new(color.into(), style.into()),
+        }
+    }
+}
+
+pub struct TextLine {
+    pub letters: Vec<Letter>,
+}
+
+impl TextLine {
+    pub fn new<L: Into<Letter>>(letters: Vec<L>) -> Self {
+        let mut letters = letters.iter().map(|l| l.into()).collect::<Vec<Letter>>();
+        letters.retain(|letter| letter.character != '\n');
+        Self { letters }
+    }
+}
+
+impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(String, C, M)> for TextLine {
+    fn from(value: (S, C, M)) -> Self {
+        let string = value.0.into();
+        let color = value.1.into();
+        let style = value.2.into();
+        let letters = string
+            .chars()
+            .map(|c| Letter::new(c, color, style))
+            .collect::<Vec<Letter>>();
+        TextLine::new(letters)
     }
 }
 
 #[derive(Component, Clone)]
 pub struct Text {
-    pub partitions: Vec<TextPartition>,
+    pub lines: Vec<TextLine>,
 }
 
 impl Text {
-    pub fn new<TP: Into<TextPartition>>(mut partitions: Vec<TP>) -> Self {
+    pub fn new<TP: Into<TextLine>>(mut lines: Vec<TP>) -> Self {
         Self {
-            partitions: partitions
+            lines: lines
                 .drain(..)
                 .map(|tp| tp.into())
-                .collect::<Vec<TextPartition>>(),
+                .collect::<Vec<TextLine>>(),
         }
     }
     pub fn length(&self) -> u32 {
         let mut len = 0;
-        for part in self.partitions.iter() {
-            len += part.characters.len();
+        for part in self.lines.iter() {
+            len += part.letters.len();
         }
         len as u32
     }
@@ -87,26 +134,5 @@ impl TextBundle {
             visibility: Visibility::new(),
             wrap_style: WrapStyleComponent(WrapStyle::Letter),
         }
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct PartitionMetadata {
-    pub color: Color,
-    pub mods: u32, //bit_flag for italic/bold/...
-}
-
-impl PartitionMetadata {
-    pub fn new<C: Into<Color>>(color: C, mods: u32) -> Self {
-        Self {
-            color: color.into(),
-            mods,
-        }
-    }
-}
-
-impl<C: Into<Color>> From<(C, u32)> for PartitionMetadata {
-    fn from(value: (C, u32)) -> Self {
-        Self::new(value.0, value.1)
     }
 }

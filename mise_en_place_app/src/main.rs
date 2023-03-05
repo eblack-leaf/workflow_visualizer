@@ -1,12 +1,7 @@
 #![allow(unused, dead_code)]
 
+use mise_en_place::{Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages, IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust, PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide, TextLine, TextPartition, TextScaleAlignment, Timer, UIView};
 use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
-use mise_en_place::{
-    Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
-    IconAttachment, Idle, Job, Launch, Location, Position, PositionAdjust, PositionAdjustAnimator,
-    Request, Text, TextAttachment, TextBoundGuide, TextBundle, TextPartition, TextScaleAlignment,
-    Timer, UIView,
-};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod serve;
@@ -22,12 +17,11 @@ fn logic(
     idle.can_idle = false;
     let text_entity = *entity_store.store.get("animated_text").unwrap();
     if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
-        text.partitions.first_mut().unwrap().characters =
-            format!("migrating pos: {:.2}, {:.2}", pos.x, pos.y);
+        *text.lines.first_mut().unwrap() = TextLine::from((format!("text pos at: {:.2}, {:.2}", pos.x, pos.y), Color::OFF_WHITE, LetterStyle::REGULAR));
     }
     let text_entity = *entity_store.store.get("timer_text").unwrap();
     if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
-        text.partitions.first_mut().unwrap().characters = format!("timer: {:.2}", timer.mark().0);
+        *text.lines.first_mut().unwrap() = TextLine::from((format!("timer: {:.2}", timer.mark().0), Color::OFF_WHITE, LetterStyle::REGULAR));
     }
 }
 
@@ -41,13 +35,12 @@ fn post_anim_logic(
     for _added in anim_start.iter() {
         let text_entity = *entity_store.store.get("start_text").unwrap();
         let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
-        text.partitions.first_mut().unwrap().characters =
-            format!("start at: {:.2}", timer.mark().0);
+        *text.lines.first_mut().unwrap() = TextLine::from((format!("start at: {:.2}", timer.mark().0), Color::OFF_WHITE, LetterStyle::REGULAR));
     }
     for _remove in removed.iter() {
         let text_entity = *entity_store.store.get("done_text").unwrap();
         let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
-        text.partitions.first_mut().unwrap().characters = format!("done at: {:.2}", timer.mark().0);
+        *text.lines.first_mut().unwrap() = TextLine::from((format!("done at: {:.2}", timer.mark().0), Color::OFF_WHITE, LetterStyle::REGULAR));
     }
 }
 
@@ -64,10 +57,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextPartition::new(
-                    "animated text",
-                    (Color::OFF_WHITE, 0),
-                )]),
+                Text::new(vec![TextLine::from(("animated_text".to_string(), Color::OFF_WHITE, LetterStyle::REGULAR))]),
                 Location::new((0.0, 0.0), 0),
                 TextScaleAlignment::Medium,
             )))
@@ -80,7 +70,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextPartition::new("timer:", (Color::OFF_WHITE, 0))]),
+                Text::new(vec![TextLine::from(("timer:".to_string(), Color::OFF_WHITE, LetterStyle::REGULAR))]),
                 Location::new((0.0, 40.0), 0),
                 TextScaleAlignment::Medium,
             )))
@@ -89,7 +79,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextPartition::new("start at:", (Color::OFF_WHITE, 0))]),
+                Text::new(vec![TextLine::from(("start at:".to_string(), Color::OFF_WHITE, LetterStyle::REGULAR))]),
                 Location::new((0.0, 80.0), 0),
                 TextScaleAlignment::Medium,
             )))
@@ -98,7 +88,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextPartition::new("done at:", (Color::OFF_WHITE, 0))]),
+                Text::new(vec![TextLine::from(("done at:".to_string(), Color::OFF_WHITE, LetterStyle::REGULAR))]),
                 Location::new((0.0, 120.0), 0),
                 TextScaleAlignment::Medium,
             )))
