@@ -11,7 +11,6 @@ use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
 
 bitflags! {
-    #[derive(Copy, Clone)]
     pub struct LetterStyle: u32 {
         const REGULAR = 0b00000001;
         const BOLD = 0b00000010;
@@ -57,14 +56,14 @@ pub struct TextLine {
 }
 
 impl TextLine {
-    pub fn new<L: Into<Letter>>(letters: Vec<L>) -> Self {
-        let mut letters = letters.iter().map(|l| l.into()).collect::<Vec<Letter>>();
+    pub fn new<L: Into<Letter>>(mut letters: Vec<L>) -> Self {
+        let mut letters = letters.drain(..).map(|l| l.into()).collect::<Vec<Letter>>();
         letters.retain(|letter| letter.character != '\n');
         Self { letters }
     }
 }
 
-impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(String, C, M)> for TextLine {
+impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(S, C, M)> for TextLine {
     fn from(value: (S, C, M)) -> Self {
         let string = value.0.into();
         let color = value.1.into();
@@ -77,7 +76,7 @@ impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(String, C, M)>
     }
 }
 
-#[derive(Component, Clone)]
+#[derive(Component)]
 pub struct Text {
     pub lines: Vec<TextLine>,
 }

@@ -1,7 +1,8 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res};
 use bevy_ecs::query::Changed;
 
-use crate::{Attach, Clickable, ClickListener, ClickState, Color, Engen, FrontEndStages, Letter, LetterStyle, Location, Request, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType};
+use crate::{Attach, BundledIconKeys, Clickable, ClickListener, ClickState, Color, Engen, FrontEndStages, Icon, IconBundle, IconKey, IconMesh, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType};
+use crate::clickable::ClickSystems;
 use crate::focus::{Focus, FocusedEntity, FocusSystems};
 use crate::text::{AlignedFonts, TextBound, TextScale};
 
@@ -34,19 +35,37 @@ impl TextInputRequest {
 pub(crate) fn spawn(
     mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
     mut cmd: Commands,
+    fonts: Res<AlignedFonts>,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for (entity, mut request) in requests.iter_mut() {
         let inner_req = request.req.take().unwrap();
+        let text_scale = TextScale::from_alignment(inner_req.alignment, scale_factor.factor);
+        let character_dimensions = fonts.fonts.get(&inner_req.alignment).unwrap().character_dimensions('a', text_scale.px());
         let text = cmd
             .spawn(TextBundle::new(
-                Text::new(vec![TextLine::from((inner_req.hint_text, inner_req.text_color, LetterStyle::REGULAR))]),
+                Text::new(vec![TextLine::from((
+                    inner_req.hint_text,
+                    inner_req.text_color,
+                    LetterStyle::REGULAR,
+                ))]),
                 inner_req.location,
                 inner_req.alignment,
             ))
             .insert(inner_req.grid_guide)
             .id();
+        let cursor_icon = cmd.spawn(
+            IconBundle::new(
+                Icon::new(Color::OFF_BLACK),
+                IconSize::Custom((character_dimensions.width as u32, character_dimensions.height as u32)),
+                IconKey("text_input::cursor"),
+                Location::from((inner_req.location.position, inner_req.location.depth.adjusted(1u32))),
+                inner_req.text_color,
+            )
+        ).id();
         cmd.entity(entity).insert(TextInput::new(
             TextInputText::new(text),
+            CursorIcon::new(cursor_icon),
             inner_req.alignment,
             inner_req.grid_guide,
             inner_req.location,
@@ -63,10 +82,7 @@ pub struct TextGridLocation {
 
 impl TextGridLocation {
     pub fn new(x: u32, y: u32) -> Self {
-        Self {
-            x,
-            y,
-        }
+        Self { x, y }
     }
 }
 
@@ -124,30 +140,60 @@ pub(crate) fn read_input_if_focused(focused: Query<&Focus>, focused_entity: Res<
 }
 
 pub(crate) fn set_cursor_location(
-    mut clicked: Query<(Entity, &ClickState, &mut Cursor, &mut Text, &TextScaleAlignment, &TextScale)>,
+    mut clicked: Query<(
+        Entity,
+        &ClickState,
+        &CursorIcon,
+        &mut Cursor,
+        &mut Text,
+        &TextScaleAlignment,
+        &TextScale,
+    )>,
     fonts: Res<AlignedFonts>,
     theme: Res<Theme>,
+    mut cmd: Commands,
 ) {
-    for (entity, click_state, mut cursor, mut text, alignment, scale) in clicked.iter_mut() {
+    for (entity, click_state, cursor_icon, mut cursor, mut text, alignment, scale) in clicked.iter_mut() {
         if click_state.clicked() {
-            let character_dimensions = fonts.fonts.get(alignment).unwrap().character_dimensions('a', scale.px());
-            let line_clicked = (click_state.click_location.unwrap().y / character_dimensions.height).floor() as usize;
+            let character_dimensions = fonts
+                .fonts
+                .get(alignment)
+                .unwrap()
+                .character_dimensions('a', scale.px());
+            let line_clicked = (click_state.click_location.unwrap().y / character_dimensions.height)
+                .floor() as usize;
             let mut line = text.lines.get_mut(line_clicked).unwrap();
             let click_x = click_state.click_location.unwrap().x;
             let mut x_letter_location = (click_x / character_dimensions.width).floor() as u32;
             if x_letter_location > line.letters.len() as u32 {
-                line.letters.push(Letter::new(' ', Color::OFF_WHITE, LetterStyle::REGULAR));
+                line.letters
+                    .push(Letter::new(' ', Color::OFF_WHITE, LetterStyle::REGULAR));
                 x_letter_location = (line.letters.len() - 1) as u32;
             }
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
             if location != cursor.cached_location {
-                let x = cursor.cached_location.x as usize;
-                line.letters.get_mut(x).unwrap().metadata.color = cursor.cached_letter_color.unwrap_or(Color::OFF_WHITE.into());
+                cmd.entity(cursor_icon.entity).insert(Position::<UIView>::new(
+                    x_letter_location as f32 * character_dimensions.width,
+                    line_clicked as f32 * character_dimensions.height,
+                ));
+                let cached_x = cursor.cached_location.x as usize;
+                line.letters.get_mut(cached_x).unwrap().metadata.color = cursor
+                    .cached_letter_color
+                    .unwrap_or(Color::OFF_WHITE.into());
                 cursor.location = location;
                 cursor.cached_location = location;
-                let current_color = line.letters.get(x_letter_location as usize).unwrap().metadata.color;
+                let current_color = line
+                    .letters
+                    .get(x_letter_location as usize)
+                    .unwrap()
+                    .metadata
+                    .color;
                 cursor.cached_letter_color.replace(current_color);
-                line.letters.get_mut(x_letter_location as usize).unwrap().metadata.color = theme.background;
+                line.letters
+                    .get_mut(x_letter_location as usize)
+                    .unwrap()
+                    .metadata
+                    .color = theme.background;
             }
         }
     }
@@ -170,6 +216,7 @@ pub(crate) struct MaxCharacters(pub(crate) u32);
 #[derive(Bundle)]
 pub struct TextInput {
     pub(crate) text_input_text: TextInputText,
+    pub(crate) cursor_icon: CursorIcon,
     pub(crate) alignment: TextScaleAlignment,
     pub(crate) bound_guide: TextGridGuide,
     #[bundle]
@@ -182,15 +229,30 @@ pub struct TextInput {
     pub(crate) cursor: Cursor,
 }
 
+#[derive(Component)]
+pub(crate) struct CursorIcon {
+    pub(crate) entity: Entity,
+}
+
+impl CursorIcon {
+    pub(crate) fn new(entity: Entity) -> Self {
+        Self {
+            entity,
+        }
+    }
+}
+
 impl TextInput {
     pub(crate) fn new(
         text_input_text: TextInputText,
+        cursor_icon: CursorIcon,
         alignment: TextScaleAlignment,
         bound_guide: TextGridGuide,
         location: Location<UIView>,
     ) -> Self {
         Self {
             text_input_text,
+            cursor_icon,
             alignment,
             bound_guide,
             location,
@@ -213,6 +275,16 @@ impl Attach for TextInputPlugin {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Resolve, read_area_from_text_bound);
+        engen.frontend.container.spawn(
+            IconMeshAddRequest::new(
+                IconKey("text_input::cursor"),
+                IconMesh::bundled(BundledIconKeys::Cursor),
+                5,
+            ),
+        );
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::Prepare, set_cursor_location.after(ClickSystems::RegisterClick),
+        );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
             open_virtual_keyboard.after(FocusSystems::SetFocused),

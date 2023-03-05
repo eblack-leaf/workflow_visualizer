@@ -21,6 +21,12 @@ impl From<f32> for DepthAdjust {
     }
 }
 
+impl From<u32> for DepthAdjust {
+    fn from(value: u32) -> Self {
+        Self::new(value as f32)
+    }
+}
+
 pub(crate) fn depth_adjust(
     mut adjusted: Query<(Entity, &mut Depth, &DepthAdjust)>,
     mut cmd: Commands,

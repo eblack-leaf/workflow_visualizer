@@ -22,7 +22,7 @@ impl Color {
     pub const RED: (f32, f32, f32) = (0.9, 0.1, 0.1);
     pub const GREEN: (f32, f32, f32) = (0.1, 0.9, 0.1);
     pub const BLUE: (f32, f32, f32) = (0.1, 0.1, 0.9);
-    pub const OFF_BLACK: (f32, f32, f32) = (0.05, 0.05, 0.05);
+    pub const OFF_BLACK: (f32, f32, f32) = (0.005, 0.005, 0.005);
     pub fn rgb(red: f32, green: f32, blue: f32) -> Self {
         Self {
             red,

@@ -52,7 +52,7 @@ impl Placer {
             });
         }
         for text_line in text.lines.iter() {
-            for letter in text_line.letters {
+            for letter in text_line.letters.iter() {
                 let mut tmp = [0u8; 4];
                 self.layout.append(
                     font.font_slice(),

@@ -5,8 +5,8 @@ use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
+use crate::{DeviceView, GpuPosition, Position};
 use crate::gfx::GfxSurface;
-use crate::GpuPosition;
 
 #[derive(Clone)]
 pub struct IconMesh {
@@ -15,6 +15,20 @@ pub struct IconMesh {
 
 pub enum BundledIconKeys {
     Box,
+    Cursor,
+}
+
+#[cfg(test)]
+#[test]
+fn generate_cursor_mesh() {
+    let mut mesh = Vec::<IconVertex>::new();
+    mesh.push(IconVertex::new(Position::<DeviceView>::new(0.0, 0.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
+    mesh.push(IconVertex::new(Position::<DeviceView>::new(0.0, 1.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
+    mesh.push(IconVertex::new(Position::<DeviceView>::new(1.0, 0.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
+    mesh.push(IconVertex::new(Position::<DeviceView>::new(1.0, 0.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
+    mesh.push(IconVertex::new(Position::<DeviceView>::new(0.0, 1.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
+    mesh.push(IconVertex::new(Position::<DeviceView>::new(1.0, 1.0).to_gpu(), ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::CONSTANT)));
+    write_mesh(&mesh, "/home/omi-voshuli/Desktop/note-ifications/mise_en_place/src/icon/icons/cursor.icon_mesh");
 }
 
 impl IconMesh {
@@ -28,6 +42,9 @@ impl IconMesh {
                     let data = read_mesh_bytes(include_bytes!("icons/box.icon_mesh")).unwrap();
                     data
                 }
+                BundledIconKeys::Cursor => {
+                    read_mesh_bytes(include_bytes!("icons/cursor.icon_mesh")).unwrap()
+                }
             },
         }
     }
@@ -36,7 +53,7 @@ impl IconMesh {
             mesh: gfx_surface
                 .device
                 .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                    label: Some("text vertex buffer"),
+                    label: Some("icon vertex buffer"),
                     contents: bytemuck::cast_slice(&self.mesh),
                     usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                 }),

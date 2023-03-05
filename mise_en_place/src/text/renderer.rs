@@ -2,22 +2,22 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
+use crate::{Color, Job, ScaleFactor, Viewport};
 use crate::coord::{GpuArea, GpuPosition};
 use crate::engen::Container;
-use crate::gfx::Extract;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::gfx::{Render, RenderPassHandle, RenderPhase};
+use crate::gfx::Extract;
+use crate::instance::GpuAttributeBuffer;
 use crate::instance::index::Indexer;
 use crate::instance::key::Key;
-use crate::instance::GpuAttributeBuffer;
 use crate::instance::NullBit;
 use crate::text::atlas::AtlasBindGroup;
 use crate::text::coords::Coords;
 use crate::text::extraction::Extraction;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::scale::AlignedFonts;
-use crate::text::vertex::{vertex_buffer, Vertex, GLYPH_AABB};
-use crate::{Color, Job, ScaleFactor, Viewport};
+use crate::text::vertex::{AABB, aabb_vertex_buffer, Vertex};
 
 #[derive(Resource)]
 pub(crate) struct TextRenderer {
@@ -197,7 +197,7 @@ pub(crate) fn setup(
     let pipeline = gfx_surface.device.create_render_pipeline(&descriptor);
     let renderer = TextRenderer {
         pipeline,
-        vertex_buffer: vertex_buffer(&gfx_surface),
+        vertex_buffer: aabb_vertex_buffer(&gfx_surface),
         sampler_bind_group,
         render_groups: HashMap::new(),
         render_group_bind_group_layout,
@@ -211,8 +211,8 @@ pub(crate) fn setup(
 
 impl Extract for TextRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job)
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let mut extraction = frontend
             .container
@@ -304,7 +304,7 @@ impl Render for TextRenderer {
                 }
                 render_pass_handle
                     .0
-                    .draw(0..GLYPH_AABB.len() as u32, 0..indexer.count());
+                    .draw(0..AABB.len() as u32, 0..indexer.count());
                 if let Some(_) = draw_section.section {
                     render_pass_handle.0.set_scissor_rect(
                         0,
