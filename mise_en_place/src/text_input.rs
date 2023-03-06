@@ -1,15 +1,15 @@
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Query, Res};
+use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res};
 use bevy_ecs::query::Changed;
 
-use crate::clickable::ClickSystems;
-use crate::focus::{Focus, FocusSystems, FocusedEntity};
-use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::{
-    Attach, ClickListener, ClickState, Clickable, Color, ColorInvert, Engen, FrontEndStages, Icon,
-    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, LetterStyle, Location, Position,
+    Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon,
+    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Location, Position,
     Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment,
     TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
+use crate::clickable::ClickSystems;
+use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::text::{AlignedFonts, TextBound, TextScale};
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -52,13 +52,13 @@ pub(crate) fn spawn(
             .get(&inner_req.alignment)
             .unwrap()
             .character_dimensions('a', text_scale.px());
+        let mut lines = Vec::new();
+        for i in 0..inner_req.grid_guide.line_max {
+            lines.push(TextLine::new(vec![]));
+        }
         let text = cmd
             .spawn(TextBundle::new(
-                Text::new(vec![TextLine::from((
-                    inner_req.hint_text,
-                    inner_req.text_color,
-                    LetterStyle::REGULAR,
-                ))]),
+                Text::new(lines),
                 inner_req.location,
                 inner_req.alignment,
             ))
@@ -121,24 +121,36 @@ impl Cursor {
 }
 
 pub(crate) fn read_area_from_text_bound(
-    text_inputs: Query<(Entity, &TextBound), Changed<TextBound>>,
+    text_inputs: Query<(Entity, &TextBound, &TextInputText, &TextGridGuide), (Or<(Changed<TextBound>, Changed<TextGridGuide>)>)>,
+    mut text: Query<(Entity, &mut Text)>,
     mut cmd: Commands,
 ) {
-    for (entity, bound) in text_inputs.iter() {
+    for (entity, bound, text_input_text, grid_guide) in text_inputs.iter() {
+        let (text_ent, mut text) = text.get_mut(text_input_text.entity).unwrap();
+        let current_line_count = text.lines.len() as u32;
+        if current_line_count < grid_guide.line_max {
+            for i in current_line_count..grid_guide.line_max {
+                text.lines.push(TextLine::new(vec![]));
+            }
+        }
         cmd.entity(entity).insert(bound.area.clone());
     }
 }
 
 pub(crate) fn open_virtual_keyboard(
     virtual_keyboard: Res<VirtualKeyboardAdapter>,
-    focus_changed: Query<(&Focus, &VirtualKeyboardType), Changed<Focus>>,
+    focus_changed: Query<(&Focus, &VirtualKeyboardType, &CursorIcon), Changed<Focus>>,
+    mut cmd: Commands,
 ) {
     let mut should_close = true;
     let mut keyboard = VirtualKeyboardType::Keyboard;
-    for (focus, v_key_type) in focus_changed.iter() {
+    for (focus, v_key_type, cursor_icon) in focus_changed.iter() {
         if focus.focused() {
             should_close = false;
             keyboard = *v_key_type;
+            cmd.entity(cursor_icon.entity).insert(ColorInvert::off());
+        } else {
+            cmd.entity(cursor_icon.entity).insert(ColorInvert::on());
         }
     }
     if should_close {
@@ -148,9 +160,9 @@ pub(crate) fn open_virtual_keyboard(
     }
 }
 
-pub(crate) fn read_input_if_focused(focused: Query<&Focus>, focused_entity: Res<FocusedEntity>) {
+pub(crate) fn read_input_if_focused(focused: Query<(&Focus, &Cursor)>, focused_entity: Res<FocusedEntity>) {
     if let Some(entity) = focused_entity.entity {
-        if let Ok(focus) = focused.get(entity) {
+        if let Ok((focus, cursor)) = focused.get(entity) {
             // limit text input by max characters here
         }
     }
