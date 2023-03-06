@@ -11,7 +11,7 @@ pub(crate) struct TextScale {
     pub(crate) scale: u32,
 }
 
-#[derive(Component)]
+#[derive(Component, Copy, Clone)]
 pub struct TextScaleLetterDimensions {
     pub(crate) dimensions: Area<Numerical>,
 }

@@ -82,20 +82,17 @@ impl Differences {
     }
     pub(crate) fn clean(&mut self) {
         let removed_entities = self.icon_removes.clone();
-        for entity in removed_entities {
-            self.position.remove(&entity);
-            self.area.remove(&entity);
-            self.depth.remove(&entity);
-            self.color.remove(&entity);
-            self.secondary_color.remove(&entity);
-            self.color_invert.remove(&entity);
-        }
+        self.clean_entity(removed_entities);
         let added_entities = self
             .icon_adds
             .iter()
             .map(|a| *a.0)
             .collect::<HashSet<Entity>>();
-        for entity in added_entities {
+        self.clean_entity(added_entities);
+    }
+
+    fn clean_entity(&mut self, removed_entities: HashSet<Entity>) {
+        for entity in removed_entities {
             self.position.remove(&entity);
             self.area.remove(&entity);
             self.depth.remove(&entity);

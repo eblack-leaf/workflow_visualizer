@@ -126,20 +126,20 @@ impl Cursor {
 pub(crate) fn read_area_from_text_bound(
     text_inputs: Query<
         (Entity, &TextBound, &TextInputText, &TextGridGuide),
-        (Or<(Changed<TextBound>, Changed<TextGridGuide>)>),
+        Or<(Changed<TextBound>, Changed<TextGridGuide>)>,
     >,
-    mut text: Query<(Entity, &mut Text)>,
+    mut text: Query<(&mut Text, &TextScaleLetterDimensions)>,
     mut cmd: Commands,
 ) {
     for (entity, bound, text_input_text, grid_guide) in text_inputs.iter() {
-        let (text_ent, mut text) = text.get_mut(text_input_text.entity).unwrap();
+        let (mut text, letter_dimensions) = text.get_mut(text_input_text.entity).unwrap();
         let current_line_count = text.lines.len() as u32;
         if current_line_count < grid_guide.line_max {
             for i in current_line_count..grid_guide.line_max {
                 text.lines.push(TextLine::new(vec![]));
             }
         }
-        cmd.entity(entity).insert(bound.area.clone());
+        cmd.entity(entity).insert((bound.area, *letter_dimensions));
     }
 }
 
@@ -169,12 +169,12 @@ pub(crate) fn open_virtual_keyboard(
 pub(crate) fn read_input_if_focused(
     focused: Query<(&Focus, &Cursor, &MaxCharacters, &TextInputText)>,
     focused_entity: Res<FocusedEntity>,
-    mut text: Query<(&mut Text)>,
+    mut text: Query<(Entity, &mut Text)>,
 ) {
     if let Some(entity) = focused_entity.entity {
         if let Ok((focus, cursor, max_characters, text_input_text)) = focused.get(entity) {
             // limit text input by max characters here
-            let mut t = text.get_mut(text_input_text.entity).unwrap();
+            let (entity, mut t) = text.get_mut(text_input_text.entity).unwrap();
             if t.length() < max_characters.0 {
                 t.lines.get_mut(0).unwrap().letters.push(Letter::new(
                     'a',
@@ -188,51 +188,59 @@ pub(crate) fn read_input_if_focused(
 
 pub(crate) fn set_cursor_location(
     mut clicked: Query<(
+        &Position<UIView>,
         &ClickState,
         &CursorIcon,
         &mut Cursor,
-        &mut Text,
+        &TextInputText,
         &TextScaleLetterDimensions,
     )>,
+    mut text_entities: Query<&mut Text>,
     theme: Res<Theme>,
     mut cmd: Commands,
 ) {
-    for (click_state, cursor_icon, mut cursor, mut text, character_dimensions) in clicked.iter_mut()
+    for (pos, click_state, cursor_icon, mut cursor, text_input_text, character_dimensions) in
+        clicked.iter_mut()
     {
         if click_state.clicked() {
-            let line_clicked = (click_state.click_location.unwrap().y
-                / character_dimensions.dimensions.height)
+            let click_location = click_state.click_location.unwrap();
+            let line_clicked = ((click_location.y - pos.y) / character_dimensions.dimensions.height)
                 .floor() as usize;
+            let mut text = text_entities.get_mut(text_input_text.entity).unwrap();
+            println!("line clicked: {}", line_clicked);
             let line = text.lines.get_mut(line_clicked).unwrap();
-            let click_x = click_state.click_location.unwrap().x;
+            let click_x = click_location.x - pos.x;
             let x_letter_location =
                 (click_x / character_dimensions.dimensions.width).floor() as u32;
-            let x_letter_location = x_letter_location.max(line.letters.len() as u32);
+            let x_letter_location = x_letter_location.min(line.letters.len() as u32);
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
+            println!("cursor location {}, {}", location.x, location.y);
             if location != cursor.cached_location {
                 cmd.entity(cursor_icon.entity)
                     .insert(Position::<UIView>::new(
-                        x_letter_location as f32 * character_dimensions.dimensions.width,
-                        line_clicked as f32 * character_dimensions.dimensions.height,
+                        pos.x + x_letter_location as f32 * character_dimensions.dimensions.width,
+                        pos.y + line_clicked as f32 * character_dimensions.dimensions.height,
                     ));
                 let cached_x = cursor.cached_location.x as usize;
-                line.letters.get_mut(cached_x).unwrap().metadata.color = cursor
-                    .cached_letter_color
-                    .unwrap_or(Color::OFF_WHITE.into());
+                if let Some(letter) = line.letters.get_mut(cached_x) {
+                    letter.metadata.color = cursor
+                        .cached_letter_color
+                        .unwrap_or(Color::OFF_WHITE.into());
+                }
                 cursor.location = location;
                 cursor.cached_location = location;
-                let current_color = line
-                    .letters
-                    .get(x_letter_location as usize)
-                    .unwrap()
-                    .metadata
-                    .color;
+                let current_color = match line.letters.get(x_letter_location as usize) {
+                    None => Color::OFF_WHITE.into(),
+                    Some(letter) => letter.metadata.color,
+                };
                 cursor.cached_letter_color.replace(current_color);
-                line.letters
+                let _ = line
+                    .letters
                     .get_mut(x_letter_location as usize)
-                    .unwrap()
-                    .metadata
-                    .color = theme.background;
+                    .and_then(|letter| {
+                        letter.metadata.color = theme.background;
+                        Some(())
+                    });
             }
         }
     }
@@ -334,7 +342,8 @@ impl Attach for TextInputAttachment {
             FrontEndStages::Prepare,
             read_input_if_focused
                 .label(TextInputSystems::ReadInput)
-                .after(TextInputSystems::CursorLocation),
+                .after(TextInputSystems::CursorLocation)
+                .after(FocusSystems::SetFocused),
         );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
