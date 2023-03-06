@@ -1,7 +1,12 @@
 #![allow(unused, dead_code)]
 
-use mise_en_place::{Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages, IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust, PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide, TextInputRequest, TextInputText, TextLine, TextScaleAlignment, Timer, UIView, VisibleSection};
 use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
+use mise_en_place::{
+    Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
+    IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust,
+    PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide,
+    TextInputRequest, TextInputText, TextLine, TextScaleAlignment, Timer, UIView, VisibleSection,
+};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod serve;
@@ -135,17 +140,16 @@ impl Launch for Launcher {
             )))
             .id();
         job.store_entity("done_text", id);
-        let id = job.container.spawn(
-            Request::new(
-                TextInputRequest::new(
-                    "".to_string(),
-                    TextScaleAlignment::Medium,
-                    TextGridGuide::new(50, 2),
-                    Location::from(((0, 160), 0)),
-                    Color::OFF_WHITE,
-                )
-            )
-        ).id();
+        let id = job
+            .container
+            .spawn(Request::new(TextInputRequest::new(
+                "".to_string(),
+                TextScaleAlignment::Medium,
+                TextGridGuide::new(50, 2),
+                Location::from(((0, 160), 0)),
+                Color::OFF_WHITE,
+            )))
+            .id();
         job.store_entity("text input", id);
     }
 }

@@ -1,10 +1,18 @@
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, SystemLabel};
+use bevy_ecs::prelude::{
+    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, SystemLabel,
+};
 use bevy_ecs::query::Changed;
 
-use crate::{Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon, IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility};
 use crate::clickable::ClickSystems;
-use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::focus::{Focus, FocusSystems, FocusedEntity};
 use crate::text::{AlignedFonts, TextBound, TextScale};
+use crate::{
+    Attach, ClickListener, ClickState, Clickable, Color, ColorInvert, Engen, FrontEndStages, Icon,
+    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location,
+    Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment,
+    TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
+    Visibility,
+};
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -116,7 +124,10 @@ impl Cursor {
 }
 
 pub(crate) fn read_area_from_text_bound(
-    text_inputs: Query<(Entity, &TextBound, &TextInputText, &TextGridGuide), (Or<(Changed<TextBound>, Changed<TextGridGuide>)>)>,
+    text_inputs: Query<
+        (Entity, &TextBound, &TextInputText, &TextGridGuide),
+        (Or<(Changed<TextBound>, Changed<TextGridGuide>)>),
+    >,
     mut text: Query<(Entity, &mut Text)>,
     mut cmd: Commands,
 ) {
@@ -155,14 +166,21 @@ pub(crate) fn open_virtual_keyboard(
     }
 }
 
-pub(crate) fn read_input_if_focused(focused: Query<(&Focus, &Cursor, &MaxCharacters, &TextInputText)>, focused_entity: Res<FocusedEntity>,
-                                    mut text: Query<(&mut Text)>) {
+pub(crate) fn read_input_if_focused(
+    focused: Query<(&Focus, &Cursor, &MaxCharacters, &TextInputText)>,
+    focused_entity: Res<FocusedEntity>,
+    mut text: Query<(&mut Text)>,
+) {
     if let Some(entity) = focused_entity.entity {
         if let Ok((focus, cursor, max_characters, text_input_text)) = focused.get(entity) {
             // limit text input by max characters here
             let mut t = text.get_mut(text_input_text.entity).unwrap();
             if t.length() < max_characters.0 {
-                t.lines.get_mut(0).unwrap().letters.push(Letter::new('a', Color::OFF_WHITE, LetterStyle::REGULAR));
+                t.lines.get_mut(0).unwrap().letters.push(Letter::new(
+                    'a',
+                    Color::OFF_WHITE,
+                    LetterStyle::REGULAR,
+                ));
             }
         }
     }
@@ -308,9 +326,16 @@ impl Attach for TextInputAttachment {
             .spawn(IconMeshAddRequest::new(IconDescriptors::Cursor, 5));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
-            set_cursor_location.label(TextInputSystems::CursorLocation).after(ClickSystems::RegisterClick),
+            set_cursor_location
+                .label(TextInputSystems::CursorLocation)
+                .after(ClickSystems::RegisterClick),
         );
-        engen.frontend.main.add_system_to_stage(FrontEndStages::Prepare, read_input_if_focused.label(TextInputSystems::ReadInput).after(TextInputSystems::CursorLocation));
+        engen.frontend.main.add_system_to_stage(
+            FrontEndStages::Prepare,
+            read_input_if_focused
+                .label(TextInputSystems::ReadInput)
+                .after(TextInputSystems::CursorLocation),
+        );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
             open_virtual_keyboard.after(FocusSystems::SetFocused),
