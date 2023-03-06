@@ -1,12 +1,7 @@
 #![allow(unused, dead_code)]
 
+use mise_en_place::{Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages, IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust, PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide, TextInputRequest, TextInputText, TextLine, TextScaleAlignment, Timer, UIView, VisibleSection};
 use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
-use mise_en_place::{
-    Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
-    IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust,
-    PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide, TextLine,
-    TextScaleAlignment, Timer, UIView,
-};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod serve;
@@ -18,6 +13,7 @@ fn logic(
     entity_store: Res<EntityStore>,
     mut text_query: Query<(&mut Text, &Position<UIView>)>,
     timer: Res<Timer>,
+    text_input: Query<(Entity, &TextInputText, &VisibleSection)>,
 ) {
     idle.can_idle = false;
     let text_entity = *entity_store.store.get("animated_text").unwrap();
@@ -32,6 +28,14 @@ fn logic(
     if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
         *text.lines.first_mut().unwrap() = TextLine::from((
             format!("timer: {:.2}", timer.mark().0),
+            Color::OFF_WHITE,
+            LetterStyle::REGULAR,
+        ));
+    }
+    for (entity, input_text, v_section) in text_input.iter() {
+        let (mut text, pos) = text_query.get_mut(input_text.entity).unwrap();
+        *text.lines.first_mut().unwrap() = TextLine::from((
+            format!("visible section: {:?}", v_section.section()),
             Color::OFF_WHITE,
             LetterStyle::REGULAR,
         ));
@@ -86,7 +90,7 @@ impl Launch for Launcher {
                 Location::new((0.0, 0.0), 0),
                 TextScaleAlignment::Medium,
             )))
-            .insert(PositionAdjust::<UIView>::new(212.30, 500.0).animate(1.75))
+            .insert(PositionAdjust::<UIView>::new(212.30, 0.0).animate(1.75))
             .id();
         job.store_entity("animated_text", id);
         job.main.add_system_to_stage(FrontEndStages::Process, logic);
@@ -131,6 +135,18 @@ impl Launch for Launcher {
             )))
             .id();
         job.store_entity("done_text", id);
+        let id = job.container.spawn(
+            Request::new(
+                TextInputRequest::new(
+                    "".to_string(),
+                    TextScaleAlignment::Medium,
+                    TextGridGuide::new(50, 2),
+                    Location::from(((0, 160), 0)),
+                    Color::OFF_WHITE,
+                )
+            )
+        ).id();
+        job.store_entity("text input", id);
     }
 }
 

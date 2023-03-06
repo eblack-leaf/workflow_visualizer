@@ -1,5 +1,6 @@
 use winit::event::{Event, StartCause, WindowEvent};
 
+use crate::{Engen, gfx, IconAttachment, PositionAdjustAnimator, TextAttachment, TextInputAttachment, ViewportAttachment};
 use crate::clickable::ClickableAttachment;
 use crate::coord::CoordAttachment;
 use crate::engen::TaskLabel;
@@ -7,9 +8,6 @@ use crate::focus::FocusAttachment;
 use crate::time::Timer;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    gfx, Engen, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
-};
 
 pub(crate) fn ignite(mut engen: Engen) {
     let event_loop = engen.event_loop.take().expect("no event loop");
@@ -28,6 +26,7 @@ pub(crate) fn ignite(mut engen: Engen) {
                     engen.invoke_attach::<TextAttachment>();
                     engen.invoke_attach::<IconAttachment>();
                     engen.invoke_attach::<PositionAdjustAnimator>();
+                    engen.invoke_attach::<TextInputAttachment>();
                     engen.attach_from_queue();
                     engen.frontend.exec(TaskLabel::Startup);
                     engen.backend.exec(TaskLabel::Startup);

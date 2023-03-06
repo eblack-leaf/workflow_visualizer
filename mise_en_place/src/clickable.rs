@@ -3,12 +3,12 @@ use bevy_ecs::prelude::{
     Without,
 };
 
-use crate::engen::FrontEndStages;
-use crate::engen::{Attach, Engen};
-use crate::focus::FocusedEntity;
 use crate::{
     ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
 };
+use crate::engen::{Attach, Engen};
+use crate::engen::FrontEndStages;
+use crate::focus::FocusedEntity;
 
 #[derive(Bundle)]
 pub struct Clickable {
@@ -109,7 +109,7 @@ pub(crate) fn register_click(
         .map(|ce| TrackedClick::new(*ce))
         .collect::<Vec<TrackedClick>>();
     for (entity, mut click_state, listener, visibility, visible_section, depth) in
-        clickables.iter_mut()
+    clickables.iter_mut()
     {
         if visibility.visible() {
             for click in new_clicks.iter_mut() {
@@ -192,7 +192,7 @@ pub(crate) fn register_click(
                 ClickEventType::Cancelled => {}
             }
         } else {
-            focused_entity.entity.take();
+            if resolved_click.click_event.ty == ClickEventType::OnPress { focused_entity.entity.take(); }
         }
     }
 }

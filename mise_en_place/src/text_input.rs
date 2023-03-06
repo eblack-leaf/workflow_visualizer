@@ -1,12 +1,7 @@
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res};
+use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, SystemLabel};
 use bevy_ecs::query::Changed;
 
-use crate::{
-    Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon,
-    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Location, Position,
-    Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment,
-    TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
-};
+use crate::{Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon, IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Location, Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility};
 use crate::clickable::ClickSystems;
 use crate::focus::{Focus, FocusedEntity, FocusSystems};
 use crate::text::{AlignedFonts, TextBound, TextScale};
@@ -221,8 +216,8 @@ pub(crate) fn set_cursor_location(
 }
 
 #[derive(Component)]
-pub(crate) struct TextInputText {
-    pub(crate) entity: Entity,
+pub struct TextInputText {
+    pub entity: Entity,
 }
 
 impl TextInputText {
@@ -248,6 +243,7 @@ pub struct TextInput {
     pub(crate) focus: Focus,
     pub(crate) keyboard_type: VirtualKeyboardType,
     pub(crate) cursor: Cursor,
+    pub(crate) visibility: Visibility,
 }
 
 #[derive(Component)]
@@ -282,13 +278,20 @@ impl TextInput {
             focus: Focus::new(),
             keyboard_type: VirtualKeyboardType::Keyboard,
             cursor: Cursor::new(),
+            visibility: Visibility::new(),
         }
     }
 }
 
-pub struct TextInputPlugin;
+pub struct TextInputAttachment;
 
-impl Attach for TextInputPlugin {
+#[derive(SystemLabel)]
+pub enum TextInputSystems {
+    CursorLocation,
+    ReadInput,
+}
+
+impl Attach for TextInputAttachment {
     fn attach(engen: &mut Engen) {
         engen
             .frontend
@@ -300,8 +303,9 @@ impl Attach for TextInputPlugin {
             .spawn(IconMeshAddRequest::new(IconDescriptors::Cursor, 5));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
-            set_cursor_location.after(ClickSystems::RegisterClick),
+            set_cursor_location.label(TextInputSystems::CursorLocation).after(ClickSystems::RegisterClick),
         );
+        engen.frontend.main.add_system_to_stage(FrontEndStages::Prepare, read_input_if_focused.label(TextInputSystems::ReadInput).after(TextInputSystems::CursorLocation));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
             open_virtual_keyboard.after(FocusSystems::SetFocused),

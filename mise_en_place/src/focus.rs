@@ -2,8 +2,8 @@ use bevy_ecs::prelude::{
     Component, DetectChanges, Entity, IntoSystemDescriptor, Query, Res, Resource, SystemLabel,
 };
 
-use crate::clickable::ClickSystems;
 use crate::{Attach, Engen, FrontEndStages};
+use crate::clickable::ClickSystems;
 
 #[derive(Component)]
 pub struct Focus {
@@ -44,16 +44,19 @@ pub(crate) fn set_focused(
         if let Some(f_entity) = focused_entity_res.entity {
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if f_entity == entity {
+                    println!("focusing entity: {:?}", entity);
                     listener.focus();
                 } else {
                     if listener.focused() {
+                        println!("unfocusing entity: {:?}", entity);
                         listener.blur();
                     }
                 }
             }
         } else {
-            for (_, mut listener) in focus_listeners.iter_mut() {
+            for (entity, mut listener) in focus_listeners.iter_mut() {
                 if listener.focused() {
+                    println!("bluring entity: {:?}", entity);
                     listener.blur();
                 }
             }
