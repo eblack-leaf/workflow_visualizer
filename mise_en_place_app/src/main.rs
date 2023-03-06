@@ -1,12 +1,12 @@
 #![allow(unused, dead_code)]
 
-use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 use mise_en_place::{
     Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
     IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust,
-    PositionAdjustAnimator, Request, Text, TextAttachment, TextBundle, TextGridGuide,
-    TextInputRequest, TextInputText, TextLine, TextScaleAlignment, Timer, UIView, VisibleSection,
+    PositionAdjustAnimator, Request, Text, TextAttachment, TextBuffer, TextBundle,
+    TextGridGuide, TextInputRequest, TextInputText, TextScaleAlignment, Timer, UIView, VisibleSection,
 };
+use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod serve;
@@ -23,7 +23,7 @@ fn logic(
     idle.can_idle = false;
     let text_entity = *entity_store.store.get("animated_text").unwrap();
     if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
-        *text.lines.first_mut().unwrap() = TextLine::from((
+        *text.lines.first_mut().unwrap() = TextBuffer::from((
             format!("text pos at: {:.2}, {:.2}", pos.x, pos.y),
             Color::OFF_WHITE,
             LetterStyle::REGULAR,
@@ -31,7 +31,7 @@ fn logic(
     }
     let text_entity = *entity_store.store.get("timer_text").unwrap();
     if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
-        *text.lines.first_mut().unwrap() = TextLine::from((
+        *text.lines.first_mut().unwrap() = TextBuffer::from((
             format!("timer: {:.2}", timer.mark().0),
             Color::OFF_WHITE,
             LetterStyle::REGULAR,
@@ -57,7 +57,7 @@ fn post_anim_logic(
     for _added in anim_start.iter() {
         let text_entity = *entity_store.store.get("start_text").unwrap();
         let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
-        *text.lines.first_mut().unwrap() = TextLine::from((
+        *text.lines.first_mut().unwrap() = TextBuffer::from((
             format!("start at: {:.2}", timer.mark().0),
             Color::OFF_WHITE,
             LetterStyle::REGULAR,
@@ -66,7 +66,7 @@ fn post_anim_logic(
     for _remove in removed.iter() {
         let text_entity = *entity_store.store.get("done_text").unwrap();
         let (mut text, pos) = text_query.get_mut(text_entity).unwrap();
-        *text.lines.first_mut().unwrap() = TextLine::from((
+        *text.lines.first_mut().unwrap() = TextBuffer::from((
             format!("done at: {:.2}", timer.mark().0),
             Color::OFF_WHITE,
             LetterStyle::REGULAR,
@@ -87,7 +87,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextLine::from((
+                Text::new(vec![TextBuffer::from((
                     "animated_text".to_string(),
                     Color::OFF_WHITE,
                     LetterStyle::REGULAR,
@@ -104,7 +104,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextLine::from((
+                Text::new(vec![TextBuffer::from((
                     "timer:".to_string(),
                     Color::OFF_WHITE,
                     LetterStyle::REGULAR,
@@ -117,7 +117,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextLine::from((
+                Text::new(vec![TextBuffer::from((
                     "start at:".to_string(),
                     Color::OFF_WHITE,
                     LetterStyle::REGULAR,
@@ -130,7 +130,7 @@ impl Launch for Launcher {
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
-                Text::new(vec![TextLine::from((
+                Text::new(vec![TextBuffer::from((
                     "done at:".to_string(),
                     Color::OFF_WHITE,
                     LetterStyle::REGULAR,

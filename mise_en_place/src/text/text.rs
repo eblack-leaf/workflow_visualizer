@@ -1,14 +1,17 @@
+use std::collections::HashMap;
+
 use bevy_ecs::prelude::{Bundle, Component};
 use bitflags::bitflags;
 use fontdue::layout::WrapStyle;
 
+use crate::{Color, Location, TextGridLocation, Visibility, WrapStyleComponent};
 use crate::coord::{Section, UIView};
 use crate::text::cache::Cache;
+use crate::text::content_scroll::{Content, ContentView};
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::visibility::VisibleSection;
-use crate::{Color, Location, Visibility, WrapStyleComponent};
 
 bitflags! {
     pub struct LetterStyle: u32 {
@@ -51,18 +54,24 @@ impl Letter {
     }
 }
 
-pub struct TextLine {
-    pub letters: Vec<Letter>,
+// read lines of content view + grid_guide to determine
+// current line structure for reading in text input
+// update on content view + grid_guide
+pub struct LineStructure {
+    pub letter_count: Vec<u32>,
 }
 
-impl TextLine {
-    pub fn new(mut letters: Vec<Letter>) -> Self {
-        letters.retain(|letter| letter.character != '\n');
+pub struct TextBuffer {
+    pub letters: HashMap<TextGridLocation, Letter>,
+}
+
+impl TextBuffer {
+    pub fn new(content: &Content, content_view: &ContentView) -> Self {
         Self { letters }
     }
 }
 
-impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(S, C, M)> for TextLine {
+impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(S, C, M)> for TextBuffer {
     fn from(value: (S, C, M)) -> Self {
         let string = value.0.into();
         let color = value.1.into();
@@ -71,22 +80,19 @@ impl<S: Into<String>, C: Into<Color>, M: Into<LetterStyle>> From<(S, C, M)> for 
             .chars()
             .map(|c| Letter::new(c, color, style))
             .collect::<Vec<Letter>>();
-        TextLine::new(letters)
+        TextBuffer::new(letters)
     }
 }
 
 #[derive(Component)]
 pub struct Text {
-    pub lines: Vec<TextLine>,
+    pub lines: TextBuffer,
 }
 
 impl Text {
-    pub fn new<TP: Into<TextLine>>(mut lines: Vec<TP>) -> Self {
+    pub fn new<TP: Into<TextBuffer>>(lines: TP) -> Self {
         Self {
-            lines: lines
-                .drain(..)
-                .map(|tp| tp.into())
-                .collect::<Vec<TextLine>>(),
+            lines: lines.into(),
         }
     }
     pub fn length(&self) -> u32 {

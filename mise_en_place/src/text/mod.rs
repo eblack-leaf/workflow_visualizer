@@ -8,7 +8,7 @@ pub(crate) use crate::text::scale::AlignedFonts;
 pub(crate) use crate::text::scale::TextScale;
 pub use crate::text::scale::TextScaleAlignment;
 pub use crate::text::scale::TextScaleLetterDimensions;
-pub use crate::text::text::{Letter, LetterStyle, Text, TextBundle, TextLine};
+pub use crate::text::text::{Letter, LetterStyle, Text, TextBuffer, TextBundle};
 
 mod atlas;
 mod attachment;

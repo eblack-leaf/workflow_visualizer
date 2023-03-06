@@ -3,16 +3,16 @@ use bevy_ecs::prelude::{
 };
 use bevy_ecs::query::Changed;
 
-use crate::clickable::ClickSystems;
-use crate::focus::{Focus, FocusSystems, FocusedEntity};
-use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::{
-    Attach, ClickListener, ClickState, Clickable, Color, ColorInvert, Engen, FrontEndStages, Icon,
+    Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon,
     IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location,
-    Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment,
+    Position, Request, ScaleFactor, Text, TextBuffer, TextBundle, TextGridGuide, TextScaleAlignment,
     TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
     Visibility,
 };
+use crate::clickable::ClickSystems;
+use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::text::{AlignedFonts, TextBound, TextScale};
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -57,7 +57,7 @@ pub(crate) fn spawn(
             .character_dimensions('a', text_scale.px());
         let mut lines = Vec::new();
         for i in 0..inner_req.grid_guide.line_max {
-            lines.push(TextLine::new(vec![]));
+            lines.push(TextBuffer::new(vec![]));
         }
         let text = cmd
             .spawn(TextBundle::new(
@@ -136,7 +136,7 @@ pub(crate) fn read_area_from_text_bound(
         let current_line_count = text.lines.len() as u32;
         if current_line_count < grid_guide.line_max {
             for i in current_line_count..grid_guide.line_max {
-                text.lines.push(TextLine::new(vec![]));
+                text.lines.push(TextBuffer::new(vec![]));
             }
         }
         cmd.entity(entity).insert((bound.area, *letter_dimensions));
@@ -200,7 +200,7 @@ pub(crate) fn set_cursor_location(
     mut cmd: Commands,
 ) {
     for (pos, click_state, cursor_icon, mut cursor, text_input_text, character_dimensions) in
-        clicked.iter_mut()
+    clicked.iter_mut()
     {
         if click_state.clicked() {
             let click_location = click_state.click_location.unwrap();

@@ -6,6 +6,7 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
+use crate::{AreaAdjust, TextGridGuide};
 use crate::coord::{Area, Depth, DeviceView, Position, Section, UIView};
 use crate::instance::key::Key;
 use crate::text::atlas::AtlasBlock;
@@ -20,7 +21,6 @@ use crate::text::text::Text;
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
-use crate::{AreaAdjust, TextGridGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -39,7 +39,7 @@ pub(crate) fn intercept_area_adjust(
 pub(crate) fn calc_scale_from_alignment(
     text: Query<
         (Entity, &TextScaleAlignment),
-        Or<(Without<TextScale>, Changed<TextScaleAlignment>)>,
+        Changed<TextScaleAlignment>,
     >,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<AlignedFonts>,
@@ -331,7 +331,7 @@ pub(crate) fn place(
     )>,
 ) {
     for (text, scale, mut placer, text_scale_alignment, wrap_style, maybe_text_bound) in
-        text.p0().iter_mut()
+    text.p0().iter_mut()
     {
         placer.place(
             text,
