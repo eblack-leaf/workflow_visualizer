@@ -21,12 +21,14 @@ pub enum FrontEndStages {
     Resize,
     Prepare,
     Process,
+    PostProcess,
     Spawn,
     AnimationStart,
     AnimationUpdate,
     AnimationResolved,
-    CoordHook,
+    CoordPrepare,
     CoordAdjust,
+    ResolvePrepare,
     Resolve,
     VisibilityPreparation,
     ResolveVisibility,
@@ -70,6 +72,8 @@ pub(crate) fn staged_frontend() -> Job {
     job.main
         .add_stage(FrontEndStages::Process, SystemStage::parallel());
     job.main
+        .add_stage(FrontEndStages::PostProcess, SystemStage::parallel());
+    job.main
         .add_stage(FrontEndStages::Spawn, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::AnimationStart, SystemStage::parallel());
@@ -78,9 +82,11 @@ pub(crate) fn staged_frontend() -> Job {
     job.main
         .add_stage(FrontEndStages::AnimationResolved, SystemStage::parallel());
     job.main
-        .add_stage(FrontEndStages::CoordHook, SystemStage::parallel());
+        .add_stage(FrontEndStages::CoordPrepare, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
+    job.main
+        .add_stage(FrontEndStages::ResolvePrepare, SystemStage::parallel());
     job.main
         .add_stage(FrontEndStages::Resolve, SystemStage::parallel());
     job.main.add_stage(

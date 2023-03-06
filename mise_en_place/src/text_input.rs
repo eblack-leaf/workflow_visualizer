@@ -3,16 +3,16 @@ use bevy_ecs::prelude::{
 };
 use bevy_ecs::query::Changed;
 
-use crate::{
-    Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon,
-    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location,
-    Position, Request, ScaleFactor, Text, TextBuffer, TextBundle, TextGridGuide, TextScaleAlignment,
-    TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType,
-    Visibility,
-};
 use crate::clickable::ClickSystems;
-use crate::focus::{Focus, FocusedEntity, FocusSystems};
-use crate::text::{AlignedFonts, TextBound, TextScale};
+use crate::focus::{Focus, FocusSystems, FocusedEntity};
+use crate::text::{AlignedFonts, TextBound, TextContent, TextContentView, TextScale};
+use crate::{
+    Attach, ClickListener, ClickState, Clickable, Color, ColorInvert, Engen, FrontEndStages, Icon,
+    IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location,
+    Position, Request, ScaleFactor, TextBuffer, TextBundle, TextGridGuide, TextLineStructure,
+    TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter,
+    VirtualKeyboardType, Visibility,
+};
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -55,17 +55,20 @@ pub(crate) fn spawn(
             .get(&inner_req.alignment)
             .unwrap()
             .character_dimensions('a', text_scale.px());
-        let mut lines = Vec::new();
-        for i in 0..inner_req.grid_guide.line_max {
-            lines.push(TextBuffer::new(vec![]));
-        }
+        let content = TextContent::new(inner_req.hint_text);
+        let view = TextContentView::new(
+            0,
+            inner_req.grid_guide.horizontal_character_max * inner_req.grid_guide.line_max,
+            Color::OFF_WHITE,
+        );
         let text = cmd
             .spawn(TextBundle::new(
-                Text::new(lines),
+                content,
+                view,
                 inner_req.location,
                 inner_req.alignment,
+                inner_req.grid_guide,
             ))
-            .insert(inner_req.grid_guide)
             .id();
         let cursor_icon = cmd
             .spawn(IconBundle::new(
@@ -94,7 +97,7 @@ pub(crate) fn spawn(
     }
 }
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone)]
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
 pub struct TextGridLocation {
     pub x: u32,
     pub y: u32,
@@ -109,16 +112,14 @@ impl TextGridLocation {
 #[derive(Component)]
 pub struct Cursor {
     pub location: TextGridLocation,
-    pub cached_location: TextGridLocation,
-    pub cached_letter_color: Option<Color>,
+    pub cached_location: Option<TextGridLocation>,
 }
 
 impl Cursor {
     pub(crate) fn new() -> Self {
         Self {
             location: TextGridLocation::new(0, 0),
-            cached_location: TextGridLocation::new(0, 0),
-            cached_letter_color: None,
+            cached_location: None,
         }
     }
 }
@@ -128,18 +129,18 @@ pub(crate) fn read_area_from_text_bound(
         (Entity, &TextBound, &TextInputText, &TextGridGuide),
         Or<(Changed<TextBound>, Changed<TextGridGuide>)>,
     >,
-    mut text: Query<(&mut Text, &TextScaleLetterDimensions)>,
+    text: Query<&TextScaleLetterDimensions>,
     mut cmd: Commands,
 ) {
     for (entity, bound, text_input_text, grid_guide) in text_inputs.iter() {
-        let (mut text, letter_dimensions) = text.get_mut(text_input_text.entity).unwrap();
-        let current_line_count = text.lines.len() as u32;
-        if current_line_count < grid_guide.line_max {
-            for i in current_line_count..grid_guide.line_max {
-                text.lines.push(TextBuffer::new(vec![]));
-            }
-        }
+        let (letter_dimensions) = text.get(text_input_text.entity).unwrap();
         cmd.entity(entity).insert((bound.area, *letter_dimensions));
+        let view = TextContentView::new(
+            0,
+            grid_guide.horizontal_character_max * grid_guide.line_max,
+            Color::OFF_WHITE,
+        );
+        cmd.entity(text_input_text.entity).insert(view);
     }
 }
 
@@ -167,20 +168,39 @@ pub(crate) fn open_virtual_keyboard(
 }
 
 pub(crate) fn read_input_if_focused(
-    focused: Query<(&Focus, &Cursor, &MaxCharacters, &TextInputText)>,
+    mut focused: Query<(
+        &Focus,
+        &mut Cursor,
+        &MaxCharacters,
+        &TextInputText,
+        &TextGridGuide,
+    )>,
     focused_entity: Res<FocusedEntity>,
-    mut text: Query<(Entity, &mut Text)>,
+    mut text_query: Query<(Entity, &mut TextBuffer)>,
 ) {
     if let Some(entity) = focused_entity.entity {
-        if let Ok((focus, cursor, max_characters, text_input_text)) = focused.get(entity) {
-            // limit text input by max characters here
-            let (entity, mut t) = text.get_mut(text_input_text.entity).unwrap();
-            if t.length() < max_characters.0 {
-                t.lines.get_mut(0).unwrap().letters.push(Letter::new(
-                    'a',
-                    Color::OFF_WHITE,
-                    LetterStyle::REGULAR,
-                ));
+        if let Ok((focus, mut cursor, max_characters, text_input_text, grid_guide)) =
+            focused.get_mut(entity)
+        {
+            if focus.focused() {
+                let (entity, mut text) = text_query.get_mut(text_input_text.entity).unwrap();
+                if text.num_letters() < max_characters.0 {
+                    text.letters.insert(
+                        cursor.location,
+                        Letter::new('a', Color::OFF_WHITE, LetterStyle::REGULAR),
+                    );
+                    cursor.location.x += 1;
+                    if cursor.location.x > grid_guide.horizontal_character_max {
+                        if cursor.location.y >= grid_guide.line_max {
+                            cursor.location.x -= 1;
+                        } else {
+                            cursor.location.x = 0;
+                            cursor.location.y += 1;
+                        }
+                    }
+                    let current_location = cursor.location;
+                    cursor.cached_location.replace(current_location);
+                }
             }
         }
     }
@@ -190,59 +210,101 @@ pub(crate) fn set_cursor_location(
     mut clicked: Query<(
         &Position<UIView>,
         &ClickState,
-        &CursorIcon,
         &mut Cursor,
         &TextInputText,
         &TextScaleLetterDimensions,
+        &TextGridGuide,
     )>,
-    mut text_entities: Query<&mut Text>,
+    mut text_entities: Query<(&mut TextBuffer, &TextLineStructure)>,
     theme: Res<Theme>,
-    mut cmd: Commands,
 ) {
-    for (pos, click_state, cursor_icon, mut cursor, text_input_text, character_dimensions) in
-    clicked.iter_mut()
+    for (pos, click_state, mut cursor, text_input_text, character_dimensions, grid_guide) in
+        clicked.iter_mut()
     {
         if click_state.clicked() {
+            let (mut text, line_structure) = text_entities.get_mut(text_input_text.entity).unwrap();
             let click_location = click_state.click_location.unwrap();
-            let line_clicked = ((click_location.y - pos.y) / character_dimensions.dimensions.height)
+            let mut line_clicked = ((click_location.y - pos.y)
+                / character_dimensions.dimensions.height)
                 .floor() as usize;
-            let mut text = text_entities.get_mut(text_input_text.entity).unwrap();
-            println!("line clicked: {}", line_clicked);
-            let line = text.lines.get_mut(line_clicked).unwrap();
+            let potential_letter_count = line_structure
+                .letter_count
+                .get(line_clicked)
+                .cloned()
+                .unwrap_or_default();
+            if line_clicked > line_structure.letter_count.len() || potential_letter_count == 0 {
+                if line_clicked != 0 {
+                    let mut next_line_up = line_clicked - 1;
+                    let mut next_line_count = 0;
+                    while next_line_up != 0
+                        && next_line_up >= line_structure.letter_count.len() - 1
+                        && next_line_count == 0
+                    {
+                        next_line_count = *line_structure.letter_count.get(next_line_up).unwrap();
+                        if next_line_count == 0 {
+                            next_line_up -= 1;
+                        }
+                    }
+                    line_clicked = next_line_up
+                }
+            }
             let click_x = click_location.x - pos.x;
             let x_letter_location =
                 (click_x / character_dimensions.dimensions.width).floor() as u32;
-            let x_letter_location = x_letter_location.min(line.letters.len() as u32);
+            let x_letter_location =
+                x_letter_location.min(*line_structure.letter_count.get(line_clicked).unwrap());
+            let x_letter_location = x_letter_location
+                + 1 * (x_letter_location < grid_guide.horizontal_character_max) as u32; // try to add one to get next available spot on that line
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
-            println!("cursor location {}, {}", location.x, location.y);
-            if location != cursor.cached_location {
-                cmd.entity(cursor_icon.entity)
-                    .insert(Position::<UIView>::new(
-                        pos.x + x_letter_location as f32 * character_dimensions.dimensions.width,
-                        pos.y + line_clicked as f32 * character_dimensions.dimensions.height,
-                    ));
-                let cached_x = cursor.cached_location.x as usize;
-                if let Some(letter) = line.letters.get_mut(cached_x) {
-                    letter.metadata.color = cursor
-                        .cached_letter_color
-                        .unwrap_or(Color::OFF_WHITE.into());
+            if let Some(cached_location) = cursor.cached_location {
+                if location != cached_location {
+                    if let Some(letter) = text.letters.get_mut(&cached_location) {
+                        letter.metadata.color = Color::OFF_WHITE.into();
+                    }
                 }
-                cursor.location = location;
-                cursor.cached_location = location;
-                let current_color = match line.letters.get(x_letter_location as usize) {
-                    None => Color::OFF_WHITE.into(),
-                    Some(letter) => letter.metadata.color,
-                };
-                cursor.cached_letter_color.replace(current_color);
-                let _ = line
-                    .letters
-                    .get_mut(x_letter_location as usize)
-                    .and_then(|letter| {
-                        letter.metadata.color = theme.background;
-                        Some(())
-                    });
+            }
+            cursor.location = location;
+            cursor.cached_location.replace(location);
+            if let Some(letter) = text.letters.get_mut(&location) {
+                letter.metadata.color = theme.background;
             }
         }
+    }
+}
+
+pub(crate) fn cursor_letter_color_filter(
+    polled: Query<(&Cursor, &TextInputText)>,
+    mut changed_text_buffers: Query<&mut TextBuffer, Changed<TextBuffer>>,
+    theme: Res<Theme>,
+) {
+    for (cursor, text_input_text) in polled.iter() {
+        if let Ok(mut text) = changed_text_buffers.get_mut(text_input_text.entity) {
+            if let Some(letter) = text.letters.get_mut(&cursor.location) {
+                letter.metadata.color = theme.background;
+            }
+        }
+    }
+}
+
+pub(crate) fn update_cursor_pos(
+    updated: Query<
+        (
+            Entity,
+            &Position<UIView>,
+            &Cursor,
+            &TextScaleLetterDimensions,
+            &CursorIcon,
+        ),
+        Changed<Cursor>,
+    >,
+    mut cmd: Commands,
+) {
+    for (entity, pos, cursor, letter_dimensions, cursor_icon) in updated.iter() {
+        cmd.entity(cursor_icon.entity)
+            .insert(Position::<UIView>::new(
+                pos.x + cursor.location.x as f32 * letter_dimensions.dimensions.width,
+                pos.y + cursor.location.y as f32 * letter_dimensions.dimensions.height,
+            ));
     }
 }
 
@@ -352,6 +414,14 @@ impl Attach for TextInputAttachment {
         engen
             .frontend
             .main
+            .add_system_to_stage(FrontEndStages::CoordPrepare, update_cursor_pos);
+        engen
+            .frontend
+            .main
             .add_system_to_stage(FrontEndStages::Spawn, spawn);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::ResolvePrepare, cursor_letter_color_filter);
     }
 }

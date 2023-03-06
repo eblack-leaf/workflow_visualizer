@@ -16,10 +16,9 @@ use crate::text::atlas::{
 use crate::text::coords::Coords;
 use crate::text::glyph::GlyphId;
 use crate::text::scale::TextScaleAlignment;
-use crate::text::text::Text;
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
-use crate::{Area, Color, Depth, Position, Section};
+use crate::{Area, Color, Depth, Position, Section, TextBuffer};
 
 #[derive(Component, Copy, Clone)]
 pub(crate) struct RenderGroupMax(pub(crate) u32);
@@ -30,8 +29,8 @@ pub(crate) struct RenderGroupUniqueGlyphs {
 }
 
 impl RenderGroupUniqueGlyphs {
-    pub(crate) fn from_text(text: &Text) -> Self {
-        let length = text.length();
+    pub(crate) fn from_text(text: &TextBuffer) -> Self {
+        let length = text.num_letters();
         Self {
             unique_glyphs: length.min(1024),
         }

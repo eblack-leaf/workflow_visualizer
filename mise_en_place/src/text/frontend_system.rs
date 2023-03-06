@@ -6,7 +6,6 @@ use bevy_ecs::prelude::{
     Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
 };
 
-use crate::{AreaAdjust, TextGridGuide};
 use crate::coord::{Area, Depth, DeviceView, Position, Section, UIView};
 use crate::instance::key::Key;
 use crate::text::atlas::AtlasBlock;
@@ -17,10 +16,11 @@ use crate::text::glyph::Glyph;
 use crate::text::place::{Placer, WrapStyleComponent};
 use crate::text::render_group::{RenderGroupMax, RenderGroupUniqueGlyphs, TextBound};
 use crate::text::scale::{AlignedFonts, TextScale, TextScaleAlignment, TextScaleLetterDimensions};
-use crate::text::text::Text;
+use crate::text::text::{TextLineStructure, TextViewedContent};
 use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::window::ScaleFactor;
+use crate::{AreaAdjust, TextBuffer, TextContent, TextContentView, TextGridGuide};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -28,7 +28,7 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 }
 
 pub(crate) fn intercept_area_adjust(
-    attempted_area_adjust: Query<Entity, (With<Text>, With<AreaAdjust<UIView>>)>,
+    attempted_area_adjust: Query<Entity, (With<TextBuffer>, With<AreaAdjust<UIView>>)>,
     mut cmd: Commands,
 ) {
     for entity in attempted_area_adjust.iter() {
@@ -37,10 +37,7 @@ pub(crate) fn intercept_area_adjust(
 }
 
 pub(crate) fn calc_scale_from_alignment(
-    text: Query<
-        (Entity, &TextScaleAlignment),
-        Changed<TextScaleAlignment>,
-    >,
+    text: Query<(Entity, &TextScaleAlignment), Changed<TextScaleAlignment>>,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<AlignedFonts>,
     mut cmd: Commands,
@@ -78,11 +75,37 @@ pub(crate) fn calc_bound_from_guide(
     }
 }
 
+pub(crate) fn update_content(
+    mut text_query: Query<
+        (
+            &TextContent,
+            &TextContentView,
+            &mut Cache,
+            &mut TextBuffer,
+            &TextGridGuide,
+            &mut TextViewedContent,
+        ),
+        Or<(Changed<TextContent>, Changed<TextContentView>)>,
+    >,
+) {
+    for (content, content_view, mut cache, mut buffer, grid_guide, mut viewed_content) in
+        text_query.iter_mut()
+    {
+        let new_viewed_content = content.view(content_view);
+        if cache.viewed_content_string != new_viewed_content.0 {
+            *buffer = TextBuffer::new(&new_viewed_content, content_view.initial_color, grid_guide);
+            cache.viewed_content_string = new_viewed_content.0.clone();
+            *viewed_content = new_viewed_content;
+        }
+    }
+}
+
 pub(crate) fn manage_render_groups(
     mut text: Query<
         (
             Entity,
-            &Text,
+            &TextBuffer,
+            &TextViewedContent,
             &TextScale,
             &Position<UIView>,
             &VisibleSection,
@@ -93,15 +116,16 @@ pub(crate) fn manage_render_groups(
             &Visibility,
             &TextScaleAlignment,
         ),
-        Or<(Changed<Visibility>, Added<Text>, Changed<TextScale>)>,
+        Or<(Changed<Visibility>, Added<TextBuffer>, Changed<TextScale>)>,
     >,
-    removed: RemovedComponents<Text>,
+    removed: RemovedComponents<TextBuffer>,
     mut extraction: ResMut<Extraction>,
     font: Res<AlignedFonts>,
 ) {
     for (
         entity,
         text,
+        viewed_content,
         scale,
         position,
         visible_section,
@@ -115,7 +139,12 @@ pub(crate) fn manage_render_groups(
     {
         if visibility.visible() {
             *difference = Difference::new();
-            *cache = Cache::new(*position, *depth, *visible_section);
+            *cache = Cache::new(
+                *position,
+                *depth,
+                *visible_section,
+                viewed_content.0.clone(),
+            );
             difference.position.replace(*position);
             difference.depth.replace(*depth);
             if let Some(bounds) = maybe_bound {
@@ -124,7 +153,7 @@ pub(crate) fn manage_render_groups(
                     .bounds
                     .replace(TextBoundDifference::Changed(*bounds));
             }
-            let max = RenderGroupMax(text.length().max(1));
+            let max = RenderGroupMax(text.num_letters().max(1));
             let unique_glyphs = RenderGroupUniqueGlyphs::from_text(text);
             extraction.added_render_groups.insert(
                 entity,
@@ -277,7 +306,7 @@ pub(crate) fn bounds_diff(
 }
 
 pub(crate) fn depth_diff(
-    mut text: Query<(&Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<Text>)>,
+    mut text: Query<(&Depth, &mut Cache, &mut Difference), (Changed<Depth>, With<TextBuffer>)>,
 ) {
     for (depth, mut cache, mut difference) in text.iter_mut() {
         if *depth != cache.depth {
@@ -290,7 +319,7 @@ pub(crate) fn depth_diff(
 pub(crate) fn position_diff(
     mut text: Query<
         (&Position<UIView>, &mut Cache, &mut Difference),
-        (Changed<Position<UIView>>, With<Text>),
+        (Changed<Position<UIView>>, With<TextBuffer>),
     >,
 ) {
     for (position, mut cache, mut difference) in text.iter_mut() {
@@ -307,7 +336,7 @@ pub(crate) fn place(
     mut text: ParamSet<(
         Query<
             (
-                &Text,
+                &TextBuffer,
                 &TextScale,
                 &mut Placer,
                 &TextScaleAlignment,
@@ -315,14 +344,14 @@ pub(crate) fn place(
                 Option<&TextBound>,
             ),
             Or<(
-                Changed<Text>,
+                Changed<TextBuffer>,
                 Changed<TextScale>,
                 Changed<Visibility>,
                 Changed<TextBound>,
             )>,
         >,
         Query<(
-            &Text,
+            &TextBuffer,
             &TextScale,
             &mut Placer,
             &TextScaleAlignment,
@@ -331,7 +360,7 @@ pub(crate) fn place(
     )>,
 ) {
     for (text, scale, mut placer, text_scale_alignment, wrap_style, maybe_text_bound) in
-    text.p0().iter_mut()
+        text.p0().iter_mut()
     {
         placer.place(
             text,
@@ -362,7 +391,7 @@ pub(crate) fn place(
 pub(crate) fn visible_area_diff(
     mut text: Query<
         (&VisibleSection, &mut Difference, &mut Cache),
-        (Changed<VisibleSection>, With<Text>),
+        (Changed<VisibleSection>, With<TextBuffer>),
     >,
 ) {
     for (visible_section, mut difference, mut cache) in text.iter_mut() {
@@ -427,5 +456,42 @@ pub(crate) fn pull_differences(
             extraction.differences.insert(entity, difference.clone());
             difference.reset();
         }
+    }
+}
+
+pub(crate) fn calc_line_structure(
+    updated: Query<(Entity, &Placer, &TextScaleLetterDimensions), Changed<Placer>>,
+    mut cmd: Commands,
+) {
+    for (entity, placer, letter_dimensions) in updated.iter() {
+        let mut x = 0;
+        let mut y = 0;
+        let mut line_y = Option::<f32>::None;
+        let mut letter_counts = Vec::new();
+        for (a, b) in placer.filtered_placement() {
+            let mut line_changed = false;
+            let current_line_y = b.y;
+            if let Some(cached_line_y) = line_y {
+                // need to check line.y not glyph.y
+                // normalize with letter_dimensions + .floor
+                if cached_line_y != current_line_y {
+                    line_changed = true;
+                }
+            } else {
+                line_y.replace(current_line_y);
+            }
+            if b.parent == '\n' || line_changed {
+                y += 1;
+                letter_counts.push(x + 1 * (b.parent != '\n') as u32);
+                x = 0;
+            }
+            x += 1;
+        }
+        if letter_counts.is_empty() {
+            letter_counts.push(0);
+        }
+        println!("letter counts: {:?}", letter_counts);
+        cmd.entity(entity)
+            .insert(TextLineStructure::new(letter_counts));
     }
 }

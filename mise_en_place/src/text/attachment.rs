@@ -6,9 +6,10 @@ use crate::text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };
 use crate::text::frontend_system::{
-    bounds_diff, calc_area, calc_bound_from_guide, calc_scale_from_alignment, depth_diff,
-    discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups, place,
-    position_diff, pull_differences, setup as frontend_setup, visible_area_diff,
+    bounds_diff, calc_area, calc_bound_from_guide, calc_line_structure, calc_scale_from_alignment,
+    depth_diff, discard_out_of_bounds, intercept_area_adjust, letter_diff, manage_render_groups,
+    place, position_diff, pull_differences, setup as frontend_setup, update_content,
+    visible_area_diff,
 };
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
@@ -18,11 +19,6 @@ use crate::{spawn, TextBundle};
 pub enum TextSystems {
     CreateRenderGroups,
     RenderGroupDiff,
-}
-
-#[derive(StageLabel)]
-pub enum TextStages {
-    PlacementPreparation,
 }
 
 pub struct TextAttachment;
@@ -41,14 +37,19 @@ impl Attach for TextAttachment {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::CoordHook, intercept_area_adjust);
-        engen.frontend.main.add_stage_before(
-            FrontEndStages::Resolve,
-            TextStages::PlacementPreparation,
-            SystemStage::parallel()
-                .with_system(calc_bound_from_guide)
-                .with_system(calc_scale_from_alignment),
-        );
+            .add_system_to_stage(FrontEndStages::CoordPrepare, intercept_area_adjust);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::ResolvePrepare, calc_bound_from_guide);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::ResolvePrepare, calc_scale_from_alignment);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::ResolvePrepare, update_content);
         engen
             .frontend
             .main
@@ -89,6 +90,10 @@ impl Attach for TextAttachment {
             .frontend
             .main
             .add_system_to_stage(FrontEndStages::Finish, pull_differences);
+        engen
+            .frontend
+            .main
+            .add_system_to_stage(FrontEndStages::Finish, calc_line_structure);
         engen
             .backend
             .startup

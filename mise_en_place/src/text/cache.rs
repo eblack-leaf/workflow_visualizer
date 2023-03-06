@@ -19,6 +19,7 @@ pub(crate) struct Cache {
     pub(crate) position: Position<UIView>,
     pub(crate) depth: Depth,
     pub(crate) visible_section: VisibleSection,
+    pub(crate) viewed_content_string: String,
 }
 
 impl Cache {
@@ -26,6 +27,7 @@ impl Cache {
         position: Position<UIView>,
         depth: Depth,
         visible_section: VisibleSection,
+        viewed_content: String,
     ) -> Self {
         Self {
             keys: HashSet::new(),
@@ -36,6 +38,7 @@ impl Cache {
             position,
             depth,
             visible_section,
+            viewed_content_string: viewed_content,
         }
     }
     pub(crate) fn exists(&self, key: Key) -> bool {

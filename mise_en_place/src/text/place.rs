@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashSet;
 
 use bevy_ecs::prelude::Component;
@@ -7,8 +8,8 @@ use crate::instance::key::{Key, KeyFactory};
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
-use crate::text::text::{LetterMetadata, Text};
-use crate::{Color, LetterStyle};
+use crate::text::text::LetterMetadata;
+use crate::{Color, Letter, LetterStyle, TextBuffer, TextGridLocation};
 
 #[derive(Component)]
 pub(crate) struct Placer {
@@ -32,7 +33,7 @@ impl Placer {
     }
     pub(crate) fn place(
         &mut self,
-        text: &Text,
+        text: &TextBuffer,
         scale: &TextScale,
         font: &MonoSpacedFont,
         wrap_style: &WrapStyleComponent,
@@ -51,26 +52,26 @@ impl Placer {
                 ..LayoutSettings::default()
             });
         }
-        for text_line in text.lines.iter() {
-            for letter in text_line.letters.iter() {
-                let mut tmp = [0u8; 4];
-                self.layout.append(
-                    font.font_slice(),
-                    &TextStyle::with_user_data(
-                        letter.character.encode_utf8(&mut tmp),
-                        scale.px(),
-                        MonoSpacedFont::index(),
-                        letter.metadata,
-                    ),
-                );
+        let mut letters = text.letters.clone();
+        let mut letters = letters.drain().collect::<Vec<(TextGridLocation, Letter)>>();
+        letters.sort_by(|lhs, rhs| -> Ordering {
+            if lhs.0 > rhs.0 {
+                return Ordering::Greater;
             }
+            if lhs.0 < rhs.0 {
+                return Ordering::Less;
+            }
+            Ordering::Equal
+        });
+        for (_, letter) in letters {
+            let mut tmp = [0u8; 4];
             self.layout.append(
                 font.font_slice(),
                 &TextStyle::with_user_data(
-                    "\n",
+                    letter.character.encode_utf8(&mut tmp),
                     scale.px(),
                     MonoSpacedFont::index(),
-                    LetterMetadata::new(Color::OFF_WHITE, LetterStyle::REGULAR),
+                    letter.metadata,
                 ),
             );
         }
