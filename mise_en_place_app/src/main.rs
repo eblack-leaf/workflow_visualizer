@@ -32,14 +32,14 @@ fn logic(
             LetterStyle::REGULAR,
         ));
     }
-    for (entity, input_text, v_section) in text_input.iter() {
-        let (mut text, pos) = text_query.get_mut(input_text.entity).unwrap();
-        *text.lines.first_mut().unwrap() = TextLine::from((
-            format!("visible section: {:?}", v_section.section()),
-            Color::OFF_WHITE,
-            LetterStyle::REGULAR,
-        ));
-    }
+    // for (entity, input_text, v_section) in text_input.iter() {
+    //     let (mut text, pos) = text_query.get_mut(input_text.entity).unwrap();
+    //     *text.lines.first_mut().unwrap() = TextLine::from((
+    //         format!("visible section: {:?}", v_section.section()),
+    //         Color::OFF_WHITE,
+    //         LetterStyle::REGULAR,
+    //     ));
+    // }
 }
 
 fn post_anim_logic(

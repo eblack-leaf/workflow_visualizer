@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, SystemLabel};
 use bevy_ecs::query::Changed;
 
-use crate::{Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon, IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Location, Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility};
+use crate::{Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon, IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBundle, TextGridGuide, TextLine, TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter, VirtualKeyboardType, Visibility};
 use crate::clickable::ClickSystems;
 use crate::focus::{Focus, FocusedEntity, FocusSystems};
 use crate::text::{AlignedFonts, TextBound, TextScale};
@@ -155,10 +155,15 @@ pub(crate) fn open_virtual_keyboard(
     }
 }
 
-pub(crate) fn read_input_if_focused(focused: Query<(&Focus, &Cursor)>, focused_entity: Res<FocusedEntity>) {
+pub(crate) fn read_input_if_focused(focused: Query<(&Focus, &Cursor, &MaxCharacters, &TextInputText)>, focused_entity: Res<FocusedEntity>,
+                                    mut text: Query<(&mut Text)>) {
     if let Some(entity) = focused_entity.entity {
-        if let Ok((focus, cursor)) = focused.get(entity) {
+        if let Ok((focus, cursor, max_characters, text_input_text)) = focused.get(entity) {
             // limit text input by max characters here
+            let mut t = text.get_mut(text_input_text.entity).unwrap();
+            if t.length() < max_characters.0 {
+                t.lines.get_mut(0).unwrap().letters.push(Letter::new('a', Color::OFF_WHITE, LetterStyle::REGULAR));
+            }
         }
     }
 }

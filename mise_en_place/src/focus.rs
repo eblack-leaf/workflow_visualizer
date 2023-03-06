@@ -44,11 +44,9 @@ pub(crate) fn set_focused(
         if let Some(f_entity) = focused_entity_res.entity {
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if f_entity == entity {
-                    println!("focusing entity: {:?}", entity);
                     listener.focus();
                 } else {
                     if listener.focused() {
-                        println!("unfocusing entity: {:?}", entity);
                         listener.blur();
                     }
                 }
@@ -56,7 +54,6 @@ pub(crate) fn set_focused(
         } else {
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if listener.focused() {
-                    println!("bluring entity: {:?}", entity);
                     listener.blur();
                 }
             }
