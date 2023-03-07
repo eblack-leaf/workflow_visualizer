@@ -3,16 +3,16 @@ use bevy_ecs::prelude::{
 };
 use bevy_ecs::query::Changed;
 
-use crate::clickable::ClickSystems;
-use crate::focus::{Focus, FocusSystems, FocusedEntity};
-use crate::text::{AlignedFonts, TextBound, TextContent, TextContentView, TextScale};
 use crate::{
-    Attach, ClickListener, ClickState, Clickable, Color, ColorInvert, Engen, FrontEndStages, Icon,
+    Attach, Clickable, ClickListener, ClickState, Color, ColorInvert, Engen, FrontEndStages, Icon,
     IconBundle, IconDescriptors, IconMeshAddRequest, IconSize, Letter, LetterStyle, Location,
     Position, Request, ScaleFactor, TextBuffer, TextBundle, TextGridGuide, TextLineStructure,
     TextScaleAlignment, TextScaleLetterDimensions, Theme, UIView, VirtualKeyboardAdapter,
     VirtualKeyboardType, Visibility,
 };
+use crate::clickable::ClickSystems;
+use crate::focus::{Focus, FocusedEntity, FocusSystems};
+use crate::text::{AlignedFonts, TextBound, TextContent, TextContentView, TextScale};
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -213,8 +213,7 @@ pub(crate) fn read_input_if_focused(
                         Letter::new(character, Color::OFF_WHITE, LetterStyle::REGULAR),
                     );
                     if cursor.location.x + 1 >= grid_guide.horizontal_character_max {
-                        if cursor.location.y >= grid_guide.line_max - 1 {
-                        } else {
+                        if cursor.location.y >= grid_guide.line_max - 1 {} else {
                             cursor.location.x = 0;
                             cursor.location.y += 1;
                         }
@@ -248,7 +247,7 @@ pub(crate) fn set_cursor_location(
     scale_factor: Res<ScaleFactor>,
 ) {
     for (pos, click_state, mut cursor, text_input_text, character_dimensions, grid_guide) in
-        clicked.iter_mut()
+    clicked.iter_mut()
     {
         if click_state.clicked() {
             let (mut text, line_structure) = text_entities.get_mut(text_input_text.entity).unwrap();
@@ -261,7 +260,7 @@ pub(crate) fn set_cursor_location(
                 .get(line_clicked)
                 .cloned()
                 .unwrap_or_default();
-            if line_clicked > line_structure.letter_count.len() || potential_letter_count == 0 {
+            if line_clicked >= line_structure.letter_count.len() || potential_letter_count == 0 {
                 if line_clicked != 0 {
                     let mut next_line_up = line_clicked - 1;
                     let mut next_line_count = 0;
@@ -269,7 +268,7 @@ pub(crate) fn set_cursor_location(
                         && next_line_up >= line_structure.letter_count.len() - 1
                         && next_line_count == 0
                     {
-                        next_line_count = *line_structure.letter_count.get(next_line_up).unwrap();
+                        next_line_count = line_structure.letter_count.get(next_line_up).cloned().unwrap_or_default();
                         if next_line_count == 0 {
                             next_line_up -= 1;
                         }
@@ -279,7 +278,7 @@ pub(crate) fn set_cursor_location(
             }
             let click_x = click_location.x - pos.x;
             let x_letter_location = (click_x / ui_letter_dimensions.width).floor() as u32;
-            let current_line_letter_count = *line_structure.letter_count.get(line_clicked).unwrap();
+            let current_line_letter_count = line_structure.letter_count.get(line_clicked).cloned().unwrap_or_default();
             let mut was_over = false;
             if x_letter_location > current_line_letter_count {
                 was_over = true;
@@ -287,8 +286,8 @@ pub(crate) fn set_cursor_location(
             let x_letter_location = x_letter_location.min(current_line_letter_count);
             let x_letter_location = x_letter_location
                 + 1 * (x_letter_location < (grid_guide.horizontal_character_max - 1)
-                    && was_over
-                    && current_line_letter_count != 0) as u32;
+                && was_over
+                && current_line_letter_count != 0) as u32;
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
             if let Some(cached_location) = cursor.cached_location {
                 if location != cached_location {
