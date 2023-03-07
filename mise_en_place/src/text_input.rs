@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::{
-    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, ResMut, SystemLabel,
+    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, SystemLabel,
 };
 use bevy_ecs::query::Changed;
 
@@ -145,7 +145,7 @@ pub(crate) fn read_area_from_text_bound(
 }
 
 pub(crate) fn open_virtual_keyboard(
-    mut virtual_keyboard: ResMut<VirtualKeyboardAdapter>,
+    virtual_keyboard: Res<VirtualKeyboardAdapter>,
     mut focus_changed: Query<
         (
             &Focus,
@@ -161,7 +161,9 @@ pub(crate) fn open_virtual_keyboard(
 ) {
     let mut should_close = true;
     let mut keyboard = VirtualKeyboardType::Keyboard;
+    let mut system_ran = false;
     for (focus, v_key_type, cursor_icon, mut cursor, text_input_text) in focus_changed.iter_mut() {
+        system_ran = true;
         if focus.focused() {
             should_close = false;
             keyboard = *v_key_type;
@@ -177,10 +179,12 @@ pub(crate) fn open_virtual_keyboard(
             cmd.entity(cursor_icon.entity).insert(ColorInvert::on());
         }
     }
-    if should_close {
-        virtual_keyboard.close();
-    } else {
-        virtual_keyboard.open(keyboard);
+    if system_ran {
+        if should_close {
+            virtual_keyboard.close();
+        } else {
+            virtual_keyboard.open(keyboard);
+        }
     }
 }
 
@@ -241,6 +245,7 @@ pub(crate) fn set_cursor_location(
     )>,
     mut text_entities: Query<(&mut TextBuffer, &TextLineStructure)>,
     theme: Res<Theme>,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for (pos, click_state, mut cursor, text_input_text, character_dimensions, grid_guide) in
         clicked.iter_mut()
@@ -248,9 +253,9 @@ pub(crate) fn set_cursor_location(
         if click_state.clicked() {
             let (mut text, line_structure) = text_entities.get_mut(text_input_text.entity).unwrap();
             let click_location = click_state.click_location.unwrap();
-            let mut line_clicked = ((click_location.y - pos.y)
-                / character_dimensions.dimensions.height)
-                .floor() as usize;
+            let ui_letter_dimensions = character_dimensions.dimensions.to_ui(scale_factor.factor);
+            let mut line_clicked =
+                ((click_location.y - pos.y) / ui_letter_dimensions.height).floor() as usize;
             let potential_letter_count = line_structure
                 .letter_count
                 .get(line_clicked)
@@ -273,8 +278,7 @@ pub(crate) fn set_cursor_location(
                 }
             }
             let click_x = click_location.x - pos.x;
-            let x_letter_location =
-                (click_x / character_dimensions.dimensions.width).floor() as u32;
+            let x_letter_location = (click_x / ui_letter_dimensions.width).floor() as u32;
             let current_line_letter_count = *line_structure.letter_count.get(line_clicked).unwrap();
             let mut was_over = false;
             if x_letter_location > current_line_letter_count {
@@ -330,12 +334,14 @@ pub(crate) fn update_cursor_pos(
         Changed<Cursor>,
     >,
     mut cmd: Commands,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for (_entity, pos, cursor, letter_dimensions, cursor_icon) in updated.iter() {
+        let ui_letter_dimensions = letter_dimensions.dimensions.to_ui(scale_factor.factor);
         cmd.entity(cursor_icon.entity)
             .insert(Position::<UIView>::new(
-                pos.x + cursor.location.x as f32 * letter_dimensions.dimensions.width,
-                pos.y + cursor.location.y as f32 * letter_dimensions.dimensions.height,
+                pos.x + cursor.location.x as f32 * ui_letter_dimensions.width,
+                pos.y + cursor.location.y as f32 * ui_letter_dimensions.height,
             ));
     }
 }

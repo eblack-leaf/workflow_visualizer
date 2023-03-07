@@ -4,7 +4,7 @@ use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 
 use crate::text::font::MonoSpacedFont;
-use crate::{Area, Numerical};
+use crate::{Area, DeviceView};
 
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub(crate) struct TextScale {
@@ -13,11 +13,11 @@ pub(crate) struct TextScale {
 
 #[derive(Component, Copy, Clone)]
 pub struct TextScaleLetterDimensions {
-    pub(crate) dimensions: Area<Numerical>,
+    pub(crate) dimensions: Area<DeviceView>,
 }
 
 impl TextScaleLetterDimensions {
-    pub(crate) fn new<A: Into<Area<Numerical>>>(area: A) -> Self {
+    pub(crate) fn new<A: Into<Area<DeviceView>>>(area: A) -> Self {
         Self {
             dimensions: area.into(),
         }

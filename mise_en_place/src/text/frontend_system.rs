@@ -49,8 +49,9 @@ pub(crate) fn calc_scale_from_alignment(
             .get(text_scale_alignment)
             .unwrap()
             .character_dimensions('a', scale.px());
+        let device_dimensions = Area::<DeviceView>::new(dimensions.width, dimensions.height);
         cmd.entity(entity)
-            .insert((scale, TextScaleLetterDimensions::new(dimensions)));
+            .insert((scale, TextScaleLetterDimensions::new(device_dimensions)));
     }
 }
 
