@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, StageLabel};
+use bevy_ecs::prelude::IntoSystemDescriptor;
 
 use crate::engen::{Attach, Engen};
 use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
@@ -12,11 +12,6 @@ use crate::icon::IconRenderer;
 use crate::{spawn, IconBundle};
 
 pub struct IconAttachment;
-
-#[derive(StageLabel)]
-pub enum IconStages {
-    CalcArea,
-}
 
 impl Attach for IconAttachment {
     fn attach(engen: &mut Engen) {

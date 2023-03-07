@@ -122,11 +122,11 @@ impl TextBuffer {
         let mut letters = HashMap::new();
         let color = color.into();
         for ch in viewed_content.0.chars() {
-            if ch == '\n' || x > grid_guide.horizontal_character_max {
+            if ch == '\n' || x > grid_guide.horizontal_character_max - 1 {
                 x = 0;
                 y += 1;
             }
-            if y > grid_guide.line_max {
+            if y > grid_guide.line_max - 1 {
                 break;
             }
             letters.insert(

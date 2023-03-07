@@ -10,7 +10,10 @@ use crate::window::Orientation::{Landscape, Portrait};
 use crate::{Area, FrontEndStartupStages, Position, VisibleBounds};
 
 #[derive(Resource)]
-pub struct VirtualKeyboardAdapter {}
+pub struct VirtualKeyboardAdapter {
+    #[allow(unused)]
+    open: bool,
+}
 
 #[derive(Component, Copy, Clone)]
 pub enum VirtualKeyboardType {
@@ -39,61 +42,67 @@ impl VirtualKeyboardAdapter {
             let body = document.body().unwrap();
             body.append_child(&node).unwrap();
         }
-        Self {}
+        Self { open: false }
     }
     #[allow(unused)]
-    pub fn open(&self, ty: VirtualKeyboardType) {
+    pub fn open(&mut self, ty: VirtualKeyboardType) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
-            let document = web_sys::window().unwrap().document().unwrap();
-            let trigger_element = match ty {
-                VirtualKeyboardType::Keyboard => document
+            if !self.open {
+                use wasm_bindgen::{prelude::*, JsCast};
+                let document = web_sys::window().unwrap().document().unwrap();
+                let trigger_element = match ty {
+                    VirtualKeyboardType::Keyboard => document
+                        .get_element_by_id("keyboard_trigger")
+                        .unwrap()
+                        .dyn_into::<web_sys::HtmlElement>()
+                        .unwrap(),
+                    VirtualKeyboardType::TelephonePad => document
+                        .get_element_by_id("telephone_pad_trigger")
+                        .unwrap()
+                        .dyn_into::<web_sys::HtmlElement>()
+                        .unwrap(),
+                    VirtualKeyboardType::NumberPad => document
+                        .get_element_by_id("numpad_trigger")
+                        .unwrap()
+                        .dyn_into::<web_sys::HtmlElement>()
+                        .unwrap(),
+                };
+                trigger_element.blur().unwrap();
+                trigger_element.focus().unwrap();
+                self.open = true;
+            }
+        }
+    }
+    pub fn close(&mut self) {
+        #[cfg(target_arch = "wasm32")]
+        {
+            if self.open {
+                use wasm_bindgen::JsCast;
+                let document = web_sys::window().unwrap().document().unwrap();
+                document
                     .get_element_by_id("keyboard_trigger")
                     .unwrap()
                     .dyn_into::<web_sys::HtmlElement>()
-                    .unwrap(),
-                VirtualKeyboardType::TelephonePad => document
+                    .unwrap()
+                    .blur()
+                    .unwrap();
+                document
                     .get_element_by_id("telephone_pad_trigger")
                     .unwrap()
                     .dyn_into::<web_sys::HtmlElement>()
-                    .unwrap(),
-                VirtualKeyboardType::NumberPad => document
+                    .unwrap()
+                    .blur()
+                    .unwrap();
+                document
                     .get_element_by_id("numpad_trigger")
                     .unwrap()
                     .dyn_into::<web_sys::HtmlElement>()
-                    .unwrap(),
-            };
-            trigger_element.blur().unwrap();
-            trigger_element.focus().unwrap();
-        }
-    }
-    pub fn close(&self) {
-        #[cfg(target_arch = "wasm32")]
-        {
-            use wasm_bindgen::JsCast;
-            let document = web_sys::window().unwrap().document().unwrap();
-            document
-                .get_element_by_id("keyboard_trigger")
-                .unwrap()
-                .dyn_into::<web_sys::HtmlElement>()
-                .unwrap()
-                .blur()
-                .unwrap();
-            document
-                .get_element_by_id("telephone_pad_trigger")
-                .unwrap()
-                .dyn_into::<web_sys::HtmlElement>()
-                .unwrap()
-                .blur()
-                .unwrap();
-            document
-                .get_element_by_id("numpad_trigger")
-                .unwrap()
-                .dyn_into::<web_sys::HtmlElement>()
-                .unwrap()
-                .blur()
-                .unwrap();
+                    .unwrap()
+                    .blur()
+                    .unwrap();
+                self.open = false;
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::{
-    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, SystemLabel,
+    Bundle, Commands, Component, Entity, IntoSystemDescriptor, Or, Query, Res, ResMut, SystemLabel,
 };
 use bevy_ecs::query::Changed;
 
@@ -97,7 +97,7 @@ pub(crate) fn spawn(
     }
 }
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Debug)]
 pub struct TextGridLocation {
     pub x: u32,
     pub y: u32,
@@ -133,7 +133,7 @@ pub(crate) fn read_area_from_text_bound(
     mut cmd: Commands,
 ) {
     for (entity, bound, text_input_text, grid_guide) in text_inputs.iter() {
-        let (letter_dimensions) = text.get(text_input_text.entity).unwrap();
+        let letter_dimensions = text.get(text_input_text.entity).unwrap();
         cmd.entity(entity).insert((bound.area, *letter_dimensions));
         let view = TextContentView::new(
             0,
@@ -145,18 +145,35 @@ pub(crate) fn read_area_from_text_bound(
 }
 
 pub(crate) fn open_virtual_keyboard(
-    virtual_keyboard: Res<VirtualKeyboardAdapter>,
-    focus_changed: Query<(&Focus, &VirtualKeyboardType, &CursorIcon), Changed<Focus>>,
+    mut virtual_keyboard: ResMut<VirtualKeyboardAdapter>,
+    mut focus_changed: Query<
+        (
+            &Focus,
+            &VirtualKeyboardType,
+            &CursorIcon,
+            &mut Cursor,
+            &TextInputText,
+        ),
+        Changed<Focus>,
+    >,
+    mut text_query: Query<&mut TextBuffer>,
     mut cmd: Commands,
 ) {
     let mut should_close = true;
     let mut keyboard = VirtualKeyboardType::Keyboard;
-    for (focus, v_key_type, cursor_icon) in focus_changed.iter() {
+    for (focus, v_key_type, cursor_icon, mut cursor, text_input_text) in focus_changed.iter_mut() {
         if focus.focused() {
             should_close = false;
             keyboard = *v_key_type;
             cmd.entity(cursor_icon.entity).insert(ColorInvert::off());
         } else {
+            if let Some(cached) = cursor.cached_location.take() {
+                if let Ok(mut text_buffer) = text_query.get_mut(text_input_text.entity) {
+                    if let Some(letter) = text_buffer.letters.get_mut(&cached) {
+                        letter.metadata.color = Color::OFF_WHITE.into();
+                    }
+                }
+            }
             cmd.entity(cursor_icon.entity).insert(ColorInvert::on());
         }
     }
@@ -183,22 +200,29 @@ pub(crate) fn read_input_if_focused(
             focused.get_mut(entity)
         {
             if focus.focused() {
-                let (entity, mut text) = text_query.get_mut(text_input_text.entity).unwrap();
-                if text.num_letters() < max_characters.0 {
+                let (_entity, mut text) = text_query.get_mut(text_input_text.entity).unwrap();
+                let num_letters = text.num_letters();
+                if num_letters < max_characters.0 {
+                    let character = char::from(num_letters as u8 + 32);
                     text.letters.insert(
                         cursor.location,
-                        Letter::new('a', Color::OFF_WHITE, LetterStyle::REGULAR),
+                        Letter::new(character, Color::OFF_WHITE, LetterStyle::REGULAR),
                     );
-                    cursor.location.x += 1;
-                    if cursor.location.x > grid_guide.horizontal_character_max {
-                        if cursor.location.y >= grid_guide.line_max {
-                            cursor.location.x -= 1;
+                    if cursor.location.x + 1 >= grid_guide.horizontal_character_max {
+                        if cursor.location.y >= grid_guide.line_max - 1 {
                         } else {
                             cursor.location.x = 0;
                             cursor.location.y += 1;
                         }
+                    } else {
+                        cursor.location.x += 1;
                     }
                     let current_location = cursor.location;
+                    if let Some(cached) = cursor.cached_location {
+                        if let Some(letter) = text.letters.get_mut(&cached) {
+                            letter.metadata.color = Color::OFF_WHITE.into();
+                        }
+                    }
                     cursor.cached_location.replace(current_location);
                 }
             }
@@ -251,10 +275,16 @@ pub(crate) fn set_cursor_location(
             let click_x = click_location.x - pos.x;
             let x_letter_location =
                 (click_x / character_dimensions.dimensions.width).floor() as u32;
-            let x_letter_location =
-                x_letter_location.min(*line_structure.letter_count.get(line_clicked).unwrap());
+            let current_line_letter_count = *line_structure.letter_count.get(line_clicked).unwrap();
+            let mut was_over = false;
+            if x_letter_location > current_line_letter_count {
+                was_over = true;
+            }
+            let x_letter_location = x_letter_location.min(current_line_letter_count);
             let x_letter_location = x_letter_location
-                + 1 * (x_letter_location < grid_guide.horizontal_character_max) as u32; // try to add one to get next available spot on that line
+                + 1 * (x_letter_location < (grid_guide.horizontal_character_max - 1)
+                    && was_over
+                    && current_line_letter_count != 0) as u32;
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
             if let Some(cached_location) = cursor.cached_location {
                 if location != cached_location {
@@ -273,14 +303,16 @@ pub(crate) fn set_cursor_location(
 }
 
 pub(crate) fn cursor_letter_color_filter(
-    polled: Query<(&Cursor, &TextInputText)>,
+    polled: Query<(&Cursor, &TextInputText, &Focus)>,
     mut changed_text_buffers: Query<&mut TextBuffer, Changed<TextBuffer>>,
     theme: Res<Theme>,
 ) {
-    for (cursor, text_input_text) in polled.iter() {
-        if let Ok(mut text) = changed_text_buffers.get_mut(text_input_text.entity) {
-            if let Some(letter) = text.letters.get_mut(&cursor.location) {
-                letter.metadata.color = theme.background;
+    for (cursor, text_input_text, focus) in polled.iter() {
+        if focus.focused() {
+            if let Ok(mut text) = changed_text_buffers.get_mut(text_input_text.entity) {
+                if let Some(letter) = text.letters.get_mut(&cursor.location) {
+                    letter.metadata.color = theme.background;
+                }
             }
         }
     }
@@ -299,7 +331,7 @@ pub(crate) fn update_cursor_pos(
     >,
     mut cmd: Commands,
 ) {
-    for (entity, pos, cursor, letter_dimensions, cursor_icon) in updated.iter() {
+    for (_entity, pos, cursor, letter_dimensions, cursor_icon) in updated.iter() {
         cmd.entity(cursor_icon.entity)
             .insert(Position::<UIView>::new(
                 pos.x + cursor.location.x as f32 * letter_dimensions.dimensions.width,

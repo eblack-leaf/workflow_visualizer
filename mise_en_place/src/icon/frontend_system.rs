@@ -78,126 +78,138 @@ pub(crate) fn initialization(
 }
 
 pub(crate) fn color_invert_cache_check(
-    icons: Query<(Entity, &ColorInvert), Changed<ColorInvert>>,
+    icons: Query<(Entity, &ColorInvert, &Visibility), Changed<ColorInvert>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, color_invert) in icons.iter() {
-        let cached_value = cache.color_invert.get(&entity);
-        if let Some(val) = cached_value {
-            if color_invert.signal != val.signal {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .color_invert
-                    .insert(entity, *color_invert);
-                cache.color_invert.insert(entity, *color_invert);
+    for (entity, color_invert, visibility) in icons.iter() {
+        if visibility.visible() {
+            let cached_value = cache.color_invert.get(&entity);
+            if let Some(val) = cached_value {
+                if color_invert.signal != val.signal {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .color_invert
+                        .insert(entity, *color_invert);
+                    cache.color_invert.insert(entity, *color_invert);
+                }
             }
         }
     }
 }
 
 pub(crate) fn position_cache_check(
-    icons: Query<(Entity, &Position<UIView>), Changed<Position<UIView>>>,
+    icons: Query<(Entity, &Position<UIView>, &Visibility), Changed<Position<UIView>>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, position) in icons.iter() {
-        let cached_value = cache.position.get(&entity);
-        if let Some(val) = cached_value {
-            if position != val {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .position
-                    .insert(entity, *position);
-                cache.position.insert(entity, *position);
+    for (entity, position, visibility) in icons.iter() {
+        if visibility.visible() {
+            let cached_value = cache.position.get(&entity);
+            if let Some(val) = cached_value {
+                if position != val {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .position
+                        .insert(entity, *position);
+                    cache.position.insert(entity, *position);
+                }
             }
         }
     }
 }
 
 pub(crate) fn area_cache_check(
-    icons: Query<(Entity, &Area<UIView>), Changed<Area<UIView>>>,
+    icons: Query<(Entity, &Area<UIView>, &Visibility), Changed<Area<UIView>>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, area) in icons.iter() {
-        let cached_value = cache.area.get(&entity);
-        if let Some(val) = cached_value {
-            if area != val {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .area
-                    .insert(entity, *area);
-                cache.area.insert(entity, *area);
+    for (entity, area, visibility) in icons.iter() {
+        if visibility.visible() {
+            let cached_value = cache.area.get(&entity);
+            if let Some(val) = cached_value {
+                if area != val {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .area
+                        .insert(entity, *area);
+                    cache.area.insert(entity, *area);
+                }
             }
         }
     }
 }
 
 pub(crate) fn depth_cache_check(
-    icons: Query<(Entity, &Depth), Changed<Depth>>,
+    icons: Query<(Entity, &Depth, &Visibility), Changed<Depth>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, depth) in icons.iter() {
-        let cached_value = cache.depth.get(&entity);
-        if let Some(val) = cached_value {
-            if depth != val {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .depth
-                    .insert(entity, *depth);
-                cache.depth.insert(entity, *depth);
+    for (entity, depth, visibility) in icons.iter() {
+        if visibility.visible() {
+            let cached_value = cache.depth.get(&entity);
+            if let Some(val) = cached_value {
+                if depth != val {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .depth
+                        .insert(entity, *depth);
+                    cache.depth.insert(entity, *depth);
+                }
             }
         }
     }
 }
 
 pub(crate) fn color_cache_check(
-    icons: Query<(Entity, &Color), Changed<Color>>,
+    icons: Query<(Entity, &Color, &Visibility), Changed<Color>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, color) in icons.iter() {
-        let cached_value = cache.color.get(&entity);
-        if let Some(val) = cached_value {
-            if color != val {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .color
-                    .insert(entity, *color);
-                cache.color.insert(entity, *color);
+    for (entity, color, visibility) in icons.iter() {
+        if visibility.visible() {
+            let cached_value = cache.color.get(&entity);
+            if let Some(val) = cached_value {
+                if color != val {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .color
+                        .insert(entity, *color);
+                    cache.color.insert(entity, *color);
+                }
             }
         }
     }
 }
 
 pub(crate) fn secondary_color_cache_check(
-    icons: Query<(Entity, &Icon), Changed<Icon>>,
+    icons: Query<(Entity, &Icon, &Visibility), Changed<Icon>>,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, color) in icons.iter() {
-        let cached_value = cache.secondary_color.get(&entity);
-        if let Some(val) = cached_value {
-            if color.secondary_color != *val {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .secondary_color
-                    .insert(entity, color.secondary_color);
-                cache.color.insert(entity, color.secondary_color);
+    for (entity, color, visibility) in icons.iter() {
+        if visibility.visible() {
+            let cached_value = cache.secondary_color.get(&entity);
+            if let Some(val) = cached_value {
+                if color.secondary_color != *val {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .secondary_color
+                        .insert(entity, color.secondary_color);
+                    cache.color.insert(entity, color.secondary_color);
+                }
             }
         }
     }
@@ -214,40 +226,45 @@ pub(crate) fn icon_key_cache_check(
             &Depth,
             &Color,
             &ColorInvert,
+            &Visibility,
         ),
         Changed<IconKey>,
     >,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
 ) {
-    for (entity, icon, icon_key, position, area, depth, color, color_invert) in icons.iter() {
-        let cached_value = cache.icon_key.get(&entity);
-        if let Some(val) = cached_value {
-            if icon_key != val {
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .icon_removes
-                    .insert(entity);
-                difference_holder
-                    .differences
-                    .as_mut()
-                    .unwrap()
-                    .icon_adds
-                    .insert(
-                        entity,
-                        (
-                            *icon_key,
-                            *position,
-                            *area,
-                            *depth,
-                            *color,
-                            icon.secondary_color,
-                            *color_invert,
-                        ),
-                    );
-                cache.icon_key.insert(entity, *icon_key);
+    for (entity, icon, icon_key, position, area, depth, color, color_invert, visibility) in
+        icons.iter()
+    {
+        if visibility.visible() {
+            let cached_value = cache.icon_key.get(&entity);
+            if let Some(val) = cached_value {
+                if icon_key != val {
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .icon_removes
+                        .insert(entity);
+                    difference_holder
+                        .differences
+                        .as_mut()
+                        .unwrap()
+                        .icon_adds
+                        .insert(
+                            entity,
+                            (
+                                *icon_key,
+                                *position,
+                                *area,
+                                *depth,
+                                *color,
+                                icon.secondary_color,
+                                *color_invert,
+                            ),
+                        );
+                    cache.icon_key.insert(entity, *icon_key);
+                }
             }
         }
     }

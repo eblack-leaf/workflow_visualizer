@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::{
-    Component, DetectChanges, Entity, IntoSystemDescriptor, Query, Res, Resource, SystemLabel,
+    Component, Entity, IntoSystemDescriptor, Query, Res, Resource, SystemLabel,
 };
 
 use crate::clickable::ClickSystems;
@@ -52,7 +52,7 @@ pub(crate) fn set_focused(
                 }
             }
         } else {
-            for (entity, mut listener) in focus_listeners.iter_mut() {
+            for (_entity, mut listener) in focus_listeners.iter_mut() {
                 if listener.focused() {
                     listener.blur();
                 }

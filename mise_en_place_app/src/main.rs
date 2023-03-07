@@ -114,7 +114,7 @@ impl Launch for Launcher {
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridGuide::new(50, 2),
+                TextGridGuide::new(47, 2),
                 Location::from(((0, 160), 0)),
                 Color::OFF_WHITE,
             )))

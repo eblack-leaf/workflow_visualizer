@@ -460,37 +460,28 @@ pub(crate) fn pull_differences(
 }
 
 pub(crate) fn calc_line_structure(
-    updated: Query<(Entity, &Placer, &TextScaleLetterDimensions), Changed<Placer>>,
+    updated: Query<(Entity, &TextBuffer), Changed<TextBuffer>>,
     mut cmd: Commands,
 ) {
-    for (entity, placer, letter_dimensions) in updated.iter() {
-        let mut x = 0;
-        let mut y = 0;
-        let mut line_y = Option::<f32>::None;
+    for (entity, text_buffer) in updated.iter() {
+        let mut max_y = 0;
+        for (loc, _) in text_buffer.letters.iter() {
+            if loc.y > max_y {
+                max_y = loc.y;
+            }
+        }
         let mut letter_counts = Vec::new();
-        for (a, b) in placer.filtered_placement() {
-            let mut line_changed = false;
-            let current_line_y = b.y;
-            if let Some(cached_line_y) = line_y {
-                // need to check line.y not glyph.y
-                // normalize with letter_dimensions + .floor
-                if cached_line_y != current_line_y {
-                    line_changed = true;
+        letter_counts.resize(max_y as usize + 1, 0);
+        for (loc, _) in text_buffer.letters.iter() {
+            if let Some(current_max) = letter_counts.get_mut(loc.y as usize) {
+                if loc.x > *current_max {
+                    *current_max = loc.x;
                 }
-            } else {
-                line_y.replace(current_line_y);
             }
-            if b.parent == '\n' || line_changed {
-                y += 1;
-                letter_counts.push(x + 1 * (b.parent != '\n') as u32);
-                x = 0;
-            }
-            x += 1;
         }
         if letter_counts.is_empty() {
             letter_counts.push(0);
         }
-        println!("letter counts: {:?}", letter_counts);
         cmd.entity(entity)
             .insert(TextLineStructure::new(letter_counts));
     }

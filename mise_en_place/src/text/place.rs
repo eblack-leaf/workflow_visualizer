@@ -9,7 +9,7 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::LetterMetadata;
-use crate::{Color, Letter, LetterStyle, TextBuffer, TextGridLocation};
+use crate::{Letter, TextBuffer, TextGridLocation};
 
 #[derive(Component)]
 pub(crate) struct Placer {
@@ -55,15 +55,20 @@ impl Placer {
         let mut letters = text.letters.clone();
         let mut letters = letters.drain().collect::<Vec<(TextGridLocation, Letter)>>();
         letters.sort_by(|lhs, rhs| -> Ordering {
-            if lhs.0 > rhs.0 {
+            if lhs.0.y > rhs.0.y {
                 return Ordering::Greater;
-            }
-            if lhs.0 < rhs.0 {
+            } else if lhs.0.y < rhs.0.y {
                 return Ordering::Less;
+            } else {
+                if lhs.0.x > rhs.0.x {
+                    return Ordering::Greater;
+                } else if lhs.0.x < rhs.0.x {
+                    return Ordering::Less;
+                }
             }
             Ordering::Equal
         });
-        for (_, letter) in letters {
+        for (_loc, letter) in letters {
             let mut tmp = [0u8; 4];
             self.layout.append(
                 font.font_slice(),

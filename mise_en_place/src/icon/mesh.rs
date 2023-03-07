@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
 use crate::gfx::GfxSurface;
-use crate::{DeviceView, GpuPosition, Position};
+use crate::GpuPosition;
 
 #[derive(Clone)]
 pub struct IconMesh {
@@ -38,6 +38,8 @@ impl IconDescriptors {
 #[cfg(test)]
 #[test]
 fn generate_cursor_mesh() {
+    use crate::DeviceView;
+    use crate::Position;
     let mut mesh = Vec::<IconVertex>::new();
     mesh.push(IconVertex::new(
         Position::<DeviceView>::new(0.0, 0.0).to_gpu(),
