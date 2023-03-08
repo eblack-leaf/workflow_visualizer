@@ -1,6 +1,7 @@
 use std::ops::{Add, AddAssign, Div, Sub, SubAssign};
 
 use bevy_ecs::prelude::Resource;
+#[cfg(not(target_arch = "wasm32"))]
 use tokio::time::Instant;
 
 #[derive(Resource)]
