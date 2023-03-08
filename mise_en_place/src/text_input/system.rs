@@ -62,7 +62,7 @@ pub(crate) fn spawn(
             .spawn(IconBundle::new(
                 Icon::new(inner_req.text_color),
                 IconSize::Custom((character_dimensions.width, character_dimensions.height)),
-                IconDescriptors::Cursor.key(),
+                IconDescriptors::Panel.key(),
                 Location::from((
                     inner_req.location.position,
                     inner_req.location.depth.adjusted(2u32),

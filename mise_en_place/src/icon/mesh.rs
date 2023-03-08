@@ -16,6 +16,7 @@ pub struct IconMesh {
 pub enum IconDescriptors {
     Box,
     Cursor,
+    Panel,
     User(&'static str, IconMesh),
 }
 
@@ -24,6 +25,7 @@ impl IconDescriptors {
         match self {
             IconDescriptors::Box => IconKey("engen::Box"),
             IconDescriptors::Cursor => IconKey("engen::Cursor"),
+            IconDescriptors::Panel => IconKey("engen::Panel"),
             IconDescriptors::User(key, _) => IconKey(key),
         }
     }
@@ -33,42 +35,6 @@ impl IconDescriptors {
             _ => IconMesh::bundled(self).unwrap(),
         }
     }
-}
-
-#[cfg(test)]
-#[test]
-fn generate_cursor_mesh() {
-    use crate::DeviceView;
-    use crate::Position;
-    let mut mesh = Vec::<IconVertex>::new();
-    mesh.push(IconVertex::new(
-        Position::<DeviceView>::new(0.0, 0.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ));
-    mesh.push(IconVertex::new(
-        Position::<DeviceView>::new(0.0, 1.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ));
-    mesh.push(IconVertex::new(
-        Position::<DeviceView>::new(1.0, 0.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ));
-    mesh.push(IconVertex::new(
-        Position::<DeviceView>::new(1.0, 0.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ));
-    mesh.push(IconVertex::new(
-        Position::<DeviceView>::new(0.0, 1.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ));
-    mesh.push(IconVertex::new(
-        Position::<DeviceView>::new(1.0, 1.0).to_gpu(),
-        ColorHooks::new(ColorHooks::POSITIVE_SPACE, ColorHooks::HOOKABLE),
-    ));
-    write_mesh(
-        &mesh,
-        "/home/omi-voshuli/Desktop/note-ifications/mise_en_place/src/icon/icons/cursor.icon_mesh",
-    );
 }
 
 impl IconMesh {
@@ -83,6 +49,9 @@ impl IconMesh {
             }
             IconDescriptors::Cursor => Some(Self::new(
                 read_mesh_bytes(include_bytes!("icons/cursor.icon_mesh")).unwrap(),
+            )),
+            IconDescriptors::Panel => Some(Self::new(
+                read_mesh_bytes(include_bytes!("icons/panel.icon_mesh")).unwrap(),
             )),
             _ => None,
         }

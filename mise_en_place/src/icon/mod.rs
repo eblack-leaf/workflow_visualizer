@@ -30,6 +30,7 @@ mod frontend_system;
 mod instance;
 mod interface;
 mod mesh;
+mod proc_gen;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {

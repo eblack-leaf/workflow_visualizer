@@ -27,6 +27,10 @@ impl Attach for TextInputAttachment {
             .frontend
             .container
             .spawn(IconMeshAddRequest::new(IconDescriptors::Cursor, 5));
+        engen
+            .frontend
+            .container
+            .spawn(IconMeshAddRequest::new(IconDescriptors::Panel, 5));
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::Prepare,
             system::set_cursor_location

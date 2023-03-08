@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use std::ops::Sub;
+use std::ops::{Add, Sub};
 
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
@@ -19,6 +19,13 @@ pub struct Position<Context: CoordContext> {
 pub struct GpuPosition {
     pub x: f32,
     pub y: f32,
+}
+
+impl<Context: CoordContext> Add for Position<Context> {
+    type Output = Position<Context>;
+    fn add(self, rhs: Self) -> Self::Output {
+        Position::<Context>::new(self.x + rhs.x, self.y + rhs.y)
+    }
 }
 
 impl<Context: CoordContext> Sub for Position<Context> {
