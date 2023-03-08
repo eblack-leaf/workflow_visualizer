@@ -6,7 +6,7 @@ use crate::engen::{Attach, Engen};
 use crate::engen::{BackEndStartupStages, BackendStages};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
-use crate::window::Resize;
+use crate::window::WindowResize;
 use crate::{Area, Position, Section};
 
 #[derive(Resource)]
@@ -191,7 +191,7 @@ pub(crate) fn adjust_area(
     gfx_surface: Res<GfxSurface>,
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
     mut viewport: ResMut<Viewport>,
-    mut resize_events: EventReader<Resize>,
+    mut resize_events: EventReader<WindowResize>,
 ) {
     for _resize in resize_events.iter() {
         viewport.adjust_area(

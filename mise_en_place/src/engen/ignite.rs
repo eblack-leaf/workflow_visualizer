@@ -4,12 +4,12 @@ use crate::clickable::ClickableAttachment;
 use crate::coord::CoordAttachment;
 use crate::engen::TaskLabel;
 use crate::focus::FocusAttachment;
-use crate::time::Timer;
+use crate::text_input::TextInputAttachment;
+use crate::time::TimerAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
 use crate::{
-    gfx, Engen, IconAttachment, PositionAdjustAnimator, TextAttachment, TextInputAttachment,
-    ViewportAttachment,
+    gfx, Engen, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
 };
 
 pub(crate) fn ignite(mut engen: Engen) {
@@ -19,7 +19,7 @@ pub(crate) fn ignite(mut engen: Engen) {
             Event::NewEvents(start_cause) => match start_cause {
                 StartCause::Init => {
                     engen.init_native_gfx(event_loop_window_target);
-                    engen.invoke_attach::<Timer>();
+                    engen.invoke_attach::<TimerAttachment>();
                     engen.invoke_attach::<CoordAttachment>();
                     engen.invoke_attach::<WindowAttachment>();
                     engen.invoke_attach::<ViewportAttachment>();

@@ -1,6 +1,9 @@
 pub use bevy_ecs;
 
 pub use animate::{start_animations, Animate, Animation};
+pub use clickable::ClickListener;
+pub use clickable::ClickState;
+pub use clickable::Clickable;
 pub use engen::BackEndStartupStages;
 pub use engen::BackendStages;
 pub use engen::EngenOptions;
@@ -9,12 +12,28 @@ pub use engen::FrontEndStartupStages;
 pub use engen::{Attach, Engen, Launch};
 pub use engen::{Attachment, EntityStore, ExecutionState, Exit, Idle, Job, Task};
 pub use request::{spawn, Request};
+pub use text_input::TextGridLocation;
+pub use text_input::TextInput;
+pub use text_input::TextInputAttachment;
+pub use text_input::TextInputRequest;
+pub use text_input::TextInputSystems;
+pub use text_input::TextInputText;
 pub use visibility::VisibleBounds;
 pub use wasm_compiler::WasmCompiler;
 #[cfg(not(target_arch = "wasm32"))]
 pub use wasm_server::WasmServer;
+pub use window::Click;
+pub use window::ClickEvent;
+pub use window::ClickEventType;
+pub use window::Finger;
+pub use window::MouseAdapter;
+pub use window::Orientation;
+pub use window::ScaleFactor;
+pub use window::TouchAdapter;
+pub use window::VirtualKeyboardAdapter;
+pub use window::VirtualKeyboardType;
+pub use window::WindowResize;
 
-pub use crate::clickable::{ClickListener, ClickState, Clickable};
 pub use crate::color::Color;
 pub use crate::coord::{
     Area, AreaAdjust, Depth, DepthAdjust, DeviceView, GpuArea, GpuPosition, Location, Numerical,
@@ -31,19 +50,15 @@ pub use crate::text::{
     TextGridGuide, TextLineStructure, TextScaleAlignment, TextScaleLetterDimensions,
     WrapStyleComponent, WrapStyleExpt,
 };
-pub use crate::text_input::{
-    TextGridLocation, TextInput, TextInputAttachment, TextInputRequest, TextInputSystems,
-    TextInputText,
-};
 pub use crate::theme::Theme;
-pub use crate::time::{TimeDelta, TimeMarker, Timer};
 pub use crate::visibility::{Visibility, VisibleSection};
-pub use crate::window::{
-    Click, ClickEvent, ClickEventType, Finger, MouseAdapter, MouseButtonExpt, Orientation, Resize,
-    ScaleFactor, TouchAdapter, VirtualKeyboardAdapter, VirtualKeyboardType,
-};
+
+pub use self::time::TimeDelta;
+pub use self::time::TimeMarker;
+pub use self::time::Timer;
 
 mod animate;
+mod button;
 mod clickable;
 mod color;
 mod coord;
@@ -52,7 +67,6 @@ mod focus;
 mod gfx;
 mod icon;
 mod instance;
-mod r_button;
 mod request;
 mod signal;
 mod text;

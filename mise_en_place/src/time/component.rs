@@ -1,10 +1,7 @@
 use std::ops::{Add, AddAssign, Div, Sub, SubAssign};
 
-use bevy_ecs::prelude::{ResMut, Resource};
-#[cfg(not(target_arch = "wasm32"))]
+use bevy_ecs::prelude::Resource;
 use tokio::time::Instant;
-
-use crate::{Attach, Engen, FrontEndStages, FrontEndStartupStages};
 
 #[derive(Resource)]
 pub struct Timer {
@@ -52,7 +49,7 @@ impl Timer {
         self.frame_diff()
     }
 
-    fn set_to_now(&mut self) {
+    pub(crate) fn set_to_now(&mut self) {
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.current = Instant::now().duration_since(self.beginning).as_secs_f64();
@@ -65,28 +62,6 @@ impl Timer {
             };
             self.current = millisecond_to_sec(now) - self.beginning;
         }
-    }
-}
-
-pub(crate) fn read_time(mut timer: ResMut<Timer>) {
-    let _delta = timer.read();
-}
-
-pub(crate) fn start_time(mut timer: ResMut<Timer>) {
-    timer.set_to_now();
-}
-
-impl Attach for Timer {
-    fn attach(engen: &mut Engen) {
-        engen.frontend.container.insert_resource(Timer::new());
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::First, read_time);
-        engen
-            .frontend
-            .startup
-            .add_system_to_stage(FrontEndStartupStages::Last, start_time);
     }
 }
 

@@ -7,9 +7,9 @@ use bevy_ecs::prelude::{Added, Commands, Query, RemovedComponents, Res};
 
 use crate::visibility::spacial_hasher::SpacialHasher;
 use crate::visibility::{Collision, CollisionBegin, CollisionEnd};
-use crate::{
-    Area, Position, Resize, ScaleFactor, Section, UIView, Visibility, VisibleBounds, VisibleSection,
-};
+use crate::window::ScaleFactor;
+use crate::window::WindowResize;
+use crate::{Area, Position, Section, UIView, Visibility, VisibleBounds, VisibleSection};
 
 pub(crate) fn visibility_setup(
     added: Query<Entity, Added<Visibility>>,
@@ -121,7 +121,7 @@ pub(crate) fn calc_visible_section(
 }
 
 pub(crate) fn resize(
-    mut resize_events: EventReader<Resize>,
+    mut resize_events: EventReader<WindowResize>,
     mut visible_bounds: ResMut<VisibleBounds>,
     scale_factor: Res<ScaleFactor>,
     mut spacial_hasher: ResMut<SpacialHasher>,

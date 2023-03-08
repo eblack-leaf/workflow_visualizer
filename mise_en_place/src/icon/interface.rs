@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-
 use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::Resource;
 
 use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::{Color, Location, UIView, Visibility};
@@ -52,33 +49,10 @@ impl IconBundle {
     }
 }
 
-#[derive(Component, Hash, Eq, PartialEq, Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub enum IconSize {
     Small,
     Medium,
     Large,
-    Custom((u32, u32)),
-}
-
-#[derive(Resource)]
-pub struct IconAreaGuide {
-    pub guide: HashMap<IconSize, u32>,
-}
-
-impl IconAreaGuide {
-    pub fn new() -> Self {
-        Self {
-            guide: HashMap::new(),
-        }
-    }
-}
-
-impl Default for IconAreaGuide {
-    fn default() -> Self {
-        let mut guide = Self::new();
-        guide.guide.insert(IconSize::Small, 12);
-        guide.guide.insert(IconSize::Medium, 15);
-        guide.guide.insert(IconSize::Large, 22);
-        guide
-    }
+    Custom((f32, f32)),
 }

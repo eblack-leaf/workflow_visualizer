@@ -9,7 +9,8 @@ use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::TextBound;
 use crate::text::scale::TextScale;
 use crate::text::text::LetterMetadata;
-use crate::{Letter, TextBuffer, TextGridLocation};
+use crate::text_input::TextGridLocation;
+use crate::{Letter, TextBuffer};
 
 #[derive(Component)]
 pub(crate) struct Placer {

@@ -5,11 +5,9 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
 
 use crate::icon::cache::{Cache, DifferenceHolder};
-use crate::icon::interface::IconAreaGuide;
 use crate::icon::mesh::ColorInvert;
-use crate::{
-    Area, Color, Depth, Icon, IconKey, IconSize, Position, ScaleFactor, UIView, Visibility,
-};
+use crate::window::ScaleFactor;
+use crate::{Area, Color, Depth, Icon, IconKey, IconSize, Position, UIView, Visibility};
 
 pub(crate) fn initialization(
     icons: Query<
@@ -273,11 +271,9 @@ pub(crate) fn icon_key_cache_check(
 pub(crate) fn frontend_setup(mut cmd: Commands) {
     cmd.insert_resource(Cache::new());
     cmd.insert_resource(DifferenceHolder::new());
-    cmd.insert_resource(IconAreaGuide::default());
 }
 
 pub(crate) fn calc_area(
-    icon_area_guide: Res<IconAreaGuide>,
     scale_factor: Res<ScaleFactor>,
     icons: Query<(Entity, &IconSize), Changed<IconSize>>,
     mut cmd: Commands,
@@ -285,14 +281,18 @@ pub(crate) fn calc_area(
     for (entity, size) in icons.iter() {
         match size {
             IconSize::Small | IconSize::Medium | IconSize::Large => {
-                let area_guide = *icon_area_guide.guide.get(size).unwrap();
+                let area_guide = match size {
+                    IconSize::Small => 12.0,
+                    IconSize::Medium => 15.0,
+                    IconSize::Large => 18.0,
+                    _ => 0.0,
+                };
                 let scaled = area_guide as f64 * scale_factor.factor;
                 cmd.entity(entity)
                     .insert(Area::<UIView>::new(scaled as f32, scaled as f32));
             }
             IconSize::Custom((w, h)) => {
-                cmd.entity(entity)
-                    .insert(Area::<UIView>::new(*w as f32, *h as f32));
+                cmd.entity(entity).insert(Area::<UIView>::new(*w, *h));
             }
         }
     }

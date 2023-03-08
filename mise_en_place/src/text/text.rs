@@ -9,8 +9,9 @@ use crate::text::cache::Cache;
 use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
+use crate::text_input::TextGridLocation;
 use crate::visibility::VisibleSection;
-use crate::{Color, Location, TextGridGuide, TextGridLocation, Visibility, WrapStyleComponent};
+use crate::{Color, Location, TextGridGuide, Visibility, WrapStyleComponent};
 
 bitflags! {
     pub struct LetterStyle: u32 {

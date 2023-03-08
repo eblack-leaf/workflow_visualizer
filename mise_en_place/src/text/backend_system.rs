@@ -28,7 +28,8 @@ use crate::text::renderer::TextRenderer;
 use crate::text::scale::{AlignedFonts, TextScaleAlignment};
 use crate::uniform::Uniform;
 use crate::visibility::VisibleSection;
-use crate::window::{Resize, ScaleFactor};
+use crate::window::ScaleFactor;
+use crate::window::WindowResize;
 use crate::{Area, Color, Position, Section, Viewport};
 
 pub(crate) fn create_render_groups(
@@ -1067,7 +1068,7 @@ fn write_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gro
 
 pub(crate) fn resize_receiver(
     mut renderer: ResMut<TextRenderer>,
-    mut event_reader: EventReader<Resize>,
+    mut event_reader: EventReader<WindowResize>,
     viewport: Res<Viewport>,
     scale_factor: Res<ScaleFactor>,
 ) {

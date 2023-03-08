@@ -19,6 +19,7 @@ use crate::{spawn, TextBundle};
 pub enum TextSystems {
     CreateRenderGroups,
     RenderGroupDiff,
+    OutOfBounds,
 }
 
 pub struct TextAttachment;
@@ -53,14 +54,14 @@ impl Attach for TextAttachment {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, place.label("place"));
+            .add_system_to_stage(FrontEndStages::ResolveStart, place);
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, calc_area.after("place"));
+            .add_system_to_stage(FrontEndStages::Resolve, calc_area);
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::PushDiffs,
-            manage_render_groups.before("out of bounds"),
+            manage_render_groups.before(TextSystems::OutOfBounds),
         );
         engen
             .frontend
@@ -80,11 +81,11 @@ impl Attach for TextAttachment {
             .add_system_to_stage(FrontEndStages::PushDiffs, visible_area_diff);
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::PushDiffs,
-            discard_out_of_bounds.label("out of bounds"),
+            discard_out_of_bounds.label(TextSystems::OutOfBounds),
         );
         engen.frontend.main.add_system_to_stage(
             FrontEndStages::PushDiffs,
-            letter_diff.label("letter diff").after("out of bounds"),
+            letter_diff.after(TextSystems::OutOfBounds),
         );
         engen
             .frontend

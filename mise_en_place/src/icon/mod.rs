@@ -5,7 +5,6 @@ use wgpu::{include_wgsl, VertexState};
 
 pub(crate) use cache::{DifferenceHolder, Differences};
 pub(crate) use instance::IconAdd;
-pub use interface::IconAreaGuide;
 pub(crate) use mesh::GpuIconMesh;
 pub use mesh::{
     read_mesh, write_mesh, ColorHooks, ColorInvert, IconDescriptors, IconKey, IconMesh,

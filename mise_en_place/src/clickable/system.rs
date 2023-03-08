@@ -1,92 +1,14 @@
-use bevy_ecs::prelude::{
-    Bundle, Component, Entity, EventReader, IntoSystemDescriptor, Query, Res, ResMut, SystemLabel,
-    Without,
-};
+use bevy_ecs::change_detection::ResMut;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::event::EventReader;
+use bevy_ecs::prelude::{Query, Res, Without};
 
-use crate::engen::FrontEndStages;
-use crate::engen::{Attach, Engen};
+use crate::clickable::{DisableClick, TrackedClick};
 use crate::focus::FocusedEntity;
 use crate::{
-    ClickEvent, ClickEventType, Depth, Position, ScaleFactor, UIView, Visibility, VisibleSection,
+    ClickEvent, ClickEventType, ClickListener, ClickState, Depth, Position, ScaleFactor,
+    Visibility, VisibleSection,
 };
-
-#[derive(Bundle)]
-pub struct Clickable {
-    pub(crate) click_state: ClickState,
-    pub(crate) click_listener: ClickListener,
-}
-
-impl Clickable {
-    pub fn new(listener: ClickListener, initial_toggle: bool) -> Self {
-        Self {
-            click_state: ClickState::new(initial_toggle),
-            click_listener: listener,
-        }
-    }
-}
-
-#[derive(Component)]
-pub struct ClickState {
-    pub(crate) clicked: bool,
-    pub(crate) currently_pressed: bool,
-    pub(crate) toggle: bool,
-    pub(crate) click_location: Option<Position<UIView>>,
-}
-
-impl ClickState {
-    pub fn new(initial_toggle: bool) -> Self {
-        Self {
-            clicked: false,
-            currently_pressed: false,
-            toggle: initial_toggle,
-            click_location: None,
-        }
-    }
-    pub fn clicked(&self) -> bool {
-        self.clicked
-    }
-    pub fn toggled(&self) -> bool {
-        self.toggle
-    }
-    pub fn currently_pressed(&self) -> bool {
-        self.currently_pressed
-    }
-}
-
-#[derive(Component)]
-pub struct ClickListener {
-    pub ty: ClickEventType,
-}
-
-impl ClickListener {
-    pub fn on_press() -> Self {
-        Self {
-            ty: ClickEventType::OnPress,
-        }
-    }
-    pub fn on_release() -> Self {
-        Self {
-            ty: ClickEventType::OnRelease,
-        }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct DisableClick {}
-
-pub(crate) struct TrackedClick {
-    pub(crate) grabbed: Option<(Entity, Depth)>,
-    pub(crate) click_event: ClickEvent,
-}
-
-impl TrackedClick {
-    pub(crate) fn new(click_event: ClickEvent) -> Self {
-        Self {
-            grabbed: None,
-            click_event,
-        }
-    }
-}
 
 pub(crate) fn register_click(
     mut clickables: Query<
@@ -213,25 +135,5 @@ fn set_grabbed(entity: Entity, depth: &Depth, click: &mut TrackedClick) {
 pub(crate) fn reset_click(mut clickables: Query<&mut ClickState>) {
     for mut click_state in clickables.iter_mut() {
         click_state.clicked = false;
-    }
-}
-
-pub struct ClickableAttachment;
-
-#[derive(SystemLabel)]
-pub enum ClickSystems {
-    RegisterClick,
-}
-
-impl Attach for ClickableAttachment {
-    fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Prepare,
-            register_click.label(ClickSystems::RegisterClick),
-        );
-        engen
-            .frontend
-            .main
-            .add_system_to_stage(FrontEndStages::Last, reset_click);
     }
 }

@@ -21,10 +21,10 @@ use crate::gfx::{
 #[cfg(not(target_arch = "wasm32"))]
 use crate::gfx::{GfxOptions, GfxSurface};
 use crate::theme::ThemeAttachment;
-use crate::{
-    Click, ClickEvent, ClickEventType, DeviceView, Finger, MouseAdapter, Position, Resize,
-    ScaleFactor, TouchAdapter, VisibleBounds,
-};
+use crate::window::ScaleFactor;
+use crate::window::WindowResize;
+use crate::window::{Click, ClickEvent, ClickEventType, Finger, MouseAdapter, TouchAdapter};
+use crate::{DeviceView, Position, VisibleBounds};
 
 mod ignite;
 mod job;
@@ -95,7 +95,7 @@ impl Engen {
         self.frontend.container.insert_resource(scale_factor);
     }
     fn resize_callback(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
-        let resize_event = Resize::new((size.width, size.height).into(), scale_factor);
+        let resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
         self.frontend.container.send_event(resize_event);
         self.backend.container.send_event(resize_event);
         self.attach_scale_factor(scale_factor);
@@ -175,15 +175,25 @@ impl Engen {
         }
     }
     fn register_touch(&mut self, touch: Touch) {
+        let viewport_offset = self
+            .frontend
+            .container
+            .get_resource::<VisibleBounds>()
+            .unwrap()
+            .section;
         let mut touch_adapter = self
             .frontend
             .container
             .get_resource_mut::<TouchAdapter>()
             .expect("no touch adapter slot");
         let mut click_events = Vec::new();
+        let touch_location = (
+            touch.location.x - viewport_offset.position.x as f64,
+            touch.location.y - viewport_offset.position.y as f64,
+        );
         match touch.phase {
             TouchPhase::Started => {
-                let click = Click::new((touch.location.x, touch.location.y));
+                let click = Click::new(touch_location);
                 if touch_adapter.primary.is_none() {
                     touch_adapter.primary.replace(touch.id as Finger);
                     click_events.push(ClickEvent::new(ClickEventType::OnPress, click));
@@ -194,7 +204,7 @@ impl Engen {
                 if let Some(click) = touch_adapter.tracked.get_mut(&(touch.id as Finger)) {
                     click
                         .current
-                        .replace((touch.location.x, touch.location.y).into());
+                        .replace((touch_location.0, touch_location.1).into());
                 }
                 let primary = touch_adapter.primary.clone();
                 if let Some(prime) = primary {
@@ -206,9 +216,7 @@ impl Engen {
             }
             TouchPhase::Ended => {
                 if let Some(click) = touch_adapter.tracked.get_mut(&(touch.id as Finger)) {
-                    click
-                        .end
-                        .replace((touch.location.x, touch.location.y).into());
+                    click.end.replace(touch_location.into());
                 }
                 if let Some(finger) = touch_adapter.primary {
                     if finger == touch.id as Finger {

@@ -17,7 +17,8 @@ use crate::text::extraction::Extraction;
 use crate::text::render_group::{DrawSection, RenderGroupBindGroup};
 use crate::text::scale::AlignedFonts;
 use crate::text::vertex::{aabb_vertex_buffer, Vertex, AABB};
-use crate::{Color, Job, ScaleFactor, Viewport};
+use crate::window::ScaleFactor;
+use crate::{Color, Job, Viewport};
 
 #[derive(Resource)]
 pub(crate) struct TextRenderer {

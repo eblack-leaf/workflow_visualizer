@@ -2,9 +2,11 @@ use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res};
 
-use crate::animate::{Animate, Animation, Interpolator};
+use crate::animate::Interpolator;
+use crate::animate::{Animate, Animation};
 use crate::coord::{CoordContext, Position};
-use crate::time::{TimeDelta, Timer};
+use crate::time::TimeDelta;
+use crate::time::Timer;
 use crate::{animate, Attach, Engen, FrontEndStages, UIView};
 
 #[derive(Component, Copy, Clone, Default, PartialEq, Debug)]

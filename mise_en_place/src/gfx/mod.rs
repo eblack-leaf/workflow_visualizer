@@ -9,7 +9,7 @@ pub use render::{Render, RenderPassHandle, RenderPhase};
 pub(crate) use viewport::ViewportOffset;
 pub use viewport::{Viewport, ViewportAttachment};
 
-use crate::window::Resize;
+use crate::window::WindowResize;
 
 mod extract;
 mod render;
@@ -168,7 +168,7 @@ impl GfxSurfaceConfiguration {
 pub(crate) fn resize(
     gfx_surface: Res<GfxSurface>,
     mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
-    mut resize_events: EventReader<Resize>,
+    mut resize_events: EventReader<WindowResize>,
 ) {
     for resize in resize_events.iter() {
         gfx_surface_configuration.configuration.width =

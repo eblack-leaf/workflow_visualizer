@@ -3,9 +3,8 @@ use bevy_ecs::prelude::{Res, Resource};
 
 use crate::gfx::{Extract, GfxSurface};
 use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::{
-    Area, DeviceView, Job, Position, PositionAdjust, ScaleFactor, Section, UIView, Viewport,
-};
+use crate::window::ScaleFactor;
+use crate::{Area, DeviceView, Job, Position, PositionAdjust, Section, UIView, Viewport};
 
 #[derive(Resource)]
 pub struct VisibleBounds {

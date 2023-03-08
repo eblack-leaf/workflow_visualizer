@@ -9,7 +9,8 @@ use crate::visibility::{
     collision, spacial_hasher, system, visible_bounds, ViewportOffsetUpdate,
     VisibleBoundsPositionAdjust,
 };
-use crate::{Area, DeviceView, ScaleFactor, VisibleBounds};
+use crate::window::ScaleFactor;
+use crate::{Area, DeviceView, VisibleBounds};
 
 pub struct VisibilityAttachment;
 
