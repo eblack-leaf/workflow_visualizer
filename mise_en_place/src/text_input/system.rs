@@ -209,7 +209,7 @@ pub(crate) fn read_input_if_focused(
             if focus.focused() {
                 let (_entity, mut text) = text_query.get_mut(text_input_text.entity).unwrap();
                 let num_letters = text.num_letters();
-                if num_letters < max_characters.0 {
+                if num_letters < max_characters.0 && num_letters + 32 < 126 {
                     let character = char::from(num_letters as u8 + 32);
                     text.letters.insert(
                         cursor.location,

@@ -4,7 +4,7 @@ use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
 use crate::coord::{GpuArea, GpuPosition};
 use crate::engen::Container;
-use crate::gfx::Extract;
+use crate::gfx::{Extract, MsaaRenderAttachment};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::gfx::{Render, RenderPassHandle, RenderPhase};
 use crate::instance::index::Indexer;
@@ -37,6 +37,7 @@ pub(crate) fn setup(
     viewport: Res<Viewport>,
     mut cmd: Commands,
     scale_factor: Res<ScaleFactor>,
+    msaa_attachment: Res<MsaaRenderAttachment>,
 ) {
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("sampler bind group layout"),
@@ -191,7 +192,10 @@ pub(crate) fn setup(
         vertex: vertex_state,
         primitive: primitive_state,
         depth_stencil: depth_stencil_state,
-        multisample: wgpu::MultisampleState::default(),
+        multisample: wgpu::MultisampleState {
+            count: msaa_attachment.requested,
+            ..wgpu::MultisampleState::default()
+        },
         fragment: Some(fragment_state),
         multiview: None,
     };

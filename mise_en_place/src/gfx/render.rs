@@ -33,6 +33,55 @@ pub trait Render {
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
 
+#[derive(Resource)]
+pub(crate) struct MsaaRenderAttachment {
+    pub(crate) max: u32,
+    pub(crate) requested: u32,
+    pub(crate) view: Option<wgpu::TextureView>,
+}
+
+impl MsaaRenderAttachment {
+    pub(crate) fn new(
+        gfx_surface: &GfxSurface,
+        gfx_surface_config: &GfxSurfaceConfiguration,
+        max: u32,
+        requested: u32,
+    ) -> Self {
+        let requested = requested.min(max);
+        match requested > 1u32 {
+            true => {
+                let texture_extent = wgpu::Extent3d {
+                    width: gfx_surface_config.configuration.width,
+                    height: gfx_surface_config.configuration.height,
+                    depth_or_array_layers: 1,
+                };
+                let descriptor = wgpu::TextureDescriptor {
+                    size: texture_extent,
+                    mip_level_count: 1,
+                    sample_count: requested,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: gfx_surface_config.configuration.format,
+                    usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                    label: Some("msaa render attachment"),
+                    view_formats: &[],
+                };
+                let texture = gfx_surface.device.create_texture(&descriptor);
+                let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+                Self {
+                    view: Some(view),
+                    max,
+                    requested,
+                }
+            }
+            false => Self {
+                view: None,
+                max: 1,
+                requested,
+            },
+        }
+    }
+}
+
 pub(crate) fn render(engen: &mut Engen) {
     let gfx_surface = engen
         .backend
@@ -54,6 +103,11 @@ pub(crate) fn render(engen: &mut Engen) {
         .container
         .get_resource::<Viewport>()
         .expect("no viewport attached");
+    let msaa_attachment = engen
+        .backend
+        .container
+        .get_resource::<MsaaRenderAttachment>()
+        .expect("no msaa attachment");
     if let Some(surface_texture) = gfx_surface.surface_texture(gfx_surface_configuration) {
         let mut command_encoder =
             gfx_surface
@@ -68,30 +122,36 @@ pub(crate) fn render(engen: &mut Engen) {
             let depth_texture_view = viewport
                 .depth_texture
                 .create_view(&wgpu::TextureViewDescriptor::default());
-            let mut render_pass_handle = RenderPassHandle(command_encoder.begin_render_pass(
-                &wgpu::RenderPassDescriptor {
-                    label: Some("render pass"),
-                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                        view: &surface_texture_view,
-                        resolve_target: None,
-                        ops: wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(theme.background.into()),
-                            store: true,
-                        },
-                    })],
-                    depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                        view: &depth_texture_view,
-                        depth_ops: Some(wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(viewport.cpu.far_layer()),
-                            store: true,
-                        }),
-                        stencil_ops: Some(wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(0u32),
-                            store: true,
-                        }),
-                    }),
+            let (v, rt) = match &msaa_attachment.view {
+                Some(view) => (view, Some(&surface_texture_view)),
+                None => (&surface_texture_view, None),
+            };
+            let should_store = msaa_attachment.requested == 1;
+            let color_attachment = wgpu::RenderPassColorAttachment {
+                view: v,
+                resolve_target: rt,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(theme.background.into()),
+                    store: should_store,
                 },
-            ));
+            };
+            let render_pass_descriptor = wgpu::RenderPassDescriptor {
+                label: Some("render pass"),
+                color_attachments: &[Some(color_attachment)],
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &depth_texture_view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(viewport.cpu.far_layer()),
+                        store: true,
+                    }),
+                    stencil_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(0u32),
+                        store: true,
+                    }),
+                }),
+            };
+            let mut render_pass_handle =
+                RenderPassHandle(command_encoder.begin_render_pass(&render_pass_descriptor));
             for invoke in engen.render_fns.0.iter_mut() {
                 invoke(&engen.backend, &mut render_pass_handle);
             }

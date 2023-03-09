@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::ops::Mul;
 
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
@@ -87,5 +88,12 @@ impl<Context: CoordContext> From<(f32, f32)> for Area<Context> {
 impl<Context: CoordContext> From<(u32, u32)> for Area<Context> {
     fn from(value: (u32, u32)) -> Self {
         Self::new(value.0 as f32, value.1 as f32)
+    }
+}
+
+impl<Context: CoordContext> Mul for Area<Context> {
+    type Output = Area<Context>;
+    fn mul(self, rhs: Self) -> Self::Output {
+        Area::<Context>::new(self.width * rhs.width, self.height * rhs.height)
     }
 }

@@ -9,6 +9,8 @@ pub use render::{Render, RenderPassHandle, RenderPhase};
 pub(crate) use viewport::ViewportOffset;
 pub use viewport::{Viewport, ViewportAttachment};
 
+pub(crate) use crate::gfx::render::MsaaRenderAttachment;
+pub(crate) use crate::gfx::viewport::viewport_attach;
 use crate::window::WindowResize;
 
 mod extract;
@@ -23,6 +25,7 @@ pub struct GfxOptions {
     pub features: wgpu::Features,
     pub limits: wgpu::Limits,
     pub present_mode: wgpu::PresentMode,
+    pub msaa: u32,
 }
 
 impl GfxOptions {
@@ -42,6 +45,7 @@ impl GfxOptions {
             features: wgpu::Features::default(),
             limits: wgpu::Limits::default(),
             present_mode: wgpu::PresentMode::Fifo,
+            msaa: 1,
         }
     }
 }
@@ -58,7 +62,7 @@ impl GfxSurface {
     pub(crate) async fn new(
         window: &Window,
         options: GfxOptions,
-    ) -> (Self, GfxSurfaceConfiguration) {
+    ) -> (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment) {
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()
@@ -81,7 +85,8 @@ impl GfxSurface {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: Some("device/queue"),
-                    features: options.features,
+                    features: options.features
+                        | wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES,
                     limits: options.limits.clone().using_resolution(adapter.limits()),
                 },
                 None,
@@ -109,15 +114,34 @@ impl GfxSurface {
             view_formats: vec![surface_format],
         };
         surface.configure(&device, &surface_configuration);
-        (
-            Self {
-                surface,
-                device,
-                queue,
-                options,
-            },
-            GfxSurfaceConfiguration::new(surface_configuration),
-        )
+        let gfx_surface = Self {
+            surface,
+            device,
+            queue,
+            options: options.clone(),
+        };
+        let gfx_surface_config = GfxSurfaceConfiguration::new(surface_configuration);
+        let msaa_flags = adapter
+            .get_texture_format_features(gfx_surface_config.configuration.format)
+            .flags;
+        let max_sample_count = {
+            if msaa_flags.contains(wgpu::TextureFormatFeatureFlags::MULTISAMPLE_X8) {
+                8
+            } else if msaa_flags.contains(wgpu::TextureFormatFeatureFlags::MULTISAMPLE_X4) {
+                4
+            } else if msaa_flags.contains(wgpu::TextureFormatFeatureFlags::MULTISAMPLE_X2) {
+                2
+            } else {
+                1
+            }
+        };
+        let msaa_render_attachment = MsaaRenderAttachment::new(
+            &gfx_surface,
+            &gfx_surface_config,
+            max_sample_count,
+            options.msaa,
+        );
+        (gfx_surface, gfx_surface_config, msaa_render_attachment)
     }
     pub(crate) fn surface_texture(
         &self,
@@ -169,12 +193,19 @@ pub(crate) fn resize(
     gfx_surface: Res<GfxSurface>,
     mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
     mut resize_events: EventReader<WindowResize>,
+    mut msaa_attachment: ResMut<MsaaRenderAttachment>,
 ) {
     for resize in resize_events.iter() {
         gfx_surface_configuration.configuration.width =
             (resize.size.width as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
         gfx_surface_configuration.configuration.height =
             (resize.size.height as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
+        *msaa_attachment = MsaaRenderAttachment::new(
+            &gfx_surface,
+            &gfx_surface_configuration,
+            msaa_attachment.max,
+            msaa_attachment.requested,
+        );
         gfx_surface.surface.configure(
             &gfx_surface.device,
             &gfx_surface_configuration.configuration,

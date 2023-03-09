@@ -1,11 +1,13 @@
 #![allow(unused, dead_code)]
 
-use mise_en_place::bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
+use mise_en_place::bevy_ecs::prelude::{
+    Added, Entity, IntoSystemConfig, Query, RemovedComponents, Res, ResMut,
+};
 use mise_en_place::TextInputRequest;
 use mise_en_place::TextInputText;
 use mise_en_place::Timer;
 use mise_en_place::{
-    Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndStages,
+    Animate, Animation, Attachment, Color, Engen, EngenOptions, EntityStore, FrontEndBuckets,
     IconAttachment, Idle, Job, Launch, LetterStyle, Location, Position, PositionAdjust,
     PositionAdjustAnimator, Request, TextAttachment, TextBuffer, TextBundle, TextContent,
     TextContentView, TextGridGuide, TextScaleAlignment, UIView, VisibleSection,
@@ -35,7 +37,7 @@ fn logic(
 }
 
 fn post_anim_logic(
-    removed: RemovedComponents<Animation<PositionAdjustAnimator>>,
+    mut removed: RemovedComponents<Animation<PositionAdjustAnimator>>,
     entity_store: Res<EntityStore>,
     anim_start: Query<Entity, Added<Animation<PositionAdjustAnimator>>>,
     mut text_query: Query<(&mut TextContent, &Position<UIView>)>,
@@ -74,9 +76,9 @@ impl Launch for Launcher {
             )))
             .id();
         job.store_entity("animated_text", id);
-        job.main.add_system_to_stage(FrontEndStages::Process, logic);
+        job.main.add_system(logic.in_set(FrontEndBuckets::Process));
         job.main
-            .add_system_to_stage(FrontEndStages::AnimationResolved, post_anim_logic);
+            .add_system(post_anim_logic.in_set(FrontEndBuckets::AnimationResolved));
         let id = job
             .container
             .spawn(Request::new(TextBundle::new(
@@ -115,7 +117,7 @@ impl Launch for Launcher {
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridGuide::new(47, 2),
+                TextGridGuide::new(32, 12),
                 Location::from(((100, 120), 0)),
                 Color::OFF_WHITE,
                 Color::DARK_GREY,

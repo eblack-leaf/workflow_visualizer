@@ -1,3 +1,5 @@
+use bevy_ecs::prelude::IntoSystemConfig;
+
 pub use crate::coord::area::Area;
 pub use crate::coord::area::GpuArea;
 pub use crate::coord::area_adjust::AreaAdjust;
@@ -9,7 +11,7 @@ pub use crate::coord::position::GpuPosition;
 pub use crate::coord::position::Position;
 pub use crate::coord::position_adjust::{PositionAdjust, PositionAdjustAnimator};
 pub use crate::coord::section::Section;
-use crate::engen::FrontEndStages;
+use crate::engen::FrontEndBuckets;
 use crate::engen::{Attach, Engen};
 
 mod area;
@@ -47,17 +49,16 @@ impl CoordContext for DeviceView {}
 
 impl Attach for CoordAttachment {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::CoordAdjust,
-            position_adjust::position_adjust::<UIView>,
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::CoordAdjust,
-            area_adjust::area_adjust::<UIView>,
+        engen.frontend.main.add_system(
+            position_adjust::position_adjust::<UIView>.in_set(FrontEndBuckets::CoordAdjust),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::CoordAdjust, depth_adjust::depth_adjust);
+            .add_system(area_adjust::area_adjust::<UIView>.in_set(FrontEndBuckets::CoordAdjust));
+        engen
+            .frontend
+            .main
+            .add_system(depth_adjust::depth_adjust.in_set(FrontEndBuckets::CoordAdjust));
     }
 }

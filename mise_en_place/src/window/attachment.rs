@@ -1,9 +1,10 @@
 use bevy_ecs::event::Events;
+use bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::window::orientation;
 use crate::{
-    Attach, BackendStages, ClickEvent, Engen, FrontEndStages, FrontEndStartupStages, MouseAdapter,
-    TouchAdapter, VirtualKeyboardAdapter, WindowResize,
+    Attach, BackendBuckets, ClickEvent, Engen, FrontEndBuckets, FrontEndStartupBuckets,
+    MouseAdapter, TouchAdapter, VirtualKeyboardAdapter, WindowResize,
 };
 
 pub struct WindowAttachment;
@@ -22,26 +23,25 @@ impl Attach for WindowAttachment {
             .frontend
             .container
             .insert_resource(Events::<ClickEvent>::default());
-        engen.frontend.startup.add_system_to_stage(
-            FrontEndStartupStages::Initialization,
-            orientation::setup_orientation,
+        engen.frontend.startup.add_system(
+            orientation::setup_orientation.in_set(FrontEndStartupBuckets::Initialization),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Prepare, orientation::calc_orientation);
+            .add_system(orientation::calc_orientation.in_set(FrontEndBuckets::Prepare));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::First, Events::<WindowResize>::update_system);
+            .add_system(Events::<WindowResize>::update_system.in_set(FrontEndBuckets::First));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::First, Events::<ClickEvent>::update_system);
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Initialize,
-            Events::<WindowResize>::update_system,
-        );
+            .add_system(Events::<ClickEvent>::update_system.in_set(FrontEndBuckets::First));
+        engen
+            .backend
+            .main
+            .add_system(Events::<WindowResize>::update_system.in_set(BackendBuckets::Initialize));
         engen
             .frontend
             .container

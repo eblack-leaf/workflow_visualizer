@@ -6,7 +6,7 @@ fn generate_panel_mesh() {
     use std::f32::consts::{FRAC_PI_2, PI};
     let mut mesh = Vec::<IconVertex>::new();
     let mut corners = Vec::new();
-    let corner_precision = 16.0;
+    let corner_precision = 444.0;
     let radius = 0.050f32;
     let mut tris = Vec::new();
     {
@@ -24,7 +24,6 @@ fn generate_panel_mesh() {
             let y = current.sin() * radius;
             let point = corner_center + Position::<DeviceView>::from((x, -y));
             let tri = vec![corner_center, last, point];
-            println!("pushed corner tri: {:?}", tri);
             tris.push(tri);
             last = point;
             current += interval;
@@ -34,10 +33,8 @@ fn generate_panel_mesh() {
         let other_top = Position::from((radius, 0.0));
         let other_bottom = Position::from((other_top.x, other_top.y + radius));
         let tri = vec![bar_bottom, bar_top, other_top];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
         let tri = vec![other_top, other_bottom, bar_bottom];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
     }
     {
@@ -55,8 +52,6 @@ fn generate_panel_mesh() {
             let y = current.sin() * radius;
             let point = corner_center + Position::<DeviceView>::from((x, -y));
             let tri = vec![corner_center, last, point];
-
-            println!("pushed corner tri: {:?}", tri);
             tris.push(tri);
             last = point;
             current += interval;
@@ -66,10 +61,8 @@ fn generate_panel_mesh() {
         let other_top = Position::from((0.0, 1.0 - radius));
         let other_bottom = Position::from((other_top.x + radius, other_top.y));
         let tri = vec![bar_bottom, bar_top, other_top];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
         let tri = vec![other_top, other_bottom, bar_bottom];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
     }
     {
@@ -87,7 +80,6 @@ fn generate_panel_mesh() {
             let y = current.sin() * radius;
             let point = corner_center + Position::<DeviceView>::from((x, -y));
             let tri = vec![corner_center, last, point];
-            println!("pushed corner tri: {:?}", tri);
             tris.push(tri);
             last = point;
             current += interval;
@@ -97,10 +89,8 @@ fn generate_panel_mesh() {
         let other_top = Position::from((1.0 - radius, 1.0));
         let other_bottom = Position::from((other_top.x, other_top.y - radius));
         let tri = vec![bar_bottom, bar_top, other_top];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
         let tri = vec![other_top, other_bottom, bar_bottom];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
     }
     {
@@ -118,8 +108,6 @@ fn generate_panel_mesh() {
             let y = current.sin() * radius;
             let point = corner_center + Position::<DeviceView>::from((x, -y));
             let tri = vec![corner_center, last, point];
-
-            println!("pushed corner tri: {:?}", tri);
             tris.push(tri);
             last = point;
             current += interval;
@@ -129,17 +117,13 @@ fn generate_panel_mesh() {
         let other_top = Position::from((1.0, radius));
         let other_bottom = Position::from((other_top.x - radius, other_top.y));
         let tri = vec![bar_bottom, bar_top, other_top];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
         let tri = vec![other_top, other_bottom, bar_bottom];
-        println!("pushed bar tri: {:?}", tri);
         tris.push(tri);
     }
     let inner_mesh_one = vec![corners[0], corners[1], corners[2]];
-    println!("pushed inner tri: {:?}", inner_mesh_one);
     tris.push(inner_mesh_one);
     let inner_mesh_two = vec![corners[0], corners[2], corners[3]];
-    println!("pushed inner tri: {:?}", inner_mesh_two);
     tris.push(inner_mesh_two);
     for tri in tris {
         for vertex in tri {

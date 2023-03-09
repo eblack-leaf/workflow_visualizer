@@ -1,5 +1,7 @@
+use bevy_ecs::prelude::IntoSystemConfig;
+
 use crate::time::system;
-use crate::{Attach, Engen, FrontEndStages, FrontEndStartupStages, Timer};
+use crate::{Attach, Engen, FrontEndBuckets, FrontEndStartupBuckets, Timer};
 
 pub struct TimerAttachment;
 
@@ -9,10 +11,10 @@ impl Attach for TimerAttachment {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::First, system::read_time);
+            .add_system(system::read_time.in_set(FrontEndBuckets::First));
         engen
             .frontend
             .startup
-            .add_system_to_stage(FrontEndStartupStages::Last, system::start_time);
+            .add_system(system::start_time.in_set(FrontEndStartupBuckets::Last));
     }
 }

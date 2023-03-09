@@ -1,22 +1,18 @@
-use bevy_ecs::prelude::{StageLabel, SystemLabel, SystemStage};
+use bevy_ecs::prelude::{apply_system_buffers, IntoSystemConfig, IntoSystemSetConfig, SystemSet};
 
-use crate::engen::Container;
 use crate::{gfx, Job};
+use crate::engen::Container;
+use crate::engen::job::JobBucket;
 
-#[derive(StageLabel)]
-pub enum FrontEndStartupStages {
+#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+pub enum FrontEndStartupBuckets {
     Startup,
     Initialization,
     Last,
 }
 
-#[derive(SystemLabel)]
-pub enum FrontEndSystems {
-    UpdateVisibleBounds,
-}
-
-#[derive(StageLabel)]
-pub enum FrontEndStages {
+#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+pub enum FrontEndBuckets {
     First,
     Resize,
     Prepare,
@@ -38,15 +34,15 @@ pub enum FrontEndStages {
     Last,
 }
 
-#[derive(StageLabel)]
-pub enum BackEndStartupStages {
+#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+pub enum BackEndStartupBuckets {
     Startup,
-    Setup,
-    PostSetup,
+    Prepare,
+    Resolve,
 }
 
-#[derive(StageLabel)]
-pub enum BackendStages {
+#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+pub enum BackendBuckets {
     Initialize,
     GfxSurfaceResize,
     Resize,
@@ -56,86 +52,96 @@ pub enum BackendStages {
 
 pub(crate) fn staged_frontend() -> Job {
     let mut job = Job::new();
-    job.startup
-        .add_stage(FrontEndStartupStages::Startup, SystemStage::parallel());
-    job.startup.add_stage(
-        FrontEndStartupStages::Initialization,
-        SystemStage::parallel(),
+    job.startup.configure_sets((
+        FrontEndStartupBuckets::Startup,
+        FrontEndStartupBuckets::Initialization.after(FrontEndStartupBuckets::Startup),
+        FrontEndStartupBuckets::Last.after(FrontEndStartupBuckets::Initialization),
+    ));
+    job.startup.add_systems(
+        (
+            apply_system_buffers.before(FrontEndStartupBuckets::Initialization),
+            apply_system_buffers.before(FrontEndStartupBuckets::Last),
+            apply_system_buffers.after(FrontEndStartupBuckets::Last),
+        )
     );
-    job.startup
-        .add_stage(FrontEndStartupStages::Last, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::First, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Resize, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Prepare, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Process, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::PostProcess, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Spawn, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::AnimationStart, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::AnimationUpdate, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::AnimationResolved, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::CoordPrepare, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::CoordAdjust, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::ResolvePrepare, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::ResolveStart, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Resolve, SystemStage::parallel());
-    job.main.add_stage(
-        FrontEndStages::VisibilityPreparation,
-        SystemStage::parallel(),
-    );
-    job.main
-        .add_stage(FrontEndStages::ResolveVisibility, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::PushDiffs, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Finish, SystemStage::parallel());
-    job.main
-        .add_stage(FrontEndStages::Last, SystemStage::parallel());
-    job.main.add_stage_after(
-        FrontEndStages::Last,
-        "clear trackers",
-        SystemStage::single(Container::clear_trackers),
-    );
+    job.main.configure_sets((
+        FrontEndBuckets::First.after(JobBucket::Idle),
+        FrontEndBuckets::Resize.after(FrontEndBuckets::First),
+        FrontEndBuckets::Prepare.after(FrontEndBuckets::Resize),
+        FrontEndBuckets::Process.after(FrontEndBuckets::Prepare),
+        FrontEndBuckets::PostProcess.after(FrontEndBuckets::Process),
+        FrontEndBuckets::Spawn.after(FrontEndBuckets::PostProcess),
+        FrontEndBuckets::AnimationStart.after(FrontEndBuckets::Spawn),
+        FrontEndBuckets::AnimationUpdate.after(FrontEndBuckets::AnimationStart),
+        FrontEndBuckets::AnimationResolved.after(FrontEndBuckets::AnimationUpdate),
+    ));
+    job.main.configure_sets((
+        FrontEndBuckets::CoordPrepare.after(FrontEndBuckets::AnimationResolved),
+        FrontEndBuckets::CoordAdjust.after(FrontEndBuckets::CoordPrepare),
+        FrontEndBuckets::ResolvePrepare.after(FrontEndBuckets::CoordAdjust),
+        FrontEndBuckets::ResolveStart.after(FrontEndBuckets::ResolvePrepare),
+        FrontEndBuckets::Resolve.after(FrontEndBuckets::ResolveStart),
+        FrontEndBuckets::VisibilityPreparation.after(FrontEndBuckets::Resolve),
+        FrontEndBuckets::ResolveVisibility.after(FrontEndBuckets::VisibilityPreparation),
+        FrontEndBuckets::PushDiffs.after(FrontEndBuckets::ResolveVisibility),
+        FrontEndBuckets::Finish.after(FrontEndBuckets::PushDiffs),
+        FrontEndBuckets::Last.after(FrontEndBuckets::Finish),
+    ));
+    job.main.add_systems((
+        apply_system_buffers.before(FrontEndBuckets::First),
+        apply_system_buffers.before(FrontEndBuckets::Resize),
+        apply_system_buffers.before(FrontEndBuckets::Prepare),
+        apply_system_buffers.before(FrontEndBuckets::Process),
+        apply_system_buffers.before(FrontEndBuckets::PostProcess),
+        apply_system_buffers.before(FrontEndBuckets::Spawn),
+        apply_system_buffers.before(FrontEndBuckets::AnimationStart),
+        apply_system_buffers.before(FrontEndBuckets::AnimationUpdate),
+        apply_system_buffers.before(FrontEndBuckets::AnimationResolved),
+    ));
+    job.main.add_systems((
+        apply_system_buffers.before(FrontEndBuckets::CoordPrepare),
+        apply_system_buffers.before(FrontEndBuckets::CoordAdjust),
+        apply_system_buffers.before(FrontEndBuckets::ResolvePrepare),
+        apply_system_buffers.before(FrontEndBuckets::ResolveStart),
+        apply_system_buffers.before(FrontEndBuckets::Resolve),
+        apply_system_buffers.before(FrontEndBuckets::VisibilityPreparation),
+        apply_system_buffers.before(FrontEndBuckets::ResolveVisibility),
+        apply_system_buffers.before(FrontEndBuckets::PushDiffs),
+        apply_system_buffers.before(FrontEndBuckets::Finish),
+        apply_system_buffers.before(FrontEndBuckets::Last),
+        Container::clear_trackers.in_set(FrontEndBuckets::Last),
+    ));
     job
 }
 
 pub(crate) fn staged_backend() -> Job {
     let mut job = Job::new();
+    job.startup.configure_sets((
+        BackEndStartupBuckets::Startup,
+        BackEndStartupBuckets::Prepare.after(BackEndStartupBuckets::Startup),
+        BackEndStartupBuckets::Resolve.after(BackEndStartupBuckets::Prepare),
+    ));
     job.startup
-        .add_stage(BackEndStartupStages::Startup, SystemStage::parallel());
-    job.startup
-        .add_stage(BackEndStartupStages::Setup, SystemStage::parallel());
-    job.startup
-        .add_stage(BackEndStartupStages::PostSetup, SystemStage::parallel());
-    job.main
-        .add_stage(BackendStages::Initialize, SystemStage::parallel());
-    job.main.add_stage(
-        BackendStages::GfxSurfaceResize,
-        SystemStage::single(gfx::resize),
-    );
-    job.main
-        .add_stage(BackendStages::Resize, SystemStage::parallel());
-    job.main
-        .add_stage(BackendStages::Prepare, SystemStage::parallel());
-    job.main
-        .add_stage(BackendStages::Last, SystemStage::parallel());
-    job.main.add_stage_after(
-        BackendStages::Last,
-        "clear trackers",
-        SystemStage::single(Container::clear_trackers),
-    );
+        .add_systems((
+            apply_system_buffers.after(BackEndStartupBuckets::Startup),
+            apply_system_buffers.before(BackEndStartupBuckets::Prepare),
+            apply_system_buffers.before(BackEndStartupBuckets::Resolve),
+        ));
+    job.main.configure_sets((
+        BackendBuckets::Initialize.after(JobBucket::Idle),
+        BackendBuckets::GfxSurfaceResize.after(BackendBuckets::Initialize),
+        BackendBuckets::Resize.after(BackendBuckets::GfxSurfaceResize),
+        BackendBuckets::Prepare.after(BackendBuckets::Resize),
+        BackendBuckets::Last.after(BackendBuckets::Prepare),
+    ));
+    job.main.add_systems((
+        apply_system_buffers.before(BackendBuckets::Initialize),
+        apply_system_buffers.before(BackendBuckets::GfxSurfaceResize),
+        apply_system_buffers.before(BackendBuckets::Resize),
+        apply_system_buffers.before(BackendBuckets::Prepare),
+        apply_system_buffers.before(BackendBuckets::Last),
+        gfx::resize.in_set(BackendBuckets::GfxSurfaceResize),
+        Container::clear_trackers.in_set(BackendBuckets::Last),
+    ));
     job
 }

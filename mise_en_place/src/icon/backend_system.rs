@@ -2,7 +2,7 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Commands, Query, Res};
 
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::icon::cache::Differences;
 use crate::icon::IconRenderer;
 use crate::window::ScaleFactor;
@@ -38,11 +38,13 @@ pub(crate) fn setup(
     gfx_surface: Res<GfxSurface>,
     gfx_surface_config: Res<GfxSurfaceConfiguration>,
     viewport: Res<Viewport>,
+    msaa_attachment: Res<MsaaRenderAttachment>,
     mut cmd: Commands,
 ) {
     cmd.insert_resource(IconRenderer::new(
         &gfx_surface,
         &gfx_surface_config,
         &viewport,
+        msaa_attachment.requested,
     ));
 }

@@ -1,9 +1,10 @@
-use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
+use bevy_ecs::prelude::{Commands, EventReader, IntoSystemConfig, Res, ResMut, Resource};
 use nalgebra::matrix;
 
 use crate::coord::{Depth, DeviceView};
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages};
+use crate::engen::{BackEndStartupBuckets, BackendBuckets};
+use crate::gfx::render::MsaaRenderAttachment;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::uniform::Uniform;
 use crate::window::WindowResize;
@@ -37,7 +38,7 @@ impl ViewportOffset {
 }
 
 impl Viewport {
-    pub(crate) fn new(device: &wgpu::Device, area: Area<DeviceView>) -> Self {
+    pub(crate) fn new(device: &wgpu::Device, area: Area<DeviceView>, sample_count: u32) -> Self {
         let depth = 100u32.into();
         let cpu_viewport = CpuViewport::new(area, depth);
         let gpu_viewport = cpu_viewport.gpu_viewport();
@@ -84,7 +85,7 @@ impl Viewport {
             ],
         });
         let depth_format = wgpu::TextureFormat::Depth24PlusStencil8;
-        let depth_texture = depth_texture(device, area, depth_format);
+        let depth_texture = depth_texture(device, area, depth_format, sample_count);
         Self {
             cpu: cpu_viewport,
             gpu: gpu_viewport,
@@ -103,12 +104,19 @@ impl Viewport {
             self.cpu.area,
         )
     }
-    pub(crate) fn adjust_area(&mut self, gfx_surface: &GfxSurface, width: u32, height: u32) {
+    pub(crate) fn adjust_area(
+        &mut self,
+        gfx_surface: &GfxSurface,
+        width: u32,
+        height: u32,
+        sample_count: u32,
+    ) {
         let area = Area::<DeviceView>::new(width as f32, height as f32);
         self.cpu = CpuViewport::new(area, 100u32.into());
         self.gpu = self.cpu.gpu_viewport();
         self.uniform.update(&gfx_surface.queue, self.gpu);
-        self.depth_texture = depth_texture(&gfx_surface.device, area, self.depth_format);
+        self.depth_texture =
+            depth_texture(&gfx_surface.device, area, self.depth_format, sample_count);
     }
     pub(crate) fn update_offset(&mut self, queue: &wgpu::Queue, offset: Position<DeviceView>) {
         self.offset = ViewportOffset::new(offset);
@@ -120,6 +128,7 @@ fn depth_texture(
     device: &wgpu::Device,
     area: Area<DeviceView>,
     format: wgpu::TextureFormat,
+    sample_count: u32,
 ) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("depth texture"),
@@ -129,7 +138,7 @@ fn depth_texture(
             depth_or_array_layers: 1,
         },
         mip_level_count: 1,
-        sample_count: 1,
+        sample_count,
         dimension: wgpu::TextureDimension::D2,
         format,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
@@ -175,16 +184,21 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
     }
 }
 
-pub(crate) fn attach(
+pub(crate) fn viewport_attach(
     gfx_surface: Res<GfxSurface>,
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
+    msaa_attachment: Res<MsaaRenderAttachment>,
     mut cmd: Commands,
 ) {
     let area = Area::<DeviceView>::new(
         gfx_surface_configuration.configuration.width as f32,
         gfx_surface_configuration.configuration.height as f32,
     );
-    cmd.insert_resource(Viewport::new(&gfx_surface.device, area));
+    cmd.insert_resource(Viewport::new(
+        &gfx_surface.device,
+        area,
+        msaa_attachment.requested,
+    ));
 }
 
 pub(crate) fn adjust_area(
@@ -192,12 +206,14 @@ pub(crate) fn adjust_area(
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
     mut viewport: ResMut<Viewport>,
     mut resize_events: EventReader<WindowResize>,
+    msaa_attachment: Res<MsaaRenderAttachment>,
 ) {
     for _resize in resize_events.iter() {
         viewport.adjust_area(
             &gfx_surface,
             gfx_surface_configuration.configuration.width,
             gfx_surface_configuration.configuration.height,
+            msaa_attachment.requested,
         );
     }
 }
@@ -209,10 +225,10 @@ impl Attach for ViewportAttachment {
         engen
             .backend
             .startup
-            .add_system_to_stage(BackEndStartupStages::Startup, attach);
+            .add_system(viewport_attach.in_set(BackEndStartupBuckets::Startup));
         engen
             .backend
             .main
-            .add_system_to_stage(BackendStages::Resize, adjust_area);
+            .add_system(adjust_area.in_set(BackendBuckets::Resize));
     }
 }

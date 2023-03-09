@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Entity, ResMut, Resource, Schedule, SystemStage, World};
+use bevy_ecs::prelude::{Entity, IntoSystemConfig, ResMut, Resource, Schedule, SystemSet, World};
+use bevy_ecs::schedule::ExecutorKind;
 
 pub type Container = World;
 pub type Task = Schedule;
@@ -70,6 +71,11 @@ pub struct Job {
     pub teardown: Task,
 }
 
+#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+pub enum JobBucket {
+    Idle,
+}
+
 impl Job {
     pub fn store_entity(&mut self, id: &'static str, entity: Entity) {
         self.container
@@ -91,7 +97,8 @@ impl Job {
             startup: Task::default(),
             main: {
                 let mut task = Task::default();
-                task.add_stage("idle", SystemStage::single(attempt_to_idle));
+                task.configure_set(JobBucket::Idle);
+                task.add_system(attempt_to_idle.in_set(JobBucket::Idle));
                 task
             },
             teardown: Task::default(),
@@ -103,7 +110,8 @@ impl Job {
             TaskLabel::Main => &mut self.main,
             TaskLabel::Teardown => &mut self.teardown,
         };
-        task.run_once(&mut self.container);
+        task.set_executor_kind(ExecutorKind::SingleThreaded)
+            .run(&mut self.container);
     }
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;

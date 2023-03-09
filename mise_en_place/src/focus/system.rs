@@ -1,5 +1,5 @@
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Query, Res};
+use bevy_ecs::prelude::{DetectChanges, Query, Res};
 
 use crate::focus::component::{Focus, FocusedEntity};
 

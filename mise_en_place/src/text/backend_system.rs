@@ -801,7 +801,8 @@ fn rasterize_add_queue(renderer: &mut TextRenderer, font: &AlignedFonts, render_
             .unwrap()
             .font()
             .rasterize(add.character, add.scale.px());
-        let glyph_area = (rasterization.0.width, rasterization.0.height).into();
+        // TODO since subpixel , combine them here to save space
+        let glyph_area: Area<Numerical> = (rasterization.0.width, rasterization.0.height).into();
         let location = renderer
             .container
             .get_mut::<AtlasFreeLocations>(render_group)
@@ -1047,14 +1048,16 @@ fn write_atlas(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render_gro
             },
             aspect: wgpu::TextureAspect::All,
         };
+        let extent_w = glyph_area.width as u32;
+        let extent_h = glyph_area.height as u32;
         let image_data_layout = wgpu::ImageDataLayout {
             offset: 0,
-            bytes_per_row: NonZeroU32::new(glyph_area.width as u32),
-            rows_per_image: NonZeroU32::new(glyph_area.height as u32),
+            bytes_per_row: NonZeroU32::new(extent_w),
+            rows_per_image: NonZeroU32::new(extent_h),
         };
         let extent = wgpu::Extent3d {
-            width: glyph_area.width as u32,
-            height: glyph_area.height as u32,
+            width: extent_w,
+            height: extent_h,
             depth_or_array_layers: 1,
         };
         gfx_surface.queue.write_texture(

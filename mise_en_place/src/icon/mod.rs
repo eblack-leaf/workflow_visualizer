@@ -383,6 +383,7 @@ impl IconRenderer {
         gfx_surface: &GfxSurface,
         gfx_surface_config: &GfxSurfaceConfiguration,
         viewport: &Viewport,
+        sample_count: u32,
     ) -> Self {
         Self {
             pipeline: {
@@ -474,7 +475,10 @@ impl IconRenderer {
                         stencil: wgpu::StencilState::default(),
                         bias: wgpu::DepthBiasState::default(),
                     }),
-                    multisample: wgpu::MultisampleState::default(),
+                    multisample: wgpu::MultisampleState {
+                        count: sample_count,
+                        ..wgpu::MultisampleState::default()
+                    },
                     fragment: Some(fragment_state),
                     multiview: None,
                 };

@@ -1,7 +1,9 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
+use bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages};
+use crate::engen::{
+    BackEndStartupBuckets, BackendBuckets, FrontEndBuckets, FrontEndStartupBuckets,
+};
 use crate::text::backend_system::{
     create_render_groups, render_group_differences, reset_extraction, resize_receiver,
 };
@@ -15,13 +17,6 @@ use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
 use crate::{spawn, TextBundle};
 
-#[derive(SystemLabel)]
-pub enum TextSystems {
-    CreateRenderGroups,
-    RenderGroupDiff,
-    OutOfBounds,
-}
-
 pub struct TextAttachment;
 
 impl Attach for TextAttachment {
@@ -30,92 +25,94 @@ impl Attach for TextAttachment {
         engen
             .frontend
             .startup
-            .add_system_to_stage(FrontEndStartupStages::Startup, frontend_setup);
+            .add_system(frontend_setup.in_set(FrontEndStartupBuckets::Startup));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Spawn, spawn::<TextBundle>);
+            .add_system(spawn::<TextBundle>.in_set(FrontEndBuckets::Spawn));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::CoordPrepare, intercept_area_adjust);
+            .add_system(intercept_area_adjust.in_set(FrontEndBuckets::CoordPrepare));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::ResolvePrepare, calc_bound_from_guide);
+            .add_system(calc_bound_from_guide.in_set(FrontEndBuckets::ResolvePrepare));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::ResolvePrepare, calc_scale_from_alignment);
+            .add_system(calc_scale_from_alignment.in_set(FrontEndBuckets::ResolvePrepare));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::ResolvePrepare, update_content);
+            .add_system(update_content.in_set(FrontEndBuckets::ResolvePrepare));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::ResolveStart, place);
+            .add_system(place.in_set(FrontEndBuckets::ResolveStart));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Resolve, calc_area);
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::PushDiffs,
-            manage_render_groups.before(TextSystems::OutOfBounds),
+            .add_system(calc_area.in_set(FrontEndBuckets::Resolve));
+        engen.frontend.main.add_system(
+            manage_render_groups
+                .in_set(FrontEndBuckets::PushDiffs)
+                .before(discard_out_of_bounds),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PushDiffs, bounds_diff);
+            .add_system(bounds_diff.in_set(FrontEndBuckets::PushDiffs));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PushDiffs, depth_diff);
+            .add_system(depth_diff.in_set(FrontEndBuckets::PushDiffs));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PushDiffs, position_diff);
+            .add_system(position_diff.in_set(FrontEndBuckets::PushDiffs));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::PushDiffs, visible_area_diff);
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::PushDiffs,
-            discard_out_of_bounds.label(TextSystems::OutOfBounds),
+            .add_system(visible_area_diff.in_set(FrontEndBuckets::PushDiffs));
+        engen
+            .frontend
+            .main
+            .add_system(discard_out_of_bounds.in_set(FrontEndBuckets::PushDiffs));
+        engen.frontend.main.add_system(
+            letter_diff
+                .after(discard_out_of_bounds)
+                .in_set(FrontEndBuckets::PushDiffs),
         );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::PushDiffs,
-            letter_diff.after(TextSystems::OutOfBounds),
-        );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Finish, pull_differences);
+            .add_system(pull_differences.in_set(FrontEndBuckets::Finish));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Finish, calc_line_structure);
+            .add_system(calc_line_structure.in_set(FrontEndBuckets::Finish));
         engen
             .backend
             .startup
-            .add_system_to_stage(BackEndStartupStages::Setup, renderer::setup);
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Prepare,
-            create_render_groups.label(TextSystems::CreateRenderGroups),
-        );
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Prepare,
+            .add_system(renderer::setup.in_set(BackEndStartupBuckets::Prepare));
+        engen
+            .backend
+            .main
+            .add_system(create_render_groups.in_set(BackendBuckets::Prepare));
+        engen.backend.main.add_system(
             render_group_differences
-                .label(TextSystems::RenderGroupDiff)
-                .after(TextSystems::CreateRenderGroups),
+                .in_set(BackendBuckets::Prepare)
+                .after(create_render_groups),
         );
-        engen.backend.main.add_system_to_stage(
-            BackendStages::Prepare,
-            resize_receiver.after(TextSystems::RenderGroupDiff),
+        engen.backend.main.add_system(
+            resize_receiver
+                .after(render_group_differences)
+                .in_set(BackendBuckets::Prepare),
         );
         engen
             .backend
             .main
-            .add_system_to_stage(BackendStages::Last, reset_extraction);
+            .add_system(reset_extraction.in_set(BackendBuckets::Last));
     }
 }

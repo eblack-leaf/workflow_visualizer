@@ -119,7 +119,7 @@ pub(crate) fn manage_render_groups(
         ),
         Or<(Changed<Visibility>, Added<TextBuffer>, Changed<TextScale>)>,
     >,
-    removed: RemovedComponents<TextBuffer>,
+    mut removed: RemovedComponents<TextBuffer>,
     mut extraction: ResMut<Extraction>,
     font: Res<AlignedFonts>,
 ) {
@@ -281,7 +281,7 @@ pub(crate) fn bounds_diff(
         Query<(&TextBound, &mut Cache, &mut Difference), Changed<TextBound>>,
         Query<(&mut Cache, &mut Difference)>,
     )>,
-    removed: RemovedComponents<TextBound>,
+    mut removed: RemovedComponents<TextBound>,
 ) {
     for (bound, mut cache, mut difference) in text.p0().iter_mut() {
         if let Some(cached_bound) = cache.bound {
@@ -333,7 +333,7 @@ pub(crate) fn position_diff(
 
 pub(crate) fn place(
     font: Res<AlignedFonts>,
-    removed_bounds: RemovedComponents<TextBound>,
+    mut removed_bounds: RemovedComponents<TextBound>,
     mut text: ParamSet<(
         Query<
             (

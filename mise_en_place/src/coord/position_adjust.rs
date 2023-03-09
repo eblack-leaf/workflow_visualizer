@@ -1,13 +1,13 @@
 use std::marker::PhantomData;
 
-use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res};
+use bevy_ecs::prelude::{Commands, Component, Entity, IntoSystemConfig, Query, Res};
 
 use crate::animate::Interpolator;
 use crate::animate::{Animate, Animation};
 use crate::coord::{CoordContext, Position};
 use crate::time::TimeDelta;
 use crate::time::Timer;
-use crate::{animate, Attach, Engen, FrontEndStages, UIView};
+use crate::{animate, Attach, Engen, FrontEndBuckets, UIView};
 
 #[derive(Component, Copy, Clone, Default, PartialEq, Debug)]
 pub struct PositionAdjust<Context: CoordContext> {
@@ -84,13 +84,13 @@ impl Animate for PositionAdjust<UIView> {
 
 impl Attach for PositionAdjustAnimator {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::AnimationStart,
-            animate::start_animations::<PositionAdjustAnimator>,
+        engen.frontend.main.add_system(
+            animate::start_animations::<PositionAdjustAnimator>
+                .in_set(FrontEndBuckets::AnimationStart),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::AnimationUpdate, animate_position_adjust);
+            .add_system(animate_position_adjust.in_set(FrontEndBuckets::AnimationUpdate));
     }
 }

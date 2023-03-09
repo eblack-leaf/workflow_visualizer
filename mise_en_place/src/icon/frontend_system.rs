@@ -26,7 +26,7 @@ pub(crate) fn initialization(
     >,
     mut cache: ResMut<Cache>,
     mut difference_holder: ResMut<DifferenceHolder>,
-    removed_icons: RemovedComponents<Icon>,
+    mut removed_icons: RemovedComponents<Icon>,
 ) {
     let mut removals = HashSet::new();
     for entity in removed_icons.iter() {

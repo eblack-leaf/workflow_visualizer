@@ -1,28 +1,23 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
+use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::clickable::ClickSystems;
-use crate::focus::FocusSystems;
+use crate::clickable::register_click;
+use crate::focus::set_focused;
 use crate::text_input::system;
-use crate::{Attach, Engen, FrontEndStages, IconDescriptors, IconMeshAddRequest};
+use crate::text_input::system::set_cursor_location;
+use crate::{Attach, Engen, FrontEndBuckets, IconDescriptors, IconMeshAddRequest};
 
 pub struct TextInputAttachment;
-
-#[derive(SystemLabel)]
-pub enum TextInputSystems {
-    CursorLocation,
-    ReadInput,
-}
 
 impl Attach for TextInputAttachment {
     fn attach(engen: &mut Engen) {
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::ResolvePrepare, system::position_ties);
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::ResolveStart,
-            system::read_area_from_text_bound,
-        );
+            .add_system(system::position_ties.in_set(FrontEndBuckets::ResolvePrepare));
+        engen
+            .frontend
+            .main
+            .add_system(system::read_area_from_text_bound.in_set(FrontEndBuckets::ResolveStart));
         engen
             .frontend
             .container
@@ -31,34 +26,33 @@ impl Attach for TextInputAttachment {
             .frontend
             .container
             .spawn(IconMeshAddRequest::new(IconDescriptors::Panel, 5));
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Prepare,
+        engen.frontend.main.add_system(
             system::set_cursor_location
-                .label(TextInputSystems::CursorLocation)
-                .after(ClickSystems::RegisterClick),
+                .in_set(FrontEndBuckets::Prepare)
+                .after(register_click),
         );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Prepare,
+        engen.frontend.main.add_system(
             system::read_input_if_focused
-                .label(TextInputSystems::ReadInput)
-                .after(TextInputSystems::CursorLocation)
-                .after(FocusSystems::SetFocused),
+                .in_set(FrontEndBuckets::Prepare)
+                .after(set_cursor_location)
+                .after(set_focused),
         );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Prepare,
-            system::open_virtual_keyboard.after(FocusSystems::SetFocused),
+        engen.frontend.main.add_system(
+            system::open_virtual_keyboard
+                .in_set(FrontEndBuckets::Prepare)
+                .after(set_focused),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::CoordPrepare, system::update_cursor_pos);
+            .add_system(system::update_cursor_pos.in_set(FrontEndBuckets::CoordPrepare));
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Spawn, system::spawn);
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::ResolvePrepare,
-            system::cursor_letter_color_filter,
-        );
+            .add_system(system::spawn.in_set(FrontEndBuckets::Spawn));
+        engen
+            .frontend
+            .main
+            .add_system(system::cursor_letter_color_filter.in_set(FrontEndBuckets::ResolvePrepare));
     }
 }

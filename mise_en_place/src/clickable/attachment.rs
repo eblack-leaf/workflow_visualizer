@@ -1,24 +1,20 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
+use bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::clickable::system;
-use crate::{Attach, Engen, FrontEndStages};
+use crate::clickable::system::register_click;
+use crate::{Attach, Engen, FrontEndBuckets};
 
 pub struct ClickableAttachment;
 
-#[derive(SystemLabel)]
-pub enum ClickSystems {
-    RegisterClick,
-}
-
 impl Attach for ClickableAttachment {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Prepare,
-            system::register_click.label(ClickSystems::RegisterClick),
-        );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Last, system::reset_click);
+            .add_system(register_click.in_set(FrontEndBuckets::Prepare));
+        engen
+            .frontend
+            .main
+            .add_system(system::reset_click.in_set(FrontEndBuckets::Last));
     }
 }

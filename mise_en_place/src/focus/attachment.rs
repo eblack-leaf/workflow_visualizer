@@ -1,16 +1,11 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
+use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::clickable::ClickSystems;
+use crate::clickable::register_click;
 use crate::focus::component::FocusedEntity;
-use crate::focus::system;
-use crate::{Attach, Engen, FrontEndStages};
+use crate::focus::system::set_focused;
+use crate::{Attach, Engen, FrontEndBuckets};
 
 pub struct FocusAttachment;
-
-#[derive(SystemLabel)]
-pub enum FocusSystems {
-    SetFocused,
-}
 
 impl Attach for FocusAttachment {
     fn attach(engen: &mut Engen) {
@@ -18,11 +13,10 @@ impl Attach for FocusAttachment {
             .frontend
             .container
             .insert_resource(FocusedEntity::new(None));
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Prepare,
-            system::set_focused
-                .label(FocusSystems::SetFocused)
-                .after(ClickSystems::RegisterClick),
+        engen.frontend.main.add_system(
+            set_focused
+                .in_set(FrontEndBuckets::Prepare)
+                .after(register_click),
         );
     }
 }

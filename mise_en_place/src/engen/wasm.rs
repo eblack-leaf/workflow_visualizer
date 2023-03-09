@@ -43,6 +43,7 @@ pub(crate) async fn web_ignite(mut engen: Engen) {
     let gfx = GfxSurface::new(&window, GfxOptions::web()).await;
     engen.backend.container.insert_resource(gfx.0);
     engen.backend.container.insert_resource(gfx.1);
+    engen.backend.container.insert_resource(gfx.2);
     engen.window.replace(window);
     if let Err(error) = call_catch(&Closure::once_into_js(move || ignite(engen))) {
         let is_control_flow_exception = error.dyn_ref::<js_sys::Error>().map_or(false, |e| {

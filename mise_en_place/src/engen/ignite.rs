@@ -31,6 +31,10 @@ pub(crate) fn ignite(mut engen: Engen) {
                     engen.invoke_attach::<PositionAdjustAnimator>();
                     engen.invoke_attach::<TextInputAttachment>();
                     engen.attach_from_queue();
+                    let dag = engen.frontend.main.graph().dependency().cached_topsort();
+                    for node in dag {
+                        println!("node: {}", node.is_system());
+                    }
                     engen.frontend.exec(TaskLabel::Startup);
                     engen.backend.exec(TaskLabel::Startup);
                 }

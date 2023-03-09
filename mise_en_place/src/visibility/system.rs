@@ -27,7 +27,7 @@ pub(crate) fn visibility_setup(
 }
 
 pub(crate) fn visibility_cleanup(
-    lost_visibility: RemovedComponents<Visibility>,
+    mut lost_visibility: RemovedComponents<Visibility>,
     mut spacial_hasher: ResMut<SpacialHasher>,
     mut lost_contact_entities: Query<&mut CollisionEnd>,
 ) {
@@ -120,7 +120,7 @@ pub(crate) fn calc_visible_section(
     }
 }
 
-pub(crate) fn resize(
+pub(crate) fn update_visible_bounds(
     mut resize_events: EventReader<WindowResize>,
     mut visible_bounds: ResMut<VisibleBounds>,
     scale_factor: Res<ScaleFactor>,

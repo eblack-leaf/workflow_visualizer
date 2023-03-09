@@ -11,9 +11,7 @@ use winit::window::WindowBuilder;
 pub(crate) use job::TaskLabel;
 pub use job::{Container, EntityStore, ExecutionState, Exit, Idle, Job, Task};
 pub use options::EngenOptions;
-pub use stages::{
-    BackEndStartupStages, BackendStages, FrontEndStages, FrontEndStartupStages, FrontEndSystems,
-};
+pub use stages::{BackEndStartupBuckets, BackendBuckets, FrontEndBuckets, FrontEndStartupBuckets};
 
 use crate::gfx::{
     invoke_extract, invoke_render, Extract, ExtractFns, Render, RenderFns, RenderPhase,
@@ -260,6 +258,7 @@ impl Engen {
             self.window.replace(window);
             self.backend.container.insert_resource(gfx.0);
             self.backend.container.insert_resource(gfx.1);
+            self.backend.container.insert_resource(gfx.2);
         }
     }
     fn attach_from_queue(&mut self) {

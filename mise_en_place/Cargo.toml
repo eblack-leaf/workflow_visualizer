@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 winit = "0.28.1"
-wgpu = { version = "0.15.0", features = ["webgl"] }
+wgpu = { version = "0.15.1", features = ["webgl"] }
 bytemuck = { version = "1.12.3", features = ["derive"] }
-bevy_ecs = "0.9.1"
+bevy_ecs = "0.10.0"
 nalgebra = "0.32.1"
 wasm-bindgen-cli-support = "0.2.83"
 fontdue = "0.7.2"

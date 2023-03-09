@@ -1,13 +1,13 @@
-use bevy_ecs::prelude::{IntoSystemDescriptor, SystemLabel};
+use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::engen::{Attach, Engen, FrontEndSystems};
-use crate::engen::{BackendStages, FrontEndStages};
+use crate::engen::{Attach, Engen};
+use crate::engen::{BackendBuckets, FrontEndBuckets};
 use crate::gfx::GfxSurfaceConfiguration;
-use crate::visibility::spacial_hasher::SpacialHasher;
-use crate::visibility::system::calc_visible_section;
+use crate::visibility::spacial_hasher::{update_spacial_hash, SpacialHasher};
+use crate::visibility::system::{calc_visible_section, update_visible_bounds};
+use crate::visibility::visible_bounds::adjust_position;
 use crate::visibility::{
-    collision, spacial_hasher, system, visible_bounds, ViewportOffsetUpdate,
-    VisibleBoundsPositionAdjust,
+    collision, system, visible_bounds, ViewportOffsetUpdate, VisibleBoundsPositionAdjust,
 };
 use crate::window::ScaleFactor;
 use crate::{Area, DeviceView, VisibleBounds};
@@ -53,50 +53,43 @@ impl Attach for VisibilityAttachment {
         engen
             .backend
             .main
-            .add_system_to_stage(BackendStages::Resize, visible_bounds::viewport_read_offset);
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Resize,
-            system::resize.label(FrontEndSystems::UpdateVisibleBounds),
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::Resize,
-            calc_visible_section.after(FrontEndSystems::UpdateVisibleBounds),
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::VisibilityPreparation,
-            system::visibility_setup,
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::VisibilityPreparation,
-            system::visibility_cleanup,
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::ResolveVisibility,
-            visible_bounds::adjust_position.label(VisibilitySystems::AdjustPosition),
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::ResolveVisibility,
-            spacial_hasher::update_spacial_hash
-                .label(VisibilitySystems::UpdateSpacialHash)
-                .after(VisibilitySystems::AdjustPosition),
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::ResolveVisibility,
-            collision::collision_responses.after(VisibilitySystems::UpdateSpacialHash),
-        );
-        engen.frontend.main.add_system_to_stage(
-            FrontEndStages::ResolveVisibility,
-            system::calc_visible_section.after(VisibilitySystems::UpdateSpacialHash),
+            .add_system(visible_bounds::viewport_read_offset.in_set(BackendBuckets::Resize));
+        engen.frontend.main.add_system(update_visible_bounds);
+        engen.frontend.main.add_system(
+            calc_visible_section
+                .in_set(FrontEndBuckets::Resize)
+                .after(update_visible_bounds),
         );
         engen
             .frontend
             .main
-            .add_system_to_stage(FrontEndStages::Last, collision::clean_collision_responses);
+            .add_system(system::visibility_setup.in_set(FrontEndBuckets::VisibilityPreparation));
+        engen
+            .frontend
+            .main
+            .add_system(system::visibility_cleanup.in_set(FrontEndBuckets::VisibilityPreparation));
+        engen
+            .frontend
+            .main
+            .add_system(visible_bounds::adjust_position.in_set(FrontEndBuckets::ResolveVisibility));
+        engen.frontend.main.add_system(
+            update_spacial_hash
+                .in_set(FrontEndBuckets::ResolveVisibility)
+                .after(adjust_position),
+        );
+        engen.frontend.main.add_system(
+            collision::collision_responses
+                .in_set(FrontEndBuckets::ResolveVisibility)
+                .after(update_spacial_hash),
+        );
+        engen.frontend.main.add_system(
+            calc_visible_section
+                .in_set(FrontEndBuckets::ResolveVisibility)
+                .after(update_spacial_hash),
+        );
+        engen
+            .frontend
+            .main
+            .add_system(collision::clean_collision_responses.in_set(FrontEndBuckets::Last));
     }
-}
-
-#[derive(SystemLabel)]
-enum VisibilitySystems {
-    AdjustPosition,
-    UpdateSpacialHash,
 }
