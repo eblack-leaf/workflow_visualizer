@@ -1,0 +1,1 @@
+   Compiling mise_en_place_app v0.1.0 (/home/omi-voshuli/Desktop/note-ifications/mise_en_place_app)

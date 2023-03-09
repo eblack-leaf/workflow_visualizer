@@ -1,16 +1,16 @@
-use bevy_ecs::prelude::IntoSystemConfig;
+use bevy_ecs::prelude::{apply_system_buffers, IntoSystemConfig};
 
+use crate::{Area, DeviceView, VisibleBounds};
 use crate::engen::{Attach, Engen};
 use crate::engen::{BackendBuckets, FrontEndBuckets};
 use crate::gfx::GfxSurfaceConfiguration;
-use crate::visibility::spacial_hasher::{update_spacial_hash, SpacialHasher};
+use crate::visibility::{
+    collision, system, ViewportOffsetUpdate, visible_bounds, VisibleBoundsPositionAdjust,
+};
+use crate::visibility::spacial_hasher::{SpacialHasher, update_spacial_hash};
 use crate::visibility::system::{calc_visible_section, update_visible_bounds};
 use crate::visibility::visible_bounds::adjust_position;
-use crate::visibility::{
-    collision, system, visible_bounds, ViewportOffsetUpdate, VisibleBoundsPositionAdjust,
-};
 use crate::window::ScaleFactor;
-use crate::{Area, DeviceView, VisibleBounds};
 
 pub struct VisibilityAttachment;
 
@@ -60,6 +60,7 @@ impl Attach for VisibilityAttachment {
                 .in_set(FrontEndBuckets::Resize)
                 .after(update_visible_bounds),
         );
+        engen.frontend.main.add_system(apply_system_buffers.in_set(FrontEndBuckets::Resize));
         engen
             .frontend
             .main
@@ -71,7 +72,7 @@ impl Attach for VisibilityAttachment {
         engen
             .frontend
             .main
-            .add_system(visible_bounds::adjust_position.in_set(FrontEndBuckets::ResolveVisibility));
+            .add_system(adjust_position.in_set(FrontEndBuckets::ResolveVisibility));
         engen.frontend.main.add_system(
             update_spacial_hash
                 .in_set(FrontEndBuckets::ResolveVisibility)

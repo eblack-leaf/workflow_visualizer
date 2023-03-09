@@ -1,14 +1,14 @@
 use bevy_ecs::prelude::{Commands, EventReader, IntoSystemConfig, Res, ResMut, Resource};
 use nalgebra::matrix;
 
+use crate::{Area, Position, Section};
 use crate::coord::{Depth, DeviceView};
 use crate::engen::{Attach, Engen};
-use crate::engen::{BackEndStartupBuckets, BackendBuckets};
-use crate::gfx::render::MsaaRenderAttachment;
+use crate::engen::{BackendBuckets, BackEndStartupBuckets};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
+use crate::gfx::render::MsaaRenderAttachment;
 use crate::uniform::Uniform;
 use crate::window::WindowResize;
-use crate::{Area, Position, Section};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -226,6 +226,7 @@ impl Attach for ViewportAttachment {
             .backend
             .startup
             .add_system(viewport_attach.in_set(BackEndStartupBuckets::Startup));
+
         engen
             .backend
             .main

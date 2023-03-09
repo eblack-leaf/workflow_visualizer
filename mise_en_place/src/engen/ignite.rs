@@ -1,5 +1,8 @@
 use winit::event::{Event, StartCause, WindowEvent};
 
+use crate::{
+    Engen, gfx, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
+};
 use crate::clickable::ClickableAttachment;
 use crate::coord::CoordAttachment;
 use crate::engen::TaskLabel;
@@ -8,12 +11,10 @@ use crate::text_input::TextInputAttachment;
 use crate::time::TimerAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    gfx, Engen, IconAttachment, PositionAdjustAnimator, TextAttachment, ViewportAttachment,
-};
 
 pub(crate) fn ignite(mut engen: Engen) {
     let event_loop = engen.event_loop.take().expect("no event loop");
+    let mut displayed = false;
     event_loop.run(
         move |event, event_loop_window_target, control_flow| match event {
             Event::NewEvents(start_cause) => match start_cause {
@@ -31,10 +32,6 @@ pub(crate) fn ignite(mut engen: Engen) {
                     engen.invoke_attach::<PositionAdjustAnimator>();
                     engen.invoke_attach::<TextInputAttachment>();
                     engen.attach_from_queue();
-                    let dag = engen.frontend.main.graph().dependency().cached_topsort();
-                    for node in dag {
-                        println!("node: {}", node.is_system());
-                    }
                     engen.frontend.exec(TaskLabel::Startup);
                     engen.backend.exec(TaskLabel::Startup);
                 }
@@ -106,6 +103,13 @@ pub(crate) fn ignite(mut engen: Engen) {
             Event::MainEventsCleared => {
                 if engen.frontend.active() {
                     engen.frontend.exec(TaskLabel::Main);
+                    if !displayed {
+                        // let dag = engen.frontend.main.graph().dependency().cached_topsort();
+                        // for node in dag.iter() {
+                        //     println!("node: {:?}", node);
+                        // }
+                        displayed = true;
+                    }
                 }
                 if engen.frontend.should_exit() {
                     control_flow.set_exit();
