@@ -10,15 +10,15 @@ use crate::render::{
 use crate::scale_factor::ScaleFactor;
 use crate::theme::{Theme, ThemeAttachment};
 use crate::time::TimerAttachment;
-use crate::touch::{Interactor, RegisteredTouch, Touch, TouchAdapter, TouchEvent, TouchType};
+use crate::touch::{Interactor, MouseAdapter, RegisteredTouch, Touch, TouchAdapter, TouchEvent, TouchType};
 use crate::viewport::{ViewportAttachment, ViewportHandle};
 use crate::visibility::VisibilityAttachment;
 use crate::window::{WindowAttachment, WindowResize};
-use crate::{DeviceContext, GfxOptions};
+use crate::{DeviceContext, GfxOptions, Position};
 use bevy_ecs::prelude::Resource;
 use std::rc::Rc;
-use winit::dpi::PhysicalSize;
-use winit::event::{Event, StartCause, TouchPhase, WindowEvent};
+use winit::dpi::{PhysicalPosition, PhysicalSize};
+use winit::event::{ElementState, Event, MouseButton, StartCause, TouchPhase, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
@@ -78,7 +78,9 @@ impl Engen {
                         state,
                         button,
                         ..
-                    } => {}
+                    } => {
+                        self.register_mouse_click(state, button);
+                    }
                     WindowEvent::MouseWheel {
                         device_id,
                         delta,
@@ -89,9 +91,22 @@ impl Engen {
                         device_id,
                         position,
                         ..
-                    } => {}
-                    WindowEvent::CursorEntered { device_id } => {}
-                    WindowEvent::CursorLeft { device_id } => {}
+                    } => {
+                        self.set_mouse_location(position);
+                    }
+                    WindowEvent::CursorEntered { device_id } => {
+
+                    }
+                    WindowEvent::CursorLeft { device_id } => {
+                        self.frontend.container.send_event(TouchEvent::new(TouchType::Cancelled, Touch::default()));
+                        self.frontend.container.get_resource_mut::<MouseAdapter>().expect("no mouse adapter").tracked.iter_mut().for_each(
+                            |(button, track_state)| {
+                                if let Some(registered_touch) = track_state.1.as_mut() {
+                                    registered_touch.cancelled = true;
+                                }
+                            }
+                        );
+                    }
                     _ => {}
                 },
                 Event::Suspended => {
@@ -181,6 +196,86 @@ impl Engen {
     }
 }
 impl Engen {
+    fn register_mouse_click(&mut self, state: ElementState, button: MouseButton) {
+        let viewport_handle_section = self
+            .frontend
+            .container
+            .get_resource::<ViewportHandle>()
+            .expect("no viewport handle")
+            .section;
+        let scale_factor = self
+            .frontend
+            .container
+            .get_resource::<ScaleFactor>()
+            .expect("no scale factor")
+            .factor;
+        let mut mouse_adapter = self
+            .frontend
+            .container
+            .get_resource_mut::<MouseAdapter>()
+            .expect("no mouse adapter");
+        let cached = mouse_adapter
+            .tracked
+            .get(&button)
+            .cloned()
+            .unwrap_or((ElementState::Released, None));
+        let mut touch_events = Vec::new();
+        let mouse_location = mouse_adapter.location.unwrap_or_default();
+        let in_bounds = viewport_handle_section.contains(mouse_location.to_ui(scale_factor));
+        let interactor = Interactor::from_button(button);
+        let is_primary = interactor == MouseAdapter::PRIMARY_INTERACTOR;
+        if cached.0 != state {
+            match state {
+                ElementState::Pressed => {
+                    if in_bounds {
+                        if is_primary{
+                            touch_events.push(TouchEvent::new(TouchType::OnPress, mouse_location));
+                        }
+                        mouse_adapter.tracked.insert(button, (state, Some(RegisteredTouch::new(mouse_location))));
+                    }
+                }
+                ElementState::Released => {
+                    if in_bounds {
+                        if is_primary {
+                            touch_events.push(TouchEvent::new(TouchType::OnRelease, mouse_location));
+                            if let Some(r_touch) = mouse_adapter.tracked.get_mut(&button) {
+                                if let Some(r_touch) = r_touch.1.as_mut() {
+                                    r_touch.end.replace(mouse_location);
+                                }
+                            }
+                        }
+                    } else {
+                        if is_primary {
+                            touch_events
+                                .push(TouchEvent::new(TouchType::Cancelled, Touch::default()));
+                        }
+                        mouse_adapter.tracked.get_mut(&button).unwrap().1.unwrap().cancelled = true;
+                    }
+                }
+            }
+        }
+        for event in touch_events {
+            self.frontend.container.send_event(event);
+        }
+    }
+    fn set_mouse_location(&mut self, position: PhysicalPosition<f64>) {
+        let mut mouse_adapter = self
+            .frontend
+            .container
+            .get_resource_mut::<MouseAdapter>()
+            .expect("no mouse adapter");
+        let mouse_position = Position::<DeviceContext>::new(position.x as f32, position.y as f32);
+        mouse_adapter.location.replace(mouse_position);
+        let mut click_events = Vec::new();
+        for (button, track_state) in mouse_adapter.tracked.iter_mut() {
+            if let Some(t_state) = track_state.1.as_mut() {
+                t_state.current = mouse_position;
+            }
+            if *button == MouseButton::Left {
+                click_events.push(TouchEvent::new(TouchType::OnMove, mouse_position));
+            }
+        }
+    }
     fn register_touch(&mut self, touch: winit::event::Touch) {
         let viewport_section = self
             .frontend
@@ -201,12 +296,11 @@ impl Engen {
         let interactor = Interactor(touch.id as u32);
         match touch.phase {
             TouchPhase::Started => {
-                let internal_touch = RegisteredTouch::new(touch_location);
                 if touch_adapter.primary.is_none() {
                     touch_adapter.primary.replace(interactor);
-                    touch_events.push(TouchEvent::new(TouchType::OnPress, internal_touch.origin));
+                    touch_events.push(TouchEvent::new(TouchType::OnPress, touch_location));
                 }
-                touch_adapter.tracked.insert(interactor, internal_touch);
+                touch_adapter.tracked.insert(interactor, RegisteredTouch::new(touch_location));
             }
             TouchPhase::Moved => {
                 if let Some(registered_touch) = touch_adapter.tracked.get_mut(&interactor) {
@@ -228,13 +322,9 @@ impl Engen {
                 if let Some(prime) = touch_adapter.primary {
                     if prime == interactor {
                         touch_adapter.primary.take();
-                        let internal_touch = *touch_adapter
-                            .tracked
-                            .get(&prime)
-                            .expect("no tracked interactor");
                         touch_events.push(TouchEvent::new(
                             TouchType::OnRelease,
-                            internal_touch.end.unwrap(),
+                            touch_location,
                         ));
                     }
                 }
@@ -246,7 +336,9 @@ impl Engen {
                         touch_events.push(TouchEvent::new(TouchType::Cancelled, Touch::default()));
                     }
                 }
-                touch_adapter.tracked.remove(&interactor);
+                if let Some(tracked) = touch_adapter.tracked.get_mut(&interactor) {
+                    tracked.cancelled = true;
+                }
             }
         }
         for event in touch_events {
