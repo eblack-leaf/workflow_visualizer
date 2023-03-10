@@ -1,7 +1,7 @@
 use crate::area::Area;
 use crate::focus::FocusAttachment;
 use crate::gfx::{GfxStack, GfxSurface};
-use crate::job::{TaskLabel, Workflow};
+use crate::job::{Job, TaskLabel};
 use crate::orientation::OrientationAttachment;
 use crate::render::{
     extract, invoke_extract, invoke_render, render, Extract, ExtractFns, Render, RenderFns,
@@ -24,8 +24,8 @@ use winit::window::{Window, WindowBuilder};
 
 pub struct Engen {
     pub options: EngenOptions,
-    pub(crate) frontend: Workflow,
-    pub(crate) backend: Workflow,
+    pub(crate) frontend: Job,
+    pub(crate) backend: Job,
     event_loop: Option<EventLoop<()>>,
     window: Option<Rc<Window>>,
     pub(crate) render_fns: (RenderFns, RenderFns),
@@ -253,8 +253,8 @@ impl Engen {
     }
     fn new(options: EngenOptions) -> Self {
         Self {
-            frontend: Workflow::new(),
-            backend: Workflow::new(),
+            frontend: Job::new(),
+            backend: Job::new(),
             event_loop: None,
             window: None,
             options,
@@ -418,7 +418,7 @@ impl EngenOptions {
 
 pub trait Launch {
     fn options() -> EngenOptions;
-    fn preparation(frontend: &mut Workflow);
+    fn preparation(frontend: &mut Job);
 }
 
 pub struct Attachment(pub Box<fn(&mut Engen)>);

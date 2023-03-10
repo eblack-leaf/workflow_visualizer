@@ -1,5 +1,5 @@
 use winit::event_loop::EventLoop;
-use workflow_visualizer::{Engen, EngenOptions, Launch, Workflow};
+use workflow_visualizer::{Engen, EngenOptions, Job, Launch};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -29,7 +29,7 @@ impl Launch for Launcher {
         EngenOptions::new().with_native_dimensions((500, 900))
     }
 
-    fn preparation(frontend: &mut Workflow) {}
+    fn preparation(frontend: &mut Job) {}
 }
 fn main() {
     #[cfg(not(target_arch = "wasm32"))]

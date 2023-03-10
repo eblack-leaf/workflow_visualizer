@@ -6,7 +6,7 @@ use crate::position::Position;
 use crate::section::Section;
 use crate::uniform::Uniform;
 use crate::window::WindowResize;
-use crate::{Attach, Engen, Extract, InterfaceContext, ScaleFactor, Workflow};
+use crate::{Attach, Engen, Extract, InterfaceContext, Job, ScaleFactor};
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, Resource};
@@ -283,7 +283,7 @@ pub(crate) fn viewport_read_offset(
 }
 
 impl Extract for ViewportHandle {
-    fn extract(frontend: &mut Workflow, backend: &mut Workflow) {
+    fn extract(frontend: &mut Job, backend: &mut Job) {
         let scale_factor = frontend
             .container
             .get_resource::<ScaleFactor>()

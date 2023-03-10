@@ -37,7 +37,7 @@ pub use instance::{
     key::Key,
     offset, InstanceAttributeManager, NullBit,
 };
-pub use job::Workflow;
+pub use job::Job;
 pub use layer::Layer;
 pub use location::Location;
 pub use panel::Panel;

@@ -63,7 +63,7 @@ impl EntityStore {
     }
 }
 
-pub struct Workflow {
+pub struct Job {
     pub execution_state: ExecutionState,
     pub container: Container,
     pub startup: Task,
@@ -72,11 +72,11 @@ pub struct Workflow {
 }
 
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
-pub enum WorkflowSet {
+pub enum JobSet {
     Idle,
 }
 
-impl Workflow {
+impl Job {
     pub fn store_entity(&mut self, id: &'static str, entity: Entity) {
         self.container
             .get_resource_mut::<EntityStore>()
@@ -97,7 +97,7 @@ impl Workflow {
             startup: Task::default(),
             main: {
                 let mut task = Task::default();
-                task.add_system(attempt_to_idle.in_set(WorkflowSet::Idle));
+                task.add_system(attempt_to_idle.in_set(JobSet::Idle));
                 task
             },
             teardown: Task::default(),
