@@ -3,6 +3,7 @@ use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
 use nalgebra::matrix;
 use crate::area::Area;
+use crate::{Attach, Engen, Extract, InterfaceContext, Job, ScaleFactor};
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::layer::Layer;
@@ -169,7 +170,7 @@ impl CpuViewport {
         return self.orthographic.data.0.into();
     }
     pub(crate) fn far_layer(&self) -> f32 {
-        self.layer.layer
+        self.layer.z
     }
 }
 
@@ -191,7 +192,7 @@ pub(crate) fn viewport_attach(
     msaa_attachment: Res<MsaaRenderAttachment>,
     mut cmd: Commands,
 ) {
-    let area = Area::<DeviceView>::new(
+    let area = Area::<DeviceContext>::new(
         gfx_surface_configuration.configuration.width as f32,
         gfx_surface_configuration.configuration.height as f32,
     );
@@ -216,5 +217,136 @@ pub(crate) fn adjust_area(
             gfx_surface_configuration.configuration.height,
             msaa_attachment.requested,
         );
+    }
+}
+#[derive(Resource)]
+pub struct ViewportHandle {
+    pub(crate) section: Section<InterfaceContext>,
+    dirty: bool,
+}
+
+impl ViewportHandle {
+    pub(crate) fn new(section: Section<InterfaceContext>) -> Self {
+        Self {
+            section,
+            dirty: false,
+        }
+    }
+    pub fn position_adjust(&mut self, adjust: Position<InterfaceContext>) {
+        self.section.position += adjust;
+        self.dirty = true;
+    }
+    pub fn adjust_area(&mut self, area: Area<InterfaceContext>) {
+        self.section.area = area;
+    }
+}
+
+#[derive(Resource)]
+pub struct ViewportHandleAdjust {
+    pub adjust: Option<Position<InterfaceContext>>,
+}
+
+impl ViewportHandleAdjust {
+    pub(crate) fn new() -> Self {
+        Self { adjust: None }
+    }
+}
+
+pub(crate) fn adjust_position(
+    mut visible_bounds: ResMut<ViewportHandle>,
+    mut visible_bounds_position_adjust: ResMut<ViewportHandleAdjust>,
+) {
+    if let Some(adjust) = visible_bounds_position_adjust.adjust.take() {
+        visible_bounds.position_adjust(adjust);
+    }
+}
+
+#[derive(Resource)]
+pub(crate) struct ViewportOffsetUpdate {
+    pub(crate) update: Option<Position<DeviceContext>>,
+}
+
+impl ViewportOffsetUpdate {
+    pub(crate) fn new() -> Self {
+        Self { update: None }
+    }
+}
+
+pub(crate) fn viewport_read_offset(
+    mut viewport_offset_update: ResMut<ViewportOffsetUpdate>,
+    mut viewport: ResMut<Viewport>,
+    gfx_surface: Res<GfxSurface>,
+) {
+    if let Some(update) = viewport_offset_update.update.take() {
+        viewport.update_offset(&gfx_surface.queue, update);
+    }
+}
+
+impl Extract for ViewportHandle {
+    fn extract(frontend: &mut Job, backend: &mut Job) {
+        let scale_factor = frontend
+            .container
+            .get_resource::<ScaleFactor>()
+            .expect("no scale factor")
+            .factor;
+        let mut viewport_handle = frontend
+            .container
+            .get_resource_mut::<ViewportHandle>()
+            .expect("no viewport handle");
+        if viewport_handle.dirty {
+            backend
+                .container
+                .get_resource_mut::<ViewportOffsetUpdate>()
+                .expect("no viewport offset update")
+                .update
+                .replace(viewport_handle.section.position.to_device(scale_factor));
+            viewport_handle.dirty = false;
+        }
+    }
+}
+pub struct ViewportAttachment;
+
+impl Attach for ViewportAttachment {
+    fn attach(engen: &mut Engen) {
+        engen.add_extraction::<ViewportHandle>();
+        engen.frontend.main.add_system(adjust_position);
+        engen.backend.main.add_system(viewport_read_offset);
+        engen
+            .backend
+            .container
+            .insert_resource(ViewportOffsetUpdate::new());
+        let gfx_surface_configuration = engen
+            .backend
+            .container
+            .get_resource::<GfxSurfaceConfiguration>()
+            .expect("no gfx surface config");
+        let scale_factor = engen
+            .frontend
+            .container
+            .get_resource::<ScaleFactor>()
+            .expect("no scale factor")
+            .factor;
+        let surface_area: Area<DeviceContext> = (
+            gfx_surface_configuration.configuration.width,
+            gfx_surface_configuration.configuration.height,
+        )
+            .into();
+        let visible_section = ((0u32, 0u32), surface_area.to_ui(scale_factor)).into();
+        engen
+            .frontend
+            .container
+            .insert_resource(ViewportHandle::new(visible_section));
+        engen
+            .frontend
+            .container
+            .insert_resource(ViewportHandleAdjust::new());
+        engen
+            .backend
+            .startup
+            .add_system(viewport_attach);
+        engen
+            .backend
+            .main
+            .add_system(adjust_area);
     }
 }

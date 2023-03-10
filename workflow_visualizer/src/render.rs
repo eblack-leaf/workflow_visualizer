@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::Resource;
-use crate::Engen;
+use crate::engen::Engen;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::job::Job;
 use crate::theme::Theme;

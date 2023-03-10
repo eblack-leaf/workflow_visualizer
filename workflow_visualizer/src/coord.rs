@@ -1,4 +1,4 @@
-pub trait CoordContext {}
+pub trait CoordContext where Self: Send + Sync + 'static + Copy + Clone {}
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub struct DeviceContext;
 #[derive(Copy, Clone, PartialOrd, PartialEq)]

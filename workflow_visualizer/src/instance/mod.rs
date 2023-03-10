@@ -129,7 +129,7 @@ pub fn offset<T>(index: &Index) -> wgpu::BufferAddress {
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone)]
-pub(crate) struct NullBit {
+pub struct NullBit {
     bit: u32,
 }
 

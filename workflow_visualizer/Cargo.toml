@@ -29,7 +29,7 @@ tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 tower = "0.4.13"
 tower-http = { version = "0.4.0", features = ["fs", "compression-gzip", "cors", "set-header", "trace"] }
-axum = { version = "0.6.7", features = ["http2", "macros"] }
+axum = { version = "0.6.7", features = ["http2", "macros", "headers"] }
 axum-server = { version = "0.4.6", features = ["tls-rustls"] }
 futures = "0.3.26"
 [[example]]

@@ -16,7 +16,7 @@ impl<Context: CoordContext> Section<Context> {
             area: area.into(),
         }
     }
-    pub fn from_ltrb(left: f32, top: f32, right: f32, bottom: f32) -> Self {
+    pub fn from_left_top_right_bottom(left: f32, top: f32, right: f32, bottom: f32) -> Self {
         Self {
             position: (left, top).into(),
             area: (right - left, bottom - top).into(),
@@ -70,6 +70,13 @@ impl<Context: CoordContext> Section<Context> {
         let bottom = self.bottom().min(other.bottom());
         let left = self.left().max(other.left());
         let right = self.right().min(other.right());
-        Option::from(Self::from_ltrb(left, top, right, bottom))
+        Option::from(Self::from_left_top_right_bottom(left, top, right, bottom))
+    }
+}
+impl<Context: CoordContext, P: Into<Position<Context>>, A: Into<Area<Context>>> From<(P, A)>
+for Section<Context>
+{
+    fn from(value: (P, A)) -> Self {
+        Self::new(value.0.into(), value.1.into())
     }
 }

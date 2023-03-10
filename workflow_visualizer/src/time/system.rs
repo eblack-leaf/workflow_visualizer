@@ -1,6 +1,6 @@
-use bevy_ecs::change_detection::ResMut;
+use bevy_ecs::prelude::ResMut;
+use crate::time::Timer;
 
-use crate::Timer;
 
 pub(crate) fn read_time(mut timer: ResMut<Timer>) {
     let _delta = timer.read();

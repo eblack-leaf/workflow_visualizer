@@ -4,20 +4,26 @@ pub struct WasmCompiler {
     pub package: String,
     pub package_options: String,
     pub destination: String,
+    pub bin: String,
+    pub bin_options: String,
 }
 
 impl WasmCompiler {
-    pub fn new<T: Into<String>>(package: T, package_options: T, destination: T) -> Self {
+    pub fn new<T: Into<String>>(package: T, bin_options: T, bin: T, package_options: T, destination: T) -> Self {
         Self {
             package: package.into(),
             package_options: package_options.into(),
             destination: destination.into(),
+            bin: bin.into(),
+            bin_options: bin_options.into(),
         }
     }
     pub fn compile(&self) -> Result<(), bool> {
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let package = self.package.as_str();
         let profile = self.package_options.as_str();
+        let bin = self.bin.as_str();
+        let bin_options = self.bin_options.as_str();
         let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .ancestors()
             .nth(1)
@@ -35,8 +41,8 @@ impl WasmCompiler {
         args.push(&package);
         args.push("--target-dir");
         args.push(target.as_os_str().to_str().unwrap());
-        args.push("--bin");
-        args.push(&package);
+        args.push(&bin_options);
+        args.push(&bin);
         let status = std::process::Command::new(&cargo)
             .current_dir(&project_root)
             .args(&args)
