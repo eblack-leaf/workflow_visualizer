@@ -25,6 +25,7 @@ pub enum TouchType {
 pub type Touch = Position<DeviceContext>;
 #[derive(Bundle, Copy, Clone)]
 pub struct Touchable {}
+
 #[derive(Copy, Clone)]
 pub struct RegisteredTouch {
     pub origin: Touch,
@@ -79,6 +80,10 @@ pub(crate) fn read_events(
                 }
                 _ => {}
             }
+        }
+    } else {
+        if let Some(prime) = primary_touch.touch.as_mut() {
+            prime.cancelled = true;
         }
     }
 }
