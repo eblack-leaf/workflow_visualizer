@@ -1,9 +1,9 @@
+use crate::viewport::ViewportHandle;
+use crate::window::WindowResize;
+use crate::{Area, Attach, DeviceContext, Engen, ScaleFactor};
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, Res, Resource};
-use crate::{Area, Attach, DeviceContext, Engen, ScaleFactor};
-use crate::viewport::ViewportHandle;
-use crate::window::WindowResize;
 
 #[derive(Resource, Copy, Clone)]
 pub enum Orientation {

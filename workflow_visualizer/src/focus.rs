@@ -1,5 +1,5 @@
-use bevy_ecs::prelude::{DetectChanges, Entity, Query, Res};
 use crate::{Attach, Engen};
+use bevy_ecs::prelude::{DetectChanges, Entity, Query, Res};
 #[derive(Component)]
 pub struct Focus {
     pub(crate) focused: bool,
@@ -61,8 +61,6 @@ impl Attach for FocusAttachment {
             .frontend
             .container
             .insert_resource(FocusedEntity::new(None));
-        engen.frontend.main.add_system(
-            set_focused
-        );
+        engen.frontend.main.add_system(set_focused);
     }
 }

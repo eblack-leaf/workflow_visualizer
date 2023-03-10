@@ -1,17 +1,17 @@
-use bevy_ecs::prelude::Resource;
 use crate::engen::Engen;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
-use crate::job::Job;
+use crate::job::Workflow;
 use crate::theme::Theme;
 use crate::viewport::Viewport;
+use bevy_ecs::prelude::Resource;
 
-pub(crate) type ExtractFns = Vec<Box<fn(&mut Job, &mut Job)>>;
+pub(crate) type ExtractFns = Vec<Box<fn(&mut Workflow, &mut Workflow)>>;
 
 pub trait Extract {
-    fn extract(frontend: &mut Job, backend: &mut Job);
+    fn extract(frontend: &mut Workflow, backend: &mut Workflow);
 }
 
-pub(crate) fn invoke_extract<Extractor: Extract>(frontend: &mut Job, backend: &mut Job) {
+pub(crate) fn invoke_extract<Extractor: Extract>(frontend: &mut Workflow, backend: &mut Workflow) {
     Extractor::extract(frontend, backend);
 }
 
@@ -27,7 +27,7 @@ pub enum RenderPhase {
 }
 
 pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
-    backend: &'a Job,
+    backend: &'a Workflow,
     render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
     let viewport = backend
@@ -43,7 +43,7 @@ pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
 
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
 
-pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Job, &mut RenderPassHandle<'a>)>>;
+pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Workflow, &mut RenderPassHandle<'a>)>>;
 
 pub trait Render {
     fn phase() -> RenderPhase;

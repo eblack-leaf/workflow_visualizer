@@ -1,6 +1,6 @@
-use bevy_ecs::prelude::{Component, Query, Res};
-use crate::{Area, Attach, Engen, InterfaceContext, Position, Section};
 use crate::viewport::ViewportHandle;
+use crate::{Area, Attach, Engen, InterfaceContext, Position, Section};
+use bevy_ecs::prelude::{Component, Query, Res};
 
 #[derive(Component, Copy, Clone)]
 pub struct Visibility {
@@ -30,7 +30,12 @@ impl VisibleSection {
     }
 }
 pub(crate) fn calc_visibility(
-    mut potentially_visible: Query<(&Position<InterfaceContext>, &Area<InterfaceContext>, &mut Visibility, &mut VisibleSection)>,
+    mut potentially_visible: Query<(
+        &Position<InterfaceContext>,
+        &Area<InterfaceContext>,
+        &mut Visibility,
+        &mut VisibleSection,
+    )>,
     viewport_handle: Res<ViewportHandle>,
 ) {
     for (pos, area, vis, vis_sec) in potentially_visible.iter_mut() {

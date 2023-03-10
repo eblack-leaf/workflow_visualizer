@@ -1,7 +1,7 @@
-use bevy_ecs::bundle::Bundle;
 use crate::coord::CoordContext;
 use crate::layer::Layer;
 use crate::position::Position;
+use bevy_ecs::bundle::Bundle;
 
 #[derive(Bundle, Copy, Clone, PartialEq)]
 pub struct Location<Context: CoordContext> {
@@ -19,7 +19,7 @@ impl<Context: CoordContext> Location<Context> {
 }
 
 impl<Context: CoordContext, P: Into<Position<Context>>, L: Into<Layer>> From<(P, L)>
-for Location<Context>
+    for Location<Context>
 {
     fn from(value: (P, L)) -> Self {
         Self::new(value.0, value.1)

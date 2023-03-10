@@ -9,7 +9,13 @@ pub struct WasmCompiler {
 }
 
 impl WasmCompiler {
-    pub fn new<T: Into<String>>(package: T, bin_options: T, bin: T, package_options: T, destination: T) -> Self {
+    pub fn new<T: Into<String>>(
+        package: T,
+        bin_options: T,
+        bin: T,
+        package_options: T,
+        destination: T,
+    ) -> Self {
         Self {
             package: package.into(),
             package_options: package_options.into(),

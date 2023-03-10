@@ -1,13 +1,13 @@
+use axum::headers::{HeaderName, HeaderValue};
+use axum::http::Method;
+use axum::response::{Html, IntoResponse};
+use axum::routing::get;
+use axum::Router;
+use axum_server::tls_rustls::RustlsConfig;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
-use axum::headers::{HeaderName, HeaderValue};
-use axum::http::Method;
-use axum::response::{Html, IntoResponse};
-use axum::Router;
-use axum::routing::get;
-use axum_server::tls_rustls::RustlsConfig;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
@@ -20,10 +20,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 pub struct WasmServer;
 
 impl WasmServer {
-    pub fn serve_at<P: Into<PathBuf>, Addr: Into<SocketAddr>>(
-        src: P,
-        addr: Addr,
-    ) {
+    pub fn serve_at<P: Into<PathBuf>, Addr: Into<SocketAddr>>(src: P, addr: Addr) {
         let src = src.into();
         let rt = tokio::runtime::Runtime::new().unwrap();
         let html_content = std::fs::read_to_string(src.join("index.html")).unwrap();

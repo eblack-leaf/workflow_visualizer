@@ -63,7 +63,7 @@ impl EntityStore {
     }
 }
 
-pub struct Job {
+pub struct Workflow {
     pub execution_state: ExecutionState,
     pub container: Container,
     pub startup: Task,
@@ -72,11 +72,11 @@ pub struct Job {
 }
 
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
-pub enum JobBucket {
+pub enum WorkflowSet {
     Idle,
 }
 
-impl Job {
+impl Workflow {
     pub fn store_entity(&mut self, id: &'static str, entity: Entity) {
         self.container
             .get_resource_mut::<EntityStore>()
@@ -97,7 +97,7 @@ impl Job {
             startup: Task::default(),
             main: {
                 let mut task = Task::default();
-                task.add_system(attempt_to_idle.in_set(JobBucket::Idle));
+                task.add_system(attempt_to_idle.in_set(WorkflowSet::Idle));
                 task
             },
             teardown: Task::default(),
@@ -109,8 +109,7 @@ impl Job {
             TaskLabel::Main => &mut self.main,
             TaskLabel::Teardown => &mut self.teardown,
         };
-        task.set_executor_kind(ExecutorKind::SingleThreaded)
-            .run(&mut self.container);
+        task.run(&mut self.container);
     }
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;

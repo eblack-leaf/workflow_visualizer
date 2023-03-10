@@ -1,9 +1,9 @@
-use std::ops::{Add, AddAssign, Sub};
-use bevy_ecs::component::Component;
-use std::marker::PhantomData;
-use bytemuck::{Pod, Zeroable};
 use crate::coord::{CoordContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
+use bevy_ecs::component::Component;
+use bytemuck::{Pod, Zeroable};
+use std::marker::PhantomData;
+use std::ops::{Add, AddAssign, Sub};
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Position<Context: CoordContext> {
@@ -38,7 +38,10 @@ impl Position<InterfaceContext> {
 
 impl Position<DeviceContext> {
     pub fn to_ui(&self, scale_factor: f64) -> Position<InterfaceContext> {
-        Position::<InterfaceContext>::new(self.x / scale_factor as f32, self.y / scale_factor as f32)
+        Position::<InterfaceContext>::new(
+            self.x / scale_factor as f32,
+            self.y / scale_factor as f32,
+        )
     }
 }
 impl<Context: CoordContext> Add for Position<Context> {
@@ -64,10 +67,7 @@ pub struct RawPosition {
 
 impl RawPosition {
     pub fn new(x: f32, y: f32) -> Self {
-        Self {
-            x,
-            y,
-        }
+        Self { x, y }
     }
 }
 impl<Context: CoordContext> From<(f32, f32)> for Position<Context> {

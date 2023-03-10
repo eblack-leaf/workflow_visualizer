@@ -1,5 +1,5 @@
 use winit::event_loop::EventLoop;
-use workflow_visualizer::{Engen, EngenOptions, Job, Launch};
+use workflow_visualizer::{Engen, EngenOptions, Launch, Workflow};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -19,10 +19,7 @@ pub fn compile_and_serve() {
         }
     }
     if args.contains(&"serve".to_string()) {
-        WasmServer::serve_at(
-            "app_web_build",
-            ([0, 0, 0, 0], 3030),
-        );
+        WasmServer::serve_at("app_web_build", ([0, 0, 0, 0], 3030));
         return;
     }
 }
@@ -32,8 +29,7 @@ impl Launch for Launcher {
         EngenOptions::new().with_native_dimensions((500, 900))
     }
 
-    fn preparation(frontend: &mut Job) {
-    }
+    fn preparation(frontend: &mut Workflow) {}
 }
 fn main() {
     #[cfg(not(target_arch = "wasm32"))]

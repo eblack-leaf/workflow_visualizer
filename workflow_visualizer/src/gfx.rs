@@ -1,15 +1,15 @@
-use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
-use winit::window::Window;
 use crate::area::Area;
 use crate::coord::DeviceContext;
 use crate::engen::Engen;
-use crate::job::Job;
+use crate::job::Workflow;
 use crate::layer::Layer;
 use crate::position::Position;
 use crate::section::Section;
 use crate::theme::Theme;
 use crate::uniform::Uniform;
 use crate::window::WindowResize;
+use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
+use winit::window::Window;
 
 #[derive(Clone)]
 pub struct GfxOptions {
@@ -52,10 +52,7 @@ pub struct GfxSurface {
 }
 pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment);
 impl GfxSurface {
-    pub(crate) async fn new(
-        window: &Window,
-        options: GfxOptions,
-    ) -> GfxStack {
+    pub(crate) async fn new(window: &Window, options: GfxOptions) -> GfxStack {
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()

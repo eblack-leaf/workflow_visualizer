@@ -1,9 +1,9 @@
-use bevy_ecs::component::Component;
-use std::marker::PhantomData;
-use std::ops::Mul;
-use bytemuck::{Pod, Zeroable};
 use crate::coord::{CoordContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
+use bevy_ecs::component::Component;
+use bytemuck::{Pod, Zeroable};
+use std::marker::PhantomData;
+use std::ops::Mul;
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Area<Context: CoordContext> {
@@ -56,10 +56,7 @@ pub struct RawArea {
 
 impl RawArea {
     pub fn new(width: f32, height: f32) -> Self {
-        Self {
-            width,
-            height,
-        }
+        Self { width, height }
     }
 }
 impl<Context: CoordContext> From<(usize, usize)> for Area<Context> {

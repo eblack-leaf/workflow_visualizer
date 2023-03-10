@@ -1,9 +1,4 @@
-use bevy_ecs::prelude::{Commands, Resource};
-use bevy_ecs::change_detection::{Res, ResMut};
-use bevy_ecs::event::EventReader;
-use nalgebra::matrix;
 use crate::area::Area;
-use crate::{Attach, Engen, Extract, InterfaceContext, Job, ScaleFactor};
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::layer::Layer;
@@ -11,6 +6,11 @@ use crate::position::Position;
 use crate::section::Section;
 use crate::uniform::Uniform;
 use crate::window::WindowResize;
+use crate::{Attach, Engen, Extract, InterfaceContext, ScaleFactor, Workflow};
+use bevy_ecs::change_detection::{Res, ResMut};
+use bevy_ecs::event::EventReader;
+use bevy_ecs::prelude::{Commands, Resource};
+use nalgebra::matrix;
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -283,7 +283,7 @@ pub(crate) fn viewport_read_offset(
 }
 
 impl Extract for ViewportHandle {
-    fn extract(frontend: &mut Job, backend: &mut Job) {
+    fn extract(frontend: &mut Workflow, backend: &mut Workflow) {
         let scale_factor = frontend
             .container
             .get_resource::<ScaleFactor>()
@@ -340,13 +340,7 @@ impl Attach for ViewportAttachment {
             .frontend
             .container
             .insert_resource(ViewportHandleAdjust::new());
-        engen
-            .backend
-            .startup
-            .add_system(viewport_attach);
-        engen
-            .backend
-            .main
-            .add_system(adjust_area);
+        engen.backend.startup.add_system(viewport_attach);
+        engen.backend.main.add_system(adjust_area);
     }
 }
