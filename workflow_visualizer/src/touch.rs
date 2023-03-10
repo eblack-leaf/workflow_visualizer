@@ -54,7 +54,7 @@ pub(crate) fn read_events(
 ) {
     let new_clicks = event_reader.iter().cloned().collect::<Vec<TouchEvent>>();
 }
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Interactor(pub u32);
 impl Interactor {
     pub fn from_button(button: MouseButton) -> Self {
@@ -80,6 +80,7 @@ impl TouchAdapter {
     }
 }
 pub type CursorLocation = Position<DeviceContext>;
+#[derive(Resource)]
 pub struct MouseAdapter {
     pub location: Option<CursorLocation>,
     pub tracked: HashMap<MouseButton, ElementState>,

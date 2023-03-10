@@ -3,7 +3,7 @@ use crate::coord::CoordContext;
 use crate::position::Position;
 use bevy_ecs::bundle::Bundle;
 
-#[derive(Bundle, Copy, Clone)]
+#[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Section<Context: CoordContext> {
     pub position: Position<Context>,
     pub area: Area<Context>,

@@ -1,5 +1,5 @@
 use crate::{Attach, Engen};
-use bevy_ecs::prelude::{DetectChanges, Entity, Query, Res};
+use bevy_ecs::prelude::{Component, DetectChanges, Entity, Query, Res, Resource};
 #[derive(Component)]
 pub struct Focus {
     pub(crate) focused: bool,

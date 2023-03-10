@@ -38,17 +38,16 @@ pub(crate) fn calc_visibility(
     )>,
     viewport_handle: Res<ViewportHandle>,
 ) {
-    for (pos, area, vis, vis_sec) in potentially_visible.iter_mut() {
+    for (pos, area, mut vis, mut vis_sec) in potentially_visible.iter_mut() {
         let section = Section::from((*pos, *area));
         let intersection = viewport_handle.section.intersection(section);
         let visible = intersection.is_some();
         if let Some(inter) = intersection {
-            if let Some(current_vis_sec) = vis_sec.section.as_mut() {
+            if let Some(current_vis_sec) = vis_sec.section {
                 if current_vis_sec != inter {
-                    *current_vis_sec = inter;
+                    vis_sec.section.replace(inter);
                 }
             } else {
-                vis_sec.section.replace(inter);
             }
         } else {
             vis_sec.section.take();

@@ -204,21 +204,20 @@ impl Engen {
                 let internal_touch = RegisteredTouch::new(touch_location);
                 if touch_adapter.primary.is_none() {
                     touch_adapter.primary.replace(interactor);
-                    touch_events.push(TouchEvent::new(TouchType::OnPress, internal_touch));
+                    touch_events.push(TouchEvent::new(TouchType::OnPress, internal_touch.origin));
                 }
                 touch_adapter.tracked.insert(interactor, internal_touch);
             }
             TouchPhase::Moved => {
-                if let Some(click) = touch_adapter.tracked.get_mut(&interactor) {
-                    click
-                        .current
-                        .replace((touch_location.0, touch_location.1).into());
+                if let Some(registered_touch) = touch_adapter.tracked.get_mut(&interactor) {
+                    registered_touch.current = (touch_location.0, touch_location.1).into();
                 }
                 let primary = touch_adapter.primary.clone();
                 if let Some(prime) = primary {
                     if prime == interactor {
                         let internal_touch = touch_adapter.tracked.get_mut(&prime).unwrap();
-                        touch_events.push(TouchEvent::new(TouchType::OnMove, *internal_touch));
+                        touch_events
+                            .push(TouchEvent::new(TouchType::OnMove, internal_touch.current));
                     }
                 }
             }
@@ -233,7 +232,10 @@ impl Engen {
                             .tracked
                             .get(&prime)
                             .expect("no tracked interactor");
-                        touch_events.push(TouchEvent::new(TouchType::OnRelease, internal_touch));
+                        touch_events.push(TouchEvent::new(
+                            TouchType::OnRelease,
+                            internal_touch.end.unwrap(),
+                        ));
                     }
                 }
             }
