@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["mise_en_place", "mise_en_place_app"]
+members = ["mise_en_place", "mise_en_place_app", "workflow_visualizer"]
 #[profile.dev]
 #opt-level = 1
 [profile.release]
