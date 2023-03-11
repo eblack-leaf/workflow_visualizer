@@ -33,6 +33,7 @@ pub type Touch = Position<DeviceContext>;
 pub struct Touchable {
     pub(crate) touched: Touched,
     pub(crate) touched_state: TouchedState,
+    pub(crate) toggle_state: ToggleState,
     pub(crate) listener: TouchListener,
 }
 impl Touchable {
@@ -40,6 +41,7 @@ impl Touchable {
         Self {
             touched: Touched::new(),
             touched_state: TouchedState::new(),
+            toggle_state: ToggleState::new(),
             listener,
         }
     }
@@ -66,14 +68,23 @@ pub struct Touched {
 }
 #[derive(Component, Copy, Clone)]
 pub struct TouchedState {
-    pub toggle: bool,
     pub currently_pressed: bool,
 }
 impl TouchedState {
     pub fn new() -> Self {
         Self {
-            toggle: false,
             currently_pressed: false,
+        }
+    }
+}
+#[derive(Component, Copy, Clone)]
+pub struct ToggleState {
+    pub toggle: bool,
+}
+impl ToggleState {
+    pub fn new() -> Self {
+        Self {
+            toggle: false,
         }
     }
 }
@@ -134,6 +145,7 @@ pub(crate) fn read_events(
         &TouchListener,
         &mut Touched,
         &mut TouchedState,
+        &mut ToggleState,
     )>,
     scale_factor: Res<ScaleFactor>,
     viewport_handle: Res<ViewportHandle>,
@@ -168,7 +180,7 @@ pub(crate) fn read_events(
         }
     }
     if !new_touch.is_empty() && !is_cancelled {
-        for (entity, pos, area, layer, listener, _, _) in touch_listeners.iter() {
+        for (entity, pos, area, layer, listener, _, _, _) in touch_listeners.iter() {
             let section = Section::from((*pos, *area));
             match listener.listened_type {
                 ListenableTouchType::OnPress => {
@@ -212,7 +224,7 @@ pub(crate) fn read_events(
             }
         }
         if let Some(grabbed) = touch_grab_state.grab_state {
-            if let Ok((_, _, _, _, listener, mut touched, mut touched_state)) =
+            if let Ok((_, _, _, _, listener, mut touched, mut touched_state, mut toggle_state)) =
                 touch_listeners.get_mut(grabbed.0)
             {
                 if trigger_on_press {
@@ -220,6 +232,7 @@ pub(crate) fn read_events(
                     match listener.listened_type {
                         ListenableTouchType::OnPress => {
                             touched.touched = true;
+                            toggle_state.toggle = !toggle_state.toggle;
                         }
                         ListenableTouchType::OnRelease => {}
                     }
@@ -230,6 +243,7 @@ pub(crate) fn read_events(
                         ListenableTouchType::OnPress => {}
                         ListenableTouchType::OnRelease => {
                             touched.touched = true;
+                            toggle_state.toggle = !toggle_state.toggle;
                         }
                     }
                 }
