@@ -10,7 +10,7 @@ use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::text::WrapStyleComponent;
-use crate::visibility::{Visibility, VisibleSection};
+use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 use crate::{Color, Location, Section, TextGridDescriptor};
 
 bitflags! {
@@ -168,7 +168,8 @@ pub struct Text {
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
-    pub(crate) visibility: Visibility,
+    #[bundle]
+    pub(crate) visibility: EnableVisibility,
     pub(crate) wrap_style: WrapStyleComponent,
     pub(crate) text_buffer: TextBuffer,
 }
@@ -206,7 +207,7 @@ impl Text {
                 cached_viewed_content,
             ),
             difference: Difference::new(),
-            visibility: Visibility::new(),
+            visibility: EnableVisibility::new(),
             wrap_style: WrapStyleComponent(WrapStyle::Letter),
             text_buffer,
         }

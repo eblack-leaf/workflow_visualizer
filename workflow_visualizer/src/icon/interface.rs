@@ -1,5 +1,5 @@
 use crate::icon::mesh::{ColorInvert, IconKey};
-use crate::visibility::Visibility;
+use crate::visibility::{EnableVisibility, Visibility};
 use crate::{Color, InterfaceContext, Location};
 use bevy_ecs::prelude::{Bundle, Component};
 
@@ -25,7 +25,8 @@ pub struct Icon {
     pub location: Location<InterfaceContext>,
     pub color: Color,
     pub(crate) color_invert: ColorInvert,
-    pub(crate) visibility: Visibility,
+    #[bundle]
+    pub(crate) visibility: EnableVisibility,
 }
 
 impl Icon {
@@ -43,7 +44,7 @@ impl Icon {
             location: location.into(),
             color: color.into(),
             color_invert: ColorInvert::off(),
-            visibility: Visibility::new(),
+            visibility: EnableVisibility::new(),
         }
     }
 }

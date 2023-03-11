@@ -67,7 +67,7 @@ pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
 pub use viewport::Viewport;
 pub use virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
-pub use visibility::{Visibility, VisibleSection};
+pub use visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use wasm_compiler::WasmCompiler;
 #[cfg(not(target_arch = "wasm32"))]
 pub use wasm_server::WasmServer;

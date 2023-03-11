@@ -1,7 +1,19 @@
 use crate::viewport::ViewportHandle;
 use crate::{Area, Attach, Engen, InterfaceContext, Position, Section};
-use bevy_ecs::prelude::{Component, Query, Res};
-
+use bevy_ecs::prelude::{Bundle, Component, Query, Res};
+#[derive(Bundle)]
+pub struct EnableVisibility {
+    pub visibility: Visibility,
+    pub visible_section: VisibleSection,
+}
+impl EnableVisibility {
+    pub fn new() -> Self {
+        Self {
+            visibility: Visibility::new(),
+            visible_section: VisibleSection::new(None),
+        }
+    }
+}
 #[derive(Component, Copy, Clone)]
 pub struct Visibility {
     visible: bool,

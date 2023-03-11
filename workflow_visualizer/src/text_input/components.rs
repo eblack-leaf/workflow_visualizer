@@ -2,6 +2,7 @@ use crate::focus::Focus;
 use crate::text_input::cursor::CursorIcon;
 use crate::text_input::Cursor;
 use crate::touch::{TouchListener, Touchable};
+use crate::visibility::EnableVisibility;
 use crate::{
     Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment, VirtualKeyboardType,
     Visibility,
@@ -39,7 +40,8 @@ pub struct TextInput {
     pub(crate) focus: Focus,
     pub(crate) keyboard_type: VirtualKeyboardType,
     pub(crate) cursor: Cursor,
-    pub(crate) visibility: Visibility,
+    #[bundle]
+    pub(crate) visibility: EnableVisibility,
     pub(crate) text_color: TextColor,
     pub(crate) background_color: TextBackgroundColor,
 }
@@ -75,7 +77,7 @@ impl TextInput {
             focus: Focus::new(),
             keyboard_type: VirtualKeyboardType::Keyboard,
             cursor: Cursor::new(),
-            visibility: Visibility::new(),
+            visibility: EnableVisibility::new(),
             text_color: TextColor(text_color.into()),
             background_color: TextBackgroundColor(text_background_color.into()),
         }
