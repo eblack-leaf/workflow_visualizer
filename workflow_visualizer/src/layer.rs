@@ -1,6 +1,7 @@
 use bevy_ecs::component::Component;
-
-#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
+use bytemuck::{Pod, Zeroable};
+#[repr(C)]
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Pod, Zeroable)]
 pub struct Layer {
     pub z: f32,
 }

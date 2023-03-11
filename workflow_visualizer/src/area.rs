@@ -48,7 +48,7 @@ impl Area<DeviceContext> {
     }
 }
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone)]
+#[derive(Pod, Zeroable, Copy, Clone, Default)]
 pub struct RawArea {
     width: f32,
     height: f32,
