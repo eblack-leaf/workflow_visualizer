@@ -22,6 +22,10 @@ wasm-bindgen = "0.2.84"
 wasm-bindgen-futures = "0.4.33"
 nalgebra = "0.32.1"
 wasm-bindgen-cli-support = "0.2.83"
+serde = { version = "1.0.154", features = ["derive"] }
+rmp-serde = "1.1.1"
+fontdue = "0.7.2"
+bitflags = "1.3.2"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1.24.2", features = ["full"] }
 env_logger = "0.10.0"

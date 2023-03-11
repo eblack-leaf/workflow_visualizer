@@ -1,6 +1,7 @@
 use crate::area::Area;
 use crate::coord::CoordContext;
 use crate::position::Position;
+use crate::{DeviceContext, InterfaceContext};
 use bevy_ecs::bundle::Bundle;
 
 #[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default)]
@@ -71,6 +72,22 @@ impl<Context: CoordContext> Section<Context> {
         let left = self.left().max(other.left());
         let right = self.right().min(other.right());
         Option::from(Self::from_left_top_right_bottom(left, top, right, bottom))
+    }
+}
+impl Section<InterfaceContext> {
+    pub(crate) fn to_device(&self, scale_factor: f64) -> Section<DeviceContext> {
+        Section::<DeviceContext>::new(
+            self.position.to_device(scale_factor),
+            self.area.to_device(scale_factor),
+        )
+    }
+}
+impl Section<DeviceContext> {
+    pub(crate) fn to_device(&self, scale_factor: f64) -> Section<InterfaceContext> {
+        Section::<InterfaceContext>::new(
+            self.position.to_ui(scale_factor),
+            self.area.to_ui(scale_factor),
+        )
     }
 }
 impl<Context: CoordContext, P: Into<Position<Context>>, A: Into<Area<Context>>> From<(P, A)>

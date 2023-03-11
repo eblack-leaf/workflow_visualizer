@@ -83,9 +83,7 @@ pub struct ToggleState {
 }
 impl ToggleState {
     pub fn new() -> Self {
-        Self {
-            toggle: false,
-        }
+        Self { toggle: false }
     }
 }
 impl Touched {

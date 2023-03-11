@@ -2,6 +2,7 @@ use crate::coord::{CoordContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
+use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Sub};
 
@@ -59,10 +60,10 @@ impl<Context: CoordContext> Sub for Position<Context> {
 }
 
 #[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone)]
+#[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize, Debug)]
 pub struct RawPosition {
-    x: f32,
-    y: f32,
+    pub(crate) x: f32,
+    pub(crate) y: f32,
 }
 
 impl RawPosition {

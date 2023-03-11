@@ -1,0 +1,82 @@
+use std::collections::{HashMap, HashSet};
+
+use bevy_ecs::prelude::Component;
+
+use crate::coord::{InterfaceContext, NumericalContext};
+use crate::instance::key::Key;
+use crate::text::glyph::GlyphId;
+use crate::text::render_group::TextBound;
+use crate::visibility::VisibleSection;
+use crate::{Color, Layer, Position};
+
+#[derive(Component)]
+pub(crate) struct Cache {
+    pub(crate) keys: HashSet<Key>,
+    pub(crate) glyph_positions: HashMap<Key, Position<NumericalContext>>,
+    pub(crate) glyph_ids: HashMap<Key, GlyphId>,
+    pub(crate) glyph_colors: HashMap<Key, Color>,
+    pub(crate) bound: Option<TextBound>,
+    pub(crate) position: Position<InterfaceContext>,
+    pub(crate) layer: Layer,
+    pub(crate) visible_section: VisibleSection,
+    pub(crate) viewed_content_string: String,
+}
+
+impl Cache {
+    pub(crate) fn new(
+        position: Position<InterfaceContext>,
+        depth: Layer,
+        visible_section: VisibleSection,
+        viewed_content: String,
+    ) -> Self {
+        Self {
+            keys: HashSet::new(),
+            glyph_positions: HashMap::new(),
+            glyph_ids: HashMap::new(),
+            glyph_colors: HashMap::new(),
+            bound: None,
+            position,
+            layer: depth,
+            visible_section,
+            viewed_content_string: viewed_content,
+        }
+    }
+    pub(crate) fn exists(&self, key: Key) -> bool {
+        self.keys.contains(&key)
+    }
+    pub(crate) fn get_glyph_id(&self, key: Key) -> GlyphId {
+        *self.glyph_ids.get(&key).expect("no glyph id")
+    }
+    pub(crate) fn remove(&mut self, key: Key) {
+        self.keys.remove(&key);
+        self.glyph_ids.remove(&key);
+        self.glyph_positions.remove(&key);
+    }
+    pub(crate) fn add(
+        &mut self,
+        key: Key,
+        glyph_id: GlyphId,
+        glyph_position: Position<NumericalContext>,
+    ) {
+        self.keys.insert(key);
+        self.glyph_ids.insert(key, glyph_id);
+        self.glyph_positions.insert(key, glyph_position);
+    }
+    pub(crate) fn glyph_position_different(
+        &self,
+        key: Key,
+        glyph_position: Position<NumericalContext>,
+    ) -> bool {
+        *self
+            .glyph_positions
+            .get(&key)
+            .expect("no glyph position for key")
+            != glyph_position
+    }
+    pub(crate) fn glyph_id_different(&self, key: Key, glyph_id: GlyphId) -> bool {
+        *self.glyph_ids.get(&key).expect("no glyph id for key") != glyph_id
+    }
+    pub(crate) fn glyph_color_different(&self, key: Key, glyph_color: Color) -> bool {
+        *self.glyph_colors.get(&key).expect("no glyph color for key") != glyph_color
+    }
+}

@@ -1,6 +1,7 @@
 use crate::area::Area;
 use crate::focus::FocusAttachment;
 use crate::gfx::{GfxStack, GfxSurface};
+use crate::icon::IconAttachment;
 use crate::job::{Job, TaskLabel};
 use crate::orientation::OrientationAttachment;
 use crate::render::{
@@ -8,6 +9,7 @@ use crate::render::{
     RenderPhase,
 };
 use crate::scale_factor::ScaleFactor;
+use crate::text::TextAttachment;
 use crate::theme::{Theme, ThemeAttachment};
 use crate::time::TimerAttachment;
 use crate::touch::{
@@ -51,6 +53,8 @@ impl Engen {
                         self.invoke_attach::<FocusAttachment>();
                         self.invoke_attach::<VisibilityAttachment>();
                         self.invoke_attach::<TouchAttachment>();
+                        self.invoke_attach::<IconAttachment>();
+                        self.invoke_attach::<TextAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
