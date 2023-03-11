@@ -2,13 +2,13 @@ pub(crate) use render_group::TextBound;
 
 pub use crate::text::attachment::TextAttachment;
 pub use crate::text::place::{WrapStyleComponent, WrapStyleExpt};
-pub use crate::text::render_group::TextGridGuide;
+pub use crate::text::render_group::TextGridDescriptor;
 pub(crate) use crate::text::scale::AlignedFonts;
 pub(crate) use crate::text::scale::TextScale;
 pub use crate::text::scale::TextScaleAlignment;
 pub use crate::text::scale::TextScaleLetterDimensions;
 pub use crate::text::text::{
-    Letter, LetterStyle, TextBuffer, TextBundle, TextContent, TextContentView, TextGridLocation,
+    Letter, LetterStyle, Text, TextBuffer, TextContent, TextContentView, TextGridLocation,
     TextLineStructure,
 };
 

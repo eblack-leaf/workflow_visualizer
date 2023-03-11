@@ -58,10 +58,13 @@ impl WasmCompiler {
             return Err(true);
         }
         let absolute_target = project_root.join(&target);
-        let source = absolute_target
+        let mut source = absolute_target
             .join("wasm32-unknown-unknown")
-            .join(&profile)
-            .join(format!("{}.wasm", &package));
+            .join(&profile);
+        if bin_options == "--example" {
+            source = source.join("examples");
+        }
+        source = source.join(format!("{}.wasm", &bin));
         let destination = project_root.join(self.destination.as_str());
         std::fs::create_dir_all(&destination).unwrap();
         let mut bindgen = wasm_bindgen_cli_support::Bindgen::new();
@@ -70,7 +73,7 @@ impl WasmCompiler {
             .unwrap()
             .omit_default_module_path(false)
             .input_path(&source)
-            .out_name("app")
+            .out_name(&bin)
             .generate(&destination)
             .unwrap();
         let template = include_str!("index.template.html");

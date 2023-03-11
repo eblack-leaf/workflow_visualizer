@@ -11,7 +11,7 @@ use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::text::WrapStyleComponent;
 use crate::visibility::{Visibility, VisibleSection};
-use crate::{Color, Location, Section, TextGridGuide};
+use crate::{Color, Location, Section, TextGridDescriptor};
 
 bitflags! {
     pub struct LetterStyle: u32 {
@@ -126,7 +126,7 @@ impl TextBuffer {
     pub fn new<C: Into<Color>>(
         viewed_content: &TextViewedContent,
         color: C,
-        grid_guide: &TextGridGuide,
+        grid_guide: &TextGridDescriptor,
     ) -> Self {
         let mut x = 0;
         let mut y = 0;
@@ -157,14 +157,14 @@ impl TextBuffer {
 pub struct TextViewedContent(pub String);
 
 #[derive(Bundle)]
-pub struct TextBundle {
+pub struct Text {
     pub content: TextContent,
     pub content_view: TextContentView,
     pub viewed_content: TextViewedContent,
     #[bundle]
     pub location: Location<InterfaceContext>,
     pub scale_alignment: TextScaleAlignment,
-    pub grid_guide: TextGridGuide,
+    pub grid_guide: TextGridDescriptor,
     pub(crate) placer: Placer,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
@@ -173,7 +173,7 @@ pub struct TextBundle {
     pub(crate) text_buffer: TextBuffer,
 }
 
-impl TextBundle {
+impl Text {
     pub fn new<
         T: Into<TextContent>,
         CV: Into<TextContentView>,
@@ -183,7 +183,7 @@ impl TextBundle {
         content_view: CV,
         location: L,
         scale_alignment: TextScaleAlignment,
-        grid_guide: TextGridGuide,
+        grid_guide: TextGridDescriptor,
     ) -> Self {
         let location = location.into();
         let content = content.into();

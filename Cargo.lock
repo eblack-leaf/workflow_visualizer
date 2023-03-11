@@ -3392,6 +3392,7 @@ dependencies = [
  "env_logger",
  "fontdue",
  "futures",
+ "js-sys",
  "nalgebra",
  "rmp-serde",
  "serde",

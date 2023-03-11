@@ -1,17 +1,6 @@
+use crate::TextGridLocation;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-
-#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Debug)]
-pub struct TextGridLocation {
-    pub x: u32,
-    pub y: u32,
-}
-
-impl TextGridLocation {
-    pub fn new(x: u32, y: u32) -> Self {
-        Self { x, y }
-    }
-}
 
 #[derive(Component)]
 pub struct Cursor {

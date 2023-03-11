@@ -18,28 +18,37 @@ mod request;
 mod scale_factor;
 mod section;
 mod text;
+mod text_input;
 mod theme;
 mod time;
 mod touch;
 mod uniform;
 mod viewport;
+mod virtual_keyboard;
 mod visibility;
 mod wasm_compiler;
 #[cfg(not(target_arch = "wasm32"))]
 mod wasm_server;
 mod window;
+
+pub use animate::{Animate, Animation, Interpolator};
 pub use area::{Area, RawArea};
 pub use bevy_ecs;
 pub use color::Color;
 pub use coord::{CoordContext, DeviceContext, InterfaceContext, NumericalContext};
 pub use engen::{Attach, Attachment, Engen, EngenOptions, Launch};
+pub use focus::Focus;
 pub use gfx::GfxOptions;
+pub use icon::{
+    read_mesh, write_mesh, ColorHooks, ColorInvert, Icon, IconDescriptors, IconKey, IconMesh,
+    IconMeshAddRequest, IconSecondaryColor, IconSize, IconVertex,
+};
 pub use instance::{
     index::{Index, Indexer},
     key::Key,
     offset, InstanceAttributeManager, NullBit,
 };
-pub use job::Job;
+pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSet};
 pub use layer::Layer;
 pub use location::Location;
 pub use panel::Panel;
@@ -49,14 +58,18 @@ pub use request::{spawn, Request};
 pub use scale_factor::ScaleFactor;
 pub use section::Section;
 pub use text::{
-    Letter, LetterStyle, TextBuffer, TextBundle, TextContent, TextContentView, TextGridGuide,
-    TextGridLocation, TextScaleAlignment,
+    Letter, LetterStyle, Text, TextBuffer, TextContent, TextContentView, TextGridDescriptor,
+    TextGridLocation, TextLineStructure, TextScaleAlignment, TextScaleLetterDimensions,
 };
+pub use text_input::{TextBackgroundColor, TextColor, TextInputRequest, TextInputText};
 pub use theme::Theme;
 pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
 pub use viewport::Viewport;
+pub use virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
+pub use visibility::{Visibility, VisibleSection};
 pub use wasm_compiler::WasmCompiler;
+#[cfg(not(target_arch = "wasm32"))]
 pub use wasm_server::WasmServer;
 pub use wgpu;
 pub use winit;

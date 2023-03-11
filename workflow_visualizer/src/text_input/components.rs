@@ -1,13 +1,14 @@
-use bevy_ecs::bundle::Bundle;
-use bevy_ecs::component::Component;
-use bevy_ecs::entity::Entity;
-
-use crate::clickable::{ClickListener, Clickable};
 use crate::focus::Focus;
 use crate::text_input::cursor::CursorIcon;
 use crate::text_input::Cursor;
-use crate::window::VirtualKeyboardType;
-use crate::{Color, InterfaceContext, Location, TextGridGuide, TextScaleAlignment, Visibility};
+use crate::touch::{TouchListener, Touchable};
+use crate::{
+    Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment, VirtualKeyboardType,
+    Visibility,
+};
+use bevy_ecs::bundle::Bundle;
+use bevy_ecs::component::Component;
+use bevy_ecs::entity::Entity;
 
 #[derive(Component)]
 pub struct TextInputText {
@@ -29,11 +30,11 @@ pub struct TextInput {
     pub(crate) cursor_icon: CursorIcon,
     pub(crate) background_icon: TextBackgroundIcon,
     pub(crate) alignment: TextScaleAlignment,
-    pub(crate) grid_guide: TextGridGuide,
+    pub(crate) grid_guide: TextGridDescriptor,
     #[bundle]
     pub(crate) location: Location<InterfaceContext>,
     #[bundle]
-    pub(crate) clickable: Clickable,
+    pub(crate) clickable: Touchable,
     pub(crate) max_characters: MaxCharacters,
     pub(crate) focus: Focus,
     pub(crate) keyboard_type: VirtualKeyboardType,
@@ -55,7 +56,7 @@ impl TextInput {
         cursor_icon: CursorIcon,
         background_icon: TextBackgroundIcon,
         alignment: TextScaleAlignment,
-        bound_guide: TextGridGuide,
+        bound_guide: TextGridDescriptor,
         location: Location<InterfaceContext>,
         text_color: C,
         text_background_color: C,
@@ -67,7 +68,7 @@ impl TextInput {
             alignment,
             grid_guide: bound_guide,
             location,
-            clickable: Clickable::new(ClickListener::on_press(), false),
+            clickable: Touchable::new(TouchListener::on_press()),
             max_characters: MaxCharacters(
                 bound_guide.horizontal_character_max * bound_guide.line_max,
             ),

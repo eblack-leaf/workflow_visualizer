@@ -35,6 +35,7 @@ pub struct Touchable {
     pub(crate) touched_state: TouchedState,
     pub(crate) toggle_state: ToggleState,
     pub(crate) listener: TouchListener,
+    pub(crate) touch_location: TouchLocation,
 }
 impl Touchable {
     pub fn new(listener: TouchListener) -> Self {
@@ -43,6 +44,7 @@ impl Touchable {
             touched_state: TouchedState::new(),
             toggle_state: ToggleState::new(),
             listener,
+            touch_location: TouchLocation(None),
         }
     }
 }
@@ -62,6 +64,8 @@ impl TouchListener {
         }
     }
 }
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq)]
+pub struct TouchLocation(pub Option<Position<DeviceContext>>);
 #[derive(Component, Copy, Clone)]
 pub struct Touched {
     pub(crate) touched: bool,
@@ -89,6 +93,9 @@ impl ToggleState {
 impl Touched {
     pub(crate) fn new() -> Self {
         Self { touched: false }
+    }
+    pub fn touched(&self) -> bool {
+        self.touched
     }
 }
 #[derive(Copy, Clone)]
@@ -144,6 +151,7 @@ pub(crate) fn read_events(
         &mut Touched,
         &mut TouchedState,
         &mut ToggleState,
+        &mut TouchLocation,
     )>,
     scale_factor: Res<ScaleFactor>,
     viewport_handle: Res<ViewportHandle>,
@@ -178,7 +186,7 @@ pub(crate) fn read_events(
         }
     }
     if !new_touch.is_empty() && !is_cancelled {
-        for (entity, pos, area, layer, listener, _, _, _) in touch_listeners.iter() {
+        for (entity, pos, area, layer, listener, _, _, _, _) in touch_listeners.iter() {
             let section = Section::from((*pos, *area));
             match listener.listened_type {
                 ListenableTouchType::OnPress => {
@@ -222,8 +230,17 @@ pub(crate) fn read_events(
             }
         }
         if let Some(grabbed) = touch_grab_state.grab_state {
-            if let Ok((_, _, _, _, listener, mut touched, mut touched_state, mut toggle_state)) =
-                touch_listeners.get_mut(grabbed.0)
+            if let Ok((
+                _,
+                _,
+                _,
+                _,
+                listener,
+                mut touched,
+                mut touched_state,
+                mut toggle_state,
+                mut touch_location,
+            )) = touch_listeners.get_mut(grabbed.0)
             {
                 if trigger_on_press {
                     touched_state.currently_pressed = true;
@@ -231,25 +248,31 @@ pub(crate) fn read_events(
                         ListenableTouchType::OnPress => {
                             touched.touched = true;
                             toggle_state.toggle = !toggle_state.toggle;
+                            touch_location
+                                .0
+                                .replace(primary_touch.touch.unwrap().origin);
                         }
-                        ListenableTouchType::OnRelease => {}
+                        _ => {}
                     }
                 }
                 if trigger_on_release {
                     touched_state.currently_pressed = false;
                     match listener.listened_type {
-                        ListenableTouchType::OnPress => {}
                         ListenableTouchType::OnRelease => {
                             touched.touched = true;
                             toggle_state.toggle = !toggle_state.toggle;
+                            touch_location
+                                .0
+                                .replace(primary_touch.touch.unwrap().origin);
                         }
+                        _ => {}
                     }
                 }
             }
         }
     }
 }
-pub(crate) fn reset_touched(mut touch_listeners: Query<(&mut Touched)>) {
+pub(crate) fn reset_touched(mut touch_listeners: Query<&mut Touched>) {
     for mut touched in touch_listeners.iter_mut() {
         touched.touched = false;
     }

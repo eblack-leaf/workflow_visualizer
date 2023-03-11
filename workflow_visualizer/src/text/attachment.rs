@@ -11,7 +11,7 @@ use crate::text::frontend_system::{
 };
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
-use crate::{spawn, TextBundle};
+use crate::{spawn, Text};
 
 pub struct TextAttachment;
 
@@ -19,7 +19,7 @@ impl Attach for TextAttachment {
     fn attach(engen: &mut Engen) {
         engen.add_renderer::<TextRenderer>();
         engen.frontend.startup.add_system(frontend_setup);
-        engen.frontend.main.add_system(spawn::<TextBundle>);
+        engen.frontend.main.add_system(spawn::<Text>);
         engen.frontend.main.add_system(calc_bound_from_guide);
         engen.frontend.main.add_system(calc_scale_from_alignment);
         engen.frontend.main.add_system(update_content);

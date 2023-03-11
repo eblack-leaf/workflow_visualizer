@@ -10,6 +10,7 @@ use crate::render::{
 };
 use crate::scale_factor::ScaleFactor;
 use crate::text::TextAttachment;
+use crate::text_input::TextInputAttachment;
 use crate::theme::{Theme, ThemeAttachment};
 use crate::time::TimerAttachment;
 use crate::touch::{
@@ -17,9 +18,10 @@ use crate::touch::{
     TrackedTouch,
 };
 use crate::viewport::{ViewportAttachment, ViewportHandle};
+use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::{WindowAttachment, WindowResize};
-use crate::{DeviceContext, GfxOptions, Position};
+use crate::{DeviceContext, GfxOptions, Position, VirtualKeyboardAdapter};
 use bevy_ecs::prelude::Resource;
 use std::rc::Rc;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
@@ -55,6 +57,8 @@ impl Engen {
                         self.invoke_attach::<TouchAttachment>();
                         self.invoke_attach::<IconAttachment>();
                         self.invoke_attach::<TextAttachment>();
+                        self.invoke_attach::<VirtualKeyboardAttachment>();
+                        self.invoke_attach::<TextInputAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
@@ -440,7 +444,9 @@ impl Engen {
     async fn web_ignite(mut self) {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
-        self.init_gfx(self.event_loop.as_ref().unwrap()).await;
+        let event_loop = self.event_loop.take();
+        self.init_gfx(event_loop.as_ref().unwrap()).await;
+        self.event_loop.replace(event_loop.unwrap());
         use wasm_bindgen::{prelude::*, JsCast};
         if let Err(error) = call_catch(&Closure::once_into_js(move || self.ignite())) {
             let is_control_flow_exception = error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
@@ -458,6 +464,7 @@ impl Engen {
     }
     #[cfg(target_arch = "wasm32")]
     fn add_web_canvas(window: &Window) {
+        use winit::platform::web::WindowExtWebSys;
         web_sys::window()
             .and_then(|win| win.document())
             .and_then(|doc| doc.body())
@@ -489,7 +496,7 @@ impl Engen {
         let w_window = window.clone();
         let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
             let scale_factor = w_window.scale_factor();
-            let size = window_dimensions(scale_factor);
+            let size = Self::window_dimensions(scale_factor);
             w_window.set_inner_size(size);
         }) as Box<dyn FnMut(_)>);
         let _ = web_sys::window()

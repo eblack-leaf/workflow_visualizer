@@ -21,7 +21,7 @@ use crate::visibility::Visibility;
 use crate::visibility::VisibleSection;
 use crate::{
     Area, DeviceContext, Layer, Position, ScaleFactor, Section, TextBuffer, TextContent,
-    TextContentView, TextGridGuide,
+    TextContentView, TextGridDescriptor,
 };
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
@@ -50,8 +50,8 @@ pub(crate) fn calc_scale_from_alignment(
 
 pub(crate) fn calc_bound_from_guide(
     text: Query<
-        (Entity, &TextGridGuide, &TextScaleAlignment),
-        Or<(Without<TextBound>, Changed<TextGridGuide>)>,
+        (Entity, &TextGridDescriptor, &TextScaleAlignment),
+        Or<(Without<TextBound>, Changed<TextGridDescriptor>)>,
     >,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
@@ -76,7 +76,7 @@ pub(crate) fn update_content(
             &TextContentView,
             &mut Cache,
             &mut TextBuffer,
-            &TextGridGuide,
+            &TextGridDescriptor,
             &mut TextViewedContent,
         ),
         Or<(Changed<TextContent>, Changed<TextContentView>)>,

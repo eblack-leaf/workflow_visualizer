@@ -1,20 +1,18 @@
-use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
-
-use crate::clickable::ClickState;
 use crate::focus::{Focus, FocusedEntity};
 use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::text_input::components::{MaxCharacters, TextBackgroundIcon, TextInput, TextInputText};
 use crate::text_input::cursor::{Cursor, CursorIcon};
 use crate::text_input::request::TextInputRequest;
 use crate::text_input::{TextBackgroundColor, TextColor};
-use crate::window::ScaleFactor;
-use crate::window::{VirtualKeyboardAdapter, VirtualKeyboardType};
+use crate::touch::{TouchLocation, Touched};
 use crate::{
     Area, ColorInvert, Icon, IconDescriptors, IconSecondaryColor, IconSize, InterfaceContext,
-    Letter, LetterStyle, Location, Position, Request, TextBuffer, TextBundle, TextContent,
-    TextContentView, TextGridGuide, TextGridLocation, TextLineStructure, TextScaleLetterDimensions,
+    Layer, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBuffer,
+    TextContent, TextContentView, TextGridDescriptor, TextGridLocation, TextLineStructure,
+    TextScaleLetterDimensions, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
+use bevy_ecs::entity::Entity;
+use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 
 pub(crate) fn spawn(
     mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
@@ -37,7 +35,7 @@ pub(crate) fn spawn(
             inner_req.text_color,
         );
         let text = cmd
-            .spawn(TextBundle::new(
+            .spawn(Text::new(
                 content,
                 view,
                 inner_req.location,
@@ -47,27 +45,27 @@ pub(crate) fn spawn(
             .id();
         let cursor_icon = cmd
             .spawn(Icon::new(
-                IconSecondaryColor::new(inner_req.background_color),
-                IconSize::Custom((character_dimensions.width, character_dimensions.height)),
                 IconDescriptors::Cursor.key(),
                 Location::from((
                     inner_req.location.position,
-                    inner_req.location.depth.adjusted(1u32),
+                    inner_req.location.layer + Layer::from(1u32),
                 )),
+                IconSize::Custom((character_dimensions.width, character_dimensions.height)),
                 inner_req.text_color,
+                IconSecondaryColor::new(inner_req.background_color),
             ))
             .insert(ColorInvert::on())
             .id();
         let background_icon = cmd
             .spawn(Icon::new(
-                IconSecondaryColor::new(inner_req.text_color),
-                IconSize::Custom((character_dimensions.width, character_dimensions.height)),
-                IconDescriptors::Panel.key(),
+                IconDescriptors::Cursor.key(),
                 Location::from((
                     inner_req.location.position,
-                    inner_req.location.depth.adjusted(2u32),
+                    inner_req.location.layer + Layer::from(2u32),
                 )),
+                IconSize::Custom((character_dimensions.width, character_dimensions.height)),
                 inner_req.background_color,
+                IconSecondaryColor::new(inner_req.text_color),
             ))
             .id();
         cmd.entity(entity).insert(TextInput::new(
@@ -118,11 +116,11 @@ pub(crate) fn read_area_from_text_bound(
             Entity,
             &TextBound,
             &TextInputText,
-            &TextGridGuide,
+            &TextGridDescriptor,
             &TextColor,
             &TextBackgroundIcon,
         ),
-        Or<(Changed<TextBound>, Changed<TextGridGuide>)>,
+        Or<(Changed<TextBound>, Changed<TextGridDescriptor>)>,
     >,
     text: Query<&TextScaleLetterDimensions>,
     mut cmd: Commands,
@@ -196,7 +194,7 @@ pub(crate) fn read_input_if_focused(
         &mut Cursor,
         &MaxCharacters,
         &TextInputText,
-        &TextGridGuide,
+        &TextGridDescriptor,
         &TextColor,
     )>,
     focused_entity: Res<FocusedEntity>,
@@ -240,11 +238,12 @@ pub(crate) fn read_input_if_focused(
 pub(crate) fn set_cursor_location(
     mut clicked: Query<(
         &Position<InterfaceContext>,
-        &ClickState,
+        &Touched,
+        &TouchLocation,
         &mut Cursor,
         &TextInputText,
         &TextScaleLetterDimensions,
-        &TextGridGuide,
+        &TextGridDescriptor,
         &TextColor,
         &TextBackgroundColor,
     )>,
@@ -253,7 +252,8 @@ pub(crate) fn set_cursor_location(
 ) {
     for (
         pos,
-        click_state,
+        touched,
+        touch_location,
         mut cursor,
         text_input_text,
         character_dimensions,
@@ -262,9 +262,9 @@ pub(crate) fn set_cursor_location(
         text_background_color,
     ) in clicked.iter_mut()
     {
-        if click_state.clicked() {
+        if touched.touched() {
             let (mut text, line_structure) = text_entities.get_mut(text_input_text.entity).unwrap();
-            let click_location = click_state.click_location.unwrap();
+            let click_location = touch_location.0.unwrap();
             let ui_letter_dimensions = character_dimensions.dimensions.to_ui(scale_factor.factor);
             let mut line_clicked =
                 ((click_location.y - pos.y) / ui_letter_dimensions.height).floor() as usize;

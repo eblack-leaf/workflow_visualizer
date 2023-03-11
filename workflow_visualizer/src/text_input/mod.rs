@@ -1,6 +1,6 @@
 pub use attachment::TextInputAttachment;
 pub use components::{TextBackgroundColor, TextColor, TextInput, TextInputText};
-pub use cursor::{Cursor, TextGridLocation};
+pub use cursor::Cursor;
 pub use request::TextInputRequest;
 
 mod attachment;
