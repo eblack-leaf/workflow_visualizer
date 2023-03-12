@@ -65,7 +65,10 @@ pub(crate) fn calc_bound_from_guide(
         );
         let width = guide.horizontal_character_max as f32 * character_dimensions.width;
         let height = guide.line_max as f32 * character_dimensions.height;
-        cmd.entity(entity).insert(TextBound::new((width, height)));
+        cmd.entity(entity).insert((
+            TextBound::new((width, height)),
+            Area::<DeviceContext>::new(width, height).to_ui(scale_factor.factor),
+        ));
     }
 }
 
@@ -244,25 +247,6 @@ pub(crate) fn letter_diff(
                 difference.remove.insert(key);
                 cache.remove(key);
             }
-        }
-    }
-}
-
-pub(crate) fn calc_area(
-    text: Query<(Entity, &Placer), Changed<Placer>>,
-    mut cmd: Commands,
-    scale_factor: Res<ScaleFactor>,
-) {
-    for (entity, placer) in text.iter() {
-        let mut width: f32 = 0.0;
-        let mut height: f32 = 0.0;
-        for (_, glyph) in placer.unfiltered_placement().iter() {
-            width = width.max(glyph.x + glyph.width as f32);
-            height = height.max(glyph.y + glyph.height as f32);
-        }
-        if width != 0.0 && height != 0.0 {
-            cmd.entity(entity)
-                .insert(Area::<DeviceContext>::new(width, height).to_ui(scale_factor.factor));
         }
     }
 }

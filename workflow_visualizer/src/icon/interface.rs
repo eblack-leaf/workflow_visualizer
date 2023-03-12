@@ -16,7 +16,7 @@ impl IconSecondaryColor {
     }
 }
 
-#[derive(Bundle, Clone)]
+#[derive(Bundle)]
 pub struct Icon {
     pub secondary_color: IconSecondaryColor,
     pub size: IconSize,

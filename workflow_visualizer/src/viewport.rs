@@ -5,11 +5,11 @@ use crate::layer::Layer;
 use crate::position::Position;
 use crate::section::Section;
 use crate::uniform::Uniform;
-use crate::window::WindowResize;
-use crate::{Attach, Engen, Extract, InterfaceContext, Job, ScaleFactor};
+use crate::window::{gfx_resize, WindowResize};
+use crate::{Attach, Engen, Extract, InterfaceContext, Job, ScaleFactor, SyncPoint};
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{Commands, Resource};
+use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
 use nalgebra::matrix;
 
 #[derive(Resource)]
@@ -203,7 +203,7 @@ pub(crate) fn viewport_attach(
     ));
 }
 
-pub(crate) fn adjust_area(
+pub(crate) fn viewport_resize(
     gfx_surface: Res<GfxSurface>,
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
     mut viewport: ResMut<Viewport>,
@@ -219,22 +219,31 @@ pub(crate) fn adjust_area(
         );
     }
 }
+pub(crate) fn frontend_area_adjust(
+    mut resize_events: EventReader<WindowResize>,
+    mut viewport_handle: ResMut<ViewportHandle>,
+    scale_factor: Res<ScaleFactor>,
+) {
+    for event in resize_events.iter() {
+        viewport_handle.section.area = event.size.to_ui(scale_factor.factor);
+    }
+}
 #[derive(Resource)]
 pub struct ViewportHandle {
     pub(crate) section: Section<InterfaceContext>,
-    dirty: bool,
+    position_dirty: bool,
 }
 
 impl ViewportHandle {
     pub(crate) fn new(section: Section<InterfaceContext>) -> Self {
         Self {
             section,
-            dirty: false,
+            position_dirty: false,
         }
     }
     pub fn position_adjust(&mut self, adjust: Position<InterfaceContext>) {
         self.section.position += adjust;
-        self.dirty = true;
+        self.position_dirty = true;
     }
     pub fn adjust_area(&mut self, area: Area<InterfaceContext>) {
         self.section.area = area;
@@ -293,14 +302,14 @@ impl Extract for ViewportHandle {
             .container
             .get_resource_mut::<ViewportHandle>()
             .expect("no viewport handle");
-        if viewport_handle.dirty {
+        if viewport_handle.position_dirty {
             backend
                 .container
                 .get_resource_mut::<ViewportOffsetUpdate>()
                 .expect("no viewport offset update")
                 .update
                 .replace(viewport_handle.section.position.to_device(scale_factor));
-            viewport_handle.dirty = false;
+            viewport_handle.position_dirty = false;
         }
     }
 }
@@ -309,7 +318,14 @@ pub struct ViewportAttachment;
 impl Attach for ViewportAttachment {
     fn attach(engen: &mut Engen) {
         engen.add_extraction::<ViewportHandle>();
-        engen.frontend.main.add_system(adjust_position);
+        engen
+            .frontend
+            .main
+            .add_system(adjust_position.in_set(SyncPoint::Initialization));
+        engen
+            .frontend
+            .main
+            .add_system(frontend_area_adjust.in_set(SyncPoint::Initialization));
         engen.backend.main.add_system(viewport_read_offset);
         engen
             .backend
@@ -340,7 +356,14 @@ impl Attach for ViewportAttachment {
             .frontend
             .container
             .insert_resource(ViewportHandleAdjust::new());
-        engen.backend.startup.add_system(viewport_attach);
-        engen.backend.main.add_system(adjust_area);
+        engen
+            .backend
+            .startup
+            .add_system(viewport_attach.in_set(SyncPoint::Initialization));
+        engen.backend.main.add_system(
+            viewport_resize
+                .in_set(SyncPoint::Initialization)
+                .after(gfx_resize),
+        );
     }
 }

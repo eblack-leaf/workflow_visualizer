@@ -17,6 +17,7 @@ mod render;
 mod request;
 mod scale_factor;
 mod section;
+mod sync;
 mod text;
 mod text_input;
 mod theme;
@@ -30,7 +31,6 @@ mod wasm_compiler;
 #[cfg(not(target_arch = "wasm32"))]
 mod wasm_server;
 mod window;
-
 pub use animate::{Animate, Animation, Interpolator};
 pub use area::{Area, RawArea};
 pub use bevy_ecs;
@@ -48,7 +48,7 @@ pub use instance::{
     key::Key,
     offset, InstanceAttributeManager, NullBit,
 };
-pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSet};
+pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
 pub use layer::Layer;
 pub use location::Location;
 pub use panel::Panel;
@@ -57,6 +57,7 @@ pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
 pub use scale_factor::ScaleFactor;
 pub use section::Section;
+pub use sync::{SyncPoint, UserSpaceSyncPoint};
 pub use text::{
     Letter, LetterStyle, Text, TextBuffer, TextContent, TextContentView, TextGridDescriptor,
     TextGridLocation, TextLineStructure, TextScaleAlignment, TextScaleLetterDimensions,

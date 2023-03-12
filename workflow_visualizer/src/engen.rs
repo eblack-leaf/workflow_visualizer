@@ -9,6 +9,7 @@ use crate::render::{
     RenderPhase,
 };
 use crate::scale_factor::ScaleFactor;
+use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::text_input::TextInputAttachment;
 use crate::theme::{Theme, ThemeAttachment};
@@ -49,9 +50,9 @@ impl Engen {
                         #[cfg(not(target_arch = "wasm32"))]
                         futures::executor::block_on(self.init_gfx(&event_loop_window_target));
                         self.invoke_attach::<TimerAttachment>();
+                        self.invoke_attach::<ViewportAttachment>();
                         self.invoke_attach::<OrientationAttachment>();
                         self.invoke_attach::<WindowAttachment>();
-                        self.invoke_attach::<ViewportAttachment>();
                         self.invoke_attach::<FocusAttachment>();
                         self.invoke_attach::<VisibilityAttachment>();
                         self.invoke_attach::<TouchAttachment>();
@@ -186,6 +187,7 @@ impl Engen {
     pub fn launch<Launchable: Launch>(event_loop: EventLoop<()>) {
         let options = Launchable::options();
         let mut engen = Engen::new(options);
+        set_sync_points(&mut engen);
         engen.invoke_attach::<ThemeAttachment>();
         Launchable::preparation(&mut engen.frontend);
         engen.event_loop.replace(event_loop);

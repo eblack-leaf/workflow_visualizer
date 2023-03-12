@@ -1,9 +1,12 @@
+use crate::focus::FocusedEntity;
 use crate::viewport::ViewportHandle;
 use crate::{
     Area, Attach, DeviceContext, Engen, InterfaceContext, Layer, Position, ScaleFactor, Section,
+    SyncPoint,
 };
 use bevy_ecs::prelude::{
-    Bundle, Commands, Component, Entity, EventReader, Events, Query, Res, ResMut, Resource,
+    Bundle, Commands, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut,
+    Resource,
 };
 use std::collections::HashMap;
 use winit::event::{ElementState, MouseButton};
@@ -139,7 +142,7 @@ impl TouchGrabState {
         Self { grab_state: None }
     }
 }
-pub(crate) fn read_events(
+pub(crate) fn read_touch_events(
     mut event_reader: EventReader<TouchEvent>,
     mut primary_touch: ResMut<PrimaryTouch>,
     mut touch_listeners: Query<(
@@ -156,6 +159,7 @@ pub(crate) fn read_events(
     scale_factor: Res<ScaleFactor>,
     viewport_handle: Res<ViewportHandle>,
     mut touch_grab_state: ResMut<TouchGrabState>,
+    mut focused_entity: ResMut<FocusedEntity>,
 ) {
     let new_touch = event_reader.iter().cloned().collect::<Vec<TouchEvent>>();
     let mut cancelled_events = new_touch.clone();
@@ -251,6 +255,7 @@ pub(crate) fn read_events(
                             touch_location
                                 .0
                                 .replace(primary_touch.touch.unwrap().origin);
+                            focused_entity.entity.replace(grabbed.0);
                         }
                         _ => {}
                     }
@@ -264,6 +269,7 @@ pub(crate) fn read_events(
                             touch_location
                                 .0
                                 .replace(primary_touch.touch.unwrap().origin);
+                            focused_entity.entity.replace(grabbed.0);
                         }
                         _ => {}
                     }
@@ -333,9 +339,15 @@ impl Attach for TouchAttachment {
         engen
             .frontend
             .main
-            .add_system(Events::<TouchEvent>::update_system);
-        engen.frontend.main.add_system(read_events);
-        engen.frontend.main.add_system(reset_touched);
+            .add_system(Events::<TouchEvent>::update_system.in_set(SyncPoint::Event));
+        engen
+            .frontend
+            .main
+            .add_system(read_touch_events.in_set(SyncPoint::Config));
+        engen
+            .frontend
+            .main
+            .add_system(reset_touched.in_set(SyncPoint::Finish));
         engen
             .frontend
             .container

@@ -110,7 +110,7 @@ pub(crate) fn position_ties(
     }
 }
 
-pub(crate) fn read_area_from_text_bound(
+pub(crate) fn calc_area(
     text_inputs: Query<
         (
             Entity,

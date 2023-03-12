@@ -9,6 +9,7 @@ use crate::theme::Theme;
 use crate::uniform::Uniform;
 use crate::window::WindowResize;
 use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
+use wgpu::Adapter;
 use winit::window::Window;
 
 #[derive(Clone)]
@@ -111,6 +112,17 @@ impl GfxSurface {
             options: options.clone(),
         };
         let gfx_surface_config = GfxSurfaceConfiguration::new(surface_configuration);
+        let msaa_render_attachment =
+            Self::configure_msaa(options, adapter, &gfx_surface, &gfx_surface_config);
+        (gfx_surface, gfx_surface_config, msaa_render_attachment)
+    }
+
+    fn configure_msaa(
+        options: GfxOptions,
+        adapter: Adapter,
+        gfx_surface: &GfxSurface,
+        gfx_surface_config: &GfxSurfaceConfiguration,
+    ) -> MsaaRenderAttachment {
         let msaa_flags = adapter
             .get_texture_format_features(gfx_surface_config.configuration.format)
             .flags;
@@ -131,7 +143,7 @@ impl GfxSurface {
             max_sample_count,
             options.msaa,
         );
-        (gfx_surface, gfx_surface_config, msaa_render_attachment)
+        msaa_render_attachment
     }
     pub(crate) fn surface_texture(
         &self,

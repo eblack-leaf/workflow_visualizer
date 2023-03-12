@@ -72,7 +72,7 @@ pub struct Job {
 }
 
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
-pub enum JobSet {
+pub enum JobSyncPoint {
     Idle,
 }
 
@@ -97,7 +97,7 @@ impl Job {
             startup: Task::default(),
             main: {
                 let mut task = Task::default();
-                task.add_system(attempt_to_idle.in_set(JobSet::Idle));
+                task.add_system(attempt_to_idle.in_set(JobSyncPoint::Idle));
                 task
             },
             teardown: Task::default(),

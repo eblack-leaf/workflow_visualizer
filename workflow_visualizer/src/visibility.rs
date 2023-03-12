@@ -1,6 +1,8 @@
-use crate::viewport::ViewportHandle;
-use crate::{Area, Attach, Engen, InterfaceContext, Position, Section};
-use bevy_ecs::prelude::{Bundle, Component, Query, Res};
+use crate::viewport::{adjust_position, frontend_area_adjust, ViewportHandle};
+use crate::window::gfx_resize;
+use crate::{Area, Attach, Engen, InterfaceContext, Position, Section, SyncPoint};
+use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
+
 #[derive(Bundle)]
 pub struct EnableVisibility {
     pub visibility: Visibility,
@@ -72,6 +74,13 @@ pub(crate) fn calc_visibility(
 pub struct VisibilityAttachment;
 impl Attach for VisibilityAttachment {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_system(calc_visibility);
+        engen
+            .frontend
+            .main
+            .add_system(calc_visibility.in_set(SyncPoint::Config));
+        engen
+            .frontend
+            .main
+            .add_system(calc_visibility.in_set(SyncPoint::ResolveVisibility));
     }
 }

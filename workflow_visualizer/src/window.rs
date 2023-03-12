@@ -1,8 +1,9 @@
 use crate::area::Area;
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
+use crate::sync::SyncPoint;
 use crate::{Attach, Engen};
-use bevy_ecs::prelude::{EventReader, Events, Res, ResMut};
+use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
 
 #[derive(Clone, Copy)]
 pub struct WindowResize {
@@ -15,7 +16,7 @@ impl WindowResize {
         Self { size, scale_factor }
     }
 }
-pub(crate) fn resize(
+pub(crate) fn gfx_resize(
     gfx_surface: Res<GfxSurface>,
     mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
     mut resize_events: EventReader<WindowResize>,
@@ -49,14 +50,17 @@ impl Attach for WindowAttachment {
             .backend
             .container
             .insert_resource(Events::<WindowResize>::default());
-        engen.backend.main.add_system(resize);
-        engen
-            .frontend
-            .main
-            .add_system(Events::<WindowResize>::update_system);
         engen
             .backend
             .main
-            .add_system(Events::<WindowResize>::update_system);
+            .add_system(gfx_resize.in_set(SyncPoint::Initialization));
+        engen
+            .frontend
+            .main
+            .add_system(Events::<WindowResize>::update_system.in_set(SyncPoint::Event));
+        engen
+            .backend
+            .main
+            .add_system(Events::<WindowResize>::update_system.in_set(SyncPoint::Event));
     }
 }

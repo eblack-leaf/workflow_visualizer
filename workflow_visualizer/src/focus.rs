@@ -1,5 +1,7 @@
-use crate::{Attach, Engen};
-use bevy_ecs::prelude::{Component, DetectChanges, Entity, Query, Res, Resource};
+use crate::touch::read_touch_events;
+use crate::{Attach, Engen, SyncPoint};
+use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemConfig, Query, Res, Resource};
+
 #[derive(Component)]
 pub struct Focus {
     pub(crate) focused: bool,
@@ -61,6 +63,10 @@ impl Attach for FocusAttachment {
             .frontend
             .container
             .insert_resource(FocusedEntity::new(None));
-        engen.frontend.main.add_system(set_focused);
+        engen.frontend.main.add_system(
+            set_focused
+                .in_set(SyncPoint::Config)
+                .after(read_touch_events),
+        );
     }
 }

@@ -1,9 +1,9 @@
 use crate::viewport::ViewportHandle;
 use crate::window::WindowResize;
-use crate::{Area, Attach, DeviceContext, Engen, ScaleFactor};
+use crate::{Area, Attach, DeviceContext, Engen, ScaleFactor, SyncPoint};
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{Commands, Res, Resource};
+use bevy_ecs::prelude::{Commands, IntoSystemConfig, Res, Resource};
 
 #[derive(Resource, Copy, Clone)]
 pub enum Orientation {
@@ -44,6 +44,9 @@ pub struct OrientationAttachment;
 impl Attach for OrientationAttachment {
     fn attach(engen: &mut Engen) {
         engen.frontend.startup.add_system(setup_orientation);
-        engen.frontend.main.add_system(calc_orientation);
+        engen
+            .frontend
+            .main
+            .add_system(calc_orientation.in_set(SyncPoint::Config));
     }
 }
