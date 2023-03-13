@@ -109,7 +109,8 @@ impl Job {
             TaskLabel::Main => &mut self.main,
             TaskLabel::Teardown => &mut self.teardown,
         };
-        task.run(&mut self.container);
+        task.set_executor_kind(ExecutorKind::MultiThreaded)
+            .run(&mut self.container);
     }
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;

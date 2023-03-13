@@ -1,10 +1,10 @@
-use bevy_ecs::prelude::{Added, Entity, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{Added, Entity, IntoSystemConfig, Query, RemovedComponents, Res, ResMut};
 use std::net::SocketAddr;
 use winit::event_loop::EventLoop;
 use workflow_visualizer::{
     Animation, Color, Engen, EngenOptions, EntityStore, Idle, InterfaceContext, Job, Launch,
     Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
-    TextInputRequest, TextInputText, TextScaleAlignment, Timer, VisibleSection,
+    TextInputRequest, TextInputText, TextScaleAlignment, Timer, UserSpaceSyncPoint, VisibleSection,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -85,7 +85,9 @@ impl Launch for Launcher {
             )))
             .id();
         frontend.store_entity("animated_text", id);
-        frontend.main.add_system(logic);
+        frontend
+            .main
+            .add_system(logic.in_set(UserSpaceSyncPoint::Process));
         let id = frontend
             .container
             .spawn(Request::new(Text::new(
@@ -124,7 +126,7 @@ impl Launch for Launcher {
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridDescriptor::new(32, 12),
+                TextGridDescriptor::new(32, 3),
                 Location::from(((100, 120), 0)),
                 Color::OFF_WHITE,
                 Color::DARK_GREY,

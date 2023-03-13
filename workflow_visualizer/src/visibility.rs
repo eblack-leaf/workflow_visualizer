@@ -62,6 +62,7 @@ pub(crate) fn calc_visibility(
                     vis_sec.section.replace(inter);
                 }
             } else {
+                vis_sec.section.replace(inter);
             }
         } else {
             vis_sec.section.take();

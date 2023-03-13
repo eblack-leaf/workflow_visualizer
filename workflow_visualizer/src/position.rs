@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Sub};
 
-#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Position<Context: CoordContext> {
     pub x: f32,
     pub y: f32,

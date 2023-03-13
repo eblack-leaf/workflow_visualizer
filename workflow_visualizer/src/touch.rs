@@ -11,7 +11,7 @@ use bevy_ecs::prelude::{
 use std::collections::HashMap;
 use winit::event::{ElementState, MouseButton};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct TouchEvent {
     pub ty: TouchType,
     pub touch: Touch,
@@ -24,7 +24,7 @@ impl TouchEvent {
         }
     }
 }
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum TouchType {
     OnPress,
     OnMove,
@@ -233,7 +233,7 @@ pub(crate) fn read_touch_events(
                 }
             }
         }
-        if let Some(grabbed) = touch_grab_state.grab_state {
+        if let Some(grabbed) = touch_grab_state.grab_state.take() {
             if let Ok((
                 _,
                 _,

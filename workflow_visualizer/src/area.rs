@@ -5,7 +5,7 @@ use bytemuck::{Pod, Zeroable};
 use std::marker::PhantomData;
 use std::ops::Mul;
 
-#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Area<Context: CoordContext> {
     pub width: f32,
     pub height: f32,

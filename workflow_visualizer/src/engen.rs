@@ -237,6 +237,9 @@ impl Engen {
             .get(&button)
             .cloned()
             .unwrap_or((ElementState::Released, None));
+        if let Some(cached) = mouse_adapter.tracked.get_mut(&button) {
+            cached.0 = state;
+        }
         let mut touch_events = Vec::new();
         let mouse_location = mouse_adapter.location.unwrap_or_default();
         let in_bounds = viewport_handle_section.contains(mouse_location.to_ui(scale_factor));
