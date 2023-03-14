@@ -191,7 +191,7 @@ impl AtlasGlyphReference {
         self.count += 1;
     }
     pub(crate) fn decrement(&mut self) {
-        let sub_value = 1 * (self.count == 0) as u32;
+        let sub_value = (self.count == 0) as u32;
         self.count -= sub_value;
     }
 }

@@ -44,12 +44,12 @@ impl WasmCompiler {
         args.push("--target");
         args.push("wasm32-unknown-unknown");
         args.push("--package");
-        args.push(&package);
+        args.push(package);
         args.push("--target-dir");
         args.push(target.as_os_str().to_str().unwrap());
-        args.push(&bin_options);
-        args.push(&bin);
-        let status = std::process::Command::new(&cargo)
+        args.push(bin_options);
+        args.push(bin);
+        let status = std::process::Command::new(cargo)
             .current_dir(&project_root)
             .args(&args)
             .status()
@@ -57,10 +57,10 @@ impl WasmCompiler {
         if !status.success() {
             return Err(true);
         }
-        let absolute_target = project_root.join(&target);
+        let absolute_target = project_root.join(target);
         let mut source = absolute_target
             .join("wasm32-unknown-unknown")
-            .join(&profile);
+            .join(profile);
         if bin_options == "--example" {
             source = source.join("examples");
         }
@@ -73,7 +73,7 @@ impl WasmCompiler {
             .unwrap()
             .omit_default_module_path(false)
             .input_path(&source)
-            .out_name(&bin)
+            .out_name(bin)
             .generate(&destination)
             .unwrap();
         let template = include_str!("index.template.html");

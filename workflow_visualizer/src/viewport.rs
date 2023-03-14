@@ -167,7 +167,7 @@ impl CpuViewport {
         }
     }
     pub(crate) fn gpu_viewport(&self) -> GpuViewport {
-        return self.orthographic.data.0.into();
+        self.orthographic.data.0.into()
     }
     pub(crate) fn far_layer(&self) -> f32 {
         self.layer.z

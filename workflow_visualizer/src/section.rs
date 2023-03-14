@@ -24,13 +24,13 @@ impl<Context: CoordContext> Section<Context> {
         }
     }
     pub fn width(&self) -> f32 {
-        return self.area.width;
+        self.area.width
     }
     pub fn height(&self) -> f32 {
-        return self.area.height;
+        self.area.height
     }
     pub fn left(&self) -> f32 {
-        return self.position.x;
+        self.position.x
     }
     pub fn right(&self) -> f32 {
         self.position.x + self.area.width
@@ -61,7 +61,7 @@ impl<Context: CoordContext> Section<Context> {
         {
             return true;
         }
-        return false;
+        false
     }
     pub fn intersection(&self, other: Self) -> Option<Self> {
         if !self.is_overlapping(other) {

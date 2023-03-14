@@ -1,5 +1,5 @@
 use crate::icon::mesh::{ColorInvert, IconKey};
-use crate::visibility::{EnableVisibility, Visibility};
+use crate::visibility::{EnableVisibility};
 use crate::{Color, InterfaceContext, Location};
 use bevy_ecs::prelude::{Bundle, Component};
 

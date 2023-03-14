@@ -30,10 +30,8 @@ pub(crate) fn set_focused(
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if f_entity == entity {
                     listener.focus();
-                } else {
-                    if listener.focused() {
-                        listener.blur();
-                    }
+                } else if listener.focused() {
+                    listener.blur();
                 }
             }
         } else {

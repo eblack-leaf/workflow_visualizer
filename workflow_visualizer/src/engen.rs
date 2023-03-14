@@ -22,7 +22,7 @@ use crate::viewport::{ViewportAttachment, ViewportHandle};
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::{WindowAttachment, WindowResize};
-use crate::{DeviceContext, GfxOptions, Position, VirtualKeyboardAdapter};
+use crate::{DeviceContext, GfxOptions, Position};
 use bevy_ecs::prelude::Resource;
 use std::rc::Rc;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
@@ -48,7 +48,7 @@ impl Engen {
                 Event::NewEvents(start_cause) => match start_cause {
                     StartCause::Init => {
                         #[cfg(not(target_arch = "wasm32"))]
-                        futures::executor::block_on(self.init_gfx(&event_loop_window_target));
+                        futures::executor::block_on(self.init_gfx(event_loop_window_target));
                         self.invoke_attach::<TimerAttachment>();
                         self.invoke_attach::<ViewportAttachment>();
                         self.invoke_attach::<OrientationAttachment>();
@@ -87,7 +87,7 @@ impl Engen {
                         self.register_touch(touch);
                     }
                     WindowEvent::MouseInput {
-                        device_id,
+                        
                         state,
                         button,
                         ..
@@ -95,20 +95,20 @@ impl Engen {
                         self.register_mouse_click(state, button);
                     }
                     WindowEvent::MouseWheel {
-                        device_id,
-                        delta,
-                        phase,
+                        
+                        
+                        
                         ..
                     } => {}
                     WindowEvent::CursorMoved {
-                        device_id,
+                        
                         position,
                         ..
                     } => {
                         self.set_mouse_location(position);
                     }
-                    WindowEvent::CursorEntered { device_id } => {}
-                    WindowEvent::CursorLeft { device_id } => {
+                    WindowEvent::CursorEntered { device_id: _ } => {}
+                    WindowEvent::CursorLeft { device_id: _ } => {
                         self.frontend
                             .container
                             .send_event(TouchEvent::new(TouchType::Cancelled, Touch::default()));
@@ -118,7 +118,7 @@ impl Engen {
                             .expect("no mouse adapter")
                             .tracked
                             .iter_mut()
-                            .for_each(|(button, track_state)| {
+                            .for_each(|(_button, track_state)| {
                                 if let Some(registered_touch) = track_state.1.as_mut() {
                                     registered_touch.cancelled = true;
                                 }
@@ -338,7 +338,7 @@ impl Engen {
                 if let Some(registered_touch) = touch_adapter.tracked.get_mut(&interactor) {
                     registered_touch.current = (touch_location.0, touch_location.1).into();
                 }
-                let primary = touch_adapter.primary.clone();
+                let primary = touch_adapter.primary;
                 if let Some(prime) = primary {
                     if prime == interactor {
                         let internal_touch = touch_adapter.tracked.get_mut(&prime).unwrap();

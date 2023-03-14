@@ -5,7 +5,6 @@ use crate::touch::{TouchListener, Touchable};
 use crate::visibility::EnableVisibility;
 use crate::{
     Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment, VirtualKeyboardType,
-    Visibility,
 };
 use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;

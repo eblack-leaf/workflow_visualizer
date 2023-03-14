@@ -81,7 +81,7 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
     }
     pub fn grow(&mut self, gfx_surface: &GfxSurface, max: u32) {
         self.cpu.buffer.resize(max as usize, Attribute::default());
-        self.gpu = GpuAttributeBuffer::<Attribute>::new(&gfx_surface, max, "attribute buffer");
+        self.gpu = GpuAttributeBuffer::<Attribute>::new(gfx_surface, max, "attribute buffer");
         gfx_surface
             .queue
             .write_buffer(&self.gpu.buffer, 0, bytemuck::cast_slice(&self.cpu.buffer));

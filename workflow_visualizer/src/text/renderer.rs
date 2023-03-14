@@ -309,7 +309,7 @@ impl Render for TextRenderer {
                 render_pass_handle
                     .0
                     .draw(0..AABB.len() as u32, 0..indexer.count());
-                if let Some(_) = draw_section.section {
+                if draw_section.section.is_some() {
                     render_pass_handle.0.set_scissor_rect(
                         0,
                         0,

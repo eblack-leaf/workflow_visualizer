@@ -273,25 +273,23 @@ pub(crate) fn set_cursor_location(
                 .get(line_clicked)
                 .cloned()
                 .unwrap_or_default();
-            if line_clicked >= line_structure.letter_count.len() || potential_letter_count == 0 {
-                if line_clicked != 0 {
-                    let mut next_line_up = line_clicked - 1;
-                    let mut next_line_count = 0;
-                    while next_line_up != 0
-                        && next_line_up >= line_structure.letter_count.len() - 1
-                        && next_line_count == 0
-                    {
-                        next_line_count = line_structure
-                            .letter_count
-                            .get(next_line_up)
-                            .cloned()
-                            .unwrap_or_default();
-                        if next_line_count == 0 {
-                            next_line_up -= 1;
-                        }
+            if (line_clicked >= line_structure.letter_count.len() || potential_letter_count == 0) && line_clicked != 0 {
+                let mut next_line_up = line_clicked - 1;
+                let mut next_line_count = 0;
+                while next_line_up != 0
+                    && next_line_up >= line_structure.letter_count.len() - 1
+                    && next_line_count == 0
+                {
+                    next_line_count = line_structure
+                        .letter_count
+                        .get(next_line_up)
+                        .cloned()
+                        .unwrap_or_default();
+                    if next_line_count == 0 {
+                        next_line_up -= 1;
                     }
-                    line_clicked = next_line_up
                 }
+                line_clicked = next_line_up
             }
             let click_x = click_location.x - pos.x;
             let x_letter_location = (click_x / ui_letter_dimensions.width).floor() as u32;
@@ -306,7 +304,7 @@ pub(crate) fn set_cursor_location(
             }
             let x_letter_location = x_letter_location.min(current_line_letter_count);
             let x_letter_location = x_letter_location
-                + 1 * (x_letter_location < (grid_guide.horizontal_character_max - 1)
+                + (x_letter_location < (grid_guide.horizontal_character_max - 1)
                     && was_over
                     && current_line_letter_count != 0) as u32;
             let location = TextGridLocation::new(x_letter_location, line_clicked as u32);

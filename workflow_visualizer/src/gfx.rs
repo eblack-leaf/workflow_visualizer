@@ -1,14 +1,14 @@
-use crate::area::Area;
-use crate::coord::DeviceContext;
-use crate::engen::Engen;
-use crate::job::Job;
-use crate::layer::Layer;
-use crate::position::Position;
-use crate::section::Section;
-use crate::theme::Theme;
-use crate::uniform::Uniform;
-use crate::window::WindowResize;
-use bevy_ecs::prelude::{Commands, EventReader, Res, ResMut, Resource};
+
+
+
+
+
+
+
+
+
+
+use bevy_ecs::prelude::{Resource};
 use wgpu::Adapter;
 use winit::window::Window;
 
@@ -27,7 +27,7 @@ impl GfxOptions {
     pub fn web_align(mut self) -> Self {
         self.backends = wgpu::Backends::all();
         self.limits = wgpu::Limits::downlevel_webgl2_defaults();
-        return self;
+        self
     }
     pub fn web() -> Self {
         Self::native().web_align()
@@ -137,19 +137,20 @@ impl GfxSurface {
                 1
             }
         };
-        let msaa_render_attachment = MsaaRenderAttachment::new(
-            &gfx_surface,
-            &gfx_surface_config,
+        
+        MsaaRenderAttachment::new(
+            gfx_surface,
+            gfx_surface_config,
             max_sample_count,
             options.msaa,
-        );
-        msaa_render_attachment
+        )
     }
     pub(crate) fn surface_texture(
         &self,
         surface_configuration: &GfxSurfaceConfiguration,
     ) -> Option<wgpu::SurfaceTexture> {
-        let surface_texture = match self.surface.get_current_texture() {
+        
+        match self.surface.get_current_texture() {
             Ok(surface_texture) => Some(surface_texture),
             Err(err) => match err {
                 wgpu::SurfaceError::Timeout => None,
@@ -175,8 +176,7 @@ impl GfxSurface {
                     panic!("gpu out of memory");
                 }
             },
-        };
-        surface_texture
+        }
     }
 }
 

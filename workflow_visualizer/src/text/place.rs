@@ -52,12 +52,10 @@ impl Placer {
                 return Ordering::Greater;
             } else if lhs.0.y < rhs.0.y {
                 return Ordering::Less;
-            } else {
-                if lhs.0.x > rhs.0.x {
-                    return Ordering::Greater;
-                } else if lhs.0.x < rhs.0.x {
-                    return Ordering::Less;
-                }
+            } else if lhs.0.x > rhs.0.x {
+                return Ordering::Greater;
+            } else if lhs.0.x < rhs.0.x {
+                return Ordering::Less;
             }
             Ordering::Equal
         });

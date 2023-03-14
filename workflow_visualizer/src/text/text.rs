@@ -10,8 +10,8 @@ use crate::text::difference::Difference;
 use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::text::WrapStyleComponent;
-use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
-use crate::{Color, Location, Section, TextGridDescriptor};
+use crate::visibility::{EnableVisibility, VisibleSection};
+use crate::{Color, Location, TextGridDescriptor};
 
 bitflags! {
     pub struct LetterStyle: u32 {

@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
-    Added, Changed, Commands, Or, ParamSet, Query, RemovedComponents, Res, With, Without,
+    Added, Changed, Commands, Or, Query, RemovedComponents, Res, With, Without,
 };
 
 use crate::coord::InterfaceContext;

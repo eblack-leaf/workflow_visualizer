@@ -4,10 +4,10 @@ use axum::response::{Html, IntoResponse};
 use axum::routing::get;
 use axum::Router;
 use axum_server::tls_rustls::RustlsConfig;
-use std::collections::HashMap;
+
 use std::net::SocketAddr;
 use std::path::PathBuf;
-use std::sync::Arc;
+
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;

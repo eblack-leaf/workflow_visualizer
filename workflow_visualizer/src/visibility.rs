@@ -1,5 +1,5 @@
-use crate::viewport::{adjust_position, frontend_area_adjust, ViewportHandle};
-use crate::window::gfx_resize;
+use crate::viewport::{ViewportHandle};
+
 use crate::{Area, Attach, Engen, InterfaceContext, Position, Section, SyncPoint};
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 

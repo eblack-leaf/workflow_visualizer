@@ -5,7 +5,7 @@ use crate::{
     SyncPoint,
 };
 use bevy_ecs::prelude::{
-    Bundle, Commands, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut,
+    Bundle, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut,
     Resource,
 };
 use std::collections::HashMap;

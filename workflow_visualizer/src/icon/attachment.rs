@@ -9,7 +9,7 @@ use crate::icon::frontend_system::{
 };
 use crate::icon::{Icon, IconRenderer};
 use crate::viewport::viewport_attach;
-use crate::{gfx, spawn, SyncPoint};
+use crate::{spawn, SyncPoint};
 
 pub struct IconAttachment;
 

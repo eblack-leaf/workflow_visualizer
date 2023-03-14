@@ -75,6 +75,6 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
             }
             return true;
         }
-        return false;
+        false
     }
 }

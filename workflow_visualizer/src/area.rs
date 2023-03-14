@@ -73,7 +73,7 @@ impl<Context: CoordContext> From<(i32, i32)> for Area<Context> {
 
 impl<Context: CoordContext> From<(f32, f32)> for Area<Context> {
     fn from(value: (f32, f32)) -> Self {
-        Self::new(value.0 as f32, value.1 as f32)
+        Self::new(value.0, value.1)
     }
 }
 

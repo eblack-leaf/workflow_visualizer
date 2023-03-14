@@ -12,7 +12,7 @@ use crate::text::frontend_system::{
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
 use crate::viewport::viewport_attach;
-use crate::visibility::calc_visibility;
+
 use crate::{spawn, SyncPoint, Text};
 
 pub struct TextAttachment;

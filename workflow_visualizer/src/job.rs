@@ -119,10 +119,10 @@ impl Job {
         self.execution_state = ExecutionState::Active;
     }
     pub fn suspended(&self) -> bool {
-        return self.execution_state == ExecutionState::Suspended;
+        self.execution_state == ExecutionState::Suspended
     }
     pub fn active(&self) -> bool {
-        return self.execution_state == ExecutionState::Active;
+        self.execution_state == ExecutionState::Active
     }
     pub fn should_exit(&self) -> bool {
         return self

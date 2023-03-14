@@ -291,7 +291,7 @@ pub(crate) fn calc_area(
                     IconSize::Large => 18.0,
                     _ => 0.0,
                 };
-                let scaled = area_guide as f64 * scale_factor.factor;
+                let scaled = area_guide * scale_factor.factor;
                 cmd.entity(entity)
                     .insert(Area::<InterfaceContext>::new(scaled as f32, scaled as f32));
             }

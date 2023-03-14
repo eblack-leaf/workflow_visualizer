@@ -431,7 +431,7 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
             .container
             .get_mut::<GpuAttributeBuffer<RawPosition>>(render_group)
             .unwrap() =
-            GpuAttributeBuffer::<RawPosition>::new(&gfx_surface, max, "glyph position buffer");
+            GpuAttributeBuffer::<RawPosition>::new(gfx_surface, max, "glyph position buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
@@ -456,7 +456,7 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
         *renderer
             .container
             .get_mut::<GpuAttributeBuffer<RawArea>>(render_group)
-            .unwrap() = GpuAttributeBuffer::<RawArea>::new(&gfx_surface, max, "glyph area buffer");
+            .unwrap() = GpuAttributeBuffer::<RawArea>::new(gfx_surface, max, "glyph area buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
@@ -481,7 +481,7 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
         *renderer
             .container
             .get_mut::<GpuAttributeBuffer<NullBit>>(render_group)
-            .unwrap() = GpuAttributeBuffer::<NullBit>::new(&gfx_surface, max, "null bit buffer");
+            .unwrap() = GpuAttributeBuffer::<NullBit>::new(gfx_surface, max, "null bit buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
@@ -506,7 +506,7 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
         *renderer
             .container
             .get_mut::<GpuAttributeBuffer<Coords>>(render_group)
-            .unwrap() = GpuAttributeBuffer::<Coords>::new(&gfx_surface, max, "coords buffer");
+            .unwrap() = GpuAttributeBuffer::<Coords>::new(gfx_surface, max, "coords buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
@@ -531,7 +531,7 @@ fn grow_attributes(renderer: &mut TextRenderer, gfx_surface: &GfxSurface, render
         *renderer
             .container
             .get_mut::<GpuAttributeBuffer<Color>>(render_group)
-            .unwrap() = GpuAttributeBuffer::<Color>::new(&gfx_surface, max, "color buffer");
+            .unwrap() = GpuAttributeBuffer::<Color>::new(gfx_surface, max, "color buffer");
         gfx_surface.queue.write_buffer(
             &renderer
                 .container
@@ -709,9 +709,9 @@ fn grow_atlas(
             *renderer.container.get::<AtlasBlock>(render_group).unwrap(),
             new_dimension,
         );
-        let atlas = Atlas::new(&gfx_surface, texture_dimensions);
+        let atlas = Atlas::new(gfx_surface, texture_dimensions);
         let atlas_bind_group =
-            AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
+            AtlasBindGroup::new(gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
         *renderer
             .container
             .get_mut::<AtlasBindGroup>(render_group)

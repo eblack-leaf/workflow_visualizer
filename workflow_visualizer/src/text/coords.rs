@@ -16,12 +16,12 @@ impl Coords {
         texture_dimensions: AtlasTextureDimensions,
     ) -> Self {
         let normalized_position = Position::<NumericalContext>::new(
-            glyph_section.position.x / texture_dimensions.dimensions.width as f32,
-            glyph_section.position.y / texture_dimensions.dimensions.height as f32,
+            glyph_section.position.x / texture_dimensions.dimensions.width,
+            glyph_section.position.y / texture_dimensions.dimensions.height,
         );
         let normalized_area = Area::<NumericalContext>::new(
-            glyph_section.width() / texture_dimensions.dimensions.width as f32,
-            glyph_section.height() / texture_dimensions.dimensions.height as f32,
+            glyph_section.width() / texture_dimensions.dimensions.width,
+            glyph_section.height() / texture_dimensions.dimensions.height,
         );
         let normalized_section = Section::new(normalized_position, normalized_area);
         Coords::new(

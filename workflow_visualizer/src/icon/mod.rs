@@ -162,18 +162,18 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
                 .entity_keys
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get(entity)
                 .unwrap();
             let index = self
                 .indexer
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get_index(*key)
                 .unwrap();
             self.position
-                .get_mut(&icon_key)
+                .get_mut(icon_key)
                 .unwrap()
                 .write
                 .write
@@ -183,17 +183,17 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
                 .entity_keys
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get(entity)
                 .unwrap();
             let index = self
                 .indexer
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get_index(*key)
                 .unwrap();
-            self.area.get_mut(&icon_key).unwrap().write.write.insert(
+            self.area.get_mut(icon_key).unwrap().write.write.insert(
                 index,
                 Area::<DeviceContext>::new(area.width, area.height).as_raw(),
             );
@@ -202,18 +202,18 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
                 .entity_keys
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get(entity)
                 .unwrap();
             let index = self
                 .indexer
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get_index(*key)
                 .unwrap();
             self.depth
-                .get_mut(&icon_key)
+                .get_mut(icon_key)
                 .unwrap()
                 .write
                 .write
@@ -223,18 +223,18 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
                 .entity_keys
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get(entity)
                 .unwrap();
             let index = self
                 .indexer
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get_index(*key)
                 .unwrap();
             self.color
-                .get_mut(&icon_key)
+                .get_mut(icon_key)
                 .unwrap()
                 .write
                 .write
@@ -244,18 +244,18 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
                 .entity_keys
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get(entity)
                 .unwrap();
             let index = self
                 .indexer
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get_index(*key)
                 .unwrap();
             self.secondary_color
-                .get_mut(&icon_key)
+                .get_mut(icon_key)
                 .unwrap()
                 .write
                 .write
@@ -265,25 +265,25 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self
                 .entity_keys
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get(entity)
                 .unwrap();
             let index = self
                 .indexer
-                .get(&icon_key)
+                .get(icon_key)
                 .unwrap()
                 .get_index(*key)
                 .unwrap();
             self.color_invert
-                .get_mut(&icon_key)
+                .get_mut(icon_key)
                 .unwrap()
                 .write
                 .write
                 .insert(index, *color_invert);
         }
-        self.grow(&gfx_surface);
-        self.write(&gfx_surface);
+        self.grow(gfx_surface);
+        self.write(gfx_surface);
     }
     pub(crate) fn grow(&mut self, gfx_surface: &GfxSurface) {
         let mut growth_requests = HashSet::new();
@@ -333,31 +333,31 @@ impl IconRenderer {
             self.position
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
             self.area
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
             self.depth
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
             self.color
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
             self.secondary_color
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
             self.color_invert
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
             self.null_bit
                 .get_mut(&key)
                 .unwrap()
-                .write_attribute(&gfx_surface);
+                .write_attribute(gfx_surface);
         }
     }
     pub(crate) fn remove_icon(&mut self, entity: Entity) {
@@ -481,10 +481,10 @@ impl IconRenderer {
                     fragment: Some(fragment_state),
                     multiview: None,
                 };
-                let pipeline = gfx_surface
+                
+                gfx_surface
                     .device
-                    .create_render_pipeline(&pipeline_descriptor);
-                pipeline
+                    .create_render_pipeline(&pipeline_descriptor)
             },
             icon_entities: HashMap::new(),
             entity_icons: HashMap::new(),
