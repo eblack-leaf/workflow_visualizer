@@ -5,8 +5,7 @@ use crate::{
     SyncPoint,
 };
 use bevy_ecs::prelude::{
-    Bundle, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut,
-    Resource,
+    Bundle, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut, Resource,
 };
 use std::collections::HashMap;
 use winit::event::{ElementState, MouseButton};

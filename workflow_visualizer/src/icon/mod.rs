@@ -160,18 +160,8 @@ impl IconRenderer {
         }
         for (entity, pos) in differences.position.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
-            let key = self
-                .entity_keys
-                .get(icon_key)
-                .unwrap()
-                .get(entity)
-                .unwrap();
-            let index = self
-                .indexer
-                .get(icon_key)
-                .unwrap()
-                .get_index(*key)
-                .unwrap();
+            let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
+            let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
             self.position
                 .get_mut(icon_key)
                 .unwrap()
@@ -181,18 +171,8 @@ impl IconRenderer {
         }
         for (entity, area) in differences.area.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
-            let key = self
-                .entity_keys
-                .get(icon_key)
-                .unwrap()
-                .get(entity)
-                .unwrap();
-            let index = self
-                .indexer
-                .get(icon_key)
-                .unwrap()
-                .get_index(*key)
-                .unwrap();
+            let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
+            let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
             self.area.get_mut(icon_key).unwrap().write.write.insert(
                 index,
                 Area::<DeviceContext>::new(area.width, area.height).as_raw(),
@@ -200,18 +180,8 @@ impl IconRenderer {
         }
         for (entity, depth) in differences.depth.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
-            let key = self
-                .entity_keys
-                .get(icon_key)
-                .unwrap()
-                .get(entity)
-                .unwrap();
-            let index = self
-                .indexer
-                .get(icon_key)
-                .unwrap()
-                .get_index(*key)
-                .unwrap();
+            let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
+            let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
             self.depth
                 .get_mut(icon_key)
                 .unwrap()
@@ -221,18 +191,8 @@ impl IconRenderer {
         }
         for (entity, color) in differences.color.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
-            let key = self
-                .entity_keys
-                .get(icon_key)
-                .unwrap()
-                .get(entity)
-                .unwrap();
-            let index = self
-                .indexer
-                .get(icon_key)
-                .unwrap()
-                .get_index(*key)
-                .unwrap();
+            let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
+            let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
             self.color
                 .get_mut(icon_key)
                 .unwrap()
@@ -242,18 +202,8 @@ impl IconRenderer {
         }
         for (entity, color) in differences.secondary_color.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
-            let key = self
-                .entity_keys
-                .get(icon_key)
-                .unwrap()
-                .get(entity)
-                .unwrap();
-            let index = self
-                .indexer
-                .get(icon_key)
-                .unwrap()
-                .get_index(*key)
-                .unwrap();
+            let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
+            let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
             self.secondary_color
                 .get_mut(icon_key)
                 .unwrap()
@@ -263,18 +213,8 @@ impl IconRenderer {
         }
         for (entity, color_invert) in differences.color_invert.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();
-            let key = self
-                .entity_keys
-                .get(icon_key)
-                .unwrap()
-                .get(entity)
-                .unwrap();
-            let index = self
-                .indexer
-                .get(icon_key)
-                .unwrap()
-                .get_index(*key)
-                .unwrap();
+            let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
+            let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
             self.color_invert
                 .get_mut(icon_key)
                 .unwrap()
@@ -481,7 +421,7 @@ impl IconRenderer {
                     fragment: Some(fragment_state),
                     multiview: None,
                 };
-                
+
                 gfx_surface
                     .device
                     .create_render_pipeline(&pipeline_descriptor)

@@ -58,9 +58,7 @@ impl WasmCompiler {
             return Err(true);
         }
         let absolute_target = project_root.join(target);
-        let mut source = absolute_target
-            .join("wasm32-unknown-unknown")
-            .join(profile);
+        let mut source = absolute_target.join("wasm32-unknown-unknown").join(profile);
         if bin_options == "--example" {
             source = source.join("examples");
         }

@@ -86,25 +86,11 @@ impl Engen {
                     WindowEvent::Touch(touch) => {
                         self.register_touch(touch);
                     }
-                    WindowEvent::MouseInput {
-                        
-                        state,
-                        button,
-                        ..
-                    } => {
+                    WindowEvent::MouseInput { state, button, .. } => {
                         self.register_mouse_click(state, button);
                     }
-                    WindowEvent::MouseWheel {
-                        
-                        
-                        
-                        ..
-                    } => {}
-                    WindowEvent::CursorMoved {
-                        
-                        position,
-                        ..
-                    } => {
+                    WindowEvent::MouseWheel { .. } => {}
+                    WindowEvent::CursorMoved { position, .. } => {
                         self.set_mouse_location(position);
                     }
                     WindowEvent::CursorEntered { device_id: _ } => {}

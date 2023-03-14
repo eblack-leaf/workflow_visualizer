@@ -1,6 +1,7 @@
 mod animate;
 mod area;
 mod color;
+mod content_panel;
 mod coord;
 mod engen;
 mod focus;
@@ -31,6 +32,7 @@ mod wasm_compiler;
 #[cfg(not(target_arch = "wasm32"))]
 mod wasm_server;
 mod window;
+
 pub use animate::{Animate, Animation, Interpolator};
 pub use area::{Area, RawArea};
 pub use bevy_ecs;

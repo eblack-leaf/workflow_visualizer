@@ -1,11 +1,10 @@
-
 #[cfg(test)]
 #[test]
 fn generate_panel_mesh() {
+    use crate::write_mesh;
+    use crate::DeviceContext;
     use crate::Position;
     use crate::{ColorHooks, IconVertex};
-    use crate::DeviceContext;
-    use crate::write_mesh;
     use std::f32::consts::{FRAC_PI_2, PI};
     let mut mesh = Vec::<IconVertex>::new();
     let mut corners = Vec::new();
@@ -145,10 +144,10 @@ fn generate_panel_mesh() {
 #[cfg(test)]
 #[test]
 fn generate_cursor_mesh() {
-    use crate::Position;
-    use crate::IconVertex;
     use crate::ColorHooks;
     use crate::DeviceContext;
+    use crate::IconVertex;
+    use crate::Position;
     let mut mesh = Vec::<IconVertex>::new();
     mesh.push(IconVertex::new(
         Position::<DeviceContext>::new(0.0, 0.0).to_gpu(),

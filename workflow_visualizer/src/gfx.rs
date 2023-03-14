@@ -1,14 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-use bevy_ecs::prelude::{Resource};
+use bevy_ecs::prelude::Resource;
 use wgpu::Adapter;
 use winit::window::Window;
 
@@ -137,7 +127,7 @@ impl GfxSurface {
                 1
             }
         };
-        
+
         MsaaRenderAttachment::new(
             gfx_surface,
             gfx_surface_config,
@@ -149,7 +139,6 @@ impl GfxSurface {
         &self,
         surface_configuration: &GfxSurfaceConfiguration,
     ) -> Option<wgpu::SurfaceTexture> {
-        
         match self.surface.get_current_texture() {
             Ok(surface_texture) => Some(surface_texture),
             Err(err) => match err {

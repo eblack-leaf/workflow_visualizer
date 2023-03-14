@@ -273,7 +273,9 @@ pub(crate) fn set_cursor_location(
                 .get(line_clicked)
                 .cloned()
                 .unwrap_or_default();
-            if (line_clicked >= line_structure.letter_count.len() || potential_letter_count == 0) && line_clicked != 0 {
+            if (line_clicked >= line_structure.letter_count.len() || potential_letter_count == 0)
+                && line_clicked != 0
+            {
                 let mut next_line_up = line_clicked - 1;
                 let mut next_line_count = 0;
                 while next_line_up != 0

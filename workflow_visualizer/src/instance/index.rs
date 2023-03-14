@@ -37,6 +37,9 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
             holes: HashSet::new(),
         }
     }
+    pub fn has_instances(&self) -> bool {
+        self.count() > 0
+    }
     pub fn max(&self) -> u32 {
         self.max
     }
