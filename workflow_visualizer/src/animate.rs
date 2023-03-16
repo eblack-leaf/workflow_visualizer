@@ -1,5 +1,6 @@
-use crate::{TimeDelta, TimeMarker, Timer};
 use bevy_ecs::prelude::{Added, Component, Query, Res};
+
+use crate::{TimeDelta, TimeMarker, Timer};
 
 #[derive(Component)]
 pub struct Animation<T: Component> {

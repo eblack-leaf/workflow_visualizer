@@ -1,7 +1,8 @@
+use std::path::Path;
+
 use bevy_ecs::prelude::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use wgpu::util::DeviceExt;
 
 use crate::gfx::GfxSurface;

@@ -1,3 +1,11 @@
+use std::rc::Rc;
+
+use bevy_ecs::prelude::Resource;
+use winit::dpi::{PhysicalPosition, PhysicalSize};
+use winit::event::{ElementState, Event, MouseButton, StartCause, TouchPhase, WindowEvent};
+use winit::event_loop::{EventLoop, EventLoopWindowTarget};
+use winit::window::{Window, WindowBuilder};
+
 use crate::area::Area;
 use crate::content_panel::ContentPanelAttachment;
 use crate::focus::FocusAttachment;
@@ -24,12 +32,6 @@ use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::{WindowAttachment, WindowResize};
 use crate::{DeviceContext, GfxOptions, Position};
-use bevy_ecs::prelude::Resource;
-use std::rc::Rc;
-use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{ElementState, Event, MouseButton, StartCause, TouchPhase, WindowEvent};
-use winit::event_loop::{EventLoop, EventLoopWindowTarget};
-use winit::window::{Window, WindowBuilder};
 
 pub struct Engen {
     pub options: EngenOptions,

@@ -1,6 +1,7 @@
-use crate::{Engen, JobSyncPoint};
 use bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 use bevy_ecs::schedule::apply_system_buffers;
+
+use crate::{Engen, JobSyncPoint};
 
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 pub enum SyncPoint {

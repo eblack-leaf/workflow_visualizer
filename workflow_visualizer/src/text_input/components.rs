@@ -1,3 +1,6 @@
+use bevy_ecs::bundle::Bundle;
+use bevy_ecs::component::Component;
+use bevy_ecs::entity::Entity;
 
 use crate::focus::Focus;
 use crate::text_input::cursor::CursorIcon;
@@ -8,9 +11,6 @@ use crate::{
     Area, Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment,
     TextScaleLetterDimensions, VirtualKeyboardType,
 };
-use bevy_ecs::bundle::Bundle;
-use bevy_ecs::component::Component;
-use bevy_ecs::entity::Entity;
 
 #[derive(Component)]
 pub struct TextInputText {

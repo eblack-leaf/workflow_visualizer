@@ -1,8 +1,11 @@
+use std::f32::consts::{FRAC_PI_2, PI};
+
+use bytemuck::{Pod, Zeroable};
+use wgpu::util::DeviceExt;
+
 use crate::gfx::GfxSurface;
 use crate::{DeviceContext, InterfaceContext, Interpolator, Position, RawPosition};
-use bytemuck::{Pod, Zeroable};
-use std::f32::consts::{FRAC_PI_2, PI};
-use wgpu::util::DeviceExt;
+
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
 pub struct ListenOffset {

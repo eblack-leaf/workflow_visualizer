@@ -1,14 +1,17 @@
+use std::collections::{HashMap, HashSet};
+
+use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
+
+pub use attachment::ContentPanelAttachment;
+pub use system::calc_area_from_content_area;
+
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Position};
+
 mod attachment;
 mod renderer;
 mod system;
 mod vertex;
 
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Position};
-pub use attachment::ContentPanelAttachment;
-use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
-
-use std::collections::{HashMap, HashSet};
-pub use system::calc_area_from_content_area;
 #[derive(Component, Copy, Clone)]
 pub struct LineWidth(pub u32);
 #[derive(Component, Copy, Clone)]

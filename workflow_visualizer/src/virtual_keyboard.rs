@@ -1,5 +1,6 @@
-use crate::{Attach, Engen};
 use bevy_ecs::prelude::{Component, Resource};
+
+use crate::{Attach, Engen};
 
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {}

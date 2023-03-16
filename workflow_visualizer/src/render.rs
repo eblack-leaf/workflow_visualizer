@@ -1,9 +1,10 @@
+use bevy_ecs::prelude::Resource;
+
 use crate::engen::Engen;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::job::Job;
 use crate::theme::Theme;
 use crate::viewport::Viewport;
-use bevy_ecs::prelude::Resource;
 
 pub(crate) type ExtractFns = Vec<Box<fn(&mut Job, &mut Job)>>;
 

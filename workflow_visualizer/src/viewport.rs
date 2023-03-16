@@ -1,3 +1,8 @@
+use bevy_ecs::change_detection::{Res, ResMut};
+use bevy_ecs::event::EventReader;
+use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
+use nalgebra::matrix;
+
 use crate::area::Area;
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
@@ -7,10 +12,6 @@ use crate::section::Section;
 use crate::uniform::Uniform;
 use crate::window::{gfx_resize, WindowResize};
 use crate::{Attach, Engen, Extract, InterfaceContext, Job, ScaleFactor, SyncPoint};
-use bevy_ecs::change_detection::{Res, ResMut};
-use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
-use nalgebra::matrix;
 
 #[derive(Resource)]
 pub struct Viewport {

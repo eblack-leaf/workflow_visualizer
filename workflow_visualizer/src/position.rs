@@ -1,10 +1,12 @@
-use crate::coord::{CoordContext, NumericalContext};
-use crate::{DeviceContext, InterfaceContext};
+use std::marker::PhantomData;
+use std::ops::{Add, AddAssign, Sub};
+
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
-use std::marker::PhantomData;
-use std::ops::{Add, AddAssign, Sub};
+
+use crate::coord::{CoordContext, NumericalContext};
+use crate::{DeviceContext, InterfaceContext};
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Position<Context: CoordContext> {

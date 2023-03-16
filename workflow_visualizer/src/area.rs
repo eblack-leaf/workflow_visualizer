@@ -1,9 +1,11 @@
-use crate::coord::{CoordContext, NumericalContext};
-use crate::{DeviceContext, InterfaceContext};
-use bevy_ecs::component::Component;
-use bytemuck::{Pod, Zeroable};
 use std::marker::PhantomData;
 use std::ops::{Add, Mul};
+
+use bevy_ecs::component::Component;
+use bytemuck::{Pod, Zeroable};
+
+use crate::coord::{CoordContext, NumericalContext};
+use crate::{DeviceContext, InterfaceContext};
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Area<Context: CoordContext> {

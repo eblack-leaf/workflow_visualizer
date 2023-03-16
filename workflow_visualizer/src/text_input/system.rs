@@ -1,3 +1,6 @@
+use bevy_ecs::entity::Entity;
+use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Without};
+
 use crate::content_panel::{ContentArea, ContentPanel, Padding};
 use crate::focus::{Focus, FocusedEntity};
 use crate::text::{AlignedFonts, TextBound, TextScale};
@@ -12,8 +15,6 @@ use crate::{
     TextBuffer, TextContent, TextContentView, TextGridDescriptor, TextGridLocation,
     TextLineStructure, TextScaleLetterDimensions, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
-use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Without};
 
 pub(crate) fn spawn(
     mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,

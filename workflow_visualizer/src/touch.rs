@@ -1,14 +1,16 @@
+use std::collections::HashMap;
+
+use bevy_ecs::prelude::{
+    Bundle, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut, Resource,
+};
+use winit::event::{ElementState, MouseButton};
+
 use crate::focus::FocusedEntity;
 use crate::viewport::ViewportHandle;
 use crate::{
     Area, Attach, DeviceContext, Engen, InterfaceContext, Layer, Position, ScaleFactor, Section,
     SyncPoint,
 };
-use bevy_ecs::prelude::{
-    Bundle, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut, Resource,
-};
-use std::collections::HashMap;
-use winit::event::{ElementState, MouseButton};
 
 #[derive(Copy, Clone, Debug)]
 pub struct TouchEvent {

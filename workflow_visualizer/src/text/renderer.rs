@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
+
 use crate::gfx::MsaaRenderAttachment;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 use crate::instance::index::Indexer;
@@ -17,7 +19,6 @@ use crate::{
     Color, Extract, Job, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor,
     Viewport,
 };
-use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
 #[derive(Resource)]
 pub(crate) struct TextRenderer {

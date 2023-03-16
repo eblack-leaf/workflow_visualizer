@@ -1,13 +1,12 @@
+use std::net::SocketAddr;
+use std::path::PathBuf;
+
 use axum::headers::{HeaderName, HeaderValue};
 use axum::http::Method;
 use axum::response::{Html, IntoResponse};
 use axum::routing::get;
 use axum::Router;
 use axum_server::tls_rustls::RustlsConfig;
-
-use std::net::SocketAddr;
-use std::path::PathBuf;
-
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;

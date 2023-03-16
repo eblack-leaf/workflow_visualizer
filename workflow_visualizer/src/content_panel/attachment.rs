@@ -1,3 +1,5 @@
+use bevy_ecs::prelude::IntoSystemConfig;
+
 use crate::content_panel::renderer::ContentPanelRenderer;
 use crate::content_panel::system::{
     calc_area_from_content_area, color_diff, content_area_diff, layer_diff, management,
@@ -5,7 +7,6 @@ use crate::content_panel::system::{
 };
 use crate::content_panel::{renderer, Extraction};
 use crate::{Attach, Engen, SyncPoint};
-use bevy_ecs::prelude::IntoSystemConfig;
 
 pub struct ContentPanelAttachment;
 impl Attach for ContentPanelAttachment {

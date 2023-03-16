@@ -1,12 +1,12 @@
+use bevy_ecs::change_detection::ResMut;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
+
 use crate::content_panel::renderer::ContentPanelRenderer;
 use crate::content_panel::vertex::CORNER_DEPTH;
 use crate::content_panel::{Cache, ContentArea, Difference, Extraction, Padding};
 use crate::gfx::GfxSurface;
-
 use crate::{Area, Color, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility};
-use bevy_ecs::change_detection::ResMut;
-use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,

@@ -1,9 +1,11 @@
-use bevy_ecs::prelude::{Added, Entity, IntoSystemConfig, Query, RemovedComponents, Res, ResMut};
 use std::net::SocketAddr;
+
+use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
+
 use workflow_visualizer::{
-    Animation, Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job,
-    Launch, Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
+    Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job, Launch,
+    Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
     TextInputRequest, TextInputText, TextScaleAlignment, Timer, UserSpaceSyncPoint, VisibleSection,
 };
 
@@ -28,7 +30,6 @@ pub fn compile_and_serve() {
         let addr = ([0, 0, 0, 0], 3030);
         println!("serving at addr: https://{:?}/", SocketAddr::from(addr));
         WasmServer::serve_at("app_web_build", addr);
-        return;
     }
 }
 fn logic(
@@ -36,7 +37,7 @@ fn logic(
     entity_store: Res<EntityStore>,
     mut text_query: Query<(&mut TextContent, &Position<InterfaceContext>)>,
     timer: Res<Timer>,
-    text_input: Query<(Entity, &TextInputText, &VisibleSection)>,
+    _text_input: Query<(Entity, &TextInputText, &VisibleSection)>,
 ) {
     idle.can_idle = false;
     let text_entity = *entity_store.store.get("animated_text").unwrap();
@@ -44,7 +45,7 @@ fn logic(
         text.data = format!("text pos at: {:.2}, {:.2}", pos.x, pos.y);
     }
     let text_entity = *entity_store.store.get("timer_text").unwrap();
-    if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
+    if let Ok((mut text, _pos)) = text_query.get_mut(text_entity) {
         text.data = format!("timer: {:.2}", timer.mark().0);
     }
 }

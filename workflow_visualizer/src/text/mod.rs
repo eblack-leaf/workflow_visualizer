@@ -1,3 +1,6 @@
+pub(crate) use frontend_system::{
+    calc_bound_from_guide, calc_scale_from_alignment, update_content,
+};
 pub(crate) use render_group::TextBound;
 
 pub use crate::text::attachment::TextAttachment;
@@ -11,9 +14,7 @@ pub use crate::text::text::{
     Letter, LetterStyle, Text, TextBuffer, TextContent, TextContentView, TextGridLocation,
     TextLineStructure,
 };
-pub(crate) use frontend_system::{
-    calc_bound_from_guide, calc_scale_from_alignment, update_content,
-};
+
 mod atlas;
 mod attachment;
 mod backend_system;

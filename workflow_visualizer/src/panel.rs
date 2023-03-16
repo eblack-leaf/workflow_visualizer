@@ -1,7 +1,8 @@
+use bevy_ecs::bundle::Bundle;
+
 use crate::coord::CoordContext;
 use crate::layer::Layer;
 use crate::section::Section;
-use bevy_ecs::bundle::Bundle;
 
 #[derive(Bundle, Copy, Clone)]
 pub struct Panel<Context: CoordContext> {

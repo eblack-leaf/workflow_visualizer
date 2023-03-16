@@ -1,6 +1,8 @@
+use std::ops::Add;
+
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
-use std::ops::Add;
+
 #[repr(C)]
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Pod, Zeroable)]
 pub struct Layer {
