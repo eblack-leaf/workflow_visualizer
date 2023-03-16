@@ -37,7 +37,7 @@ pub(crate) fn spawn(
         );
         let padding = inner_req.padding;
         let padding_pos = Position::new(padding.0.width, padding.0.height);
-        let padding_area = Area::from(padding.0);
+        let padding_area = padding.0;
         let text = cmd
             .spawn(Text::new(
                 content,

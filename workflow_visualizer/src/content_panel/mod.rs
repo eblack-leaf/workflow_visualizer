@@ -2,11 +2,11 @@ mod attachment;
 mod renderer;
 mod system;
 mod vertex;
-use crate::content_panel::vertex::CORNER_DEPTH;
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Panel, Position};
+
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Position};
 pub use attachment::ContentPanelAttachment;
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, ResMut, Resource};
-use bevy_ecs::query::Changed;
+use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
+
 use std::collections::{HashMap, HashSet};
 pub use system::calc_area_from_content_area;
 #[derive(Component, Copy, Clone)]

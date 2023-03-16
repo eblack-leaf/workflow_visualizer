@@ -1,4 +1,4 @@
-use crate::content_panel::Padding;
+
 use crate::focus::Focus;
 use crate::text_input::cursor::CursorIcon;
 use crate::text_input::Cursor;
