@@ -1,3 +1,4 @@
+use std::f32::consts::FRAC_PI_2;
 use crate::gfx::GfxSurface;
 use crate::RawPosition;
 use bytemuck::{Pod, Zeroable};
@@ -25,6 +26,12 @@ pub struct ContentPanelVertex {
 }
 pub(crate) const CORNER_DEPTH: u32 = 3;
 pub(crate) fn generate_mesh(corner_precision: u32, scale_factor: f64) -> Vec<ContentPanelVertex> {
+    let interval = 1f32 / corner_precision as f32;
+    let mut corners = Vec::new();
+    let mut mesh = Vec::new();
+    let mut current = 0f32;
+    let mut end = FRAC_PI_2;
+    let mut current_corner =
     vec![]
 }
 pub(crate) fn vertex_buffer(
