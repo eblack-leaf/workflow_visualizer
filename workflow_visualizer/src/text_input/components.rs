@@ -4,7 +4,8 @@ use crate::text_input::Cursor;
 use crate::touch::{TouchListener, Touchable};
 use crate::visibility::EnableVisibility;
 use crate::{
-    Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment, VirtualKeyboardType,
+    Area, Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment,
+    TextScaleLetterDimensions, VirtualKeyboardType,
 };
 use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
@@ -28,7 +29,7 @@ pub(crate) struct MaxCharacters(pub(crate) u32);
 pub struct TextInput {
     pub(crate) text_input_text: TextInputText,
     pub(crate) cursor_icon: CursorIcon,
-    pub(crate) background_icon: TextBackgroundIcon,
+    pub(crate) background_icon: TextContentPanel,
     pub(crate) alignment: TextScaleAlignment,
     pub(crate) grid_guide: TextGridDescriptor,
     #[bundle]
@@ -43,6 +44,8 @@ pub struct TextInput {
     pub(crate) visibility: EnableVisibility,
     pub(crate) text_color: TextColor,
     pub(crate) background_color: TextBackgroundColor,
+    pub(crate) area: Area<InterfaceContext>,
+    pub(crate) letter_dimensions: TextScaleLetterDimensions,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -55,7 +58,7 @@ impl TextInput {
     pub(crate) fn new<C: Into<Color>>(
         text_input_text: TextInputText,
         cursor_icon: CursorIcon,
-        background_icon: TextBackgroundIcon,
+        background_icon: TextContentPanel,
         alignment: TextScaleAlignment,
         bound_guide: TextGridDescriptor,
         location: Location<InterfaceContext>,
@@ -79,9 +82,11 @@ impl TextInput {
             visibility: EnableVisibility::new(),
             text_color: TextColor(text_color.into()),
             background_color: TextBackgroundColor(text_background_color.into()),
+            area: Area::default(),
+            letter_dimensions: TextScaleLetterDimensions::new(Area::default()),
         }
     }
 }
 
 #[derive(Component, Copy, Clone)]
-pub struct TextBackgroundIcon(pub Entity);
+pub struct TextContentPanel(pub Entity);

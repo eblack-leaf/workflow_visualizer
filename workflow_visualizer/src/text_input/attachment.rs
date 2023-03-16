@@ -1,8 +1,8 @@
 use crate::text_input::system::{
     cursor_letter_color_filter, open_virtual_keyboard, position_ties, read_input_if_focused,
-    set_cursor_location, spawn, update_cursor_pos,
+    reconfigure_text_input, set_cursor_location, spawn, update_cursor_pos,
 };
-use crate::{Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
+use crate::{content_panel, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
 use bevy_ecs::prelude::IntoSystemConfig;
 
 pub struct TextInputAttachment;
@@ -17,10 +17,18 @@ impl Attach for TextInputAttachment {
             .frontend
             .container
             .spawn(IconMeshAddRequest::new(IconDescriptors::Cursor, 5));
-        engen
-            .frontend
-            .main
-            .add_system(set_cursor_location.in_set(SyncPoint::Reconfigure));
+        engen.frontend.main.add_system(
+            set_cursor_location
+                .in_set(SyncPoint::Reconfigure)
+                .after(reconfigure_text_input),
+        );
+        engen.frontend.main.add_system(
+            reconfigure_text_input
+                .in_set(SyncPoint::Reconfigure)
+                .after(text::calc_scale_from_alignment)
+                .after(text::calc_bound_from_guide)
+                .before(content_panel::calc_area_from_content_area),
+        );
         engen
             .frontend
             .main

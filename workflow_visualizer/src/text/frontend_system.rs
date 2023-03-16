@@ -30,12 +30,15 @@ pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
 }
 
 pub(crate) fn calc_scale_from_alignment(
-    text: Query<(Entity, &TextScaleAlignment), Changed<TextScaleAlignment>>,
+    mut text: Query<
+        (Entity, &TextScaleAlignment, &mut TextScaleLetterDimensions),
+        Changed<TextScaleAlignment>,
+    >,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<AlignedFonts>,
     mut cmd: Commands,
 ) {
-    for (entity, text_scale_alignment) in text.iter() {
+    for (entity, text_scale_alignment, mut letter_dimensions) in text.iter_mut() {
         let scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor);
         let dimensions = fonts
             .fonts
@@ -43,21 +46,26 @@ pub(crate) fn calc_scale_from_alignment(
             .unwrap()
             .character_dimensions('a', scale.px());
         let device_dimensions = Area::<DeviceContext>::new(dimensions.width, dimensions.height);
-        cmd.entity(entity)
-            .insert((scale, TextScaleLetterDimensions::new(device_dimensions)));
+        *letter_dimensions = TextScaleLetterDimensions::new(device_dimensions);
+        cmd.entity(entity).insert(scale);
     }
 }
 
 pub(crate) fn calc_bound_from_guide(
-    text: Query<
-        (Entity, &TextGridDescriptor, &TextScaleAlignment),
+    mut text: Query<
+        (
+            Entity,
+            &TextGridDescriptor,
+            &TextScaleAlignment,
+            &mut Area<InterfaceContext>,
+        ),
         Or<(Without<TextBound>, Changed<TextGridDescriptor>)>,
     >,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
     aligned_fonts: Res<AlignedFonts>,
 ) {
-    for (entity, guide, alignment) in text.iter() {
+    for (entity, guide, alignment, mut area) in text.iter_mut() {
         let font = aligned_fonts.fonts.get(alignment).expect("no aligned font");
         let character_dimensions = font.character_dimensions(
             'a',
@@ -65,10 +73,8 @@ pub(crate) fn calc_bound_from_guide(
         );
         let width = guide.horizontal_character_max as f32 * character_dimensions.width;
         let height = guide.line_max as f32 * character_dimensions.height;
-        cmd.entity(entity).insert((
-            TextBound::new((width, height)),
-            Area::<DeviceContext>::new(width, height).to_ui(scale_factor.factor),
-        ));
+        *area = Area::<DeviceContext>::new(width, height).to_ui(scale_factor.factor);
+        cmd.entity(entity).insert(TextBound::new((width, height)));
     }
 }
 

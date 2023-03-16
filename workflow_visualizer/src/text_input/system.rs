@@ -1,16 +1,12 @@
+use crate::content_panel::{ContentArea, ContentPanel};
 use crate::focus::{Focus, FocusedEntity};
 use crate::text::{AlignedFonts, TextBound, TextScale};
-use crate::text_input::components::{MaxCharacters, TextBackgroundIcon, TextInput, TextInputText};
+use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
 use crate::text_input::cursor::{Cursor, CursorIcon};
 use crate::text_input::request::TextInputRequest;
 use crate::text_input::{TextBackgroundColor, TextColor};
 use crate::touch::{TouchLocation, Touched};
-use crate::{
-    Area, ColorInvert, Icon, IconDescriptors, IconSecondaryColor, IconSize, InterfaceContext,
-    Layer, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBuffer,
-    TextContent, TextContentView, TextGridDescriptor, TextGridLocation, TextLineStructure,
-    TextScaleLetterDimensions, VirtualKeyboardAdapter, VirtualKeyboardType,
-};
+use crate::{Area, Color, ColorInvert, Icon, IconDescriptors, IconSecondaryColor, IconSize, InterfaceContext, Layer, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBuffer, TextContent, TextContentView, TextGridDescriptor, TextGridLocation, TextLineStructure, TextScaleLetterDimensions, VirtualKeyboardAdapter, VirtualKeyboardType};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 
@@ -56,22 +52,16 @@ pub(crate) fn spawn(
             ))
             .insert(ColorInvert::on())
             .id();
-        let background_icon = cmd
-            .spawn(Icon::new(
-                IconDescriptors::Cursor.key(),
-                Location::from((
-                    inner_req.location.position,
-                    inner_req.location.layer + Layer::from(2u32),
-                )),
-                IconSize::Custom((character_dimensions.width, character_dimensions.height)),
-                inner_req.background_color,
-                IconSecondaryColor::new(inner_req.text_color),
-            ))
-            .id();
+        let content_panel = cmd.spawn(
+            ContentPanel::new(Location::from((
+                inner_req.location.position,
+                inner_req.location.layer + Layer::from(2u32),
+            )), inner_req.background_color, Area::from((3, 3)), 1, Color::OFF_WHITE.into())
+        ).id();
         cmd.entity(entity).insert(TextInput::new(
             TextInputText::new(text),
             CursorIcon::new(cursor_icon),
-            TextBackgroundIcon(background_icon),
+            TextContentPanel(content_panel),
             inner_req.alignment,
             inner_req.grid_guide,
             inner_req.location,
@@ -87,7 +77,7 @@ pub(crate) fn position_ties(
         (
             &Position<InterfaceContext>,
             &TextInputText,
-            &TextBackgroundIcon,
+            &TextContentPanel,
             &CursorIcon,
             &TextScaleLetterDimensions,
             &Cursor,
@@ -110,34 +100,35 @@ pub(crate) fn position_ties(
     }
 }
 
-pub(crate) fn calc_area(
-    text_inputs: Query<
+pub(crate) fn reconfigure_text_input(
+    mut text_inputs: Query<
         (
-            Entity,
-            &TextBound,
             &TextInputText,
             &TextGridDescriptor,
             &TextColor,
-            &TextBackgroundIcon,
+            &TextContentPanel,
+            &Area<InterfaceContext>,
+            &mut TextScaleLetterDimensions,
         ),
         Or<(Changed<TextBound>, Changed<TextGridDescriptor>)>,
     >,
-    text: Query<&TextScaleLetterDimensions>,
-    mut cmd: Commands,
+    mut text: Query<(&TextScaleLetterDimensions, &mut TextContentView)>,
+    mut content_panels: Query<&mut ContentArea>,
 ) {
-    for (entity, bound, text_input_text, grid_guide, text_color, background_icon) in
-        text_inputs.iter()
+    for (text_input_text, grid_guide, text_color, content_panel, area, mut letter_dimensions) in
+        text_inputs.iter_mut()
     {
-        let letter_dimensions = text.get(text_input_text.entity).unwrap();
-        cmd.entity(entity).insert((bound.area, *letter_dimensions));
+        let (text_letter_dimensions, mut text_content_view) =
+            text.get_mut(text_input_text.entity).unwrap();
+        *letter_dimensions = *text_letter_dimensions;
         let view = TextContentView::new(
             0,
             grid_guide.horizontal_character_max * grid_guide.line_max,
             text_color.0,
         );
-        cmd.entity(text_input_text.entity).insert(view);
-        cmd.entity(background_icon.0)
-            .insert(IconSize::Custom((bound.area.width, bound.area.height)));
+        *text_content_view = view;
+        let mut content_panel_area = content_panels.get_mut(content_panel.0).unwrap();
+        *content_panel_area = ContentArea(*area);
     }
 }
 

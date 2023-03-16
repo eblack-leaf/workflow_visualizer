@@ -11,7 +11,7 @@ use crate::text::place::Placer;
 use crate::text::scale::TextScaleAlignment;
 use crate::text::WrapStyleComponent;
 use crate::visibility::{EnableVisibility, VisibleSection};
-use crate::{Color, Location, TextGridDescriptor};
+use crate::{Area, Color, Location, TextGridDescriptor, TextScaleLetterDimensions};
 
 bitflags! {
     pub struct LetterStyle: u32 {
@@ -172,6 +172,8 @@ pub struct Text {
     pub(crate) visibility: EnableVisibility,
     pub(crate) wrap_style: WrapStyleComponent,
     pub(crate) text_buffer: TextBuffer,
+    pub(crate) area: Area<InterfaceContext>,
+    pub(crate) letter_dimensions: TextScaleLetterDimensions,
 }
 
 impl Text {
@@ -210,6 +212,8 @@ impl Text {
             visibility: EnableVisibility::new(),
             wrap_style: WrapStyleComponent(WrapStyle::Letter),
             text_buffer,
+            area: Area::default(),
+            letter_dimensions: TextScaleLetterDimensions::new(Area::default()),
         }
     }
 }

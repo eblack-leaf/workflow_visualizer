@@ -3,7 +3,7 @@ use crate::{DeviceContext, InterfaceContext};
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use std::marker::PhantomData;
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Area<Context: CoordContext> {
@@ -87,5 +87,11 @@ impl<Context: CoordContext> Mul for Area<Context> {
     type Output = Area<Context>;
     fn mul(self, rhs: Self) -> Self::Output {
         Area::<Context>::new(self.width * rhs.width, self.height * rhs.height)
+    }
+}
+impl<Context: CoordContext> Add for Area<Context> {
+    type Output = Area<Context>;
+    fn add(self, rhs: Self) -> Self::Output {
+        Area::<Context>::new(self.width + rhs.width, self.height + rhs.height)
     }
 }

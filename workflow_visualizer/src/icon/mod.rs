@@ -40,7 +40,7 @@ pub(crate) struct IconRenderer {
     pub(crate) meshes: HashMap<IconKey, GpuIconMesh>,
     pub(crate) position: HashMap<IconKey, InstanceAttributeManager<RawPosition>>,
     pub(crate) area: HashMap<IconKey, InstanceAttributeManager<RawArea>>,
-    pub(crate) depth: HashMap<IconKey, InstanceAttributeManager<Layer>>,
+    pub(crate) layer: HashMap<IconKey, InstanceAttributeManager<Layer>>,
     pub(crate) color: HashMap<IconKey, InstanceAttributeManager<Color>>,
     pub(crate) secondary_color: HashMap<IconKey, InstanceAttributeManager<Color>>,
     pub(crate) color_invert: HashMap<IconKey, InstanceAttributeManager<ColorInvert>>,
@@ -63,7 +63,7 @@ impl IconRenderer {
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.area
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
-        self.depth
+        self.layer
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
         self.color
             .insert(icon_key, InstanceAttributeManager::new(gfx_surface, max));
@@ -101,7 +101,7 @@ impl IconRenderer {
             .write
             .write
             .insert(index, icon.panel.section.area.as_raw());
-        self.depth
+        self.layer
             .get_mut(&icon.key)
             .unwrap()
             .write
@@ -182,7 +182,7 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
             let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
-            self.depth
+            self.layer
                 .get_mut(icon_key)
                 .unwrap()
                 .write
@@ -242,7 +242,7 @@ impl IconRenderer {
                 .get_mut(&icon_key)
                 .unwrap()
                 .grow(gfx_surface, new_max);
-            self.depth
+            self.layer
                 .get_mut(&icon_key)
                 .unwrap()
                 .grow(gfx_surface, new_max);
@@ -278,7 +278,7 @@ impl IconRenderer {
                 .get_mut(&key)
                 .unwrap()
                 .write_attribute(gfx_surface);
-            self.depth
+            self.layer
                 .get_mut(&key)
                 .unwrap()
                 .write_attribute(gfx_surface);
@@ -434,7 +434,7 @@ impl IconRenderer {
             color: HashMap::new(),
             secondary_color: HashMap::new(),
             area: HashMap::new(),
-            depth: HashMap::new(),
+            layer: HashMap::new(),
             key_factory: HashMap::new(),
             indexer: HashMap::new(),
             null_bit: HashMap::new(),
@@ -481,7 +481,7 @@ impl Render for IconRenderer {
                 let mesh = self.meshes.get(icon_key).unwrap();
                 let positions = self.position.get(icon_key).unwrap();
                 let area = self.area.get(icon_key).unwrap();
-                let depth = self.depth.get(icon_key).unwrap();
+                let depth = self.layer.get(icon_key).unwrap();
                 let color = self.color.get(icon_key).unwrap();
                 let secondary_color = self.secondary_color.get(icon_key).unwrap();
                 let null_bit = self.null_bit.get(icon_key).unwrap();

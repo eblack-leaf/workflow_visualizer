@@ -1,4 +1,5 @@
 use crate::area::Area;
+use crate::content_panel::ContentPanelAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::{GfxStack, GfxSurface};
 use crate::icon::IconAttachment;
@@ -60,6 +61,7 @@ impl Engen {
                         self.invoke_attach::<TextAttachment>();
                         self.invoke_attach::<VirtualKeyboardAttachment>();
                         self.invoke_attach::<TextInputAttachment>();
+                        self.invoke_attach::<ContentPanelAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
