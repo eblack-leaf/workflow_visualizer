@@ -2,8 +2,8 @@ use bevy_ecs::prelude::{Added, Entity, IntoSystemConfig, Query, RemovedComponent
 use std::net::SocketAddr;
 use winit::event_loop::EventLoop;
 use workflow_visualizer::{
-    Animation, Color, Engen, EngenOptions, EntityStore, Idle, InterfaceContext, Job, Launch,
-    Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
+    Animation, Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job,
+    Launch, Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
     TextInputRequest, TextInputText, TextScaleAlignment, Timer, UserSpaceSyncPoint, VisibleSection,
 };
 
@@ -70,7 +70,9 @@ fn logic(
 struct Launcher;
 impl Launch for Launcher {
     fn options() -> EngenOptions {
-        EngenOptions::new().with_native_dimensions((500, 900))
+        EngenOptions::new()
+            .with_native_dimensions((500, 900))
+            .with_gfx_options(GfxOptions::native().with_msaa(4))
     }
 
     fn preparation(frontend: &mut Job) {
@@ -130,6 +132,7 @@ impl Launch for Launcher {
                 Location::from(((100, 120), 0)),
                 Color::OFF_WHITE,
                 Color::DARK_GREY,
+                (5, 5),
             )))
             // .insert(PositionAdjust::<UIView>::new(400.0, 0.0).animate(4.0))
             .id();

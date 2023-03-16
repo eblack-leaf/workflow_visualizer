@@ -280,7 +280,6 @@ pub(crate) fn frontend_setup(mut cmd: Commands) {
 pub(crate) fn calc_area(
     scale_factor: Res<ScaleFactor>,
     mut icons: Query<(&IconSize, &mut Area<InterfaceContext>), Changed<IconSize>>,
-    mut cmd: Commands,
 ) {
     for (size, mut area) in icons.iter_mut() {
         match size {

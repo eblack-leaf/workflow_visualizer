@@ -7,7 +7,7 @@ use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Pa
 pub use attachment::ContentPanelAttachment;
 use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query, ResMut, Resource};
 use bevy_ecs::query::Changed;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 pub use system::calc_area_from_content_area;
 #[derive(Component, Copy, Clone)]
 pub struct LineWidth(pub u32);
@@ -93,11 +93,13 @@ impl Difference {
 #[derive(Resource)]
 pub(crate) struct Extraction {
     pub(crate) differences: HashMap<Entity, Difference>,
+    pub(crate) removed: HashSet<Entity>,
 }
 impl Extraction {
     pub(crate) fn new() -> Self {
         Self {
             differences: HashMap::new(),
+            removed: HashSet::new(),
         }
     }
 }

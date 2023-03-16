@@ -1,9 +1,12 @@
+use crate::content_panel::renderer::ContentPanelRenderer;
 use crate::content_panel::vertex::CORNER_DEPTH;
 use crate::content_panel::{Cache, ContentArea, Difference, Extraction, Padding};
-use crate::{Area, Color, InterfaceContext, Layer, Position};
+use crate::gfx::GfxSurface;
+use crate::render::render;
+use crate::{Area, Color, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility};
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Commands, Query};
+use bevy_ecs::prelude::{Changed, Commands, Or, Query, RemovedComponents, Res, With};
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -18,39 +21,152 @@ pub(crate) fn pull_differences(
 pub fn calc_area_from_content_area(
     mut content_changed: Query<
         (&ContentArea, &Padding, &mut Area<InterfaceContext>),
-        Changed<ContentArea>,
+        Or<(Changed<ContentArea>, Changed<Padding>)>,
     >,
 ) {
     for (content_area, padding, mut area) in content_changed.iter_mut() {
-        let calculated_area = content_area.0
-            + padding.0 * Area::from((2, 2))
-            + Area::from((CORNER_DEPTH * 2, CORNER_DEPTH * 2));
+        let calculated_area =
+            content_area.0 + padding.0 + Area::from((CORNER_DEPTH * 2.0, CORNER_DEPTH * 2.0));
+        println!(
+            "content area: {:?}, calculated area: {:?}",
+            content_area.0, calculated_area
+        );
         *area = calculated_area;
     }
 }
-
+pub(crate) fn management(
+    mut removed: RemovedComponents<ContentArea>,
+    lost_visibility: Query<(Entity, &Visibility), (With<ContentArea>, Changed<Visibility>)>,
+    mut extraction: ResMut<Extraction>,
+) {
+    for entity in removed.iter() {
+        extraction.removed.insert(entity);
+    }
+    for (entity, visibility) in lost_visibility.iter() {
+        if !visibility.visible() {
+            extraction.removed.insert(entity);
+        }
+    }
+}
 pub(crate) fn position_diff(
     mut pos_changed: Query<
         (&Position<InterfaceContext>, &mut Cache, &mut Difference),
         Changed<Position<InterfaceContext>>,
     >,
 ) {
+    for (pos, mut cache, mut diff) in pos_changed.iter_mut() {
+        if let Some(cached) = cache.position {
+            if *pos != cached {
+                cache.position.replace(*pos);
+                diff.position.replace(*pos);
+            }
+        } else {
+            cache.position.replace(*pos);
+            diff.position.replace(*pos);
+        }
+    }
 }
 
 pub(crate) fn content_area_diff(
     mut content_area_changed: Query<
-        (&ContentArea, &mut Cache, &mut Difference),
-        Changed<ContentArea>,
+        (&ContentArea, &Padding, &mut Cache, &mut Difference),
+        Or<(Changed<ContentArea>, Changed<Padding>)>,
     >,
 ) {
+    for (content_area, padding, mut cache, mut diff) in content_area_changed.iter_mut() {
+        let padded_content_area = content_area.0 + padding.0;
+        println!("padded content area: {:?}", padded_content_area);
+        if let Some(cached) = cache.content_area {
+            if padded_content_area != cached {
+                cache.content_area.replace(padded_content_area);
+                diff.content_area.replace(padded_content_area);
+            }
+        } else {
+            cache.content_area.replace(padded_content_area);
+            diff.content_area.replace(padded_content_area);
+        }
+    }
 }
 
 pub(crate) fn layer_diff(
     mut layer_changed: Query<(&Layer, &mut Cache, &mut Difference), Changed<Layer>>,
 ) {
+    for (layer, mut cache, mut diff) in layer_changed.iter_mut() {
+        if let Some(cached) = cache.layer {
+            if *layer != cached {
+                cache.layer.replace(*layer);
+                diff.layer.replace(*layer);
+            }
+        } else {
+            cache.layer.replace(*layer);
+            diff.layer.replace(*layer);
+        }
+    }
 }
 
 pub(crate) fn color_diff(
     mut color_changed: Query<(&Color, &mut Cache, &mut Difference), Changed<Color>>,
 ) {
+    for (color, mut cache, mut diff) in color_changed.iter_mut() {
+        if let Some(cached) = cache.color {
+            if *color != cached {
+                cache.color.replace(*color);
+                diff.color.replace(*color);
+            }
+        } else {
+            cache.color.replace(*color);
+            diff.color.replace(*color);
+        }
+    }
+}
+
+pub(crate) fn process_extraction(
+    mut renderer: ResMut<ContentPanelRenderer>,
+    mut extraction: ResMut<Extraction>,
+    scale_factor: Res<ScaleFactor>,
+    gfx_surface: Res<GfxSurface>,
+) {
+    for entity in extraction.removed.drain() {
+        let old = renderer.indexer.remove(entity);
+        if let Some(o) = old {
+            renderer.null_bits.queue_write(o, NullBit::null());
+        }
+    }
+    for (entity, difference) in extraction.differences.iter() {
+        if renderer.indexer.get_index(*entity).is_none() {
+            let _ = renderer.indexer.next(*entity);
+        }
+    }
+    if renderer.indexer.should_grow() {
+        let max = renderer.indexer.max();
+        renderer.positions.grow(&gfx_surface, max);
+        renderer.content_area.grow(&gfx_surface, max);
+        renderer.layers.grow(&gfx_surface, max);
+        renderer.colors.grow(&gfx_surface, max);
+        renderer.null_bits.grow(&gfx_surface, max);
+    }
+    for (entity, difference) in extraction.differences.drain() {
+        let index = renderer.indexer.get_index(entity).unwrap();
+        if let Some(pos) = difference.position {
+            renderer
+                .positions
+                .queue_write(index, pos.to_device(scale_factor.factor).as_raw());
+        }
+        if let Some(content_area) = difference.content_area {
+            renderer
+                .content_area
+                .queue_write(index, content_area.to_device(scale_factor.factor).as_raw())
+        }
+        if let Some(layer) = difference.layer {
+            renderer.layers.queue_write(index, layer);
+        }
+        if let Some(color) = difference.color {
+            renderer.colors.queue_write(index, color);
+        }
+    }
+    renderer.positions.write_attribute(&gfx_surface);
+    renderer.content_area.write_attribute(&gfx_surface);
+    renderer.layers.write_attribute(&gfx_surface);
+    renderer.colors.write_attribute(&gfx_surface);
+    renderer.null_bits.write_attribute(&gfx_surface);
 }

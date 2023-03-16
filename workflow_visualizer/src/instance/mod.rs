@@ -79,6 +79,9 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
             write: AttributeWrite::new(),
         }
     }
+    pub fn queue_write(&mut self, index: Index, attr: Attribute) {
+        self.write.write.insert(index, attr);
+    }
     pub fn grow(&mut self, gfx_surface: &GfxSurface, max: u32) {
         self.cpu.buffer.resize(max as usize, Attribute::default());
         self.gpu = GpuAttributeBuffer::<Attribute>::new(gfx_surface, max, "attribute buffer");

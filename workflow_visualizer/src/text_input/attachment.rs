@@ -1,6 +1,6 @@
 use crate::text_input::system::{
     cursor_letter_color_filter, open_virtual_keyboard, position_ties, read_input_if_focused,
-    reconfigure_text_input, set_cursor_location, spawn, update_cursor_pos,
+    read_padding_change, reconfigure_text_input, set_cursor_location, spawn, update_cursor_pos,
 };
 use crate::{content_panel, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
 use bevy_ecs::prelude::IntoSystemConfig;
@@ -9,6 +9,11 @@ pub struct TextInputAttachment;
 
 impl Attach for TextInputAttachment {
     fn attach(engen: &mut Engen) {
+        engen.frontend.main.add_system(
+            read_padding_change
+                .in_set(SyncPoint::Reconfigure)
+                .before(position_ties),
+        );
         engen
             .frontend
             .main

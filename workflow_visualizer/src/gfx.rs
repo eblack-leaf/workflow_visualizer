@@ -33,6 +33,10 @@ impl GfxOptions {
             msaa: 1,
         }
     }
+    pub fn with_msaa(mut self, msaa: u32) -> Self {
+        self.msaa = msaa;
+        self
+    }
 }
 #[derive(Resource)]
 pub struct GfxSurface {

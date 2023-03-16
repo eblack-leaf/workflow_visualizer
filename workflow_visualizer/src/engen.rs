@@ -405,7 +405,8 @@ impl Engen {
             .options
             .gfx_options
             .clone()
-            .unwrap_or(GfxOptions::web());
+            .unwrap_or(GfxOptions::web())
+            .web_align();
         #[cfg(target_arch = "wasm32")]
         {
             use winit::platform::web::WindowExtWebSys;
@@ -526,6 +527,10 @@ impl EngenOptions {
     }
     pub fn with_theme(mut self, theme: Theme) -> Self {
         self.theme = theme;
+        self
+    }
+    pub fn with_gfx_options(mut self, gfx_options: GfxOptions) -> Self {
+        self.gfx_options.replace(gfx_options);
         self
     }
 }

@@ -47,6 +47,16 @@ pub(crate) fn set_sync_points(engen: &mut Engen) {
         )
             .chain(),
     );
+    engen.frontend.main.add_system(
+        apply_system_buffers
+            .after(SyncPoint::Spawn)
+            .before(SyncPoint::Reconfigure),
+    );
+    engen.frontend.main.add_system(
+        apply_system_buffers
+            .after(SyncPoint::Reconfigure)
+            .before(SyncPoint::ResolveVisibility),
+    );
     engen.backend.startup.configure_sets(
         (
             SyncPoint::Initialization,

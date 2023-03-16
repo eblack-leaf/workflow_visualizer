@@ -1,4 +1,4 @@
-use crate::content_panel::{ContentArea, ContentPanel};
+use crate::content_panel::{ContentArea, ContentPanel, Padding};
 use crate::focus::{Focus, FocusedEntity};
 use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
@@ -6,9 +6,14 @@ use crate::text_input::cursor::{Cursor, CursorIcon};
 use crate::text_input::request::TextInputRequest;
 use crate::text_input::{TextBackgroundColor, TextColor};
 use crate::touch::{TouchLocation, Touched};
-use crate::{Area, Color, ColorInvert, Icon, IconDescriptors, IconSecondaryColor, IconSize, InterfaceContext, Layer, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text, TextBuffer, TextContent, TextContentView, TextGridDescriptor, TextGridLocation, TextLineStructure, TextScaleLetterDimensions, VirtualKeyboardAdapter, VirtualKeyboardType};
+use crate::{
+    Area, Color, ColorInvert, Icon, IconDescriptors, IconSecondaryColor, IconSize,
+    InterfaceContext, Layer, Letter, LetterStyle, Location, Position, Request, ScaleFactor, Text,
+    TextBuffer, TextContent, TextContentView, TextGridDescriptor, TextGridLocation,
+    TextLineStructure, TextScaleLetterDimensions, VirtualKeyboardAdapter, VirtualKeyboardType,
+};
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
+use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Without};
 
 pub(crate) fn spawn(
     mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
@@ -30,11 +35,17 @@ pub(crate) fn spawn(
             inner_req.grid_guide.horizontal_character_max * inner_req.grid_guide.line_max,
             inner_req.text_color,
         );
+        let padding = inner_req.padding;
+        let padding_pos = Position::new(padding.0.width, padding.0.height);
+        let padding_area = Area::from(padding.0);
         let text = cmd
             .spawn(Text::new(
                 content,
                 view,
-                inner_req.location,
+                Location::from((
+                    inner_req.location.position + padding_pos,
+                    inner_req.location.layer,
+                )),
                 inner_req.alignment,
                 inner_req.grid_guide,
             ))
@@ -43,7 +54,7 @@ pub(crate) fn spawn(
             .spawn(Icon::new(
                 IconDescriptors::Cursor.key(),
                 Location::from((
-                    inner_req.location.position,
+                    inner_req.location.position + padding_pos,
                     inner_req.location.layer + Layer::from(1u32),
                 )),
                 IconSize::Custom((character_dimensions.width, character_dimensions.height)),
@@ -52,26 +63,44 @@ pub(crate) fn spawn(
             ))
             .insert(ColorInvert::on())
             .id();
-        let content_panel = cmd.spawn(
-            ContentPanel::new(Location::from((
-                inner_req.location.position,
-                inner_req.location.layer + Layer::from(2u32),
-            )), inner_req.background_color, Area::from((3, 3)), 1, Color::OFF_WHITE.into())
-        ).id();
+        let content_panel = cmd
+            .spawn(ContentPanel::new(
+                Location::from((
+                    inner_req.location.position,
+                    inner_req.location.layer + Layer::from(2u32),
+                )),
+                inner_req.background_color,
+                padding_area,
+                1,
+                Color::OFF_WHITE.into(),
+            ))
+            .id();
         cmd.entity(entity).insert(TextInput::new(
             TextInputText::new(text),
             CursorIcon::new(cursor_icon),
             TextContentPanel(content_panel),
             inner_req.alignment,
             inner_req.grid_guide,
-            inner_req.location,
+            Location::from((
+                inner_req.location.position + padding_pos,
+                inner_req.location.layer,
+            )),
             inner_req.text_color,
             inner_req.background_color,
         ));
         cmd.entity(entity).remove::<Request<TextInputRequest>>();
     }
 }
-
+pub(crate) fn read_padding_change(
+    mut text_inputs: Query<(&TextContentPanel, &mut Position<InterfaceContext>), Without<Padding>>,
+    changed_content_panels: Query<(&Padding, &Position<InterfaceContext>), Changed<Padding>>,
+) {
+    for (content_panel, mut pos) in text_inputs.iter_mut() {
+        if let Ok((padding, content_panel_pos)) = changed_content_panels.get(content_panel.0) {
+            *pos = *content_panel_pos + Position::new(padding.0.width, padding.0.height);
+        }
+    }
+}
 pub(crate) fn position_ties(
     moved: Query<
         (
@@ -84,16 +113,19 @@ pub(crate) fn position_ties(
         ),
         Changed<Position<InterfaceContext>>,
     >,
+    padding_read: Query<&Padding>,
     mut cmd: Commands,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (pos, text_input_text, text_background_icon, cursor_icon, letter_dimensions, cursor) in
+    for (pos, text_input_text, text_content_panel, cursor_icon, letter_dimensions, cursor) in
         moved.iter()
     {
+        let padding = padding_read.get(text_content_panel.0).unwrap();
         cmd.entity(text_input_text.entity).insert(*pos);
-        cmd.entity(text_background_icon.0).insert(*pos);
+        cmd.entity(text_content_panel.0)
+            .insert(*pos - Position::new(padding.0.width, padding.0.height));
         cmd.entity(cursor_icon.entity).insert(cursor_coords(
-            pos,
+            *pos,
             cursor,
             letter_dimensions.dimensions.to_ui(scale_factor.factor),
         ));
@@ -101,26 +133,21 @@ pub(crate) fn position_ties(
 }
 
 pub(crate) fn reconfigure_text_input(
-    mut text_inputs: Query<
+    text_inputs: Query<
         (
             &TextInputText,
             &TextGridDescriptor,
             &TextColor,
             &TextContentPanel,
             &Area<InterfaceContext>,
-            &mut TextScaleLetterDimensions,
         ),
         Or<(Changed<TextBound>, Changed<TextGridDescriptor>)>,
     >,
-    mut text: Query<(&TextScaleLetterDimensions, &mut TextContentView)>,
+    mut text: Query<&mut TextContentView>,
     mut content_panels: Query<&mut ContentArea>,
 ) {
-    for (text_input_text, grid_guide, text_color, content_panel, area, mut letter_dimensions) in
-        text_inputs.iter_mut()
-    {
-        let (text_letter_dimensions, mut text_content_view) =
-            text.get_mut(text_input_text.entity).unwrap();
-        *letter_dimensions = *text_letter_dimensions;
+    for (text_input_text, grid_guide, text_color, content_panel, area) in text_inputs.iter() {
+        let mut text_content_view = text.get_mut(text_input_text.entity).unwrap();
         let view = TextContentView::new(
             0,
             grid_guide.horizontal_character_max * grid_guide.line_max,
@@ -254,11 +281,12 @@ pub(crate) fn set_cursor_location(
     ) in clicked.iter_mut()
     {
         if touched.touched() {
-            let (mut text, line_structure) = text_entities.get_mut(text_input_text.entity).unwrap();
             let click_location = touch_location.0.unwrap();
+            let click_offset_x = click_location.x - pos.x;
+            let click_offset_y = click_location.y - pos.y;
+            let (mut text, line_structure) = text_entities.get_mut(text_input_text.entity).unwrap();
             let ui_letter_dimensions = character_dimensions.dimensions.to_ui(scale_factor.factor);
-            let mut line_clicked =
-                ((click_location.y - pos.y) / ui_letter_dimensions.height).floor() as usize;
+            let mut line_clicked = (click_offset_y / ui_letter_dimensions.height).floor() as usize;
             let potential_letter_count = line_structure
                 .letter_count
                 .get(line_clicked)
@@ -284,8 +312,7 @@ pub(crate) fn set_cursor_location(
                 }
                 line_clicked = next_line_up
             }
-            let click_x = click_location.x - pos.x;
-            let x_letter_location = (click_x / ui_letter_dimensions.width).floor() as u32;
+            let x_letter_location = (click_offset_x / ui_letter_dimensions.width).floor() as u32;
             let current_line_letter_count = line_structure
                 .letter_count
                 .get(line_clicked)
@@ -349,12 +376,12 @@ pub(crate) fn update_cursor_pos(
     for (_entity, pos, cursor, letter_dimensions, cursor_icon) in updated.iter() {
         let ui_letter_dimensions = letter_dimensions.dimensions.to_ui(scale_factor.factor);
         cmd.entity(cursor_icon.entity)
-            .insert(cursor_coords(pos, cursor, ui_letter_dimensions));
+            .insert(cursor_coords(*pos, cursor, ui_letter_dimensions));
     }
 }
 
 fn cursor_coords(
-    pos: &Position<InterfaceContext>,
+    pos: Position<InterfaceContext>,
     cursor: &Cursor,
     ui_letter_dimensions: Area<InterfaceContext>,
 ) -> Position<InterfaceContext> {

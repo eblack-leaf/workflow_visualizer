@@ -3,10 +3,11 @@ use crate::content_panel::{Difference, Extraction};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::instance::key::KeyFactory;
 use crate::{
-    Color, Extract, Indexer, InstanceAttributeManager, Job, Key, Layer, NullBit, RawArea,
+    Color, Extract, Index, Indexer, InstanceAttributeManager, Job, Key, Layer, NullBit, RawArea,
     RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
+use std::collections::HashMap;
 #[derive(Resource)]
 pub(crate) struct ContentPanelRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
@@ -17,8 +18,7 @@ pub(crate) struct ContentPanelRenderer {
     pub(crate) null_bits: InstanceAttributeManager<NullBit>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) mesh_length: u32,
-    pub(crate) indexer: Indexer<Key>,
-    pub(crate) key_factory: KeyFactory,
+    pub(crate) indexer: Indexer<Entity>,
 }
 pub(crate) fn setup(
     gfx_surface: Res<GfxSurface>,
@@ -111,7 +111,7 @@ pub(crate) fn setup(
         multiview: None,
     };
     let pipeline = gfx_surface.device.create_render_pipeline(&descriptor);
-    let mesh = generate_mesh(16, scale_factor.factor);
+    let mesh = generate_mesh(64, scale_factor.factor);
     let mesh_len = mesh.len() as u32;
     let buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
     let initial_max = 5;
@@ -125,7 +125,6 @@ pub(crate) fn setup(
         vertex_buffer: buffer,
         mesh_length: mesh_len,
         indexer: Indexer::new(initial_max),
-        key_factory: KeyFactory::new(),
     };
     cmd.insert_resource(renderer);
 }
