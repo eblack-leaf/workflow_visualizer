@@ -17,6 +17,7 @@ impl GfxOptions {
     pub fn web_align(mut self) -> Self {
         self.backends = wgpu::Backends::all();
         self.limits = wgpu::Limits::downlevel_webgl2_defaults();
+        self.msaa = 1;
         self
     }
     pub fn web() -> Self {

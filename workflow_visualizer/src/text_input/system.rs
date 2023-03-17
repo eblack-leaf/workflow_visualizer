@@ -70,6 +70,7 @@ pub(crate) fn spawn(
                     inner_req.location.position,
                     inner_req.location.layer + Layer::from(2u32),
                 )),
+                Area::default(),
                 inner_req.background_color,
                 padding_area,
                 1,

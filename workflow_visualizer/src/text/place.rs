@@ -18,7 +18,7 @@ pub(crate) struct Placer {
     filtered_placement: Vec<(Key, GlyphPosition<LetterMetadata>)>,
 }
 
-pub type WrapStyleExpt = WrapStyle;
+
 
 #[derive(Component)]
 pub struct WrapStyleComponent(pub WrapStyle);

@@ -231,7 +231,7 @@ pub(crate) fn frontend_area_adjust(
 }
 #[derive(Resource)]
 pub struct ViewportHandle {
-    pub(crate) section: Section<InterfaceContext>,
+    pub section: Section<InterfaceContext>,
     position_dirty: bool,
 }
 
@@ -245,9 +245,6 @@ impl ViewportHandle {
     pub fn position_adjust(&mut self, adjust: Position<InterfaceContext>) {
         self.section.position += adjust;
         self.position_dirty = true;
-    }
-    pub fn adjust_area(&mut self, area: Area<InterfaceContext>) {
-        self.section.area = area;
     }
 }
 

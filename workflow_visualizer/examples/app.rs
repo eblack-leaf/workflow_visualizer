@@ -3,12 +3,7 @@ use std::net::SocketAddr;
 use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
 
-use workflow_visualizer::{
-    Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job, Launch,
-    Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
-    TextInputRequest, TextInputText, TextScaleAlignment, Theme, ThemeDescriptor, Timer,
-    UserSpaceSyncPoint, VisibleSection,
-};
+use workflow_visualizer::{Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job, Launch, Location, Panel, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor, TextInputRequest, TextInputText, TextScaleAlignment, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, VisibleSection};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -77,16 +72,26 @@ impl Launch for Launcher {
             .with_theme(Theme::new(
                 ThemeDescriptor::new().with_background(Color::DARK_CYAN),
             ))
-            .with_gfx_options(GfxOptions::native().with_msaa(1))
+            .with_gfx_options(GfxOptions::native().with_msaa(4))
     }
 
     fn preparation(frontend: &mut Job) {
+        let id = frontend.container.spawn(Request::new(
+            Panel::new(
+                Location::from(((10.0, 10.0), 3)),
+                (44 * 11, 200),
+                Color::DARK_ORANGE,
+                (3, 3),
+                1, Color::DARK_ORANGE,
+            )
+        )).id();
+        frontend.store_entity("panel", id);
         let id = frontend
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("animated text"),
-                TextContentView::new(0, 50u32, Color::CYAN),
-                Location::new((10.0, 0.0), 0),
+                TextContentView::new(0, 50u32, Color::DARK_CYAN),
+                Location::new((15.0, 15.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -99,8 +104,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("timer:"),
-                TextContentView::new(0, 50u32, Color::CYAN),
-                Location::new((10.0, 40.0), 0),
+                TextContentView::new(0, 50u32, Color::DARK_CYAN),
+                Location::new((15.0, 40.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -110,8 +115,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("start at:"),
-                TextContentView::new(0, 50u32, Color::CYAN),
-                Location::new((10.0, 80.0), 0),
+                TextContentView::new(0, 50u32, Color::DARK_CYAN),
+                Location::new((15.0, 80.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -122,7 +127,7 @@ impl Launch for Launcher {
             .spawn(Request::new(Text::new(
                 TextContent::new("Address:"),
                 TextContentView::new(0, 50u32, Color::DARK_ORANGE),
-                Location::new((10.0, 120.0), 0),
+                Location::new((15.0, 120.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 4),
             )))
@@ -133,8 +138,8 @@ impl Launch for Launcher {
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridDescriptor::new(39, 3),
-                Location::from(((10, 160), 0)),
+                TextGridDescriptor::new(44, 3),
+                Location::from(((10, 260), 0)),
                 Color::DARK_CYAN,
                 Color::DARK_ORANGE,
                 (5, 5),

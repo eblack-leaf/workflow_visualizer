@@ -62,6 +62,7 @@ impl TouchListener {
             listened_type: ListenableTouchType::OnPress,
         }
     }
+    #[allow(unused)]
     pub fn on_release() -> Self {
         Self {
             listened_type: ListenableTouchType::OnRelease,
@@ -102,6 +103,7 @@ impl Touched {
         self.touched
     }
 }
+#[allow(unused)]
 #[derive(Copy, Clone)]
 pub enum ListenableTouchType {
     OnPress,

@@ -4,7 +4,7 @@ pub(crate) use frontend_system::{
 pub(crate) use render_group::TextBound;
 
 pub use crate::text::attachment::TextAttachment;
-pub use crate::text::place::{WrapStyleComponent, WrapStyleExpt};
+pub use crate::text::place::{WrapStyleComponent};
 pub use crate::text::render_group::TextGridDescriptor;
 pub(crate) use crate::text::scale::AlignedFonts;
 pub(crate) use crate::text::scale::TextScale;

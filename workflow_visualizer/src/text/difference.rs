@@ -12,7 +12,6 @@ use crate::{Color, Layer, Position};
 #[derive(Copy, Clone)]
 pub(crate) enum TextBoundDifference {
     Changed(TextBound),
-    Removed,
 }
 
 #[derive(Component, Clone)]

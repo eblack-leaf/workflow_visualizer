@@ -236,14 +236,6 @@ fn set_text_bound(
                     .text_bound_area
                     .replace(bound.area);
             }
-            TextBoundDifference::Removed => {
-                renderer
-                    .container
-                    .get_mut::<RenderGroupTextBound>(render_group)
-                    .expect("no render group text bound")
-                    .text_bound_area
-                    .take();
-            }
         }
     }
 }

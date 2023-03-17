@@ -34,7 +34,7 @@ pub trait Animate {
     type Animator: Component;
     fn animate<T: Into<TimeDelta>>(self, total_time: T) -> Animation<Self::Animator>;
 }
-
+#[allow(unused)]
 pub fn start_animations<T: Component>(
     mut uninitialized_animations: Query<&mut Animation<T>, Added<Animation<T>>>,
     timer: Res<Timer>,

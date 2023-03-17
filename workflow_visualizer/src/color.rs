@@ -17,7 +17,7 @@ impl Default for Color {
 
 impl Color {
     pub const WHITE: (f32, f32, f32) = (1.0, 1.0, 1.0);
-    pub const DARK_ORANGE: (f32, f32, f32) = (0.7, 0.27, 0.00);
+    pub const DARK_ORANGE: (f32, f32, f32) = (0.55, 0.22, 0.00);
     pub const DARK_CYAN: (f32, f32, f32) = (0.0, 0.12, 0.06);
     pub const CYAN: (f32, f32, f32) = (0.0, 0.5, 0.25);
     pub const OFF_WHITE: (f32, f32, f32) = (0.8, 0.8, 0.8);

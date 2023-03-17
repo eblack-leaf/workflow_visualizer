@@ -84,6 +84,7 @@ impl Section<InterfaceContext> {
     }
 }
 impl Section<DeviceContext> {
+    #[allow(unused)]
     pub(crate) fn to_device(&self, scale_factor: f64) -> Section<InterfaceContext> {
         Section::<InterfaceContext>::new(
             self.position.to_ui(scale_factor),

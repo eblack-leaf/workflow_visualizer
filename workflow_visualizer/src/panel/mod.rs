@@ -40,6 +40,7 @@ impl Panel {
         C: Into<Color>,
     >(
         location: L,
+        content_area: A,
         color: C,
         padding: A,
         line_width: u32,
@@ -47,7 +48,7 @@ impl Panel {
     ) -> Self {
         Self {
             location: location.into(),
-            content_area: ContentArea(Area::default()),
+            content_area: ContentArea(content_area.into()),
             color: color.into(),
             padding: Padding(padding.into()),
             line_width: LineWidth(line_width),
