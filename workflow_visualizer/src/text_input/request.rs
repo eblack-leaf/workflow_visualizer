@@ -1,4 +1,4 @@
-use crate::content_panel::Padding;
+use crate::panel::Padding;
 use crate::{Area, Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment};
 
 pub struct TextInputRequest {

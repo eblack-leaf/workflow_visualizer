@@ -15,6 +15,14 @@ impl ThemeDescriptor {
             primary: None,
         }
     }
+    pub fn with_background<C: Into<Color>>(mut self, color: C) -> Self {
+        self.background.replace(color.into());
+        self
+    }
+    pub fn with_primary<C: Into<Color>>(mut self, color: C) -> Self {
+        self.primary.replace(color.into());
+        self
+    }
 }
 
 #[derive(Resource, Copy, Clone)]

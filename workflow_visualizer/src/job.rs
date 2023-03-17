@@ -97,7 +97,7 @@ impl Job {
             startup: Task::default(),
             main: {
                 let mut task = Task::default();
-                task.add_system(attempt_to_idle.in_set(JobSyncPoint::Idle));
+                task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle),));
                 task
             },
             teardown: Task::default(),

@@ -5,6 +5,7 @@ pub use winit;
 pub use animate::{Animate, Animation, Interpolator};
 pub use area::{Area, RawArea};
 pub use color::Color;
+pub use coord::Coordinate;
 pub use coord::{CoordContext, DeviceContext, InterfaceContext, NumericalContext};
 pub use engen::{Attach, Attachment, Engen, EngenOptions, Launch};
 pub use focus::Focus;
@@ -21,7 +22,6 @@ pub use instance::{
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
 pub use layer::Layer;
 pub use location::Location;
-pub use panel::Panel;
 pub use position::{Position, RawPosition};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
@@ -33,7 +33,7 @@ pub use text::{
     TextGridLocation, TextLineStructure, TextScaleAlignment, TextScaleLetterDimensions,
 };
 pub use text_input::{TextBackgroundColor, TextColor, TextInputRequest, TextInputText};
-pub use theme::Theme;
+pub use theme::{Theme, ThemeDescriptor};
 pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
 pub use viewport::Viewport;
@@ -46,7 +46,6 @@ pub use wasm_server::WasmServer;
 mod animate;
 mod area;
 mod color;
-mod content_panel;
 mod coord;
 mod engen;
 mod focus;

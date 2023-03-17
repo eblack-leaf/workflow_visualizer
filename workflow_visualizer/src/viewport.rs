@@ -319,15 +319,20 @@ pub struct ViewportAttachment;
 impl Attach for ViewportAttachment {
     fn attach(engen: &mut Engen) {
         engen.add_extraction::<ViewportHandle>();
+        engen.frontend.main.add_systems((
+            adjust_position.in_set(SyncPoint::Initialization),
+            frontend_area_adjust.in_set(SyncPoint::Initialization),
+        ));
         engen
-            .frontend
-            .main
-            .add_system(adjust_position.in_set(SyncPoint::Initialization));
-        engen
-            .frontend
-            .main
-            .add_system(frontend_area_adjust.in_set(SyncPoint::Initialization));
-        engen.backend.main.add_system(viewport_read_offset);
+            .backend
+            .startup
+            .add_system(viewport_attach.in_set(SyncPoint::Initialization));
+        engen.backend.main.add_systems((
+            viewport_read_offset,
+            viewport_resize
+                .in_set(SyncPoint::Initialization)
+                .after(gfx_resize),
+        ));
         engen
             .backend
             .container
@@ -357,14 +362,5 @@ impl Attach for ViewportAttachment {
             .frontend
             .container
             .insert_resource(ViewportHandleAdjust::new());
-        engen
-            .backend
-            .startup
-            .add_system(viewport_attach.in_set(SyncPoint::Initialization));
-        engen.backend.main.add_system(
-            viewport_resize
-                .in_set(SyncPoint::Initialization)
-                .after(gfx_resize),
-        );
     }
 }

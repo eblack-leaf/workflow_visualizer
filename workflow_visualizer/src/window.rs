@@ -51,16 +51,12 @@ impl Attach for WindowAttachment {
             .backend
             .container
             .insert_resource(Events::<WindowResize>::default());
-        engen
-            .backend
-            .main
-            .add_system(gfx_resize.in_set(SyncPoint::Initialization));
+        engen.backend.main.add_systems((
+            gfx_resize.in_set(SyncPoint::Initialization),
+            Events::<WindowResize>::update_system.in_set(SyncPoint::Event),
+        ));
         engen
             .frontend
-            .main
-            .add_system(Events::<WindowResize>::update_system.in_set(SyncPoint::Event));
-        engen
-            .backend
             .main
             .add_system(Events::<WindowResize>::update_system.in_set(SyncPoint::Event));
     }

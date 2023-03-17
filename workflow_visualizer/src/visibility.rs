@@ -75,13 +75,9 @@ pub(crate) fn calc_visibility(
 pub struct VisibilityAttachment;
 impl Attach for VisibilityAttachment {
     fn attach(engen: &mut Engen) {
-        engen
-            .frontend
-            .main
-            .add_system(calc_visibility.in_set(SyncPoint::Config));
-        engen
-            .frontend
-            .main
-            .add_system(calc_visibility.in_set(SyncPoint::ResolveVisibility));
+        engen.frontend.main.add_systems((
+            calc_visibility.in_set(SyncPoint::Config),
+            calc_visibility.in_set(SyncPoint::ResolveVisibility),
+        ));
     }
 }

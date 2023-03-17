@@ -276,6 +276,10 @@ pub(crate) fn read_touch_events(
                     }
                 }
             }
+        } else if trigger_on_press {
+            if focused_entity.entity.is_some() {
+                let _ = focused_entity.entity.take();
+            }
         }
     }
 }
@@ -339,23 +343,16 @@ impl Attach for TouchAttachment {
             .insert_resource(Events::<TouchEvent>::default());
         engen
             .frontend
-            .main
-            .add_system(Events::<TouchEvent>::update_system.in_set(SyncPoint::Event));
-        engen
-            .frontend
-            .main
-            .add_system(read_touch_events.in_set(SyncPoint::Config));
-        engen
-            .frontend
-            .main
-            .add_system(reset_touched.in_set(SyncPoint::Finish));
-        engen
-            .frontend
             .container
             .insert_resource(TouchAdapter::new());
         engen
             .frontend
             .container
             .insert_resource(MouseAdapter::new());
+        engen.frontend.main.add_systems((
+            Events::<TouchEvent>::update_system.in_set(SyncPoint::Event),
+            read_touch_events.in_set(SyncPoint::Config),
+            reset_touched.in_set(SyncPoint::Finish),
+        ));
     }
 }

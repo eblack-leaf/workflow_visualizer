@@ -7,12 +7,12 @@ use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
 use crate::area::Area;
-use crate::content_panel::ContentPanelAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::{GfxStack, GfxSurface};
 use crate::icon::IconAttachment;
 use crate::job::{Job, TaskLabel};
 use crate::orientation::OrientationAttachment;
+use crate::panel::PanelAttachment;
 use crate::render::{
     extract, invoke_extract, invoke_render, render, Extract, ExtractFns, Render, RenderFns,
     RenderPhase,
@@ -63,7 +63,7 @@ impl Engen {
                         self.invoke_attach::<TextAttachment>();
                         self.invoke_attach::<VirtualKeyboardAttachment>();
                         self.invoke_attach::<TextInputAttachment>();
-                        self.invoke_attach::<ContentPanelAttachment>();
+                        self.invoke_attach::<PanelAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);

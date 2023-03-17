@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 
-pub use attachment::ContentPanelAttachment;
+pub use attachment::PanelAttachment;
 pub use system::calc_area_from_content_area;
 
 use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Position};
@@ -21,7 +21,7 @@ pub struct ContentArea(pub Area<InterfaceContext>);
 #[derive(Component, Copy, Clone)]
 pub struct Padding(pub Area<InterfaceContext>);
 #[derive(Bundle)]
-pub struct ContentPanel {
+pub struct Panel {
     pub location: Location<InterfaceContext>,
     pub content_area: ContentArea,
     pub color: Color,
@@ -33,7 +33,7 @@ pub struct ContentPanel {
     pub line_color: LineColor,
     pub(crate) area: Area<InterfaceContext>,
 }
-impl ContentPanel {
+impl Panel {
     pub fn new<
         L: Into<Location<InterfaceContext>>,
         A: Into<Area<InterfaceContext>>,

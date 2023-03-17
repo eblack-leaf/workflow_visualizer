@@ -27,11 +27,11 @@ impl ListenOffset {
 }
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
-pub struct ContentPanelVertex {
+pub struct PanelVertex {
     pub position: RawPosition,
     pub listen_offset: ListenOffset,
 }
-impl ContentPanelVertex {
+impl PanelVertex {
     pub fn new<P: Into<RawPosition>>(position: P, listen_offset: ListenOffset) -> Self {
         Self {
             position: position.into(),
@@ -47,7 +47,7 @@ pub(crate) fn generate_corner(
     x_offset: bool,
     y_offset: bool,
     scale_factor: f64,
-) -> Vec<ContentPanelVertex> {
+) -> Vec<PanelVertex> {
     let mut tris = Vec::new();
     let listen_offset = ListenOffset::new(
         ListenOffset::from_bool(x_offset),
@@ -74,15 +74,13 @@ pub(crate) fn generate_corner(
     }
     let mut corner_tris = tris
         .iter()
-        .map(|vertex| -> ContentPanelVertex {
-            ContentPanelVertex::new(vertex.as_raw(), listen_offset)
-        })
-        .collect::<Vec<ContentPanelVertex>>();
+        .map(|vertex| -> PanelVertex { PanelVertex::new(vertex.as_raw(), listen_offset) })
+        .collect::<Vec<PanelVertex>>();
     let mut bar_tris = Vec::new();
-    let near_inner = ContentPanelVertex::new(current_corner.as_raw(), listen_offset);
-    let near_outer = ContentPanelVertex::new(last.as_raw(), listen_offset);
-    let mut far_inner = ContentPanelVertex::new(current_corner.as_raw(), listen_offset);
-    let mut far_outer = ContentPanelVertex::new(last.as_raw(), listen_offset);
+    let near_inner = PanelVertex::new(current_corner.as_raw(), listen_offset);
+    let near_outer = PanelVertex::new(last.as_raw(), listen_offset);
+    let mut far_inner = PanelVertex::new(current_corner.as_raw(), listen_offset);
+    let mut far_outer = PanelVertex::new(last.as_raw(), listen_offset);
     if x_offset && y_offset {
         far_inner.listen_offset.listen_y = ListenOffset::from_bool(false);
         far_outer.listen_offset.listen_y = ListenOffset::from_bool(false);
@@ -109,7 +107,7 @@ pub(crate) fn position_from_angle(angle: f32, scale_factor: f64) -> Position<Dev
     Position::<InterfaceContext>::from((angle.cos() * CORNER_DEPTH, -angle.sin() * CORNER_DEPTH))
         .to_device(scale_factor)
 }
-pub(crate) fn generate_mesh(corner_precision: u32, scale_factor: f64) -> Vec<ContentPanelVertex> {
+pub(crate) fn generate_mesh(corner_precision: u32, scale_factor: f64) -> Vec<PanelVertex> {
     let delta = 1f32 / corner_precision as f32;
     let mut mesh = Vec::new();
     let center =
@@ -146,51 +144,48 @@ pub(crate) fn generate_mesh(corner_precision: u32, scale_factor: f64) -> Vec<Con
         false,
         scale_factor,
     ));
-    mesh.push(ContentPanelVertex::new(
+    mesh.push(PanelVertex::new(
         center.as_raw(),
         ListenOffset::new(
             ListenOffset::from_bool(false),
             ListenOffset::from_bool(false),
         ),
     ));
-    mesh.push(ContentPanelVertex::new(
-        center.as_raw(),
-        ListenOffset::new(
-            ListenOffset::from_bool(false),
-            ListenOffset::from_bool(true),
-        ),
-    ));
-    mesh.push(ContentPanelVertex::new(
-        center.as_raw(),
-        ListenOffset::new(
-            ListenOffset::from_bool(true),
-            ListenOffset::from_bool(false),
-        ),
-    ));
-    mesh.push(ContentPanelVertex::new(
-        center.as_raw(),
-        ListenOffset::new(
-            ListenOffset::from_bool(true),
-            ListenOffset::from_bool(false),
-        ),
-    ));
-    mesh.push(ContentPanelVertex::new(
+    mesh.push(PanelVertex::new(
         center.as_raw(),
         ListenOffset::new(
             ListenOffset::from_bool(false),
             ListenOffset::from_bool(true),
         ),
     ));
-    mesh.push(ContentPanelVertex::new(
+    mesh.push(PanelVertex::new(
+        center.as_raw(),
+        ListenOffset::new(
+            ListenOffset::from_bool(true),
+            ListenOffset::from_bool(false),
+        ),
+    ));
+    mesh.push(PanelVertex::new(
+        center.as_raw(),
+        ListenOffset::new(
+            ListenOffset::from_bool(true),
+            ListenOffset::from_bool(false),
+        ),
+    ));
+    mesh.push(PanelVertex::new(
+        center.as_raw(),
+        ListenOffset::new(
+            ListenOffset::from_bool(false),
+            ListenOffset::from_bool(true),
+        ),
+    ));
+    mesh.push(PanelVertex::new(
         center.as_raw(),
         ListenOffset::new(ListenOffset::from_bool(true), ListenOffset::from_bool(true)),
     ));
     mesh
 }
-pub(crate) fn vertex_buffer(
-    gfx_surface: &GfxSurface,
-    mesh: Vec<ContentPanelVertex>,
-) -> wgpu::Buffer {
+pub(crate) fn vertex_buffer(gfx_surface: &GfxSurface, mesh: Vec<PanelVertex>) -> wgpu::Buffer {
     gfx_surface
         .device
         .create_buffer_init(&wgpu::util::BufferInitDescriptor {

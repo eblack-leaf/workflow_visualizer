@@ -17,11 +17,16 @@ impl Default for Color {
 
 impl Color {
     pub const WHITE: (f32, f32, f32) = (1.0, 1.0, 1.0);
+    pub const DARK_ORANGE: (f32, f32, f32) = (0.7, 0.27, 0.00);
+    pub const DARK_CYAN: (f32, f32, f32) = (0.0, 0.12, 0.06);
+    pub const CYAN: (f32, f32, f32) = (0.0, 0.5, 0.25);
     pub const OFF_WHITE: (f32, f32, f32) = (0.8, 0.8, 0.8);
     pub const DARK_GREY: (f32, f32, f32) = (0.1, 0.1, 0.1);
     pub const BLACK: (f32, f32, f32) = (0.0, 0.0, 0.0);
-    pub const RED: (f32, f32, f32) = (0.9, 0.1, 0.1);
-    pub const GREEN: (f32, f32, f32) = (0.1, 0.9, 0.1);
+    pub const RED: (f32, f32, f32) = (0.8, 0.01, 0.01);
+    pub const GREEN: (f32, f32, f32) = (0.01, 0.8, 0.01);
+    pub const MEDIUM_GREEN: (f32, f32, f32) = (0.01, 0.6, 0.01);
+    pub const DARK_GREEN: (f32, f32, f32) = (0.01, 0.4, 0.01);
     pub const BLUE: (f32, f32, f32) = (0.1, 0.1, 0.9);
     pub const OFF_BLACK: (f32, f32, f32) = (0.005, 0.005, 0.005);
     pub fn rgb(red: f32, green: f32, blue: f32) -> Self {

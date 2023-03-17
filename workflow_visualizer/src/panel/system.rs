@@ -2,10 +2,10 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
-use crate::content_panel::renderer::ContentPanelRenderer;
-use crate::content_panel::vertex::CORNER_DEPTH;
-use crate::content_panel::{Cache, ContentArea, Difference, Extraction, Padding};
 use crate::gfx::GfxSurface;
+use crate::panel::renderer::PanelRenderer;
+use crate::panel::vertex::CORNER_DEPTH;
+use crate::panel::{Cache, ContentArea, Difference, Extraction, Padding};
 use crate::{Area, Color, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility};
 
 pub(crate) fn pull_differences(
@@ -27,10 +27,6 @@ pub fn calc_area_from_content_area(
     for (content_area, padding, mut area) in content_changed.iter_mut() {
         let calculated_area =
             content_area.0 + padding.0 + Area::from((CORNER_DEPTH * 2.0, CORNER_DEPTH * 2.0));
-        println!(
-            "content area: {:?}, calculated area: {:?}",
-            content_area.0, calculated_area
-        );
         *area = calculated_area;
     }
 }
@@ -75,7 +71,6 @@ pub(crate) fn content_area_diff(
 ) {
     for (content_area, padding, mut cache, mut diff) in content_area_changed.iter_mut() {
         let padded_content_area = content_area.0 + padding.0;
-        println!("padded content area: {:?}", padded_content_area);
         if let Some(cached) = cache.content_area {
             if padded_content_area != cached {
                 cache.content_area.replace(padded_content_area);
@@ -121,7 +116,7 @@ pub(crate) fn color_diff(
 }
 
 pub(crate) fn process_extraction(
-    mut renderer: ResMut<ContentPanelRenderer>,
+    mut renderer: ResMut<PanelRenderer>,
     mut extraction: ResMut<Extraction>,
     scale_factor: Res<ScaleFactor>,
     gfx_surface: Res<GfxSurface>,

@@ -1,15 +1,15 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
-use crate::content_panel::vertex::{generate_mesh, vertex_buffer, ContentPanelVertex};
-use crate::content_panel::{Difference, Extraction};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
+use crate::panel::vertex::{generate_mesh, vertex_buffer, PanelVertex};
+use crate::panel::{Difference, Extraction};
 use crate::{
     Color, Extract, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition,
     Render, RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
 
 #[derive(Resource)]
-pub(crate) struct ContentPanelRenderer {
+pub(crate) struct PanelRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) positions: InstanceAttributeManager<RawPosition>,
     pub(crate) content_area: InstanceAttributeManager<RawArea>,
@@ -38,7 +38,7 @@ pub(crate) fn setup(
         .create_pipeline_layout(&pipeline_layout_descriptor);
     let shader = gfx_surface
         .device
-        .create_shader_module(wgpu::include_wgsl!("content_panel.wgsl"));
+        .create_shader_module(wgpu::include_wgsl!("panel.wgsl"));
     let color_target_state = [Some(wgpu::ColorTargetState {
         format: gfx_surface_config.configuration.format,
         blend: None,
@@ -52,7 +52,7 @@ pub(crate) fn setup(
             entry_point: "vertex_entry",
             buffers: &[
                 wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::<ContentPanelVertex>() as wgpu::BufferAddress,
+                    array_stride: std::mem::size_of::<PanelVertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &wgpu::vertex_attr_array![0 => Float32x4],
                 },
@@ -115,7 +115,7 @@ pub(crate) fn setup(
     let mesh_len = mesh.len() as u32;
     let buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
     let initial_max = 5;
-    let renderer = ContentPanelRenderer {
+    let renderer = PanelRenderer {
         pipeline,
         positions: InstanceAttributeManager::new(&gfx_surface, initial_max),
         content_area: InstanceAttributeManager::new(&gfx_surface, initial_max),
@@ -128,7 +128,7 @@ pub(crate) fn setup(
     };
     cmd.insert_resource(renderer);
 }
-impl Extract for ContentPanelRenderer {
+impl Extract for PanelRenderer {
     fn extract(frontend: &mut Job, backend: &mut Job) {
         let extracted_differences = frontend
             .container
@@ -147,7 +147,7 @@ impl Extract for ContentPanelRenderer {
         }
     }
 }
-impl Render for ContentPanelRenderer {
+impl Render for PanelRenderer {
     fn phase() -> RenderPhase {
         RenderPhase::Opaque
     }

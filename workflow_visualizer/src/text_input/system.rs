@@ -1,8 +1,8 @@
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Without};
 
-use crate::content_panel::{ContentArea, ContentPanel, Padding};
 use crate::focus::{Focus, FocusedEntity};
+use crate::panel::{ContentArea, Padding, Panel};
 use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
 use crate::text_input::cursor::{Cursor, CursorIcon};
@@ -65,7 +65,7 @@ pub(crate) fn spawn(
             .insert(ColorInvert::on())
             .id();
         let content_panel = cmd
-            .spawn(ContentPanel::new(
+            .spawn(Panel::new(
                 Location::from((
                     inner_req.location.position,
                     inner_req.location.layer + Layer::from(2u32),

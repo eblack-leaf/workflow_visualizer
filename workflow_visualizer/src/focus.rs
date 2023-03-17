@@ -62,10 +62,8 @@ impl Attach for FocusAttachment {
             .frontend
             .container
             .insert_resource(FocusedEntity::new(None));
-        engen.frontend.main.add_system(
-            set_focused
-                .in_set(SyncPoint::Config)
-                .after(read_touch_events),
-        );
+        engen.frontend.main.add_systems((set_focused
+            .in_set(SyncPoint::Config)
+            .after(read_touch_events),));
     }
 }

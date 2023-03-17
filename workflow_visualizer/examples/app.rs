@@ -6,7 +6,8 @@ use winit::event_loop::EventLoop;
 use workflow_visualizer::{
     Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job, Launch,
     Location, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
-    TextInputRequest, TextInputText, TextScaleAlignment, Timer, UserSpaceSyncPoint, VisibleSection,
+    TextInputRequest, TextInputText, TextScaleAlignment, Theme, ThemeDescriptor, Timer,
+    UserSpaceSyncPoint, VisibleSection,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -73,7 +74,10 @@ impl Launch for Launcher {
     fn options() -> EngenOptions {
         EngenOptions::new()
             .with_native_dimensions((500, 900))
-            .with_gfx_options(GfxOptions::native().with_msaa(4))
+            .with_theme(Theme::new(
+                ThemeDescriptor::new().with_background(Color::DARK_CYAN),
+            ))
+            .with_gfx_options(GfxOptions::native().with_msaa(1))
     }
 
     fn preparation(frontend: &mut Job) {
@@ -81,8 +85,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("animated text"),
-                TextContentView::new(0, 50u32, Color::OFF_WHITE),
-                Location::new((0.0, 0.0), 0),
+                TextContentView::new(0, 50u32, Color::CYAN),
+                Location::new((10.0, 0.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -95,8 +99,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("timer:"),
-                TextContentView::new(0, 50u32, Color::OFF_WHITE),
-                Location::new((0.0, 40.0), 0),
+                TextContentView::new(0, 50u32, Color::CYAN),
+                Location::new((10.0, 40.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -106,8 +110,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("start at:"),
-                TextContentView::new(0, 50u32, Color::OFF_WHITE),
-                Location::new((0.0, 80.0), 0),
+                TextContentView::new(0, 50u32, Color::CYAN),
+                Location::new((10.0, 80.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -116,9 +120,9 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(Text::new(
-                TextContent::new("done at:"),
-                TextContentView::new(0, 50u32, Color::OFF_WHITE),
-                Location::new((0.0, 120.0), 0),
+                TextContent::new("Address:"),
+                TextContentView::new(0, 50u32, Color::DARK_ORANGE),
+                Location::new((10.0, 120.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 4),
             )))
@@ -129,10 +133,10 @@ impl Launch for Launcher {
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridDescriptor::new(32, 3),
-                Location::from(((100, 120), 0)),
-                Color::OFF_WHITE,
-                Color::DARK_GREY,
+                TextGridDescriptor::new(39, 3),
+                Location::from(((10, 160), 0)),
+                Color::DARK_CYAN,
+                Color::DARK_ORANGE,
                 (5, 5),
             )))
             // .insert(PositionAdjust::<UIView>::new(400.0, 0.0).animate(4.0))
