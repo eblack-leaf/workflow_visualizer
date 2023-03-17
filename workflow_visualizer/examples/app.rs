@@ -3,7 +3,12 @@ use std::net::SocketAddr;
 use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
 
-use workflow_visualizer::{Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job, Launch, Location, Panel, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor, TextInputRequest, TextInputText, TextScaleAlignment, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, VisibleSection};
+use workflow_visualizer::{
+    Color, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext, Job, Launch,
+    Location, Panel, Position, Request, Text, TextContent, TextContentView, TextGridDescriptor,
+    TextInputRequest, TextInputText, TextScaleAlignment, Theme, ThemeDescriptor, Timer,
+    UserSpaceSyncPoint, VisibleSection,
+};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -76,15 +81,17 @@ impl Launch for Launcher {
     }
 
     fn preparation(frontend: &mut Job) {
-        let id = frontend.container.spawn(Request::new(
-            Panel::new(
+        let id = frontend
+            .container
+            .spawn(Request::new(Panel::new(
                 Location::from(((10.0, 10.0), 3)),
                 (44 * 11, 200),
                 Color::DARK_ORANGE,
                 (3, 3),
-                1, Color::DARK_ORANGE,
-            )
-        )).id();
+                1,
+                Color::DARK_ORANGE,
+            )))
+            .id();
         frontend.store_entity("panel", id);
         let id = frontend
             .container

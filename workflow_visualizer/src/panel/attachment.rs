@@ -6,7 +6,7 @@ use crate::panel::system::{
     position_diff, process_extraction, pull_differences,
 };
 use crate::panel::{renderer, Extraction, Panel};
-use crate::{Attach, Engen, spawn, SyncPoint};
+use crate::{spawn, Attach, Engen, SyncPoint};
 
 pub struct PanelAttachment;
 impl Attach for PanelAttachment {

@@ -22,9 +22,7 @@ pub use instance::{
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
 pub use layer::Layer;
 pub use location::Location;
-pub use panel::{
-  Panel, Padding, ContentArea,
-};
+pub use panel::{ContentArea, Padding, Panel};
 pub use position::{Position, RawPosition};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
