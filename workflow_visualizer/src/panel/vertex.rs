@@ -4,7 +4,7 @@ use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
 
 use crate::gfx::GfxSurface;
-use crate::{DeviceContext, InterfaceContext, Interpolator, Position, RawPosition};
+use crate::{DeviceContext, InterfaceContext, Interpolator, Panel, Position, RawPosition};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
@@ -39,7 +39,6 @@ impl PanelVertex {
         }
     }
 }
-pub(crate) const CORNER_DEPTH: f32 = 5f32;
 pub(crate) fn generate_corner(
     current: f32,
     current_corner: Position<DeviceContext>,
@@ -104,14 +103,17 @@ pub(crate) fn generate_corner(
     corner_tris
 }
 pub(crate) fn position_from_angle(angle: f32, scale_factor: f64) -> Position<DeviceContext> {
-    Position::<InterfaceContext>::from((angle.cos() * CORNER_DEPTH, -angle.sin() * CORNER_DEPTH))
-        .to_device(scale_factor)
+    Position::<InterfaceContext>::from((
+        angle.cos() * Panel::CORNER_DEPTH,
+        -angle.sin() * Panel::CORNER_DEPTH,
+    ))
+    .to_device(scale_factor)
 }
 pub(crate) fn generate_mesh(corner_precision: u32, scale_factor: f64) -> Vec<PanelVertex> {
     let delta = 1f32 / corner_precision as f32;
     let mut mesh = Vec::new();
-    let center =
-        Position::<InterfaceContext>::from((CORNER_DEPTH, CORNER_DEPTH)).to_device(scale_factor);
+    let center = Position::<InterfaceContext>::from((Panel::CORNER_DEPTH, Panel::CORNER_DEPTH))
+        .to_device(scale_factor);
     mesh.extend(generate_corner(
         FRAC_PI_2,
         center,

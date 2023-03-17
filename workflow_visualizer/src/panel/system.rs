@@ -1,12 +1,13 @@
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
+use bevy_ecs::prelude::{Changed, Query, RemovedComponents, Res, With};
 
 use crate::gfx::GfxSurface;
 use crate::panel::renderer::PanelRenderer;
-use crate::panel::vertex::CORNER_DEPTH;
-use crate::panel::{Cache, ContentArea, Difference, Extraction, Padding};
-use crate::{Area, Color, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility};
+use crate::panel::{Cache, ContentArea, Difference, Extraction};
+use crate::{
+    Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
+};
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -19,14 +20,12 @@ pub(crate) fn pull_differences(
 }
 
 pub fn calc_area_from_content_area(
-    mut content_changed: Query<
-        (&ContentArea, &Padding, &mut Area<InterfaceContext>),
-        Or<(Changed<ContentArea>, Changed<Padding>)>,
-    >,
+    mut content_changed: Query<(&ContentArea, &mut Area<InterfaceContext>), Changed<ContentArea>>,
 ) {
-    for (content_area, padding, mut area) in content_changed.iter_mut() {
-        let calculated_area =
-            content_area.0 + padding.0 + Area::from((CORNER_DEPTH * 2.0, CORNER_DEPTH * 2.0));
+    for (content_area, mut area) in content_changed.iter_mut() {
+        let calculated_area = content_area.0
+            + Area::from(Panel::PADDING)
+            + Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
         *area = calculated_area;
     }
 }
@@ -65,12 +64,12 @@ pub(crate) fn position_diff(
 
 pub(crate) fn content_area_diff(
     mut content_area_changed: Query<
-        (&ContentArea, &Padding, &mut Cache, &mut Difference),
-        Or<(Changed<ContentArea>, Changed<Padding>)>,
+        (&ContentArea, &mut Cache, &mut Difference),
+        Changed<ContentArea>,
     >,
 ) {
-    for (content_area, padding, mut cache, mut diff) in content_area_changed.iter_mut() {
-        let padded_content_area = content_area.0 + padding.0;
+    for (content_area, mut cache, mut diff) in content_area_changed.iter_mut() {
+        let padded_content_area = content_area.0 + Area::from(Panel::PADDING);
         if let Some(cached) = cache.content_area {
             if padded_content_area != cached {
                 cache.content_area.replace(padded_content_area);

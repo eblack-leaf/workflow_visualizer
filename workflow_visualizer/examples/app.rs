@@ -85,9 +85,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Panel::new(
                 Location::from(((10.0, 10.0), 3)),
-                (44 * 11, 200),
-                Color::DARK_ORANGE,
-                (3, 3),
+                (42 * 11, 200),
+                Color::CYAN,
                 1,
                 Color::DARK_ORANGE,
             )))
@@ -133,7 +132,7 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("Address:"),
-                TextContentView::new(0, 50u32, Color::DARK_ORANGE),
+                TextContentView::new(0, 50u32, Color::DARK_CYAN),
                 Location::new((15.0, 120.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 4),
@@ -145,11 +144,10 @@ impl Launch for Launcher {
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridDescriptor::new(44, 3),
+                TextGridDescriptor::new(43, 3),
                 Location::from(((10, 260), 0)),
                 Color::DARK_CYAN,
                 Color::DARK_ORANGE,
-                (5, 5),
             )))
             // .insert(PositionAdjust::<UIView>::new(400.0, 0.0).animate(4.0))
             .id();

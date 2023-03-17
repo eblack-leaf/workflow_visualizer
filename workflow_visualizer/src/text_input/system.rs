@@ -1,8 +1,8 @@
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res, Without};
+use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 
 use crate::focus::{Focus, FocusedEntity};
-use crate::panel::{ContentArea, Padding, Panel};
+use crate::panel::{ContentArea, Panel};
 use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
 use crate::text_input::cursor::{Cursor, CursorIcon};
@@ -36,9 +36,7 @@ pub(crate) fn spawn(
             inner_req.grid_guide.horizontal_character_max * inner_req.grid_guide.line_max,
             inner_req.text_color,
         );
-        let padding = inner_req.padding;
-        let padding_pos = Position::new(padding.0.width, padding.0.height);
-        let padding_area = padding.0;
+        let padding_pos = Position::from(Panel::PADDING);
         let text = cmd
             .spawn(Text::new(
                 content,
@@ -60,7 +58,7 @@ pub(crate) fn spawn(
                 )),
                 IconSize::Custom((character_dimensions.width, character_dimensions.height)),
                 inner_req.text_color,
-                IconSecondaryColor::new(inner_req.background_color),
+                IconSecondaryColor::new(Color::BLANK),
             ))
             .insert(ColorInvert::on())
             .id();
@@ -72,7 +70,6 @@ pub(crate) fn spawn(
                 )),
                 Area::default(),
                 inner_req.background_color,
-                padding_area,
                 1,
                 Color::OFF_WHITE.into(),
             ))
@@ -93,16 +90,6 @@ pub(crate) fn spawn(
         cmd.entity(entity).remove::<Request<TextInputRequest>>();
     }
 }
-pub(crate) fn read_padding_change(
-    mut text_inputs: Query<(&TextContentPanel, &mut Position<InterfaceContext>), Without<Padding>>,
-    changed_content_panels: Query<(&Padding, &Position<InterfaceContext>), Changed<Padding>>,
-) {
-    for (content_panel, mut pos) in text_inputs.iter_mut() {
-        if let Ok((padding, content_panel_pos)) = changed_content_panels.get(content_panel.0) {
-            *pos = *content_panel_pos + Position::new(padding.0.width, padding.0.height);
-        }
-    }
-}
 pub(crate) fn position_ties(
     moved: Query<
         (
@@ -115,17 +102,16 @@ pub(crate) fn position_ties(
         ),
         Changed<Position<InterfaceContext>>,
     >,
-    padding_read: Query<&Padding>,
     mut cmd: Commands,
     scale_factor: Res<ScaleFactor>,
 ) {
     for (pos, text_input_text, text_content_panel, cursor_icon, letter_dimensions, cursor) in
         moved.iter()
     {
-        let padding = padding_read.get(text_content_panel.0).unwrap();
+        let padding = Position::from(Panel::PADDING);
         cmd.entity(text_input_text.entity).insert(*pos);
         cmd.entity(text_content_panel.0)
-            .insert(*pos - Position::new(padding.0.width, padding.0.height));
+            .insert(*pos - padding - Position::from((Panel::CORNER_DEPTH, Panel::CORNER_DEPTH)));
         cmd.entity(cursor_icon.entity).insert(cursor_coords(
             *pos,
             cursor,

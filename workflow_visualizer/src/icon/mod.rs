@@ -343,7 +343,7 @@ impl IconRenderer {
                     entry_point: "fragment_entry",
                     targets: &[Some(wgpu::ColorTargetState {
                         format: gfx_surface_config.configuration.format,
-                        blend: Some(wgpu::BlendState::REPLACE),
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
                         write_mask: Default::default(),
                     })],
                 };

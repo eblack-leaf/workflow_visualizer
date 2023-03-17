@@ -18,14 +18,11 @@ pub struct LineWidth(pub u32);
 pub struct LineColor(pub Color);
 #[derive(Component, Copy, Clone)]
 pub struct ContentArea(pub Area<InterfaceContext>);
-#[derive(Component, Copy, Clone)]
-pub struct Padding(pub Area<InterfaceContext>);
 #[derive(Bundle)]
 pub struct Panel {
     pub location: Location<InterfaceContext>,
     pub content_area: ContentArea,
     pub color: Color,
-    pub(crate) padding: Padding,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
     pub(crate) visibility: EnableVisibility,
@@ -34,6 +31,8 @@ pub struct Panel {
     pub(crate) area: Area<InterfaceContext>,
 }
 impl Panel {
+    pub const PADDING: (f32, f32) = (5.0, 5.0);
+    pub const CORNER_DEPTH: f32 = 5f32;
     pub fn new<
         L: Into<Location<InterfaceContext>>,
         A: Into<Area<InterfaceContext>>,
@@ -42,7 +41,6 @@ impl Panel {
         location: L,
         content_area: A,
         color: C,
-        padding: A,
         line_width: u32,
         line_color: C,
     ) -> Self {
@@ -50,7 +48,6 @@ impl Panel {
             location: location.into(),
             content_area: ContentArea(content_area.into()),
             color: color.into(),
-            padding: Padding(padding.into()),
             line_width: LineWidth(line_width),
             line_color: LineColor(line_color.into()),
             visibility: EnableVisibility::new(),
