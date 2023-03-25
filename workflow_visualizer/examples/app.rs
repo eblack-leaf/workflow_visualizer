@@ -41,10 +41,10 @@ fn logic(
     _text_input: Query<(Entity, &TextInputText, &VisibleSection)>,
 ) {
     idle.can_idle = false;
-    let text_entity = *entity_store.store.get("animated_text").unwrap();
-    if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
-        text.data = format!("text pos at: {:.2}, {:.2}", pos.x, pos.y);
-    }
+    // let text_entity = *entity_store.store.get("animated_text").unwrap();
+    // if let Ok((mut text, pos)) = text_query.get_mut(text_entity) {
+    //     text.data = format!("text pos at: {:.2}, {:.2}", pos.x, pos.y);
+    // }
     let text_entity = *entity_store.store.get("timer_text").unwrap();
     if let Ok((mut text, _pos)) = text_query.get_mut(text_entity) {
         text.data = format!("timer: {:.2}", timer.mark().0);
@@ -85,7 +85,7 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Panel::new(
                 Location::from(((10.0, 10.0), 3)),
-                (42 * 11, 200),
+                (42 * 11, 300),
                 Color::CYAN,
                 1,
                 Color::DARK_ORANGE,
@@ -95,11 +95,14 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(Text::new(
-                TextContent::new("animated text"),
-                TextContentView::new(0, 50u32, Color::DARK_CYAN),
+                TextContent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore \
+                magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in\
+                 reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui \
+                 officia deserunt mollit anim id est laborum."),
+                TextContentView::new(0, 500u32, Color::DARK_CYAN),
                 Location::new((15.0, 15.0), 0),
                 TextScaleAlignment::Medium,
-                TextGridDescriptor::new(100, 1),
+                TextGridDescriptor::new(42, 12),
             )))
             .id();
         frontend.store_entity("animated_text", id);
@@ -110,8 +113,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("timer:"),
-                TextContentView::new(0, 50u32, Color::DARK_CYAN),
-                Location::new((15.0, 40.0), 0),
+                TextContentView::new(0, 50u32, Color::DARK_ORANGE),
+                Location::new((15.0, 600.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -120,32 +123,21 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(Text::new(
-                TextContent::new("start at:"),
-                TextContentView::new(0, 50u32, Color::DARK_CYAN),
-                Location::new((15.0, 80.0), 0),
+                TextContent::new("Click here to test input demo: "),
+                TextContentView::new(0, 50u32, Color::DARK_ORANGE),
+                Location::new((10.0, 370.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
             .id();
-        frontend.store_entity("start_text", id);
-        let id = frontend
-            .container
-            .spawn(Request::new(Text::new(
-                TextContent::new("Address:"),
-                TextContentView::new(0, 50u32, Color::DARK_CYAN),
-                Location::new((15.0, 120.0), 0),
-                TextScaleAlignment::Medium,
-                TextGridDescriptor::new(100, 4),
-            )))
-            .id();
-        frontend.store_entity("done_text", id);
+        frontend.store_entity("text_input_label", id);
         let id = frontend
             .container
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(43, 3),
-                Location::from(((10, 260), 0)),
+                Location::from(((10, 400), 0)),
                 Color::DARK_CYAN,
                 Color::DARK_ORANGE,
             )))
