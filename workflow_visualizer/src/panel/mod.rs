@@ -13,21 +13,15 @@ mod system;
 mod vertex;
 
 #[derive(Component, Copy, Clone)]
-pub struct LineWidth(pub u32);
-#[derive(Component, Copy, Clone)]
-pub struct LineColor(pub Color);
-#[derive(Component, Copy, Clone)]
-pub struct ContentArea(pub Area<InterfaceContext>);
+pub struct PanelContentArea(pub Area<InterfaceContext>);
 #[derive(Bundle)]
 pub struct Panel {
     pub location: Location<InterfaceContext>,
-    pub content_area: ContentArea,
+    pub content_area: PanelContentArea,
     pub color: Color,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
     pub(crate) visibility: EnableVisibility,
-    pub line_width: LineWidth,
-    pub line_color: LineColor,
     pub(crate) area: Area<InterfaceContext>,
 }
 impl Panel {
@@ -41,15 +35,11 @@ impl Panel {
         location: L,
         content_area: A,
         color: C,
-        line_width: u32,
-        line_color: C,
     ) -> Self {
         Self {
             location: location.into(),
-            content_area: ContentArea(content_area.into()),
+            content_area: PanelContentArea(content_area.into()),
             color: color.into(),
-            line_width: LineWidth(line_width),
-            line_color: LineColor(line_color.into()),
             visibility: EnableVisibility::new(),
             cache: Cache::new(),
             difference: Difference::new(),

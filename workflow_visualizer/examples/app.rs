@@ -75,7 +75,7 @@ impl Launch for Launcher {
         EngenOptions::new()
             .with_native_dimensions((500, 900))
             .with_theme(Theme::new(
-                ThemeDescriptor::new().with_background(Color::DARK_CYAN),
+                ThemeDescriptor::new().with_background(Color::BLUE_DARK),
             ))
             .with_gfx_options(GfxOptions::native().with_msaa(4))
     }
@@ -85,21 +85,22 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Panel::new(
                 Location::from(((10.0, 10.0), 3)),
-                (42 * 11, 300),
-                Color::CYAN,
-                1,
-                Color::DARK_ORANGE,
+                (480, 300),
+                Color::DARK_CYAN,
             )))
             .id();
         frontend.store_entity("panel", id);
         let id = frontend
             .container
             .spawn(Request::new(Text::new(
-                TextContent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore \
-                magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in\
-                 reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui \
+                TextContent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+                sed do eiusmod tempor incididunt ut labore et dolore \
+                magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi \
+                ut aliquip ex ea commodo consequat. Duis aute irure dolor in\
+                 reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur \
+                 sint occaecat cupidatat non proident, sunt in culpa qui \
                  officia deserunt mollit anim id est laborum."),
-                TextContentView::new(0, 500u32, Color::DARK_CYAN),
+                TextContentView::new(0, 500u32, Color::BLUE_DARK),
                 Location::new((15.0, 15.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(42, 12),
@@ -113,7 +114,7 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("timer:"),
-                TextContentView::new(0, 50u32, Color::DARK_ORANGE),
+                TextContentView::new(0, 50u32, Color::CYAN),
                 Location::new((15.0, 600.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
@@ -124,8 +125,8 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Text::new(
                 TextContent::new("Click here to test input demo: "),
-                TextContentView::new(0, 50u32, Color::DARK_ORANGE),
-                Location::new((10.0, 370.0), 0),
+                TextContentView::new(0, 50u32, Color::CYAN),
+                Location::new((15.0, 410.0), 0),
                 TextScaleAlignment::Medium,
                 TextGridDescriptor::new(100, 1),
             )))
@@ -133,13 +134,22 @@ impl Launch for Launcher {
         frontend.store_entity("text_input_label", id);
         let id = frontend
             .container
+            .spawn(Request::new(Panel::new(
+                Location::from(((10.0, 400.0), 3)),
+                (480, 300),
+                Color::DARK_CYAN,
+            )))
+            .id();
+        frontend.store_entity("other panel", id);
+        let id = frontend
+            .container
             .spawn(Request::new(TextInputRequest::new(
                 "".to_string(),
                 TextScaleAlignment::Medium,
-                TextGridDescriptor::new(43, 3),
-                Location::from(((10, 400), 0)),
-                Color::DARK_CYAN,
-                Color::DARK_ORANGE,
+                TextGridDescriptor::new(38, 3),
+                Location::from(((20, 440), 0)),
+                Color::BLUE_DARK,
+                Color::CYAN_MEDIUM,
             )))
             // .insert(PositionAdjust::<UIView>::new(400.0, 0.0).animate(4.0))
             .id();

@@ -30,7 +30,7 @@ pub(crate) struct MaxCharacters(pub(crate) u32);
 pub struct TextInput {
     pub(crate) text_input_text: TextInputText,
     pub(crate) cursor_icon: CursorIcon,
-    pub(crate) background_icon: TextContentPanel,
+    pub(crate) content_panel: TextContentPanel,
     pub(crate) alignment: TextScaleAlignment,
     pub(crate) grid_guide: TextGridDescriptor,
     #[bundle]
@@ -59,7 +59,7 @@ impl TextInput {
     pub(crate) fn new<C: Into<Color>>(
         text_input_text: TextInputText,
         cursor_icon: CursorIcon,
-        background_icon: TextContentPanel,
+        content_panel: TextContentPanel,
         alignment: TextScaleAlignment,
         bound_guide: TextGridDescriptor,
         location: Location<InterfaceContext>,
@@ -69,7 +69,7 @@ impl TextInput {
         Self {
             text_input_text,
             cursor_icon,
-            background_icon,
+            content_panel,
             alignment,
             grid_guide: bound_guide,
             location,

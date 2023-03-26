@@ -4,7 +4,7 @@ use bevy_ecs::prelude::{Changed, Query, RemovedComponents, Res, With};
 
 use crate::gfx::GfxSurface;
 use crate::panel::renderer::PanelRenderer;
-use crate::panel::{Cache, ContentArea, Difference, Extraction};
+use crate::panel::{Cache, Difference, Extraction, PanelContentArea};
 use crate::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
@@ -20,18 +20,20 @@ pub(crate) fn pull_differences(
 }
 
 pub fn calc_area_from_content_area(
-    mut content_changed: Query<(&ContentArea, &mut Area<InterfaceContext>), Changed<ContentArea>>,
+    mut content_changed: Query<
+        (&PanelContentArea, &mut Area<InterfaceContext>),
+        Changed<PanelContentArea>,
+    >,
 ) {
     for (content_area, mut area) in content_changed.iter_mut() {
-        let calculated_area = content_area.0
-            + Area::from(Panel::PADDING)
-            + Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
+        let calculated_area =
+            content_area.0 + Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
         *area = calculated_area;
     }
 }
 pub(crate) fn management(
-    mut removed: RemovedComponents<ContentArea>,
-    lost_visibility: Query<(Entity, &Visibility), (With<ContentArea>, Changed<Visibility>)>,
+    mut removed: RemovedComponents<PanelContentArea>,
+    lost_visibility: Query<(Entity, &Visibility), (With<PanelContentArea>, Changed<Visibility>)>,
     mut extraction: ResMut<Extraction>,
 ) {
     for entity in removed.iter() {
@@ -64,8 +66,8 @@ pub(crate) fn position_diff(
 
 pub(crate) fn content_area_diff(
     mut content_area_changed: Query<
-        (&ContentArea, &mut Cache, &mut Difference),
-        Changed<ContentArea>,
+        (&PanelContentArea, &mut Cache, &mut Difference),
+        Changed<PanelContentArea>,
     >,
 ) {
     for (content_area, mut cache, mut diff) in content_area_changed.iter_mut() {

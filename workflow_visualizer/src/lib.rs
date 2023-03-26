@@ -22,7 +22,7 @@ pub use instance::{
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
 pub use layer::Layer;
 pub use location::Location;
-pub use panel::{ContentArea, Panel};
+pub use panel::{Panel, PanelContentArea};
 pub use position::{Position, RawPosition};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
@@ -46,6 +46,7 @@ pub use wasm_server::WasmServer;
 
 mod animate;
 mod area;
+mod border;
 mod color;
 mod coord;
 mod engen;
@@ -70,6 +71,7 @@ mod theme;
 mod time;
 mod touch;
 mod uniform;
+mod view;
 mod viewport;
 mod virtual_keyboard;
 mod visibility;

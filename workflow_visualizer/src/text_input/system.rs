@@ -2,7 +2,7 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 
 use crate::focus::{Focus, FocusedEntity};
-use crate::panel::{ContentArea, Panel};
+use crate::panel::{Panel, PanelContentArea};
 use crate::text::{AlignedFonts, TextBound, TextScale};
 use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
 use crate::text_input::cursor::{Cursor, CursorIcon};
@@ -70,8 +70,6 @@ pub(crate) fn spawn(
                 )),
                 Area::default(),
                 inner_req.background_color,
-                1,
-                Color::OFF_WHITE.into(),
             ))
             .id();
         cmd.entity(entity).insert(TextInput::new(
@@ -132,7 +130,7 @@ pub(crate) fn reconfigure_text_input(
         Or<(Changed<TextBound>, Changed<TextGridDescriptor>)>,
     >,
     mut text: Query<&mut TextContentView>,
-    mut content_panels: Query<&mut ContentArea>,
+    mut content_panels: Query<&mut PanelContentArea>,
 ) {
     for (text_input_text, grid_guide, text_color, content_panel, area) in text_inputs.iter() {
         let mut text_content_view = text.get_mut(text_input_text.entity).unwrap();
@@ -143,7 +141,7 @@ pub(crate) fn reconfigure_text_input(
         );
         *text_content_view = view;
         let mut content_panel_area = content_panels.get_mut(content_panel.0).unwrap();
-        *content_panel_area = ContentArea(*area);
+        *content_panel_area = PanelContentArea(*area + Area::from(Panel::PADDING));
     }
 }
 
