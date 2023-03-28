@@ -19,6 +19,8 @@ pub struct TextRequest {
     pub(crate) filtered_placement: FilteredPlacement,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
+    pub(crate) text_letter_dimensions: TextLetterDimensions,
+    pub(crate) text_grid_placement: TextGridPlacement,
 }
 impl TextRequest {
     pub fn new<Coord: Into<Coordinate<InterfaceContext>>, S: Into<String>, C: Into<Color>>(
@@ -40,6 +42,8 @@ impl TextRequest {
             filtered_placement: FilteredPlacement(vec![]),
             cache: Cache::new(),
             difference: Difference::new(),
+            text_letter_dimensions: TextLetterDimensions(Area::default()),
+            text_grid_placement: TextGridPlacement(HashMap::new()),
         }
     }
 }
