@@ -69,7 +69,7 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(TextRequest::new(
-                Coordinate::new(Section::new(Position::new(15.0, 15.0), Area::new(380.0, 260.0)), Layer::new(0.0)),
+                Coordinate::new(Section::new(Position::new(15.0, 15.0), Area::new(380.0, 280.0)), Layer::new(0.0)),
                 String::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
                 sed do eiusmod tempor incididunt ut labore et dolore \
                 magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi \
