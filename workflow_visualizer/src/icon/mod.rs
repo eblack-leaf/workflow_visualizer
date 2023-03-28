@@ -174,10 +174,12 @@ impl IconRenderer {
             let icon_key = self.entity_icons.get(entity).unwrap();
             let key = self.entity_keys.get(icon_key).unwrap().get(entity).unwrap();
             let index = self.indexer.get(icon_key).unwrap().get_index(*key).unwrap();
-            self.area.get_mut(icon_key).unwrap().write.write.insert(
-                index,
-                Area::<DeviceContext>::new(area.width, area.height).as_raw(),
-            );
+            self.area
+                .get_mut(icon_key)
+                .unwrap()
+                .write
+                .write
+                .insert(index, area.to_device(scale_factor).as_raw());
         }
         for (entity, depth) in differences.depth.iter() {
             let icon_key = self.entity_icons.get(entity).unwrap();

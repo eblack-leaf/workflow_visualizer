@@ -130,7 +130,7 @@ pub(crate) fn reconfigure_text_input(
         Or<(Changed<TextBound>, Changed<TextGridDescriptor>)>,
     >,
     mut text: Query<&mut TextContentView>,
-    mut content_panels: Query<&mut PanelContentArea>,
+    mut content_panels: Query<&mut Area<InterfaceContext>>,
 ) {
     for (text_input_text, grid_guide, text_color, content_panel, area) in text_inputs.iter() {
         let mut text_content_view = text.get_mut(text_input_text.entity).unwrap();
@@ -141,7 +141,7 @@ pub(crate) fn reconfigure_text_input(
         );
         *text_content_view = view;
         let mut content_panel_area = content_panels.get_mut(content_panel.0).unwrap();
-        *content_panel_area = PanelContentArea(*area + Area::from(Panel::PADDING));
+        *content_panel_area = *area + Area::from(Panel::PADDING);
     }
 }
 

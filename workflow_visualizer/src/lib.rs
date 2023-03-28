@@ -60,6 +60,7 @@ mod location;
 mod orientation;
 mod panel;
 mod position;
+mod r_text;
 mod render;
 mod request;
 mod scale_factor;

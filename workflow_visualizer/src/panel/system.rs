@@ -19,16 +19,16 @@ pub(crate) fn pull_differences(
     }
 }
 
-pub fn calc_area_from_content_area(
+pub fn calc_content_area(
     mut content_changed: Query<
-        (&PanelContentArea, &mut Area<InterfaceContext>),
-        Changed<PanelContentArea>,
+        (&mut PanelContentArea, &Area<InterfaceContext>),
+        Changed<Area<InterfaceContext>>,
     >,
 ) {
-    for (content_area, mut area) in content_changed.iter_mut() {
+    for (mut content_area, area) in content_changed.iter_mut() {
         let calculated_area =
-            content_area.0 + Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
-        *area = calculated_area;
+            area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
+        *content_area.0 = calculated_area;
     }
 }
 pub(crate) fn management(

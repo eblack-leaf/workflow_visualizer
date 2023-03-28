@@ -30,7 +30,7 @@ impl Visibility {
     }
 }
 
-#[derive(Component, Copy, Clone)]
+#[derive(Component, Copy, Clone, Default)]
 pub struct VisibleSection {
     pub(crate) section: Option<Section<InterfaceContext>>,
 }

@@ -28,7 +28,7 @@ impl Attach for TextInputAttachment {
                 .in_set(SyncPoint::Reconfigure)
                 .after(text::calc_scale_from_alignment)
                 .after(text::calc_bound_from_guide)
-                .before(panel::calc_area_from_content_area)
+                .before(panel::calc_content_area)
                 .before(text::update_content),
         ));
         engen

@@ -278,7 +278,6 @@ pub(crate) fn frontend_setup(mut cmd: Commands) {
 }
 
 pub(crate) fn calc_area(
-    scale_factor: Res<ScaleFactor>,
     mut icons: Query<(&IconSize, &mut Area<InterfaceContext>), Changed<IconSize>>,
 ) {
     for (size, mut area) in icons.iter_mut() {
@@ -290,8 +289,7 @@ pub(crate) fn calc_area(
                     IconSize::Large => 18.0,
                     _ => 0.0,
                 };
-                let scaled = area_guide * scale_factor.factor;
-                *area = Area::<InterfaceContext>::new(scaled as f32, scaled as f32);
+                *area = Area::<InterfaceContext>::new(area_guide as f32, area_guide as f32);
             }
             IconSize::Custom((w, h)) => {
                 *area = Area::<InterfaceContext>::new(*w, *h);
