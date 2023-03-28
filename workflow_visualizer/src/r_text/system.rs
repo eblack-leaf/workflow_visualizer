@@ -1,42 +1,172 @@
-use std::collections::HashSet;
-use crate::r_text::atlas::{Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition, AtlasTextureDimensions, AtlasWriteQueue, Bitmap, TextureCoordinates};
-use crate::r_text::component::{Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, Text, TextGridPlacement, TextLetterDimensions, TextScale, TextScaleAlignment};
-use crate::r_text::font::AlignedFonts;
-use crate::r_text::render_group::{DrawSection, KeyedGlyphIds, LayerWrite, PositionWrite, RenderGroup, RenderGroupBindGroup, RenderGroupUniqueGlyphs, TextPlacement};
-use crate::r_text::renderer::{Extraction, TextRenderer};
-use crate::{Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer, NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility, VisibleSection};
-use bevy_ecs::prelude::{Added, Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
 use crate::gfx::GfxSurface;
+use crate::instance::key::KeyFactory;
+use crate::r_text::atlas::{
+    Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
+    AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
+    AtlasTextureDimensions, AtlasWriteQueue, Bitmap, TextureCoordinates,
+};
+use crate::r_text::component::{
+    Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, Text,
+    TextGridPlacement, TextLetterDimensions, TextScale, TextScaleAlignment, TextWrapStyle,
+};
+use crate::r_text::font::{AlignedFonts, MonoSpacedFont};
+use crate::r_text::render_group::{
+    DrawSection, KeyedGlyphIds, LayerWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
+    RenderGroupUniqueGlyphs, TextPlacement,
+};
+use crate::r_text::renderer::{Extraction, TextRenderer};
+use crate::window::WindowResize;
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
+use bevy_ecs::prelude::{
+    Added, Changed, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+};
+use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
+use std::collections::HashSet;
+use std::num::NonZeroU32;
 
 pub(crate) fn place(
     mut text_query: Query<
-        (&mut Placer, &mut Placement, &Text),
-        Or<(Changed<Area<InterfaceContext>>, Changed<Text>)>,
+        (
+            &mut Placer,
+            &mut Placement,
+            &Text,
+            &Area<InterfaceContext>,
+            &TextWrapStyle,
+            &TextScale,
+            &TextScaleAlignment,
+        ),
+        Or<(
+            Changed<Area<InterfaceContext>>,
+            Changed<Text>,
+            Changed<TextScale>,
+        )>,
+    >,
+    fonts: Res<AlignedFonts>,
+) {
+    for (mut placer, mut placement, text, area, wrap_style, text_scale, text_scale_alignment) in
+        text_query.iter_mut()
+    {
+        placer.0.reset(&LayoutSettings {
+            max_width: Some(area.width),
+            max_height: Some(area.height),
+            wrap_style: wrap_style.0,
+            ..LayoutSettings::default()
+        });
+        placer.0.append(
+            fonts.fonts.get(text_scale_alignment).unwrap().font_slice(),
+            &TextStyle::new(text.0.as_str(), text_scale.px(), MonoSpacedFont::index()),
+        );
+        let mut key_factory = KeyFactory::new();
+        placement.0 = placer
+            .0
+            .glyphs()
+            .iter()
+            .map(|g| (key_factory.generate(), *g))
+            .collect::<Vec<(Key, GlyphPosition<()>)>>();
+    }
+}
+pub(crate) fn letter_cache_check(
+    mut text_query: Query<
+        (
+            &FilteredPlacement,
+            &Visibility,
+            &mut Cache,
+            &mut Difference,
+            &TextScale,
+            &Color,
+        ),
+        Changed<FilteredPlacement>,
     >,
 ) {
+    for (filtered_placement, visibility, mut cache, mut difference, text_scale, color) in
+        text_query.iter_mut()
+    {
+        if visibility.visible() {
+            let mut retained_keys = HashSet::new();
+            let old_keys = cache.keys.clone();
+            let mut keys_to_remove = HashSet::new();
+            for (key, placed_glyph) in filtered_placement.0.iter() {
+                if placed_glyph.parent.is_ascii_control()
+                    || placed_glyph.parent.is_ascii_whitespace()
+                {
+                    if cache.exists(*key) {
+                        keys_to_remove.insert(*key);
+                    }
+                    continue;
+                }
+                let glyph_position = (placed_glyph.x, placed_glyph.y).into();
+                let glyph_id = placed_glyph.key;
+                let character = placed_glyph.parent;
+                let glyph = Glyph::new(character, *text_scale, glyph_id);
+                if cache.exists(*key) {
+                    retained_keys.insert(*key);
+                    if cache.glyph_position_different(*key, glyph_position) {
+                        difference.updated.insert(*key, glyph_position);
+                        cache.glyph_position.insert(*key, glyph_position);
+                    }
+                    if cache.glyph_id_different(*key, glyph_id) {
+                        difference.glyph_add.insert(*key, glyph);
+                        cache.glyphs.insert(*key, glyph_id);
+                    }
+                } else {
+                    difference.glyph_color_update.insert(*key, *color);
+                    cache.glyph_color.insert(*key, *color);
+                    difference.added.insert(*key, glyph_position);
+                    difference.glyph_add.insert(*key, glyph);
+                    cache.add(*key, glyph_id, glyph_position);
+                }
+            }
+            keys_to_remove.extend(
+                old_keys
+                    .difference(&retained_keys)
+                    .copied()
+                    .collect::<HashSet<Key>>(),
+            );
+            for key in keys_to_remove {
+                difference.glyph_remove.insert(cache.get_glyph_id(key));
+                difference.remove.insert(key);
+                cache.remove(key);
+            }
+        }
+    }
 }
 pub(crate) fn filter(
     mut text_query: Query<
-        (&Placement, &mut FilteredPlacement, &mut TextGridPlacement, &VisibleSection, &Position<InterfaceContext>, &TextLetterDimensions),
-        Or<(
-            Changed<Text>,
-            Changed<VisibleSection>,
-        )>,
+        (
+            &Placement,
+            &mut FilteredPlacement,
+            &mut TextGridPlacement,
+            &VisibleSection,
+            &Position<InterfaceContext>,
+            &TextLetterDimensions,
+        ),
+        Or<(Changed<Text>, Changed<VisibleSection>)>,
     >,
 ) {
-    for (placement, mut filtered_placement, mut grid_placement, visible_section) in text_query.iter_mut(){
+    for (placement, mut filtered_placement, mut grid_placement, visible_section) in
+        text_query.iter_mut()
+    {
         if let Some(v_sec) = visible_section.section {
             filtered_placement.0 = placement.0.clone();
             let mut filter_queue = HashSet::new();
             for (key, glyph_pos) in placement.0.iter() {
-                let glyph_section = Section::<InterfaceContext>::from(((glyph_pos.x, glyph_pos.y), (glyph_pos.width, glyph_pos.height)));
-                let grid_location = ();
-                grid_placement.0.insert(grid_location, *key);
+                let glyph_section = Section::<InterfaceContext>::from((
+                    (glyph_pos.x, glyph_pos.y),
+                    (glyph_pos.width, glyph_pos.height),
+                ));
+                // let grid_location = ();
+                // grid_placement.0.insert(grid_location, *key);
                 if !v_sec.is_overlapping(glyph_section) {
                     filter_queue.insert(*key);
                 }
             }
-            filtered_placement.0.retain(|(key, _)| !filter_queue.contains(key));
+            filtered_placement
+                .0
+                .retain(|(key, _)| !filter_queue.contains(key));
         }
     }
 }
@@ -52,12 +182,16 @@ pub(crate) fn scale_change(
     scale_factor: Res<ScaleFactor>,
     fonts: Res<AlignedFonts>,
 ) {
-    for (mut text_scale, mut text_letter_dimensions, text_scale_alignment) in text_query.iter_mut() {
+    for (mut text_scale, mut text_letter_dimensions, text_scale_alignment) in text_query.iter_mut()
+    {
         *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor);
-        let letter_dimensions = fonts.fonts.get(text_scale_alignment).unwrap().character_dimensions('a', text_scale.px());
-        let letter_dimensions = Area::<InterfaceContext>::from(
-            (letter_dimensions.width, letter_dimensions.height)
-        );
+        let letter_dimensions = fonts
+            .fonts
+            .get(text_scale_alignment)
+            .unwrap()
+            .character_dimensions('a', text_scale.px());
+        let letter_dimensions =
+            Area::<InterfaceContext>::from((letter_dimensions.width, letter_dimensions.height));
         *text_letter_dimensions = TextLetterDimensions(letter_dimensions);
     }
 }
@@ -120,7 +254,6 @@ pub(crate) fn manage(
         extraction.removed.insert(entity);
     }
 }
-pub(crate) fn letter_cache_check() {}
 pub(crate) fn position_diff(
     mut text_query: Query<
         (&Position<InterfaceContext>, &mut Cache, &mut Difference),
@@ -188,45 +321,57 @@ pub(crate) fn create_render_groups(
     for entity in extraction.removed.iter() {
         renderer.render_groups.remove(entity);
     }
-    for (entity, (max, pos, visible_section, layer, unique_glyphs, text_scale_alignment, atlas_block)) in extraction.added.iter() {
+    for (
+        entity,
+        (max, pos, visible_section, layer, unique_glyphs, text_scale_alignment, atlas_block),
+    ) in extraction.added.iter()
+    {
         let position = pos.to_device(scale_factor.factor);
         let text_placement = TextPlacement::new(position, *layer);
         let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
-        let render_group_bind_group = RenderGroupBindGroup::new(&gfx_surface, &renderer.render_group_bind_group_layout, &text_placement_uniform);
+        let render_group_bind_group = RenderGroupBindGroup::new(
+            &gfx_surface,
+            &renderer.render_group_bind_group_layout,
+            &text_placement_uniform,
+        );
         let atlas_dimension = AtlasDimension::from_unique_glyphs(unique_glyphs.unique_glyphs);
         let atlas_texture_dimensions = AtlasTextureDimensions::new(*atlas_block, atlas_dimension);
         let atlas = Atlas::new(&gfx_surface, atlas_texture_dimensions);
-        let atlas_bind_group = AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
-        renderer.render_groups.insert(*entity, RenderGroup{
-            position,
-            visible_section: *visible_section,
-            layer: *layer,
-            position_write: PositionWrite::new(),
-            layer_write: LayerWrite::new(),
-            keyed_glyph_ids: KeyedGlyphIds::new(),
-            draw_section: DrawSection::new(),
-            text_placement,
-            text_placement_uniform,
-            unique_glyphs: *unique_glyphs,
-            text_scale_alignment: *text_scale_alignment,
-            indexer: Indexer::new(*max),
-            glyph_positions: InstanceAttributeManager::new(&gfx_surface, *max),
-            glyph_areas: InstanceAttributeManager::new(&gfx_surface, *max),
-            glyph_colors: InstanceAttributeManager::new(&gfx_surface, *max),
-            null_bits: InstanceAttributeManager::new(&gfx_surface, *max),
-            glyph_tex_coords: InstanceAttributeManager::new(&gfx_surface, *max),
-            render_group_bind_group,
-            atlas,
-            atlas_bind_group,
-            atlas_texture_dimensions,
-            atlas_dimension,
-            atlas_free_locations: AtlasFreeLocations::new(atlas_dimension),
-            atlas_glyph_references: AtlasGlyphReferences::new(),
-            atlas_write_queue: AtlasWriteQueue::new(),
-            atlas_add_queue: AtlasAddQueue::new(),
-            atlas_glyphs: AtlasGlyphs::new(),
-            atlas_block: *atlas_block
-        });
+        let atlas_bind_group =
+            AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
+        renderer.render_groups.insert(
+            *entity,
+            RenderGroup {
+                position,
+                visible_section: *visible_section,
+                layer: *layer,
+                position_write: PositionWrite::new(),
+                layer_write: LayerWrite::new(),
+                keyed_glyph_ids: KeyedGlyphIds::new(),
+                draw_section: DrawSection::new(),
+                text_placement,
+                text_placement_uniform,
+                unique_glyphs: *unique_glyphs,
+                text_scale_alignment: *text_scale_alignment,
+                indexer: Indexer::new(*max),
+                glyph_positions: InstanceAttributeManager::new(&gfx_surface, *max),
+                glyph_areas: InstanceAttributeManager::new(&gfx_surface, *max),
+                glyph_colors: InstanceAttributeManager::new(&gfx_surface, *max),
+                null_bits: InstanceAttributeManager::new(&gfx_surface, *max),
+                glyph_tex_coords: InstanceAttributeManager::new(&gfx_surface, *max),
+                render_group_bind_group,
+                atlas,
+                atlas_bind_group,
+                atlas_texture_dimensions,
+                atlas_dimension,
+                atlas_free_locations: AtlasFreeLocations::new(atlas_dimension),
+                atlas_glyph_references: AtlasGlyphReferences::new(),
+                atlas_write_queue: AtlasWriteQueue::new(),
+                atlas_add_queue: AtlasAddQueue::new(),
+                atlas_glyphs: AtlasGlyphs::new(),
+                atlas_block: *atlas_block,
+            },
+        );
     }
 }
 pub(crate) fn render_group_differences(
@@ -245,7 +390,10 @@ pub(crate) fn render_group_differences(
             draw_section_resize_needed = true;
         }
         if let Some(position) = difference.position {
-            render_group.position_write.write.replace(position.to_device(scale_factor.factor));
+            render_group
+                .position_write
+                .write
+                .replace(position.to_device(scale_factor.factor));
             draw_section_resize_needed = true;
         }
         if let Some(layer) = difference.layer {
@@ -259,8 +407,12 @@ pub(crate) fn render_group_differences(
         }
         for (key, glyph_position) in difference.added.iter() {
             let index = render_group.indexer.next(*key);
-            render_group.glyph_positions.queue_write(index, glyph_position.as_raw());
-            render_group.null_bits.queue_write(index, NullBit::not_null());
+            render_group
+                .glyph_positions
+                .queue_write(index, glyph_position.as_raw());
+            render_group
+                .null_bits
+                .queue_write(index, NullBit::not_null());
         }
         for (key, color) in difference.glyph_color_update.iter() {
             let index = render_group.indexer.get_index(*key).unwrap();
@@ -276,39 +428,31 @@ pub(crate) fn render_group_differences(
         }
         for (key, glyph_position) in difference.updated.iter() {
             let index = render_group.indexer.get_index(*key).unwrap();
-            render_group.glyph_positions.queue_write(index, glyph_position.as_raw());
+            render_group
+                .glyph_positions
+                .queue_write(index, glyph_position.as_raw());
         }
         for (key, glyph) in difference.glyph_add.iter() {
             render_group.keyed_glyph_ids.ids.insert(*key, glyph.id);
             render_group.atlas_add_queue.queue.insert(glyph.clone());
         }
         let mut add_retained_glyphs = HashSet::new();
-        for glyph in render_group.atlas_add_queue
-            .queue
-            .iter()
-        {
-            if render_group.atlas_glyphs
-                .glyphs
-                .contains_key(&glyph.id)
-            {
+        for glyph in render_group.atlas_add_queue.queue.iter() {
+            if render_group.atlas_glyphs.glyphs.contains_key(&glyph.id) {
                 add_retained_glyphs.insert(glyph.clone());
             }
         }
         for glyph in add_retained_glyphs {
-            render_group.atlas_glyph_references
+            render_group
+                .atlas_glyph_references
                 .references
                 .get_mut(&glyph.id)
                 .unwrap()
                 .increment();
-            render_group.atlas_add_queue
-                .queue
-                .remove(&glyph);
+            render_group.atlas_add_queue.queue.remove(&glyph);
         }
         let mut orphaned_glyphs = HashSet::new();
-        for (glyph_id, reference) in render_group.atlas_glyph_references
-            .references
-            .iter()
-        {
+        for (glyph_id, reference) in render_group.atlas_glyph_references.references.iter() {
             if reference.count == 0 {
                 orphaned_glyphs.insert(*glyph_id);
             }
@@ -317,30 +461,20 @@ pub(crate) fn render_group_differences(
         // ...
         // free
         for glyph_id in orphaned_glyphs {
-            let (_, _, location, _) = render_group.atlas_glyphs
-                .glyphs
-                .remove(&glyph_id)
-                .unwrap();
-            render_group.atlas_free_locations
-                .free
-                .insert(location);
-            render_group.atlas_glyph_references
+            let (_, _, location, _) = render_group.atlas_glyphs.glyphs.remove(&glyph_id).unwrap();
+            render_group.atlas_free_locations.free.insert(location);
+            render_group
+                .atlas_glyph_references
                 .references
                 .remove(&glyph_id);
         }
         let adjusted_glyphs = {
             let mut adjusted_glyphs = HashSet::new();
-            let num_new_glyphs = render_group.atlas_add_queue
-                .queue
-                .len() as u32;
+            let num_new_glyphs = render_group.atlas_add_queue.queue.len() as u32;
             if num_new_glyphs != 0
-                && num_new_glyphs
-                > render_group.atlas_free_locations
-                .free
-                .len() as u32
+                && num_new_glyphs > render_group.atlas_free_locations.free.len() as u32
             {
-                let current_dimension = render_group.atlas_dimension
-                    .dimension;
+                let current_dimension = render_group.atlas_dimension.dimension;
                 let current_total = current_dimension.pow(2);
                 let mut incremental_dimension_add = 1;
                 let mut next_size_up_total = (current_dimension + incremental_dimension_add).pow(2);
@@ -348,11 +482,10 @@ pub(crate) fn render_group_differences(
                     incremental_dimension_add += 1;
                     next_size_up_total = (current_dimension + incremental_dimension_add).pow(2);
                 }
-                let new_dimension = AtlasDimension::new(current_dimension + incremental_dimension_add);
-                let texture_dimensions = AtlasTextureDimensions::new(
-                    render_group.atlas_block,
-                    new_dimension,
-                );
+                let new_dimension =
+                    AtlasDimension::new(current_dimension + incremental_dimension_add);
+                let texture_dimensions =
+                    AtlasTextureDimensions::new(render_group.atlas_block, new_dimension);
                 let atlas = Atlas::new(&gfx_surface, texture_dimensions);
                 let atlas_bind_group =
                     AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
@@ -365,16 +498,13 @@ pub(crate) fn render_group_differences(
                     Area<NumericalContext>,
                     Bitmap,
                 )>::new();
-                for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in render_group.atlas_glyphs
-                    .glyphs
-                    .iter()
+                for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in
+                    render_group.atlas_glyphs.glyphs.iter()
                 {
-                    let position = AtlasPosition::new(
-                        *atlas_location,
-                        render_group.atlas_block,
-                    );
+                    let position = AtlasPosition::new(*atlas_location, render_group.atlas_block);
                     let glyph_section = Section::new(position.position, *glyph_area);
-                    let coords = TextureCoordinates::from_section(glyph_section, texture_dimensions);
+                    let coords =
+                        TextureCoordinates::from_section(glyph_section, texture_dimensions);
                     writes.push((
                         *glyph_id,
                         *atlas_location,
@@ -386,12 +516,14 @@ pub(crate) fn render_group_differences(
                     adjusted_glyphs.insert(*glyph_id);
                 }
                 for write in writes {
-                    render_group.atlas_glyphs
+                    render_group
+                        .atlas_glyphs
                         .glyphs
                         .get_mut(&write.0)
                         .unwrap()
                         .0 = write.2;
-                   render_group.atlas_write_queue
+                    render_group
+                        .atlas_write_queue
                         .queue
                         .insert(write.1, (write.2, write.3, write.4));
                 }
@@ -402,83 +534,159 @@ pub(crate) fn render_group_differences(
             }
             adjusted_glyphs
         };
-        let add_queue = render_group.atlas_add_queue
+        let add_queue = render_group
+            .atlas_add_queue
             .queue
             .drain()
             .collect::<HashSet<Glyph>>();
         for add in add_queue {
-            render_group.atlas_glyph_references
+            render_group
+                .atlas_glyph_references
                 .references
                 .insert(add.id, AtlasGlyphReference::new());
-            render_group.atlas_glyph_references
+            render_group
+                .atlas_glyph_references
                 .references
                 .get_mut(&add.id)
                 .unwrap()
                 .increment();
             let rasterization = font
                 .fonts
-                .get(
-                    &render_group.text_scale_alignment,
-                )
+                .get(&render_group.text_scale_alignment)
                 .unwrap()
                 .font()
                 .rasterize(add.character, add.scale.px());
             // TODO since subpixel , combine them here to save space
             let glyph_area: Area<NumericalContext> =
                 (rasterization.0.width, rasterization.0.height).into();
-            let location = render_group.atlas_free_locations
-                .next();
-            let position = AtlasPosition::new(
-                location,
-                render_group.atlas_block,
-            );
+            let location = render_group.atlas_free_locations.next();
+            let position = AtlasPosition::new(location, render_group.atlas_block);
             let glyph_section = Section::new(position.position, glyph_area);
             let coords = TextureCoordinates::from_section(
                 glyph_section,
                 render_group.atlas_texture_dimensions,
             );
-            render_group.atlas_write_queue
+            render_group
+                .atlas_write_queue
                 .queue
                 .insert(location, (coords, glyph_area, rasterization.1.clone()));
-           render_group.atlas_glyphs
+            render_group
+                .atlas_glyphs
                 .glyphs
                 .insert(add.id, (coords, glyph_area, location, rasterization.1));
         }
         let mut glyph_info_writes = HashSet::<(Key, GlyphId)>::new();
         for adj_glyph in adjusted_glyphs {
-            for (key, glyph_id) in render_group.keyed_glyph_ids
-                .ids
-                .iter()
-            {
+            for (key, glyph_id) in render_group.keyed_glyph_ids.ids.iter() {
                 if adj_glyph == *glyph_id {
                     glyph_info_writes.insert((*key, *glyph_id));
                 }
             }
         }
         for (key, glyph_id) in glyph_info_writes {
-            let (coords, area, _, _) = render_group.atlas_glyphs
+            let (coords, area, _, _) = render_group
+                .atlas_glyphs
                 .glyphs
                 .get(&glyph_id)
                 .unwrap()
                 .clone();
-            let index = render_group.indexer
-                .get_index(key)
-                .unwrap();
+            let index = render_group.indexer.get_index(key).unwrap();
             render_group.glyph_areas.queue_write(index, area.as_raw());
             render_group.glyph_tex_coords.queue_write(index, coords);
         }
         for (key, glyph) in difference.glyph_add.iter() {
-            let (coords, area, _, _) = render_group.atlas_glyphs
+            let (coords, area, _, _) = render_group
+                .atlas_glyphs
                 .glyphs
                 .get(&glyph.id)
                 .unwrap()
                 .clone();
-            let index = render_group.indexer
-                .get_index(*key)
-                .unwrap();
+            let index = render_group.indexer.get_index(*key).unwrap();
             render_group.glyph_areas.queue_write(index, area.as_raw());
             render_group.glyph_tex_coords.queue_write(index, coords);
         }
+        render_group.glyph_positions.write_attribute(&gfx_surface);
+        render_group.glyph_areas.write_attribute(&gfx_surface);
+        render_group.glyph_colors.write_attribute(&gfx_surface);
+        render_group.glyph_tex_coords.write_attribute(&gfx_surface);
+        render_group.null_bits.write_attribute(&gfx_surface);
+        let mut dirty = false;
+        if let Some(position) = render_group.position_write.write.take() {
+            render_group.position = position;
+            render_group.text_placement.placement[0] = position.x;
+            render_group.text_placement.placement[1] = position.y;
+            dirty = true;
+        }
+        if let Some(layer) = render_group.layer_write.write.take() {
+            render_group.text_placement.placement[2] = layer.z;
+            dirty = true;
+        }
+        if dirty {
+            render_group
+                .text_placement_uniform
+                .update(&gfx_surface.queue, render_group.text_placement);
+        }
+        for (location, (_, glyph_area, bitmap)) in render_group.atlas_write_queue.queue.iter() {
+            let atlas = &render_group.atlas;
+            let atlas_block = render_group.atlas_block;
+            let position = AtlasPosition::new(*location, *atlas_block).position;
+            let image_copy_texture = wgpu::ImageCopyTexture {
+                texture: &atlas.texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d {
+                    x: position.x as u32,
+                    y: position.y as u32,
+                    z: 0,
+                },
+                aspect: wgpu::TextureAspect::All,
+            };
+            let extent_w = glyph_area.width as u32;
+            let extent_h = glyph_area.height as u32;
+            let image_data_layout = wgpu::ImageDataLayout {
+                offset: 0,
+                bytes_per_row: NonZeroU32::new(extent_w),
+                rows_per_image: NonZeroU32::new(extent_h),
+            };
+            let extent = wgpu::Extent3d {
+                width: extent_w,
+                height: extent_h,
+                depth_or_array_layers: 1,
+            };
+            gfx_surface.queue.write_texture(
+                image_copy_texture,
+                bitmap.as_slice(),
+                image_data_layout,
+                extent,
+            );
+        }
+        if draw_section_resize_needed {
+            if let Some(v_sec) = render_group.visible_section.section {
+                let v_sec = v_sec.to_device(scale_factor.factor);
+                let draw_bound = Section::<DeviceContext>::new(
+                    v_sec.position - viewport.as_section().position,
+                    v_sec.area,
+                );
+                render_group.draw_section.section.replace(draw_bound);
+            }
+        }
     }
 }
-pub(crate) fn resolve_draw_section_on_resize() {}
+pub(crate) fn resolve_draw_section_on_resize(
+    mut renderer: ResMut<TextRenderer>,
+    mut event_reader: EventReader<WindowResize>,
+    viewport: Res<Viewport>,
+    scale_factor: Res<ScaleFactor>,
+) {
+    for _event in event_reader.iter() {
+        for (_, render_group) in renderer.render_groups.iter_mut() {
+            if let Some(v_sec) = render_group.visible_section.section {
+                let v_sec = v_sec.to_device(scale_factor.factor);
+                let draw_bound = Section::<DeviceContext>::new(
+                    v_sec.position - viewport.as_section().position,
+                    v_sec.area,
+                );
+                render_group.draw_section.section.replace(draw_bound);
+            }
+        }
+    }
+}

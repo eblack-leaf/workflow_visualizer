@@ -137,6 +137,41 @@ impl Cache {
             visible_section: VisibleSection::default(),
         }
     }
+    pub(crate) fn exists(&self, key: Key) -> bool {
+        self.keys.contains(&key)
+    }
+    pub(crate) fn get_glyph_id(&self, key: Key) -> GlyphId {
+        *self.glyphs.get(&key).expect("no glyph id")
+    }
+    pub(crate) fn remove(&mut self, key: Key) {
+        self.keys.remove(&key);
+        self.glyphs.remove(&key);
+        self.glyph_position.remove(&key);
+    }
+    pub(crate) fn add(
+        &mut self,
+        key: Key,
+        glyph_id: GlyphId,
+        glyph_position: Position<NumericalContext>,
+    ) {
+        self.keys.insert(key);
+        self.glyphs.insert(key, glyph_id);
+        self.glyph_position.insert(key, glyph_position);
+    }
+    pub(crate) fn glyph_position_different(
+        &self,
+        key: Key,
+        glyph_position: Position<NumericalContext>,
+    ) -> bool {
+        *self
+            .glyph_position
+            .get(&key)
+            .expect("no glyph position for key")
+            != glyph_position
+    }
+    pub(crate) fn glyph_id_different(&self, key: Key, glyph_id: GlyphId) -> bool {
+        *self.glyphs.get(&key).expect("no glyph id for key") != glyph_id
+    }
 }
 #[derive(Component, Clone)]
 pub(crate) struct Difference {
