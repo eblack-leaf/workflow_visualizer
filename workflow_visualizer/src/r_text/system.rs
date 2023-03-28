@@ -7,7 +7,8 @@ use crate::r_text::atlas::{
 };
 use crate::r_text::component::{
     Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, Text,
-    TextGridPlacement, TextLetterDimensions, TextScale, TextScaleAlignment, TextWrapStyle,
+    TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
+    TextScaleAlignment, TextWrapStyle,
 };
 use crate::r_text::font::{AlignedFonts, MonoSpacedFont};
 use crate::r_text::render_group::{
@@ -22,12 +23,15 @@ use crate::{
     VisibleSection,
 };
 use bevy_ecs::prelude::{
-    Added, Changed, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
 };
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use std::collections::HashSet;
 use std::num::NonZeroU32;
-
+pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
+    cmd.insert_resource(Extraction::new());
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
+}
 pub(crate) fn place(
     mut text_query: Query<
         (
@@ -46,10 +50,12 @@ pub(crate) fn place(
         )>,
     >,
     fonts: Res<AlignedFonts>,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for (mut placer, mut placement, text, area, wrap_style, text_scale, text_scale_alignment) in
         text_query.iter_mut()
     {
+        let area = area.to_device(scale_factor.factor);
         placer.0.reset(&LayoutSettings {
             max_width: Some(area.width),
             max_height: Some(area.height),
@@ -69,7 +75,7 @@ pub(crate) fn place(
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
     }
 }
-pub(crate) fn letter_cache_check(
+pub(crate) fn letter_differential(
     mut text_query: Query<
         (
             &FilteredPlacement,
@@ -140,17 +146,20 @@ pub(crate) fn filter(
             &Placement,
             &mut FilteredPlacement,
             &mut TextGridPlacement,
+            &mut TextLineStructure,
             &VisibleSection,
             &Position<InterfaceContext>,
             &TextLetterDimensions,
         ),
         Or<(Changed<Text>, Changed<VisibleSection>)>,
     >,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for (
         placement,
         mut filtered_placement,
         mut grid_placement,
+        mut text_line_structure,
         visible_section,
         pos,
         text_letter_dimensions,
@@ -159,13 +168,18 @@ pub(crate) fn filter(
         if let Some(v_sec) = visible_section.section {
             filtered_placement.0 = placement.0.clone();
             let mut filter_queue = HashSet::new();
+            let position = pos.to_device(scale_factor.factor);
+            let v_sec = v_sec.to_device(scale_factor.factor);
             for (key, glyph_pos) in placement.0.iter() {
-                let glyph_section = Section::<InterfaceContext>::from((
-                    (glyph_pos.x, glyph_pos.y),
+                let glyph_section = Section::<DeviceContext>::from((
+                    (position.x + glyph_pos.x, position.y + glyph_pos.y),
                     (glyph_pos.width, glyph_pos.height),
                 ));
-                // let grid_location = ();
-                // grid_placement.0.insert(grid_location, *key);
+                let grid_location = TextGridLocation::from_position(
+                    glyph_section.position,
+                    *text_letter_dimensions,
+                );
+                grid_placement.0.insert(grid_location, *key);
                 if !v_sec.is_overlapping(glyph_section) {
                     filter_queue.insert(*key);
                 }
@@ -173,6 +187,7 @@ pub(crate) fn filter(
             filtered_placement
                 .0
                 .retain(|(key, _)| !filter_queue.contains(key));
+            *text_line_structure = TextLineStructure::from_grid_placement(&grid_placement);
         }
     }
 }
@@ -197,7 +212,7 @@ pub(crate) fn scale_change(
             .unwrap()
             .character_dimensions('a', text_scale.px());
         let letter_dimensions =
-            Area::<InterfaceContext>::from((letter_dimensions.width, letter_dimensions.height));
+            Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
         *text_letter_dimensions = TextLetterDimensions(letter_dimensions);
     }
 }

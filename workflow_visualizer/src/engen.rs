@@ -13,14 +13,13 @@ use crate::icon::IconAttachment;
 use crate::job::{Job, TaskLabel};
 use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
+use crate::r_text::TextAttachment;
 use crate::render::{
     extract, invoke_extract, invoke_render, render, Extract, ExtractFns, Render, RenderFns,
     RenderPhase,
 };
 use crate::scale_factor::ScaleFactor;
 use crate::sync::set_sync_points;
-use crate::text::TextAttachment;
-use crate::text_input::TextInputAttachment;
 use crate::theme::{Theme, ThemeAttachment};
 use crate::time::TimerAttachment;
 use crate::touch::{
@@ -62,7 +61,6 @@ impl Engen {
                         self.invoke_attach::<IconAttachment>();
                         self.invoke_attach::<TextAttachment>();
                         self.invoke_attach::<VirtualKeyboardAttachment>();
-                        self.invoke_attach::<TextInputAttachment>();
                         self.invoke_attach::<PanelAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);

@@ -33,17 +33,18 @@ impl Panel {
         C: Into<Color>,
     >(
         location: L,
-        content_area: A,
+        area: A,
         color: C,
     ) -> Self {
+        let area = area.into();
         Self {
             location: location.into(),
-            content_area: PanelContentArea(content_area.into()),
+            content_area: PanelContentArea(area),
             color: color.into(),
             visibility: EnableVisibility::new(),
             cache: Cache::new(),
             difference: Difference::new(),
-            area: Area::default(),
+            area,
         }
     }
 }

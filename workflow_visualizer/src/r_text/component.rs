@@ -1,10 +1,12 @@
 use crate::{
-    Area, Color, Coordinate, EnableVisibility, InterfaceContext, Key, Layer, NumericalContext,
-    Position, VisibleSection,
+    Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
+    NumericalContext, Position, VisibleSection,
 };
+use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 use std::collections::{HashMap, HashSet};
+
 #[derive(Bundle)]
 pub struct TextRequest {
     #[bundle]
@@ -21,6 +23,8 @@ pub struct TextRequest {
     pub(crate) difference: Difference,
     pub(crate) text_letter_dimensions: TextLetterDimensions,
     pub(crate) text_grid_placement: TextGridPlacement,
+    pub(crate) text_line_structure: TextLineStructure,
+    pub(crate) text_scale: TextScale,
 }
 impl TextRequest {
     pub fn new<Coord: Into<Coordinate<InterfaceContext>>, S: Into<String>, C: Into<Color>>(
@@ -44,9 +48,12 @@ impl TextRequest {
             difference: Difference::new(),
             text_letter_dimensions: TextLetterDimensions(Area::default()),
             text_grid_placement: TextGridPlacement(HashMap::new()),
+            text_line_structure: TextLineStructure(vec![]),
+            text_scale: TextScale(TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[0]),
         }
     }
 }
+pub type WrapStyleExpt = WrapStyle;
 #[derive(Component)]
 pub struct TextWrapStyle(pub WrapStyle);
 pub(crate) type GlyphId = fontdue::layout::GlyphRasterConfig;
@@ -97,8 +104,8 @@ pub enum TextScaleAlignment {
 impl TextScaleAlignment {
     pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [15, 18, 22];
 }
-#[derive(Component)]
-pub struct TextLetterDimensions(pub Area<InterfaceContext>);
+#[derive(Component, Copy, Clone)]
+pub struct TextLetterDimensions(pub Area<DeviceContext>);
 #[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Debug)]
 pub struct TextGridLocation {
     pub x: u32,
@@ -109,9 +116,38 @@ impl TextGridLocation {
     pub fn new(x: u32, y: u32) -> Self {
         Self { x, y }
     }
+    pub fn from_position(
+        position: Position<DeviceContext>,
+        letter_dimensions: TextLetterDimensions,
+    ) -> Self {
+        let x = (position.x / letter_dimensions.0.width).floor() as u32;
+        let y = (position.y / letter_dimensions.0.height).floor() as u32;
+        Self::new(x, y)
+    }
 }
 #[derive(Component)]
 pub struct TextGridPlacement(pub HashMap<TextGridLocation, Key>);
+#[derive(Component)]
+pub struct TextLineStructure(pub Vec<u32>);
+impl TextLineStructure {
+    pub(crate) fn from_grid_placement(grid_placement: &TextGridPlacement) -> Self {
+        let mut max_y = 0;
+        for key in grid_placement.0.keys() {
+            if key.y > max_y {
+                max_y = key.y;
+            }
+        }
+        let mut line_counts = vec![];
+        for i in 0..max_y + 1 {
+            line_counts.push(0);
+        }
+        for placed in grid_placement.0.keys() {
+            *line_counts.get_mut(placed.y as usize).unwrap() += 1;
+        }
+        Self(line_counts)
+    }
+}
+
 #[derive(Component)]
 pub(crate) struct Placer(pub(crate) Layout);
 #[derive(Component)]

@@ -24,16 +24,15 @@ pub use layer::Layer;
 pub use location::Location;
 pub use panel::{Panel, PanelContentArea};
 pub use position::{Position, RawPosition};
+pub use r_text::{
+    Text, TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextScale,
+    TextScaleAlignment, TextWrapStyle, WrapStyleExpt,
+};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
 pub use scale_factor::ScaleFactor;
 pub use section::Section;
 pub use sync::{SyncPoint, UserSpaceSyncPoint};
-pub use text::{
-    Letter, LetterStyle, Text, TextBuffer, TextContent, TextContentView, TextGridDescriptor,
-    TextGridLocation, TextLineStructure, TextScaleAlignment, TextScaleLetterDimensions,
-};
-pub use text_input::{TextBackgroundColor, TextColor, TextInputRequest, TextInputText};
 pub use theme::{Theme, ThemeDescriptor};
 pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
@@ -66,8 +65,6 @@ mod request;
 mod scale_factor;
 mod section;
 mod sync;
-mod text;
-mod text_input;
 mod theme;
 mod time;
 mod touch;

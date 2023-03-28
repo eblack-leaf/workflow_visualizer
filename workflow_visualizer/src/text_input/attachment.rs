@@ -4,7 +4,7 @@ use crate::text_input::system::{
     cursor_letter_color_filter, open_virtual_keyboard, position_ties, read_input_if_focused,
     reconfigure_text_input, set_cursor_location, spawn, update_cursor_pos,
 };
-use crate::{panel, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
+use crate::{panel, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint, r_text};
 
 pub struct TextInputAttachment;
 
@@ -26,10 +26,8 @@ impl Attach for TextInputAttachment {
                 .after(set_cursor_location),
             reconfigure_text_input
                 .in_set(SyncPoint::Reconfigure)
-                .after(text::calc_scale_from_alignment)
-                .after(text::calc_bound_from_guide)
+                .after(r_text::scale_change)
                 .before(panel::calc_content_area)
-                .before(text::update_content),
         ));
         engen
             .frontend
