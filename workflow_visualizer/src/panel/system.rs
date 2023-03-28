@@ -27,8 +27,8 @@ pub fn calc_content_area(
 ) {
     for (mut content_area, area) in content_changed.iter_mut() {
         let calculated_area =
-            area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
-        *content_area.0 = calculated_area;
+            *area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
+        content_area.0 = calculated_area;
     }
 }
 pub(crate) fn management(

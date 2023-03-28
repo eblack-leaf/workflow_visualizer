@@ -2,6 +2,7 @@ use crate::gfx::GfxSurface;
 use crate::r_text::component::{Glyph, GlyphId, TextScale};
 use crate::r_text::font::MonoSpacedFont;
 use crate::{Area, GfxOptions, NumericalContext, Position, Section};
+use bytemuck::{Pod, Zeroable};
 use std::collections::{HashMap, HashSet};
 
 #[repr(C)]
@@ -252,7 +253,15 @@ impl AtlasAddQueue {
     }
 }
 pub(crate) struct AtlasGlyphs {
-    pub(crate) glyphs: HashMap<GlyphId, (Coords, Area<NumericalContext>, AtlasLocation, Bitmap)>,
+    pub(crate) glyphs: HashMap<
+        GlyphId,
+        (
+            TextureCoordinates,
+            Area<NumericalContext>,
+            AtlasLocation,
+            Bitmap,
+        ),
+    >,
 }
 
 impl AtlasGlyphs {

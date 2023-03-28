@@ -8,6 +8,7 @@ use crate::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
     RawArea, RawPosition, Section, Uniform, VisibleSection,
 };
+use bevy_ecs::prelude::Component;
 use std::collections::HashMap;
 
 #[repr(C)]

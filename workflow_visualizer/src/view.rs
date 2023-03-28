@@ -1,5 +1,5 @@
 use crate::viewport::ViewportHandle;
-use crate::{Area, Attach, Engen, InterfaceContext, Position};
+use crate::{Area, Attach, Engen, InterfaceContext, Position, SyncPoint};
 use bevy_ecs::prelude::{Changed, Component, IntoSystemConfig, Query, Res};
 
 #[derive(Component, Copy, Clone)]
@@ -87,6 +87,9 @@ pub(crate) fn set_from_view(
 pub struct ViewAttachment;
 impl Attach for ViewAttachment {
     fn attach(engen: &mut Engen) {
-        engen.frontend.main.add_systems((set_from_view.in_set(),));
+        engen
+            .frontend
+            .main
+            .add_systems((set_from_view.in_set(SyncPoint::Reconfigure),));
     }
 }

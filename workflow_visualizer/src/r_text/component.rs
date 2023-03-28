@@ -43,6 +43,7 @@ impl TextRequest {
         }
     }
 }
+#[derive(Component)]
 pub struct TextWrapStyle(pub WrapStyle);
 pub(crate) type GlyphId = fontdue::layout::GlyphRasterConfig;
 #[derive(Clone, Hash, Eq, PartialEq, Debug)]

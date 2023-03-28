@@ -147,8 +147,14 @@ pub(crate) fn filter(
         Or<(Changed<Text>, Changed<VisibleSection>)>,
     >,
 ) {
-    for (placement, mut filtered_placement, mut grid_placement, visible_section) in
-        text_query.iter_mut()
+    for (
+        placement,
+        mut filtered_placement,
+        mut grid_placement,
+        visible_section,
+        pos,
+        text_letter_dimensions,
+    ) in text_query.iter_mut()
     {
         if let Some(v_sec) = visible_section.section {
             filtered_placement.0 = placement.0.clone();
@@ -285,7 +291,7 @@ pub(crate) fn color_diff(
     mut text_query: Query<(&Color, &mut Cache, &mut Difference), Changed<Color>>,
 ) {
     for (color, mut cache, mut difference) in text_query.iter_mut() {
-        for key in cache.keys.iter() {
+        for key in cache.keys.clone().iter() {
             difference.glyph_color_update.insert(*key, *color);
             cache.glyph_color.insert(*key, *color);
         }
@@ -383,7 +389,7 @@ pub(crate) fn render_group_differences(
     scale_factor: Res<ScaleFactor>,
 ) {
     for (entity, difference) in extraction.differences.iter() {
-        let render_group = renderer.render_groups.get_mut(entity).unwrap();
+        let mut render_group = renderer.render_groups.remove(entity).unwrap();
         let mut draw_section_resize_needed = false;
         if let Some(v_sec) = difference.visible_section {
             render_group.visible_section = v_sec;
@@ -629,7 +635,7 @@ pub(crate) fn render_group_differences(
         for (location, (_, glyph_area, bitmap)) in render_group.atlas_write_queue.queue.iter() {
             let atlas = &render_group.atlas;
             let atlas_block = render_group.atlas_block;
-            let position = AtlasPosition::new(*location, *atlas_block).position;
+            let position = AtlasPosition::new(*location, atlas_block).position;
             let image_copy_texture = wgpu::ImageCopyTexture {
                 texture: &atlas.texture,
                 mip_level: 0,
@@ -669,6 +675,7 @@ pub(crate) fn render_group_differences(
                 render_group.draw_section.section.replace(draw_bound);
             }
         }
+        renderer.render_groups.insert(*entity, render_group);
     }
 }
 pub(crate) fn resolve_draw_section_on_resize(
