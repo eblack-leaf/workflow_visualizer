@@ -292,12 +292,14 @@ pub(crate) fn visible_section_diff(
     mut text_query: Query<(&VisibleSection, &mut Cache, &mut Difference), Changed<VisibleSection>>,
 ) {
     for (visible_section, mut cache, mut difference) in text_query.iter_mut() {
-        if let Some(cached_section) = cache.visible_section.section {
-            if let Some(entity_section) = visible_section.section {
+        if let Some(entity_section) = visible_section.section {
+            if let Some(cached_section) = cache.visible_section.section {
                 if cached_section != entity_section {
                     difference.visible_section.replace(*visible_section);
                     cache.visible_section = *visible_section;
                 }
+            } else {
+                cache.visible_section.section.replace(entity_section);
             }
         }
     }

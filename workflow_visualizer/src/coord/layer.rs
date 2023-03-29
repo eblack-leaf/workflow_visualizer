@@ -19,6 +19,11 @@ impl From<u32> for Layer {
         Self::new(value as f32)
     }
 }
+impl From<i32> for Layer {
+    fn from(value: i32) -> Self {
+        Layer::new(value as f32)
+    }
+}
 impl Add for Layer {
     type Output = Layer;
     fn add(self, rhs: Self) -> Self::Output {

@@ -6,6 +6,7 @@ use crate::panel::system::{
     process_extraction, pull_differences,
 };
 use crate::panel::{renderer, Extraction, Panel};
+use crate::view::set_from_view;
 use crate::{spawn, Attach, Engen, SyncPoint};
 
 pub struct PanelAttachment;
@@ -24,7 +25,9 @@ impl Attach for PanelAttachment {
             .add_system(process_extraction.in_set(SyncPoint::Preparation));
         engen.frontend.main.add_systems((
             spawn::<Panel>.in_set(SyncPoint::Spawn),
-            calc_content_area.in_set(SyncPoint::Reconfigure),
+            calc_content_area
+                .in_set(SyncPoint::Reconfigure)
+                .after(set_from_view),
             management.in_set(SyncPoint::Resolve),
             position_diff.in_set(SyncPoint::PushDiff),
             content_area_diff.in_set(SyncPoint::PushDiff),

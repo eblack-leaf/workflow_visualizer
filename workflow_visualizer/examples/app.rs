@@ -4,10 +4,10 @@ use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
 
 use workflow_visualizer::{
-    Area, Color, Coordinate, Engen, EngenOptions, EntityStore, GfxOptions, Idle, InterfaceContext,
-    Job, Launch, Layer, Location, Panel, Position, Request, Section, Text, TextRequest,
-    TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint,
-    VisibleSection, WrapStyleExpt,
+    Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle,
+    InterfaceContext, Job, Launch, Layer, Location, Panel, Position, RelativePoint, Request,
+    Section, Text, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
+    UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, VisibleSection, WrapStyleExpt,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -60,8 +60,18 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(Panel::new(
-                Location::from(((10.0, 10.0), 3)),
-                (480, 300),
+                ViewPosition::new(
+                    ViewPoint::new(RelativePoint::new(0.0078), Some(FixedBreakPoint(15.0))),
+                    ViewPoint::new(RelativePoint::new(0.0139), Some(FixedBreakPoint(15.0))),
+                ),
+                ViewArea::new(
+                    ViewPoint::new(
+                        RelativePoint::new(1.0 - 0.0078 * 2.0),
+                        Some(FixedBreakPoint(480.0)),
+                    ),
+                    ViewPoint::new(RelativePoint::new(0.4), None),
+                ),
+                Layer::new(10.0),
                 Color::DARK_CYAN,
             )))
             .id();
@@ -69,7 +79,18 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(TextRequest::new(
-                Coordinate::new(Section::new(Position::new(15.0, 15.0), Area::new(380.0, 280.0)), Layer::new(0.0)),
+                ViewPosition::new(
+                    ViewPoint::new(RelativePoint::new(20.0/1920.0), Some(FixedBreakPoint(20.0))),
+                    ViewPoint::new(RelativePoint::new(20.0/1080.0), Some(FixedBreakPoint(20.0))),
+                ),
+                ViewArea::new(
+                    ViewPoint::new(
+                        RelativePoint::new(0.8),
+                        Some(FixedBreakPoint(460.0)),
+                    ),
+                    ViewPoint::new(RelativePoint::new(0.38), None),
+                ),
+                Layer::new(0.0),
                 String::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
                 sed do eiusmod tempor incididunt ut labore et dolore \
                 magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi \
@@ -86,13 +107,18 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(TextRequest::new(
-                Coordinate::new(
-                    Section::new(Position::new(15.0, 615.0), Area::new(380.0, 260.0)),
-                    Layer::new(0.0),
+                ViewPosition::new(
+                    ViewPoint::new(RelativePoint::new(0.0078), Some(FixedBreakPoint(15.0))),
+                    ViewPoint::new(RelativePoint::new(0.45), None),
                 ),
+                ViewArea::new(
+                    ViewPoint::new(RelativePoint::new(0.8), Some(FixedBreakPoint(480.0))),
+                    ViewPoint::new(RelativePoint::new(0.1), None),
+                ),
+                Layer::new(0.0),
                 String::from("timer: not started yet"),
                 TextScaleAlignment::Medium,
-                Color::DARK_ORANGE,
+                Color::RED_ORANGE,
                 TextWrapStyle(WrapStyleExpt::Word),
             )))
             .id();

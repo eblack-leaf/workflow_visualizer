@@ -1,6 +1,7 @@
+use crate::view::{ViewArea, ViewPosition};
 use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
-    NumericalContext, Position, VisibleSection,
+    NumericalContext, Position, Section, VisibleSection,
 };
 use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{Bundle, Component};
@@ -9,8 +10,9 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Bundle)]
 pub struct TextRequest {
-    #[bundle]
-    pub coord: Coordinate<InterfaceContext>,
+    pub view_position: ViewPosition,
+    pub view_area: ViewArea,
+    pub layer: Layer,
     pub text: Text,
     pub scale_alignment: TextScaleAlignment,
     pub color: Color,
@@ -25,17 +27,22 @@ pub struct TextRequest {
     pub(crate) text_grid_placement: TextGridPlacement,
     pub(crate) text_line_structure: TextLineStructure,
     pub(crate) text_scale: TextScale,
+    pub(crate) section: Section<InterfaceContext>,
 }
 impl TextRequest {
-    pub fn new<Coord: Into<Coordinate<InterfaceContext>>, S: Into<String>, C: Into<Color>>(
-        coord: Coord,
+    pub fn new<S: Into<String>, C: Into<Color>>(
+        view_position: ViewPosition,
+        view_area: ViewArea,
+        layer: Layer,
         text: S,
         scale_alignment: TextScaleAlignment,
         color: C,
         wrap_style: TextWrapStyle,
     ) -> Self {
         Self {
-            coord: coord.into(),
+            view_position,
+            view_area,
+            layer,
             text: Text(text.into()),
             scale_alignment,
             color: color.into(),
@@ -50,6 +57,7 @@ impl TextRequest {
             text_grid_placement: TextGridPlacement(HashMap::new()),
             text_line_structure: TextLineStructure(vec![]),
             text_scale: TextScale(TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[0]),
+            section: Section::default(),
         }
     }
 }

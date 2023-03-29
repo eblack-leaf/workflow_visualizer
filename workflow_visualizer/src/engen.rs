@@ -6,7 +6,7 @@ use winit::event::{ElementState, Event, MouseButton, StartCause, TouchPhase, Win
 use winit::event_loop::{EventLoop, EventLoopWindowTarget};
 use winit::window::{Window, WindowBuilder};
 
-use crate::area::Area;
+use crate::coord::area::Area;
 use crate::focus::FocusAttachment;
 use crate::gfx::{GfxStack, GfxSurface};
 use crate::icon::IconAttachment;
@@ -26,6 +26,7 @@ use crate::touch::{
     Interactor, MouseAdapter, Touch, TouchAdapter, TouchAttachment, TouchEvent, TouchType,
     TrackedTouch,
 };
+use crate::view::ViewAttachment;
 use crate::viewport::{ViewportAttachment, ViewportHandle};
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
@@ -62,6 +63,7 @@ impl Engen {
                         self.invoke_attach::<TextAttachment>();
                         self.invoke_attach::<VirtualKeyboardAttachment>();
                         self.invoke_attach::<PanelAttachment>();
+                        self.invoke_attach::<ViewAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);

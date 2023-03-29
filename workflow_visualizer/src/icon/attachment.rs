@@ -8,6 +8,7 @@ use crate::icon::frontend_system::{
     secondary_color_cache_check,
 };
 use crate::icon::{Icon, IconRenderer};
+use crate::view::set_from_view;
 use crate::viewport::viewport_attach;
 use crate::{spawn, SyncPoint};
 
@@ -33,10 +34,11 @@ impl Attach for IconAttachment {
             .frontend
             .main
             .add_system(spawn::<Icon>.in_set(SyncPoint::Spawn));
-        engen
-            .frontend
-            .main
-            .add_system(calc_area.in_set(SyncPoint::Reconfigure));
+        engen.frontend.main.add_system(
+            calc_area
+                .in_set(SyncPoint::Reconfigure)
+                .after(set_from_view),
+        );
         engen
             .frontend
             .main
