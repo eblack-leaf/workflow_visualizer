@@ -99,10 +99,28 @@ impl Launch for Launcher {
         frontend.store_entity("animated_text", id);
         let id = frontend
             .container
-            .spawn(Request::new(TextRequest::new(
+            .spawn(Request::new(Panel::new(
+                PanelType::Border,
                 ViewPosition::new(
                     ViewPoint::new(RelativePoint::new(0.025), Some(FixedBreakPoint(15.0))),
-                    ViewPoint::new(RelativePoint::new(0.45), None),
+                    ViewPoint::new(RelativePoint::new(0.5139), None),
+                ),
+                ViewArea::new(
+                    ViewPoint::new(RelativePoint::new(0.95), Some(FixedBreakPoint(490.0))),
+                    ViewPoint::new(RelativePoint::new(0.12), None),
+                ),
+                Layer::new(10.0),
+                Color::DARK_GREY,
+                Color::CYAN,
+            )))
+            .id();
+        frontend.store_entity("border", id);
+        let id = frontend
+            .container
+            .spawn(Request::new(TextRequest::new(
+                ViewPosition::new(
+                    ViewPoint::new(RelativePoint::new(0.035), Some(FixedBreakPoint(20.0))),
+                    ViewPoint::new(RelativePoint::new(0.52), None),
                 ),
                 ViewArea::new(
                     ViewPoint::new(RelativePoint::new(0.8), Some(FixedBreakPoint(480.0))),
