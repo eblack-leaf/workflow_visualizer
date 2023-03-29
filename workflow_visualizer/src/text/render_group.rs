@@ -1,9 +1,9 @@
 use crate::gfx::GfxSurface;
-use crate::r_text::atlas::{
+use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReferences, AtlasGlyphs, AtlasTextureDimensions, AtlasWriteQueue, TextureCoordinates,
 };
-use crate::r_text::component::{GlyphId, Text, TextScaleAlignment};
+use crate::text::component::{GlyphId, Text, TextScaleAlignment};
 use crate::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
     RawArea, RawPosition, Section, Uniform, VisibleSection,

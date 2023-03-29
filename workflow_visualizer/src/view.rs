@@ -64,12 +64,12 @@ pub(crate) fn set_from_view(
 ) {
     for (mut position, view_position) in positions.iter_mut() {
         let new_position = calc_view_pos(&viewport_handle, view_position);
-        println!("new position: {:?}", new_position);
+        // println!("new position: {:?}", new_position);
         *position = new_position;
     }
     for (mut area, view_area) in areas.iter_mut() {
         let new_area = calc_view_area(&viewport_handle, view_area);
-        println!("new area: {:?}", new_area);
+        // println!("new area: {:?}", new_area);
         *area = new_area;
     }
 }
@@ -120,10 +120,12 @@ pub(crate) fn resize_recalc(
     if viewport_handle.is_changed() {
         for (mut pos, view_pos) in viewed.iter_mut() {
             let new_position = calc_view_pos(&viewport_handle, view_pos);
+            // println!("new position: {:?}", new_position);
             *pos = new_position;
         }
         for (mut area, view_area) in viewed_area.iter_mut() {
             let new_area = calc_view_area(&viewport_handle, view_area);
+            // println!("new area: {:?}", new_area);
             *area = new_area;
         }
     }

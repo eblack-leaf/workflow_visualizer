@@ -1,7 +1,7 @@
-use crate::r_text::component::TextRequest;
-use crate::r_text::renderer;
-use crate::r_text::renderer::TextRenderer;
-use crate::r_text::system::{
+use crate::text::component::TextRequest;
+use crate::text::renderer;
+use crate::text::renderer::TextRenderer;
+use crate::text::system::{
     color_diff, create_render_groups, filter, layer_diff, letter_differential, manage, place,
     position_diff, pull_differences, render_group_differences, resolve_draw_section_on_resize,
     scale_change, setup, visible_section_diff,

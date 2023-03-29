@@ -13,7 +13,7 @@ use crate::icon::IconAttachment;
 use crate::job::{Job, TaskLabel};
 use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
-use crate::r_text::TextAttachment;
+use crate::text::TextAttachment;
 use crate::render::{
     extract, invoke_extract, invoke_render, render, Extract, ExtractFns, Render, RenderFns,
     RenderPhase,

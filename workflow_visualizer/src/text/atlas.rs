@@ -1,6 +1,6 @@
 use crate::gfx::GfxSurface;
-use crate::r_text::component::{Glyph, GlyphId, TextScale};
-use crate::r_text::font::MonoSpacedFont;
+use crate::text::component::{Glyph, GlyphId, TextScale};
+use crate::text::font::MonoSpacedFont;
 use crate::{Area, GfxOptions, NumericalContext, Position, Section};
 use bytemuck::{Pod, Zeroable};
 use std::collections::{HashMap, HashSet};

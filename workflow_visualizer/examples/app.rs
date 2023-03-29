@@ -61,13 +61,13 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(Panel::new(
                 ViewPosition::new(
-                    ViewPoint::new(RelativePoint::new(0.0078), Some(FixedBreakPoint(15.0))),
+                    ViewPoint::new(RelativePoint::new(0.025), Some(FixedBreakPoint(15.0))),
                     ViewPoint::new(RelativePoint::new(0.0139), Some(FixedBreakPoint(15.0))),
                 ),
                 ViewArea::new(
                     ViewPoint::new(
-                        RelativePoint::new(1.0 - 0.0078 * 2.0),
-                        Some(FixedBreakPoint(480.0)),
+                        RelativePoint::new(0.95),
+                        Some(FixedBreakPoint(490.0)),
                     ),
                     ViewPoint::new(RelativePoint::new(0.4), None),
                 ),
@@ -80,12 +80,12 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(TextRequest::new(
                 ViewPosition::new(
-                    ViewPoint::new(RelativePoint::new(20.0/1920.0), Some(FixedBreakPoint(20.0))),
-                    ViewPoint::new(RelativePoint::new(20.0/1080.0), Some(FixedBreakPoint(20.0))),
+                    ViewPoint::new(RelativePoint::new(0.036), Some(FixedBreakPoint(40.0))),
+                    ViewPoint::new(RelativePoint::new(40.0/1080.0), Some(FixedBreakPoint(40.0))),
                 ),
                 ViewArea::new(
                     ViewPoint::new(
-                        RelativePoint::new(0.8),
+                        RelativePoint::new(0.94),
                         Some(FixedBreakPoint(460.0)),
                     ),
                     ViewPoint::new(RelativePoint::new(0.38), None),
@@ -108,7 +108,7 @@ impl Launch for Launcher {
             .container
             .spawn(Request::new(TextRequest::new(
                 ViewPosition::new(
-                    ViewPoint::new(RelativePoint::new(0.0078), Some(FixedBreakPoint(15.0))),
+                    ViewPoint::new(RelativePoint::new(0.025), Some(FixedBreakPoint(15.0))),
                     ViewPoint::new(RelativePoint::new(0.45), None),
                 ),
                 ViewArea::new(
@@ -118,7 +118,7 @@ impl Launch for Launcher {
                 Layer::new(0.0),
                 String::from("timer: not started yet"),
                 TextScaleAlignment::Medium,
-                Color::RED_ORANGE,
+                Color::CYAN,
                 TextWrapStyle(WrapStyleExpt::Word),
             )))
             .id();

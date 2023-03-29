@@ -1,8 +1,8 @@
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
-use crate::r_text::atlas::{AtlasBlock, TextureCoordinates};
-use crate::r_text::component::{Difference, TextScaleAlignment};
-use crate::r_text::font::AlignedFonts;
-use crate::r_text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
+use crate::text::atlas::{AtlasBlock, TextureCoordinates};
+use crate::text::component::{Difference, TextScaleAlignment};
+use crate::text::font::AlignedFonts;
+use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 use crate::{
     Color, Extract, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,

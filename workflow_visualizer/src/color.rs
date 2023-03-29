@@ -18,14 +18,14 @@ impl Default for Color {
 impl Color {
     pub const WHITE: (f32, f32, f32) = (1.0, 1.0, 1.0);
     pub const DARK_ORANGE: (f32, f32, f32) = (0.55, 0.20, 0.00);
-    pub const DARK_CYAN: (f32, f32, f32) = (0.0, 0.2, 0.1);
-    pub const CYAN: (f32, f32, f32) = (0.0, 0.5, 0.25);
-    pub const CYAN_MEDIUM: (f32, f32, f32) = (0.0, 0.25, 0.125);
+    pub const DARK_CYAN: (f32, f32, f32) = (0.0, 0.15, 0.05);
+    pub const CYAN: (f32, f32, f32) = (0.0, 0.75, 0.35);
+    pub const CYAN_MEDIUM: (f32, f32, f32) = (0.0, 0.45, 0.145);
     pub const OFF_WHITE: (f32, f32, f32) = (0.8, 0.8, 0.8);
     pub const DARK_GREY: (f32, f32, f32) = (0.1, 0.1, 0.1);
     pub const BLACK: (f32, f32, f32) = (0.0, 0.0, 0.0);
     pub const RED: (f32, f32, f32) = (0.8, 0.01, 0.01);
-    pub const RED_ORANGE: (f32, f32, f32) = (0.4, 0.1, 0.1);
+    pub const RED_ORANGE: (f32, f32, f32) = (0.6, 0.15, 0.15);
     pub const GREEN: (f32, f32, f32) = (0.01, 0.8, 0.01);
     pub const MEDIUM_GREEN: (f32, f32, f32) = (0.01, 0.6, 0.01);
     pub const DARK_GREEN: (f32, f32, f32) = (0.01, 0.4, 0.01);

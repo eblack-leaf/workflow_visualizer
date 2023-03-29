@@ -25,7 +25,7 @@ pub use instance::{
 };
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
 pub use panel::{Panel, PanelContentArea};
-pub use r_text::{
+pub use text::{
     Text, TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextScale,
     TextScaleAlignment, TextWrapStyle, WrapStyleExpt,
 };
@@ -55,7 +55,7 @@ mod instance;
 mod job;
 mod orientation;
 mod panel;
-mod r_text;
+mod text;
 mod render;
 mod request;
 mod scale_factor;

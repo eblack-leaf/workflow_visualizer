@@ -5,7 +5,7 @@ use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
 use crate::coord::NumericalContext;
-use crate::r_text::component::{TextScale, TextScaleAlignment};
+use crate::text::component::{TextScale, TextScaleAlignment};
 use crate::Area;
 
 #[derive(Resource)]

@@ -1,21 +1,21 @@
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
-use crate::r_text::atlas::{
+use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
     AtlasTextureDimensions, AtlasWriteQueue, Bitmap, TextureCoordinates,
 };
-use crate::r_text::component::{
+use crate::text::component::{
     Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, Text,
     TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
     TextScaleAlignment, TextWrapStyle,
 };
-use crate::r_text::font::{AlignedFonts, MonoSpacedFont};
-use crate::r_text::render_group::{
+use crate::text::font::{AlignedFonts, MonoSpacedFont};
+use crate::text::render_group::{
     DrawSection, KeyedGlyphIds, LayerWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
     RenderGroupUniqueGlyphs, TextPlacement,
 };
-use crate::r_text::renderer::{Extraction, TextRenderer};
+use crate::text::renderer::{Extraction, TextRenderer};
 use crate::window::WindowResize;
 use crate::{
     Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
