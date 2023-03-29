@@ -1,7 +1,6 @@
 use std::path::Path;
 
 pub struct WasmCompiler {
-    pub package: String,
     pub package_options: String,
     pub destination: String,
     pub bin: String,
@@ -10,14 +9,12 @@ pub struct WasmCompiler {
 
 impl WasmCompiler {
     pub fn new<T: Into<String>>(
-        package: T,
         bin_options: T,
         bin: T,
         package_options: T,
         destination: T,
     ) -> Self {
         Self {
-            package: package.into(),
             package_options: package_options.into(),
             destination: destination.into(),
             bin: bin.into(),
@@ -26,14 +23,10 @@ impl WasmCompiler {
     }
     pub fn compile(&self) -> Result<(), bool> {
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
-        let package = self.package.as_str();
         let profile = self.package_options.as_str();
         let bin = self.bin.as_str();
         let bin_options = self.bin_options.as_str();
         let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
-            .ancestors()
-            .nth(1)
-            .unwrap()
             .to_path_buf();
         let target = Path::new("wasm_rebuild_avoidance_target");
         let mut args = Vec::<&str>::new();
@@ -43,12 +36,11 @@ impl WasmCompiler {
         }
         args.push("--target");
         args.push("wasm32-unknown-unknown");
-        args.push("--package");
-        args.push(package);
         args.push("--target-dir");
         args.push(target.as_os_str().to_str().unwrap());
         args.push(bin_options);
         args.push(bin);
+        println!("args: {:?}, project_root: {:?}", args, project_root);
         let status = std::process::Command::new(cargo)
             .current_dir(&project_root)
             .args(&args)

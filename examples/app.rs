@@ -5,9 +5,9 @@ use winit::event_loop::EventLoop;
 
 use workflow_visualizer::{
     Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle,
-    InterfaceContext, Job, Launch, Layer, Location, Panel, Position, RelativePoint, Request,
+    InterfaceContext, Job, Launch, Layer, Panel, Position, RelativePoint, Request,
     Section, Text, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
-    UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, VisibleSection, WrapStyleExpt,
+    UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt,
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -15,7 +15,6 @@ pub fn compile_and_serve() {
     use workflow_visualizer::{WasmCompiler, WasmServer};
     let args: Vec<String> = std::env::args().collect();
     let wasm_compiler = WasmCompiler::new(
-        "workflow_visualizer",
         "--example",
         "app",
         "release",
