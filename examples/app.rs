@@ -3,12 +3,7 @@ use std::net::SocketAddr;
 use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
 
-use workflow_visualizer::{
-    Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle,
-    InterfaceContext, Job, Launch, Layer, Panel, PanelType, Position, RelativePoint, Request,
-    Section, Text, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
-    UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt,
-};
+use workflow_visualizer::{Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle, InterfaceContext, Job, Launch, Layer, Panel, PanelType, Position, RelativePoint, Request, Section, Text, TextInputRequest, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -33,11 +28,6 @@ fn logic(
     mut text_query: Query<(&mut Text, &Position<InterfaceContext>)>,
     timer: Res<Timer>,
 ) {
-    idle.can_idle = false;
-    let text_entity = *entity_store.store.get("timer_text").unwrap();
-    if let Ok((mut text, _pos)) = text_query.get_mut(text_entity) {
-        text.0 = format!("timer: {:.2}", timer.mark().0);
-    }
 }
 struct Launcher;
 impl Launch for Launcher {
@@ -97,10 +87,8 @@ impl Launch for Launcher {
             )))
             .id();
         frontend.store_entity("animated_text", id);
-        let id = frontend
-            .container
-            .spawn(Request::new(Panel::new(
-                PanelType::Border,
+        let id = frontend.container.spawn(
+            Request::new(TextInputRequest::new(
                 ViewPosition::new(
                     ViewPoint::new(RelativePoint::new(0.025), Some(FixedBreakPoint(15.0))),
                     ViewPoint::new(RelativePoint::new(0.5139), None),
@@ -109,30 +97,11 @@ impl Launch for Launcher {
                     ViewPoint::new(RelativePoint::new(0.95), Some(FixedBreakPoint(490.0))),
                     ViewPoint::new(RelativePoint::new(0.12), None),
                 ),
-                Layer::new(10.0),
-                Color::DARK_GREY,
-                Color::CYAN,
-            )))
-            .id();
-        frontend.store_entity("border", id);
-        let id = frontend
-            .container
-            .spawn(Request::new(TextRequest::new(
-                ViewPosition::new(
-                    ViewPoint::new(RelativePoint::new(0.035), Some(FixedBreakPoint(20.0))),
-                    ViewPoint::new(RelativePoint::new(0.52), None),
-                ),
-                ViewArea::new(
-                    ViewPoint::new(RelativePoint::new(0.8), Some(FixedBreakPoint(480.0))),
-                    ViewPoint::new(RelativePoint::new(0.1), None),
-                ),
                 Layer::new(0.0),
-                String::from("timer: not started yet"),
-                TextScaleAlignment::Medium,
-                Color::CYAN,
-                TextWrapStyle(WrapStyleExpt::Word),
-            )))
-            .id();
+                "type here...".to_string(),
+                TextScaleAlignment::Medium, Color::CYAN, Color::DARK_CYAN
+            ))
+        ).id();
         frontend.store_entity("timer_text", id);
         frontend
             .main

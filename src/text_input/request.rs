@@ -1,28 +1,34 @@
-use crate::{Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment};
+use crate::{
+    Color, InterfaceContext, Layer, Location, TextScaleAlignment, ViewArea,
+    ViewPosition,
+};
 
 pub struct TextInputRequest {
     pub hint_text: String,
     pub alignment: TextScaleAlignment,
-    pub grid_guide: TextGridDescriptor,
-    pub location: Location<InterfaceContext>,
+    pub view_position: ViewPosition,
+    pub view_area: ViewArea,
+    pub layer: Layer,
     pub text_color: Color,
     pub background_color: Color,
 }
 
 impl TextInputRequest {
-    pub fn new<L: Into<Location<InterfaceContext>>, C: Into<Color>>(
+    pub fn new<C: Into<Color>>(
+        view_position: ViewPosition,
+        view_area: ViewArea,
+        layer: Layer,
         hint_text: String,
         alignment: TextScaleAlignment,
-        grid_guide: TextGridDescriptor,
-        location: L,
         color: C,
         background_color: C,
     ) -> Self {
         Self {
             hint_text,
             alignment,
-            grid_guide,
-            location: location.into(),
+            view_position,
+            view_area,
+            layer,
             text_color: color.into(),
             background_color: background_color.into(),
         }

@@ -190,7 +190,9 @@ impl Render for PanelRenderer {
             render_pass_handle
                 .0
                 .draw(0..self.panel_mesh_len, 0..self.indexer.count());
-            render_pass_handle.0.set_vertex_buffer(0, self.border_vertex_buffer.slice(..));
+            render_pass_handle
+                .0
+                .set_vertex_buffer(0, self.border_vertex_buffer.slice(..));
             render_pass_handle
                 .0
                 .set_vertex_buffer(4, self.border_colors.gpu.buffer.slice(..));

@@ -33,6 +33,7 @@ pub use text::{
     Text, TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextScale,
     TextScaleAlignment, TextWrapStyle, WrapStyleExpt,
 };
+pub use text_input::{TextInputRequest, TextColor, TextBackgroundColor, TextInputText, Cursor};
 pub use theme::{Theme, ThemeDescriptor};
 pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
@@ -59,6 +60,7 @@ mod request;
 mod scale_factor;
 mod sync;
 mod text;
+mod text_input;
 mod theme;
 mod time;
 mod touch;

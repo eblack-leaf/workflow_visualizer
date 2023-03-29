@@ -217,13 +217,15 @@ pub(crate) fn generate_border_corner(
     let mut current_angle = current;
     let mut outer_bottom =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
-    let mut inner_bottom = current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
+    let mut inner_bottom =
+        current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
     let mut interpolator = Interpolator::new(FRAC_PI_2);
     let (mut extract, mut done) = interpolator.extract(delta);
     current_angle += extract;
     let mut outer_top =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
-    let mut inner_top = current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
+    let mut inner_top =
+        current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
     tris.extend([inner_top, inner_bottom, outer_top]);
     tris.extend([inner_bottom, outer_bottom, outer_top]);
     inner_bottom = inner_top;
@@ -233,7 +235,8 @@ pub(crate) fn generate_border_corner(
         current_angle += extract;
         outer_top =
             current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
-        inner_top = current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
+        inner_top =
+            current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
         tris.extend([inner_top, inner_bottom, outer_top]);
         tris.extend([inner_bottom, outer_bottom, outer_top]);
         inner_bottom = inner_top;
@@ -269,7 +272,6 @@ pub(crate) fn generate_border_corner(
     bar_tris.push(near_inner);
     corner_tris.extend(bar_tris);
     corner_tris
-
 }
 pub(crate) fn generate_border_mesh(corner_precision: u32, scale_factor: f64) -> Vec<PanelVertex> {
     let delta = 1f32 / corner_precision as f32;

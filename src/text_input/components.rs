@@ -8,8 +8,8 @@ use crate::text_input::Cursor;
 use crate::touch::{TouchListener, Touchable};
 use crate::visibility::EnableVisibility;
 use crate::{
-    Area, Color, InterfaceContext, Location, TextGridDescriptor, TextScaleAlignment,
-    TextScaleLetterDimensions, VirtualKeyboardType,
+    Area, Color, InterfaceContext, Layer, Location, Section, TextLetterDimensions,
+    TextLineStructure, TextScaleAlignment, ViewArea, ViewPosition, VirtualKeyboardType,
 };
 
 #[derive(Component)]
@@ -32,11 +32,13 @@ pub struct TextInput {
     pub(crate) cursor_icon: CursorIcon,
     pub(crate) content_panel: TextContentPanel,
     pub(crate) alignment: TextScaleAlignment,
-    pub(crate) grid_guide: TextGridDescriptor,
+    pub(crate) view_position: ViewPosition,
+    pub(crate) view_area: ViewArea,
+    pub(crate) layer: Layer,
     #[bundle]
-    pub(crate) location: Location<InterfaceContext>,
+    pub(crate) section: Section<InterfaceContext>,
     #[bundle]
-    pub(crate) clickable: Touchable,
+    pub(crate) touchable: Touchable,
     pub(crate) max_characters: MaxCharacters,
     pub(crate) focus: Focus,
     pub(crate) keyboard_type: VirtualKeyboardType,
@@ -45,8 +47,7 @@ pub struct TextInput {
     pub(crate) visibility: EnableVisibility,
     pub(crate) text_color: TextColor,
     pub(crate) background_color: TextBackgroundColor,
-    pub(crate) area: Area<InterfaceContext>,
-    pub(crate) letter_dimensions: TextScaleLetterDimensions,
+    pub(crate) letter_dimensions: TextLetterDimensions,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -57,34 +58,35 @@ pub struct TextBackgroundColor(pub Color);
 
 impl TextInput {
     pub(crate) fn new<C: Into<Color>>(
+        view_position: ViewPosition,
+        view_area: ViewArea,
+        layer: Layer,
         text_input_text: TextInputText,
         cursor_icon: CursorIcon,
         content_panel: TextContentPanel,
         alignment: TextScaleAlignment,
-        bound_guide: TextGridDescriptor,
-        location: Location<InterfaceContext>,
         text_color: C,
         text_background_color: C,
+        max_characters: u32,
     ) -> Self {
         Self {
             text_input_text,
             cursor_icon,
             content_panel,
             alignment,
-            grid_guide: bound_guide,
-            location,
-            clickable: Touchable::new(TouchListener::on_press()),
-            max_characters: MaxCharacters(
-                bound_guide.horizontal_character_max * bound_guide.line_max,
-            ),
+            view_position,
+            view_area,
+            layer,
+            section: Section::default(),
+            touchable: Touchable::new(TouchListener::on_press()),
+            max_characters: MaxCharacters(max_characters),
             focus: Focus::new(),
             keyboard_type: VirtualKeyboardType::Keyboard,
             cursor: Cursor::new(),
             visibility: EnableVisibility::new(),
             text_color: TextColor(text_color.into()),
             background_color: TextBackgroundColor(text_background_color.into()),
-            area: Area::default(),
-            letter_dimensions: TextScaleLetterDimensions::new(Area::default()),
+            letter_dimensions: TextLetterDimensions(Area::default()),
         }
     }
 }

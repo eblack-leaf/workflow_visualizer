@@ -34,7 +34,7 @@ pub struct Icon {
 }
 
 impl Icon {
-    pub fn new<P: Into<Location<InterfaceContext>>, C: Into<Color>>(
+    pub fn new<C: Into<Color>>(
         key: IconKey,
         view_position: ViewPosition,
         view_area: ViewArea,

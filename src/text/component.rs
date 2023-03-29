@@ -137,6 +137,7 @@ impl TextGridLocation {
 pub struct TextGridPlacement(pub HashMap<TextGridLocation, Key>);
 #[derive(Component)]
 pub struct TextLineStructure(pub Vec<u32>);
+
 impl TextLineStructure {
     pub(crate) fn from_grid_placement(grid_placement: &TextGridPlacement) -> Self {
         let mut max_y = 0;
@@ -153,6 +154,18 @@ impl TextLineStructure {
             *line_counts.get_mut(placed.y as usize).unwrap() += 1;
         }
         Self(line_counts)
+    }
+    pub(crate) fn horizontal_character_max(&self) -> u32 {
+        let mut max = 0;
+        for line in self.0.iter() {
+            if *line > max {
+                max = *line;
+            }
+        }
+        max
+    }
+    pub(crate) fn line_max(&self) -> u32 {
+        self.0.len() as u32
     }
 }
 

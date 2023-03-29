@@ -32,6 +32,7 @@ use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::{WindowAttachment, WindowResize};
 use crate::{DeviceContext, GfxOptions, Position};
+use crate::text_input::TextInputAttachment;
 
 pub struct Engen {
     pub options: EngenOptions,
@@ -64,6 +65,7 @@ impl Engen {
                         self.invoke_attach::<VirtualKeyboardAttachment>();
                         self.invoke_attach::<PanelAttachment>();
                         self.invoke_attach::<ViewAttachment>();
+                        self.invoke_attach::<TextInputAttachment>();
                         self.attach_from_queue();
                         self.frontend.exec(TaskLabel::Startup);
                         self.backend.exec(TaskLabel::Startup);
