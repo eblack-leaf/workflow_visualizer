@@ -5,8 +5,8 @@ use winit::event_loop::EventLoop;
 
 use workflow_visualizer::{
     Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle,
-    InterfaceContext, Job, Launch, Layer, Panel, Position, RelativePoint, Request,
-    Section, Text, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
+    InterfaceContext, Job, Launch, Layer, Panel, Position, RelativePoint, Request, Section, Text,
+    TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
     UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt,
 };
 
@@ -14,12 +14,7 @@ use workflow_visualizer::{
 pub fn compile_and_serve() {
     use workflow_visualizer::{WasmCompiler, WasmServer};
     let args: Vec<String> = std::env::args().collect();
-    let wasm_compiler = WasmCompiler::new(
-        "--example",
-        "app",
-        "release",
-        "app_web_build",
-    );
+    let wasm_compiler = WasmCompiler::new("--example", "app", "release", "app_web_build");
     if args.contains(&"build".to_string()) {
         wasm_compiler.compile().expect("could not compile wasm");
         if !args.contains(&"serve".to_string()) {
@@ -64,10 +59,7 @@ impl Launch for Launcher {
                     ViewPoint::new(RelativePoint::new(0.0139), Some(FixedBreakPoint(15.0))),
                 ),
                 ViewArea::new(
-                    ViewPoint::new(
-                        RelativePoint::new(0.95),
-                        Some(FixedBreakPoint(490.0)),
-                    ),
+                    ViewPoint::new(RelativePoint::new(0.95), Some(FixedBreakPoint(490.0))),
                     ViewPoint::new(RelativePoint::new(0.4), None),
                 ),
                 Layer::new(10.0),

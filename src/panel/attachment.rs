@@ -1,10 +1,7 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::panel::renderer::PanelRenderer;
-use crate::panel::system::{
-    calc_content_area, color_diff, content_area_diff, layer_diff, management, position_diff,
-    process_extraction, pull_differences,
-};
+use crate::panel::system::{calc_content_area, color_diff, content_area_diff, layer_diff, management, panel_type_diff, position_diff, process_extraction, pull_differences};
 use crate::panel::{renderer, Extraction, Panel};
 use crate::view::set_from_view;
 use crate::{spawn, Attach, Engen, SyncPoint};
@@ -29,6 +26,7 @@ impl Attach for PanelAttachment {
                 .in_set(SyncPoint::Reconfigure)
                 .after(set_from_view),
             management.in_set(SyncPoint::Resolve),
+            panel_type_diff.in_set(SyncPoint::PushDiff),
             position_diff.in_set(SyncPoint::PushDiff),
             content_area_diff.in_set(SyncPoint::PushDiff),
             layer_diff.in_set(SyncPoint::PushDiff),

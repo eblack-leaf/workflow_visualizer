@@ -24,15 +24,15 @@ pub use instance::{
     offset, InstanceAttributeManager, NullBit,
 };
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
-pub use panel::{Panel, PanelContentArea};
-pub use text::{
-    Text, TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextScale,
-    TextScaleAlignment, TextWrapStyle, WrapStyleExpt,
-};
+pub use panel::{Panel, ContentArea};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
 pub use scale_factor::ScaleFactor;
 pub use sync::{SyncPoint, UserSpaceSyncPoint};
+pub use text::{
+    Text, TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextScale,
+    TextScaleAlignment, TextWrapStyle, WrapStyleExpt,
+};
 pub use theme::{Theme, ThemeDescriptor};
 pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
@@ -44,7 +44,6 @@ pub use wasm_compiler::WasmCompiler;
 #[cfg(not(target_arch = "wasm32"))]
 pub use wasm_server::WasmServer;
 mod animate;
-mod border;
 mod color;
 mod coord;
 mod engen;
@@ -55,11 +54,11 @@ mod instance;
 mod job;
 mod orientation;
 mod panel;
-mod text;
 mod render;
 mod request;
 mod scale_factor;
 mod sync;
+mod text;
 mod theme;
 mod time;
 mod touch;

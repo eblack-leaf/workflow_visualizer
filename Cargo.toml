@@ -7,9 +7,8 @@ resolver = "2"
 opt-level = 1
 [profile.release]
 #debug = true
-lto = true
-opt-level = "s"
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+#lto = true
+#opt-level = "s"
 
 [dependencies]
 bevy_ecs = "0.10.0"

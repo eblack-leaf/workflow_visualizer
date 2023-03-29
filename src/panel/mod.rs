@@ -17,13 +17,25 @@ mod vertex;
 
 #[derive(Component, Copy, Clone)]
 pub struct PanelContentArea(pub Area<InterfaceContext>);
+#[derive(Component, Copy, Clone)]
+pub enum PanelType {
+    Panel,
+    Border,
+    BorderedPanel
+}
+#[derive(Component, Copy, Clone)]
+pub struct PanelColor(pub Color);
+#[derive(Component, Copy, Clone)]
+pub struct BorderColor(pub Color);
 #[derive(Bundle)]
 pub struct Panel {
+    pub panel_type: PanelType,
     pub view_position: ViewPosition,
     pub view_area: ViewArea,
     pub layer: Layer,
     pub content_area: PanelContentArea,
-    pub color: Color,
+    pub panel_color: PanelColor,
+    pub border_color: BorderColor,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
     pub(crate) visibility: EnableVisibility,
@@ -33,17 +45,21 @@ impl Panel {
     pub const PADDING: (f32, f32) = (5.0, 5.0);
     pub const CORNER_DEPTH: f32 = 5f32;
     pub fn new<C: Into<Color>>(
+        panel_type: PanelType,
         view_position: ViewPosition,
         view_area: ViewArea,
         layer: Layer,
-        color: C,
+        panel_color: C,
+        border_color: C,
     ) -> Self {
         Self {
+            panel_type,
             view_position,
             view_area,
             layer,
+            border_color: BorderColor(border_color.into()),
             content_area: PanelContentArea(Area::default()),
-            color: color.into(),
+            panel_color: PanelColor(panel_color.into()),
             visibility: EnableVisibility::new(),
             cache: Cache::new(),
             difference: Difference::new(),
@@ -53,35 +69,43 @@ impl Panel {
 }
 #[derive(Component)]
 pub(crate) struct Cache {
+    pub(crate) panel_type: Option<PanelType>,
     pub(crate) position: Option<Position<InterfaceContext>>,
     pub(crate) content_area: Option<Area<InterfaceContext>>,
     pub(crate) layer: Option<Layer>,
-    pub(crate) color: Option<Color>,
+    pub(crate) panel_color: Option<Color>,
+    pub(crate) border_color: Option<Color>,
 }
 impl Cache {
     pub(crate) fn new() -> Self {
         Self {
+            panel_type: None,
             position: None,
             content_area: None,
             layer: None,
-            color: None,
+            panel_color: None,
+            border_color: None,
         }
     }
 }
 #[derive(Component, Clone)]
 pub(crate) struct Difference {
+    pub(crate) panel_type: Option<PanelType>,
     pub(crate) position: Option<Position<InterfaceContext>>,
     pub(crate) content_area: Option<Area<InterfaceContext>>,
     pub(crate) layer: Option<Layer>,
-    pub(crate) color: Option<Color>,
+    pub(crate) panel_color: Option<Color>,
+    pub(crate) border_color: Option<Color>,
 }
 impl Difference {
     pub(crate) fn new() -> Self {
         Self {
+            panel_type: None,
             position: None,
             content_area: None,
             layer: None,
-            color: None,
+            panel_color: None,
+            border_color: None,
         }
     }
 }

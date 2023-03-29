@@ -7,6 +7,7 @@ use crate::{
     Color, Extract, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition,
     Render, RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
+use crate::render::render;
 
 #[derive(Resource)]
 pub(crate) struct PanelRenderer {
@@ -14,10 +15,14 @@ pub(crate) struct PanelRenderer {
     pub(crate) positions: InstanceAttributeManager<RawPosition>,
     pub(crate) content_area: InstanceAttributeManager<RawArea>,
     pub(crate) layers: InstanceAttributeManager<Layer>,
-    pub(crate) colors: InstanceAttributeManager<Color>,
-    pub(crate) null_bits: InstanceAttributeManager<NullBit>,
-    pub(crate) vertex_buffer: wgpu::Buffer,
-    pub(crate) mesh_length: u32,
+    pub(crate) panel_colors: InstanceAttributeManager<Color>,
+    pub(crate) panel_null_bits: InstanceAttributeManager<NullBit>,
+    pub(crate) panel_vertex_buffer: wgpu::Buffer,
+    pub(crate) panel_mesh_len: u32,
+    pub(crate) border_null_bits: InstanceAttributeManager<NullBit>,
+    pub(crate) border_colors: InstanceAttributeManager<Color>,
+    pub(crate) border_vertex_buffer: wgpu::Buffer,
+    pub(crate) border_mesh_len: u32,
     pub(crate) indexer: Indexer<Entity>,
 }
 pub(crate) fn setup(
@@ -114,16 +119,23 @@ pub(crate) fn setup(
     let mesh = generate_mesh(64, scale_factor.factor);
     let mesh_len = mesh.len() as u32;
     let buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
+    let border_mesh = ();
+    let border_mesh_len = 0;
+    let border_vertex_buffer = ();
     let initial_max = 5;
     let renderer = PanelRenderer {
         pipeline,
         positions: InstanceAttributeManager::new(&gfx_surface, initial_max),
         content_area: InstanceAttributeManager::new(&gfx_surface, initial_max),
         layers: InstanceAttributeManager::new(&gfx_surface, initial_max),
-        colors: InstanceAttributeManager::new(&gfx_surface, initial_max),
-        null_bits: InstanceAttributeManager::new(&gfx_surface, initial_max),
-        vertex_buffer: buffer,
-        mesh_length: mesh_len,
+        panel_colors: InstanceAttributeManager::new(&gfx_surface, initial_max),
+        panel_null_bits: InstanceAttributeManager::new(&gfx_surface, initial_max),
+        panel_vertex_buffer: buffer,
+        panel_mesh_len: mesh_len,
+        border_null_bits: InstanceAttributeManager::new(&gfx_surface, initial_max),
+        border_colors: InstanceAttributeManager::new(&gfx_surface, initial_max),
+        border_vertex_buffer,
+        border_mesh_len,
         indexer: Indexer::new(initial_max),
     };
     cmd.insert_resource(renderer);
@@ -159,7 +171,7 @@ impl Render for PanelRenderer {
                 .set_bind_group(0, &viewport.bind_group, &[]);
             render_pass_handle
                 .0
-                .set_vertex_buffer(0, self.vertex_buffer.slice(..));
+                .set_vertex_buffer(0, self.panel_vertex_buffer.slice(..));
             render_pass_handle
                 .0
                 .set_vertex_buffer(1, self.positions.gpu.buffer.slice(..));
@@ -171,13 +183,17 @@ impl Render for PanelRenderer {
                 .set_vertex_buffer(3, self.layers.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(4, self.colors.gpu.buffer.slice(..));
+                .set_vertex_buffer(4, self.panel_colors.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(5, self.null_bits.gpu.buffer.slice(..));
+                .set_vertex_buffer(5, self.panel_null_bits.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .draw(0..self.mesh_length, 0..self.indexer.count());
+                .draw(0..self.panel_mesh_len, 0..self.indexer.count());
+            render_pass_handle.0.set_vertex_buffer(4, self.border_colors.gpu.buffer.slice(..));
+            render_pass_handle.0.set_vertex_buffer(5, self.border_null_bits.gpu.buffer.slice(..));
+            render_pass_handle.0.draw(0..self.border_mesh_len, 0..self.indexer.count());
+
         }
     }
 }

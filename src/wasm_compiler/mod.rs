@@ -26,8 +26,7 @@ impl WasmCompiler {
         let profile = self.package_options.as_str();
         let bin = self.bin.as_str();
         let bin_options = self.bin_options.as_str();
-        let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
-            .to_path_buf();
+        let project_root = Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).to_path_buf();
         let target = Path::new("wasm_rebuild_avoidance_target");
         let mut args = Vec::<&str>::new();
         args.push("build");
