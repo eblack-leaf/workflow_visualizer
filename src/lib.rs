@@ -24,7 +24,7 @@ pub use instance::{
     offset, InstanceAttributeManager, NullBit,
 };
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
-pub use panel::{Panel, ContentArea};
+pub use panel::{Panel, PanelContentArea, PanelType};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
 pub use request::{spawn, Request};
 pub use scale_factor::ScaleFactor;

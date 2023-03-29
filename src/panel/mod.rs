@@ -17,13 +17,13 @@ mod vertex;
 
 #[derive(Component, Copy, Clone)]
 pub struct PanelContentArea(pub Area<InterfaceContext>);
-#[derive(Component, Copy, Clone)]
+#[derive(Component, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum PanelType {
     Panel,
     Border,
-    BorderedPanel
+    BorderedPanel,
 }
-#[derive(Component, Copy, Clone)]
+#[derive(Component, Copy, Clone, PartialEq)]
 pub struct PanelColor(pub Color);
 #[derive(Component, Copy, Clone)]
 pub struct BorderColor(pub Color);
@@ -44,6 +44,7 @@ pub struct Panel {
 impl Panel {
     pub const PADDING: (f32, f32) = (5.0, 5.0);
     pub const CORNER_DEPTH: f32 = 5f32;
+    pub const LINE_WIDTH: f32 = 2f32;
     pub fn new<C: Into<Color>>(
         panel_type: PanelType,
         view_position: ViewPosition,

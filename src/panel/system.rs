@@ -4,11 +4,13 @@ use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
 use crate::gfx::GfxSurface;
 use crate::panel::renderer::PanelRenderer;
-use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelColor, PanelContentArea, PanelType};
+use crate::panel::{
+    BorderColor, Cache, Difference, Extraction, PanelColor, PanelContentArea, PanelType,
+};
+use crate::render::render;
 use crate::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
-use crate::render::render;
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -46,7 +48,9 @@ pub(crate) fn management(
         }
     }
 }
-pub(crate) fn panel_type_diff(mut panel_type_changed: Query<(&PanelType, &mut Cache, &mut Difference), Changed<PanelType>>) {
+pub(crate) fn panel_type_diff(
+    mut panel_type_changed: Query<(&PanelType, &mut Cache, &mut Difference), Changed<PanelType>>,
+) {
     for (panel_type, mut cache, mut difference) in panel_type_changed.iter_mut() {
         if let Some(p_type) = cache.panel_type {
             if *panel_type != p_type {
@@ -115,26 +119,29 @@ pub(crate) fn layer_diff(
 }
 
 pub(crate) fn color_diff(
-    mut color_changed: Query<(&PanelColor, &BorderColor, &mut Cache, &mut Difference), Or<(Changed<PanelColor>, Changed<BorderColor>)>>,
+    mut color_changed: Query<
+        (&PanelColor, &BorderColor, &mut Cache, &mut Difference),
+        Or<(Changed<PanelColor>, Changed<BorderColor>)>,
+    >,
 ) {
     for (panel_color, border_color, mut cache, mut diff) in color_changed.iter_mut() {
         if let Some(cached) = cache.panel_color {
-            if *panel_color != cached {
-                cache.panel_color.replace(*panel_color.0);
-                diff.panel_color.replace(*panel_color.0);
+            if panel_color.0 != cached {
+                cache.panel_color.replace(panel_color.0);
+                diff.panel_color.replace(panel_color.0);
             }
         } else {
-            cache.panel_color.replace(*panel_color.0);
-            diff.panel_color.replace(*panel_color.0);
+            cache.panel_color.replace(panel_color.0);
+            diff.panel_color.replace(panel_color.0);
         }
         if let Some(cached) = cache.border_color {
-            if *border_color != cached {
-                cache.panel_color.replace(*border_color.0);
-                diff.panel_color.replace(*border_color.0);
+            if border_color.0 != cached {
+                cache.border_color.replace(border_color.0);
+                diff.border_color.replace(border_color.0);
             }
         } else {
-            cache.panel_color.replace(*border_color.0);
-            diff.panel_color.replace(*border_color.0);
+            cache.border_color.replace(border_color.0);
+            diff.border_color.replace(border_color.0);
         }
     }
 }
@@ -191,16 +198,26 @@ pub(crate) fn process_extraction(
         if let Some(panel_type) = difference.panel_type {
             match panel_type {
                 PanelType::Panel => {
-                    renderer.panel_null_bits.queue_write(index, NullBit::not_null());
-                    renderer.border_null_bits.queue_write(index, NullBit::null());
+                    renderer
+                        .panel_null_bits
+                        .queue_write(index, NullBit::not_null());
+                    renderer
+                        .border_null_bits
+                        .queue_write(index, NullBit::null());
                 }
                 PanelType::Border => {
                     renderer.panel_null_bits.queue_write(index, NullBit::null());
-                    renderer.border_null_bits.queue_write(index, NullBit::not_null());
+                    renderer
+                        .border_null_bits
+                        .queue_write(index, NullBit::not_null());
                 }
                 PanelType::BorderedPanel => {
-                    renderer.panel_null_bits.queue_write(index, NullBit::not_null());
-                    renderer.border_null_bits.queue_write(index, NullBit::not_null());
+                    renderer
+                        .panel_null_bits
+                        .queue_write(index, NullBit::not_null());
+                    renderer
+                        .border_null_bits
+                        .queue_write(index, NullBit::not_null());
                 }
             }
         }

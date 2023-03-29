@@ -5,8 +5,8 @@ use winit::event_loop::EventLoop;
 
 use workflow_visualizer::{
     Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle,
-    InterfaceContext, Job, Launch, Layer, Panel, Position, RelativePoint, Request, Section, Text,
-    TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
+    InterfaceContext, Job, Launch, Layer, Panel, PanelType, Position, RelativePoint, Request,
+    Section, Text, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer,
     UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt,
 };
 
@@ -54,6 +54,7 @@ impl Launch for Launcher {
         let id = frontend
             .container
             .spawn(Request::new(Panel::new(
+                PanelType::BorderedPanel,
                 ViewPosition::new(
                     ViewPoint::new(RelativePoint::new(0.025), Some(FixedBreakPoint(15.0))),
                     ViewPoint::new(RelativePoint::new(0.0139), Some(FixedBreakPoint(15.0))),
@@ -64,6 +65,7 @@ impl Launch for Launcher {
                 ),
                 Layer::new(10.0),
                 Color::DARK_CYAN,
+                Color::CYAN,
             )))
             .id();
         frontend.store_entity("panel", id);

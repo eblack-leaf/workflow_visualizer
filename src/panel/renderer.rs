@@ -1,13 +1,13 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
-use crate::panel::vertex::{generate_mesh, vertex_buffer, PanelVertex};
+use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
 use crate::panel::{Difference, Extraction};
+use crate::render::render;
 use crate::{
     Color, Extract, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition,
     Render, RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
-use crate::render::render;
 
 #[derive(Resource)]
 pub(crate) struct PanelRenderer {
@@ -100,7 +100,7 @@ pub(crate) fn setup(
         depth_stencil: Some(wgpu::DepthStencilState {
             format: viewport.depth_format,
             depth_write_enabled: true,
-            depth_compare: wgpu::CompareFunction::Less,
+            depth_compare: wgpu::CompareFunction::LessEqual,
             stencil: wgpu::StencilState::default(),
             bias: wgpu::DepthBiasState::default(),
         }),
@@ -116,12 +116,12 @@ pub(crate) fn setup(
         multiview: None,
     };
     let pipeline = gfx_surface.device.create_render_pipeline(&descriptor);
-    let mesh = generate_mesh(64, scale_factor.factor);
+    let mesh = generate_panel_mesh(64, scale_factor.factor);
     let mesh_len = mesh.len() as u32;
     let buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
-    let border_mesh = ();
-    let border_mesh_len = 0;
-    let border_vertex_buffer = ();
+    let border_mesh = generate_border_mesh(64, scale_factor.factor);
+    let border_mesh_len = border_mesh.len() as u32;
+    let border_vertex_buffer = vertex_buffer(&gfx_surface, border_mesh);
     let initial_max = 5;
     let renderer = PanelRenderer {
         pipeline,
@@ -190,10 +190,16 @@ impl Render for PanelRenderer {
             render_pass_handle
                 .0
                 .draw(0..self.panel_mesh_len, 0..self.indexer.count());
-            render_pass_handle.0.set_vertex_buffer(4, self.border_colors.gpu.buffer.slice(..));
-            render_pass_handle.0.set_vertex_buffer(5, self.border_null_bits.gpu.buffer.slice(..));
-            render_pass_handle.0.draw(0..self.border_mesh_len, 0..self.indexer.count());
-
+            render_pass_handle.0.set_vertex_buffer(0, self.border_vertex_buffer.slice(..));
+            render_pass_handle
+                .0
+                .set_vertex_buffer(4, self.border_colors.gpu.buffer.slice(..));
+            render_pass_handle
+                .0
+                .set_vertex_buffer(5, self.border_null_bits.gpu.buffer.slice(..));
+            render_pass_handle
+                .0
+                .draw(0..self.border_mesh_len, 0..self.indexer.count());
         }
     }
 }
