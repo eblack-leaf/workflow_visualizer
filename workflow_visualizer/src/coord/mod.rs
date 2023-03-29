@@ -1,6 +1,12 @@
 use crate::{Layer, Section};
 use bevy_ecs::bundle::Bundle;
 
+pub mod area;
+pub mod layer;
+pub mod location;
+pub mod position;
+pub mod section;
+
 pub trait CoordContext
 where
     Self: Send + Sync + 'static + Copy + Clone,
@@ -16,7 +22,7 @@ impl CoordContext for DeviceContext {}
 impl CoordContext for InterfaceContext {}
 impl CoordContext for NumericalContext {}
 
-#[derive(Bundle, Copy, Clone)]
+#[derive(Bundle, Copy, Clone, Default)]
 pub struct Coordinate<Context: CoordContext> {
     #[bundle]
     pub section: Section<Context>,

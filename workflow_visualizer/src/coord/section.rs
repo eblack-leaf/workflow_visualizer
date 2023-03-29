@@ -1,11 +1,11 @@
 use bevy_ecs::bundle::Bundle;
 
-use crate::area::Area;
+use crate::coord::area::Area;
+use crate::coord::position::Position;
 use crate::coord::CoordContext;
-use crate::position::Position;
 use crate::{DeviceContext, InterfaceContext};
 
-#[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default)]
+#[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Section<Context: CoordContext> {
     pub position: Position<Context>,
     pub area: Area<Context>,

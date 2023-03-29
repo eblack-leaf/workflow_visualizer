@@ -1,8 +1,9 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
 use crate::icon::mesh::{ColorInvert, IconKey};
+use crate::view::{ViewArea, ViewPosition};
 use crate::visibility::EnableVisibility;
-use crate::{Area, Color, InterfaceContext, Location};
+use crate::{Area, Color, Coordinate, InterfaceContext, Layer, Location, Section};
 
 #[derive(Component, Copy, Clone)]
 pub struct IconSecondaryColor {
@@ -22,19 +23,22 @@ pub struct Icon {
     pub secondary_color: IconSecondaryColor,
     pub size: IconSize,
     pub key: IconKey,
-    #[bundle]
-    pub location: Location<InterfaceContext>,
+    pub view_position: ViewPosition,
+    pub view_area: ViewArea,
+    pub layer: Layer,
     pub color: Color,
     pub(crate) color_invert: ColorInvert,
     #[bundle]
     pub(crate) visibility: EnableVisibility,
-    pub(crate) area: Area<InterfaceContext>,
+    pub(crate) section: Section<InterfaceContext>,
 }
 
 impl Icon {
     pub fn new<P: Into<Location<InterfaceContext>>, C: Into<Color>>(
         key: IconKey,
-        location: P,
+        view_position: ViewPosition,
+        view_area: ViewArea,
+        layer: Layer,
         size: IconSize,
         color: C,
         secondary_color: IconSecondaryColor,
@@ -43,11 +47,13 @@ impl Icon {
             secondary_color,
             size,
             key,
-            location: location.into(),
+            view_position,
+            view_area,
+            layer,
             color: color.into(),
             color_invert: ColorInvert::off(),
             visibility: EnableVisibility::new(),
-            area: Area::default(),
+            section: Section::default(),
         }
     }
 }

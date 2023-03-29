@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
 
-use crate::area::Area;
+use crate::coord::area::Area;
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::sync::SyncPoint;

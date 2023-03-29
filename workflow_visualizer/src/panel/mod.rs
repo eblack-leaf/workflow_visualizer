@@ -5,7 +5,10 @@ use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 pub use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Location, Position};
+use crate::view::{ViewArea, ViewPosition};
+use crate::{
+    Area, Color, Coordinate, EnableVisibility, InterfaceContext, Layer, Location, Position, Section,
+};
 
 mod attachment;
 mod renderer;
@@ -16,35 +19,35 @@ mod vertex;
 pub struct PanelContentArea(pub Area<InterfaceContext>);
 #[derive(Bundle)]
 pub struct Panel {
-    pub location: Location<InterfaceContext>,
+    pub view_position: ViewPosition,
+    pub view_area: ViewArea,
+    pub layer: Layer,
     pub content_area: PanelContentArea,
     pub color: Color,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
     pub(crate) visibility: EnableVisibility,
-    pub(crate) area: Area<InterfaceContext>,
+    pub(crate) section: Section<InterfaceContext>,
 }
 impl Panel {
     pub const PADDING: (f32, f32) = (5.0, 5.0);
     pub const CORNER_DEPTH: f32 = 5f32;
-    pub fn new<
-        L: Into<Location<InterfaceContext>>,
-        A: Into<Area<InterfaceContext>>,
-        C: Into<Color>,
-    >(
-        location: L,
-        area: A,
+    pub fn new<C: Into<Color>>(
+        view_position: ViewPosition,
+        view_area: ViewArea,
+        layer: Layer,
         color: C,
     ) -> Self {
-        let area = area.into();
         Self {
-            location: location.into(),
-            content_area: PanelContentArea(area),
+            view_position,
+            view_area,
+            layer,
+            content_area: PanelContentArea(Area::default()),
             color: color.into(),
             visibility: EnableVisibility::new(),
             cache: Cache::new(),
             difference: Difference::new(),
-            area,
+            section: Section::default(),
         }
     }
 }
