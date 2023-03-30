@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
 };
 use winit::event::{ElementState, MouseButton};
 
-use crate::focus::FocusedEntity;
-use crate::viewport::ViewportHandle;
 use crate::{
     Area, Attach, DeviceContext, Engen, InterfaceContext, Layer, Position, ScaleFactor, Section,
     SyncPoint,
 };
+use crate::focus::FocusedEntity;
+use crate::viewport::ViewportHandle;
 
 #[derive(Copy, Clone, Debug)]
 pub struct TouchEvent {

@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 
-use crate::viewport::ViewportHandle;
 use crate::{Area, Attach, Engen, InterfaceContext, Position, Section, SyncPoint};
+use crate::viewport::ViewportHandle;
 
 #[derive(Bundle)]
 pub struct EnableVisibility {

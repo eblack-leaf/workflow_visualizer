@@ -1,12 +1,14 @@
-use crate::view::{ViewArea, ViewPosition};
+use std::collections::{HashMap, HashSet};
+
+use bevy_ecs::change_detection::Mut;
+use bevy_ecs::prelude::{Bundle, Component};
+use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
+
 use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, Section, VisibleSection,
 };
-use bevy_ecs::change_detection::Mut;
-use bevy_ecs::prelude::{Bundle, Component};
-use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
-use std::collections::{HashMap, HashSet};
+use crate::view::{ViewArea, ViewPosition};
 
 #[derive(Bundle)]
 pub struct TextRequest {
@@ -55,7 +57,7 @@ impl TextRequest {
             difference: Difference::new(),
             text_letter_dimensions: TextLetterDimensions(Area::default()),
             text_grid_placement: TextGridPlacement(HashMap::new()),
-            text_line_structure: TextLineStructure(vec![]),
+            text_line_structure: TextLineStructure(vec![], (0, 0)),
             text_scale: TextScale(TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[0]),
             section: Section::default(),
         }
@@ -136,10 +138,15 @@ impl TextGridLocation {
 #[derive(Component)]
 pub struct TextGridPlacement(pub HashMap<TextGridLocation, Key>);
 #[derive(Component)]
-pub struct TextLineStructure(pub Vec<u32>);
+pub struct TextLineStructure(pub Vec<u32>, pub (u32, u32));
 
 impl TextLineStructure {
-    pub(crate) fn from_grid_placement(grid_placement: &TextGridPlacement) -> Self {
+    pub(crate) fn from_grid_placement(
+        grid_placement: &TextGridPlacement,
+        area: &Area<InterfaceContext>,
+        letter_dimensions: &TextLetterDimensions,
+        scale_factor: f64,
+    ) -> Self {
         let mut max_y = 0;
         for key in grid_placement.0.keys() {
             if key.y > max_y {
@@ -147,25 +154,22 @@ impl TextLineStructure {
             }
         }
         let mut line_counts = vec![];
-        for i in 0..max_y + 1 {
+        for _i in 0..max_y + 1 {
             line_counts.push(0);
         }
         for placed in grid_placement.0.keys() {
             *line_counts.get_mut(placed.y as usize).unwrap() += 1;
         }
-        Self(line_counts)
+        let area = area.to_device(scale_factor);
+        let max_x = (area.width / letter_dimensions.0.width).floor() as u32;
+        let max_y = (area.height / letter_dimensions.0.height).floor() as u32;
+        Self(line_counts, (max_x, max_y))
     }
     pub(crate) fn horizontal_character_max(&self) -> u32 {
-        let mut max = 0;
-        for line in self.0.iter() {
-            if *line > max {
-                max = *line;
-            }
-        }
-        max
+        self.1 .0 - 1 * (!self.1.0 == 0) as u32
     }
     pub(crate) fn line_max(&self) -> u32 {
-        self.0.len() as u32
+        self.1 .1 - 1 * (!self.1.1 == 0) as u32
     }
 }
 
@@ -182,7 +186,6 @@ pub(crate) struct Cache {
     pub(crate) glyph_position: HashMap<Key, Position<NumericalContext>>,
     pub(crate) glyph_color: HashMap<Key, Color>,
     pub(crate) position: Position<InterfaceContext>,
-    pub(crate) area: Area<InterfaceContext>,
     pub(crate) layer: Layer,
     pub(crate) visible_section: VisibleSection,
 }
@@ -194,7 +197,6 @@ impl Cache {
             glyph_position: HashMap::new(),
             glyph_color: HashMap::new(),
             position: Position::default(),
-            area: Area::default(),
             layer: Layer::default(),
             visible_section: VisibleSection::default(),
         }

@@ -1,6 +1,7 @@
-use crate::viewport::ViewportHandle;
-use crate::{Area, Attach, Engen, InterfaceContext, Position, SyncPoint};
 use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
+
+use crate::{Area, Attach, Engen, InterfaceContext, Position, SyncPoint};
+use crate::viewport::ViewportHandle;
 
 #[derive(Component, Copy, Clone)]
 pub struct RelativePoint {

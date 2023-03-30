@@ -2,13 +2,13 @@ use std::collections::HashSet;
 
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, Res};
+use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents};
 
+use crate::{Area, Color, InterfaceContext, Layer, Position};
+use crate::icon::{IconKey, IconSecondaryColor, IconSize};
 use crate::icon::cache::{Cache, DifferenceHolder};
 use crate::icon::mesh::ColorInvert;
-use crate::icon::{IconKey, IconSecondaryColor, IconSize};
 use crate::visibility::Visibility;
-use crate::{Area, Color, InterfaceContext, Layer, Position, ScaleFactor};
 
 pub(crate) fn initialization(
     icons: Query<

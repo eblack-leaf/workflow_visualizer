@@ -1,10 +1,10 @@
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
 
+use crate::{Attach, Engen};
 use crate::coord::area::Area;
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::sync::SyncPoint;
-use crate::{Attach, Engen};
 
 #[derive(Clone, Copy)]
 pub struct WindowResize {

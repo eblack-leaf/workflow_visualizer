@@ -2,15 +2,15 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 
-use crate::focus::Focus;
-use crate::text_input::cursor::CursorIcon;
-use crate::text_input::Cursor;
-use crate::touch::{TouchListener, Touchable};
-use crate::visibility::EnableVisibility;
 use crate::{
     Area, Color, InterfaceContext, Layer, Location, Section, TextLetterDimensions,
-    TextLineStructure, TextScaleAlignment, ViewArea, ViewPosition, VirtualKeyboardType,
+    TextLineStructure, TextScale, TextScaleAlignment, ViewArea, ViewPosition, VirtualKeyboardType,
 };
+use crate::focus::Focus;
+use crate::text_input::Cursor;
+use crate::text_input::cursor::CursorIcon;
+use crate::touch::{Touchable, TouchListener};
+use crate::visibility::EnableVisibility;
 
 #[derive(Component)]
 pub struct TextInputText {
@@ -24,7 +24,7 @@ impl TextInputText {
 }
 
 #[derive(Component)]
-pub(crate) struct MaxCharacters(pub(crate) u32);
+pub struct MaxCharacters(pub u32);
 
 #[derive(Bundle)]
 pub struct TextInput {
@@ -48,6 +48,7 @@ pub struct TextInput {
     pub(crate) text_color: TextColor,
     pub(crate) background_color: TextBackgroundColor,
     pub(crate) letter_dimensions: TextLetterDimensions,
+    pub(crate) text_scale: TextScale,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -67,7 +68,7 @@ impl TextInput {
         alignment: TextScaleAlignment,
         text_color: C,
         text_background_color: C,
-        max_characters: u32,
+        max_characters: MaxCharacters,
     ) -> Self {
         Self {
             text_input_text,
@@ -79,7 +80,7 @@ impl TextInput {
             layer,
             section: Section::default(),
             touchable: Touchable::new(TouchListener::on_press()),
-            max_characters: MaxCharacters(max_characters),
+            max_characters,
             focus: Focus::new(),
             keyboard_type: VirtualKeyboardType::Keyboard,
             cursor: Cursor::new(),
@@ -87,6 +88,7 @@ impl TextInput {
             text_color: TextColor(text_color.into()),
             background_color: TextBackgroundColor(text_background_color.into()),
             letter_dimensions: TextLetterDimensions(Area::default()),
+            text_scale: TextScale(12u32),
         }
     }
 }

@@ -3,20 +3,20 @@ use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 use bevy_ecs::query::{With, Without};
 use fontdue::layout::WrapStyle;
 
-use crate::focus::{Focus, FocusedEntity};
-use crate::panel::{Panel, PanelContentArea};
-use crate::text::{AlignedFonts, TextGridPlacement, TextScale};
-use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
-use crate::text_input::cursor::{Cursor, CursorIcon};
-use crate::text_input::request::TextInputRequest;
-use crate::text_input::{TextBackgroundColor, TextColor};
-use crate::touch::{TouchLocation, Touched};
 use crate::{
-    text, Area, Color, ColorInvert, Icon, IconDescriptors, IconKey, IconSecondaryColor, IconSize,
-    InterfaceContext, Layer, Location, PanelType, Position, Request, ScaleFactor, Text,
+    Area, Color, ColorInvert, Icon, IconDescriptors, IconKey, IconSecondaryColor, IconSize, InterfaceContext,
+    Layer, Location, PanelType, Position, Request, ScaleFactor, text, Text,
     TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextWrapStyle,
     ViewArea, ViewPosition, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
+use crate::focus::{Focus, FocusedEntity};
+use crate::panel::{Panel, PanelContentArea};
+use crate::text::{AlignedFonts, TextGridPlacement, TextScale};
+use crate::text_input::{TextBackgroundColor, TextColor};
+use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
+use crate::text_input::cursor::{Cursor, CursorIcon};
+use crate::text_input::request::TextInputRequest;
+use crate::touch::{Touched, TouchLocation};
 
 pub(crate) fn spawn(
     mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
@@ -77,7 +77,7 @@ pub(crate) fn spawn(
             inner_req.alignment,
             inner_req.text_color,
             inner_req.background_color,
-            inner_req.hint_text.len() as u32,
+            inner_req.max_characters,
         ));
         cmd.entity(entity).remove::<Request<TextInputRequest>>();
     }
@@ -212,11 +212,11 @@ pub(crate) fn read_input_if_focused(
                 let (_entity, mut text, line_structure, grid_placement, mut difference) =
                     text_query.get_mut(text_input_text.entity).unwrap();
                 let num_letters = text.0.len() as u32;
-                if num_letters < max_characters.0 && num_letters + 32 < 126 {
-                    let character = char::from(num_letters as u8 + 32);
+                if num_letters < max_characters.0 {
+                    let character = 'a';
                     text.0.push(character);
                     if cursor.location.x + 1 >= line_structure.horizontal_character_max() {
-                        if cursor.location.y >= line_structure.line_max() - 1 {
+                        if cursor.location.y >= line_structure.line_max() {
                         } else {
                             cursor.location.x = 0;
                             cursor.location.y += 1;
@@ -267,68 +267,33 @@ pub(crate) fn set_cursor_location(
     ) in clicked.iter_mut()
     {
         if touched.touched() {
-            let click_location = touch_location.0.unwrap();
-            let click_offset_x = click_location.x - pos.x;
-            let click_offset_y = click_location.y - pos.y;
+            let touch_location = touch_location.0.unwrap();
+            let relative_touch = touch_location - pos.to_device(scale_factor.factor);
             let (line_structure, grid_placement, mut difference) =
                 text_entities.get_mut(text_input_text.entity).unwrap();
-            let ui_letter_dimensions = character_dimensions.0.to_ui(scale_factor.factor);
-            let mut line_clicked = (click_offset_y / ui_letter_dimensions.height).floor() as usize;
-            let potential_letter_count = line_structure
-                .0
-                .get(line_clicked)
-                .cloned()
-                .unwrap_or_default();
-            if (line_clicked >= line_structure.0.len() || potential_letter_count == 0)
-                && line_clicked != 0
-            {
-                let mut next_line_up = line_clicked - 1;
-                let mut next_line_count = 0;
-                while next_line_up != 0
-                    && next_line_up >= line_structure.0.len() - 1
-                    && next_line_count == 0
-                {
-                    next_line_count = line_structure
-                        .0
-                        .get(next_line_up)
-                        .cloned()
-                        .unwrap_or_default();
-                    if next_line_count == 0 {
-                        next_line_up -= 1;
+            let touched_line = (relative_touch.y / character_dimensions.0.height).floor() as u32;
+            let line_structure_max = line_structure.0.len() as u32 - 1 * !line_structure.0.is_empty() as u32;
+            let line_index = touched_line.min(line_structure.line_max()).min(line_structure_max);
+            if let Some(letter_count) = line_structure.0.get(line_index as usize) {
+                let letter_count = *letter_count - 1 * (!letter_count == 0) as u32;
+                let touched_letter = (relative_touch.x / character_dimensions.0.width).floor() as u32;
+                let letter_slot_touched = touched_letter.min(letter_count);
+                let letter_index = letter_slot_touched.min(line_structure.horizontal_character_max());
+                let location = TextGridLocation::new(letter_index, line_index);
+                if let Some(cached_location) = cursor.cached_location {
+                    if location != cached_location {
+                        if let Some(letter) = grid_placement.0.get(&cached_location) {
+                            difference.glyph_color_update.insert(*letter, text_color.0);
+                        }
                     }
                 }
-                line_clicked = next_line_up
-            }
-            let x_letter_location = (click_offset_x / ui_letter_dimensions.width).floor() as u32;
-            let current_line_letter_count = line_structure
-                .0
-                .get(line_clicked)
-                .cloned()
-                .unwrap_or_default();
-            let mut was_over = false;
-            if x_letter_location > current_line_letter_count {
-                was_over = true;
-            }
-            let x_letter_location = x_letter_location.min(current_line_letter_count);
-            let x_letter_location = x_letter_location
-                + (x_letter_location < (line_structure.horizontal_character_max() - 1)
-                    && was_over
-                    && current_line_letter_count != 0) as u32;
-            let location = TextGridLocation::new(x_letter_location, line_clicked as u32);
-            if let Some(cached_location) = cursor.cached_location {
-                if location != cached_location {
-                    if let Some(letter) = grid_placement.0.get(&cached_location) {
-                        difference.glyph_color_update.insert(*letter, text_color.0);
-                    }
+                cursor.location = location;
+                cursor.cached_location.replace(location);
+                if let Some(letter) = grid_placement.0.get(&location) {
+                    difference
+                        .glyph_color_update
+                        .insert(*letter, text_background_color.0);
                 }
-            }
-            cursor.location = location;
-            cursor.cached_location.replace(location);
-            println!("setting cursor location: {:?}", cursor.location);
-            if let Some(letter) = grid_placement.0.get(&location) {
-                difference
-                    .glyph_color_update
-                    .insert(*letter, text_background_color.0);
             }
         }
     }

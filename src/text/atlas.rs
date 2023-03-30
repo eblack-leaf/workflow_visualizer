@@ -1,9 +1,11 @@
+use std::collections::{HashMap, HashSet};
+
+use bytemuck::{Pod, Zeroable};
+
+use crate::{Area, GfxOptions, NumericalContext, Position, Section};
 use crate::gfx::GfxSurface;
 use crate::text::component::{Glyph, GlyphId, TextScale};
 use crate::text::font::MonoSpacedFont;
-use crate::{Area, GfxOptions, NumericalContext, Position, Section};
-use bytemuck::{Pod, Zeroable};
-use std::collections::{HashMap, HashSet};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
@@ -212,6 +214,7 @@ impl AtlasGlyphReference {
     pub(crate) fn increment(&mut self) {
         self.count += 1;
     }
+    #[allow(unused)]
     pub(crate) fn decrement(&mut self) {
         let sub_value = (self.count == 0) as u32;
         self.count -= sub_value;

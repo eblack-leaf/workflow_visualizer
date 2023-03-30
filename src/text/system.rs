@@ -1,3 +1,16 @@
+use std::collections::HashSet;
+use std::num::NonZeroU32;
+
+use bevy_ecs::prelude::{
+    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+};
+use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
+
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -17,17 +30,7 @@ use crate::text::render_group::{
 };
 use crate::text::renderer::{Extraction, TextRenderer};
 use crate::window::WindowResize;
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
-use bevy_ecs::prelude::{
-    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
-};
-use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
-use std::collections::HashSet;
-use std::num::NonZeroU32;
+
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
@@ -149,6 +152,7 @@ pub(crate) fn filter(
             &mut TextLineStructure,
             &VisibleSection,
             &Position<InterfaceContext>,
+            &Area<InterfaceContext>,
             &TextLetterDimensions,
         ),
         Or<(Changed<Text>, Changed<VisibleSection>)>,
@@ -162,6 +166,7 @@ pub(crate) fn filter(
         mut text_line_structure,
         visible_section,
         pos,
+        area,
         text_letter_dimensions,
     ) in text_query.iter_mut()
     {
@@ -176,7 +181,7 @@ pub(crate) fn filter(
                     (glyph_pos.width, glyph_pos.height),
                 ));
                 let grid_location = TextGridLocation::from_position(
-                    glyph_section.position,
+                    glyph_section.position - position,
                     *text_letter_dimensions,
                 );
                 grid_placement.0.insert(grid_location, *key);
@@ -187,7 +192,12 @@ pub(crate) fn filter(
             filtered_placement
                 .0
                 .retain(|(key, _)| !filter_queue.contains(key));
-            *text_line_structure = TextLineStructure::from_grid_placement(&grid_placement);
+            *text_line_structure = TextLineStructure::from_grid_placement(
+                &grid_placement,
+                area,
+                text_letter_dimensions,
+                scale_factor.factor,
+            );
         }
     }
 }

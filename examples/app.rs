@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
 
-use workflow_visualizer::{Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle, InterfaceContext, Job, Launch, Layer, Panel, PanelType, Position, RelativePoint, Request, Section, Text, TextInputRequest, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt};
+use workflow_visualizer::{Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle, InterfaceContext, Job, Launch, Layer, MaxCharacters, Panel, PanelType, Position, RelativePoint, Request, Section, Text, TextInputRequest, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -23,10 +23,10 @@ pub fn compile_and_serve() {
     }
 }
 fn logic(
-    mut idle: ResMut<Idle>,
-    entity_store: Res<EntityStore>,
-    mut text_query: Query<(&mut Text, &Position<InterfaceContext>)>,
-    timer: Res<Timer>,
+    mut _idle: ResMut<Idle>,
+    _entity_store: Res<EntityStore>,
+    mut _text_query: Query<(&mut Text, &Position<InterfaceContext>)>,
+    _timer: Res<Timer>,
 ) {
 }
 struct Launcher;
@@ -87,8 +87,9 @@ impl Launch for Launcher {
             )))
             .id();
         frontend.store_entity("animated_text", id);
-        let id = frontend.container.spawn(
-            Request::new(TextInputRequest::new(
+        let id = frontend
+            .container
+            .spawn(Request::new(TextInputRequest::new(
                 ViewPosition::new(
                     ViewPoint::new(RelativePoint::new(0.025), Some(FixedBreakPoint(15.0))),
                     ViewPoint::new(RelativePoint::new(0.5139), None),
@@ -99,9 +100,12 @@ impl Launch for Launcher {
                 ),
                 Layer::new(0.0),
                 "type here...".to_string(),
-                TextScaleAlignment::Medium, Color::CYAN, Color::DARK_CYAN
-            ))
-        ).id();
+                TextScaleAlignment::Medium,
+                Color::CYAN,
+                Color::DARK_CYAN,
+                MaxCharacters(15),
+            )))
+            .id();
         frontend.store_entity("timer_text", id);
         frontend
             .main

@@ -38,7 +38,7 @@ impl VirtualKeyboardAdapter {
     pub fn open(&self, ty: VirtualKeyboardType) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             let trigger_element = match ty {
                 VirtualKeyboardType::Keyboard => document

@@ -1,8 +1,8 @@
 use bevy_ecs::bundle::Bundle;
 
+use crate::coord::CoordContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
-use crate::coord::CoordContext;
 
 #[derive(Bundle, Copy, Clone, PartialEq)]
 pub struct Location<Context: CoordContext> {

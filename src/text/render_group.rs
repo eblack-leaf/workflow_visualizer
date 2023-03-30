@@ -1,15 +1,17 @@
+use std::collections::HashMap;
+
+use bevy_ecs::prelude::Component;
+
+use crate::{
+    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
+    RawArea, RawPosition, Section, Uniform, VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReferences, AtlasGlyphs, AtlasTextureDimensions, AtlasWriteQueue, TextureCoordinates,
 };
 use crate::text::component::{GlyphId, Text, TextScaleAlignment};
-use crate::{
-    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
-};
-use bevy_ecs::prelude::Component;
-use std::collections::HashMap;
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq, Component)]

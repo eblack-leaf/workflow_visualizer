@@ -5,10 +5,10 @@ use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 pub use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
-use crate::view::{ViewArea, ViewPosition};
 use crate::{
-    Area, Color, Coordinate, EnableVisibility, InterfaceContext, Layer, Location, Position, Section,
+    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section,
 };
+use crate::view::{ViewArea, ViewPosition};
 
 mod attachment;
 mod renderer;

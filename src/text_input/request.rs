@@ -1,7 +1,5 @@
-use crate::{
-    Color, InterfaceContext, Layer, Location, TextScaleAlignment, ViewArea,
-    ViewPosition,
-};
+use crate::{Color, InterfaceContext, Layer, Location, TextScaleAlignment, ViewArea, ViewPosition};
+use crate::text_input::components::MaxCharacters;
 
 pub struct TextInputRequest {
     pub hint_text: String,
@@ -11,6 +9,7 @@ pub struct TextInputRequest {
     pub layer: Layer,
     pub text_color: Color,
     pub background_color: Color,
+    pub max_characters: MaxCharacters,
 }
 
 impl TextInputRequest {
@@ -22,6 +21,7 @@ impl TextInputRequest {
         alignment: TextScaleAlignment,
         color: C,
         background_color: C,
+        max_characters: MaxCharacters,
     ) -> Self {
         Self {
             hint_text,
@@ -31,6 +31,7 @@ impl TextInputRequest {
             layer,
             text_color: color.into(),
             background_color: background_color.into(),
+            max_characters,
         }
     }
 }

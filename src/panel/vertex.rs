@@ -3,8 +3,8 @@ use std::f32::consts::{FRAC_PI_2, PI};
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
 
-use crate::gfx::GfxSurface;
 use crate::{DeviceContext, InterfaceContext, Interpolator, Panel, Position, RawPosition};
+use crate::gfx::GfxSurface;
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]

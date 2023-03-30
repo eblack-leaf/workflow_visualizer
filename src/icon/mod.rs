@@ -3,25 +3,26 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Entity, Resource};
 use wgpu::{include_wgsl, VertexState};
 
+pub(crate) use cache::{DifferenceHolder, Differences};
+pub(crate) use frontend_system::position_cache_check;
+pub(crate) use instance::IconAdd;
+pub use mesh::{
+    ColorHooks, ColorInvert, IconDescriptors, IconKey, IconMesh, IconMeshAddRequest, IconVertex,
+    read_mesh, write_mesh,
+};
+pub(crate) use mesh::GpuIconMesh;
+
+use crate::{
+    Color, Extract, Job, Layer, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, Viewport,
+};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration};
 pub use crate::icon::attachment::IconAttachment;
 pub use crate::icon::interface::{Icon, IconSecondaryColor, IconSize};
 use crate::instance::index::Indexer;
-use crate::instance::key::{Key, KeyFactory};
 use crate::instance::InstanceAttributeManager;
+use crate::instance::key::{Key, KeyFactory};
 use crate::instance::NullBit;
-use crate::{
-    Area, Color, DeviceContext, Extract, Job, Layer, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, Viewport,
-};
-pub(crate) use cache::{DifferenceHolder, Differences};
-pub(crate) use frontend_system::position_cache_check;
-pub(crate) use instance::IconAdd;
-pub(crate) use mesh::GpuIconMesh;
-pub use mesh::{
-    read_mesh, write_mesh, ColorHooks, ColorInvert, IconDescriptors, IconKey, IconMesh,
-    IconMeshAddRequest, IconVertex,
-};
 
 mod attachment;
 mod backend_system;

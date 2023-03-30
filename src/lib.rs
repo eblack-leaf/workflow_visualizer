@@ -4,36 +4,36 @@ pub use winit;
 
 pub use animate::{Animate, Animation, Interpolator};
 pub use color::Color;
+pub use coord::{CoordContext, DeviceContext, InterfaceContext, NumericalContext};
 pub use coord::area::{Area, RawArea};
+pub use coord::Coordinate;
 pub use coord::layer::Layer;
 pub use coord::location::Location;
 pub use coord::position::{Position, RawPosition};
 pub use coord::section::Section;
-pub use coord::Coordinate;
-pub use coord::{CoordContext, DeviceContext, InterfaceContext, NumericalContext};
 pub use engen::{Attach, Attachment, Engen, EngenOptions, Launch};
 pub use focus::Focus;
 pub use gfx::GfxOptions;
 pub use icon::{
-    read_mesh, write_mesh, ColorHooks, ColorInvert, Icon, IconDescriptors, IconKey, IconMesh,
-    IconMeshAddRequest, IconSecondaryColor, IconSize, IconVertex,
+    ColorHooks, ColorInvert, Icon, IconDescriptors, IconKey, IconMesh, IconMeshAddRequest, IconSecondaryColor,
+    IconSize, IconVertex, read_mesh, write_mesh,
 };
 pub use instance::{
     index::{Index, Indexer},
-    key::Key,
-    offset, InstanceAttributeManager, NullBit,
+    InstanceAttributeManager,
+    key::Key, NullBit, offset,
 };
 pub use job::{EntityStore, ExecutionState, Exit, Idle, Job, JobSyncPoint};
 pub use panel::{Panel, PanelContentArea, PanelType};
 pub use render::{Extract, Render, RenderPassHandle, RenderPhase};
-pub use request::{spawn, Request};
+pub use request::{Request, spawn};
 pub use scale_factor::ScaleFactor;
 pub use sync::{SyncPoint, UserSpaceSyncPoint};
 pub use text::{
     Text, TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextScale,
     TextScaleAlignment, TextWrapStyle, WrapStyleExpt,
 };
-pub use text_input::{TextInputRequest, TextColor, TextBackgroundColor, TextInputText, Cursor};
+pub use text_input::{Cursor, MaxCharacters, TextBackgroundColor, TextColor, TextInputRequest, TextInputText};
 pub use theme::{Theme, ThemeDescriptor};
 pub use time::{TimeDelta, TimeMarker, Timer};
 pub use uniform::Uniform;
@@ -44,6 +44,7 @@ pub use visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use wasm_compiler::WasmCompiler;
 #[cfg(not(target_arch = "wasm32"))]
 pub use wasm_server::WasmServer;
+
 mod animate;
 mod color;
 mod coord;

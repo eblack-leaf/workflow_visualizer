@@ -4,8 +4,8 @@ use std::ops::{Add, Mul, Sub};
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{CoordContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
+use crate::coord::{CoordContext, NumericalContext};
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Area<Context: CoordContext> {

@@ -1,5 +1,6 @@
-use crate::{Layer, Section};
 use bevy_ecs::bundle::Bundle;
+
+use crate::{Layer, Section};
 
 pub mod area;
 pub mod layer;
