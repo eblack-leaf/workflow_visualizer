@@ -9,6 +9,7 @@ pub struct TextInputRequest {
     pub layer: Layer,
     pub text_color: Color,
     pub background_color: Color,
+    pub border_color: Color,
     pub max_characters: MaxCharacters,
 }
 
@@ -19,8 +20,9 @@ impl TextInputRequest {
         layer: Layer,
         hint_text: String,
         alignment: TextScaleAlignment,
-        color: C,
+        text_color: C,
         background_color: C,
+        border_color: C,
         max_characters: MaxCharacters,
     ) -> Self {
         Self {
@@ -29,8 +31,9 @@ impl TextInputRequest {
             view_position,
             view_area,
             layer,
-            text_color: color.into(),
+            text_color: text_color.into(),
             background_color: background_color.into(),
+            border_color: border_color.into(),
             max_characters,
         }
     }

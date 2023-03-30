@@ -65,7 +65,7 @@ pub(crate) fn spawn(
                 inner_req.view_area,
                 inner_req.layer + Layer::from(2u32),
                 inner_req.background_color,
-                inner_req.text_color,
+                inner_req.border_color,
             ))
             .id();
         cmd.entity(entity).insert(TextInput::new(

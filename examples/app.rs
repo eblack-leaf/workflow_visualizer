@@ -109,6 +109,7 @@ impl Launch for Launcher {
                 TextScaleAlignment::Medium,
                 Color::CYAN,
                 Color::DARK_CYAN,
+                Color::CYAN_MEDIUM,
                 MaxCharacters(15),
             )))
             .id();
