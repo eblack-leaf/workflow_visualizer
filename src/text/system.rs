@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{
@@ -172,6 +172,7 @@ pub(crate) fn filter(
     {
         if let Some(v_sec) = visible_section.section {
             filtered_placement.0 = placement.0.clone();
+            grid_placement.0 = HashMap::new();
             let mut filter_queue = HashSet::new();
             let position = pos.to_device(scale_factor.factor);
             let v_sec = v_sec.to_device(scale_factor.factor);
