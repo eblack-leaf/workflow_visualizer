@@ -6,11 +6,6 @@ use bevy_ecs::prelude::{
 };
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -30,6 +25,11 @@ use crate::text::render_group::{
 };
 use crate::text::renderer::{Extraction, TextRenderer};
 use crate::window::WindowResize;
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -177,6 +177,10 @@ pub(crate) fn filter(
             let position = pos.to_device(scale_factor.factor);
             let v_sec = v_sec.to_device(scale_factor.factor);
             for (key, glyph_pos) in placement.0.iter() {
+                if glyph_pos.parent.is_ascii_control() {
+                    filter_queue.insert(*key);
+                    continue;
+                }
                 let glyph_section = Section::<DeviceContext>::from((
                     (position.x + glyph_pos.x, position.y + glyph_pos.y),
                     (glyph_pos.width, glyph_pos.height),
@@ -199,7 +203,6 @@ pub(crate) fn filter(
                 text_letter_dimensions,
                 scale_factor.factor,
             );
-            println!("line structure: {:?}, grid_placement: {:?}", *text_line_structure, grid_placement);
         }
     }
 }

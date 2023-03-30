@@ -1,6 +1,5 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, Engen, spawn, SyncPoint};
 use crate::text::component::TextRequest;
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
@@ -10,6 +9,7 @@ use crate::text::system::{
     scale_change, setup, visible_section_diff,
 };
 use crate::viewport::viewport_attach;
+use crate::{spawn, Attach, Engen, SyncPoint};
 
 pub struct TextAttachment;
 impl Attach for TextAttachment {

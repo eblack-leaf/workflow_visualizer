@@ -3,9 +3,9 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Resource;
 
-use crate::{Area, Color, InterfaceContext, Layer, Position};
-use crate::icon::IconKey;
 use crate::icon::mesh::ColorInvert;
+use crate::icon::IconKey;
+use crate::{Area, Color, InterfaceContext, Layer, Position};
 
 #[derive(Resource)]
 pub(crate) struct Cache {

@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, Engen, icon, IconDescriptors, IconMeshAddRequest, panel, SyncPoint, text};
 use crate::text_input::system::{
     area_ties, cursor_letter_color_filter, open_virtual_keyboard, position_ties,
     read_input_if_focused, set_cursor_location, spawn, update_cursor_pos,
 };
 use crate::view::set_from_view;
+use crate::{icon, panel, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
 
 pub struct TextInputAttachment;
 

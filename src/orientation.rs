@@ -2,9 +2,9 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, IntoSystemConfig, Res, Resource};
 
-use crate::{Area, Attach, DeviceContext, Engen, ScaleFactor, SyncPoint};
 use crate::viewport::ViewportHandle;
 use crate::window::WindowResize;
+use crate::{Area, Attach, DeviceContext, Engen, ScaleFactor, SyncPoint};
 
 #[derive(Resource, Copy, Clone)]
 pub enum Orientation {

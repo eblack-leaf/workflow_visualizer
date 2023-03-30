@@ -4,11 +4,11 @@ use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
+use crate::view::{ViewArea, ViewPosition};
 use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, Section, VisibleSection,
 };
-use crate::view::{ViewArea, ViewPosition};
 
 #[derive(Bundle)]
 pub struct TextRequest {
@@ -135,9 +135,9 @@ impl TextGridLocation {
         Self::new(x, y)
     }
 }
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct TextGridPlacement(pub HashMap<TextGridLocation, Key>);
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct TextLineStructure(pub Vec<u32>, pub (u32, u32));
 
 impl TextLineStructure {
@@ -166,10 +166,10 @@ impl TextLineStructure {
         Self(line_counts, (max_x, max_y))
     }
     pub(crate) fn horizontal_character_max(&self) -> u32 {
-        self.1 .0 - 1 * (!self.1.0 == 0) as u32
+        self.1 .0 - 1 * (!self.1 .0 == 0) as u32
     }
     pub(crate) fn line_max(&self) -> u32 {
-        self.1 .1 - 1 * (!self.1.1 == 0) as u32
+        self.1 .1 - 1 * (!self.1 .1 == 0) as u32
     }
 }
 

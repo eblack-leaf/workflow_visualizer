@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use bytemuck::{Pod, Zeroable};
 
-use crate::{Area, GfxOptions, NumericalContext, Position, Section};
 use crate::gfx::GfxSurface;
 use crate::text::component::{Glyph, GlyphId, TextScale};
 use crate::text::font::MonoSpacedFont;
+use crate::{Area, GfxOptions, NumericalContext, Position, Section};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]

@@ -3,7 +3,13 @@ use std::net::SocketAddr;
 use bevy_ecs::prelude::{Entity, IntoSystemConfig, Query, Res, ResMut};
 use winit::event_loop::EventLoop;
 
-use workflow_visualizer::{Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle, InterfaceContext, Job, Launch, Layer, MaxCharacters, Panel, PanelType, Position, RelativePoint, Request, Section, Text, TextInputRequest, TextRequest, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition, WrapStyleExpt};
+use workflow_visualizer::{
+    Area, Color, Coordinate, Engen, EngenOptions, EntityStore, FixedBreakPoint, GfxOptions, Idle,
+    InterfaceContext, Job, Launch, Layer, MaxCharacters, Panel, PanelType, Position, RelativePoint,
+    Request, Section, Text, TextInputRequest, TextRequest, TextScaleAlignment, TextWrapStyle,
+    Theme, ThemeDescriptor, Timer, UserSpaceSyncPoint, ViewArea, ViewPoint, ViewPosition,
+    WrapStyleExpt,
+};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn compile_and_serve() {
@@ -55,7 +61,7 @@ impl Launch for Launcher {
                 ),
                 Layer::new(10.0),
                 Color::DARK_CYAN,
-                Color::CYAN,
+                Color::CYAN_MEDIUM,
             )))
             .id();
         frontend.store_entity("panel", id);

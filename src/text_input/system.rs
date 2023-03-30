@@ -1,22 +1,23 @@
+use bevy_ecs::change_detection::Mut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 use bevy_ecs::query::{With, Without};
 use fontdue::layout::WrapStyle;
 
-use crate::{
-    Area, Color, ColorInvert, Icon, IconDescriptors, IconKey, IconSecondaryColor, IconSize, InterfaceContext,
-    Layer, Location, PanelType, Position, Request, ScaleFactor, text, Text,
-    TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextWrapStyle,
-    ViewArea, ViewPosition, VirtualKeyboardAdapter, VirtualKeyboardType,
-};
 use crate::focus::{Focus, FocusedEntity};
 use crate::panel::{Panel, PanelContentArea};
 use crate::text::{AlignedFonts, TextGridPlacement, TextScale};
-use crate::text_input::{TextBackgroundColor, TextColor};
 use crate::text_input::components::{MaxCharacters, TextContentPanel, TextInput, TextInputText};
 use crate::text_input::cursor::{Cursor, CursorIcon};
 use crate::text_input::request::TextInputRequest;
-use crate::touch::{Touched, TouchLocation};
+use crate::text_input::{TextBackgroundColor, TextColor};
+use crate::touch::{TouchLocation, Touched};
+use crate::{
+    text, Area, Color, ColorInvert, Icon, IconDescriptors, IconKey, IconSecondaryColor, IconSize,
+    InterfaceContext, Layer, Location, PanelType, Position, Request, ScaleFactor, Text,
+    TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextWrapStyle,
+    ViewArea, ViewPosition, VirtualKeyboardAdapter, VirtualKeyboardType,
+};
 
 pub(crate) fn spawn(
     mut requests: Query<(Entity, &mut Request<TextInputRequest>)>,
@@ -149,7 +150,7 @@ pub(crate) fn open_virtual_keyboard(
         ),
         Changed<Focus>,
     >,
-    mut text_query: Query<(&mut text::Difference, &TextGridPlacement)>,
+    mut text_query: Query<(&mut text::Difference, &TextGridPlacement, &text::Cache)>,
     mut cmd: Commands,
 ) {
     let mut should_close = true;
@@ -165,14 +166,16 @@ pub(crate) fn open_virtual_keyboard(
             cmd.entity(cursor_icon.entity).insert(ColorInvert::off());
         } else {
             if let Some(cached) = cursor.cached_location.take() {
-                if let Ok((mut difference, grid_placement)) =
+                if let Ok((mut difference, grid_placement, cache)) =
                     text_query.get_mut(text_input_text.entity)
                 {
-                    if let Some(placed_letter) = grid_placement.0.get(&cached) {
-                        difference
-                            .glyph_color_update
-                            .insert(*placed_letter, text_color.0);
-                    }
+                    cache_checked_color_switch(
+                        text_color.0,
+                        grid_placement,
+                        &mut difference,
+                        cache,
+                        cached,
+                    );
                 }
             }
             cmd.entity(cursor_icon.entity).insert(ColorInvert::on());
@@ -202,6 +205,7 @@ pub(crate) fn read_input_if_focused(
         &TextLineStructure,
         &TextGridPlacement,
         &mut text::Difference,
+        &text::Cache,
     )>,
 ) {
     if let Some(entity) = focused_entity.entity {
@@ -209,7 +213,7 @@ pub(crate) fn read_input_if_focused(
             focused.get_mut(entity)
         {
             if focus.focused() {
-                let (_entity, mut text, line_structure, grid_placement, mut difference) =
+                let (_entity, mut text, line_structure, grid_placement, mut difference, cache) =
                     text_query.get_mut(text_input_text.entity).unwrap();
                 let num_letters = text.0.len() as u32;
                 if num_letters < max_characters.0 {
@@ -226,9 +230,13 @@ pub(crate) fn read_input_if_focused(
                     }
                     let current_location = cursor.location;
                     if let Some(cached) = cursor.cached_location {
-                        if let Some(letter) = grid_placement.0.get(&cached) {
-                            difference.glyph_color_update.insert(*letter, text_color.0);
-                        }
+                        cache_checked_color_switch(
+                            text_color.0,
+                            grid_placement,
+                            &mut difference,
+                            cache,
+                            cached,
+                        );
                     }
                     cursor.cached_location.replace(current_location);
                 }
@@ -252,6 +260,7 @@ pub(crate) fn set_cursor_location(
         &TextLineStructure,
         &TextGridPlacement,
         &mut text::Difference,
+        &text::Cache,
     )>,
     scale_factor: Res<ScaleFactor>,
 ) {
@@ -269,50 +278,82 @@ pub(crate) fn set_cursor_location(
         if touched.touched() {
             let touch_location = touch_location.0.unwrap();
             let relative_touch = touch_location - pos.to_device(scale_factor.factor);
-            let (line_structure, grid_placement, mut difference) =
+            let (line_structure, grid_placement, mut difference, cache) =
                 text_entities.get_mut(text_input_text.entity).unwrap();
             let touched_line = (relative_touch.y / character_dimensions.0.height).floor() as u32;
-            let line_structure_max = line_structure.0.len() as u32 - 1 * !line_structure.0.is_empty() as u32;
-            let line_index = touched_line.min(line_structure.line_max()).min(line_structure_max);
+            let line_structure_max =
+                line_structure.0.len() as u32 - 1 * !line_structure.0.is_empty() as u32;
+            let line_index = touched_line
+                .min(line_structure.line_max())
+                .min(line_structure_max);
             if let Some(letter_count) = line_structure.0.get(line_index as usize) {
                 let letter_count = *letter_count - 1 * (!letter_count == 0) as u32;
-                let touched_letter = (relative_touch.x / character_dimensions.0.width).floor() as u32;
+                let touched_letter =
+                    (relative_touch.x / character_dimensions.0.width).floor() as u32;
                 let letter_slot_touched = touched_letter.min(letter_count);
-                let letter_index = letter_slot_touched.min(line_structure.horizontal_character_max());
+                let letter_index =
+                    letter_slot_touched.min(line_structure.horizontal_character_max());
                 let location = TextGridLocation::new(letter_index, line_index);
                 if let Some(cached_location) = cursor.cached_location {
                     if location != cached_location {
-                        if let Some(letter) = grid_placement.0.get(&cached_location) {
-                            difference.glyph_color_update.insert(*letter, text_color.0);
-                        }
+                        cache_checked_color_switch(
+                            text_color.0,
+                            grid_placement,
+                            &mut difference,
+                            cache,
+                            cached_location,
+                        );
                     }
                 }
                 cursor.location = location;
                 cursor.cached_location.replace(location);
-                if let Some(letter) = grid_placement.0.get(&location) {
-                    difference
-                        .glyph_color_update
-                        .insert(*letter, text_background_color.0);
-                }
+                cache_checked_color_switch(
+                    text_background_color.0,
+                    grid_placement,
+                    &mut difference,
+                    cache,
+                    location,
+                );
             }
+        }
+    }
+}
+
+fn cache_checked_color_switch(
+    switched_color: Color,
+    grid_placement: &TextGridPlacement,
+    difference: &mut text::Difference,
+    cache: &text::Cache,
+    cached_location: TextGridLocation,
+) {
+    if let Some(letter) = grid_placement.0.get(&cached_location) {
+        if cache.exists(*letter) {
+            difference
+                .glyph_color_update
+                .insert(*letter, switched_color);
         }
     }
 }
 
 pub(crate) fn cursor_letter_color_filter(
     polled: Query<(&Cursor, &TextInputText, &Focus, &TextBackgroundColor)>,
-    mut changed_text_buffers: Query<(&mut text::Difference, &TextGridPlacement), Changed<Color>>,
+    mut changed_text_buffers: Query<
+        (&mut text::Difference, &TextGridPlacement, &text::Cache),
+        Changed<Color>,
+    >,
 ) {
     for (cursor, text_input_text, focus, text_background_color) in polled.iter() {
         if focus.focused() {
-            if let Ok((mut difference, grid_placement)) =
+            if let Ok((mut difference, grid_placement, cache)) =
                 changed_text_buffers.get_mut(text_input_text.entity)
             {
-                if let Some(letter) = grid_placement.0.get(&cursor.location) {
-                    difference
-                        .glyph_color_update
-                        .insert(*letter, text_background_color.0);
-                }
+                cache_checked_color_switch(
+                    text_background_color.0,
+                    grid_placement,
+                    &mut difference,
+                    cache,
+                    cursor.location,
+                );
             }
         }
     }

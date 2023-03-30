@@ -2,15 +2,15 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 
+use crate::focus::Focus;
+use crate::text_input::cursor::CursorIcon;
+use crate::text_input::Cursor;
+use crate::touch::{TouchListener, Touchable};
+use crate::visibility::EnableVisibility;
 use crate::{
     Area, Color, InterfaceContext, Layer, Location, Section, TextLetterDimensions,
     TextLineStructure, TextScale, TextScaleAlignment, ViewArea, ViewPosition, VirtualKeyboardType,
 };
-use crate::focus::Focus;
-use crate::text_input::Cursor;
-use crate::text_input::cursor::CursorIcon;
-use crate::touch::{Touchable, TouchListener};
-use crate::visibility::EnableVisibility;
 
 #[derive(Component)]
 pub struct TextInputText {

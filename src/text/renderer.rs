@@ -3,15 +3,15 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use wgpu::util::DeviceExt;
 
-use crate::{
-    Color, Extract, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
-};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::text::atlas::{AtlasBlock, TextureCoordinates};
 use crate::text::component::{Difference, TextScaleAlignment};
 use crate::text::font::AlignedFonts;
 use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
+use crate::{
+    Color, Extract, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
+};
 
 pub(crate) const AABB: [Vertex; 6] = [
     Vertex::new(RawPosition { x: 0.0, y: 0.0 }),

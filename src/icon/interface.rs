@@ -1,9 +1,9 @@
 use bevy_ecs::prelude::{Bundle, Component};
 
-use crate::{Color, InterfaceContext, Layer, Section};
 use crate::icon::mesh::{ColorInvert, IconKey};
 use crate::view::{ViewArea, ViewPosition};
 use crate::visibility::EnableVisibility;
+use crate::{Color, InterfaceContext, Layer, Section};
 
 #[derive(Component, Copy, Clone)]
 pub struct IconSecondaryColor {

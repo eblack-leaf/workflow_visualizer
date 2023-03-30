@@ -5,10 +5,8 @@ use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 pub use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
-use crate::{
-    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section,
-};
 use crate::view::{ViewArea, ViewPosition};
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section};
 
 mod attachment;
 mod renderer;
@@ -44,7 +42,7 @@ pub struct Panel {
 impl Panel {
     pub const PADDING: (f32, f32) = (5.0, 5.0);
     pub const CORNER_DEPTH: f32 = 5f32;
-    pub const LINE_WIDTH: f32 = 2f32;
+    pub const LINE_WIDTH: f32 = 1f32;
     pub fn new<C: Into<Color>>(
         panel_type: PanelType,
         view_position: ViewPosition,

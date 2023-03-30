@@ -1,16 +1,16 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{spawn, SyncPoint};
 use crate::engen::{Attach, Engen};
-use crate::icon::{Icon, IconRenderer};
 use crate::icon::backend_system::{process_differences, read_add_requests, setup};
 use crate::icon::frontend_system::{
     area_cache_check, calc_area, color_cache_check, color_invert_cache_check, depth_cache_check,
     frontend_setup, icon_key_cache_check, initialization, position_cache_check,
     secondary_color_cache_check,
 };
+use crate::icon::{Icon, IconRenderer};
 use crate::view::set_from_view;
 use crate::viewport::viewport_attach;
+use crate::{spawn, SyncPoint};
 
 pub struct IconAttachment;
 

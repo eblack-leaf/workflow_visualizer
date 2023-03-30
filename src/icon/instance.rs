@@ -1,7 +1,7 @@
-use crate::{Area, Color, DeviceContext, InterfaceContext, Layer, Position, Section};
 use crate::coord::Coordinate;
-use crate::icon::IconKey;
 use crate::icon::mesh::ColorInvert;
+use crate::icon::IconKey;
+use crate::{Area, Color, DeviceContext, InterfaceContext, Layer, Position, Section};
 
 pub(crate) struct IconAdd {
     pub(crate) key: IconKey,

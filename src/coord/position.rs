@@ -5,8 +5,8 @@ use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use crate::{DeviceContext, InterfaceContext};
 use crate::coord::{CoordContext, NumericalContext};
+use crate::{DeviceContext, InterfaceContext};
 
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Position<Context: CoordContext> {

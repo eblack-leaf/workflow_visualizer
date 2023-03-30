@@ -4,9 +4,9 @@ use std::ops::Deref;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
-use crate::Area;
 use crate::coord::NumericalContext;
 use crate::text::component::{TextScale, TextScaleAlignment};
+use crate::Area;
 
 #[derive(Resource)]
 pub(crate) struct MonoSpacedFont {

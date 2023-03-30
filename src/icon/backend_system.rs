@@ -2,10 +2,10 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Commands, Query, Res};
 
-use crate::{ScaleFactor, Viewport};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
-use crate::icon::{IconMeshAddRequest, IconRenderer};
 use crate::icon::cache::Differences;
+use crate::icon::{IconMeshAddRequest, IconRenderer};
+use crate::{ScaleFactor, Viewport};
 
 pub(crate) fn read_add_requests(
     mut renderer: ResMut<IconRenderer>,
