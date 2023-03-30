@@ -199,6 +199,7 @@ pub(crate) fn filter(
                 text_letter_dimensions,
                 scale_factor.factor,
             );
+            println!("line structure: {:?}, grid_placement: {:?}", *text_line_structure, grid_placement);
         }
     }
 }
