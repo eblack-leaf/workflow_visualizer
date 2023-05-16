@@ -1,0 +1,23 @@
+[package]
+name = "wkflw"
+version = "0.1.0"
+edition = "2021"
+resolver = "2"
+
+[profile.dev]
+opt-level = 1
+
+[dependencies]
+tokio = { version = "1.28.0", features = ["full"] }
+pollster = "0.3.0"
+winit = { version = "0.28.6" }
+wgpu = { version = "0.16.0" }
+bevy_ecs = { version = "0.10.1" }
+bytemuck = { version = "1.13.1", features = ["derive"] }
+nalgebra = { version = "0.32.2" }
+serde = { version = "1.0.160", features = ["derive"] }
+surrealdb = { version = "1.0.0-beta.9" }
+compact_str = "0.7.0"
+[[example]]
+name = "app"
+path = "examples/app/app.rs"
