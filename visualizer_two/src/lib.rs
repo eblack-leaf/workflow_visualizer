@@ -17,15 +17,16 @@ pub use crate::coord::{
 pub use crate::gfx::{GfxOptions, GfxSurface};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAttachment};
 pub use crate::job::{EntityName, Job};
-use crate::job::{Task, TaskLabel};
-use crate::render::{invoke_render, Render, RenderFns, RenderPassHandle, RenderPhase};
+use crate::job::{attempt_to_idle, Task, TaskLabel};
+use crate::render::{internal_render, invoke_render, Render, RenderFns, RenderPassHandle, RenderPhase};
 pub use crate::scale_factor::ScaleFactor;
 use crate::sync::set_sync_points;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::theme::Theme;
 pub use crate::uniform::Uniform;
 pub use crate::window::{WindowAttachment, WindowResize};
-use bevy_ecs::prelude::{Component, Entity, Resource};
+use bevy_ecs::prelude::{Component, Entity, IntoSystemConfig, Resource};
+use compact_str::CompactString;
 pub use job::JobSyncPoint;
 pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
 use winit::dpi::PhysicalSize;
@@ -44,22 +45,32 @@ pub trait Attach {
 }
 pub struct Visualizer {
     pub job: Job,
-    pub render_preparation: Task,
-    pub render_initialization: Task,
     pub(crate) render_fns: (RenderFns, RenderFns),
     attachment_queue: Vec<Attachment>,
     gfx_options: GfxOptions,
 }
 impl Visualizer {
+    pub const TASK_MAIN: TaskLabel = TaskLabel("main");
+    pub const TASK_STARTUP: TaskLabel = TaskLabel("startup");
+    pub const TASK_TEARDOWN: TaskLabel = TaskLabel("teardown");
+    pub const TASK_RENDER_STARTUP: TaskLabel = TaskLabel("render_startup");
+    pub const TASK_RENDER_MAIN: TaskLabel = TaskLabel("render_main");
     pub fn new(theme: Theme, gfx_options: GfxOptions) -> Self {
         Self {
             job: {
                 let mut job = Job::new();
                 job.container.insert_resource(theme);
+                job.tasks.insert(Self::TASK_STARTUP, Task::new());
+                job.tasks.insert(Self::TASK_RENDER_STARTUP, Task::new());
+                job.tasks.insert(Self::TASK_TEARDOWN, Task::new());
+                job.tasks.insert(Self::TASK_RENDER_MAIN, Task::new());
+                job.tasks.insert(Self::TASK_MAIN, {
+                    let mut task = Task::default();
+                    task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle), ));
+                    task
+                });
                 job
             },
-            render_preparation: Task::new(),
-            render_initialization: Task::new(),
             render_fns: (vec![], vec![]),
             attachment_queue: vec![],
             gfx_options,
@@ -108,16 +119,16 @@ impl Visualizer {
     pub fn set_mouse_location(&mut self) {}
     pub fn set_scale_factor(&mut self) {}
     fn setup(&mut self) {
-        self.job.exec(TaskLabel::Startup);
-        self.render_initialization.run(&mut self.job.container);
+        self.job.exec(Self::TASK_STARTUP);
+        self.job.exec(Self::TASK_RENDER_STARTUP)
     }
-    pub fn compute(&mut self) {
+    pub fn exec_main_task(&mut self) {
         if !self.job.suspended() {
-            self.job.exec(TaskLabel::Main);
+            self.job.exec(Self::TASK_MAIN);
         }
     }
     pub fn teardown(&mut self) {
-        self.job.exec(TaskLabel::Teardown);
+        self.job.exec(Self::TASK_TEARDOWN);
     }
     pub fn suspend(&mut self) {
         let _ = self.job.container.remove_resource::<GfxSurface>();
@@ -129,86 +140,8 @@ impl Visualizer {
     }
     pub fn render(&mut self) {
         if !self.job.suspended() {
-            self.render_preparation.run(&mut self.job.container);
-            let gfx_surface = self
-                .job
-                .container
-                .get_resource::<GfxSurface>()
-                .expect("no gfx surface attached");
-            let gfx_surface_configuration = self
-                .job
-                .container
-                .get_resource::<GfxSurfaceConfiguration>()
-                .expect("no gfx surface configuration");
-            let theme = self
-                .job
-                .container
-                .get_resource::<Theme>()
-                .expect("no theme attached");
-            let viewport = self
-                .job
-                .container
-                .get_resource::<Viewport>()
-                .expect("no viewport attached");
-            let msaa_attachment = self
-                .job
-                .container
-                .get_resource::<MsaaRenderAttachment>()
-                .expect("no msaa attachment");
-            if let Some(surface_texture) = gfx_surface.surface_texture(gfx_surface_configuration) {
-                let mut command_encoder =
-                    gfx_surface
-                        .device
-                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                            label: Some("command encoder"),
-                        });
-                let surface_texture_view = surface_texture
-                    .texture
-                    .create_view(&wgpu::TextureViewDescriptor::default());
-                {
-                    let depth_texture_view = viewport
-                        .depth_texture
-                        .create_view(&wgpu::TextureViewDescriptor::default());
-                    let (v, rt) = match &msaa_attachment.view {
-                        Some(view) => (view, Some(&surface_texture_view)),
-                        None => (&surface_texture_view, None),
-                    };
-                    let should_store = msaa_attachment.requested == 1;
-                    let color_attachment = wgpu::RenderPassColorAttachment {
-                        view: v,
-                        resolve_target: rt,
-                        ops: wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(theme.background.into()),
-                            store: should_store,
-                        },
-                    };
-                    let render_pass_descriptor = wgpu::RenderPassDescriptor {
-                        label: Some("render pass"),
-                        color_attachments: &[Some(color_attachment)],
-                        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                            view: &depth_texture_view,
-                            depth_ops: Some(wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(viewport.cpu.far_layer()),
-                                store: true,
-                            }),
-                            stencil_ops: Some(wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(0u32),
-                                store: true,
-                            }),
-                        }),
-                    };
-                    let mut render_pass_handle = RenderPassHandle(
-                        command_encoder.begin_render_pass(&render_pass_descriptor),
-                    );
-                    for invoke in self.render_fns.0.iter_mut() {
-                        invoke(&self.job, &mut render_pass_handle);
-                    }
-                }
-                gfx_surface
-                    .queue
-                    .submit(std::iter::once(command_encoder.finish()));
-                surface_texture.present();
-            }
+            self.job.exec(Self::TASK_RENDER_MAIN);
+            internal_render(self);
         }
     }
     pub fn can_idle(&self) -> bool {

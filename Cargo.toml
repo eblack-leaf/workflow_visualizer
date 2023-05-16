@@ -1,3 +1,6 @@
 [workspace]
 members = ["visualizer_one", "visualizer_two"]
 resolver = "2"
+
+[profile.dev]
+opt-level = 1

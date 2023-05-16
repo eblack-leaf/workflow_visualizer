@@ -6,12 +6,8 @@ use compact_str::CompactString;
 
 pub type Container = World;
 pub type Task = Schedule;
-
-pub(crate) enum TaskLabel {
-    Startup,
-    Main,
-    Teardown,
-}
+#[derive(Eq, PartialEq, Hash)]
+pub struct TaskLabel(pub &'static str);
 
 #[derive(PartialEq)]
 pub enum ExecutionState {
@@ -67,9 +63,7 @@ impl EntityStore {
 pub struct Job {
     pub execution_state: ExecutionState,
     pub container: Container,
-    pub startup: Task,
-    pub main: Task,
-    pub teardown: Task,
+    pub tasks: HashMap<TaskLabel, Task>,
 }
 
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
@@ -96,23 +90,17 @@ impl Job {
                 container.insert_resource(EntityStore::new());
                 container
             },
-            startup: Task::default(),
-            main: {
-                let mut task = Task::default();
-                task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle),));
-                task
-            },
-            teardown: Task::default(),
+            tasks: HashMap::new(),
         }
     }
+    pub fn task(&mut self, task_label: TaskLabel) -> &mut Task {
+        self.tasks.get_mut(&task_label).expect("no task")
+    }
     pub(crate) fn exec(&mut self, task_label: TaskLabel) {
-        let task = match task_label {
-            TaskLabel::Startup => &mut self.startup,
-            TaskLabel::Main => &mut self.main,
-            TaskLabel::Teardown => &mut self.teardown,
-        };
-        task.set_executor_kind(ExecutorKind::MultiThreaded)
-            .run(&mut self.container);
+        if let Some(task) = self.tasks.get_mut(&task_label) {
+            task.set_executor_kind(ExecutorKind::MultiThreaded)
+                .run(&mut self.container);
+        }
     }
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;

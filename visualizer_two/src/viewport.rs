@@ -307,15 +307,15 @@ pub struct ViewportAttachment;
 
 impl Attach for ViewportAttachment {
     fn attach(engen: &mut Visualizer) {
-        engen.job.main.add_systems((
+        engen.job.task(Visualizer::TASK_MAIN).add_systems((
             adjust_position.in_set(SyncPoint::Initialization),
             frontend_area_adjust.in_set(SyncPoint::Initialization),
             extract_viewport_handle_changes.in_set(SyncPoint::Resolve),
         ));
         engen
-            .render_initialization
+            .job.task(Visualizer::TASK_RENDER_STARTUP)
             .add_system(viewport_attach.in_set(SyncPoint::Initialization));
-        engen.render_preparation.add_systems((
+        engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
             viewport_read_offset,
             viewport_resize
                 .in_set(SyncPoint::Initialization)

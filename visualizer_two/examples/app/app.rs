@@ -99,7 +99,7 @@ fn main() {
                     }
                 }
                 Event::MainEventsCleared => {
-                    visualizer.compute();
+                    visualizer.exec_main_task();
                 }
                 Event::RedrawRequested(_) => {
                     visualizer.render();
