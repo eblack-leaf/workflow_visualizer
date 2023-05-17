@@ -1,5 +1,5 @@
 [package]
-name = "workflow_visualizer"
+name = "workflow_visualizer_v1"
 version = "0.1.0"
 edition = "2021"
 resolver = "2"

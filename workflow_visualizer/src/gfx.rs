@@ -1,4 +1,6 @@
+use std::fmt::{Debug, Formatter};
 use bevy_ecs::prelude::Resource;
+use tracing::{info, instrument};
 use winit::window::Window;
 
 #[derive(Clone)]
@@ -11,7 +13,11 @@ pub struct GfxOptions {
     pub present_mode: wgpu::PresentMode,
     pub msaa: u32,
 }
-
+impl Debug for GfxOptions {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "GfxOptions")
+    }
+}
 impl GfxOptions {
     pub fn web_align(mut self) -> Self {
         self.backends = wgpu::Backends::all();
@@ -48,17 +54,21 @@ pub struct GfxSurface {
 }
 pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment);
 impl GfxSurface {
+    #[instrument]
     pub(crate) async fn new(window: &Window, options: GfxOptions) -> GfxStack {
+        info!("obtaining gfx stack. Backends: {:?}, Features: {:?}", options.backends, options.features);
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()
         };
         let instance = wgpu::Instance::new(instance_descriptor);
+        info!("creating surface");
         let surface = unsafe {
             instance
                 .create_surface(window)
                 .expect("could not create surface")
         };
+        info!("requesting adapter with {:?} fallback_adapter: {:?}", options.power_preferences, options.force_fallback_adapter);
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: options.power_preferences,
@@ -67,6 +77,7 @@ impl GfxSurface {
             })
             .await
             .expect("adapter request failed");
+        info!("requesting device/queue");
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {

@@ -72,6 +72,11 @@ pub enum JobSyncPoint {
 }
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
 pub struct EntityName(pub CompactString);
+impl EntityName {
+    pub fn new(name: String) -> Self {
+        EntityName(CompactString::new(name))
+    }
+}
 impl Job {
     pub fn store_entity(&mut self, id: EntityName, entity: Entity) {
         self.container

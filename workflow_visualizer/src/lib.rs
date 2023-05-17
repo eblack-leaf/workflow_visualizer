@@ -9,6 +9,8 @@ mod theme;
 mod uniform;
 mod viewport;
 mod window;
+
+use std::fmt::{Debug, Formatter};
 pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
@@ -31,7 +33,10 @@ pub use job::JobSyncPoint;
 pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
-
+pub use winit;
+pub use bevy_ecs;
+use tracing::{info, instrument};
+pub use wgpu;
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
 impl Attachment {
@@ -42,6 +47,11 @@ impl Attachment {
 
 pub trait Attach {
     fn attach(visualizer: &mut Visualizer);
+}
+impl Debug for Visualizer {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Visualizer")
+    }
 }
 pub struct Visualizer {
     pub job: Job,
@@ -76,8 +86,11 @@ impl Visualizer {
             gfx_options,
         }
     }
+    #[instrument]
     pub async fn init_gfx(&mut self, window: &Window) {
+        info!("initializing gfx.");
         let (surface, config, msaa) = GfxSurface::new(window, self.gfx_options.clone()).await;
+        info!("gfx -> surface: {:?}", config.configuration.width);
         self.job.container.insert_resource(surface);
         self.job.container.insert_resource(config);
         self.job.container.insert_resource(msaa);

@@ -1,15 +1,17 @@
 mod workflow;
 
+use tracing::info;
 use crate::workflow::{Token, TokenName, TokenOtp};
-use winit::dpi::PhysicalSize;
-use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::{EventLoopBuilder, EventLoopProxy};
-use winit::window::WindowBuilder;
-use wkflw::{GfxOptions, Theme, Visualizer};
 use workflow::{Engen, Receivable, Sendable};
+use workflow_visualizer::{GfxOptions, Theme, Visualizer};
+use workflow_visualizer::winit::dpi::PhysicalSize;
+use workflow_visualizer::winit::event::{Event, StartCause, WindowEvent};
+use workflow_visualizer::winit::event_loop::EventLoopBuilder;
+use workflow_visualizer::winit::window::WindowBuilder;
 
 fn main() {
     let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+    tracing_subscriber::fmt::init();
     tokio_runtime.block_on(async {
         let event_loop = EventLoopBuilder::<Sendable>::with_user_event().build();
         let mut window = None;
@@ -64,9 +66,9 @@ fn main() {
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::CloseRequested => {
                         if let Ok(_) = sender.send(Receivable::ExitRequest) {
-                            println!("sending is ok");
+                            info!("sending is ok");
                         } else {
-                            println!("could not send");
+                            info!("could not send");
                         }
                     }
                     WindowEvent::ReceivedCharacter(ch) => {
@@ -82,19 +84,19 @@ fn main() {
                     _ => {}
                 },
                 Event::UserEvent(event) => {
-                    println!("ui loop received: {:?}", event);
+                    info!("ui loop received: {:?}", event);
                     match event {
                         Sendable::ExitConfirmed => {
                             control_flow.set_exit();
                         }
                         Sendable::TokenAdded(name) => {
-                            println!("token added: {:?}", name);
+                            info!("token added: {:?}", name);
                         }
                         Sendable::TokenRemoved(name) => {
-                            println!("token removed: {:?}", name);
+                            info!("token removed: {:?}", name);
                         }
                         Sendable::TokenOtp((name, otp)) => {
-                            println!("token otp: {:?}:{:?}", name, otp);
+                            info!("token otp: {:?}:{:?}", name, otp);
                         }
                     }
                 }

@@ -152,18 +152,18 @@ fn depth_texture(
 #[derive(Resource)]
 pub(crate) struct CpuViewport {
     pub(crate) area: Area<DeviceContext>,
-    pub(crate) layer: Layer,
+    pub(crate) far_layer: Layer,
     pub(crate) orthographic: nalgebra::Matrix4<f32>,
 }
 
 impl CpuViewport {
-    pub(crate) fn new(area: Area<DeviceContext>, layer: Layer) -> Self {
+    pub(crate) fn new(area: Area<DeviceContext>, far_layer: Layer) -> Self {
         Self {
             area,
-            layer,
+            far_layer,
             orthographic: matrix![2f32/area.width, 0.0, 0.0, -1.0;
                                     0.0, 2f32/-area.height, 0.0, 1.0;
-                                    0.0, 0.0, 1.0/layer.z, 0.0;
+                                    0.0, 0.0, 1.0/far_layer.z, 0.0;
                                     0.0, 0.0, 0.0, 1.0],
         }
     }
@@ -171,7 +171,7 @@ impl CpuViewport {
         self.orthographic.data.0.into()
     }
     pub(crate) fn far_layer(&self) -> f32 {
-        self.layer.z
+        self.far_layer.z
     }
 }
 
@@ -314,7 +314,7 @@ impl Attach for ViewportAttachment {
         ));
         engen
             .job.task(Visualizer::TASK_RENDER_STARTUP)
-            .add_system(viewport_attach.in_set(SyncPoint::Initialization));
+            .add_systems((viewport_attach.in_set(SyncPoint::Initialization),));
         engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
             viewport_read_offset,
             viewport_resize
