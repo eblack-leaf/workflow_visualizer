@@ -1,42 +1,57 @@
 mod color;
 mod coord;
+mod focus;
 mod gfx;
+mod instance;
 mod job;
+mod orientation;
 mod render;
 mod scale_factor;
 mod sync;
 mod theme;
+mod time;
+mod touch;
 mod uniform;
 mod viewport;
+mod visibility;
 mod window;
 
-use std::fmt::{Debug, Formatter};
 pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
+use crate::focus::FocusAttachment;
 pub use crate::gfx::{GfxOptions, GfxSurface};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAttachment};
-pub use crate::job::{EntityName, Job};
 use crate::job::{attempt_to_idle, Task, TaskLabel};
-use crate::render::{internal_render, invoke_render, Render, RenderFns, RenderPassHandle, RenderPhase};
+pub use crate::job::{EntityName, Job};
+use crate::orientation::OrientationAttachment;
+use crate::render::{
+    internal_render, invoke_render, Render, RenderFns, RenderPassHandle, RenderPhase,
+};
 pub use crate::scale_factor::ScaleFactor;
 use crate::sync::set_sync_points;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::theme::Theme;
+use crate::touch::{Interactor, MouseAdapter, Touch, TouchAdapter, TouchAttachment, TouchEvent, TouchType, TrackedTouch};
 pub use crate::uniform::Uniform;
+use crate::visibility::VisibilityAttachment;
+pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::{WindowAttachment, WindowResize};
+pub use bevy_ecs;
 use bevy_ecs::prelude::{Component, Entity, IntoSystemConfig, Resource};
 use compact_str::CompactString;
 pub use job::JobSyncPoint;
-pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
-use winit::dpi::PhysicalSize;
-use winit::window::Window;
-pub use winit;
-pub use bevy_ecs;
+use std::fmt::{Debug, Formatter};
 use tracing::{info, instrument};
+pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
 pub use wgpu;
+pub use winit;
+use winit::dpi::{PhysicalPosition, PhysicalSize};
+use winit::event::{ElementState, MouseButton, TouchPhase};
+use winit::window::Window;
+
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
 impl Attachment {
@@ -76,7 +91,7 @@ impl Visualizer {
                 job.tasks.insert(Self::TASK_RENDER_MAIN, Task::new());
                 job.tasks.insert(Self::TASK_MAIN, {
                     let mut task = Task::default();
-                    task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle), ));
+                    task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle),));
                     task
                 });
                 job
@@ -90,7 +105,10 @@ impl Visualizer {
     pub async fn init_gfx(&mut self, window: &Window) {
         info!("initializing gfx.");
         let (surface, config, msaa) = GfxSurface::new(window, self.gfx_options.clone()).await;
-        info!("gfx -> surface: {:?}", config.configuration.width);
+        info!(
+            "gfx -> surface: {:?}/{:?}",
+            config.configuration.width, config.configuration.height
+        );
         self.job.container.insert_resource(surface);
         self.job.container.insert_resource(config);
         self.job.container.insert_resource(msaa);
@@ -110,13 +128,17 @@ impl Visualizer {
         set_sync_points(self);
         self.invoke_attach::<WindowAttachment>();
         self.invoke_attach::<ViewportAttachment>();
+        self.invoke_attach::<VisibilityAttachment>();
+        self.invoke_attach::<TouchAttachment>();
+        self.invoke_attach::<FocusAttachment>();
+        self.invoke_attach::<OrientationAttachment>();
         self.attach_from_queue();
         self.setup();
     }
     pub fn set_theme(&mut self, theme: Theme) {
         self.job.container.insert_resource(theme);
     }
-    pub fn add_entities<T: Component>(&mut self, mut names: Vec<EntityName>, datum: Vec<T>) {
+    pub fn add_named_entities<T: Component>(&mut self, mut names: Vec<EntityName>, datum: Vec<T>) {
         let ids = self
             .job
             .container
@@ -127,15 +149,180 @@ impl Visualizer {
             self.job.store_entity(names.next().unwrap(), id);
         }
     }
-    pub fn register_touch(&mut self) {}
-    pub fn register_mouse_click(&mut self) {}
-    pub fn set_mouse_location(&mut self) {}
+    pub fn add_entities<T: Component>(&mut self, datum: Vec<T>) -> Vec<Entity> {
+        let ids = self
+            .job
+            .container
+            .spawn_batch(datum)
+            .collect::<Vec<Entity>>();
+        ids
+    }
+    pub fn register_touch(&mut self, touch: winit::event::Touch) {
+        let viewport_section = self
+            .job
+            .container
+            .get_resource::<ViewportHandle>()
+            .unwrap()
+            .section;
+        let mut touch_adapter = self
+            .job
+            .container
+            .get_resource_mut::<TouchAdapter>()
+            .expect("no touch adapter slot");
+        let mut touch_events = Vec::new();
+        let touch_location = (
+            touch.location.x - viewport_section.position.x as f64,
+            touch.location.y - viewport_section.position.y as f64,
+        );
+        let interactor = Interactor(touch.id as u32);
+        match touch.phase {
+            TouchPhase::Started => {
+                if touch_adapter.primary.is_none() {
+                    touch_adapter.primary.replace(interactor);
+                    touch_events.push(TouchEvent::new(TouchType::OnPress, touch_location));
+                }
+                touch_adapter
+                    .tracked
+                    .insert(interactor, TrackedTouch::new(touch_location));
+            }
+            TouchPhase::Moved => {
+                if let Some(registered_touch) = touch_adapter.tracked.get_mut(&interactor) {
+                    registered_touch.current = (touch_location.0, touch_location.1).into();
+                }
+                let primary = touch_adapter.primary;
+                if let Some(prime) = primary {
+                    if prime == interactor {
+                        let internal_touch = touch_adapter.tracked.get_mut(&prime).unwrap();
+                        touch_events
+                            .push(TouchEvent::new(TouchType::OnMove, internal_touch.current));
+                    }
+                }
+            }
+            TouchPhase::Ended => {
+                if let Some(click) = touch_adapter.tracked.get_mut(&interactor) {
+                    click.end.replace(touch_location.into());
+                }
+                if let Some(prime) = touch_adapter.primary {
+                    if prime == interactor {
+                        touch_adapter.primary.take();
+                        touch_events.push(TouchEvent::new(TouchType::OnRelease, touch_location));
+                    }
+                }
+            }
+            TouchPhase::Cancelled => {
+                if let Some(prime) = touch_adapter.primary {
+                    if prime == interactor {
+                        touch_adapter.primary.take();
+                        touch_events.push(TouchEvent::new(TouchType::Cancelled, Touch::default()));
+                    }
+                }
+                if let Some(tracked) = touch_adapter.tracked.get_mut(&interactor) {
+                    tracked.cancelled = true;
+                }
+            }
+        }
+        for event in touch_events {
+            self.job.container.send_event(event);
+        }
+    }
+    pub fn register_mouse_click(&mut self, state: ElementState, button: MouseButton) {
+        let viewport_handle_section = self
+            .job
+            .container
+            .get_resource::<ViewportHandle>()
+            .expect("no viewport handle")
+            .section;
+        let scale_factor = self
+            .job
+            .container
+            .get_resource::<ScaleFactor>()
+            .expect("no scale factor")
+            .factor;
+        let mut mouse_adapter = self
+            .job
+            .container
+            .get_resource_mut::<MouseAdapter>()
+            .expect("no mouse adapter");
+        let cached = mouse_adapter
+            .tracked
+            .get(&button)
+            .cloned()
+            .unwrap_or((ElementState::Released, None));
+        if let Some(cached) = mouse_adapter.tracked.get_mut(&button) {
+            cached.0 = state;
+        }
+        let mut touch_events = Vec::new();
+        let mouse_location = mouse_adapter.location.unwrap_or_default();
+        let in_bounds = viewport_handle_section.contains(mouse_location.to_ui(scale_factor));
+        let interactor = Interactor::from_button(button);
+        let is_primary = interactor == MouseAdapter::PRIMARY_INTERACTOR;
+        if cached.0 != state {
+            match state {
+                ElementState::Pressed => {
+                    if in_bounds {
+                        if is_primary {
+                            touch_events.push(TouchEvent::new(TouchType::OnPress, mouse_location));
+                        }
+                        mouse_adapter
+                            .tracked
+                            .insert(button, (state, Some(TrackedTouch::new(mouse_location))));
+                    }
+                }
+                ElementState::Released => {
+                    if in_bounds {
+                        if is_primary {
+                            touch_events
+                                .push(TouchEvent::new(TouchType::OnRelease, mouse_location));
+                            if let Some(r_touch) = mouse_adapter.tracked.get_mut(&button) {
+                                if let Some(r_touch) = r_touch.1.as_mut() {
+                                    r_touch.end.replace(mouse_location);
+                                }
+                            }
+                        }
+                    } else {
+                        if is_primary {
+                            touch_events
+                                .push(TouchEvent::new(TouchType::Cancelled, Touch::default()));
+                        }
+                        mouse_adapter
+                            .tracked
+                            .get_mut(&button)
+                            .unwrap()
+                            .1
+                            .unwrap()
+                            .cancelled = true;
+                    }
+                }
+            }
+        }
+        for event in touch_events {
+            self.job.container.send_event(event);
+        }
+    }
+    pub fn set_mouse_location(&mut self, position: PhysicalPosition<f64>) {
+        let mut mouse_adapter = self
+            .job
+            .container
+            .get_resource_mut::<MouseAdapter>()
+            .expect("no mouse adapter");
+        let mouse_position = Position::<DeviceContext>::new(position.x as f32, position.y as f32);
+        mouse_adapter.location.replace(mouse_position);
+        let mut click_events = Vec::new();
+        for (button, track_state) in mouse_adapter.tracked.iter_mut() {
+            if let Some(t_state) = track_state.1.as_mut() {
+                t_state.current = mouse_position;
+            }
+            if *button == MouseButton::Left {
+                click_events.push(TouchEvent::new(TouchType::OnMove, mouse_position));
+            }
+        }
+    }
     pub fn set_scale_factor(&mut self) {}
     fn setup(&mut self) {
         self.job.exec(Self::TASK_STARTUP);
         self.job.exec(Self::TASK_RENDER_STARTUP)
     }
-    pub fn exec_main_task(&mut self) {
+    pub fn exec(&mut self) {
         if !self.job.suspended() {
             self.job.exec(Self::TASK_MAIN);
         }

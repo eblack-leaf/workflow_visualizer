@@ -1,5 +1,5 @@
-use std::fmt::{Debug, Formatter};
 use bevy_ecs::prelude::Resource;
+use std::fmt::{Debug, Formatter};
 use tracing::{info, instrument};
 use winit::window::Window;
 
@@ -56,7 +56,10 @@ pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttac
 impl GfxSurface {
     #[instrument]
     pub(crate) async fn new(window: &Window, options: GfxOptions) -> GfxStack {
-        info!("obtaining gfx stack. Backends: {:?}, Features: {:?}", options.backends, options.features);
+        info!(
+            "obtaining gfx stack. Backends: {:?}, Features: {:?}",
+            options.backends, options.features
+        );
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()
@@ -68,7 +71,10 @@ impl GfxSurface {
                 .create_surface(window)
                 .expect("could not create surface")
         };
-        info!("requesting adapter with {:?} fallback_adapter: {:?}", options.power_preferences, options.force_fallback_adapter);
+        info!(
+            "requesting adapter with {:?} fallback_adapter: {:?}",
+            options.power_preferences, options.force_fallback_adapter
+        );
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: options.power_preferences,

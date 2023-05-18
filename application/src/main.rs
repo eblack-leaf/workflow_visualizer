@@ -1,15 +1,17 @@
 mod workflow;
 
-use tracing::info;
 use crate::workflow::{Token, TokenName, TokenOtp};
+use tracing::info;
+use tracing_subscriber::util::SubscriberInitExt;
 use workflow::{Engen, Receivable, Sendable};
-use workflow_visualizer::{GfxOptions, Theme, Visualizer};
 use workflow_visualizer::winit::dpi::PhysicalSize;
 use workflow_visualizer::winit::event::{Event, StartCause, WindowEvent};
 use workflow_visualizer::winit::event_loop::EventLoopBuilder;
 use workflow_visualizer::winit::window::WindowBuilder;
+use workflow_visualizer::{GfxOptions, Theme, Visualizer};
 
 fn main() {
+    coz::thread_init();
     let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
     tracing_subscriber::fmt::init();
     tokio_runtime.block_on(async {
@@ -22,8 +24,10 @@ fn main() {
         ) = tokio::sync::mpsc::unbounded_channel();
         let proxy = event_loop.create_proxy();
         tokio::task::spawn(async move {
+            coz::thread_init();
             let engen = Engen::new();
             loop {
+                coz::end!("engen receiver");
                 while let Some(message) = receiver.recv().await {
                     match message {
                         Receivable::ExitRequest => {
@@ -48,6 +52,7 @@ fn main() {
             }
         });
         event_loop.run(move |event, event_loop_window_target, control_flow| {
+            coz::progress!("event loop");
             control_flow.set_wait();
             match event {
                 Event::NewEvents(cause) => match cause {
@@ -65,6 +70,7 @@ fn main() {
                 },
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::CloseRequested => {
+                        coz::begin!("engen receiver");
                         if let Ok(_) = sender.send(Receivable::ExitRequest) {
                             info!("sending is ok");
                         } else {
@@ -73,6 +79,7 @@ fn main() {
                     }
                     WindowEvent::ReceivedCharacter(ch) => {
                         if ch == 'a' {
+                            coz::begin!("engen receiver");
                             sender
                                 .send(Receivable::AddToken((
                                     TokenName("rose".to_string()),
@@ -101,7 +108,7 @@ fn main() {
                     }
                 }
                 Event::MainEventsCleared => {
-                    visualizer.exec_main_task();
+                    visualizer.exec();
                 }
                 Event::RedrawRequested(_) => {
                     visualizer.render();

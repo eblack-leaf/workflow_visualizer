@@ -53,6 +53,7 @@ mod coord;
 mod engen;
 mod focus;
 mod gfx;
+mod grid;
 mod icon;
 mod instance;
 mod job;
@@ -76,4 +77,3 @@ mod wasm_compiler;
 #[cfg(not(target_arch = "wasm32"))]
 mod wasm_server;
 mod window;
-mod grid;

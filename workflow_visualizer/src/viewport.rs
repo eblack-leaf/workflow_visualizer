@@ -231,7 +231,7 @@ pub(crate) fn frontend_area_adjust(
 }
 #[derive(Resource)]
 pub struct ViewportHandle {
-    pub section: Section<InterfaceContext>,
+    pub(crate) section: Section<InterfaceContext>,
     position_dirty: bool,
 }
 
@@ -246,55 +246,20 @@ impl ViewportHandle {
         self.section.position += adjust;
         self.position_dirty = true;
     }
-}
-
-#[derive(Resource)]
-pub struct ViewportHandleAdjust {
-    pub adjust: Option<Position<InterfaceContext>>,
-}
-
-impl ViewportHandleAdjust {
-    pub(crate) fn new() -> Self {
-        Self { adjust: None }
-    }
-}
-
-pub(crate) fn adjust_position(
-    mut visible_bounds: ResMut<ViewportHandle>,
-    mut visible_bounds_position_adjust: ResMut<ViewportHandleAdjust>,
-) {
-    if let Some(adjust) = visible_bounds_position_adjust.adjust.take() {
-        visible_bounds.position_adjust(adjust);
-    }
-}
-
-#[derive(Resource)]
-pub(crate) struct ViewportOffsetUpdate {
-    pub(crate) update: Option<Position<DeviceContext>>,
-}
-
-impl ViewportOffsetUpdate {
-    pub(crate) fn new() -> Self {
-        Self { update: None }
+    pub fn section(&self) -> Section<InterfaceContext> {
+        self.section
     }
 }
 
 pub(crate) fn viewport_read_offset(
-    mut viewport_offset_update: ResMut<ViewportOffsetUpdate>,
+    mut viewport_handle: ResMut<ViewportHandle>,
     mut viewport: ResMut<Viewport>,
     gfx_surface: Res<GfxSurface>,
-) {
-    if let Some(update) = viewport_offset_update.update.take() {
-        viewport.update_offset(&gfx_surface.queue, update);
-    }
-}
-pub(crate) fn extract_viewport_handle_changes(
     scale_factor: Res<ScaleFactor>,
-    mut viewport_handle: ResMut<ViewportHandle>,
-    mut offset_update: ResMut<ViewportOffsetUpdate>,
 ) {
     if viewport_handle.position_dirty {
-        offset_update.update.replace(
+        viewport.update_offset(
+            &gfx_surface.queue,
             viewport_handle
                 .section
                 .position
@@ -308,23 +273,19 @@ pub struct ViewportAttachment;
 impl Attach for ViewportAttachment {
     fn attach(engen: &mut Visualizer) {
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
-            adjust_position.in_set(SyncPoint::Initialization),
             frontend_area_adjust.in_set(SyncPoint::Initialization),
-            extract_viewport_handle_changes.in_set(SyncPoint::Resolve),
-        ));
-        engen
-            .job.task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((viewport_attach.in_set(SyncPoint::Initialization),));
-        engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
-            viewport_read_offset,
-            viewport_resize
-                .in_set(SyncPoint::Initialization)
-                .after(gfx_resize),
+            viewport_read_offset.in_set(SyncPoint::Finish),
         ));
         engen
             .job
-            .container
-            .insert_resource(ViewportOffsetUpdate::new());
+            .task(Visualizer::TASK_RENDER_STARTUP)
+            .add_systems((viewport_attach.in_set(SyncPoint::Initialization),));
+        engen
+            .job
+            .task(Visualizer::TASK_RENDER_MAIN)
+            .add_systems((viewport_resize
+                .in_set(SyncPoint::Initialization)
+                .after(gfx_resize),));
         let gfx_surface_configuration = engen
             .job
             .container
@@ -341,14 +302,10 @@ impl Attach for ViewportAttachment {
             gfx_surface_configuration.configuration.height,
         )
             .into();
-        let visible_section = ((0u32, 0u32), surface_area.to_ui(scale_factor)).into();
+        let viewport_section = ((0u32, 0u32), surface_area.to_ui(scale_factor)).into();
         engen
             .job
             .container
-            .insert_resource(ViewportHandle::new(visible_section));
-        engen
-            .job
-            .container
-            .insert_resource(ViewportHandleAdjust::new());
+            .insert_resource(ViewportHandle::new(viewport_section));
     }
 }

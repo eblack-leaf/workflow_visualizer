@@ -56,17 +56,21 @@ pub(crate) fn set_sync_points(engen: &mut Visualizer) {
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::ResolveVisibility),
     ));
-    engen.job.task(Visualizer::TASK_RENDER_STARTUP).configure_sets(
-        (
-            SyncPoint::Initialization,
-            SyncPoint::Preparation,
-            SyncPoint::Resolve,
-            SyncPoint::Finish,
-        )
-            .chain(),
-    );
     engen
-        .job.task(Visualizer::TASK_RENDER_STARTUP)
+        .job
+        .task(Visualizer::TASK_RENDER_STARTUP)
+        .configure_sets(
+            (
+                SyncPoint::Initialization,
+                SyncPoint::Preparation,
+                SyncPoint::Resolve,
+                SyncPoint::Finish,
+            )
+                .chain(),
+        );
+    engen
+        .job
+        .task(Visualizer::TASK_RENDER_STARTUP)
         .add_systems((apply_system_buffers
             .after(SyncPoint::Initialization)
             .before(SyncPoint::Preparation),));

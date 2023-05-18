@@ -1,40 +1,30 @@
-use std::collections::HashMap;
+use crate::viewport::ViewportHandle;
+use crate::{Area, InterfaceContext, Position, Section};
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::{DetectChanges, Query, Res, Resource};
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
-use crate::{Area, InterfaceContext, Position, Section};
-use crate::viewport::ViewportHandle;
+use std::collections::HashMap;
 
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub enum HorizontalSpan {
-    Four, Eight, Twelve
+    Four,
+    Eight,
+    Twelve,
 }
 impl HorizontalSpan {
     pub fn gutter_base(&self) -> MarkerGrouping {
         match self {
-            HorizontalSpan::Four => {
-                MarkerGrouping(2)
-            }
-            HorizontalSpan::Eight => {
-                MarkerGrouping(2)
-            }
-            HorizontalSpan::Twelve => {
-                MarkerGrouping(3)
-            }
+            HorizontalSpan::Four => MarkerGrouping(2),
+            HorizontalSpan::Eight => MarkerGrouping(2),
+            HorizontalSpan::Twelve => MarkerGrouping(3),
         }
     }
     pub fn spacer_base(&self) -> MarkerGrouping {
         match self {
-            HorizontalSpan::Four => {
-                MarkerGrouping(10)
-            }
-            HorizontalSpan::Eight => {
-                MarkerGrouping(9)
-            }
-            HorizontalSpan::Twelve => {
-                MarkerGrouping(10)
-            }
+            HorizontalSpan::Four => MarkerGrouping(10),
+            HorizontalSpan::Eight => MarkerGrouping(9),
+            HorizontalSpan::Twelve => MarkerGrouping(10),
         }
     }
 }
@@ -61,7 +51,8 @@ pub struct RowConfig {
 }
 pub struct GridSpacer(pub i32);
 pub enum GridSpacerOffset {
-    Near, Far
+    Near,
+    Far,
 }
 pub struct GridLocation {
     pub identifier: GridSpacer,
@@ -81,9 +72,12 @@ pub struct ResponsiveGridView {
 }
 pub(crate) fn grid_response(
     viewport_handle: Res<ViewportHandle>,
-    responsively_viewed: Query<(&ResponsiveGridView, &mut Position<InterfaceContext>, &mut Area<InterfaceContext>)>,
+    responsively_viewed: Query<(
+        &ResponsiveGridView,
+        &mut Position<InterfaceContext>,
+        &mut Area<InterfaceContext>,
+    )>,
     grid: ResMut<Grid>,
-
 ) {
     if viewport_handle.is_changed() {
         // configure grid configs + span
@@ -92,7 +86,14 @@ pub(crate) fn grid_response(
 }
 pub(crate) fn set_from_view(
     grid: Res<Grid>,
-    mut changed: Query<(&ResponsiveGridView, &mut Position<InterfaceContext>, &mut Area<InterfaceContext>), Changed<ResponsiveGridView>>,
+    mut changed: Query<
+        (
+            &ResponsiveGridView,
+            &mut Position<InterfaceContext>,
+            &mut Area<InterfaceContext>,
+        ),
+        Changed<ResponsiveGridView>,
+    >,
 ) {
     for (responsive_view, mut pos, mut area) in changed.iter_mut() {
         // match from grid and set to pos / area

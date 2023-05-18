@@ -1,6 +1,6 @@
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAttachment};
 use crate::{GfxSurface, Job, Theme, Viewport, Visualizer};
 use bevy_ecs::prelude::Resource;
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAttachment};
 
 pub enum RenderPhase {
     Opaque,
@@ -98,9 +98,8 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
                     }),
                 }),
             };
-            let mut render_pass_handle = RenderPassHandle(
-                command_encoder.begin_render_pass(&render_pass_descriptor),
-            );
+            let mut render_pass_handle =
+                RenderPassHandle(command_encoder.begin_render_pass(&render_pass_descriptor));
             for invoke in visualizer.render_fns.0.iter_mut() {
                 invoke(&visualizer.job, &mut render_pass_handle);
             }

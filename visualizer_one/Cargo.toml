@@ -3,12 +3,7 @@ name = "workflow_visualizer_v1"
 version = "0.1.0"
 edition = "2021"
 resolver = "2"
-[profile.dev]
-opt-level = 1
-[profile.release]
-#debug = true
-#lto = true
-#opt-level = "s"
+
 
 [dependencies]
 bevy_ecs = "0.10.0"
