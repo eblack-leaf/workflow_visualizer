@@ -51,7 +51,6 @@ pub use winit;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
-
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
 impl Attachment {
@@ -74,6 +73,7 @@ pub struct Visualizer {
     attachment_queue: Vec<Attachment>,
     gfx_options: GfxOptions,
 }
+
 impl Visualizer {
     pub const TASK_MAIN: TaskLabel = TaskLabel("main");
     pub const TASK_STARTUP: TaskLabel = TaskLabel("startup");
@@ -316,6 +316,22 @@ impl Visualizer {
                 click_events.push(TouchEvent::new(TouchType::OnMove, mouse_position));
             }
         }
+    }
+    pub fn cancel_touches(&mut self) {
+        self.job
+            .container
+            .send_event(TouchEvent::new(TouchType::Cancelled, Touch::default()));
+        self.job
+            .container
+            .get_resource_mut::<MouseAdapter>()
+            .expect("no mouse adapter")
+            .tracked
+            .iter_mut()
+            .for_each(|(_button, track_state)| {
+                if let Some(registered_touch) = track_state.1.as_mut() {
+                    registered_touch.cancelled = true;
+                }
+            });
     }
     pub fn set_scale_factor(&mut self) {}
     fn setup(&mut self) {

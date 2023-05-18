@@ -11,7 +11,6 @@ use workflow_visualizer::winit::window::WindowBuilder;
 use workflow_visualizer::{GfxOptions, Theme, Visualizer};
 
 fn main() {
-    coz::thread_init();
     let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
     tracing_subscriber::fmt::init();
     tokio_runtime.block_on(async {
@@ -24,10 +23,8 @@ fn main() {
         ) = tokio::sync::mpsc::unbounded_channel();
         let proxy = event_loop.create_proxy();
         tokio::task::spawn(async move {
-            coz::thread_init();
-            let engen = Engen::new();
+            let _engen = Engen::new();
             loop {
-                coz::end!("engen receiver");
                 while let Some(message) = receiver.recv().await {
                     match message {
                         Receivable::ExitRequest => {
@@ -52,7 +49,6 @@ fn main() {
             }
         });
         event_loop.run(move |event, event_loop_window_target, control_flow| {
-            coz::progress!("event loop");
             control_flow.set_wait();
             match event {
                 Event::NewEvents(cause) => match cause {
@@ -70,16 +66,39 @@ fn main() {
                 },
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::CloseRequested => {
-                        coz::begin!("engen receiver");
                         if let Ok(_) = sender.send(Receivable::ExitRequest) {
                             info!("sending is ok");
                         } else {
                             info!("could not send");
                         }
                     }
+                    WindowEvent::Resized(size) => {
+                        let scale_factor = window.as_ref().unwrap().scale_factor();
+                        visualizer.trigger_resize(size, scale_factor);
+                    }
+                    WindowEvent::ScaleFactorChanged {
+                        new_inner_size,
+                        scale_factor,
+                    } => {
+                        visualizer.trigger_resize(*new_inner_size, scale_factor);
+                    }
+                    WindowEvent::Touch(touch) => {
+                        visualizer.register_touch(touch);
+                    }
+                    WindowEvent::MouseInput { state, button, .. } => {
+                        visualizer.register_mouse_click(state, button);
+                    }
+                    WindowEvent::MouseWheel { .. } => {}
+                    WindowEvent::CursorMoved { position, .. } => {
+                        visualizer.set_mouse_location(position);
+                    }
+                    WindowEvent::CursorEntered { device_id: _ } => {}
+                    WindowEvent::CursorLeft { device_id: _ } => {
+                        visualizer.cancel_touches();
+                    }
                     WindowEvent::ReceivedCharacter(ch) => {
+                        info!("char: {:?}", ch);
                         if ch == 'a' {
-                            coz::begin!("engen receiver");
                             sender
                                 .send(Receivable::AddToken((
                                     TokenName("rose".to_string()),
