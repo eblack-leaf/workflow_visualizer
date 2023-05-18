@@ -1,7 +1,6 @@
 use bevy_ecs::prelude::Resource;
 
 use crate::color::Color;
-use crate::Visualizer;
 
 pub struct ThemeDescriptor {
     pub background: Option<Color>,

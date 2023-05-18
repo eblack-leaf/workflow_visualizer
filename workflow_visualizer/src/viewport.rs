@@ -8,10 +8,10 @@ use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
 use crate::coord::DeviceContext;
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::window::{gfx_resize, WindowResize};
-use crate::{Attach, InterfaceContext, Job, ScaleFactor, SyncPoint, Visualizer};
+use crate::{Attach, InterfaceContext, ScaleFactor, SyncPoint, Visualizer};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -190,7 +190,7 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
 pub(crate) fn viewport_attach(
     gfx_surface: Res<GfxSurface>,
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
-    msaa_attachment: Res<MsaaRenderAttachment>,
+    msaa_attachment: Res<MsaaRenderAdapter>,
     mut cmd: Commands,
 ) {
     let area = Area::<DeviceContext>::new(
@@ -209,7 +209,7 @@ pub(crate) fn viewport_resize(
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
     mut viewport: ResMut<Viewport>,
     mut resize_events: EventReader<WindowResize>,
-    msaa_attachment: Res<MsaaRenderAttachment>,
+    msaa_attachment: Res<MsaaRenderAdapter>,
 ) {
     for _resize in resize_events.iter() {
         viewport.adjust_area(

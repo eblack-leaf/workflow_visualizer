@@ -1,4 +1,4 @@
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAttachment};
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::{GfxSurface, Job, Theme, Viewport, Visualizer};
 use bevy_ecs::prelude::Resource;
 
@@ -54,7 +54,7 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
     let msaa_attachment = visualizer
         .job
         .container
-        .get_resource::<MsaaRenderAttachment>()
+        .get_resource::<MsaaRenderAdapter>()
         .expect("no msaa attachment");
     if let Some(surface_texture) = gfx_surface.surface_texture(gfx_surface_configuration) {
         let mut command_encoder =

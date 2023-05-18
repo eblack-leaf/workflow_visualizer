@@ -1,8 +1,9 @@
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
+use tracing::{info, warn};
 
 use crate::coord::area::Area;
 use crate::coord::DeviceContext;
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::sync::SyncPoint;
 use crate::{Attach, Visualizer};
 
@@ -21,14 +22,15 @@ pub(crate) fn gfx_resize(
     gfx_surface: Res<GfxSurface>,
     mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
     mut resize_events: EventReader<WindowResize>,
-    mut msaa_attachment: ResMut<MsaaRenderAttachment>,
+    mut msaa_attachment: ResMut<MsaaRenderAdapter>,
 ) {
     for resize in resize_events.iter() {
+        warn!("resizing event: {:?}", resize.size);
         gfx_surface_configuration.configuration.width =
             (resize.size.width as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
         gfx_surface_configuration.configuration.height =
             (resize.size.height as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
-        *msaa_attachment = MsaaRenderAttachment::new(
+        *msaa_attachment = MsaaRenderAdapter::new(
             &gfx_surface,
             &gfx_surface_configuration,
             msaa_attachment.max,
@@ -49,7 +51,6 @@ impl Attach for WindowAttachment {
             .insert_resource(Events::<WindowResize>::default());
         engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
             gfx_resize.in_set(SyncPoint::Initialization),
-            Events::<WindowResize>::update_system.in_set(SyncPoint::Event),
         ));
         engen
             .job

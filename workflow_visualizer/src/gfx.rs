@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::Resource;
 use std::fmt::{Debug, Formatter};
-use tracing::{info, instrument};
+use tracing::{info, instrument, warn};
 use winit::window::Window;
 
 #[derive(Clone)]
@@ -52,11 +52,11 @@ pub struct GfxSurface {
     pub queue: wgpu::Queue,
     pub options: GfxOptions,
 }
-pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment);
+pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter);
 impl GfxSurface {
     #[instrument]
     pub(crate) async fn new(window: &Window, options: GfxOptions) -> GfxStack {
-        info!(
+        warn!(
             "obtaining gfx stack. Backends: {:?}, Features: {:?}",
             options.backends, options.features
         );
@@ -65,13 +65,13 @@ impl GfxSurface {
             ..wgpu::InstanceDescriptor::default()
         };
         let instance = wgpu::Instance::new(instance_descriptor);
-        info!("creating surface");
+        warn!("creating surface");
         let surface = unsafe {
             instance
                 .create_surface(window)
                 .expect("could not create surface")
         };
-        info!(
+        warn!(
             "requesting adapter with {:?} fallback_adapter: {:?}",
             options.power_preferences, options.force_fallback_adapter
         );
@@ -83,7 +83,7 @@ impl GfxSurface {
             })
             .await
             .expect("adapter request failed");
-        info!("requesting device/queue");
+        warn!("requesting device/queue");
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
@@ -134,7 +134,7 @@ impl GfxSurface {
         adapter: wgpu::Adapter,
         gfx_surface: &GfxSurface,
         gfx_surface_config: &GfxSurfaceConfiguration,
-    ) -> MsaaRenderAttachment {
+    ) -> MsaaRenderAdapter {
         let msaa_flags = adapter
             .get_texture_format_features(gfx_surface_config.configuration.format)
             .flags;
@@ -150,7 +150,7 @@ impl GfxSurface {
             }
         };
 
-        MsaaRenderAttachment::new(
+        MsaaRenderAdapter::new(
             gfx_surface,
             gfx_surface_config,
             max_sample_count,
@@ -202,13 +202,13 @@ impl GfxSurfaceConfiguration {
     }
 }
 #[derive(Resource)]
-pub(crate) struct MsaaRenderAttachment {
+pub(crate) struct MsaaRenderAdapter {
     pub(crate) max: u32,
     pub(crate) requested: u32,
     pub(crate) view: Option<wgpu::TextureView>,
 }
 
-impl MsaaRenderAttachment {
+impl MsaaRenderAdapter {
     pub(crate) fn new(
         gfx_surface: &GfxSurface,
         gfx_surface_config: &GfxSurfaceConfiguration,
