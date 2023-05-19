@@ -187,23 +187,6 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
     }
 }
 
-pub(crate) fn viewport_attach(
-    gfx_surface: Res<GfxSurface>,
-    gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
-    msaa_attachment: Res<MsaaRenderAdapter>,
-    mut cmd: Commands,
-) {
-    let area = Area::<DeviceContext>::new(
-        gfx_surface_configuration.configuration.width as f32,
-        gfx_surface_configuration.configuration.height as f32,
-    );
-    cmd.insert_resource(Viewport::new(
-        &gfx_surface.device,
-        area,
-        msaa_attachment.requested,
-    ));
-}
-
 pub(crate) fn viewport_resize(
     gfx_surface: Res<GfxSurface>,
     gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
@@ -278,34 +261,9 @@ impl Attach for ViewportAttachment {
         ));
         engen
             .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((viewport_attach.in_set(SyncPoint::Initialization),));
-        engen
-            .job
             .task(Visualizer::TASK_RENDER_MAIN)
             .add_systems((viewport_resize
                 .in_set(SyncPoint::Initialization)
                 .after(gfx_resize),));
-        let gfx_surface_configuration = engen
-            .job
-            .container
-            .get_resource::<GfxSurfaceConfiguration>()
-            .expect("no gfx surface config");
-        let scale_factor = engen
-            .job
-            .container
-            .get_resource::<ScaleFactor>()
-            .expect("no scale factor")
-            .factor;
-        let surface_area: Area<DeviceContext> = (
-            gfx_surface_configuration.configuration.width,
-            gfx_surface_configuration.configuration.height,
-        )
-            .into();
-        let viewport_section = ((0u32, 0u32), surface_area.to_ui(scale_factor)).into();
-        engen
-            .job
-            .container
-            .insert_resource(ViewportHandle::new(viewport_section));
     }
 }

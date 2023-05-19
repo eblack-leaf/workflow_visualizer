@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use tracing::info;
 use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
-use workflow_visualizer::{Receiver, Responder, tokio, Visualizer, Workflow};
+use workflow_visualizer::{tokio, Receiver, Responder, Visualizer, Workflow};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Response {
@@ -33,13 +33,10 @@ impl Engen {
             tokens: HashMap::new(),
         }
     }
-    pub(crate) async fn runner(
-        proxy: Responder<Response>,
-        mut receiver: Receiver<Action>,
-    ) {
+    pub(crate) async fn runner(responder: Responder<Response>, mut receiver: Receiver<Action>) {
         let _engen = Engen::new();
         loop {
-            while let Some(action) = receiver.0.recv().await {
+            while let Some(action) = receiver.receive().await {
                 let response = match action {
                     Action::ExitRequest => <Engen as Workflow>::exit_response(),
                     Action::AddToken((name, token)) => Response::TokenAdded(name),
@@ -49,7 +46,7 @@ impl Engen {
                     }
                     Action::RemoveToken(name) => Response::TokenRemoved(name),
                 };
-                proxy.0.send_event(response).expect("proxy");
+                responder.respond(response);
             }
         }
     }

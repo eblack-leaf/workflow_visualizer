@@ -49,9 +49,10 @@ impl Attach for WindowAttachment {
             .job
             .container
             .insert_resource(Events::<WindowResize>::default());
-        engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
-            gfx_resize.in_set(SyncPoint::Initialization),
-        ));
+        engen
+            .job
+            .task(Visualizer::TASK_RENDER_MAIN)
+            .add_systems((gfx_resize.in_set(SyncPoint::Initialization),));
         engen
             .job
             .task(Visualizer::TASK_MAIN)

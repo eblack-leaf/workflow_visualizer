@@ -19,16 +19,16 @@ impl Debug for GfxOptions {
     }
 }
 impl GfxOptions {
-    pub fn web_align(mut self) -> Self {
+    pub fn downlevel_align(mut self) -> Self {
         self.backends = wgpu::Backends::all();
         self.limits = wgpu::Limits::downlevel_webgl2_defaults();
         self.msaa = 1;
         self
     }
-    pub fn web() -> Self {
-        Self::native().web_align()
+    pub fn limited_environment() -> Self {
+        Self::native_defaults().downlevel_align()
     }
-    pub fn native() -> Self {
+    pub fn native_defaults() -> Self {
         Self {
             backends: wgpu::Backends::PRIMARY,
             power_preferences: wgpu::PowerPreference::default(),

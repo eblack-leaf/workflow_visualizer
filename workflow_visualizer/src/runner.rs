@@ -1,13 +1,13 @@
-use crate::Visualizer;
+use crate::{Area, DeviceContext, Visualizer};
 use std::fmt::Debug;
 use std::future::Future;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::{EventLoop, EventLoopBuilder, EventLoopProxy};
+use winit::event_loop::{EventLoop, EventLoopBuilder, EventLoopProxy, EventLoopWindowTarget};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
-use winit::window::{Window, WindowBuilder};
+use winit::window::{Fullscreen, Window, WindowBuilder};
 pub trait Workflow {
     type Action: Debug + Clone + PartialEq + Send + 'static;
     type Response: Debug + Clone + PartialEq + Send + 'static;
@@ -18,12 +18,25 @@ pub trait Workflow {
 pub struct NativeRunner<T: Workflow + Send + 'static> {
     pub event_loop: Option<EventLoop<T::Response>>,
     pub window: Option<Window>,
+    pub desktop_dimensions: Option<Area<DeviceContext>>,
+    initialized: bool,
 }
 pub struct Receiver<T: Send + 'static>(pub tokio::sync::mpsc::UnboundedReceiver<T>);
-pub struct Responder<T: Send + 'static>(pub EventLoopProxy<T>);
+impl<T: Send + 'static> Receiver<T> {
+    pub async fn receive(&mut self) -> Option<T> {
+        self.0.recv().await
+    }
+}
+pub struct Responder<T: Send + 'static + Debug>(pub EventLoopProxy<T>);
+impl<T: Send + 'static + Debug> Responder<T> {
+    pub fn respond(&self, response: T) {
+        self.0.send_event(response).expect("responder");
+    }
+}
 impl<T: Workflow + Send + 'static> NativeRunner<T> {
     #[cfg(target_os = "android")]
     pub fn android(android_app: AndroidApp) -> Self {
+        use winit::platform::android::EventLoopBuilderExtAndroid;
         Self {
             event_loop: Some(
                 EventLoopBuilder::<T::Response>::with_user_event()
@@ -31,25 +44,35 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                     .build(),
             ),
             window: None,
+            desktop_dimensions: None,
+            initialized: false,
         }
     }
-    pub fn desktop() -> Self {
+    pub fn desktop<A: Into<Area<DeviceContext>>>(dimensions: A) -> Self {
         Self {
             event_loop: Some(EventLoopBuilder::<T::Response>::with_user_event().build()),
             window: None,
+            desktop_dimensions: Some(dimensions.into()),
+            initialized: false,
         }
+    }
+    pub(crate) fn initialize_window(&mut self, w_target: &EventLoopWindowTarget<T::Response>) {
+        let mut builder = WindowBuilder::new().with_resizable(false);
+        #[cfg(not(target_os = "android"))]
+        {
+            let dim = self.desktop_dimensions.expect("desktop_dimensions");
+            builder = builder.with_inner_size(PhysicalSize::new(dim.width, dim.height));
+        }
+        self.window
+            .replace(builder.build(w_target).expect("window"));
     }
     pub fn run<EngenRunner, EngenRunnerFut>(
         mut self,
         mut visualizer: Visualizer,
         engen_runner: EngenRunner,
     ) where
-        EngenRunner: FnOnce(
-                Responder<T::Response>,
-                Receiver<T::Action>,
-            ) -> EngenRunnerFut
-            + Send
-            + 'static,
+        EngenRunner:
+            FnOnce(Responder<T::Response>, Receiver<T::Action>) -> EngenRunnerFut + Send + 'static,
         EngenRunnerFut: Future<Output = ()> + Send + 'static,
     {
         let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
@@ -60,33 +83,33 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                 tokio::sync::mpsc::UnboundedReceiver<T::Action>,
             ) = tokio::sync::mpsc::unbounded_channel();
             let proxy = event_loop.create_proxy();
-            tokio::task::spawn(async move { engen_runner(Responder(proxy), Receiver(receiver)).await });
+            tokio::task::spawn(
+                async move { engen_runner(Responder(proxy), Receiver(receiver)).await },
+            );
             event_loop.run(move |event, event_loop_window_target, control_flow| {
                 control_flow.set_wait();
                 match event {
                     Event::NewEvents(cause) => match cause {
                         StartCause::Init => {
-                            self.window.replace(
-                                WindowBuilder::new()
-                                    .with_resizable(true)
-                                    .with_inner_size(PhysicalSize::new(400, 600))
-                                    .build(&event_loop_window_target)
-                                    .expect("window"),
-                            );
-                            visualizer.initialize(self.window.as_ref().unwrap());
+                            #[cfg(not(target_os = "android"))]
+                            {
+                                self.initialize_window(&event_loop_window_target);
+                                visualizer.initialize(self.window.as_ref().unwrap());
+                                self.initialized = true;
+                            }
                         }
                         _ => {}
                     },
                     Event::WindowEvent { event, .. } => match event {
                         WindowEvent::CloseRequested => {
                             if let Ok(_) = sender.send(T::exit_action()) {
-                                warn!("sending is ok");
+                                info!("sending is ok");
                             } else {
-                                warn!("could not send");
+                                info!("could not send");
                             }
                         }
                         WindowEvent::Resized(size) => {
-                            warn!("resizing: {:?}", size);
+                            info!("resizing: {:?}", size);
                             let scale_factor = self.window.as_ref().unwrap().scale_factor();
                             visualizer.trigger_resize(size, scale_factor);
                         }
@@ -94,7 +117,7 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                             new_inner_size,
                             scale_factor,
                         } => {
-                            warn!("resizing: {:?}", *new_inner_size);
+                            info!("resizing: {:?}", *new_inner_size);
                             visualizer.trigger_resize(*new_inner_size, scale_factor);
                         }
                         WindowEvent::Touch(touch) => {
@@ -130,7 +153,7 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                         visualizer.render();
                     }
                     Event::RedrawEventsCleared => {
-                        if visualizer.job.active() {
+                        if visualizer.job.active() && self.initialized {
                             self.window.as_ref().unwrap().request_redraw();
                         }
                         if visualizer.can_idle() {
@@ -139,11 +162,21 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                     }
                     Event::Suspended => {
                         #[cfg(target_os = "android")]
-                        visualizer.suspend();
+                        {
+                            visualizer.suspend();
+                        }
                     }
                     Event::Resumed => {
                         #[cfg(target_os = "android")]
-                        visualizer.resume(self.window.as_ref().unwrap());
+                        {
+                            if !self.initialized {
+                                self.initialize_window(&event_loop_window_target);
+                                visualizer.initialize(self.window.as_ref().unwrap());
+                                self.initialized = true;
+                            } else {
+                                visualizer.resume(self.window.as_ref().unwrap());
+                            }
+                        }
                     }
                     Event::LoopDestroyed => {
                         visualizer.teardown();

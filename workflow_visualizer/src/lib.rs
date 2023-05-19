@@ -22,19 +22,17 @@ pub use crate::coord::{
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 use crate::focus::FocusAttachment;
+use crate::gfx::MsaaRenderAdapter;
 pub use crate::gfx::{GfxOptions, GfxSurface};
-use crate::gfx::{MsaaRenderAdapter};
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 pub use crate::job::{EntityName, Job};
 use crate::orientation::OrientationAttachment;
-use crate::render::{
-    internal_render, invoke_render, Render, RenderFns, RenderPhase,
-};
-pub use crate::runner::{NativeRunner, Workflow, Receiver, Responder};
+use crate::render::{internal_render, invoke_render, Render, RenderFns, RenderPhase};
+pub use crate::runner::{NativeRunner, Receiver, Responder, Workflow};
 pub use crate::scale_factor::ScaleFactor;
 use crate::sync::set_sync_points;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
-pub use crate::theme::Theme;
+pub use crate::theme::{Theme, ThemeDescriptor};
 use crate::touch::{
     Interactor, MouseAdapter, Touch, TouchAdapter, TouchAttachment, TouchEvent, TouchType,
     TrackedTouch,
@@ -113,12 +111,20 @@ impl Visualizer {
             "gfx -> surface: {:?}/{:?}",
             config.configuration.width, config.configuration.height
         );
+        let area = Area::<DeviceContext>::new(
+            config.configuration.width as f32,
+            config.configuration.height as f32,
+        );
+        let viewport = Viewport::new(&surface.device, area, msaa.requested);
+        let scale_factor = ScaleFactor::new(window.scale_factor());
+        let viewport_handle =
+            ViewportHandle::new(Section::new((0, 0), area.to_ui(scale_factor.factor)));
+        self.job.container.insert_resource(viewport);
+        self.job.container.insert_resource(viewport_handle);
         self.job.container.insert_resource(surface);
         self.job.container.insert_resource(config);
         self.job.container.insert_resource(msaa);
-        self.job
-            .container
-            .insert_resource(ScaleFactor::new(window.scale_factor()));
+        self.job.container.insert_resource(scale_factor);
     }
     pub fn trigger_resize(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
         let resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
@@ -352,6 +358,7 @@ impl Visualizer {
     }
     pub fn suspend(&mut self) {
         let _ = self.job.container.remove_resource::<GfxSurface>();
+        let _ = self.job.container.remove_resource::<Viewport>();
         self.job.suspend();
     }
     pub fn resume(&mut self, window: &Window) {

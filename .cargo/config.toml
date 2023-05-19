@@ -6,3 +6,6 @@ web = "run --release --example app --"
 rustflags = [
     "--cfg=web_sys_unstable_apis"
 ]
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=/usr/bin/mold"]
