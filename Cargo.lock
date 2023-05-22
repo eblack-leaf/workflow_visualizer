@@ -4484,6 +4484,9 @@ dependencies = [
  "serde",
  "tokio",
  "tracing",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
  "wgpu 0.16.0",
  "winit",
 ]

@@ -1,6 +1,8 @@
 use crate::{Area, DeviceContext, Visualizer};
+use bevy_ecs::prelude::Resource;
 use std::fmt::Debug;
 use std::future::Future;
+use std::marker::PhantomData;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
@@ -15,16 +17,6 @@ pub trait Workflow {
     fn exit_action() -> Self::Action;
     fn exit_response() -> Self::Response;
 }
-pub struct NativeRunner<T: Workflow + Send + 'static> {
-    pub event_loop: Option<EventLoop<T::Response>>,
-    pub window: Option<Window>,
-    pub desktop_dimensions: Option<Area<DeviceContext>>,
-    initialized: bool,
-    #[cfg(not(target_os = "android"))]
-    android_app: Option<()>,
-    #[cfg(target_os = "android")]
-    pub(crate) android_app: Option<AndroidApp>,
-}
 pub struct Receiver<T: Send + 'static>(pub tokio::sync::mpsc::UnboundedReceiver<T>);
 impl<T: Send + 'static> Receiver<T> {
     pub async fn receive(&mut self) -> Option<T> {
@@ -37,62 +29,81 @@ impl<T: Send + 'static + Debug> Responder<T> {
         self.0.send_event(response).expect("responder");
     }
 }
-impl<T: Workflow + Send + 'static> NativeRunner<T> {
+#[cfg(target_os = "android")]
+#[derive(Resource)]
+pub struct AndroidInterface(pub AndroidApp);
+pub struct Runner<T: Workflow + Send + 'static> {
+    _t: PhantomData<T>,
+    desktop_dimensions: Option<Area<DeviceContext>>,
+    #[cfg(not(target_os = "android"))]
+    android_app: Option<()>,
     #[cfg(target_os = "android")]
-    pub fn android(android_app: AndroidApp) -> Self {
-        use winit::platform::android::EventLoopBuilderExtAndroid;
-        info!("config {:?}", android_app.config());
+    android_app: Option<AndroidApp>,
+}
+
+impl<T: Workflow + Send + 'static> Runner<T> {
+    pub fn new() -> Self {
         Self {
-            event_loop: Some(
-                EventLoopBuilder::<T::Response>::with_user_event()
-                    .with_android_app(android_app.clone())
-                    .build(),
-            ),
-            window: None,
+            _t: PhantomData,
             desktop_dimensions: None,
-            initialized: false,
-            android_app: Some(android_app)
-        }
-    }
-    pub fn desktop<A: Into<Area<DeviceContext>>>(dimensions: A) -> Self {
-        Self {
-            event_loop: Some(EventLoopBuilder::<T::Response>::with_user_event().build()),
-            window: None,
-            desktop_dimensions: Some(dimensions.into()),
-            initialized: false,
             android_app: None,
         }
     }
-    pub(crate) fn initialize_window(&mut self, w_target: &EventLoopWindowTarget<T::Response>) {
-        let mut builder = WindowBuilder::new().with_resizable(false);
-        #[cfg(not(target_os = "android"))]
-        {
-            let dim = self.desktop_dimensions.expect("desktop_dimensions");
-            builder = builder.with_inner_size(PhysicalSize::new(dim.width, dim.height));
-        }
-        self.window
-            .replace(builder.build(w_target).expect("window"));
+    #[cfg(target_os = "android")]
+    pub fn with_android_app(mut self, android_app: AndroidApp) -> Self {
+        self.android_app.replace(android_app);
+        self
     }
-    pub fn run<EngenRunner, EngenRunnerFut>(
+    pub fn with_desktop_dimensions<A: Into<Area<DeviceContext>>>(mut self, dim: A) -> Self {
+        self.desktop_dimensions.replace(dim.into());
+        self
+    }
+    #[cfg(target_family = "wasm")]
+    pub fn web_run(visualizer: Visualizer) {
+        #[cfg(target_family = "wasm")]
+        wasm_bindgen_futures::spawn_local(self.wasm_run(visualizer));
+    }
+    #[cfg(target_family = "wasm")]
+    async fn wasm_run(mut self, visualizer: Visualizer) {
+        use winit::platform::web::WindowExtWebSys;
+        // init window and js callbacks
+        // event_loop.spawn(); including sender receiver pattern on web
+    }
+    #[cfg(not(target_family = "wasm"))]
+    pub fn native_run<NativeEngenRunner, NativeEngenRunnerFut>(
         mut self,
         mut visualizer: Visualizer,
-        engen_runner: EngenRunner,
+        native_engen_runner: NativeEngenRunner,
     ) where
-        EngenRunner:
-            FnOnce(Responder<T::Response>, Receiver<T::Action>) -> EngenRunnerFut + Send + 'static,
-        EngenRunnerFut: Future<Output = ()> + Send + 'static,
+        NativeEngenRunner: FnOnce(Responder<T::Response>, Receiver<T::Action>) -> NativeEngenRunnerFut
+            + Send
+            + 'static,
+        NativeEngenRunnerFut: Future<Output = ()> + Send + 'static,
     {
         let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
         tokio_runtime.block_on(async {
-            let event_loop = self.event_loop.take().expect("event loop");
+            let builder = &mut EventLoopBuilder::<T::Response>::with_user_event();
+            #[cfg(target_os = "android")]
+            {
+                use winit::platform::android::EventLoopBuilderExtAndroid;
+                let android_app = self.android_app.take().unwrap();
+                builder.with_android_app(android_app.clone());
+                visualizer
+                    .job
+                    .container
+                    .insert_resource(AndroidInterface(android_app.clone()));
+            }
+            let event_loop = builder.build();
             let (sender, receiver): (
                 tokio::sync::mpsc::UnboundedSender<T::Action>,
                 tokio::sync::mpsc::UnboundedReceiver<T::Action>,
             ) = tokio::sync::mpsc::unbounded_channel();
             let proxy = event_loop.create_proxy();
-            tokio::task::spawn(
-                async move { engen_runner(Responder(proxy), Receiver(receiver)).await },
-            );
+            tokio::task::spawn(async move {
+                native_engen_runner(Responder(proxy), Receiver(receiver)).await
+            });
+            let mut window: Option<Window> = None;
+            let mut initialized = false;
             event_loop.run(move |event, event_loop_window_target, control_flow| {
                 control_flow.set_wait();
                 match event {
@@ -100,9 +111,13 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                         StartCause::Init => {
                             #[cfg(not(target_os = "android"))]
                             {
-                                self.initialize_window(&event_loop_window_target);
-                                visualizer.initialize(self.window.as_ref().unwrap());
-                                self.initialized = true;
+                                initialize_native_window(
+                                    &event_loop_window_target,
+                                    &mut window,
+                                    self.desktop_dimensions,
+                                );
+                                visualizer.initialize(window.as_ref().unwrap());
+                                initialized = true;
                             }
                         }
                         _ => {}
@@ -117,7 +132,7 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                         }
                         WindowEvent::Resized(size) => {
                             info!("resizing: {:?}", size);
-                            let scale_factor = self.window.as_ref().unwrap().scale_factor();
+                            let scale_factor = window.as_ref().unwrap().scale_factor();
                             visualizer.trigger_resize(size, scale_factor);
                         }
                         WindowEvent::ScaleFactorChanged {
@@ -130,8 +145,6 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                         WindowEvent::Touch(touch) => {
                             visualizer.register_touch(touch);
                             info!("touch {:?}", touch);
-                            #[cfg(target_os = "android")]
-                            self.android_app.as_ref().unwrap().show_soft_input(true);
                         }
                         WindowEvent::MouseInput { state, button, .. } => {
                             visualizer.register_mouse_click(state, button);
@@ -163,8 +176,8 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                         visualizer.render();
                     }
                     Event::RedrawEventsCleared => {
-                        if visualizer.job.active() && self.initialized {
-                            self.window.as_ref().unwrap().request_redraw();
+                        if visualizer.job.active() && initialized {
+                            window.as_ref().unwrap().request_redraw();
                         }
                         if visualizer.can_idle() {
                             control_flow.set_wait();
@@ -179,12 +192,16 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                     Event::Resumed => {
                         #[cfg(target_os = "android")]
                         {
-                            if !self.initialized {
-                                self.initialize_window(&event_loop_window_target);
-                                visualizer.initialize(self.window.as_ref().unwrap());
-                                self.initialized = true;
+                            if !initialized {
+                                initialize_native_window(
+                                    &event_loop_window_target,
+                                    &mut window,
+                                    self.desktop_dimensions,
+                                );
+                                visualizer.initialize(window.as_ref().unwrap());
+                                initialized = true;
                             } else {
-                                visualizer.resume(self.window.as_ref().unwrap());
+                                visualizer.resume(window.as_ref().unwrap());
                             }
                         }
                     }
@@ -196,4 +213,23 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
             });
         });
     }
+}
+pub(crate) fn initialize_native_window<T>(
+    w_target: &EventLoopWindowTarget<T>,
+    window: &mut Option<Window>,
+    desktop_dimensions: Option<Area<DeviceContext>>,
+) {
+    let mut builder = WindowBuilder::new().with_resizable(false);
+    #[cfg(not(target_os = "android"))]
+    {
+        let desktop_dimensions = match desktop_dimensions {
+            None => Area::new(600.0, 800.0),
+            Some(dim) => dim.into(),
+        };
+        builder = builder.with_inner_size(PhysicalSize::new(
+            desktop_dimensions.width,
+            desktop_dimensions.height,
+        ));
+    }
+    window.replace(builder.build(w_target).expect("window"));
 }

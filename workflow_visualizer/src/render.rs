@@ -14,8 +14,7 @@ pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
         .container
         .get_resource::<Viewport>()
         .expect("no viewport attached");
-    job
-        .container
+    job.container
         .get_resource::<Renderer>()
         .expect("no render attachment")
         .render(render_pass_handle, viewport);

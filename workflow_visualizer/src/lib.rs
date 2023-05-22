@@ -16,6 +16,7 @@ mod uniform;
 mod viewport;
 mod visibility;
 mod window;
+
 pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
@@ -28,7 +29,9 @@ use crate::job::{attempt_to_idle, Task, TaskLabel};
 pub use crate::job::{EntityName, Job};
 use crate::orientation::OrientationAttachment;
 use crate::render::{internal_render, invoke_render, Render, RenderFns, RenderPhase};
-pub use crate::runner::{NativeRunner, Receiver, Responder, Workflow};
+pub use crate::runner::{Receiver, Responder, Runner, Workflow};
+#[cfg(target_os = "android")]
+pub use crate::runner::{AndroidInterface};
 pub use crate::scale_factor::ScaleFactor;
 use crate::sync::set_sync_points;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
@@ -344,7 +347,9 @@ impl Visualizer {
             });
     }
     pub fn set_scale_factor(&mut self, scale_factor: f64) {
-        self.job.container.insert_resource(ScaleFactor::new(scale_factor));
+        self.job
+            .container
+            .insert_resource(ScaleFactor::new(scale_factor));
     }
     fn setup(&mut self) {
         self.job.exec(Self::TASK_STARTUP);
