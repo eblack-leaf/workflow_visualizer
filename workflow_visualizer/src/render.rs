@@ -7,14 +7,14 @@ pub enum RenderPhase {
     Alpha(u32),
 }
 pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
-    backend: &'a Job,
+    job: &'a Job,
     render_pass_handle: &mut RenderPassHandle<'a>,
 ) {
-    let viewport = backend
+    let viewport = job
         .container
         .get_resource::<Viewport>()
         .expect("no viewport attached");
-    backend
+    job
         .container
         .get_resource::<Renderer>()
         .expect("no render attachment")

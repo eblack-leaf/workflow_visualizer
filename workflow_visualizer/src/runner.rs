@@ -20,6 +20,10 @@ pub struct NativeRunner<T: Workflow + Send + 'static> {
     pub window: Option<Window>,
     pub desktop_dimensions: Option<Area<DeviceContext>>,
     initialized: bool,
+    #[cfg(not(target_os = "android"))]
+    android_app: Option<()>,
+    #[cfg(target_os = "android")]
+    pub(crate) android_app: Option<AndroidApp>,
 }
 pub struct Receiver<T: Send + 'static>(pub tokio::sync::mpsc::UnboundedReceiver<T>);
 impl<T: Send + 'static> Receiver<T> {
@@ -37,15 +41,17 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
     #[cfg(target_os = "android")]
     pub fn android(android_app: AndroidApp) -> Self {
         use winit::platform::android::EventLoopBuilderExtAndroid;
+        info!("config {:?}", android_app.config());
         Self {
             event_loop: Some(
                 EventLoopBuilder::<T::Response>::with_user_event()
-                    .with_android_app(android_app)
+                    .with_android_app(android_app.clone())
                     .build(),
             ),
             window: None,
             desktop_dimensions: None,
             initialized: false,
+            android_app: Some(android_app)
         }
     }
     pub fn desktop<A: Into<Area<DeviceContext>>>(dimensions: A) -> Self {
@@ -54,6 +60,7 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
             window: None,
             desktop_dimensions: Some(dimensions.into()),
             initialized: false,
+            android_app: None,
         }
     }
     pub(crate) fn initialize_window(&mut self, w_target: &EventLoopWindowTarget<T::Response>) {
@@ -122,6 +129,9 @@ impl<T: Workflow + Send + 'static> NativeRunner<T> {
                         }
                         WindowEvent::Touch(touch) => {
                             visualizer.register_touch(touch);
+                            info!("touch {:?}", touch);
+                            #[cfg(target_os = "android")]
+                            self.android_app.as_ref().unwrap().show_soft_input(true);
                         }
                         WindowEvent::MouseInput { state, button, .. } => {
                             visualizer.register_mouse_click(state, button);

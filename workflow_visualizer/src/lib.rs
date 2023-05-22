@@ -343,7 +343,9 @@ impl Visualizer {
                 }
             });
     }
-    pub fn set_scale_factor(&mut self) {}
+    pub fn set_scale_factor(&mut self, scale_factor: f64) {
+        self.job.container.insert_resource(ScaleFactor::new(scale_factor));
+    }
     fn setup(&mut self) {
         self.job.exec(Self::TASK_STARTUP);
         self.job.exec(Self::TASK_RENDER_STARTUP)

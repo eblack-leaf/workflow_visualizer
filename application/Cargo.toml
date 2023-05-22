@@ -16,3 +16,4 @@ android_logger = "0.13.1"
 name = "application"
 crate-type = ["cdylib"]
 path = "src/main.rs"
+
