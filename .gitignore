@@ -2,4 +2,7 @@
 /wgpu_traces/
 /.idea/
 Cargo.lock
+/application/app/build/
+/application/.gradle/
+/application/app/src/main/jniLibs/
 
