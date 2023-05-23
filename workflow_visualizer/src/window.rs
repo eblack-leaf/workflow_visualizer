@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
-use tracing::{info, warn};
+use tracing::{info, trace, warn};
 
 use crate::coord::area::Area;
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::sync::SyncPoint;
-use crate::{Attach, Visualizer};
+use crate::visualizer::{Attach, Visualizer};
 
 #[derive(Clone, Copy)]
 pub struct WindowResize {
@@ -25,7 +25,7 @@ pub(crate) fn gfx_resize(
     mut msaa_attachment: ResMut<MsaaRenderAdapter>,
 ) {
     for resize in resize_events.iter() {
-        warn!("resizing event: {:?}", resize.size);
+        trace!("resizing event: {:?}", resize.size);
         gfx_surface_configuration.configuration.width =
             (resize.size.width as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
         gfx_surface_configuration.configuration.height =
@@ -33,8 +33,8 @@ pub(crate) fn gfx_resize(
         *msaa_attachment = MsaaRenderAdapter::new(
             &gfx_surface,
             &gfx_surface_configuration,
-            msaa_attachment.max,
-            msaa_attachment.requested,
+            msaa_attachment.max(),
+            msaa_attachment.requested(),
         );
         gfx_surface.surface.configure(
             &gfx_surface.device,

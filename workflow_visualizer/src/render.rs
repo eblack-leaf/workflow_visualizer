@@ -1,6 +1,8 @@
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::{GfxSurface, Job, Theme, Viewport, Visualizer};
+use crate::visualizer::Visualizer;
+use crate::{GfxSurface, Job, Theme, Viewport};
 use bevy_ecs::prelude::Resource;
+use tracing::{trace, warn};
 
 pub enum RenderPhase {
     Opaque,
@@ -56,6 +58,7 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
         .get_resource::<MsaaRenderAdapter>()
         .expect("no msaa attachment");
     if let Some(surface_texture) = gfx_surface.surface_texture(gfx_surface_configuration) {
+        trace!("obtained surface texture");
         let mut command_encoder =
             gfx_surface
                 .device
@@ -69,11 +72,11 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
             let depth_texture_view = viewport
                 .depth_texture
                 .create_view(&wgpu::TextureViewDescriptor::default());
-            let (v, rt) = match &msaa_attachment.view {
+            let (v, rt) = match msaa_attachment.view() {
                 Some(view) => (view, Some(&surface_texture_view)),
                 None => (&surface_texture_view, None),
             };
-            let should_store = msaa_attachment.requested == 1;
+            let should_store = msaa_attachment.requested() == 1;
             let color_attachment = wgpu::RenderPassColorAttachment {
                 view: v,
                 resolve_target: rt,
@@ -99,7 +102,13 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
             };
             let mut render_pass_handle =
                 RenderPassHandle(command_encoder.begin_render_pass(&render_pass_descriptor));
+            trace!("beginning render pass");
             for invoke in visualizer.render_fns.0.iter_mut() {
+                trace!("invoking opaque render fn");
+                invoke(&visualizer.job, &mut render_pass_handle);
+            }
+            for invoke in visualizer.render_fns.1.iter_mut() {
+                trace!("invoking transparent render fn");
                 invoke(&visualizer.job, &mut render_pass_handle);
             }
         }

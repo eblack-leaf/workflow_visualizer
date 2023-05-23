@@ -4,9 +4,10 @@ use std::marker::PhantomData;
 use bevy_ecs::prelude::Component;
 use bytemuck::{Pod, Zeroable};
 
-use index::Index;
-
 use crate::gfx::GfxSurface;
+pub use index::Index;
+pub use index::Indexer;
+pub use key::{Key, KeyFactory};
 
 pub mod index;
 pub mod key;

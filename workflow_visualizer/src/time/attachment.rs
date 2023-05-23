@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::time::{system, Timer};
+use crate::visualizer::{Attach, Visualizer};
 use crate::SyncPoint;
-use crate::{Attach, Visualizer};
 
 pub struct TimerAttachment;
 

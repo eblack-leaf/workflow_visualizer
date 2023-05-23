@@ -3,8 +3,9 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, IntoSystemConfig, Res, Resource};
 
 use crate::viewport::ViewportHandle;
+use crate::visualizer::{Attach, Visualizer};
 use crate::window::WindowResize;
-use crate::{Area, Attach, DeviceContext, ScaleFactor, SyncPoint, Visualizer};
+use crate::{Area, DeviceContext, ScaleFactor, SyncPoint};
 
 #[derive(Resource, Copy, Clone)]
 pub enum Orientation {

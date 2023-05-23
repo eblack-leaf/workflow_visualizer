@@ -10,8 +10,9 @@ use crate::coord::section::Section;
 use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
+use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{Attach, InterfaceContext, ScaleFactor, SyncPoint, Visualizer};
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
 #[derive(Resource)]
 pub struct Viewport {
@@ -199,7 +200,7 @@ pub(crate) fn viewport_resize(
             &gfx_surface,
             gfx_surface_configuration.configuration.width,
             gfx_surface_configuration.configuration.height,
-            msaa_attachment.requested,
+            msaa_attachment.requested(),
         );
     }
 }

@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use tracing::info;
 use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
-use workflow_visualizer::{Receiver, Responder, Visualizer, Workflow};
+use workflow_visualizer::Visualizer;
+use workflow_visualizer::{Receiver, Responder, Workflow};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Response {
@@ -34,7 +35,10 @@ impl Engen {
         }
     }
     #[cfg(not(target_family = "wasm"))]
-    pub(crate) async fn native_runner(responder: Responder<Response>, mut receiver: Receiver<Action>) {
+    pub(crate) async fn native_runner(
+        responder: Responder<Response>,
+        mut receiver: Receiver<Action>,
+    ) {
         let _engen = Engen::new();
         loop {
             while let Some(action) = receiver.receive().await {

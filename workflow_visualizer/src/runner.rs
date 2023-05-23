@@ -1,9 +1,11 @@
-use crate::{Area, DeviceContext, Visualizer};
+use crate::visualizer::Visualizer;
+use crate::{Area, DeviceContext};
 use bevy_ecs::prelude::Resource;
 use std::fmt::Debug;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use tracing::trace;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
@@ -11,6 +13,7 @@ use winit::event_loop::{EventLoop, EventLoopBuilder, EventLoopProxy, EventLoopWi
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Fullscreen, Window, WindowBuilder};
+
 pub trait Workflow {
     type Action: Debug + Clone + PartialEq + Send + 'static;
     type Response: Debug + Clone + PartialEq + Send + 'static;
@@ -18,7 +21,7 @@ pub trait Workflow {
     fn exit_action() -> Self::Action;
     fn exit_response() -> Self::Response;
 }
-pub struct Receiver<T: Send + 'static>{
+pub struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
     pub receiver: tokio::sync::mpsc::UnboundedReceiver<T>,
     #[cfg(target_family = "wasm")]
@@ -99,7 +102,7 @@ impl<T: Workflow + Send + 'static> Runner<T> {
             ) = tokio::sync::mpsc::unbounded_channel();
             let proxy = event_loop.create_proxy();
             tokio::task::spawn(async move {
-                native_engen_runner(Responder(proxy), Receiver{receiver}).await
+                native_engen_runner(Responder(proxy), Receiver { receiver }).await
             });
             let mut window: Option<Window> = None;
             let mut initialized = false;
@@ -157,12 +160,12 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                             visualizer.cancel_touches();
                         }
                         WindowEvent::ReceivedCharacter(ch) => {
-                            warn!("char: {:?}", ch);
+                            trace!("char: {:?}", ch);
                         }
                         _ => {}
                     },
                     Event::UserEvent(event) => {
-                        warn!("visualizer loop received: {:?}", event);
+                        info!("visualizer loop received: {:?}", event);
                         if event == T::exit_response() {
                             control_flow.set_exit();
                         }
@@ -287,12 +290,18 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                 }
                 _ => {}
             }
+            // run engen
         });
     }
     #[cfg(target_family = "wasm")]
     async fn internal_web_run(mut self, mut visualizer: Visualizer) {
         let event_loop = EventLoop::new();
-        let window = Rc::new(WindowBuilder::new().with_title("workflow_visualizer").build(&event_loop).expect("window"));
+        let window = Rc::new(
+            WindowBuilder::new()
+                .with_title("workflow_visualizer")
+                .build(&event_loop)
+                .expect("window"),
+        );
         Self::add_web_canvas(window.as_ref());
         window.set_inner_size(Self::window_dimensions(window.scale_factor()));
         visualizer.init_gfx(window.as_ref()).await;

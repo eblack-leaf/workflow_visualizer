@@ -7,9 +7,9 @@ use winit::event::{ElementState, MouseButton};
 
 use crate::focus::FocusedEntity;
 use crate::viewport::ViewportHandle;
+use crate::visualizer::{Attach, Visualizer};
 use crate::{
-    Area, Attach, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section,
-    SyncPoint, Visualizer,
+    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
 };
 
 #[derive(Copy, Clone, Debug)]

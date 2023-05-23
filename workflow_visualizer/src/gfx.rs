@@ -1,6 +1,7 @@
 use bevy_ecs::prelude::Resource;
 use std::fmt::{Debug, Formatter};
-use tracing::{info, instrument, warn};
+use tracing::{info, instrument, trace, warn};
+use wgpu::TextureView;
 use winit::window::Window;
 
 #[derive(Clone)]
@@ -56,24 +57,26 @@ pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapt
 impl GfxSurface {
     #[instrument]
     pub(crate) async fn new(window: &Window, options: GfxOptions) -> GfxStack {
-        warn!(
+        trace!(
             "obtaining gfx stack. Backends: {:?}, Features: {:?}",
-            options.backends, options.features
+            options.backends,
+            options.features
         );
         let instance_descriptor = wgpu::InstanceDescriptor {
             backends: options.backends,
             ..wgpu::InstanceDescriptor::default()
         };
         let instance = wgpu::Instance::new(instance_descriptor);
-        warn!("creating surface");
+        trace!("creating surface");
         let surface = unsafe {
             instance
                 .create_surface(window)
                 .expect("could not create surface")
         };
-        warn!(
+        trace!(
             "requesting adapter with {:?} fallback_adapter: {:?}",
-            options.power_preferences, options.force_fallback_adapter
+            options.power_preferences,
+            options.force_fallback_adapter
         );
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -83,7 +86,7 @@ impl GfxSurface {
             })
             .await
             .expect("adapter request failed");
-        warn!("requesting device/queue");
+        trace!("requesting device/queue");
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
@@ -202,13 +205,22 @@ impl GfxSurfaceConfiguration {
     }
 }
 #[derive(Resource)]
-pub(crate) struct MsaaRenderAdapter {
-    pub(crate) max: u32,
-    pub(crate) requested: u32,
-    pub(crate) view: Option<wgpu::TextureView>,
+pub struct MsaaRenderAdapter {
+    max: u32,
+    requested: u32,
+    view: Option<wgpu::TextureView>,
 }
 
 impl MsaaRenderAdapter {
+    pub fn max(&self) -> u32 {
+        self.max
+    }
+    pub fn requested(&self) -> u32 {
+        self.requested
+    }
+    pub fn view(&self) -> Option<&TextureView> {
+        self.view.as_ref()
+    }
     pub(crate) fn new(
         gfx_surface: &GfxSurface,
         gfx_surface_config: &GfxSurfaceConfiguration,

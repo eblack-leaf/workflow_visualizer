@@ -1,7 +1,9 @@
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
+use tracing::{trace, warn};
 
 use crate::viewport::ViewportHandle;
-use crate::{Area, Attach, InterfaceContext, Position, Section, SyncPoint, Visualizer};
+use crate::visualizer::{Attach, Visualizer};
+use crate::{Area, InterfaceContext, Position, Section, SyncPoint};
 
 #[derive(Bundle)]
 pub struct EnableVisibility {
@@ -70,6 +72,12 @@ pub(crate) fn calc_visibility(
         if vis.visible() != visible {
             vis.visible = visible;
         }
+        trace!(
+            "establishing visibility for {:?}, {:?}, {:?}",
+            pos,
+            area,
+            vis.visible()
+        );
     }
 }
 pub struct VisibilityAttachment;
