@@ -6,7 +6,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "co.realfit.agdkwinitwgpu"
+        applicationId "co.workflow.visualizer"
         minSdk 28
         targetSdk 31
         versionCode 1

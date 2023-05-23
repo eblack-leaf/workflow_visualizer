@@ -1,4 +1,4 @@
-package co.realfit.agdkwinitwgpu;
+package co.workflow.visualizer;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;

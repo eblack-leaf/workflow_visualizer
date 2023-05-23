@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 mod color;
 mod coord;
 mod focus;
@@ -48,7 +49,6 @@ pub use bevy_ecs;
 use bevy_ecs::prelude::{Component, Entity, IntoSystemConfig, Resource};
 pub use job::JobSyncPoint;
 use std::fmt::{Debug, Formatter};
-pub use tokio;
 use tracing::{info, instrument};
 pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
 pub use wgpu;
@@ -106,6 +106,9 @@ impl Visualizer {
             gfx_options,
         }
     }
+    pub fn set_gfx_options(&mut self, gfx_options: GfxOptions) {
+        self.gfx_options = gfx_options;
+    }
     #[instrument]
     pub async fn init_gfx(&mut self, window: &Window) {
         info!("initializing gfx.");
@@ -137,6 +140,7 @@ impl Visualizer {
             .insert_resource(ScaleFactor::new(scale_factor));
     }
     pub fn initialize(&mut self, window: &Window) {
+        #[cfg(not(target_family = "wasm"))]
         pollster::block_on(self.init_gfx(window));
         set_sync_points(self);
         self.invoke_attach::<WindowAttachment>();
@@ -369,6 +373,7 @@ impl Visualizer {
         self.job.suspend();
     }
     pub fn resume(&mut self, window: &Window) {
+        #[cfg(not(target_family = "wasm"))]
         pollster::block_on(self.init_gfx(window));
         self.job.activate();
     }
