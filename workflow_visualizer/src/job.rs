@@ -110,13 +110,13 @@ impl Job {
     pub fn suspend(&mut self) {
         self.execution_state = ExecutionState::Suspended;
     }
-    pub fn activate(&mut self) {
+    pub fn resume(&mut self) {
         self.execution_state = ExecutionState::Active;
     }
     pub fn suspended(&self) -> bool {
         self.execution_state == ExecutionState::Suspended
     }
-    pub fn active(&self) -> bool {
+    pub fn resumed(&self) -> bool {
         self.execution_state == ExecutionState::Active
     }
     pub fn should_exit(&self) -> bool {

@@ -5,5 +5,6 @@ Cargo.lock
 /application/app/build/
 /application/.gradle/
 /application/app/src/main/jniLibs/
+logcat.txt
 /application/dist/
 /application/android_rebuild_avoidance_target/

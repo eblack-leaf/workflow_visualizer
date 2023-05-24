@@ -1,7 +1,7 @@
 use crate::focus::FocusAttachment;
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::orientation::OrientationAttachment;
-use crate::render::{internal_render, invoke_render, Render, RenderFns, RenderPhase};
+use crate::render::{internal_render, invoke_render, Render, RenderTasks, RenderPhase, RenderTaskManager};
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;
@@ -45,7 +45,7 @@ impl Debug for Visualizer {
 
 pub struct Visualizer {
     pub job: Job,
-    pub(crate) render_fns: (RenderFns, RenderFns),
+    pub(crate) render_task_manager: RenderTaskManager,
     attachment_queue: Vec<Attachment>,
     gfx_options: GfxOptions,
 }
@@ -72,7 +72,7 @@ impl Visualizer {
                 });
                 job
             },
-            render_fns: (vec![], vec![]),
+            render_task_manager: RenderTaskManager::new(),
             attachment_queue: vec![],
             gfx_options,
         }
@@ -342,14 +342,19 @@ impl Visualizer {
         self.job.exec(Self::TASK_TEARDOWN);
     }
     pub fn suspend(&mut self) {
-        let _ = self.job.container.remove_resource::<GfxSurface>();
-        let _ = self.job.container.remove_resource::<Viewport>();
-        self.job.suspend();
+        if !self.job.suspended() {
+            let _ = self.job.container.remove_resource::<GfxSurface>();
+            let _ = self.job.container.remove_resource::<Viewport>();
+            self.job.suspend();
+        }
     }
     pub fn resume(&mut self, window: &Window) {
-        #[cfg(not(target_family = "wasm"))]
-        pollster::block_on(self.init_gfx(window));
-        self.job.activate();
+        if !self.job.resumed() {
+            #[cfg(not(target_family = "wasm"))]
+            pollster::block_on(self.init_gfx(window));
+            self.job.exec(Self::TASK_RENDER_STARTUP);
+            self.job.resume();
+        }
     }
     pub fn render(&mut self) {
         if !self.job.suspended() {
@@ -363,9 +368,9 @@ impl Visualizer {
     }
     pub fn register_renderer<Renderer: Render + Resource>(&mut self) {
         match Renderer::phase() {
-            RenderPhase::Opaque => self.render_fns.0.push(Box::new(invoke_render::<Renderer>)),
+            RenderPhase::Opaque => self.render_task_manager.opaque.push(Box::new(invoke_render::<Renderer>)),
             RenderPhase::Alpha(_order) => {
-                self.render_fns.1.push(Box::new(invoke_render::<Renderer>))
+                self.render_task_manager.transparent.push(Box::new(invoke_render::<Renderer>))
             }
         }
     }

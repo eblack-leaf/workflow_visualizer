@@ -11,6 +11,7 @@ use winit::platform::android::activity::AndroidApp;
 pub struct VirtualKeyboardAdapter {
     #[cfg(target_os = "android")]
     android_app: AndroidApp,
+    #[cfg(not(target_os = "android"))]
     android_app: (),
 }
 
@@ -127,14 +128,14 @@ impl Attach for VirtualKeyboardAttachment {
             .insert_resource(VirtualKeyboardAdapter::new());
         #[cfg(target_os = "android")]
         {
-            let app = engen
+            let app = visualizer
                 .job
                 .container
                 .get_resource::<AndroidInterface>()
                 .expect("android interface")
                 .0
                 .clone();
-            engen
+            visualizer
                 .job
                 .container
                 .insert_resource(VirtualKeyboardAdapter::new(app));

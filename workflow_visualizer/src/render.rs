@@ -24,8 +24,19 @@ pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
 
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
 
-pub(crate) type RenderFns = Vec<Box<for<'a> fn(&'a Job, &mut RenderPassHandle<'a>)>>;
-
+pub(crate) type RenderTasks = Vec<Box<for<'a> fn(&'a Job, &mut RenderPassHandle<'a>)>>;
+pub(crate) struct RenderTaskManager {
+    pub(crate) opaque: RenderTasks,
+    pub(crate) transparent: RenderTasks,
+}
+impl RenderTaskManager {
+    pub(crate) fn new() -> Self {
+        Self {
+            opaque: RenderTasks::new(),
+            transparent: RenderTasks::new(),
+        }
+    }
+}
 pub trait Render {
     fn phase() -> RenderPhase;
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
@@ -103,11 +114,11 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
             let mut render_pass_handle =
                 RenderPassHandle(command_encoder.begin_render_pass(&render_pass_descriptor));
             trace!("beginning render pass");
-            for invoke in visualizer.render_fns.0.iter_mut() {
+            for invoke in visualizer.render_task_manager.opaque.iter_mut() {
                 trace!("invoking opaque render fn");
                 invoke(&visualizer.job, &mut render_pass_handle);
             }
-            for invoke in visualizer.render_fns.1.iter_mut() {
+            for invoke in visualizer.render_task_manager.transparent.iter_mut() {
                 trace!("invoking transparent render fn");
                 invoke(&visualizer.job, &mut render_pass_handle);
             }

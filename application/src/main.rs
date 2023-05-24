@@ -36,10 +36,10 @@ fn visualizer() -> Visualizer {
 #[cfg(target_os = "android")]
 #[no_mangle]
 fn android_main(android_app: AndroidApp) {
-    android_logger::init_once(
-        android_logger::Config::default().with_max_level(log::LevelFilter::Trace),
-    );
-    // tracing_subscriber::fmt().init();
+    // android_logger::init_once(
+    //     android_logger::Config::default().with_max_level(log::LevelFilter::Trace),
+    // );
+    tracing_subscriber::fmt().init();
     let mut visualizer = visualizer();
     visualizer.set_gfx_options(GfxOptions::limited_environment());
     let runner = Runner::<Engen>::new()

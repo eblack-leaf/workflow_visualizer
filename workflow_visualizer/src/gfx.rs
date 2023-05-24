@@ -87,13 +87,16 @@ impl GfxSurface {
             .await
             .expect("adapter request failed");
         trace!("requesting device/queue");
+        let downlevel = adapter.get_downlevel_capabilities();
+        trace!("downlevel: {:?}", downlevel);
+        let features = options.features | wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES;
+        let mut limits = options.limits.clone().using_resolution(adapter.limits());
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: Some("device/queue"),
-                    features: options.features
-                        | wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES,
-                    limits: options.limits.clone().using_resolution(adapter.limits()),
+                    features,
+                    limits,
                 },
                 None,
             )
@@ -104,6 +107,7 @@ impl GfxSurface {
             .formats
             .first()
             .expect("surface format unsupported");
+        trace!("surface format: {:?}", surface_format);
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,

@@ -178,7 +178,7 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                         visualizer.render();
                     }
                     Event::RedrawEventsCleared => {
-                        if visualizer.job.active() && initialized {
+                        if visualizer.job.resumed() && initialized {
                             window.as_ref().unwrap().request_redraw();
                         }
                         if visualizer.can_idle() {
@@ -186,12 +186,15 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                         }
                     }
                     Event::Suspended => {
+                        info!("suspending");
                         #[cfg(target_os = "android")]
                         {
                             visualizer.suspend();
+                            // let _ = window.take();
                         }
                     }
                     Event::Resumed => {
+                        info!("resuming");
                         #[cfg(target_os = "android")]
                         {
                             if !initialized {
@@ -203,6 +206,9 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                                 visualizer.initialize(window.as_ref().unwrap());
                                 initialized = true;
                             } else {
+                                // if window.is_none() {
+                                //     initialize_native_window(&event_loop_window_target, &mut window, self.desktop_dimensions);
+                                // }
                                 visualizer.resume(window.as_ref().unwrap());
                             }
                         }
@@ -278,7 +284,7 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                     visualizer.render();
                 }
                 Event::RedrawEventsCleared => {
-                    if visualizer.job.active() {
+                    if visualizer.job.resumed() {
                         window.as_ref().request_redraw();
                     }
                     if visualizer.can_idle() {
