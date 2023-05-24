@@ -3,14 +3,14 @@ use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemConfig, Quer
 use crate::touch::read_touch_events;
 use crate::visualizer::{Attach, Visualizer};
 use crate::SyncPoint;
-
+use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 #[derive(Component)]
 pub struct Focus {
     pub(crate) focused: bool,
 }
 
 impl Focus {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self { focused: false }
     }
     pub fn focus(&mut self) {
@@ -23,12 +23,21 @@ impl Focus {
         self.focused
     }
 }
+#[derive(Component, Copy, Clone)]
+pub struct FocusInputListener {}
 pub(crate) fn set_focused(
     mut focus_listeners: Query<(Entity, &mut Focus)>,
+    focus_input_listeners: Query<(Entity, &FocusInputListener)>,
     focused_entity_res: Res<FocusedEntity>,
+    virtual_keyboard: Res<VirtualKeyboardAdapter>,
 ) {
     if focused_entity_res.is_changed() {
         if let Some(f_entity) = focused_entity_res.entity {
+            if let Ok(_) = focus_input_listeners.get(f_entity) {
+                virtual_keyboard.open(VirtualKeyboardType::Keyboard);
+            } else {
+                virtual_keyboard.close();
+            }
             for (entity, mut listener) in focus_listeners.iter_mut() {
                 if f_entity == entity {
                     listener.focus();
@@ -37,6 +46,7 @@ pub(crate) fn set_focused(
                 }
             }
         } else {
+            virtual_keyboard.close();
             for (_entity, mut listener) in focus_listeners.iter_mut() {
                 if listener.focused() {
                     listener.blur();

@@ -11,8 +11,8 @@ use crate::{
 
 #[derive(Bundle)]
 pub struct TextRequest {
-    pub view_position: Position<InterfaceContext>,
-    pub view_area: Area<InterfaceContext>,
+    pub pos: Position<InterfaceContext>,
+    pub area: Area<InterfaceContext>,
     pub layer: Layer,
     pub text: Text,
     pub scale_alignment: TextScaleAlignment,
@@ -41,8 +41,8 @@ impl TextRequest {
         wrap_style: TextWrapStyle,
     ) -> Self {
         Self {
-            view_position,
-            view_area,
+            pos: view_position,
+            area: view_area,
             layer,
             text: Text(text.into()),
             scale_alignment,

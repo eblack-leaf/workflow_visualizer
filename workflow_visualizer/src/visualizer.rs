@@ -1,7 +1,10 @@
 use crate::focus::FocusAttachment;
+use crate::gfx::GfxSurfaceConfiguration;
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::orientation::OrientationAttachment;
-use crate::render::{internal_render, invoke_render, Render, RenderTasks, RenderPhase, RenderTaskManager};
+use crate::render::{
+    internal_render, invoke_render, Render, RenderPhase, RenderTaskManager, RenderTasks,
+};
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;
@@ -18,13 +21,12 @@ use crate::{
 };
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{IntoSystemConfig, Resource};
+use bevy_ecs::prelude::{Bundle, IntoSystemConfig, Resource};
 use std::fmt::{Debug, Formatter};
-use tracing::{info, instrument, trace, warn};
+use tracing::{info, trace, warn};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
-use crate::gfx::GfxSurfaceConfiguration;
 
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
@@ -129,7 +131,7 @@ impl Visualizer {
     pub fn set_theme(&mut self, theme: Theme) {
         self.job.container.insert_resource(theme);
     }
-    pub fn add_named_entities<T: Component>(&mut self, mut names: Vec<EntityName>, datum: Vec<T>) {
+    pub fn add_named_entities<T: Bundle>(&mut self, mut names: Vec<EntityName>, datum: Vec<T>) {
         let ids = self
             .job
             .container
@@ -140,7 +142,7 @@ impl Visualizer {
             self.job.store_entity(names.next().unwrap(), id);
         }
     }
-    pub fn add_entities<T: Component>(&mut self, datum: Vec<T>) -> Vec<Entity> {
+    pub fn add_entities<T: Bundle>(&mut self, datum: Vec<T>) -> Vec<Entity> {
         let ids = self
             .job
             .container
@@ -353,9 +355,18 @@ impl Visualizer {
         }
     }
     fn recreate_surface(&mut self, window: &Window) {
-        let config = self.job.container.remove_resource::<GfxSurfaceConfiguration>().expect("gfx config");
-        let mut gfx = self.job.container.get_resource_mut::<GfxSurface>().expect("gfx");
+        let config = self
+            .job
+            .container
+            .remove_resource::<GfxSurfaceConfiguration>()
+            .expect("gfx config");
+        let mut gfx = self
+            .job
+            .container
+            .get_resource_mut::<GfxSurface>()
+            .expect("gfx");
         gfx.surface = unsafe { gfx.instance.create_surface(window).expect("gfx surface") };
+        // send resize event instead to get window sizing?
         gfx.surface.configure(&gfx.device, &config.configuration);
         self.job.container.insert_resource(config);
     }
@@ -371,10 +382,14 @@ impl Visualizer {
     }
     pub fn register_renderer<Renderer: Render + Resource>(&mut self) {
         match Renderer::phase() {
-            RenderPhase::Opaque => self.render_task_manager.opaque.push(Box::new(invoke_render::<Renderer>)),
-            RenderPhase::Alpha(_order) => {
-                self.render_task_manager.transparent.push(Box::new(invoke_render::<Renderer>))
-            }
+            RenderPhase::Opaque => self
+                .render_task_manager
+                .opaque
+                .push(Box::new(invoke_render::<Renderer>)),
+            RenderPhase::Alpha(_order) => self
+                .render_task_manager
+                .transparent
+                .push(Box::new(invoke_render::<Renderer>)),
         }
     }
     pub fn add_attachment<Attached: Attach>(&mut self) {

@@ -164,14 +164,14 @@ pub(crate) fn read_touch_events(
     mut touch_grab_state: ResMut<TouchGrabState>,
     mut focused_entity: ResMut<FocusedEntity>,
 ) {
-    let new_touch = event_reader.iter().cloned().collect::<Vec<TouchEvent>>();
-    let mut cancelled_events = new_touch.clone();
+    let new_touches = event_reader.iter().cloned().collect::<Vec<TouchEvent>>();
+    let mut cancelled_events = new_touches.clone();
     cancelled_events.retain(|c| c.ty == TouchType::Cancelled);
     let is_cancelled = !cancelled_events.is_empty();
     let mut trigger_on_press = false;
     let mut trigger_on_release = false;
     if !is_cancelled {
-        for touch in new_touch.iter() {
+        for touch in new_touches.iter() {
             match touch.ty {
                 TouchType::OnPress => {
                     primary_touch.touch.replace(TrackedTouch::new(touch.touch));
@@ -192,7 +192,7 @@ pub(crate) fn read_touch_events(
             }
         }
     }
-    if !new_touch.is_empty() && !is_cancelled {
+    if !new_touches.is_empty() && !is_cancelled {
         for (entity, pos, area, layer, listener, _, _, _, _) in touch_listeners.iter() {
             let section = Section::from((*pos, *area));
             match listener.listened_type {

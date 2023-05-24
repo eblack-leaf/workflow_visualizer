@@ -3,7 +3,7 @@ mod workflow;
 use crate::workflow::Engen;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
-use workflow_visualizer::Visualizer;
+use workflow_visualizer::{Focus, FocusInputListener, Touchable, TouchListener, Visualizer};
 use workflow_visualizer::{
     Area, Color, GfxOptions, Layer, Position, Request, Runner, Text, TextRequest,
     TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor,
@@ -14,22 +14,24 @@ fn visualizer() -> Visualizer {
     visualizer.add_entities(vec![
         Request::new(TextRequest::new(
             Position::new(10.0, 10.0),
-            Area::new(100.0, 100.0),
+            Area::new(100.0, 30.0),
             Layer::new(1.0),
             "hello",
             TextScaleAlignment::Large,
             Color::GREEN,
             TextWrapStyle::word(),
         )),
-        Request::new(TextRequest::new(
+    ]);
+    visualizer.add_entities(vec![
+        (Request::new(TextRequest::new(
             Position::new(10.0, 100.0),
-            Area::new(100.0, 100.0),
+            Area::new(100.0, 30.0),
             Layer::new(1.0),
             "world.",
             TextScaleAlignment::Large,
             Color::GREEN,
             TextWrapStyle::word(),
-        )),
+        )), Touchable::new(TouchListener::on_press()), Focus::new(), FocusInputListener{})
     ]);
     visualizer
 }

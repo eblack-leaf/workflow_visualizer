@@ -28,6 +28,7 @@ pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
+pub use crate::focus::{FocusInputListener, Focus};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::job::{EntityName, Job};
@@ -43,6 +44,7 @@ pub use crate::text::{
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};
+pub use crate::touch::{Touchable, TouchListener};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::{WindowAttachment, WindowResize};
