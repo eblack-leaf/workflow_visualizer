@@ -54,7 +54,7 @@ fn main() {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
     }
-    let visualizer = visualizer();
+    let mut visualizer = visualizer();
     #[cfg(not(target_family = "wasm"))]
     Runner::<Engen>::new()
         .with_desktop_dimensions((400, 600))
