@@ -8,7 +8,7 @@ filehash = true
 [serve]
 address = "127.0.0.1"
 port = 8080
-open = true
+open = false
 no_autoreload = true
 
 [clean]

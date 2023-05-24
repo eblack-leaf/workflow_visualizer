@@ -12,6 +12,7 @@
             background: white;
         }
     </style>
-    <link data-trunk rel="rust" href="Cargo.toml" data-bin="application"/>
+    <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-bin="application" data-type="main" />
+    <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-bin="worker" data-type="worker" />
 </head>
 </html>

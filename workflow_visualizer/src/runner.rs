@@ -308,6 +308,12 @@ impl<T: Workflow + Send + 'static> Runner<T> {
         window.set_inner_size(Self::window_dimensions(window.scale_factor()));
         visualizer.init_gfx(window.as_ref()).await;
         Self::web_resizing(&window);
+        wasm_bindgen_futures::future_to_promise(async {
+            loop {
+
+            }
+            web_sys::console::info_1(&wasm_bindgen::JsValue::from_str("done with loop"));
+        });
         self.ignite(event_loop, window, visualizer);
     }
     #[cfg(target_arch = "wasm32")]

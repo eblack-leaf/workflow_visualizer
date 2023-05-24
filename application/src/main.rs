@@ -13,7 +13,7 @@ fn visualizer() -> Visualizer {
     let mut visualizer = Visualizer::new(Theme::new(theme_desc), GfxOptions::native_defaults());
     visualizer.add_entities(vec![
         Request::new(TextRequest::new(
-            Position::new(10.0, 10.0),
+            Position::new(10.0, 100.0),
             Area::new(100.0, 30.0),
             Layer::new(1.0),
             "hello",
@@ -24,7 +24,7 @@ fn visualizer() -> Visualizer {
     ]);
     visualizer.add_entities(vec![
         (Request::new(TextRequest::new(
-            Position::new(10.0, 100.0),
+            Position::new(10.0, 130.0),
             Area::new(100.0, 30.0),
             Layer::new(1.0),
             "world.",

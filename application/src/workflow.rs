@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use gloo_worker::{HandlerId, Worker, WorkerScope};
 use tracing::info;
 use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
 use workflow_visualizer::Visualizer;
@@ -83,5 +84,24 @@ impl Workflow for Engen {
 
     fn exit_response() -> Self::Response {
         Response::ExitConfirmed
+    }
+}
+
+impl Worker for Engen {
+    type Message = ();
+    type Input = ();
+    type Output = ();
+
+    fn create(scope: &WorkerScope<Self>) -> Self {
+        todo!()
+    }
+
+    fn update(&mut self, scope: &WorkerScope<Self>, msg: Self::Message) {
+        // receive self messages after completing sends
+        // use scope.respond(...) here
+    }
+
+    fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, id: HandlerId) {
+        // send future to self using gloo_net::Request to db http endpoints
     }
 }
