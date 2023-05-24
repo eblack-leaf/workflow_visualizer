@@ -9,7 +9,7 @@ use workflow_visualizer::{
     TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor,
 };
 fn visualizer() -> Visualizer {
-    let theme_desc = ThemeDescriptor::new().with_background(Color::OFF_BLACK);
+    let theme_desc = ThemeDescriptor::new().with_background(Color::DARK_CYAN);
     let mut visualizer = Visualizer::new(Theme::new(theme_desc), GfxOptions::native_defaults());
     visualizer.add_entities(vec![
         Request::new(TextRequest::new(

@@ -48,6 +48,7 @@ impl GfxOptions {
 
 #[derive(Resource)]
 pub struct GfxSurface {
+    pub instance: wgpu::Instance,
     pub surface: wgpu::Surface,
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
@@ -86,9 +87,7 @@ impl GfxSurface {
             })
             .await
             .expect("adapter request failed");
-        trace!("requesting device/queue");
-        let downlevel = adapter.get_downlevel_capabilities();
-        trace!("downlevel: {:?}", downlevel);
+        info!("requesting device/queue");
         let features = options.features | wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES;
         let mut limits = options.limits.clone().using_resolution(adapter.limits());
         let (device, queue) = adapter
@@ -125,6 +124,7 @@ impl GfxSurface {
         };
         surface.configure(&device, &surface_configuration);
         let gfx_surface = Self {
+            instance,
             surface,
             device,
             queue,

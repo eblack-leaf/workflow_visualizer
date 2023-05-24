@@ -190,7 +190,6 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                         #[cfg(target_os = "android")]
                         {
                             visualizer.suspend();
-                            // let _ = window.take();
                         }
                     }
                     Event::Resumed => {
@@ -206,9 +205,6 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                                 visualizer.initialize(window.as_ref().unwrap());
                                 initialized = true;
                             } else {
-                                // if window.is_none() {
-                                //     initialize_native_window(&event_loop_window_target, &mut window, self.desktop_dimensions);
-                                // }
                                 visualizer.resume(window.as_ref().unwrap());
                             }
                         }

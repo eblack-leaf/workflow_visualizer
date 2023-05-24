@@ -24,6 +24,7 @@ use tracing::{info, instrument, trace, warn};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
+use crate::gfx::GfxSurfaceConfiguration;
 
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
@@ -80,7 +81,6 @@ impl Visualizer {
     pub fn set_gfx_options(&mut self, gfx_options: GfxOptions) {
         self.gfx_options = gfx_options;
     }
-    #[instrument]
     pub async fn init_gfx(&mut self, window: &Window) {
         info!("initializing gfx.");
         let (surface, config, msaa) = GfxSurface::new(window, self.gfx_options.clone()).await;
@@ -343,18 +343,21 @@ impl Visualizer {
     }
     pub fn suspend(&mut self) {
         if !self.job.suspended() {
-            let _ = self.job.container.remove_resource::<GfxSurface>();
-            let _ = self.job.container.remove_resource::<Viewport>();
             self.job.suspend();
         }
     }
     pub fn resume(&mut self, window: &Window) {
         if !self.job.resumed() {
-            #[cfg(not(target_family = "wasm"))]
-            pollster::block_on(self.init_gfx(window));
-            self.job.exec(Self::TASK_RENDER_STARTUP);
+            self.recreate_surface(window);
             self.job.resume();
         }
+    }
+    fn recreate_surface(&mut self, window: &Window) {
+        let config = self.job.container.remove_resource::<GfxSurfaceConfiguration>().expect("gfx config");
+        let mut gfx = self.job.container.get_resource_mut::<GfxSurface>().expect("gfx");
+        gfx.surface = unsafe { gfx.instance.create_surface(window).expect("gfx surface") };
+        gfx.surface.configure(&gfx.device, &config.configuration);
+        self.job.container.insert_resource(config);
     }
     pub fn render(&mut self) {
         if !self.job.suspended() {
