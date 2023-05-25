@@ -128,8 +128,9 @@ impl Runner {
         match event {
             Event::NewEvents(cause) => match cause {
                 StartCause::Init => {
-                    #[cfg(all(not(target_os = "android"), not(target_family = "wasm")))]
+                    #[cfg(not(target_os = "android"))]
                     {
+                        #[cfg(not(target_family = "wasm"))]
                         initialize_native_window(
                             &event_loop_window_target,
                             &mut window,
@@ -144,6 +145,7 @@ impl Runner {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => {
                     // queue T::exit_action() + add system of events to update + NonSend<Sender<T>>.send(queued_action)
+                    control_flow.set_exit();
                 }
                 WindowEvent::Resized(size) => {
                     info!("resizing: {:?}", size);
@@ -244,14 +246,14 @@ impl Runner {
         worker_path: String,
     ) {
         let event_loop = EventLoopBuilder::<T::Response>::with_user_event().build();
-        let window = Some(Rc::new(
+        let mut window = Some(Rc::new(
             WindowBuilder::new()
                 .with_title("workflow_visualizer")
                 .build(&event_loop)
                 .expect("window"),
         ));
         Self::add_web_canvas(window.as_ref().unwrap());
-        window.set_inner_size(Self::window_dimensions(window.as_ref().unwrap().scale_factor()));
+        window.as_ref().unwrap().set_inner_size(Self::window_dimensions(window.as_ref().unwrap().scale_factor()));
         visualizer.init_gfx(window.as_ref().unwrap()).await;
         Self::web_resizing(window.as_ref().unwrap());
         let proxy = event_loop.create_proxy();
@@ -265,9 +267,10 @@ impl Runner {
             .job
             .container
             .insert_non_send_resource(Sender::new(WebSender(bridge)));
+        let mut initialized = true;
         use winit::platform::web::EventLoopExtWebSys;
         event_loop.spawn(move |event, event_loop_window_target, control_flow| {
-            Self::internal_loop::<T>(&mut visualizer, &mut window, &mut initialized, event, event_loop_window_target, control_flow, );
+            Self::internal_loop::<T>(&mut visualizer, &mut window, &mut initialized, event, event_loop_window_target, control_flow, None);
         });
     }
     #[cfg(target_arch = "wasm32")]
