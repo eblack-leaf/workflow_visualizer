@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::info;
 use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
-use workflow_visualizer::{Receiver, Responder, Workflow};
-use workflow_visualizer::{Visualizer, WebSender, WorkflowWebExt};
+use workflow_visualizer::{OutputWrapper, Receiver, Responder, Workflow};
+use workflow_visualizer::{Visualizer, WorkflowWebExt};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -37,7 +37,7 @@ impl Engen {
         }
     }
     #[cfg(not(target_family = "wasm"))]
-    pub(crate) async fn native_runner(
+    pub async fn native_runner(
         responder: Responder<Response>,
         mut receiver: Receiver<Action>,
     ) {
@@ -87,20 +87,9 @@ impl Workflow for Engen {
         Response::ExitConfirmed
     }
 }
-pub struct OutputWrapper {
-    pub handler_id: HandlerId,
-    pub response: <Engen as Worker>::Output,
-}
-impl OutputWrapper {
-    pub(crate) fn new(handler_id: HandlerId, response: <Engen as Worker>::Output) -> Self {
-        Self {
-            handler_id,
-            response,
-        }
-    }
-}
+
 impl Worker for Engen {
-    type Message = OutputWrapper;
+    type Message = OutputWrapper<Engen>;
     type Input = Action;
     type Output = Response;
 
@@ -113,8 +102,6 @@ impl Worker for Engen {
     }
 
     fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, id: HandlerId) {
-        // send future to self using gloo_net::Request to db http endpoints
-        // inside scope.send_future(...);
         match msg {
             Action::ExitRequest => {
                 scope.send_future(
@@ -133,26 +120,23 @@ impl Worker for Engen {
     }
 }
 impl WorkflowWebExt for Engen {
-    fn send(bridge: &WebSender<Self>, action: <Self as Workflow>::Action) {
-        let input = match action {
-            Action::ExitRequest => <Self as Worker>::Input::ExitRequest,
-            Action::AddToken(data) => <Self as Worker>::Input::AddToken(data),
-            Action::GenerateOtp(data) => <Self as Worker>::Input::GenerateOtp(data),
-            Action::RemoveToken(data) => <Self as Worker>::Input::RemoveToken(data),
-        };
-        #[cfg(target_family = "wasm")]
-        bridge.send(input);
+    fn action_to_input(action: <Self as Workflow>::Action) -> <Self as Worker>::Input {
+        return action
+        // match action {
+        //     Action::ExitRequest => <Self as Worker>::Input::ExitRequest,
+        //     Action::AddToken(data) => <Self as Worker>::Input::AddToken(data),
+        //     Action::GenerateOtp(data) => <Self as Worker>::Input::GenerateOtp(data),
+        //     Action::RemoveToken(data) => <Self as Worker>::Input::RemoveToken(data),
+        // }
     }
-
-    fn is_exit_response(response: <Self as Worker>::Output) -> bool {
-        match response {
-            Response::ExitConfirmed => true,
-            _ => false,
-        }
+    fn output_to_response(output: <Self as Worker>::Output) -> <Self as Workflow>::Response {
+        return output
     }
 }
-#[cfg(target_family = "wasm")]
+
 fn main() {
-    console_error_panic_hook::set_once();
-    Engen::registrar().register();
+    #[cfg(target_family = "wasm")] {
+        console_error_panic_hook::set_once();
+        Engen::registrar().register();
+    }
 }

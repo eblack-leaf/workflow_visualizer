@@ -1,7 +1,7 @@
 use crate::visualizer::Visualizer;
 use crate::{Area, DeviceContext};
 use bevy_ecs::prelude::Resource;
-use gloo_worker::{Spawnable, Worker, WorkerBridge};
+use gloo_worker::{HandlerId, Spawnable, Worker, WorkerBridge};
 use std::fmt::Debug;
 use std::future::Future;
 use std::marker::PhantomData;
@@ -10,7 +10,7 @@ use tracing::trace;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::{EventLoop, EventLoopBuilder, EventLoopProxy, EventLoopWindowTarget};
+use winit::event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopProxy, EventLoopWindowTarget};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Fullscreen, Window, WindowBuilder};
@@ -26,8 +26,8 @@ pub trait WorkflowWebExt
 where
     Self: gloo_worker::Worker + Workflow + Send + 'static,
 {
-    fn send(bridge: &WebSender<Self>, action: <Self as Workflow>::Action);
-    fn is_exit_response(response: <Self as Worker>::Output) -> bool;
+    fn action_to_input(action: <Self as Workflow>::Action) -> <Self as Worker>::Input;
+    fn output_to_response(output: <Self as Worker>::Output) -> <Self as Workflow>::Response;
 }
 pub struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
@@ -54,7 +54,6 @@ impl<T: Send + 'static + Debug> Responder<T> {
 #[derive(Resource)]
 pub struct AndroidInterface(pub AndroidApp);
 pub struct Runner {
-    // _t: PhantomData<T>,
     desktop_dimensions: Option<Area<DeviceContext>>,
     #[cfg(not(target_os = "android"))]
     android_app: Option<()>,
@@ -65,7 +64,6 @@ pub struct Runner {
 impl Runner {
     pub fn new() -> Self {
         Self {
-            // _t: PhantomData,
             desktop_dimensions: None,
             android_app: None,
         }
@@ -115,121 +113,120 @@ impl Runner {
             visualizer
                 .job
                 .container
-                .insert_non_send_resource(NativeSender::<T>::new(sender));
-            visualizer.job.container.insert_non_send_resource(WebSender::<T>::new());
-            let mut window: Option<Window> = None;
+                .insert_non_send_resource(Sender::new(NativeSender::<T>::new(sender)));
+            let mut window: Option<Rc<Window>> = None;
             let mut initialized = false;
+            let desktop_dimensions = self.desktop_dimensions;
             event_loop.run(move |event, event_loop_window_target, control_flow| {
-                control_flow.set_wait();
-                match event {
-                    Event::NewEvents(cause) => match cause {
-                        StartCause::Init => {
-                            #[cfg(not(target_os = "android"))]
-                            {
-                                initialize_native_window(
-                                    &event_loop_window_target,
-                                    &mut window,
-                                    self.desktop_dimensions,
-                                );
-                                visualizer.initialize(window.as_ref().unwrap());
-                                initialized = true;
-                            }
-                        }
-                        _ => {}
-                    },
-                    Event::WindowEvent { event, .. } => match event {
-                        WindowEvent::CloseRequested => {
-                            if let Some(sender) = visualizer
-                                .job
-                                .container
-                                .get_non_send_resource::<NativeSender<T>>() {
-                                sender.send(T::exit_action())
-                            }
-                        }
-                        WindowEvent::Resized(size) => {
-                            info!("resizing: {:?}", size);
-                            let scale_factor = window.as_ref().unwrap().scale_factor();
-                            visualizer.trigger_resize(size, scale_factor);
-                        }
-                        WindowEvent::ScaleFactorChanged {
-                            new_inner_size,
-                            scale_factor,
-                        } => {
-                            info!("resizing: {:?}", *new_inner_size);
-                            visualizer.trigger_resize(*new_inner_size, scale_factor);
-                        }
-                        WindowEvent::Touch(touch) => {
-                            visualizer.register_touch(touch);
-                            info!("touch {:?}", touch);
-                        }
-                        WindowEvent::MouseInput { state, button, .. } => {
-                            visualizer.register_mouse_click(state, button);
-                        }
-                        WindowEvent::MouseWheel { .. } => {}
-                        WindowEvent::CursorMoved { position, .. } => {
-                            visualizer.set_mouse_location(position);
-                        }
-                        WindowEvent::CursorEntered { device_id: _ } => {}
-                        WindowEvent::CursorLeft { device_id: _ } => {
-                            visualizer.cancel_touches();
-                        }
-                        WindowEvent::ReceivedCharacter(ch) => {
-                            trace!("char: {:?}", ch);
-                        }
-                        _ => {}
-                    },
-                    Event::UserEvent(event) => {
-                        info!("visualizer loop received: {:?}", event);
-                        if event == T::exit_response() {
-                            control_flow.set_exit();
-                        }
-                        T::handle_response(&mut visualizer, event);
-                    }
-                    Event::MainEventsCleared => {
-                        visualizer.exec();
-                    }
-                    Event::RedrawRequested(_) => {
-                        visualizer.render();
-                    }
-                    Event::RedrawEventsCleared => {
-                        if visualizer.job.resumed() && initialized {
-                            window.as_ref().unwrap().request_redraw();
-                        }
-                        if visualizer.can_idle() {
-                            control_flow.set_wait();
-                        }
-                    }
-                    Event::Suspended => {
-                        info!("suspending");
-                        #[cfg(target_os = "android")]
-                        {
-                            visualizer.suspend();
-                        }
-                    }
-                    Event::Resumed => {
-                        info!("resuming");
-                        #[cfg(target_os = "android")]
-                        {
-                            if !initialized {
-                                initialize_native_window(
-                                    &event_loop_window_target,
-                                    &mut window,
-                                    self.desktop_dimensions,
-                                );
-                                visualizer.initialize(window.as_ref().unwrap());
-                                initialized = true;
-                            } else {
-                                visualizer.resume(window.as_ref().unwrap());
-                            }
-                        }
-                    }
-                    Event::LoopDestroyed => {
-                        visualizer.teardown();
-                    }
-                    _ => {}
-                }
+                Self::internal_loop::<T>(&mut visualizer, &mut window, &mut initialized, event, event_loop_window_target, control_flow, desktop_dimensions);
             });
         });
+    }
+
+    fn internal_loop<T: Workflow + Send + 'static>(mut visualizer: &mut Visualizer, mut window: &mut Option<Rc<Window>>, initialized: &mut bool, event: Event<<T as Workflow>::Response>, event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>, control_flow: &mut ControlFlow, desktop_dimensions: Option<Area<DeviceContext>>) {
+        control_flow.set_wait();
+        match event {
+            Event::NewEvents(cause) => match cause {
+                StartCause::Init => {
+                    #[cfg(all(not(target_os = "android"), not(target_family = "wasm")))]
+                    {
+                        initialize_native_window(
+                            &event_loop_window_target,
+                            &mut window,
+                            desktop_dimensions,
+                        );
+                        visualizer.initialize(window.as_ref().unwrap());
+                        *initialized = true;
+                    }
+                }
+                _ => {}
+            },
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => {
+                    // queue T::exit_action() + add system of events to update + NonSend<Sender<T>>.send(queued_action)
+                }
+                WindowEvent::Resized(size) => {
+                    info!("resizing: {:?}", size);
+                    let scale_factor = window.as_ref().unwrap().scale_factor();
+                    visualizer.trigger_resize(size, scale_factor);
+                }
+                WindowEvent::ScaleFactorChanged {
+                    new_inner_size,
+                    scale_factor,
+                } => {
+                    info!("resizing: {:?}", *new_inner_size);
+                    visualizer.trigger_resize(*new_inner_size, scale_factor);
+                }
+                WindowEvent::Touch(touch) => {
+                    visualizer.register_touch(touch);
+                    info!("touch {:?}", touch);
+                }
+                WindowEvent::MouseInput { state, button, .. } => {
+                    visualizer.register_mouse_click(state, button);
+                }
+                WindowEvent::MouseWheel { .. } => {}
+                WindowEvent::CursorMoved { position, .. } => {
+                    visualizer.set_mouse_location(position);
+                }
+                WindowEvent::CursorEntered { device_id: _ } => {}
+                WindowEvent::CursorLeft { device_id: _ } => {
+                    visualizer.cancel_touches();
+                }
+                WindowEvent::ReceivedCharacter(ch) => {
+                    trace!("char: {:?}", ch);
+                }
+                _ => {}
+            },
+            Event::UserEvent(event) => {
+                info!("visualizer loop received: {:?}", event);
+                if event == T::exit_response() {
+                    control_flow.set_exit();
+                }
+                T::handle_response(&mut visualizer, event);
+            }
+            Event::MainEventsCleared => {
+                visualizer.exec();
+            }
+            Event::RedrawRequested(_) => {
+                visualizer.render();
+            }
+            Event::RedrawEventsCleared => {
+                if visualizer.job.resumed() && *initialized {
+                    window.as_ref().unwrap().request_redraw();
+                }
+                if visualizer.can_idle() {
+                    control_flow.set_wait();
+                }
+            }
+            Event::Suspended => {
+                info!("suspending");
+                #[cfg(target_os = "android")]
+                {
+                    visualizer.suspend();
+                }
+            }
+            Event::Resumed => {
+                info!("resuming");
+                #[cfg(target_os = "android")]
+                {
+                    if !initialized {
+                        initialize_native_window(
+                            &event_loop_window_target,
+                            &mut window,
+                            desktop_dimensions,
+                        );
+                        visualizer.initialize(window.as_ref().unwrap());
+                        *initialized = true;
+                    } else {
+                        visualizer.resume(window.as_ref().unwrap());
+                    }
+                }
+            }
+            Event::LoopDestroyed => {
+                visualizer.teardown();
+            }
+            _ => {}
+        }
     }
     #[cfg(target_family = "wasm")]
     pub fn web_run<T: WorkflowWebExt + gloo_worker::Worker + Send + 'static>(
@@ -246,111 +243,31 @@ impl Runner {
         mut visualizer: Visualizer,
         worker_path: String,
     ) {
-        let event_loop = EventLoopBuilder::<T::Output>::with_user_event().build();
-        let window = Rc::new(
+        let event_loop = EventLoopBuilder::<T::Response>::with_user_event().build();
+        let window = Some(Rc::new(
             WindowBuilder::new()
                 .with_title("workflow_visualizer")
                 .build(&event_loop)
                 .expect("window"),
-        );
-        Self::add_web_canvas(window.as_ref());
-        window.set_inner_size(Self::window_dimensions(window.scale_factor()));
-        visualizer.init_gfx(window.as_ref()).await;
-        Self::web_resizing(&window);
+        ));
+        Self::add_web_canvas(window.as_ref().unwrap());
+        window.set_inner_size(Self::window_dimensions(window.as_ref().unwrap().scale_factor()));
+        visualizer.init_gfx(window.as_ref().unwrap()).await;
+        Self::web_resizing(window.as_ref().unwrap());
         let proxy = event_loop.create_proxy();
         let bridge = T::spawner()
             .callback(move |response| {
-                proxy.send_event(response);
+                proxy.send_event(T::output_to_response(response));
             })
             .spawn(worker_path.as_str());
         let bridge = Box::leak(Box::new(bridge));
         visualizer
             .job
             .container
-            .insert_non_send_resource(WebSender(bridge));
-        visualizer.job.container.insert_non_send_resource(NativeSender::<T>::new());
+            .insert_non_send_resource(Sender::new(WebSender(bridge)));
         use winit::platform::web::EventLoopExtWebSys;
         event_loop.spawn(move |event, event_loop_window_target, control_flow| {
-            control_flow.set_wait();
-            match event {
-                Event::NewEvents(cause) => match cause {
-                    StartCause::Init => {
-                        visualizer.initialize(window.as_ref());
-                    }
-                    _ => {}
-                },
-                Event::WindowEvent { event, .. } => match event {
-                    WindowEvent::CloseRequested => {
-                        info!("closing application");
-                        T::send(
-                            &visualizer
-                                .job
-                                .container
-                                .get_non_send_resource::<WebSender<T>>()
-                                .expect("web bridge"),
-                            T::exit_action(),
-                        );
-                    }
-                    WindowEvent::Resized(size) => {
-                        info!("resizing: {:?}", size);
-                        let scale_factor = window.as_ref().scale_factor();
-                        visualizer.trigger_resize(size, scale_factor);
-                    }
-                    WindowEvent::ScaleFactorChanged {
-                        new_inner_size,
-                        scale_factor,
-                    } => {
-                        info!("resizing: {:?}", *new_inner_size);
-                        visualizer.trigger_resize(*new_inner_size, scale_factor);
-                    }
-                    WindowEvent::Touch(touch) => {
-                        visualizer.register_touch(touch);
-                        info!("touch {:?}", touch);
-                    }
-                    WindowEvent::MouseInput { state, button, .. } => {
-                        visualizer.register_mouse_click(state, button);
-                    }
-                    WindowEvent::MouseWheel { .. } => {}
-                    WindowEvent::CursorMoved { position, .. } => {
-                        visualizer.set_mouse_location(position);
-                        web_sys::console::info_1(&wasm_bindgen::JsValue::from_str("cursor moved"));
-                    }
-                    WindowEvent::CursorEntered { device_id: _ } => {}
-                    WindowEvent::CursorLeft { device_id: _ } => {
-                        visualizer.cancel_touches();
-                    }
-                    WindowEvent::ReceivedCharacter(ch) => {
-                        warn!("char: {:?}", ch);
-                    }
-                    _ => {}
-                },
-                Event::UserEvent(event) => {
-                    web_sys::console::info_1(&wasm_bindgen::JsValue::from_str(
-                        "visualizer loop received event",
-                    ));
-                    if T::is_exit_response(event) {
-                        control_flow.set_exit();
-                    }
-                }
-                Event::MainEventsCleared => {
-                    visualizer.exec();
-                }
-                Event::RedrawRequested(_) => {
-                    visualizer.render();
-                }
-                Event::RedrawEventsCleared => {
-                    if visualizer.job.resumed() {
-                        window.as_ref().request_redraw();
-                    }
-                    if visualizer.can_idle() {
-                        control_flow.set_wait();
-                    }
-                }
-                Event::LoopDestroyed => {
-                    visualizer.teardown();
-                }
-                _ => {}
-            }
+            Self::internal_loop::<T>(&mut visualizer, &mut window, &mut initialized, event, event_loop_window_target, control_flow, );
         });
     }
     #[cfg(target_arch = "wasm32")]
@@ -406,11 +323,11 @@ impl Runner {
 }
 pub(crate) fn initialize_native_window<T>(
     w_target: &EventLoopWindowTarget<T>,
-    window: &mut Option<Window>,
+    window: &mut Option<Rc<Window>>,
     desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
     let mut builder = WindowBuilder::new().with_resizable(false);
-    #[cfg(not(target_os = "android"))]
+    #[cfg(all(not(target_os = "android"), not(target_family = "wasm")))]
     {
         let desktop_dimensions = match desktop_dimensions {
             None => Area::new(600.0, 800.0),
@@ -421,45 +338,69 @@ pub(crate) fn initialize_native_window<T>(
             desktop_dimensions.height,
         ));
     }
-    window.replace(builder.build(w_target).expect("window"));
+    window.replace(Rc::new(builder.build(w_target).expect("window")));
+}
+#[cfg(not(target_family = "wasm"))]
+#[derive(Resource)]
+pub struct Sender<T: Workflow> {
+    sender: NativeSender<T>,
 }
 #[cfg(target_family = "wasm")]
 #[derive(Resource)]
-pub struct WebSender<T: Worker + Send + 'static>(pub &'static mut WorkerBridge<T>);
+pub struct Sender<T: WorkflowWebExt> {
+    sender: WebSender<T>,
+}
 #[cfg(not(target_family = "wasm"))]
-#[derive(Resource)]
-pub struct WebSender<T>(PhantomData<T>);
-impl<T> WebSender<T> {
-    #[cfg(not(target_family = "wasm"))]
-    pub(crate) fn new() -> Self {
-        Self(PhantomData)
+impl<T: Workflow> Sender<T> {
+    fn new(sender: NativeSender<T>) -> Self {
+        Self {
+            sender
+        }
+    }
+    pub fn send(&self, action: <T as Workflow>::Action) {
+        self.sender.send(action);
     }
 }
+#[cfg(target_family = "wasm")]
+impl<T: WorkflowWebExt> Sender<T> {
+    fn new(sender: WebSender<T>) -> Self {
+        Self {
+            sender
+        }
+    }
+    pub fn send(&self, action: <T as Workflow>::Action) {
+        self.sender.send(T::action_to_input(action));
+    }
+}
+
+#[cfg(target_family = "wasm")]
+pub struct WebSender<T: Worker>(pub &'static mut WorkerBridge<T>);
+#[cfg(target_family = "wasm")]
 impl<T: Worker + Send + 'static> WebSender<T> {
-    #[cfg(target_family = "wasm")]
-    pub fn send(&self, input: <T as Worker>::Input) {
+    pub(crate) fn send(&self, input: <T as Worker>::Input) {
         self.0.send(input);
     }
 }
 #[cfg(not(target_family = "wasm"))]
-#[derive(Resource)]
 pub struct NativeSender<T: Workflow>(pub tokio::sync::mpsc::UnboundedSender<T::Action>);
-#[cfg(target_family = "wasm")]
-#[derive(Resource)]
-pub struct NativeSender<T>(PhantomData<T>);
+#[cfg(not(target_family = "wasm"))]
 impl<T: Workflow> NativeSender<T> {
-    #[cfg(not(target_family = "wasm"))]
     pub(crate) fn new(sender: tokio::sync::mpsc::UnboundedSender<T::Action>) -> Self {
         Self(sender)
     }
-    #[cfg(target_family = "wasm")]
-    pub(crate) fn new() -> Self {
-        Self(PhantomData)
-    }
-    #[cfg(not(target_family = "wasm"))]
     pub fn send(&self, action: <T as Workflow>::Action) {
         self.0.send(action).expect("native sender");
     }
-    #[cfg(target_family = "wasm")]
-    pub fn send(&self, action: <T as Workflow>::Action) {}
+}
+pub struct OutputWrapper<T: WorkflowWebExt> {
+    pub handler_id: HandlerId,
+    pub response: <T as Worker>::Output,
+}
+impl<T: WorkflowWebExt> OutputWrapper<T> {
+    pub fn new(handler_id: HandlerId, response: <T as Worker>::Output) -> Self {
+        Self {
+            handler_id,
+            response,
+        }
+    }
 }
