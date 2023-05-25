@@ -1,9 +1,9 @@
 use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemConfig, Query, Res, Resource};
 
 use crate::touch::read_touch_events;
+use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
 use crate::SyncPoint;
-use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 #[derive(Component)]
 pub struct Focus {
     pub(crate) focused: bool,

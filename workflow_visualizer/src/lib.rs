@@ -28,14 +28,16 @@ pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
-pub use crate::focus::{FocusInputListener, Focus};
+pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::job::{EntityName, Job};
 pub use crate::request::{spawn, Request};
 #[cfg(target_os = "android")]
 pub use crate::runner::AndroidInterface;
-pub use crate::runner::{Receiver, Responder, Runner, Workflow};
+pub use crate::runner::{
+    NativeSender, Receiver, Responder, Runner, WebSender, Workflow, WorkflowWebExt,
+};
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::text::{
@@ -44,7 +46,7 @@ pub use crate::text::{
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};
-pub use crate::touch::{Touchable, TouchListener};
+pub use crate::touch::{TouchListener, Touchable};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::{WindowAttachment, WindowResize};

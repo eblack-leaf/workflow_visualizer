@@ -1,6 +1,7 @@
 use crate::visualizer::Visualizer;
 use crate::{Area, DeviceContext};
 use bevy_ecs::prelude::Resource;
+use gloo_worker::{Spawnable, Worker, WorkerBridge};
 use std::fmt::Debug;
 use std::future::Future;
 use std::marker::PhantomData;
@@ -20,6 +21,13 @@ pub trait Workflow {
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response);
     fn exit_action() -> Self::Action;
     fn exit_response() -> Self::Response;
+}
+pub trait WorkflowWebExt
+where
+    Self: gloo_worker::Worker + Workflow + Send + 'static,
+{
+    fn send(bridge: &WebSender<Self>, action: <Self as Workflow>::Action);
+    fn is_exit_response(response: <Self as Worker>::Output) -> bool;
 }
 pub struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
@@ -45,8 +53,8 @@ impl<T: Send + 'static + Debug> Responder<T> {
 #[cfg(target_os = "android")]
 #[derive(Resource)]
 pub struct AndroidInterface(pub AndroidApp);
-pub struct Runner<T: Workflow + Send + 'static> {
-    _t: PhantomData<T>,
+pub struct Runner {
+    // _t: PhantomData<T>,
     desktop_dimensions: Option<Area<DeviceContext>>,
     #[cfg(not(target_os = "android"))]
     android_app: Option<()>,
@@ -54,10 +62,10 @@ pub struct Runner<T: Workflow + Send + 'static> {
     android_app: Option<AndroidApp>,
 }
 
-impl<T: Workflow + Send + 'static> Runner<T> {
+impl Runner {
     pub fn new() -> Self {
         Self {
-            _t: PhantomData,
+            // _t: PhantomData,
             desktop_dimensions: None,
             android_app: None,
         }
@@ -72,7 +80,7 @@ impl<T: Workflow + Send + 'static> Runner<T> {
         self
     }
     #[cfg(not(target_family = "wasm"))]
-    pub fn native_run<NativeEngenRunner, NativeEngenRunnerFut>(
+    pub fn native_run<T: Workflow + Send + 'static, NativeEngenRunner, NativeEngenRunnerFut>(
         mut self,
         mut visualizer: Visualizer,
         native_engen_runner: NativeEngenRunner,
@@ -104,6 +112,11 @@ impl<T: Workflow + Send + 'static> Runner<T> {
             tokio::task::spawn(async move {
                 native_engen_runner(Responder(proxy), Receiver { receiver }).await
             });
+            visualizer
+                .job
+                .container
+                .insert_non_send_resource(NativeSender::<T>::new(sender));
+            visualizer.job.container.insert_non_send_resource(WebSender::<T>::new());
             let mut window: Option<Window> = None;
             let mut initialized = false;
             event_loop.run(move |event, event_loop_window_target, control_flow| {
@@ -126,10 +139,11 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                     },
                     Event::WindowEvent { event, .. } => match event {
                         WindowEvent::CloseRequested => {
-                            if let Ok(_) = sender.send(T::exit_action()) {
-                                info!("sending is ok");
-                            } else {
-                                info!("could not send");
+                            if let Some(sender) = visualizer
+                                .job
+                                .container
+                                .get_non_send_resource::<NativeSender<T>>() {
+                                sender.send(T::exit_action())
                             }
                         }
                         WindowEvent::Resized(size) => {
@@ -218,12 +232,43 @@ impl<T: Workflow + Send + 'static> Runner<T> {
         });
     }
     #[cfg(target_family = "wasm")]
-    pub fn web_run(mut self, visualizer: Visualizer) {
+    pub fn web_run<T: WorkflowWebExt + gloo_worker::Worker + Send + 'static>(
+        mut self,
+        visualizer: Visualizer,
+        worker_path: String,
+    ) {
         #[cfg(target_family = "wasm")]
-        wasm_bindgen_futures::spawn_local(self.internal_web_run(visualizer));
+        wasm_bindgen_futures::spawn_local(self.internal_web_run::<T>(visualizer, worker_path));
     }
     #[cfg(target_family = "wasm")]
-    fn ignite(mut self, event_loop: EventLoop<()>, window: Rc<Window>, mut visualizer: Visualizer) {
+    async fn internal_web_run<T: WorkflowWebExt + gloo_worker::Worker + Send + 'static>(
+        mut self,
+        mut visualizer: Visualizer,
+        worker_path: String,
+    ) {
+        let event_loop = EventLoopBuilder::<T::Output>::with_user_event().build();
+        let window = Rc::new(
+            WindowBuilder::new()
+                .with_title("workflow_visualizer")
+                .build(&event_loop)
+                .expect("window"),
+        );
+        Self::add_web_canvas(window.as_ref());
+        window.set_inner_size(Self::window_dimensions(window.scale_factor()));
+        visualizer.init_gfx(window.as_ref()).await;
+        Self::web_resizing(&window);
+        let proxy = event_loop.create_proxy();
+        let bridge = T::spawner()
+            .callback(move |response| {
+                proxy.send_event(response);
+            })
+            .spawn(worker_path.as_str());
+        let bridge = Box::leak(Box::new(bridge));
+        visualizer
+            .job
+            .container
+            .insert_non_send_resource(WebSender(bridge));
+        visualizer.job.container.insert_non_send_resource(NativeSender::<T>::new());
         use winit::platform::web::EventLoopExtWebSys;
         event_loop.spawn(move |event, event_loop_window_target, control_flow| {
             control_flow.set_wait();
@@ -236,7 +281,15 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                 },
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::CloseRequested => {
-                        control_flow.set_exit();
+                        info!("closing application");
+                        T::send(
+                            &visualizer
+                                .job
+                                .container
+                                .get_non_send_resource::<WebSender<T>>()
+                                .expect("web bridge"),
+                            T::exit_action(),
+                        );
                     }
                     WindowEvent::Resized(size) => {
                         info!("resizing: {:?}", size);
@@ -260,6 +313,7 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                     WindowEvent::MouseWheel { .. } => {}
                     WindowEvent::CursorMoved { position, .. } => {
                         visualizer.set_mouse_location(position);
+                        web_sys::console::info_1(&wasm_bindgen::JsValue::from_str("cursor moved"));
                     }
                     WindowEvent::CursorEntered { device_id: _ } => {}
                     WindowEvent::CursorLeft { device_id: _ } => {
@@ -271,7 +325,12 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                     _ => {}
                 },
                 Event::UserEvent(event) => {
-                    warn!("visualizer loop received: {:?}", event);
+                    web_sys::console::info_1(&wasm_bindgen::JsValue::from_str(
+                        "visualizer loop received event",
+                    ));
+                    if T::is_exit_response(event) {
+                        control_flow.set_exit();
+                    }
                 }
                 Event::MainEventsCleared => {
                     visualizer.exec();
@@ -292,29 +351,7 @@ impl<T: Workflow + Send + 'static> Runner<T> {
                 }
                 _ => {}
             }
-            // run engen
         });
-    }
-    #[cfg(target_family = "wasm")]
-    async fn internal_web_run(mut self, mut visualizer: Visualizer) {
-        let event_loop = EventLoop::new();
-        let window = Rc::new(
-            WindowBuilder::new()
-                .with_title("workflow_visualizer")
-                .build(&event_loop)
-                .expect("window"),
-        );
-        Self::add_web_canvas(window.as_ref());
-        window.set_inner_size(Self::window_dimensions(window.scale_factor()));
-        visualizer.init_gfx(window.as_ref()).await;
-        Self::web_resizing(&window);
-        wasm_bindgen_futures::future_to_promise(async {
-            loop {
-
-            }
-            web_sys::console::info_1(&wasm_bindgen::JsValue::from_str("done with loop"));
-        });
-        self.ignite(event_loop, window, visualizer);
     }
     #[cfg(target_arch = "wasm32")]
     fn add_web_canvas(window: &Window) {
@@ -385,4 +422,44 @@ pub(crate) fn initialize_native_window<T>(
         ));
     }
     window.replace(builder.build(w_target).expect("window"));
+}
+#[cfg(target_family = "wasm")]
+#[derive(Resource)]
+pub struct WebSender<T: Worker + Send + 'static>(pub &'static mut WorkerBridge<T>);
+#[cfg(not(target_family = "wasm"))]
+#[derive(Resource)]
+pub struct WebSender<T>(PhantomData<T>);
+impl<T> WebSender<T> {
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) fn new() -> Self {
+        Self(PhantomData)
+    }
+}
+impl<T: Worker + Send + 'static> WebSender<T> {
+    #[cfg(target_family = "wasm")]
+    pub fn send(&self, input: <T as Worker>::Input) {
+        self.0.send(input);
+    }
+}
+#[cfg(not(target_family = "wasm"))]
+#[derive(Resource)]
+pub struct NativeSender<T: Workflow>(pub tokio::sync::mpsc::UnboundedSender<T::Action>);
+#[cfg(target_family = "wasm")]
+#[derive(Resource)]
+pub struct NativeSender<T>(PhantomData<T>);
+impl<T: Workflow> NativeSender<T> {
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) fn new(sender: tokio::sync::mpsc::UnboundedSender<T::Action>) -> Self {
+        Self(sender)
+    }
+    #[cfg(target_family = "wasm")]
+    pub(crate) fn new() -> Self {
+        Self(PhantomData)
+    }
+    #[cfg(not(target_family = "wasm"))]
+    pub fn send(&self, action: <T as Workflow>::Action) {
+        self.0.send(action).expect("native sender");
+    }
+    #[cfg(target_family = "wasm")]
+    pub fn send(&self, action: <T as Workflow>::Action) {}
 }

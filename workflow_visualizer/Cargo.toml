@@ -1,6 +1,6 @@
 [package]
 name = "workflow_visualizer"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 resolver = "2"
 
@@ -12,6 +12,8 @@ wgpu = { version = "0.16.0", features = ["webgl"] }
 bevy_ecs = { version = "0.10.1" }
 bytemuck = { version = "1.13.1", features = ["derive"] }
 fontdue = "0.7.3"
+gloo-worker = "0.2.1"
+gloo-console = "0.2.3"
 nalgebra = { version = "0.32.2" }
 serde = { version = "1.0.160", features = ["derive"] }
 compact_str = "0.7.0"

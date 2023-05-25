@@ -1,11 +1,12 @@
+use gloo_worker::{HandlerId, Registrable, Worker, WorkerBridge, WorkerScope};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use gloo_worker::{HandlerId, Worker, WorkerScope};
 use tracing::info;
 use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
-use workflow_visualizer::Visualizer;
 use workflow_visualizer::{Receiver, Responder, Workflow};
+use workflow_visualizer::{Visualizer, WebSender, WorkflowWebExt};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
     ExitConfirmed,
     TokenAdded(TokenName),
@@ -13,18 +14,18 @@ pub enum Response {
     TokenOtp((TokenName, TokenOtp)),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Action {
     ExitRequest,
     AddToken((TokenName, Token)),
     GenerateOtp(TokenName),
     RemoveToken(TokenName),
 }
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TokenOtp(pub String);
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TokenName(pub String);
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Token(pub String);
 pub struct Engen {
     pub tokens: HashMap<TokenName, Token>,
@@ -86,22 +87,72 @@ impl Workflow for Engen {
         Response::ExitConfirmed
     }
 }
-
+pub struct OutputWrapper {
+    pub handler_id: HandlerId,
+    pub response: <Engen as Worker>::Output,
+}
+impl OutputWrapper {
+    pub(crate) fn new(handler_id: HandlerId, response: <Engen as Worker>::Output) -> Self {
+        Self {
+            handler_id,
+            response,
+        }
+    }
+}
 impl Worker for Engen {
-    type Message = ();
-    type Input = ();
-    type Output = ();
+    type Message = OutputWrapper;
+    type Input = Action;
+    type Output = Response;
 
     fn create(scope: &WorkerScope<Self>) -> Self {
-        todo!()
+        Engen::new()
     }
 
     fn update(&mut self, scope: &WorkerScope<Self>, msg: Self::Message) {
-        // receive self messages after completing sends
-        // use scope.respond(...) here
+        scope.respond(msg.handler_id, msg.response);
     }
 
     fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, id: HandlerId) {
         // send future to self using gloo_net::Request to db http endpoints
+        // inside scope.send_future(...);
+        match msg {
+            Action::ExitRequest => {
+                scope.send_future(
+                    async move { OutputWrapper::new(id, Self::Output::ExitConfirmed) },
+                );
+            }
+            Action::AddToken(_) => {}
+            Action::GenerateOtp(name) => scope.send_future(async move {
+                OutputWrapper::new(
+                    id,
+                    Self::Output::TokenOtp((name, TokenOtp("88".to_string()))),
+                )
+            }),
+            Action::RemoveToken(_) => {}
+        }
     }
+}
+impl WorkflowWebExt for Engen {
+    fn send(bridge: &WebSender<Self>, action: <Self as Workflow>::Action) {
+        let input = match action {
+            Action::ExitRequest => <Self as Worker>::Input::ExitRequest,
+            Action::AddToken(data) => <Self as Worker>::Input::AddToken(data),
+            Action::GenerateOtp(data) => <Self as Worker>::Input::GenerateOtp(data),
+            Action::RemoveToken(data) => <Self as Worker>::Input::RemoveToken(data),
+        };
+        #[cfg(target_family = "wasm")]
+        bridge.send(input);
+    }
+
+    fn is_exit_response(response: <Self as Worker>::Output) -> bool {
+        match response {
+            Response::ExitConfirmed => true,
+            _ => false,
+        }
+    }
+}
+#[cfg(target_family = "wasm")]
+fn main() {
+    console_error_panic_hook::set_once();
+    Engen::registrar().register();
 }
