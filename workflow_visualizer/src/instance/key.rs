@@ -27,3 +27,8 @@ impl KeyFactory {
         key
     }
 }
+impl Default for KeyFactory {
+    fn default() -> Self {
+        KeyFactory::new()
+    }
+}

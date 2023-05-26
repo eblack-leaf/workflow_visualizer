@@ -8,7 +8,8 @@ use crate::text_input::Cursor;
 use crate::touch::{TouchListener, Touchable};
 use crate::visibility::EnableVisibility;
 use crate::{
-    Area, Color, InterfaceContext, Layer, Section, TextLetterDimensions, TextScale, TextScaleAlignment, ViewArea, ViewPosition, VirtualKeyboardType,
+    Area, Color, InterfaceContext, Layer, Section, TextLetterDimensions, TextScale,
+    TextScaleAlignment, ViewArea, ViewPosition, VirtualKeyboardType,
 };
 
 #[derive(Component)]

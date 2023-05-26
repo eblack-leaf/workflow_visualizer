@@ -23,6 +23,11 @@ impl Focus {
         self.focused
     }
 }
+impl Default for Focus {
+    fn default() -> Self {
+        Focus::new()
+    }
+}
 #[derive(Component, Copy, Clone)]
 pub struct FocusInputListener {}
 pub(crate) fn set_focused(

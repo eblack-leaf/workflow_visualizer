@@ -18,6 +18,11 @@ impl EnableVisibility {
         }
     }
 }
+impl Default for EnableVisibility {
+    fn default() -> Self {
+        EnableVisibility::new()
+    }
+}
 #[derive(Component, Copy, Clone)]
 pub struct Visibility {
     visible: bool,

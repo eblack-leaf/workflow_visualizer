@@ -23,7 +23,11 @@ impl ThemeDescriptor {
         self
     }
 }
-
+impl Default for ThemeDescriptor {
+    fn default() -> Self {
+        ThemeDescriptor::new()
+    }
+}
 #[derive(Resource, Copy, Clone)]
 pub struct Theme {
     pub background: Color,

@@ -1,15 +1,15 @@
 use crate::visualizer::Visualizer;
 use crate::{Area, DeviceContext, SyncPoint};
+use async_trait::async_trait;
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, NonSend, Resource};
 use gloo_worker::{HandlerId, Registrable, Spawnable, Worker, WorkerBridge, WorkerScope};
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
 use tracing::trace;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
@@ -21,9 +21,28 @@ use winit::event_loop::{
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Fullscreen, Window, WindowBuilder};
 #[async_trait]
-pub trait Workflow where Self: Default {
-    type Action: Debug + Clone + PartialEq + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
-    type Response: Debug + Clone + PartialEq + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
+pub trait Workflow
+where
+    Self: Default,
+{
+    type Action: Debug
+        + Clone
+        + PartialEq
+        + Send
+        + Sync
+        + Sized
+        + 'static
+        + Serialize
+        + for<'a> Deserialize<'a>;
+    type Response: Debug
+        + Clone
+        + PartialEq
+        + Send
+        + Sync
+        + Sized
+        + 'static
+        + Serialize
+        + for<'a> Deserialize<'a>;
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response);
     fn exit_action() -> Self::Action;
     fn exit_response() -> Self::Response;
@@ -62,7 +81,11 @@ pub struct Runner {
     #[cfg(target_os = "android")]
     android_app: Option<AndroidApp>,
 }
-
+impl Default for Runner {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Runner {
     pub fn new() -> Self {
         Self {
@@ -83,8 +106,7 @@ impl Runner {
     pub fn native_run<T: Workflow + Send + 'static + Default>(
         mut self,
         mut visualizer: Visualizer,
-    )
-    {
+    ) {
         let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
         tokio_runtime.block_on(async {
             let builder = &mut EventLoopBuilder::<T::Response>::with_user_event();
@@ -107,7 +129,7 @@ impl Runner {
 
             tokio::task::spawn(async move {
                 let engen = EngenHandle(Arc::new(Mutex::new(T::default())));
-                let mut receiver = Receiver{ receiver };
+                let mut receiver = Receiver { receiver };
                 let responder = Responder(proxy);
                 loop {
                     while let Some(action) = receiver.receive().await {
@@ -409,8 +431,7 @@ impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
         scope.send_future(async move {
             let response = <T as Workflow>::handle_action(arc, msg).await;
             OutputWrapper::new(id, response)
-        }
-        );
+        });
     }
 }
 pub(crate) fn initialize_native_window<T>(
@@ -484,7 +505,10 @@ struct OutputWrapper<T: Workflow + Default + 'static> {
     handler_id: HandlerId,
     response: <EngenHandle<T> as Worker>::Output,
 }
-impl<T: Workflow + Default + 'static> OutputWrapper<T> where Self: Sized {
+impl<T: Workflow + Default + 'static> OutputWrapper<T>
+where
+    Self: Sized,
+{
     fn new(handler_id: HandlerId, response: <EngenHandle<T> as Worker>::Output) -> Self {
         Self {
             handler_id,

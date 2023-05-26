@@ -1,4 +1,3 @@
-
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 use bevy_ecs::query::{With, Without};
@@ -14,9 +13,9 @@ use crate::text_input::{TextBackgroundColor, TextColor};
 use crate::touch::{TouchLocation, Touched};
 use crate::{
     text, Area, Color, ColorInvert, Icon, IconDescriptors, IconKey, IconSecondaryColor, IconSize,
-    InterfaceContext, Layer, PanelType, Position, Request, ScaleFactor, Text,
-    TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextWrapStyle,
-    ViewArea, ViewPosition, VirtualKeyboardAdapter, VirtualKeyboardType,
+    InterfaceContext, Layer, PanelType, Position, Request, ScaleFactor, Text, TextGridLocation,
+    TextLetterDimensions, TextLineStructure, TextRequest, TextWrapStyle, ViewArea, ViewPosition,
+    VirtualKeyboardAdapter, VirtualKeyboardType,
 };
 
 pub(crate) fn spawn(

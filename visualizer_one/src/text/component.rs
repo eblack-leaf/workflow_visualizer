@@ -1,13 +1,12 @@
 use std::collections::{HashMap, HashSet};
 
-
 use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::view::{ViewArea, ViewPosition};
 use crate::{
-    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
-    NumericalContext, Position, Section, VisibleSection,
+    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, NumericalContext,
+    Position, Section, VisibleSection,
 };
 
 #[derive(Bundle)]

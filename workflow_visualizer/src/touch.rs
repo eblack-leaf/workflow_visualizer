@@ -251,30 +251,24 @@ pub(crate) fn read_touch_events(
             {
                 if trigger_on_press {
                     touched_state.currently_pressed = true;
-                    match listener.listened_type {
-                        ListenableTouchType::OnPress => {
+                    if let ListenableTouchType::OnPress = listener.listened_type {
                             touched.touched = true;
                             toggle_state.toggle = !toggle_state.toggle;
                             touch_location
                                 .0
                                 .replace(primary_touch.touch.unwrap().origin);
                             focused_entity.entity.replace(grabbed.0);
-                        }
-                        _ => {}
                     }
                 }
                 if trigger_on_release {
                     touched_state.currently_pressed = false;
-                    match listener.listened_type {
-                        ListenableTouchType::OnRelease => {
-                            touched.touched = true;
-                            toggle_state.toggle = !toggle_state.toggle;
-                            touch_location
-                                .0
-                                .replace(primary_touch.touch.unwrap().origin);
-                            focused_entity.entity.replace(grabbed.0);
-                        }
-                        _ => {}
+                    if let ListenableTouchType::OnRelease = listener.listened_type {
+                        touched.touched = true;
+                        toggle_state.toggle = !toggle_state.toggle;
+                        touch_location
+                            .0
+                            .replace(primary_touch.touch.unwrap().origin);
+                        focused_entity.entity.replace(grabbed.0);
                     }
                 }
             }

@@ -41,7 +41,11 @@ impl<Attribute> AttributeWrite<Attribute> {
         }
     }
 }
-
+impl<Attribute> Default for AttributeWrite<Attribute> {
+    fn default() -> Self {
+        AttributeWrite::new()
+    }
+}
 #[derive(Component)]
 pub struct GpuAttributeBuffer<T> {
     pub buffer: wgpu::Buffer,
