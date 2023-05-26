@@ -1,4 +1,4 @@
-use bevy_ecs::change_detection::Mut;
+
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Commands, Or, Query, Res};
 use bevy_ecs::query::{With, Without};
@@ -14,7 +14,7 @@ use crate::text_input::{TextBackgroundColor, TextColor};
 use crate::touch::{TouchLocation, Touched};
 use crate::{
     text, Area, Color, ColorInvert, Icon, IconDescriptors, IconKey, IconSecondaryColor, IconSize,
-    InterfaceContext, Layer, Location, PanelType, Position, Request, ScaleFactor, Text,
+    InterfaceContext, Layer, PanelType, Position, Request, ScaleFactor, Text,
     TextGridLocation, TextLetterDimensions, TextLineStructure, TextRequest, TextWrapStyle,
     ViewArea, ViewPosition, VirtualKeyboardAdapter, VirtualKeyboardType,
 };
@@ -282,12 +282,12 @@ pub(crate) fn set_cursor_location(
                 text_entities.get_mut(text_input_text.entity).unwrap();
             let touched_line = (relative_touch.y / character_dimensions.0.height).floor() as u32;
             let line_structure_max =
-                line_structure.0.len() as u32 - 1 * !line_structure.0.is_empty() as u32;
+                line_structure.0.len() as u32 - !line_structure.0.is_empty() as u32;
             let line_index = touched_line
                 .min(line_structure.line_max())
                 .min(line_structure_max);
             if let Some(letter_count) = line_structure.0.get(line_index as usize) {
-                let letter_count = *letter_count - 1 * (!letter_count == 0) as u32;
+                let letter_count = *letter_count - (!letter_count == 0) as u32;
                 let touched_letter =
                     (relative_touch.x / character_dimensions.0.width).floor() as u32;
                 let letter_slot_touched = touched_letter.min(letter_count);

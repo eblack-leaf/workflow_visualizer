@@ -1,5 +1,5 @@
 use crate::text_input::components::MaxCharacters;
-use crate::{Color, InterfaceContext, Layer, Location, TextScaleAlignment, ViewArea, ViewPosition};
+use crate::{Color, Layer, TextScaleAlignment, ViewArea, ViewPosition};
 
 pub struct TextInputRequest {
     pub hint_text: String,

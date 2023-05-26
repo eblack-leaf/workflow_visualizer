@@ -172,10 +172,10 @@ impl TextLineStructure {
         Self(line_counts, (max_x, max_y))
     }
     pub(crate) fn horizontal_character_max(&self) -> u32 {
-        self.1 .0 - 1 * (!self.1 .0 == 0) as u32
+        self.1 .0 - (!self.1 .0 == 0) as u32
     }
     pub(crate) fn line_max(&self) -> u32 {
-        self.1 .1 - 1 * (!self.1 .1 == 0) as u32
+        self.1 .1 - (!self.1 .1 == 0) as u32
     }
 }
 

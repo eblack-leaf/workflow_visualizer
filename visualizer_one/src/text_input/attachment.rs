@@ -5,7 +5,7 @@ use crate::text_input::system::{
     read_input_if_focused, set_cursor_location, spawn, update_cursor_pos,
 };
 use crate::view::set_from_view;
-use crate::{icon, panel, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
+use crate::{icon, text, Attach, Engen, IconDescriptors, IconMeshAddRequest, SyncPoint};
 
 pub struct TextInputAttachment;
 

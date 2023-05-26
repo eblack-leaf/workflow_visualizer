@@ -33,7 +33,7 @@ pub(crate) fn set_focused(
 ) {
     if focused_entity_res.is_changed() {
         if let Some(f_entity) = focused_entity_res.entity {
-            if let Ok(_) = focus_input_listeners.get(f_entity) {
+            if focus_input_listeners.get(f_entity).is_ok() {
                 virtual_keyboard.open(VirtualKeyboardType::Keyboard);
             } else {
                 virtual_keyboard.close();

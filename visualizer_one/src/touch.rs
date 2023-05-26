@@ -278,10 +278,8 @@ pub(crate) fn read_touch_events(
                     }
                 }
             }
-        } else if trigger_on_press {
-            if focused_entity.entity.is_some() {
-                let _ = focused_entity.entity.take();
-            }
+        } else if trigger_on_press && focused_entity.entity.is_some() {
+            let _ = focused_entity.entity.take();
         }
     }
 }

@@ -172,8 +172,8 @@ impl Runner {
                     {
                         #[cfg(not(target_family = "wasm"))]
                         initialize_native_window(
-                            &event_loop_window_target,
-                            &mut window,
+                            event_loop_window_target,
+                            window,
                             desktop_dimensions,
                         );
                         visualizer.initialize(window.as_ref().unwrap());
@@ -226,7 +226,7 @@ impl Runner {
                 if event == T::exit_response() {
                     control_flow.set_exit();
                 }
-                T::handle_response(&mut visualizer, event);
+                T::handle_response(visualizer, event);
             }
             Event::MainEventsCleared => {
                 visualizer.exec();
@@ -423,7 +423,7 @@ pub(crate) fn initialize_native_window<T>(
     {
         let desktop_dimensions = match desktop_dimensions {
             None => Area::new(600.0, 800.0),
-            Some(dim) => dim.into(),
+            Some(dim) => dim,
         };
         builder = builder.with_inner_size(PhysicalSize::new(
             desktop_dimensions.width,

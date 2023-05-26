@@ -31,10 +31,7 @@ impl ViewPoint {
 }
 impl From<(f32, Option<f32>)> for ViewPoint {
     fn from(value: (f32, Option<f32>)) -> Self {
-        let fixed = match value.1 {
-            None => None,
-            Some(f) => Some(FixedBreakPoint(f)),
-        };
+        let fixed = value.1.map(FixedBreakPoint);
         ViewPoint::new(RelativePoint::new(value.0), fixed)
     }
 }

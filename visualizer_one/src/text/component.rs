@@ -1,12 +1,12 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::change_detection::Mut;
+
 use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::view::{ViewArea, ViewPosition};
 use crate::{
-    Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
+    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, Section, VisibleSection,
 };
 
@@ -166,10 +166,10 @@ impl TextLineStructure {
         Self(line_counts, (max_x, max_y))
     }
     pub(crate) fn horizontal_character_max(&self) -> u32 {
-        self.1 .0 - 1 * (!self.1 .0 == 0) as u32
+        self.1 .0 - (!self.1 .0 == 0) as u32
     }
     pub(crate) fn line_max(&self) -> u32 {
-        self.1 .1 - 1 * (!self.1 .1 == 0) as u32
+        self.1 .1 - (!self.1 .1 == 0) as u32
     }
 }
 

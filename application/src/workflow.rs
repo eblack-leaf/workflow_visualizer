@@ -46,7 +46,7 @@ impl Workflow for Engen {
     type Action = Action;
     type Response = Response;
 
-    fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
+    fn handle_response(_visualizer: &mut Visualizer, response: Self::Response) {
         match response {
             Response::ExitConfirmed => {
                 // save?
@@ -71,10 +71,10 @@ impl Workflow for Engen {
         Response::ExitConfirmed
     }
 
-    async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
+    async fn handle_action(_engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
         match action {
             Action::ExitRequest => <Engen as Workflow>::exit_response(),
-            Action::AddToken((name, token)) => Response::TokenAdded(name),
+            Action::AddToken((name, _token)) => Response::TokenAdded(name),
             Action::GenerateOtp(name) => {
                 let otp = "".to_string();
                 Response::TokenOtp((name, TokenOtp(otp)))

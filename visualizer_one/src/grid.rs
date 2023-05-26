@@ -1,5 +1,5 @@
 use crate::viewport::ViewportHandle;
-use crate::{Area, InterfaceContext, Position, Section};
+use crate::{Area, InterfaceContext, Position};
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::{DetectChanges, Query, Res, Resource};
 use bevy_ecs::query::Changed;
@@ -72,12 +72,12 @@ pub struct ResponsiveGridView {
 }
 pub(crate) fn grid_response(
     viewport_handle: Res<ViewportHandle>,
-    responsively_viewed: Query<(
+    _responsively_viewed: Query<(
         &ResponsiveGridView,
         &mut Position<InterfaceContext>,
         &mut Area<InterfaceContext>,
     )>,
-    grid: ResMut<Grid>,
+    _grid: ResMut<Grid>,
 ) {
     if viewport_handle.is_changed() {
         // configure grid configs + span
@@ -85,7 +85,7 @@ pub(crate) fn grid_response(
     }
 }
 pub(crate) fn set_from_view(
-    grid: Res<Grid>,
+    _grid: Res<Grid>,
     mut changed: Query<
         (
             &ResponsiveGridView,
@@ -95,7 +95,7 @@ pub(crate) fn set_from_view(
         Changed<ResponsiveGridView>,
     >,
 ) {
-    for (responsive_view, mut pos, mut area) in changed.iter_mut() {
+    for (_responsive_view, _pos, _area) in changed.iter_mut() {
         // match from grid and set to pos / area
     }
 }
