@@ -386,6 +386,7 @@ impl Visualizer {
                 .render_task_manager
                 .opaque
                 .push(Box::new(invoke_render::<Renderer>)),
+            // TODO insert in order + after if same priority
             RenderPhase::Alpha(_order) => self
                 .render_task_manager
                 .transparent

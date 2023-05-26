@@ -248,6 +248,9 @@ impl Runner {
             }
             Event::MainEventsCleared => {
                 visualizer.exec();
+                if visualizer.job.should_exit() {
+                    visualizer.job.container.send_event(ExitSignal {});
+                }
             }
             Event::RedrawRequested(_) => {
                 visualizer.render();
