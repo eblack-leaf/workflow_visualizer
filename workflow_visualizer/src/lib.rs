@@ -36,7 +36,7 @@ pub use crate::request::{spawn, Request};
 #[cfg(target_os = "android")]
 pub use crate::runner::AndroidInterface;
 pub use crate::runner::{
-    Receiver, Responder, Runner, Sender, Workflow, WorkflowWebExt, OutputWrapper
+    OutputWrapper, Receiver, Responder, Runner, Sender, Workflow, WorkflowWebExt,
 };
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};

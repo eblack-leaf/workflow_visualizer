@@ -1,6 +1,6 @@
 use crate::visualizer::Visualizer;
-use crate::{Area, DeviceContext};
-use bevy_ecs::prelude::Resource;
+use crate::{Area, DeviceContext, SyncPoint};
+use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, NonSend, Resource};
 use gloo_worker::{HandlerId, Spawnable, Worker, WorkerBridge};
 use std::fmt::Debug;
 use std::future::Future;
@@ -10,14 +10,16 @@ use tracing::trace;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
 use winit::event::{Event, StartCause, WindowEvent};
-use winit::event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopProxy, EventLoopWindowTarget};
+use winit::event_loop::{
+    ControlFlow, EventLoop, EventLoopBuilder, EventLoopProxy, EventLoopWindowTarget,
+};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Fullscreen, Window, WindowBuilder};
 
 pub trait Workflow {
-    type Action: Debug + Clone + PartialEq + Send + 'static;
-    type Response: Debug + Clone + PartialEq + Send + 'static;
+    type Action: Debug + Clone + PartialEq + Send + Sync + Sized + 'static;
+    type Response: Debug + Clone + PartialEq + Send + Sync + Sized + 'static;
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response);
     fn exit_action() -> Self::Action;
     fn exit_response() -> Self::Response;
@@ -50,6 +52,7 @@ impl<T: Send + 'static + Debug> Responder<T> {
         self.0.send_event(response).expect("responder");
     }
 }
+struct ExitSignal {}
 #[cfg(target_os = "android")]
 #[derive(Resource)]
 pub struct AndroidInterface(pub AndroidApp);
@@ -116,14 +119,72 @@ impl Runner {
                 .insert_non_send_resource(Sender::new(NativeSender::<T>::new(sender)));
             let mut window: Option<Rc<Window>> = None;
             let mut initialized = false;
+            Self::add_exit_signal_handler::<T>(&mut visualizer);
             let desktop_dimensions = self.desktop_dimensions;
             event_loop.run(move |event, event_loop_window_target, control_flow| {
-                Self::internal_loop::<T>(&mut visualizer, &mut window, &mut initialized, event, event_loop_window_target, control_flow, desktop_dimensions);
+                Self::internal_loop::<T>(
+                    &mut visualizer,
+                    &mut window,
+                    &mut initialized,
+                    event,
+                    event_loop_window_target,
+                    control_flow,
+                    desktop_dimensions,
+                );
             });
         });
     }
-
-    fn internal_loop<T: Workflow + Send + 'static>(mut visualizer: &mut Visualizer, mut window: &mut Option<Rc<Window>>, initialized: &mut bool, event: Event<<T as Workflow>::Response>, event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>, control_flow: &mut ControlFlow, desktop_dimensions: Option<Area<DeviceContext>>) {
+    #[cfg(not(target_family = "wasm"))]
+    fn add_exit_signal_handler<T: Workflow + Send + 'static>(visualizer: &mut Visualizer) {
+        visualizer
+            .job
+            .container
+            .insert_resource(Events::<ExitSignal>::default());
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            Events::<ExitSignal>::update_system.in_set(SyncPoint::Event),
+            Self::send_exit_request::<T>.in_set(SyncPoint::Initialization),
+        ));
+    }
+    #[cfg(target_family = "wasm")]
+    fn add_exit_signal_handler<T: Workflow + WorkflowWebExt + Send + 'static>(
+        visualizer: &mut Visualizer,
+    ) {
+        visualizer
+            .job
+            .container
+            .insert_resource(Events::<ExitSignal>::default());
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            Events::<ExitSignal>::update_system.in_set(SyncPoint::Event),
+            Self::send_exit_request::<T>.in_set(SyncPoint::Initialization),
+        ));
+    }
+    #[cfg(not(target_family = "wasm"))]
+    fn send_exit_request<T: Workflow + Send + 'static>(
+        sender: NonSend<Sender<T>>,
+        mut exit_requests: EventReader<ExitSignal>,
+    ) {
+        if !exit_requests.is_empty() {
+            sender.send(T::exit_action());
+        }
+    }
+    #[cfg(target_family = "wasm")]
+    fn send_exit_request<T: Workflow + WorkflowWebExt + Send + 'static>(
+        sender: NonSend<Sender<T>>,
+        mut exit_requests: EventReader<ExitSignal>,
+    ) {
+        if !exit_requests.is_empty() {
+            sender.send(T::exit_action());
+        }
+    }
+    fn internal_loop<T: Workflow + Send + 'static>(
+        mut visualizer: &mut Visualizer,
+        mut window: &mut Option<Rc<Window>>,
+        initialized: &mut bool,
+        event: Event<<T as Workflow>::Response>,
+        event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>,
+        control_flow: &mut ControlFlow,
+        desktop_dimensions: Option<Area<DeviceContext>>,
+    ) {
         control_flow.set_wait();
         match event {
             Event::NewEvents(cause) => match cause {
@@ -144,8 +205,7 @@ impl Runner {
             },
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => {
-                    // queue T::exit_action() + add system of events to update + NonSend<Sender<T>>.send(queued_action)
-                    control_flow.set_exit();
+                    visualizer.job.container.send_event(ExitSignal {});
                 }
                 WindowEvent::Resized(size) => {
                     info!("resizing: {:?}", size);
@@ -253,7 +313,12 @@ impl Runner {
                 .expect("window"),
         ));
         Self::add_web_canvas(window.as_ref().unwrap());
-        window.as_ref().unwrap().set_inner_size(Self::window_dimensions(window.as_ref().unwrap().scale_factor()));
+        window
+            .as_ref()
+            .unwrap()
+            .set_inner_size(Self::window_dimensions(
+                window.as_ref().unwrap().scale_factor(),
+            ));
         visualizer.init_gfx(window.as_ref().unwrap()).await;
         Self::web_resizing(window.as_ref().unwrap());
         let proxy = event_loop.create_proxy();
@@ -268,9 +333,18 @@ impl Runner {
             .container
             .insert_non_send_resource(Sender::new(WebSender(bridge)));
         let mut initialized = true;
+        Self::add_exit_signal_handler::<T>(&mut visualizer);
         use winit::platform::web::EventLoopExtWebSys;
         event_loop.spawn(move |event, event_loop_window_target, control_flow| {
-            Self::internal_loop::<T>(&mut visualizer, &mut window, &mut initialized, event, event_loop_window_target, control_flow, None);
+            Self::internal_loop::<T>(
+                &mut visualizer,
+                &mut window,
+                &mut initialized,
+                event,
+                event_loop_window_target,
+                control_flow,
+                None,
+            );
         });
     }
     #[cfg(target_arch = "wasm32")]
@@ -324,6 +398,7 @@ impl Runner {
         closure.forget();
     }
 }
+
 pub(crate) fn initialize_native_window<T>(
     w_target: &EventLoopWindowTarget<T>,
     window: &mut Option<Rc<Window>>,
@@ -356,9 +431,7 @@ pub struct Sender<T: WorkflowWebExt> {
 #[cfg(not(target_family = "wasm"))]
 impl<T: Workflow> Sender<T> {
     fn new(sender: NativeSender<T>) -> Self {
-        Self {
-            sender
-        }
+        Self { sender }
     }
     pub fn send(&self, action: <T as Workflow>::Action) {
         self.sender.send(action);
@@ -367,9 +440,7 @@ impl<T: Workflow> Sender<T> {
 #[cfg(target_family = "wasm")]
 impl<T: WorkflowWebExt> Sender<T> {
     fn new(sender: WebSender<T>) -> Self {
-        Self {
-            sender
-        }
+        Self { sender }
     }
     pub fn send(&self, action: <T as Workflow>::Action) {
         self.sender.send(T::action_to_input(action));

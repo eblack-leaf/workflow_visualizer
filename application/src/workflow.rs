@@ -37,10 +37,7 @@ impl Engen {
         }
     }
     #[cfg(not(target_family = "wasm"))]
-    pub async fn native_runner(
-        responder: Responder<Response>,
-        mut receiver: Receiver<Action>,
-    ) {
+    pub async fn native_runner(responder: Responder<Response>, mut receiver: Receiver<Action>) {
         let _engen = Engen::new();
         loop {
             while let Some(action) = receiver.receive().await {
@@ -121,21 +118,15 @@ impl Worker for Engen {
 }
 impl WorkflowWebExt for Engen {
     fn action_to_input(action: <Self as Workflow>::Action) -> <Self as Worker>::Input {
-        return action
-        // match action {
-        //     Action::ExitRequest => <Self as Worker>::Input::ExitRequest,
-        //     Action::AddToken(data) => <Self as Worker>::Input::AddToken(data),
-        //     Action::GenerateOtp(data) => <Self as Worker>::Input::GenerateOtp(data),
-        //     Action::RemoveToken(data) => <Self as Worker>::Input::RemoveToken(data),
-        // }
+        return action;
     }
     fn output_to_response(output: <Self as Worker>::Output) -> <Self as Workflow>::Response {
-        return output
+        return output;
     }
 }
-
 fn main() {
-    #[cfg(target_family = "wasm")] {
+    #[cfg(target_family = "wasm")]
+    {
         console_error_panic_hook::set_once();
         Engen::registrar().register();
     }
