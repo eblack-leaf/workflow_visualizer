@@ -1,11 +1,15 @@
 use crate::visualizer::Visualizer;
 use crate::{Area, DeviceContext, SyncPoint};
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, NonSend, Resource};
-use gloo_worker::{HandlerId, Spawnable, Worker, WorkerBridge};
+use gloo_worker::{HandlerId, Registrable, Spawnable, Worker, WorkerBridge, WorkerScope};
 use std::fmt::Debug;
 use std::future::Future;
 use std::marker::PhantomData;
+use std::pin::Pin;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
+use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 use tracing::trace;
 use tracing::{info, warn};
 use winit::dpi::PhysicalSize;
@@ -16,20 +20,14 @@ use winit::event_loop::{
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Fullscreen, Window, WindowBuilder};
-
+#[async_trait]
 pub trait Workflow {
-    type Action: Debug + Clone + PartialEq + Send + Sync + Sized + 'static;
-    type Response: Debug + Clone + PartialEq + Send + Sync + Sized + 'static;
+    type Action: Debug + Clone + PartialEq + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
+    type Response: Debug + Clone + PartialEq + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response);
     fn exit_action() -> Self::Action;
     fn exit_response() -> Self::Response;
-}
-pub trait WorkflowWebExt
-where
-    Self: gloo_worker::Worker + Workflow + Send + 'static,
-{
-    fn action_to_input(action: <Self as Workflow>::Action) -> <Self as Worker>::Input;
-    fn output_to_response(output: <Self as Worker>::Output) -> <Self as Workflow>::Response;
+    async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response;
 }
 pub struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
@@ -52,6 +50,7 @@ impl<T: Send + 'static + Debug> Responder<T> {
         self.0.send_event(response).expect("responder");
     }
 }
+struct EngenHandle<T: Workflow + Default>(pub Arc<Mutex<T>>);
 struct ExitSignal {}
 #[cfg(target_os = "android")]
 #[derive(Resource)]
@@ -81,15 +80,10 @@ impl Runner {
         self
     }
     #[cfg(not(target_family = "wasm"))]
-    pub fn native_run<T: Workflow + Send + 'static, NativeEngenRunner, NativeEngenRunnerFut>(
+    pub fn native_run<T: Workflow + Send + 'static + Default>(
         mut self,
         mut visualizer: Visualizer,
-        native_engen_runner: NativeEngenRunner,
-    ) where
-        NativeEngenRunner: FnOnce(Responder<T::Response>, Receiver<T::Action>) -> NativeEngenRunnerFut
-            + Send
-            + 'static,
-        NativeEngenRunnerFut: Future<Output = ()> + Send + 'static,
+    )
     {
         let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
         tokio_runtime.block_on(async {
@@ -110,8 +104,17 @@ impl Runner {
                 tokio::sync::mpsc::UnboundedReceiver<T::Action>,
             ) = tokio::sync::mpsc::unbounded_channel();
             let proxy = event_loop.create_proxy();
+
             tokio::task::spawn(async move {
-                native_engen_runner(Responder(proxy), Receiver { receiver }).await
+                let engen = EngenHandle(Arc::new(Mutex::new(T::default())));
+                let mut receiver = Receiver{ receiver };
+                let responder = Responder(proxy);
+                loop {
+                    while let Some(action) = receiver.receive().await {
+                        let response = T::handle_action(engen.0.clone(), action).await;
+                        responder.respond(response);
+                    }
+                }
             });
             visualizer
                 .job
@@ -146,7 +149,7 @@ impl Runner {
         ));
     }
     #[cfg(target_family = "wasm")]
-    fn add_exit_signal_handler<T: Workflow + WorkflowWebExt + Send + 'static>(
+    fn add_exit_signal_handler<T: Workflow + 'static + Default>(
         visualizer: &mut Visualizer,
     ) {
         visualizer
@@ -159,7 +162,7 @@ impl Runner {
         ));
     }
     #[cfg(not(target_family = "wasm"))]
-    fn send_exit_request<T: Workflow + Send + 'static>(
+    fn send_exit_request<T: Workflow + 'static>(
         sender: NonSend<Sender<T>>,
         mut exit_requests: EventReader<ExitSignal>,
     ) {
@@ -168,7 +171,7 @@ impl Runner {
         }
     }
     #[cfg(target_family = "wasm")]
-    fn send_exit_request<T: Workflow + WorkflowWebExt + Send + 'static>(
+    fn send_exit_request<T: Workflow + 'static + Default>(
         sender: NonSend<Sender<T>>,
         mut exit_requests: EventReader<ExitSignal>,
     ) {
@@ -176,7 +179,7 @@ impl Runner {
             sender.send(T::exit_action());
         }
     }
-    fn internal_loop<T: Workflow + Send + 'static>(
+    fn internal_loop<T: Workflow + 'static>(
         mut visualizer: &mut Visualizer,
         mut window: &mut Option<Rc<Window>>,
         initialized: &mut bool,
@@ -294,7 +297,7 @@ impl Runner {
         }
     }
     #[cfg(target_family = "wasm")]
-    pub fn web_run<T: WorkflowWebExt + gloo_worker::Worker + Send + 'static>(
+    pub fn web_run<T: Workflow + 'static + Default>(
         mut self,
         visualizer: Visualizer,
         worker_path: String,
@@ -303,7 +306,7 @@ impl Runner {
         wasm_bindgen_futures::spawn_local(self.internal_web_run::<T>(visualizer, worker_path));
     }
     #[cfg(target_family = "wasm")]
-    async fn internal_web_run<T: WorkflowWebExt + gloo_worker::Worker + Send + 'static>(
+    async fn internal_web_run<T: Workflow + 'static + Default>(
         mut self,
         mut visualizer: Visualizer,
         worker_path: String,
@@ -325,9 +328,9 @@ impl Runner {
         visualizer.init_gfx(window.as_ref().unwrap()).await;
         Self::web_resizing(window.as_ref().unwrap());
         let proxy = event_loop.create_proxy();
-        let bridge = T::spawner()
+        let bridge = EngenHandle::<T>::spawner()
             .callback(move |response| {
-                proxy.send_event(T::output_to_response(response));
+                proxy.send_event(response);
             })
             .spawn(worker_path.as_str());
         let bridge = Box::leak(Box::new(bridge));
@@ -400,8 +403,37 @@ impl Runner {
         }
         closure.forget();
     }
+    pub fn start_web_worker<T: Workflow + Default + 'static>() {
+        #[cfg(target_family = "wasm")]
+        {
+            console_error_panic_hook::set_once();
+            EngenHandle::<T>::registrar().register();
+        }
+    }
 }
 
+impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
+    type Message = OutputWrapper<T>;
+    type Input = T::Action;
+    type Output = T::Response;
+
+    fn create(scope: &WorkerScope<Self>) -> Self {
+        EngenHandle(Arc::new(Mutex::new(T::default())))
+    }
+
+    fn update(&mut self, scope: &WorkerScope<Self>, msg: Self::Message) {
+        scope.respond(msg.handler_id, msg.response);
+    }
+
+    fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, id: HandlerId) {
+        let arc = self.0.clone();
+        scope.send_future(async move {
+            let response = <T as Workflow>::handle_action(arc, msg).await;
+            OutputWrapper::new(id, response)
+        }
+        );
+    }
+}
 pub(crate) fn initialize_native_window<T>(
     w_target: &EventLoopWindowTarget<T>,
     window: &mut Option<Rc<Window>>,
@@ -428,7 +460,7 @@ pub struct Sender<T: Workflow> {
 }
 #[cfg(target_family = "wasm")]
 #[derive(Resource)]
-pub struct Sender<T: WorkflowWebExt> {
+pub struct Sender<T: Workflow + Default + 'static> {
     sender: WebSender<T>,
 }
 #[cfg(not(target_family = "wasm"))]
@@ -441,25 +473,25 @@ impl<T: Workflow> Sender<T> {
     }
 }
 #[cfg(target_family = "wasm")]
-impl<T: WorkflowWebExt> Sender<T> {
+impl<T: Workflow + Default> Sender<T> {
     fn new(sender: WebSender<T>) -> Self {
         Self { sender }
     }
     pub fn send(&self, action: <T as Workflow>::Action) {
-        self.sender.send(T::action_to_input(action));
+        self.sender.send(action);
     }
 }
 
 #[cfg(target_family = "wasm")]
-pub struct WebSender<T: Worker>(pub &'static mut WorkerBridge<T>);
+struct WebSender<T: Workflow + Default + 'static>(pub &'static mut WorkerBridge<EngenHandle<T>>);
 #[cfg(target_family = "wasm")]
-impl<T: Worker + Send + 'static> WebSender<T> {
-    pub(crate) fn send(&self, input: <T as Worker>::Input) {
+impl<T: Workflow + 'static + Default> WebSender<T> {
+    pub(crate) fn send(&self, input: <EngenHandle<T> as Worker>::Input) {
         self.0.send(input);
     }
 }
 #[cfg(not(target_family = "wasm"))]
-pub struct NativeSender<T: Workflow>(pub tokio::sync::mpsc::UnboundedSender<T::Action>);
+struct NativeSender<T: Workflow>(pub tokio::sync::mpsc::UnboundedSender<T::Action>);
 #[cfg(not(target_family = "wasm"))]
 impl<T: Workflow> NativeSender<T> {
     pub(crate) fn new(sender: tokio::sync::mpsc::UnboundedSender<T::Action>) -> Self {
@@ -469,12 +501,12 @@ impl<T: Workflow> NativeSender<T> {
         self.0.send(action).expect("native sender");
     }
 }
-pub struct OutputWrapper<T: WorkflowWebExt> {
-    pub handler_id: HandlerId,
-    pub response: <T as Worker>::Output,
+struct OutputWrapper<T: Workflow + Default + 'static> {
+    handler_id: HandlerId,
+    response: <EngenHandle<T> as Worker>::Output,
 }
-impl<T: WorkflowWebExt> OutputWrapper<T> {
-    pub fn new(handler_id: HandlerId, response: <T as Worker>::Output) -> Self {
+impl<T: Workflow + Default + 'static> OutputWrapper<T> where Self: Sized {
+    fn new(handler_id: HandlerId, response: <EngenHandle<T> as Worker>::Output) -> Self {
         Self {
             handler_id,
             response,

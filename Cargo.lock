@@ -150,7 +150,6 @@ dependencies = [
  "console_error_panic_hook",
  "console_log 1.0.0",
  "gloo-net",
- "gloo-worker",
  "log",
  "serde",
  "surrealdb",
@@ -4573,9 +4572,11 @@ dependencies = [
 name = "workflow_visualizer"
 version = "0.1.1"
 dependencies = [
+ "async-trait",
  "bevy_ecs",
  "bytemuck",
  "compact_str",
+ "console_error_panic_hook",
  "fontdue",
  "gloo-console",
  "gloo-worker",

@@ -36,7 +36,7 @@ pub use crate::request::{spawn, Request};
 #[cfg(target_os = "android")]
 pub use crate::runner::AndroidInterface;
 pub use crate::runner::{
-    OutputWrapper, Receiver, Responder, Runner, Sender, Workflow, WorkflowWebExt,
+    Receiver, Responder, Runner, Sender, Workflow,
 };
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
@@ -61,3 +61,4 @@ pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
 pub use wgpu;
 pub use winit;
+pub use async_trait::async_trait;

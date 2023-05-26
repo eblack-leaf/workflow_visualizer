@@ -1,10 +1,10 @@
-use gloo_worker::{HandlerId, Registrable, Worker, WorkerBridge, WorkerScope};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use tracing::info;
 use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
-use workflow_visualizer::{OutputWrapper, Receiver, Responder, Workflow};
-use workflow_visualizer::{Visualizer, WorkflowWebExt};
+use workflow_visualizer::{async_trait, Receiver, Responder, Runner, Workflow};
+use workflow_visualizer::{Visualizer};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -36,25 +36,13 @@ impl Engen {
             tokens: HashMap::new(),
         }
     }
-    #[cfg(not(target_family = "wasm"))]
-    pub async fn native_runner(responder: Responder<Response>, mut receiver: Receiver<Action>) {
-        let _engen = Engen::new();
-        loop {
-            while let Some(action) = receiver.receive().await {
-                let response = match action {
-                    Action::ExitRequest => <Engen as Workflow>::exit_response(),
-                    Action::AddToken((name, token)) => Response::TokenAdded(name),
-                    Action::GenerateOtp(name) => {
-                        let otp = "".to_string();
-                        Response::TokenOtp((name, TokenOtp(otp)))
-                    }
-                    Action::RemoveToken(name) => Response::TokenRemoved(name),
-                };
-                responder.respond(response);
-            }
-        }
+}
+impl Default for Engen {
+    fn default() -> Self {
+        Engen::new()
     }
 }
+#[async_trait]
 impl Workflow for Engen {
     type Action = Action;
     type Response = Response;
@@ -83,51 +71,19 @@ impl Workflow for Engen {
     fn exit_response() -> Self::Response {
         Response::ExitConfirmed
     }
-}
 
-impl Worker for Engen {
-    type Message = OutputWrapper<Engen>;
-    type Input = Action;
-    type Output = Response;
-
-    fn create(scope: &WorkerScope<Self>) -> Self {
-        Engen::new()
-    }
-
-    fn update(&mut self, scope: &WorkerScope<Self>, msg: Self::Message) {
-        scope.respond(msg.handler_id, msg.response);
-    }
-
-    fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, id: HandlerId) {
-        match msg {
-            Action::ExitRequest => {
-                scope.send_future(
-                    async move { OutputWrapper::new(id, Self::Output::ExitConfirmed) },
-                );
+    async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
+        match action {
+            Action::ExitRequest => <Engen as Workflow>::exit_response(),
+            Action::AddToken((name, token)) => Response::TokenAdded(name),
+            Action::GenerateOtp(name) => {
+                let otp = "".to_string();
+                Response::TokenOtp((name, TokenOtp(otp)))
             }
-            Action::AddToken(_) => {}
-            Action::GenerateOtp(name) => scope.send_future(async move {
-                OutputWrapper::new(
-                    id,
-                    Self::Output::TokenOtp((name, TokenOtp("88".to_string()))),
-                )
-            }),
-            Action::RemoveToken(_) => {}
+            Action::RemoveToken(name) => Response::TokenRemoved(name),
         }
     }
 }
-impl WorkflowWebExt for Engen {
-    fn action_to_input(action: <Self as Workflow>::Action) -> <Self as Worker>::Input {
-        return action;
-    }
-    fn output_to_response(output: <Self as Worker>::Output) -> <Self as Workflow>::Response {
-        return output;
-    }
-}
 fn main() {
-    #[cfg(target_family = "wasm")]
-    {
-        console_error_panic_hook::set_once();
-        Engen::registrar().register();
-    }
+    Runner::start_web_worker::<Engen>();
 }

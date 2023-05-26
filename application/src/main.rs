@@ -54,7 +54,7 @@ fn android_main(android_app: AndroidApp) {
     visualizer.set_gfx_options(GfxOptions::limited_environment());
     let runner = Runner::new()
         .with_android_app(android_app)
-        .native_run::<Engen, _, _>(visualizer, Engen::native_runner);
+        .native_run::<Engen>(visualizer);
 }
 fn main() {
     #[cfg(not(target_family = "wasm"))]
@@ -63,7 +63,7 @@ fn main() {
     #[cfg(not(target_family = "wasm"))]
     Runner::new()
         .with_desktop_dimensions((400, 600))
-        .native_run::<Engen, _, _>(visualizer, Engen::native_runner);
+        .native_run::<Engen>(visualizer);
     #[cfg(target_family = "wasm")]
     {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
