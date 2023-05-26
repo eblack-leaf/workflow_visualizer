@@ -49,7 +49,9 @@ pub struct GutterConfig {
 pub struct RowConfig {
     pub base: MarkerGrouping,
 }
+// Logical index using groupings to get actual markers then to px
 pub struct GridSpacer(pub i32);
+// whether to attach to beginning/end of column
 pub enum GridSpacerOffset {
     Near,
     Far,
@@ -70,6 +72,7 @@ pub struct GridView {
 pub struct ResponsiveGridView {
     pub mapping: HashMap<HorizontalSpan, GridView>,
 }
+// shorthand for defining responsive grid views needed
 pub(crate) fn grid_response(
     viewport_handle: Res<ViewportHandle>,
     responsively_viewed: Query<(
