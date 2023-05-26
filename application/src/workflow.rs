@@ -2,8 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tracing::info;
-use workflow_visualizer::winit::event_loop::{ControlFlow, EventLoopProxy};
-use workflow_visualizer::{async_trait, Receiver, Responder, Runner, Workflow};
+use workflow_visualizer::{async_trait, Runner, Workflow};
 use workflow_visualizer::{Visualizer};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

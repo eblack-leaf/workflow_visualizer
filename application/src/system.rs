@@ -14,6 +14,6 @@ pub(crate) fn send_event(
         *limiter = true;
     }
     for mut t in text.iter_mut() {
-        *t = Text("nooooo".to_string());
+        *t = Text("yes".to_string());
     }
 }

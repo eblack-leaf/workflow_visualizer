@@ -21,7 +21,7 @@ use winit::event_loop::{
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Fullscreen, Window, WindowBuilder};
 #[async_trait]
-pub trait Workflow {
+pub trait Workflow where Self: Default {
     type Action: Debug + Clone + PartialEq + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
     type Response: Debug + Clone + PartialEq + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response);
@@ -29,24 +29,24 @@ pub trait Workflow {
     fn exit_response() -> Self::Response;
     async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response;
 }
-pub struct Receiver<T: Send + 'static> {
+struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
-    pub receiver: tokio::sync::mpsc::UnboundedReceiver<T>,
+    receiver: tokio::sync::mpsc::UnboundedReceiver<T>,
     #[cfg(target_family = "wasm")]
-    pub receiver: T,
+    receiver: T,
 }
 
 impl<T: Send + 'static> Receiver<T> {
     #[cfg(not(target_family = "wasm"))]
-    pub async fn receive(&mut self) -> Option<T> {
+    async fn receive(&mut self) -> Option<T> {
         self.receiver.recv().await
     }
     #[cfg(target_family = "wasm")]
-    pub fn receive(&mut self) {}
+    fn receive(&mut self) {}
 }
-pub struct Responder<T: Send + 'static + Debug>(pub EventLoopProxy<T>);
+struct Responder<T: Send + 'static + Debug>(EventLoopProxy<T>);
 impl<T: Send + 'static + Debug> Responder<T> {
-    pub fn respond(&self, response: T) {
+    fn respond(&self, response: T) {
         self.0.send_event(response).expect("responder");
     }
 }
@@ -137,8 +137,7 @@ impl Runner {
             });
         });
     }
-    #[cfg(not(target_family = "wasm"))]
-    fn add_exit_signal_handler<T: Workflow + Send + 'static>(visualizer: &mut Visualizer) {
+    fn add_exit_signal_handler<T: Workflow + Default + 'static>(visualizer: &mut Visualizer) {
         visualizer
             .job
             .container
@@ -148,29 +147,6 @@ impl Runner {
             Self::send_exit_request::<T>.in_set(SyncPoint::Initialization),
         ));
     }
-    #[cfg(target_family = "wasm")]
-    fn add_exit_signal_handler<T: Workflow + 'static + Default>(
-        visualizer: &mut Visualizer,
-    ) {
-        visualizer
-            .job
-            .container
-            .insert_resource(Events::<ExitSignal>::default());
-        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            Events::<ExitSignal>::update_system.in_set(SyncPoint::Event),
-            Self::send_exit_request::<T>.in_set(SyncPoint::Initialization),
-        ));
-    }
-    #[cfg(not(target_family = "wasm"))]
-    fn send_exit_request<T: Workflow + 'static>(
-        sender: NonSend<Sender<T>>,
-        mut exit_requests: EventReader<ExitSignal>,
-    ) {
-        if !exit_requests.is_empty() {
-            sender.send(T::exit_action());
-        }
-    }
-    #[cfg(target_family = "wasm")]
     fn send_exit_request<T: Workflow + 'static + Default>(
         sender: NonSend<Sender<T>>,
         mut exit_requests: EventReader<ExitSignal>,
@@ -243,7 +219,10 @@ impl Runner {
                 _ => {}
             },
             Event::UserEvent(event) => {
-                info!("visualizer loop received: {:?}", event);
+                let message = format!("visualizer loop received: {:?}", event);
+                info!(message);
+                #[cfg(target_family = "wasm")]
+                gloo_console::info!(wasm_bindgen::JsValue::from_str(message.as_str()));
                 if event == T::exit_response() {
                     control_flow.set_exit();
                 }
@@ -277,7 +256,7 @@ impl Runner {
                 info!("resuming");
                 #[cfg(target_os = "android")]
                 {
-                    if !initialized {
+                    if !*initialized {
                         initialize_native_window(
                             &event_loop_window_target,
                             &mut window,
@@ -455,7 +434,7 @@ pub(crate) fn initialize_native_window<T>(
 }
 #[cfg(not(target_family = "wasm"))]
 #[derive(Resource)]
-pub struct Sender<T: Workflow> {
+pub struct Sender<T: Workflow + Default + 'static> {
     sender: NativeSender<T>,
 }
 #[cfg(target_family = "wasm")]

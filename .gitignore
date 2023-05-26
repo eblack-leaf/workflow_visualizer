@@ -2,9 +2,9 @@
 /wgpu_traces/
 /.idea/
 Cargo.lock
-/application/app/build/
-/application/.gradle/
-/application/app/src/main/jniLibs/
+/application/android_src/app/build/
+/application/android_src/.gradle/
+/application/android_src/app/src/main/jniLibs/
 logcat.txt
 /application/dist/
 /application/android_rebuild_avoidance_target/
