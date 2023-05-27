@@ -1,7 +1,6 @@
 use crate::workflow::{Engen, TokenName};
-use workflow_visualizer::bevy_ecs::prelude::{Local, Query, Res};
-use workflow_visualizer::bevy_ecs::system::NonSend;
-use workflow_visualizer::{Sender, Text, Workflow};
+use workflow_visualizer::bevy_ecs::prelude::{Local, Query, Res, NonSend};
+use workflow_visualizer::{Text, Workflow, Sender};
 
 pub(crate) fn send_event(
     sender: NonSend<Sender<Engen>>,

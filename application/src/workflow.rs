@@ -2,8 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tracing::info;
-use workflow_visualizer::Visualizer;
-use workflow_visualizer::{async_trait, Runner, Workflow};
+use workflow_visualizer::{async_trait, start_web_worker, Visualizer, Workflow};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -84,5 +83,5 @@ impl Workflow for Engen {
     }
 }
 fn main() {
-    Runner::start_web_worker::<Engen>();
+    start_web_worker::<Engen>();
 }

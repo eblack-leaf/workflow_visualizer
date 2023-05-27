@@ -1,9 +1,9 @@
 use bevy_ecs::prelude::{Component, Resource};
 use tracing::info;
 
-#[cfg(target_os = "android")]
-use crate::runner::AndroidInterface;
 use crate::visualizer::{Attach, Visualizer};
+#[cfg(target_os = "android")]
+use crate::workflow::AndroidInterface;
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 

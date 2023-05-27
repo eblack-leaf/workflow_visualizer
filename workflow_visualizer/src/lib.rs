@@ -10,7 +10,6 @@ mod job;
 mod orientation;
 mod render;
 mod request;
-mod runner;
 mod scale_factor;
 mod sync;
 mod text;
@@ -23,6 +22,7 @@ mod virtual_keyboard;
 mod visibility;
 mod visualizer;
 mod window;
+mod workflow;
 pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
@@ -33,9 +33,6 @@ pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::job::{EntityName, Job};
 pub use crate::request::{spawn, Request};
-#[cfg(target_os = "android")]
-pub use crate::runner::AndroidInterface;
-pub use crate::runner::{Runner, Sender, Workflow};
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::text::{
@@ -48,6 +45,8 @@ pub use crate::touch::{TouchListener, Touchable};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::{WindowAttachment, WindowResize};
+#[cfg(target_os = "android")]
+pub use crate::workflow::AndroidInterface;
 pub use async_trait::async_trait;
 pub use bevy_ecs;
 pub use instance::{
@@ -60,3 +59,4 @@ pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
 pub use wgpu;
 pub use winit;
+pub use workflow::{start_web_worker, Runner, Sender, Workflow};

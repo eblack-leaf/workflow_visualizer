@@ -252,12 +252,12 @@ pub(crate) fn read_touch_events(
                 if trigger_on_press {
                     touched_state.currently_pressed = true;
                     if let ListenableTouchType::OnPress = listener.listened_type {
-                            touched.touched = true;
-                            toggle_state.toggle = !toggle_state.toggle;
-                            touch_location
-                                .0
-                                .replace(primary_touch.touch.unwrap().origin);
-                            focused_entity.entity.replace(grabbed.0);
+                        touched.touched = true;
+                        toggle_state.toggle = !toggle_state.toggle;
+                        touch_location
+                            .0
+                            .replace(primary_touch.touch.unwrap().origin);
+                        focused_entity.entity.replace(grabbed.0);
                     }
                 }
                 if trigger_on_release {
