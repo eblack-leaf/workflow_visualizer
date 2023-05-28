@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dioxus = "0.3.2"
+dioxus = { version = "0.3.2" }
+dioxus-router = "0.3.0"
 dioxus-free-icons = { version = "0.6.0", features = ["hero-icons-solid", "feather"] }
 [target.'cfg(target_family = "wasm")'.dependencies]
 dioxus-web = { version = "0.3.1" }
