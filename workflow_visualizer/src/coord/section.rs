@@ -87,7 +87,7 @@ impl Section<DeviceContext> {
     #[allow(unused)]
     pub(crate) fn as_interface(&self, scale_factor: f64) -> Section<InterfaceContext> {
         Section::<InterfaceContext>::new(
-            self.position.to_ui(scale_factor),
+            self.position.to_interface(scale_factor),
             self.area.to_ui(scale_factor),
         )
     }

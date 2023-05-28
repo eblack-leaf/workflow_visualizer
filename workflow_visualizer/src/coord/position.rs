@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::coord::{CoordContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
-
+/// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Position<Context: CoordContext> {
     pub x: f32,
@@ -23,9 +23,11 @@ impl<Context: CoordContext> Position<Context> {
             _context: PhantomData,
         }
     }
+    /// returns a copy as just a number.
     pub fn as_numerical(&self) -> Position<NumericalContext> {
         Position::<NumericalContext>::new(self.x, self.y)
     }
+    /// returns a copy as a raw position
     pub fn as_raw(&self) -> RawPosition {
         RawPosition {
             x: self.x,
@@ -34,13 +36,15 @@ impl<Context: CoordContext> Position<Context> {
     }
 }
 impl Position<InterfaceContext> {
+    /// useful for converting to a device position accounting for scale factor
     pub fn to_device(&self, scale_factor: f64) -> Position<DeviceContext> {
         Position::<DeviceContext>::new(self.x * scale_factor as f32, self.y * scale_factor as f32)
     }
 }
 
 impl Position<DeviceContext> {
-    pub fn to_ui(&self, scale_factor: f64) -> Position<InterfaceContext> {
+    /// converts to interface context accounting for scale factor
+    pub fn to_interface(&self, scale_factor: f64) -> Position<InterfaceContext> {
         Position::<InterfaceContext>::new(
             self.x / scale_factor as f32,
             self.y / scale_factor as f32,
@@ -60,7 +64,7 @@ impl<Context: CoordContext> Sub for Position<Context> {
         Position::<Context>::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
-
+/// Raw position for interacting with C
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize, Debug)]
 pub struct RawPosition {

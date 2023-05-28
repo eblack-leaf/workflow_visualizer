@@ -3,7 +3,7 @@ use bevy_ecs::bundle::Bundle;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::CoordContext;
-
+/// Location is a position + layer without an area
 #[derive(Bundle, Copy, Clone, PartialEq)]
 pub struct Location<Context: CoordContext> {
     pub position: Position<Context>,

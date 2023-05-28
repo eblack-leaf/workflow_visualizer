@@ -6,7 +6,8 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::coord::{CoordContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
-
+/// Area base coordinate class for 2d area
+/// requires setting a context to differentiate and track what the area means
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Area<Context: CoordContext> {
     pub width: f32,
@@ -22,9 +23,11 @@ impl<Context: CoordContext> Area<Context> {
             _context: PhantomData,
         }
     }
+    /// return a copy as just a number
     pub fn as_numerical(&self) -> Area<NumericalContext> {
         Area::<NumericalContext>::new(self.width, self.height)
     }
+    /// return a copy as raw struct for gpu interactions
     pub fn as_raw(&self) -> RawArea {
         RawArea {
             width: self.width,
@@ -33,6 +36,7 @@ impl<Context: CoordContext> Area<Context> {
     }
 }
 impl Area<InterfaceContext> {
+    /// accounts for scale factor to convert this to device area
     pub fn to_device(&self, scale_factor: f64) -> Area<DeviceContext> {
         Area::<DeviceContext>::new(
             self.width * scale_factor as f32,
@@ -42,6 +46,7 @@ impl Area<InterfaceContext> {
 }
 
 impl Area<DeviceContext> {
+    /// accounts for scale factor to convert this to interface area
     pub fn to_ui(&self, scale_factor: f64) -> Area<InterfaceContext> {
         Area::<InterfaceContext>::new(
             self.width / scale_factor as f32,
@@ -49,6 +54,7 @@ impl Area<DeviceContext> {
         )
     }
 }
+/// Raw area defined in C representation for interacting with C (vulkan mostly)
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
 pub struct RawArea {

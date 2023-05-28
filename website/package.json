@@ -1,0 +1,12 @@
+{
+  "name": "art_gallery_demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.1"
+  }
+}

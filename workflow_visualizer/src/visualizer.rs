@@ -246,7 +246,7 @@ impl Visualizer {
         }
         let mut touch_events = Vec::new();
         let mouse_location = mouse_adapter.location.unwrap_or_default();
-        let in_bounds = viewport_handle_section.contains(mouse_location.to_ui(scale_factor));
+        let in_bounds = viewport_handle_section.contains(mouse_location.to_interface(scale_factor));
         let interactor = Interactor::from_button(button);
         let is_primary = interactor == MouseAdapter::PRIMARY_INTERACTOR;
         if cached.0 != state {

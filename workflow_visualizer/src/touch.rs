@@ -199,7 +199,7 @@ pub(crate) fn read_touch_events(
                 ListenableTouchType::OnPress => {
                     if trigger_on_press {
                         if let Some(prime) = primary_touch.touch {
-                            let touch_origin = prime.origin.to_ui(scale_factor.factor)
+                            let touch_origin = prime.origin.to_interface(scale_factor.factor)
                                 - viewport_handle.section.position;
                             if section.contains(touch_origin) {
                                 if let Some(grab_state) = touch_grab_state.grab_state.as_mut() {
@@ -218,9 +218,9 @@ pub(crate) fn read_touch_events(
                     if trigger_on_release {
                         if let Some(prime) = primary_touch.touch {
                             if let Some(end) = prime.end {
-                                let touch_origin = prime.origin.to_ui(scale_factor.factor)
+                                let touch_origin = prime.origin.to_interface(scale_factor.factor)
                                     - viewport_handle.section.position;
-                                let touch_end = end.to_ui(scale_factor.factor)
+                                let touch_end = end.to_interface(scale_factor.factor)
                                     - viewport_handle.section.position;
                                 if section.contains(touch_origin) && section.contains(touch_end) {
                                     if let Some(grab_state) = touch_grab_state.grab_state.as_mut() {

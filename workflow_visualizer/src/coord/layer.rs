@@ -2,7 +2,8 @@ use std::ops::Add;
 
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
-
+/// Layer represents what plane this entity resides on. Used to differentiate z coords in
+/// rendering.
 #[repr(C)]
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Pod, Zeroable)]
 pub struct Layer {
