@@ -19,8 +19,21 @@ fn landing(cx: Scope) -> Element {
     let rsx = rsx!(
         div {
             class: "font-mono text-neutral-300 bg-neutral-800",
-            div {}
-            Link { to: "doc/workflow_visualizer/index.html", external: true, "API Reference"}
+            div {
+                class: "px-4 py-16",
+                div {
+                class: "text-6xl font-bold",
+                    "Workflow Visualizer"
+                    Link { class: "pl-8 text-sm text-neutral-400", to: "doc/workflow_visualizer/index.html", external: true, "API Reference"}
+                    Link { class: "pl-8 text-sm text-neutral-500", to: "/architecture", "architecture" }
+                }
+                span {
+                    class: "text-orange-500", "Web |"
+                }
+                span {
+                    class:"text-cyan-500", " Native"
+                }
+            }
         }
 
     );
