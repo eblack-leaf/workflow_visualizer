@@ -13,9 +13,9 @@ fn root(cx: Scope) -> Element {
                 class: "font-mono text-neutral-300 bg-neutral-800",
                 div {
                 class: "px-4 py-8",
-                        Link { class: "text-2xl font-bold", to: "/", "Workflow-Visualizer"}
-                        Link { class: "pl-8 text-sm text-neutral-400", to: "/architecture", "ARCHITECTURE" }
-                        Link { class: "pl-8 text-sm text-neutral-400", to: "doc/workflow_visualizer/index.html", external: true, "DOC"}
+                        Link { class: "text-lg sm:text-2xl font-bold", to: "/", "Workflow-Visualizer"}
+                        Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800", to: "/architecture", "ARCHITECTURE" }
+                        Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700", to: "doc/workflow_visualizer/index.html", external: true, "API"}
                 }
                 Route { to: "/", landing(cx) }
                 Route { to: "/architecture", architecture(cx)}
@@ -28,38 +28,21 @@ fn root(cx: Scope) -> Element {
 fn landing(cx: Scope) -> Element {
     let rsx = rsx!(
         div {
-            class:"grid sm:grid-cols-2 gap-4 place-content-center",
+            class:"py-4",
             div {
-                class:"px-4 py-8 text-6xl italic",
-                p { class: "text-orange-500", "Workflow-Visualizer"}
-                div {
-                    class: "pl-8 pt-4 text-sm italic",
-                    "Web/Native UI toolkit ..."
-                }
+                class:"bg-red-800 text-neutral-300 py-4 max-w-[85%] md:text-center",
+                h1 { class:"text-2xl sm:text-7xl pl-8 font-bold", "WORKFLOW"}
+                p { class:"pl-20 mt-4 text-sm italic text-neutral-300", "structure for describing an application."}
             }
             div {
-                class:"pt-16",
-                div {
-                    dioxus_free_icons::Icon {
-                        class: "h-6 w-6 text-neutral-500 inline",
-                        icon: dioxus_free_icons::icons::hi_solid_icons::HiAdjustments,
-                    }
-                    p {class:"text-lg inline pl-4", "WEB | "}
-                    p {class:"text-lg inline text-orange-500", "NATIVE"}
-                }
-                p { class:"pt-4", "Visualizer tools compile to Wasm (WebAssembly) to run in the browser,\
-                or take full advantage of the hardware running bare metal with Vulkan/DirectX12/Metal via WGPU."}
-                br {}
-                div {
-                    dioxus_free_icons::Icon {
-                        class: "h-6 w-6 text-neutral-500 inline",
-                        icon: dioxus_free_icons::icons::hi_solid_icons::HiDatabase,
-                    }
-                    p {class:"text-lg inline pl-4", "LOCAL | "}
-                    p {class:"text-lg inline text-orange-500", "REMOTE"}
-                }
-                p { class:"pt-4", "Visualizer tools compile to Wasm (WebAssembly) to run in the browser,\
-                or take full advantage of the hardware running bare metal with Vulkan/DirectX12/Metal via WGPU."}
+                class:"text-neutral-300 bg-orange-800 py-4 ml-32 text-right md:text-center",
+                h1 { class:"text-lg sm:text-6xl pr-4 font-semibold", "VISUALIZER"}
+                p { class:"px-16 mt-4 text-sm italic text-neutral-300", "web/native rendering tools."}
+            }
+            div {
+                class:"text-neutral-800 bg-yellow-600 py-4 max-w-[75%] ml-10",
+                h1 { class:"text-md sm:text-xl pl-4", "OVERVIEW"}
+                p { class:"px-16 mt-4 text-sm italic text-neutral-700", "something."}
             }
         }
     );
