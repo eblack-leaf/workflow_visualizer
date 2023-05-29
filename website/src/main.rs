@@ -14,9 +14,18 @@ fn root(cx: Scope) -> Element {
                 class: "font-mono text-neutral-300 bg-neutral-800",
                 div {
                 class: "px-4 py-8",
-                        Link { class: "text-lg sm:text-2xl font-bold", to: "/", "Workflow-Visualizer"}
-                        Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800", to: "/architecture", "ARCHITECTURE" }
-                        Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700", to: "doc/workflow_visualizer/index.html", external: true, "API"}
+                        Link { class: "text-lg sm:text-2xl font-bold", to: "/", "Wkflw-Vslzr"}
+                        Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800",
+                        to: "/architecture", "ARCHITECTURE" }
+                        Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700",
+                        to: "doc/workflow_visualizer/index.html", external: true, "API"}
+                        Link { class:"h-12 w-12 text-neutral-400 inline ml-4 sm:ml-8",
+                        to:"https://github.com/eblack-leaf/workflow_visualizer", external: true,
+                            Icon {
+                                class:"inline",
+                                icon: dioxus_free_icons::icons::fi_icons::FiGithub,
+                            }
+                        }
                 }
                 Route { to: "/", landing(cx) }
                 Route { to: "/architecture", architecture(cx)}
@@ -42,20 +51,61 @@ fn landing(cx: Scope) -> Element {
             }
             div {
                 class:"text-neutral-800 bg-yellow-600 py-4 max-w-[75%] ml-10",
-                h1 { class:"text-lg sm:text-xl pl-4", "OVERVIEW"}
-                p { class:"px-16 mt-4 text-sm italic text-neutral-700", "something."}
+                p { class:"px-4 mt-4 text-md italic text-neutral-700",
+                    "Rust lib for blazingly fast + stylish user interfaces. Render natively on "
+                    span { class:"", "desktop/mobile" }
+                    " and via " Link {class:"text-md font-bold text-neutral-900", to:"https://webassembly.org/", external:true, "wasm"}
+                    " + browser on web. Powered by "
+                    Link {
+                        class:"font-bold text-md text-neutral-900",
+                        to:"https://wgpu.rs/", external: true,
+                        "wgpu.rs"
+                    }
+                }
             }
             div {
-                class:"text-neutral-300 bg-green-700 py-4 ml-24 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16 h-16",
+                class:"px-4 text-sm text-neutral-300 bg-green-800 py-4 ml-24 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
+                "Application thread is run async from UI thread to keep flat 16.7ms frame time. Impl "
+                Link {
+                    class:"font-bold text-md text-neutral-900",
+                    to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Workflow.html",
+                    external:true,
+                    "Workflow"
+                }
+                " to setup message passing infrastructure to communicate between the threads."
             }
             div {
-                class:"text-neutral-300 bg-blue-700 py-4 ml-20 md:ml-36 max-w-[55%] h-12",
+                class:"px-4 text-sm text-neutral-300 bg-blue-800 py-4 ml-20 md:ml-36 max-w-[55%] text-center",
             }
             div {
-                class:"text-neutral-300 bg-indigo-700 py-4 ml-32 sm:ml-48 md:ml-64 text-center mr-16 md:mr-32 h-8",
+                class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-32 sm:ml-48 md:ml-64 text-center mr-16 md:mr-32",
+                "Single render pass for efficient mobile rendering. "
+                "Extensible with custom render pipelines for specific solutions. Impl "
+                Link {
+                    class:"font-bold text-md text-neutral-900",
+                    to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Render.html",
+                    external:true,
+                    "Render"
+                }
+                " + "
+                Link {
+                    class:"font-bold text-md text-neutral-900",
+                    to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Attach.html",
+                    external:true,
+                    "Attach"
+                }
+                " to get started."
             }
             div {
-                class:"text-neutral-300 bg-violet-700 py-4 ml-24 md:ml-40 max-w-[45%] h-4",
+                class:"px-4 text-sm text-neutral-300 bg-violet-800 py-4 ml-24 md:ml-40 max-w-[45%] text-center",
+                "ECS pattern via "
+                Link {
+                    class:"font-bold text-md text-neutral-900",
+                    to:"https://github.com/bevyengine/bevy/tree/main/crates/bevy_ecs",
+                    external:true,
+                    "Bevy-ECS"
+                }
+                " for composition over inheritance + blazingly fast iteration minimizing cache misses."
             }
         }
     );
