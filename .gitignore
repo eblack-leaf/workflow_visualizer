@@ -1,6 +1,0 @@
-/target/
-/wasm_rebuild_avoidance_target/
-/android_rebuild_avoidance_target/
-/wgpu_traces/
-/.idea/
-/app_web_build/

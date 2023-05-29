@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <style type="text/css">
-        html, body {
-            margin: 0px;
-            border: 0px;
-            padding: 0px;
-            height: 100%;
-            background: white;
-        }
-    </style>
+  <title>Workflow Visualizer</title>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="tailwind.css">
+
 </head>
 <body>
-<script src="//cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
-<script type="module">
-    import init from "./app.js";
-
-    window.addEventListener("load", () => {
-        init();
+  <div id="main"></div>
+  <script type="module">
+    import init from "/assets/dioxus/workflow_visualizer.js";
+    init("/./assets/dioxus/workflow_visualizer_bg.wasm").then(wasm => {
+      if (wasm.__wbindgen_start == undefined) {
+        wasm.main();
+      }
     });
-</script>
+  </script>
+  
 </body>
 </html>
