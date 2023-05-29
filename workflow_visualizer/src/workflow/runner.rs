@@ -1,4 +1,3 @@
-use std::sync::{Arc, Mutex};
 #[cfg(not(target_family = "wasm"))]
 use crate::workflow::bridge::NativeSender;
 use crate::workflow::bridge::{OutputWrapper, Receiver, Responder, Sender};
@@ -6,9 +5,10 @@ use crate::workflow::bridge::{OutputWrapper, Receiver, Responder, Sender};
 use crate::workflow::native::internal_native_run;
 #[cfg(target_family = "wasm")]
 use crate::workflow::web::internal_web_run;
+use crate::{Area, DeviceContext, Visualizer, Workflow};
+use std::sync::{Arc, Mutex};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
-use crate::{Area, DeviceContext, Visualizer, Workflow};
 
 pub(crate) struct EngenHandle<T: Workflow + Default>(pub(crate) Arc<Mutex<T>>);
 pub struct Runner {

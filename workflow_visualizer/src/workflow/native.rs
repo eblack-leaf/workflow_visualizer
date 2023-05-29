@@ -4,9 +4,9 @@ use crate::workflow::bridge::{add_exit_signal_handler, Receiver, Responder};
 use crate::workflow::run::internal_loop;
 use crate::workflow::runner::EngenHandle;
 use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
+use bevy_ecs::prelude::Resource;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use bevy_ecs::prelude::Resource;
 use winit::dpi::PhysicalSize;
 use winit::event_loop::{EventLoopBuilder, EventLoopWindowTarget};
 #[cfg(target_os = "android")]
