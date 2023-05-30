@@ -11,7 +11,7 @@ fn root(cx: Scope) -> Element {
     let rsx = rsx!(
         Router {
             div {
-                class: "font-mono text-neutral-300 bg-neutral-800",
+                class: " text-neutral-300 bg-neutral-800",
                 div {
                 class: "px-4 py-8",
                         Link { class: "text-lg sm:text-2xl font-bold", to: "/", "W-V"}
@@ -29,7 +29,6 @@ fn root(cx: Scope) -> Element {
                 }
                 Route { to: "/", landing(cx) }
                 Route { to: "/architecture", architecture(cx)}
-                // Redirect { from: "", to: "/" }
             }
         }
     );
@@ -39,6 +38,23 @@ fn landing(cx: Scope) -> Element {
     let rsx = rsx!(
         div {
             class:"py-4",
+            div {
+                class:"bg-green-800 text-neutral-300 py-4 max-w-[85%] text-center",
+                h1 { class:"text-4xl sm:text-7xl pl-4 font-bold", "WORKFLOW"}
+            }
+            div {
+                class:"text-neutral-300 bg-sky-800 py-2 ml-16 md:ml-32 text-center",
+                h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
+            }
+            div {
+                class:"text-neutral-800 bg-fuchsia-800 max-w-[75%] ml-4 text-center",
+                p { class:"px-4 text-sm text-neutral-300",
+                    p { class:"font-semibold",
+                        Icon { class:"h-10 w-10 inline pr-4 text-fuchsia-400", icon:dioxus_free_icons::icons::fi_icons::FiCodeSlash}
+                        "Web/Native" span {class:"text-fuchsia-400", " UI "} "Toolkit."
+                    }
+                }
+            }
             div {
                 class:"text-sm text-neutral-300 bg-orange-800 py-4 ml-8 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
                 "Impl "
@@ -51,14 +67,6 @@ fn landing(cx: Scope) -> Element {
                 " to setup application."
             }
             div {
-                class:"bg-green-800 text-neutral-300 py-4 max-w-[85%] text-center",
-                h1 { class:"text-4xl sm:text-7xl pl-4 font-bold inline", "WORKFLOW"}
-            }
-            div {
-                class:"text-neutral-300 bg-sky-800 py-2 ml-16 sm:ml-16 md:ml-32 text-center",
-                h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
-            }
-            div {
                 class:"text-sm text-neutral-300 bg-amber-700 py-4 md:ml-8 max-w-[85%] text-center",
                 "Utilize "
                 Link {
@@ -68,15 +76,6 @@ fn landing(cx: Scope) -> Element {
                     "Visualizer"
                 }
                 " to define aesthetics & reactions."
-            }
-            div {
-                class:"text-neutral-800 bg-fuchsia-800 max-w-[75%] ml-4 text-center",
-                p { class:"px-4 text-sm text-neutral-300",
-                    p { class:"font-semibold",
-                        Icon { class:"h-10 w-10 inline pr-4 text-fuchsia-400", icon:dioxus_free_icons::icons::fi_icons::FiCodeSlash}
-                        "Web/Native" span {class:"text-fuchsia-400", " UI "} "Toolkit."
-                    }
-                }
             }
             div {
                 class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-7 sm:ml-16 md:ml-64 text-center mr-4 md:mr-16",
@@ -107,20 +106,36 @@ fn landing(cx: Scope) -> Element {
                 " for composition over inheritance."
             }
             div {
-                class:"mt-16 mx-4 h-96",
-                p {class:"text-md text-neutral-500", "Overview"}
+                class:"mt-16 mx-4 font-mono md:h-96",
+                p {class:"text-md text-neutral-500 text-center", "Overview"}
                 div {
-                    class:"py-4",
+                    class:"",
                     div {
-                        class:"text-xs",
-                        "Workflow-Visualizer is a rust library for creating responsive web/native UI applications.
-                        See `ARCHITECTURE` for more.
-                        "
-                        div {
-                            class:"",
-                            // Icon { class:"h-6 w-6", icon:dioxus_free_icons::icons::fi_icons::FiCpu}
-                            p {class:"", ""}
+                        class:"text-md text-center",
+                        p{
+                            class:"py-4",
+                            "Workflow-Visualizer is a "
+                            Link {
+                                class:"text-neutral-500",
+                                to:"https://www.rust-lang.org/",
+                                external:true,
+                                "rust"
+                            }
+                            " library for creating responsive web/native UI applications."
                         }
+                        p {
+                            class:"py-4", " Powered by "
+                            Link {class:"text-neutral-500", to:"https://wgpu.rs/", external:true, "wgpu.rs"}
+                            " for performant cross-platform gpu acceleration."
+                        }
+                        p{
+                            class:"", "Desktop: " span {class:"text-xs text-neutral-400 italic", "Linux | Windows | Mac"}
+                        }
+                        p {class:"", "Mobile: " span{class:"text-xs text-neutral-400 italic", "Android | (iOS coming soon...)"}}
+                        p {class:"", "Web: "
+                            Link {class:"text-neutral-500 italic", to:"https://webassembly.org/", external:true, "wasm"}
+                        }
+                        p{class:"py-4", "See " Link {class:"text-neutral-500", to:"/architecture", "ARCHITECTURE" } " for more."}
                     }
                     div {
                         class:"",
@@ -135,7 +150,6 @@ fn architecture(cx: Scope) -> Element {
     let rsx = rsx!(
         div {
             class:"",
-            "Architecture"
         }
     );
     cx.render(rsx)
