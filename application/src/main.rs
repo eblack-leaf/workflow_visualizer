@@ -15,7 +15,7 @@ fn android_main(android_app: AndroidApp) {
     tracing_subscriber::fmt().init();
     let mut visualizer = visualizer::visualizer();
     visualizer.set_gfx_options(GfxOptions::limited_environment());
-    let runner = Runner::new()
+    Runner::new()
         .with_android_app(android_app)
         .native_run::<Engen>(visualizer);
 }
