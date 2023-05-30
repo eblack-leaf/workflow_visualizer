@@ -40,27 +40,10 @@ fn landing(cx: Scope) -> Element {
         div {
             class:"py-4",
             div {
-                class:"bg-red-800 text-neutral-300 py-4 max-w-[85%] text-center",
-                h1 { class:"text-4xl sm:text-7xl pl-4 font-bold inline", "WORKFLOW"}
-            }
-            div {
-                class:"text-neutral-300 bg-orange-700 py-2 ml-16 sm:ml-16 md:ml-32 text-center",
-                h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
-            }
-            div {
-                class:"text-neutral-800 bg-yellow-800 max-w-[75%] ml-4 text-center",
-                p { class:"px-4 text-sm text-neutral-300",
-                    p { class:"font-semibold",
-                        Icon { class:"h-10 w-10 inline pr-4 text-neutral-400", icon:dioxus_free_icons::icons::fi_icons::FiCodeSlash}
-                        "Web/Native" span {class:"text-yellow-400", " UI "} "Toolkit."
-                    }
-                }
-            }
-            div {
-                class:"text-sm text-neutral-300 bg-green-800 py-4 ml-8 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
+                class:"text-sm text-neutral-300 bg-red-800 py-4 ml-8 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
                 "Impl "
                 Link {
-                    class:"font-bold text-md text-green-300",
+                    class:"font-bold text-md text-red-300",
                     to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Workflow.html",
                     external:true,
                     "Workflow"
@@ -68,15 +51,32 @@ fn landing(cx: Scope) -> Element {
                 " to setup application."
             }
             div {
-                class:"text-sm text-neutral-300 bg-blue-800 py-4 md:ml-8 max-w-[85%] text-center",
+                class:"bg-green-800 text-neutral-300 py-4 max-w-[85%] text-center",
+                h1 { class:"text-4xl sm:text-7xl pl-4 font-bold inline", "WORKFLOW"}
+            }
+            div {
+                class:"text-neutral-300 bg-sky-700 py-2 ml-16 sm:ml-16 md:ml-32 text-center",
+                h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
+            }
+            div {
+                class:"text-sm text-neutral-300 bg-amber-700 py-4 md:ml-8 max-w-[85%] text-center",
                 "Utilize "
                 Link {
-                    class:"font-bold text-md text-sky-400",
+                    class:"font-bold text-md text-amber-400",
                     to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/struct.Visualizer.html",
                     external:true,
                     "Visualizer"
                 }
                 " to define aesthetics & reactions."
+            }
+            div {
+                class:"text-neutral-800 bg-fuchsia-800 max-w-[75%] ml-4 text-center",
+                p { class:"px-4 text-sm text-neutral-300",
+                    p { class:"font-semibold",
+                        Icon { class:"h-10 w-10 inline pr-4 text-fuchsia-400", icon:dioxus_free_icons::icons::fi_icons::FiCodeSlash}
+                        "Web/Native" span {class:"text-fuchsia-400", " UI "} "Toolkit."
+                    }
+                }
             }
             div {
                 class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-7 sm:ml-16 md:ml-64 text-center mr-4 md:mr-16",
@@ -97,9 +97,9 @@ fn landing(cx: Scope) -> Element {
                 " to extend rendering."
             }
             div {
-                class:"px-4 text-sm text-neutral-300 bg-violet-800 py-4 ml-2 md:ml-15 max-w-[75%] text-center",
+                class:"px-4 text-sm text-neutral-300 bg-lime-800 py-4 ml-2 md:ml-15 max-w-[75%] text-center",
                 Link {
-                    class:"font-bold text-md text-violet-500",
+                    class:"font-bold text-md text-lime-500",
                     to:"https://github.com/bevyengine/bevy/tree/main/crates/bevy_ecs",
                     external:true,
                     "Bevy-ECS"
@@ -114,7 +114,8 @@ fn landing(cx: Scope) -> Element {
                     div {
                         class:"text-xs",
                         "Workflow-Visualizer is a rust library for creating responsive web/native UI applications.
-                        The `Workflow` trait establishes communication between an application thread and UI thread."
+                        See `ARCHITECTURE` for more.
+                        "
                         div {
                             class:"",
                             // Icon { class:"h-6 w-6", icon:dioxus_free_icons::icons::fi_icons::FiCpu}
