@@ -40,10 +40,10 @@ fn landing(cx: Scope) -> Element {
         div {
             class:"py-4",
             div {
-                class:"text-sm text-neutral-300 bg-red-800 py-4 ml-8 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
+                class:"text-sm text-neutral-300 bg-orange-800 py-4 ml-8 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
                 "Impl "
                 Link {
-                    class:"font-bold text-md text-red-300",
+                    class:"font-bold text-md text-orange-300",
                     to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Workflow.html",
                     external:true,
                     "Workflow"
@@ -55,7 +55,7 @@ fn landing(cx: Scope) -> Element {
                 h1 { class:"text-4xl sm:text-7xl pl-4 font-bold inline", "WORKFLOW"}
             }
             div {
-                class:"text-neutral-300 bg-sky-700 py-2 ml-16 sm:ml-16 md:ml-32 text-center",
+                class:"text-neutral-300 bg-sky-800 py-2 ml-16 sm:ml-16 md:ml-32 text-center",
                 h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
             }
             div {
@@ -107,7 +107,7 @@ fn landing(cx: Scope) -> Element {
                 " for composition over inheritance."
             }
             div {
-                class:"mt-16 mx-4",
+                class:"mt-16 mx-4 h-96",
                 p {class:"text-md text-neutral-500", "Overview"}
                 div {
                     class:"py-4",
