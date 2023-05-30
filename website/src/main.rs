@@ -14,7 +14,7 @@ fn root(cx: Scope) -> Element {
                 class: "font-mono text-neutral-300 bg-neutral-800",
                 div {
                 class: "px-4 py-8",
-                        Link { class: "text-lg sm:text-2xl font-bold", to: "/", "Wkflw-Vslzr"}
+                        Link { class: "text-lg sm:text-2xl font-bold", to: "/", "W-V"}
                         Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800",
                         to: "/architecture", "ARCHITECTURE" }
                         Link { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700",
@@ -42,24 +42,22 @@ fn landing(cx: Scope) -> Element {
             div {
                 class:"bg-red-800 text-neutral-300 py-4 max-w-[85%] text-center",
                 h1 { class:"text-4xl sm:text-7xl pl-4 font-bold inline", "WORKFLOW"}
-                // p { class:"pl-10 sm:pl-20 mt-4 text-xs italic text-neutral-300", "structure for describing an application."}
             }
             div {
-                class:"text-neutral-300 bg-orange-700 py-4 ml-6 sm:ml-16 md:ml-32 text-center",
+                class:"text-neutral-300 bg-orange-700 py-2 ml-16 sm:ml-16 md:ml-32 text-center",
                 h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
-                // p { class:"mt-4 text-xs italic text-neutral-300 pr-2", "web/native rendering tools."}
             }
             div {
-                class:"text-neutral-800 bg-yellow-800 py-4 max-w-[75%] ml-4 text-center",
+                class:"text-neutral-800 bg-yellow-800 max-w-[75%] ml-4 text-center",
                 p { class:"px-4 text-sm text-neutral-300",
                     p { class:"font-semibold",
                         Icon { class:"h-10 w-10 inline pr-4 text-neutral-400", icon:dioxus_free_icons::icons::fi_icons::FiCodeSlash}
-                        "Web/Native UI Toolkit."
+                        "Web/Native" span {class:"text-yellow-400", " UI "} "Toolkit."
                     }
                 }
             }
             div {
-                class:"text-sm text-neutral-300 bg-green-800 py-4 ml-10 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
+                class:"text-sm text-neutral-300 bg-green-800 py-4 ml-8 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
                 "Impl "
                 Link {
                     class:"font-bold text-md text-green-300",
@@ -70,7 +68,7 @@ fn landing(cx: Scope) -> Element {
                 " to setup application."
             }
             div {
-                class:"text-sm text-neutral-300 bg-blue-800 py-4 ml-14 md:ml-36 max-w-[55%] text-center",
+                class:"text-sm text-neutral-300 bg-blue-800 py-4 md:ml-8 max-w-[85%] text-center",
                 "Utilize "
                 Link {
                     class:"font-bold text-md text-sky-400",
@@ -81,7 +79,7 @@ fn landing(cx: Scope) -> Element {
                 " to define aesthetics & reactions."
             }
             div {
-                class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-24 sm:ml-48 md:ml-64 text-center mr-16 md:mr-32",
+                class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-7 sm:ml-16 md:ml-64 text-center mr-4 md:mr-16",
                 "Impl "
                 Link {
                     class:"font-bold text-md text-indigo-400",
@@ -99,8 +97,7 @@ fn landing(cx: Scope) -> Element {
                 " to extend rendering."
             }
             div {
-                class:"px-4 text-sm text-neutral-300 bg-violet-800 py-4 ml-28 md:ml-40 max-w-[45%] text-center",
-                "ECS pattern via "
+                class:"px-4 text-sm text-neutral-300 bg-violet-800 py-4 ml-2 md:ml-15 max-w-[75%] text-center",
                 Link {
                     class:"font-bold text-md text-violet-500",
                     to:"https://github.com/bevyengine/bevy/tree/main/crates/bevy_ecs",
@@ -108,6 +105,26 @@ fn landing(cx: Scope) -> Element {
                     "Bevy-ECS"
                 }
                 " for composition over inheritance."
+            }
+            div {
+                class:"mt-16 mx-4",
+                p {class:"text-md text-neutral-500", "Overview"}
+                div {
+                    class:"py-4",
+                    div {
+                        class:"text-xs",
+                        "Workflow-Visualizer is a rust library for creating responsive web/native UI applications.
+                        The `Workflow` trait establishes communication between an application thread and UI thread."
+                        div {
+                            class:"",
+                            // Icon { class:"h-6 w-6", icon:dioxus_free_icons::icons::fi_icons::FiCpu}
+                            p {class:"", ""}
+                        }
+                    }
+                    div {
+                        class:"",
+                    }
+                }
             }
         }
     );
