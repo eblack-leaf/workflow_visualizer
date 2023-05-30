@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 dioxus = { version = "0.3.2" }
 dioxus-router = "0.3.0"
-dioxus-free-icons = { version = "0.6.0", features = ["hero-icons-solid", "feather"] }
+dioxus-free-icons = { version = "0.6.0", features = ["hero-icons-solid", "feather", "bootstrap", "font-awesome-solid"] }
 [target.'cfg(target_family = "wasm")'.dependencies]
 dioxus-web = { version = "0.3.1" }
 

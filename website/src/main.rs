@@ -40,72 +40,74 @@ fn landing(cx: Scope) -> Element {
         div {
             class:"py-4",
             div {
-                class:"bg-red-800 text-neutral-300 py-4 max-w-[85%] md:text-center",
-                h1 { class:"text-4xl sm:text-7xl pl-4 font-bold", "WORKFLOW"}
-                p { class:"pl-10 sm:pl-20 mt-4 text-xs italic text-neutral-300", "structure for describing an application."}
+                class:"bg-red-800 text-neutral-300 py-4 max-w-[85%] text-center",
+                h1 { class:"text-4xl sm:text-7xl pl-4 font-bold inline", "WORKFLOW"}
+                // p { class:"pl-10 sm:pl-20 mt-4 text-xs italic text-neutral-300", "structure for describing an application."}
             }
             div {
-                class:"text-neutral-300 bg-orange-700 py-4 ml-16 md:ml-32 text-right md:text-center",
-                h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold", "VISUALIZER"}
-                p { class:"mt-4 text-xs italic text-neutral-300 pr-2", "web/native rendering tools."}
+                class:"text-neutral-300 bg-orange-700 py-4 ml-6 sm:ml-16 md:ml-32 text-center",
+                h1 { class:"text-2xl sm:text-6xl pr-4 font-semibold inline", "VISUALIZER"}
+                // p { class:"mt-4 text-xs italic text-neutral-300 pr-2", "web/native rendering tools."}
             }
             div {
-                class:"text-neutral-800 bg-yellow-600 py-4 max-w-[75%] ml-10",
-                p { class:"px-4 mt-4 text-md italic text-neutral-700",
-                    "Rust lib for blazingly fast + stylish user interfaces. Render natively on "
-                    span { class:"", "desktop/mobile" }
-                    " and via " Link {class:"text-md font-bold text-neutral-900", to:"https://webassembly.org/", external:true, "wasm"}
-                    " + browser on web. Powered by "
-                    Link {
-                        class:"font-bold text-md text-neutral-900",
-                        to:"https://wgpu.rs/", external: true,
-                        "wgpu.rs"
+                class:"text-neutral-800 bg-yellow-800 py-4 max-w-[75%] ml-4 text-center",
+                p { class:"px-4 text-sm text-neutral-300",
+                    p { class:"font-semibold",
+                        Icon { class:"h-10 w-10 inline pr-4 text-neutral-400", icon:dioxus_free_icons::icons::fi_icons::FiCodeSlash}
+                        "Web/Native UI Toolkit."
                     }
                 }
             }
             div {
-                class:"px-4 text-sm text-neutral-300 bg-green-800 py-4 ml-24 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
-                "Application thread is run async from UI thread to keep flat 16.7ms frame time. Impl "
+                class:"text-sm text-neutral-300 bg-green-800 py-4 ml-10 sm:ml-32 md:ml-48 text-center mr-4 md:mr-16",
+                "Impl "
                 Link {
-                    class:"font-bold text-md text-neutral-900",
+                    class:"font-bold text-md text-green-300",
                     to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Workflow.html",
                     external:true,
                     "Workflow"
                 }
-                " to setup message passing infrastructure to communicate between the threads."
+                " to setup application."
             }
             div {
-                class:"px-4 text-sm text-neutral-300 bg-blue-800 py-4 ml-20 md:ml-36 max-w-[55%] text-center",
-            }
-            div {
-                class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-32 sm:ml-48 md:ml-64 text-center mr-16 md:mr-32",
-                "Single render pass for efficient mobile rendering. "
-                "Extensible with custom render pipelines for specific solutions. Impl "
+                class:"text-sm text-neutral-300 bg-blue-800 py-4 ml-14 md:ml-36 max-w-[55%] text-center",
+                "Utilize "
                 Link {
-                    class:"font-bold text-md text-neutral-900",
+                    class:"font-bold text-md text-sky-400",
+                    to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/struct.Visualizer.html",
+                    external:true,
+                    "Visualizer"
+                }
+                " to define aesthetics & reactions."
+            }
+            div {
+                class:"px-4 text-sm text-neutral-300 bg-indigo-800 py-4 ml-24 sm:ml-48 md:ml-64 text-center mr-16 md:mr-32",
+                "Impl "
+                Link {
+                    class:"font-bold text-md text-indigo-400",
                     to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Render.html",
                     external:true,
                     "Render"
                 }
                 " + "
                 Link {
-                    class:"font-bold text-md text-neutral-900",
+                    class:"font-bold text-md text-indigo-400",
                     to:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Attach.html",
                     external:true,
                     "Attach"
                 }
-                " to get started."
+                " to extend rendering."
             }
             div {
-                class:"px-4 text-sm text-neutral-300 bg-violet-800 py-4 ml-24 md:ml-40 max-w-[45%] text-center",
+                class:"px-4 text-sm text-neutral-300 bg-violet-800 py-4 ml-28 md:ml-40 max-w-[45%] text-center",
                 "ECS pattern via "
                 Link {
-                    class:"font-bold text-md text-neutral-900",
+                    class:"font-bold text-md text-violet-500",
                     to:"https://github.com/bevyengine/bevy/tree/main/crates/bevy_ecs",
                     external:true,
                     "Bevy-ECS"
                 }
-                " for composition over inheritance + blazingly fast iteration minimizing cache misses."
+                " for composition over inheritance."
             }
         }
     );
