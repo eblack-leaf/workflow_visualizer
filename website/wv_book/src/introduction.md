@@ -46,7 +46,7 @@ responses that it generates. For this app to do anything visually we need anothe
 
 ### Visualizer 
 
-Next we have to instantiate a [`Visualizer`](./visualizer.md).
+Next we have to instantiate a [`Visualizer`](visualizer.md).
 
 ```rust
 let theme = Theme::default();
@@ -55,20 +55,21 @@ let mut visualizer = Visualizer::new(theme, gfx_options);
 // config visualizer ...
 ```
 
-This is a suite of rendering tools that are attached to a [`Job`](./job.md) which 
-collects various render pipelines and provides a structure to create a render pass, and call
-any render functions that are attached to the job; see [`Render`](./render.md). The visualizer also interprets input actions
-such as providing listeners for touches/mouse input; see [`Touch`](./touch.md). The visualizer has
-a [`Viewport`](./viewport.md) to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
-This is used by renderers to correctly position elements using [`Coord`](./coord.md) system which accounts for
-scale factor of the device by using different `CoordContext`s. [`Visibility`](./visibility.md) can be determined by 
-reading from an elements associated component. Visible elements can receive [`Focus`](./focus.md) to show
+This is a suite of rendering tools that are attached to a [`Job`](job.md). A `Job` is a `Container` for data
+and a set of `Task`s to run functions on the container. One important purpose for a job is to collect various render pipelines
+and provide a structure to create a render pass, and call any render functions that are attached to the job; 
+see [`Render`](render.md). The visualizer also interprets input actions
+such as providing listeners for touches/mouse input; see [`Touch`](touch.md). The visualizer has
+a [`Viewport`](viewport.md) to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
+This is used by renderers to correctly position elements using [`Coord`](coord.md) system which accounts for
+scale factor of the device by using different `CoordContext`s. [`Visibility`](visibility.md) can be determined by 
+reading from an elements associated component. Visible elements can receive [`Focus`](focus.md) to show
 on-screen keyboard using `VirtualKeyboard` and receive input. Prebuilt core render pipelines are included
-by default such as [`TextRenderer`](./text_renderer.md), which is a memory-efficient glyph-caching text renderer which can be 
+by default such as [`TextRenderer`](text_renderer.md), which is a memory-efficient glyph-caching text renderer which can be 
 utilized by spawning a `Text` element. Other pipelines are available that are common to UI applications. 
 If nothing quite solves your desired effect you can easily integrate your own renderer by implementing 
-[`Render`](./render.md) to setup the render function and [`Attach`](./attach.md) to configure how the renderer attaches to the 
-visualizer's [`Job`](./job.md).
+[`Render`](render.md) to setup the render function and [`Attach`](./attach.md) to configure how the renderer attaches to the 
+visualizer's [`Job`](job.md).
 
 ### Runner
 
