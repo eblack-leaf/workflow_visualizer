@@ -144,16 +144,17 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Workflow Visualizer is a rust lib to help get headless apps/cmdline programs visualized using
-modern gpu acceleration. </p>
-<blockquote>
-<p>Impl Workflow to establish the actions/responses for your program</p>
-</blockquote>
+                        <h1 id="workflow-visualizer"><a class="header" href="#workflow-visualizer">Workflow Visualizer</a></h1>
+<p>The crate workflow_visualizer is a rust lib for cross-platform UI applications.
+The structure of this lib works by creating a headless app with actions and responses
+that trigger reactions in the UI layer. </p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<h3 id="workflow"><a class="header" href="#workflow">Workflow</a></h3>
+<p>The process starts with defining your workflow. This is done by implementing <a href="./workflow.html"><code>Workflow</code></a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct Engen {
-    // any data you need for running application
+    // your data here to run app
 }
 impl Workflow for Engen {
     type Action = ();
@@ -172,54 +173,60 @@ impl Workflow for Engen {
         // ...fetch content from network request
         // return a Response to signal to the Visualizer
     }
-    fn exit_action() -&gt; Self::Action{ 
+    fn exit_action() -&gt; Self::Action{
         // tell visualizer what action is the exit action 
     }
-    fn exit_response() -&gt; Self::Response{ 
+    fn exit_response() -&gt; Self::Response{
         // tell visualizer what response is the exit response
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<p>This trait defines the messages that can be signaled between the visualizer and
-your program establishing a bridge for communication. This is needed because a responsive 
-app needs to run at 16.7ms per frame. To this end the visualizer spawns a background process 
-to receive messages when actions need happening, then that thread can take as much time as 
-needed doing async calls without interrupting the UI thread. On native platforms this takes form 
-of a tokio task. On web targets this takes advantage of web workers which requires extra setup by
-an application.</p>
-<p>A main function to start a web worker must be defined.</p>
-<pre><pre class="playground"><code class="language-rust">fn main() {
-    start_web_worker::&lt;Engen&gt;();
-}</code></pre></pre>
-<p>A common build program for wasm is Trunk. Trunk supports web workers and can be configured by putting</p>
-<pre><code class="language-toml">[[bin]]
-name = &quot;worker&quot;
-path = &quot;src/worker_main.rs&quot;
-</code></pre>
-<p>in your Cargo.toml and </p>
-<pre><code class="language-html">&lt;link data-trunk rel=&quot;rust&quot; href=&quot;Cargo.toml&quot; data-wasm-opt=&quot;z&quot; data-bin=&quot;worker&quot; data-type=&quot;worker&quot; /&gt;
-</code></pre>
-<p>in the index.html that serves as entry point for your Trunk build. Due to how web worker api is formed you need to 
-tell the visualizer the path of the web worker as so</p>
+<p>This establishes a communication protocol between a UI thread and a thread run in background for
+your application actions. This is the structure of how an app runs using workflow_visualizer. 
+This is a headless app as it only concerns itself with actions in to your app and the
+responses that it generates. For this app to do anything visually we need another part.</p>
+<h3 id="visualizer"><a class="header" href="#visualizer">Visualizer</a></h3>
+<p>Next we have to instantiate a <a href="./visualizer.html"><code>Visualizer</code></a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>Runner::new().web_run::&lt;Engen&gt;(visualizer, &quot;./worker.js&quot;.to_string());
+</span>let theme = Theme::default();
+let gfx_options = GfxOptions::native_defaults();
+let mut visualizer = Visualizer::new(theme, gfx_options);
+// config visualizer ...
 <span class="boring">}</span></code></pre></pre>
-<p>The path in Trunk builds is the name of the binary defined in the index.html. See <a href="./platform_specifics.html">Platform Specifics</a> for more details.</p>
-<p>This brings me to the next topic the Runner. The Runner is responsible for establishing a connection 
-to the platforms compositor, create a window to render within and run a loop to receive events from this connection.
-The runner cannot exit this event loop, so it spawns the background thread before entering using the definitions provided in the 
-Workflow trait.
-To run natively</p>
+<p>This is a suite of rendering tools that are attached to a <a href="./job.html"><code>Job</code></a> which 
+collects various render pipelines and provides a structure to create a render pass, and call
+any render functions that are attached to the job; see <a href="./render.html"><code>Render</code></a>. The visualizer also interprets input actions
+such as providing listeners for touches/mouse input; see <a href="./touch.html"><code>Touch</code></a>. The visualizer has
+a <a href="./viewport.html"><code>Viewport</code></a> to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
+This is used by renderers to correctly position elements using <a href="./coord.html"><code>Coord</code></a> system which accounts for
+scale factor of the device by using different <code>CoordContext</code>s. <a href="./visibility.html"><code>Visibility</code></a> can be determined by 
+reading from an elements associated component. Visible elements can receive <a href="./focus.html"><code>Focus</code></a> to show
+on-screen keyboard using <code>VirtualKeyboard</code> and receive input. Prebuilt core render pipelines are included
+by default such as <a href="./text_renderer.html"><code>TextRenderer</code></a>, which is a memory-efficient glyph-caching text renderer which can be 
+utilized by spawning a <code>Text</code> element. Other pipelines are available that are common to UI applications. 
+If nothing quite solves your desired effect you can easily integrate your own renderer by implementing 
+<a href="./render.html"><code>Render</code></a> to setup the render function and <a href="./attach.html"><code>Attach</code></a> to configure how the renderer attaches to the 
+visualizer's <a href="./job.html"><code>Job</code></a>.</p>
+<h3 id="runner"><a class="header" href="#runner">Runner</a></h3>
+<p>All of this structure needs an entry point. The <a href="./runner.html"><code>Runner</code></a> is responsible for establishing
+a connection to the compositor on the platform and obtaining a window to draw within. The runner forwards events from 
+the connection and links it to the appropriate calls into the visualizer. This event loop never returns control due to platform 
+implementation details. A background thread is spawned before entering this loop and a bridge created using the definitions 
+in <a href="./workflow.html"><code>Workflow</code></a> trait. To communicate to the application thread, a <a href="./sender.html"><code>Sender</code></a> can be used to 
+send actions. This process should return a response and the UI thread will receive this response and react 
+accordingly.</p>
+<h4 id="native-run"><a class="header" href="#native-run">Native Run</a></h4>
+<p>When running natively on desktop, dimensions can be specified to get a fixed size to develop with.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>Runner::new()
-        .with_desktop_dimensions((400, 600))
-        .native_run::&lt;Engen&gt;(visualizer);
+    .with_desktop_dimensions((400, 600))
+    .native_run::&lt;Engen&gt;(visualizer);
 <span class="boring">}</span></code></pre></pre>
-<p>This is called with desktop_dimensions as it is the only platform that supports custom window sizing.
-Mobile/Web targets must use fullscreen due to how they are structured. </p>
-<p>Android has a special requirement as well. To link with the android lifecycle the implementation refers to an Android
+<p>This is all that is needed to run on desktop.</p>
+<p>The runner also supports Android applications. To achieve this a few steps are needed.
+To link with the android lifecycle the implementation refers to an Android
 compatibility struct called AndroidApp. This serves as a pointer to android-activity that powers the event loop on Android and allows
 accessing system functionality.
 This must be given to a separate main function and then passed to the visualizer.</p>
@@ -242,7 +249,36 @@ name = &quot;application&quot;
 crate-type = [&quot;cdylib&quot;]
 path = &quot;src/main.rs&quot;
 </code></pre>
-<p>The application must extend GameActivity in Java to compile using cargo-ndk. See <a href="./platform_specifics.html">Platform Specifics</a> for more information.</p>
+<p>The application must extend GameActivity in Java and compile using cargo-ndk. See <a href="./platform_specifics.html">Platform Specifics</a> for more information.</p>
+<h4 id="web-run"><a class="header" href="#web-run">Web Run</a></h4>
+<p>To run on the web, extra setup is needed. Web workers allow separate processes in the browser and are taken advantage of 
+in this lib. </p>
+<p>A main function to start a web worker must be defined.</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    start_web_worker::&lt;Engen&gt;();
+}</code></pre></pre>
+<p>A common build program for wasm is Trunk. Trunk supports web workers and can be configured by putting</p>
+<pre><code class="language-toml">[[bin]]
+name = &quot;worker&quot;
+path = &quot;src/worker_main.rs&quot;
+</code></pre>
+<p>in your Cargo.toml and</p>
+<pre><code class="language-html">&lt;link data-trunk rel=&quot;rust&quot; href=&quot;Cargo.toml&quot; data-wasm-opt=&quot;z&quot; data-bin=&quot;worker&quot; data-type=&quot;worker&quot; /&gt;
+</code></pre>
+<p>in the index.html that serves as entry point for your Trunk build. Due to how web worker api is formed you need to
+tell the visualizer the path of the web worker as so</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Runner::new().web_run::&lt;Engen&gt;(visualizer, &quot;./worker.js&quot;.to_string());
+<span class="boring">}</span></code></pre></pre>
+<p>The path in Trunk builds is the name of the binary defined in the index.html. See <a href="./platform_specifics.html">Platform Specifics</a> for more details.</p>
+<h6 id="to-recap-we-have-three-major-parts"><a class="header" href="#to-recap-we-have-three-major-parts">To recap we have three major parts.</a></h6>
+<p>Workflow
+: trait for communication between application | UI thread.</p>
+<p>Visualizer
+: tools for rendering + connecting responses to interactions</p>
+<p>Runner
+: struct for establishing event loop connection + run</p>
 
                     </main>
 

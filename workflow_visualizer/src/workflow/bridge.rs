@@ -81,7 +81,7 @@ impl<T: Workflow> NativeSender<T> {
         Self(sender)
     }
     pub(crate) fn send(&self, action: <T as Workflow>::Action) {
-        self.0.send(action).expect("native sender");
+        self.0.send(action).expect("native sender.md");
     }
 }
 

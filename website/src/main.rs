@@ -12,7 +12,7 @@ fn root(cx: Scope) -> Element {
             class: " text-neutral-300 bg-neutral-800",
             div {
             class: "px-4 py-8",
-                    a { class: "text-lg sm:text-2xl font-bold", href:"/", "W-V"}
+                    a { class: "text-lg sm:text-2xl font-bold", href:"#", "W-V"}
                     a { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800",
                     href: "book/index.html", "ARCHITECTURE" }
                     a { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700",
@@ -81,7 +81,7 @@ fn root(cx: Scope) -> Element {
                     " to extend rendering."
                 }
                 div {
-                    class:"px-4 text-sm text-neutral-300 bg-lime-800 py-4 ml-2 md:ml-15 max-w-[75%] text-center",
+                    class:"px-4 text-sm text-neutral-300 bg-lime-800 py-4 ml-2 md:ml-14 max-w-[75%] text-center",
                     a {
                         class:"font-bold text-md text-lime-500",
                         href:"https://github.com/bevyengine/bevy/tree/main/crates/bevy_ecs",
@@ -90,8 +90,22 @@ fn root(cx: Scope) -> Element {
                     " for composition over inheritance."
                 }
                 div {
+                    class:"px-4 text-sm text-neutral-300 bg-green-800 py-4 ml-6 md:ml-20 text-center",
+                    p {
+                        class:"", "Render in the browser with "
+                            a {class:"text-green-400 italic", href:"https://webassembly.org/", "wasm"}
+                        }
+                }
+                div {
+                    class:"px-4 text-sm text-neutral-300 bg-red-800 py-4 ml-2 md:ml-8 text-center mr-10",
+                    p {
+                        class:"", "Powered by "
+                        a {class:"text-orange-400", href:"https://wgpu.rs/", "wgpu.rs"}
+                        " for performant cross-platform gpu acceleration."
+                    }
+                }
+                div {
                     class:"mt-16 mx-4 font-mono md:h-96",
-                    p {class:"text-md text-neutral-500 text-center", "Overview"}
                     div {
                         class:"",
                         div {
@@ -105,18 +119,6 @@ fn root(cx: Scope) -> Element {
                                     "rust"
                                 }
                                 " library for creating responsive web/native UI applications."
-                            }
-                            p {
-                                class:"py-4", " Powered by "
-                                a {class:"text-neutral-500", href:"https://wgpu.rs/", "wgpu.rs"}
-                                " for performant cross-platform gpu acceleration."
-                            }
-                            p{
-                                class:"", "Desktop: " span {class:"text-xs text-neutral-400 italic", "Linux | Windows | Mac"}
-                            }
-                            p {class:"", "Mobile: " span{class:"text-xs text-neutral-400 italic", "Android | (iOS coming soon...)"}}
-                            p {class:"", "Web: "
-                                a {class:"text-neutral-500 italic", href:"https://webassembly.org/", "wasm"}
                             }
                             p{class:"py-4", "See " a {class:"text-neutral-500", href:"book/index.html", "ARCHITECTURE" } " for more."}
                         }
