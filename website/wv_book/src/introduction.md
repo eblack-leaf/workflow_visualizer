@@ -8,7 +8,7 @@ that trigger reactions in the UI layer.
 
 ### Workflow
 
-The process starts with defining your workflow. This is done by implementing [`Workflow`](./workflow.md).
+The process starts with defining your workflow. This is done by implementing [`Workflow`](pages/workflow.md).
 
 ```rust 
 struct Engen {
@@ -46,7 +46,7 @@ responses that it generates. For this app to do anything visually we need anothe
 
 ### Visualizer 
 
-Next we have to instantiate a [`Visualizer`](visualizer.md).
+Next we have to instantiate a [`Visualizer`](pages/visualizer.md).
 
 ```rust
 let theme = Theme::default();
@@ -55,34 +55,34 @@ let mut visualizer = Visualizer::new(theme, gfx_options);
 // config visualizer ...
 ```
 
-This is a suite of rendering tools that are attached to a [`Job`](job.md). A `Job` is a `Container` for data
+This is a suite of rendering tools that are attached to a [`Job`](pages/job.md). A `Job` is a `Container` for data
 and a set of `Task`s to run functions on the container. One important purpose for a job is to collect various render pipelines
 and provide a structure to create a render pass, and call any render functions that are attached to the job; 
-see [`Render`](render.md). The visualizer also interprets input actions
-such as providing listeners for touches/mouse input; see [`Touch`](touch.md). The visualizer has
-a [`Viewport`](viewport.md) to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
-This is used by renderers to correctly position elements using [`Coord`](coord.md) system which accounts for
-scale factor of the device by using different `CoordContext`s. [`Visibility`](visibility.md) can be determined by 
-reading from an elements associated component. Visible elements can receive [`Focus`](focus.md) to show
+see [`Render`](pages/render.md). The visualizer also interprets input actions
+such as providing listeners for touches/mouse input; see [`Touch`](pages/touch.md). The visualizer has
+a [`Viewport`](pages/viewport.md) to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
+This is used by renderers to correctly position elements using [`Coord`](pages/coord.md) system which accounts for
+scale factor of the device by using different `CoordContext`s. [`Visibility`](pages/visibility.md) can be determined by 
+reading from an elements associated component. Visible elements can receive [`Focus`](pages/focus.md) to show
 on-screen keyboard using `VirtualKeyboard` and receive input. Prebuilt core render pipelines are included
-by default such as [`TextRenderer`](text_renderer.md), which is a memory-efficient glyph-caching text renderer which can be 
+by default such as [`TextRenderer`](pages/text_renderer.md), which is a memory-efficient glyph-caching text renderer which can be 
 utilized by spawning a `Text` element. Other pipelines are available that are common to UI applications. 
 If nothing quite solves your desired effect you can easily integrate your own renderer by implementing 
-[`Render`](render.md) to setup the render function and [`Attach`](./attach.md) to configure how the renderer attaches to the 
-visualizer's [`Job`](job.md).
+[`Render`](pages/render.md) to setup the render function and [`Attach`](pages/attach.md) to configure how the renderer attaches to the 
+visualizer's [`Job`](pages/job.md).
 
 ### Runner
 
-All of this structure needs an entry point. The [`Runner`](./runner.md) is responsible for establishing
+All of this structure needs an entry point. The [`Runner`](pages/runner.md) is responsible for establishing
 a connection to the compositor on the platform and obtaining a window to draw within. The runner forwards events from 
 the connection and links it to the appropriate calls into the visualizer. This event loop never returns control due to platform 
 implementation details. A background thread is spawned before entering this loop and a bridge created using the definitions 
-in [`Workflow`](./workflow.md) trait. To communicate to the application thread, a [`Sender`](./sender.md) can be used to 
+in [`Workflow`](pages/workflow.md) trait. To communicate to the application thread, a [`Sender`](pages/sender.md) can be used to 
 send actions. This process should return a response and the UI thread will receive this response and react 
 accordingly.
 
 #### Native Run
-
+###### Desktop
 When running natively on desktop, dimensions can be specified to get a fixed size to develop with.
 
 ```rust
@@ -92,7 +92,7 @@ Runner::new()
 ```
 
 This is all that is needed to run on desktop.
-
+###### Android
 The runner also supports Android applications. To achieve this a few steps are needed.
 To link with the android lifecycle the implementation refers to an Android
 compatibility struct called AndroidApp. This serves as a pointer to android-activity that powers the event loop on Android and allows
@@ -117,7 +117,7 @@ name = "application"
 crate-type = ["cdylib"]
 path = "src/main.rs"
 ```
-The application must extend GameActivity in Java and compile using cargo-ndk. See [Platform Specifics](./platform_specifics.md) for more information.
+The application must extend GameActivity in Java and compile using cargo-ndk. See [Platform Specifics](pages/platform_specifics.md) for more information.
 
 #### Web Run 
 
@@ -145,15 +145,6 @@ tell the visualizer the path of the web worker as so
 ```rust
 Runner::new().web_run::<Engen>(visualizer, "./worker.js".to_string());
 ```
-The path in Trunk builds is the name of the binary defined in the index.html. See [Platform Specifics](./platform_specifics.md) for more details.
+The path in Trunk builds is the name of the binary defined in the index.html. See [Platform Specifics](pages/platform_specifics.md) for more details.
 
-###### To recap we have three major parts.
 
-Workflow
-: trait for communication between application | UI thread.
-
-Visualizer
-: tools for rendering + connecting responses to interactions
-
-Runner
-: struct for establishing event loop connection + run
