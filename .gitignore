@@ -9,3 +9,5 @@ logcat.txt
 /application/dist/
 /application/android_rebuild_avoidance_target/
 /application/android_src/app/build
+/website/public/book/
+/website/public/doc/
