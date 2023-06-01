@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"workflow_visualizer":[["impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde/1.0.163/serde/de/trait.Deserialize.html\" title=\"trait serde::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"struct\" href=\"workflow_visualizer/struct.RawPosition.html\" title=\"struct workflow_visualizer::RawPosition\">RawPosition</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
