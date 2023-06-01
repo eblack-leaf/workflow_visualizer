@@ -85,7 +85,7 @@ refer to these by using the associated constants on the `Visualizer` impl.
 ```rust
 visualizer.job.task(Visualizer::TASK_MAIN).add_systems((...));
 ```
-###### Visualizer::TASK_STARTUP
+##### Visualizer::TASK_STARTUP
 This task is run once after initialization of the `Attachment`s queued in the visualizer.
 
 - `SyncPoint::Initialization`
@@ -95,7 +95,7 @@ This task is run once after initialization of the `Attachment`s queued in the vi
 - `UserSpaceSyncPoint::Resolve`
 - `SyncPoint::Finish`
 
-###### Visualizer::TASK_MAIN
+##### Visualizer::TASK_MAIN
 This task is run every iteration of the event loop, while `!job.suspended()`.
 
 - `JobSyncPoint::Idle`
@@ -112,7 +112,7 @@ This task is run every iteration of the event loop, while `!job.suspended()`.
 - `SyncPoint::PushDiff`
 - `SyncPoint::Finish`
 
-###### Visualizer::TASK_RENDER_STARTUP
+##### Visualizer::TASK_RENDER_STARTUP
 This task is run once after the initialization of the `Attachment`s queued in the visualizer.
 
 - `SyncPoint::Initialization,`
@@ -122,7 +122,7 @@ This task is run once after the initialization of the `Attachment`s queued in th
 - `UserSpaceSyncPoint::Resolve,`
 - `SyncPoint::Finish,`
 
-###### Visualizer::TASK_RENDER_MAIN
+##### Visualizer::TASK_RENDER_MAIN
 This task is run every time a redraw is requested.
 
 - `JobSyncPoint::Idle,`

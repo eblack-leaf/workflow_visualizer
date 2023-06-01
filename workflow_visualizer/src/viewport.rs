@@ -2,6 +2,7 @@ use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
 use nalgebra::matrix;
+use wgpu::TextureFormat;
 
 use crate::coord::area::Area;
 use crate::coord::layer::Layer;
@@ -42,6 +43,7 @@ impl ViewportOffset {
 }
 
 impl Viewport {
+    pub fn depth_format(&self) -> TextureFormat { self.depth_format }
     pub(crate) fn new(device: &wgpu::Device, area: Area<DeviceContext>, sample_count: u32) -> Self {
         let depth = 100u32.into();
         let cpu_viewport = CpuViewport::new(area, depth);

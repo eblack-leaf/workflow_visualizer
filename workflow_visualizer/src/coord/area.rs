@@ -4,18 +4,18 @@ use std::ops::{Add, Mul, Sub};
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{CoordContext, NumericalContext};
+use crate::coord::{CoordinateContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
 /// Area base coordinate class for 2d area
 /// requires setting a context to differentiate and track what the area means
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
-pub struct Area<Context: CoordContext> {
+pub struct Area<Context: CoordinateContext> {
     pub width: f32,
     pub height: f32,
     _context: PhantomData<Context>,
 }
 
-impl<Context: CoordContext> Area<Context> {
+impl<Context: CoordinateContext> Area<Context> {
     pub fn new(width: f32, height: f32) -> Self {
         Self {
             width,
@@ -67,43 +67,43 @@ impl RawArea {
         Self { width, height }
     }
 }
-impl<Context: CoordContext> From<(usize, usize)> for Area<Context> {
+impl<Context: CoordinateContext> From<(usize, usize)> for Area<Context> {
     fn from(value: (usize, usize)) -> Self {
         Self::new(value.0 as f32, value.1 as f32)
     }
 }
 
-impl<Context: CoordContext> From<(i32, i32)> for Area<Context> {
+impl<Context: CoordinateContext> From<(i32, i32)> for Area<Context> {
     fn from(value: (i32, i32)) -> Self {
         Self::new(value.0 as f32, value.1 as f32)
     }
 }
 
-impl<Context: CoordContext> From<(f32, f32)> for Area<Context> {
+impl<Context: CoordinateContext> From<(f32, f32)> for Area<Context> {
     fn from(value: (f32, f32)) -> Self {
         Self::new(value.0, value.1)
     }
 }
 
-impl<Context: CoordContext> From<(u32, u32)> for Area<Context> {
+impl<Context: CoordinateContext> From<(u32, u32)> for Area<Context> {
     fn from(value: (u32, u32)) -> Self {
         Self::new(value.0 as f32, value.1 as f32)
     }
 }
 
-impl<Context: CoordContext> Mul for Area<Context> {
+impl<Context: CoordinateContext> Mul for Area<Context> {
     type Output = Area<Context>;
     fn mul(self, rhs: Self) -> Self::Output {
         Area::<Context>::new(self.width * rhs.width, self.height * rhs.height)
     }
 }
-impl<Context: CoordContext> Add for Area<Context> {
+impl<Context: CoordinateContext> Add for Area<Context> {
     type Output = Area<Context>;
     fn add(self, rhs: Self) -> Self::Output {
         Area::<Context>::new(self.width + rhs.width, self.height + rhs.height)
     }
 }
-impl<Context: CoordContext> Sub for Area<Context> {
+impl<Context: CoordinateContext> Sub for Area<Context> {
     type Output = Area<Context>;
     fn sub(self, rhs: Self) -> Self::Output {
         Area::<Context>::new(self.width - rhs.width, self.height - rhs.height)

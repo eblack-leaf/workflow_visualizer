@@ -12,7 +12,7 @@ fn root(cx: Scope) -> Element {
             class: " text-neutral-300 bg-neutral-800",
             div {
             class: "px-4 py-8",
-                    a { class: "text-lg sm:text-2xl font-bold", href:"#", "W-V"}
+                    p { "W-V" }
                     a { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800",
                     href: "book/index.html", "ARCHITECTURE" }
                     a { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700",

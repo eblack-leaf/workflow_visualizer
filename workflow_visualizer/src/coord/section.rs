@@ -2,16 +2,16 @@ use bevy_ecs::bundle::Bundle;
 
 use crate::coord::area::Area;
 use crate::coord::position::Position;
-use crate::coord::CoordContext;
+use crate::coord::CoordinateContext;
 use crate::{DeviceContext, InterfaceContext};
 
 #[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
-pub struct Section<Context: CoordContext> {
+pub struct Section<Context: CoordinateContext> {
     pub position: Position<Context>,
     pub area: Area<Context>,
 }
 
-impl<Context: CoordContext> Section<Context> {
+impl<Context: CoordinateContext> Section<Context> {
     pub fn new<P: Into<Position<Context>>, A: Into<Area<Context>>>(position: P, area: A) -> Self {
         Self {
             position: position.into(),
@@ -92,7 +92,7 @@ impl Section<DeviceContext> {
         )
     }
 }
-impl<Context: CoordContext, P: Into<Position<Context>>, A: Into<Area<Context>>> From<(P, A)>
+impl<Context: CoordinateContext, P: Into<Position<Context>>, A: Into<Area<Context>>> From<(P, A)>
     for Section<Context>
 {
     fn from(value: (P, A)) -> Self {

@@ -5,17 +5,17 @@ use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use crate::coord::{CoordContext, NumericalContext};
+use crate::coord::{CoordinateContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
 /// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
-pub struct Position<Context: CoordContext> {
+pub struct Position<Context: CoordinateContext> {
     pub x: f32,
     pub y: f32,
     _context: PhantomData<Context>,
 }
 
-impl<Context: CoordContext> Position<Context> {
+impl<Context: CoordinateContext> Position<Context> {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             x,
@@ -51,14 +51,14 @@ impl Position<DeviceContext> {
         )
     }
 }
-impl<Context: CoordContext> Add for Position<Context> {
+impl<Context: CoordinateContext> Add for Position<Context> {
     type Output = Position<Context>;
     fn add(self, rhs: Self) -> Self::Output {
         Position::<Context>::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl<Context: CoordContext> Sub for Position<Context> {
+impl<Context: CoordinateContext> Sub for Position<Context> {
     type Output = Position<Context>;
     fn sub(self, rhs: Self) -> Self::Output {
         Position::<Context>::new(self.x - rhs.x, self.y - rhs.y)
@@ -77,36 +77,36 @@ impl RawPosition {
         Self { x, y }
     }
 }
-impl<Context: CoordContext> From<(f32, f32)> for Position<Context> {
+impl<Context: CoordinateContext> From<(f32, f32)> for Position<Context> {
     fn from(value: (f32, f32)) -> Self {
         Position::<Context>::new(value.0, value.1)
     }
 }
 
-impl<Context: CoordContext> From<(f64, f64)> for Position<Context> {
+impl<Context: CoordinateContext> From<(f64, f64)> for Position<Context> {
     fn from(value: (f64, f64)) -> Self {
         Position::<Context>::new(value.0 as f32, value.1 as f32)
     }
 }
 
-impl<Context: CoordContext> From<(u32, u32)> for Position<Context> {
+impl<Context: CoordinateContext> From<(u32, u32)> for Position<Context> {
     fn from(value: (u32, u32)) -> Self {
         Position::<Context>::new(value.0 as f32, value.1 as f32)
     }
 }
 
-impl<Context: CoordContext> From<(i32, i32)> for Position<Context> {
+impl<Context: CoordinateContext> From<(i32, i32)> for Position<Context> {
     fn from(value: (i32, i32)) -> Self {
         Position::<Context>::new(value.0 as f32, value.1 as f32)
     }
 }
 
-impl<Context: CoordContext> From<(usize, usize)> for Position<Context> {
+impl<Context: CoordinateContext> From<(usize, usize)> for Position<Context> {
     fn from(value: (usize, usize)) -> Self {
         Position::<Context>::new(value.0 as f32, value.1 as f32)
     }
 }
-impl<Context: CoordContext> AddAssign for Position<Context> {
+impl<Context: CoordinateContext> AddAssign for Position<Context> {
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
