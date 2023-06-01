@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li></ol></li><li class="chapter-item expanded "><a href="coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -150,7 +150,7 @@ The structure of this lib works by creating a headless app with actions and resp
 that trigger reactions in the UI layer. </p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="workflow"><a class="header" href="#workflow">Workflow</a></h3>
-<p>The process starts with defining your workflow. This is done by implementing <a href="./workflow.html"><code>Workflow</code></a>.</p>
+<p>The process starts with defining your workflow. This is done by implementing <a href="pages/workflow.html"><code>Workflow</code></a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct Engen {
@@ -186,7 +186,7 @@ your application actions. This is the structure of how an app runs using workflo
 This is a headless app as it only concerns itself with actions in to your app and the
 responses that it generates. For this app to do anything visually we need another part.</p>
 <h3 id="visualizer"><a class="header" href="#visualizer">Visualizer</a></h3>
-<p>Next we have to instantiate a <a href="visualizer.html"><code>Visualizer</code></a>.</p>
+<p>Next we have to instantiate a <a href="pages/visualizer.html"><code>Visualizer</code></a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let theme = Theme::default();
@@ -194,30 +194,31 @@ let gfx_options = GfxOptions::native_defaults();
 let mut visualizer = Visualizer::new(theme, gfx_options);
 // config visualizer ...
 <span class="boring">}</span></code></pre></pre>
-<p>This is a suite of rendering tools that are attached to a <a href="job.html"><code>Job</code></a>. A <code>Job</code> is a <code>Container</code> for data
+<p>This is a suite of rendering tools that are attached to a <a href="pages/job.html"><code>Job</code></a>. A <code>Job</code> is a <code>Container</code> for data
 and a set of <code>Task</code>s to run functions on the container. One important purpose for a job is to collect various render pipelines
 and provide a structure to create a render pass, and call any render functions that are attached to the job; 
-see <a href="render.html"><code>Render</code></a>. The visualizer also interprets input actions
-such as providing listeners for touches/mouse input; see <a href="touch.html"><code>Touch</code></a>. The visualizer has
-a <a href="viewport.html"><code>Viewport</code></a> to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
-This is used by renderers to correctly position elements using <a href="coord.html"><code>Coord</code></a> system which accounts for
-scale factor of the device by using different <code>CoordContext</code>s. <a href="visibility.html"><code>Visibility</code></a> can be determined by 
-reading from an elements associated component. Visible elements can receive <a href="focus.html"><code>Focus</code></a> to show
+see <a href="pages/render.html"><code>Render</code></a>. The visualizer also interprets input actions
+such as providing listeners for touches/mouse input; see <a href="pages/touch.html"><code>Touch</code></a>. The visualizer has
+a <a href="pages/viewport.html"><code>Viewport</code></a> to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
+This is used by renderers to correctly position elements using <a href="pages/coord.html"><code>Coord</code></a> system which accounts for
+scale factor of the device by using different <code>CoordContext</code>s. <a href="pages/visibility.html"><code>Visibility</code></a> can be determined by 
+reading from an elements associated component. Visible elements can receive <a href="pages/focus.html"><code>Focus</code></a> to show
 on-screen keyboard using <code>VirtualKeyboard</code> and receive input. Prebuilt core render pipelines are included
-by default such as <a href="text_renderer.html"><code>TextRenderer</code></a>, which is a memory-efficient glyph-caching text renderer which can be 
+by default such as <a href="pages/text_renderer.html"><code>TextRenderer</code></a>, which is a memory-efficient glyph-caching text renderer which can be 
 utilized by spawning a <code>Text</code> element. Other pipelines are available that are common to UI applications. 
 If nothing quite solves your desired effect you can easily integrate your own renderer by implementing 
-<a href="render.html"><code>Render</code></a> to setup the render function and <a href="./attach.html"><code>Attach</code></a> to configure how the renderer attaches to the 
-visualizer's <a href="job.html"><code>Job</code></a>.</p>
+<a href="pages/render.html"><code>Render</code></a> to setup the render function and <a href="pages/attach.html"><code>Attach</code></a> to configure how the renderer attaches to the 
+visualizer's <a href="pages/job.html"><code>Job</code></a>.</p>
 <h3 id="runner"><a class="header" href="#runner">Runner</a></h3>
-<p>All of this structure needs an entry point. The <a href="./runner.html"><code>Runner</code></a> is responsible for establishing
+<p>All of this structure needs an entry point. The <a href="pages/runner.html"><code>Runner</code></a> is responsible for establishing
 a connection to the compositor on the platform and obtaining a window to draw within. The runner forwards events from 
 the connection and links it to the appropriate calls into the visualizer. This event loop never returns control due to platform 
 implementation details. A background thread is spawned before entering this loop and a bridge created using the definitions 
-in <a href="./workflow.html"><code>Workflow</code></a> trait. To communicate to the application thread, a <a href="./sender.html"><code>Sender</code></a> can be used to 
+in <a href="pages/workflow.html"><code>Workflow</code></a> trait. To communicate to the application thread, a <a href="pages/sender.html"><code>Sender</code></a> can be used to 
 send actions. This process should return a response and the UI thread will receive this response and react 
 accordingly.</p>
 <h4 id="native-run"><a class="header" href="#native-run">Native Run</a></h4>
+<h6 id="desktop"><a class="header" href="#desktop">Desktop</a></h6>
 <p>When running natively on desktop, dimensions can be specified to get a fixed size to develop with.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -226,6 +227,7 @@ accordingly.</p>
     .native_run::&lt;Engen&gt;(visualizer);
 <span class="boring">}</span></code></pre></pre>
 <p>This is all that is needed to run on desktop.</p>
+<h6 id="android"><a class="header" href="#android">Android</a></h6>
 <p>The runner also supports Android applications. To achieve this a few steps are needed.
 To link with the android lifecycle the implementation refers to an Android
 compatibility struct called AndroidApp. This serves as a pointer to android-activity that powers the event loop on Android and allows
@@ -250,7 +252,7 @@ name = &quot;application&quot;
 crate-type = [&quot;cdylib&quot;]
 path = &quot;src/main.rs&quot;
 </code></pre>
-<p>The application must extend GameActivity in Java and compile using cargo-ndk. See <a href="./platform_specifics.html">Platform Specifics</a> for more information.</p>
+<p>The application must extend GameActivity in Java and compile using cargo-ndk. See <a href="pages/platform_specifics.html">Platform Specifics</a> for more information.</p>
 <h4 id="web-run"><a class="header" href="#web-run">Web Run</a></h4>
 <p>To run on the web, extra setup is needed. Web workers allow separate processes in the browser and are taken advantage of 
 in this lib. </p>
@@ -272,21 +274,14 @@ tell the visualizer the path of the web worker as so</p>
 </span><span class="boring">fn main() {
 </span>Runner::new().web_run::&lt;Engen&gt;(visualizer, &quot;./worker.js&quot;.to_string());
 <span class="boring">}</span></code></pre></pre>
-<p>The path in Trunk builds is the name of the binary defined in the index.html. See <a href="./platform_specifics.html">Platform Specifics</a> for more details.</p>
-<h6 id="to-recap-we-have-three-major-parts"><a class="header" href="#to-recap-we-have-three-major-parts">To recap we have three major parts.</a></h6>
-<p>Workflow
-: trait for communication between application | UI thread.</p>
-<p>Visualizer
-: tools for rendering + connecting responses to interactions</p>
-<p>Runner
-: struct for establishing event loop connection + run</p>
+<p>The path in Trunk builds is the name of the binary defined in the index.html. See <a href="pages/platform_specifics.html">Platform Specifics</a> for more details.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
 
-                            <a rel="next" href="workflow.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="pages/workflow.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -297,7 +292,7 @@ tell the visualizer the path of the web worker as so</p>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
 
-                    <a rel="next" href="workflow.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="pages/workflow.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

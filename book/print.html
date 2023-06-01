@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li></ol></li><li class="chapter-item expanded "><a href="coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -151,7 +151,7 @@ The structure of this lib works by creating a headless app with actions and resp
 that trigger reactions in the UI layer. </p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="workflow"><a class="header" href="#workflow">Workflow</a></h3>
-<p>The process starts with defining your workflow. This is done by implementing <a href="./workflow.html"><code>Workflow</code></a>.</p>
+<p>The process starts with defining your workflow. This is done by implementing <a href="pages/workflow.html"><code>Workflow</code></a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct Engen {
@@ -187,7 +187,7 @@ your application actions. This is the structure of how an app runs using workflo
 This is a headless app as it only concerns itself with actions in to your app and the
 responses that it generates. For this app to do anything visually we need another part.</p>
 <h3 id="visualizer"><a class="header" href="#visualizer">Visualizer</a></h3>
-<p>Next we have to instantiate a <a href="visualizer.html"><code>Visualizer</code></a>.</p>
+<p>Next we have to instantiate a <a href="pages/visualizer.html"><code>Visualizer</code></a>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let theme = Theme::default();
@@ -195,30 +195,31 @@ let gfx_options = GfxOptions::native_defaults();
 let mut visualizer = Visualizer::new(theme, gfx_options);
 // config visualizer ...
 <span class="boring">}</span></code></pre></pre>
-<p>This is a suite of rendering tools that are attached to a <a href="job.html"><code>Job</code></a>. A <code>Job</code> is a <code>Container</code> for data
+<p>This is a suite of rendering tools that are attached to a <a href="pages/job.html"><code>Job</code></a>. A <code>Job</code> is a <code>Container</code> for data
 and a set of <code>Task</code>s to run functions on the container. One important purpose for a job is to collect various render pipelines
 and provide a structure to create a render pass, and call any render functions that are attached to the job; 
-see <a href="render.html"><code>Render</code></a>. The visualizer also interprets input actions
-such as providing listeners for touches/mouse input; see <a href="touch.html"><code>Touch</code></a>. The visualizer has
-a <a href="viewport.html"><code>Viewport</code></a> to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
-This is used by renderers to correctly position elements using <a href="coord.html"><code>Coord</code></a> system which accounts for
-scale factor of the device by using different <code>CoordContext</code>s. <a href="visibility.html"><code>Visibility</code></a> can be determined by 
-reading from an elements associated component. Visible elements can receive <a href="focus.html"><code>Focus</code></a> to show
+see <a href="pages/render.html"><code>Render</code></a>. The visualizer also interprets input actions
+such as providing listeners for touches/mouse input; see <a href="pages/touch.html"><code>Touch</code></a>. The visualizer has
+a <a href="pages/viewport.html"><code>Viewport</code></a> to convert screen coordinates to NDC coordinates used by Vulkan | DirectX12 | Metal.
+This is used by renderers to correctly position elements using <a href="pages/coord.html"><code>Coord</code></a> system which accounts for
+scale factor of the device by using different <code>CoordContext</code>s. <a href="pages/visibility.html"><code>Visibility</code></a> can be determined by 
+reading from an elements associated component. Visible elements can receive <a href="pages/focus.html"><code>Focus</code></a> to show
 on-screen keyboard using <code>VirtualKeyboard</code> and receive input. Prebuilt core render pipelines are included
-by default such as <a href="text_renderer.html"><code>TextRenderer</code></a>, which is a memory-efficient glyph-caching text renderer which can be 
+by default such as <a href="pages/text_renderer.html"><code>TextRenderer</code></a>, which is a memory-efficient glyph-caching text renderer which can be 
 utilized by spawning a <code>Text</code> element. Other pipelines are available that are common to UI applications. 
 If nothing quite solves your desired effect you can easily integrate your own renderer by implementing 
-<a href="render.html"><code>Render</code></a> to setup the render function and <a href="./attach.html"><code>Attach</code></a> to configure how the renderer attaches to the 
-visualizer's <a href="job.html"><code>Job</code></a>.</p>
+<a href="pages/render.html"><code>Render</code></a> to setup the render function and <a href="pages/attach.html"><code>Attach</code></a> to configure how the renderer attaches to the 
+visualizer's <a href="pages/job.html"><code>Job</code></a>.</p>
 <h3 id="runner"><a class="header" href="#runner">Runner</a></h3>
-<p>All of this structure needs an entry point. The <a href="./runner.html"><code>Runner</code></a> is responsible for establishing
+<p>All of this structure needs an entry point. The <a href="pages/runner.html"><code>Runner</code></a> is responsible for establishing
 a connection to the compositor on the platform and obtaining a window to draw within. The runner forwards events from 
 the connection and links it to the appropriate calls into the visualizer. This event loop never returns control due to platform 
 implementation details. A background thread is spawned before entering this loop and a bridge created using the definitions 
-in <a href="./workflow.html"><code>Workflow</code></a> trait. To communicate to the application thread, a <a href="./sender.html"><code>Sender</code></a> can be used to 
+in <a href="pages/workflow.html"><code>Workflow</code></a> trait. To communicate to the application thread, a <a href="pages/sender.html"><code>Sender</code></a> can be used to 
 send actions. This process should return a response and the UI thread will receive this response and react 
 accordingly.</p>
 <h4 id="native-run"><a class="header" href="#native-run">Native Run</a></h4>
+<h6 id="desktop"><a class="header" href="#desktop">Desktop</a></h6>
 <p>When running natively on desktop, dimensions can be specified to get a fixed size to develop with.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -227,6 +228,7 @@ accordingly.</p>
     .native_run::&lt;Engen&gt;(visualizer);
 <span class="boring">}</span></code></pre></pre>
 <p>This is all that is needed to run on desktop.</p>
+<h6 id="android"><a class="header" href="#android">Android</a></h6>
 <p>The runner also supports Android applications. To achieve this a few steps are needed.
 To link with the android lifecycle the implementation refers to an Android
 compatibility struct called AndroidApp. This serves as a pointer to android-activity that powers the event loop on Android and allows
@@ -251,7 +253,7 @@ name = &quot;application&quot;
 crate-type = [&quot;cdylib&quot;]
 path = &quot;src/main.rs&quot;
 </code></pre>
-<p>The application must extend GameActivity in Java and compile using cargo-ndk. See <a href="./platform_specifics.html">Platform Specifics</a> for more information.</p>
+<p>The application must extend GameActivity in Java and compile using cargo-ndk. See <a href="pages/platform_specifics.html">Platform Specifics</a> for more information.</p>
 <h4 id="web-run"><a class="header" href="#web-run">Web Run</a></h4>
 <p>To run on the web, extra setup is needed. Web workers allow separate processes in the browser and are taken advantage of 
 in this lib. </p>
@@ -273,17 +275,358 @@ tell the visualizer the path of the web worker as so</p>
 </span><span class="boring">fn main() {
 </span>Runner::new().web_run::&lt;Engen&gt;(visualizer, &quot;./worker.js&quot;.to_string());
 <span class="boring">}</span></code></pre></pre>
-<p>The path in Trunk builds is the name of the binary defined in the index.html. See <a href="./platform_specifics.html">Platform Specifics</a> for more details.</p>
-<h6 id="to-recap-we-have-three-major-parts"><a class="header" href="#to-recap-we-have-three-major-parts">To recap we have three major parts.</a></h6>
-<p>Workflow
-: trait for communication between application | UI thread.</p>
-<p>Visualizer
-: tools for rendering + connecting responses to interactions</p>
-<p>Runner
-: struct for establishing event loop connection + run</p>
+<p>The path in Trunk builds is the name of the binary defined in the index.html. See <a href="pages/platform_specifics.html">Platform Specifics</a> for more details.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="workflow-1"><a class="header" href="#workflow-1">Workflow</a></h1>
-<p>The first part to set up is the trait <a href="">Workflow</a></p>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
+<p>The first part to set up is the trait <code>Workflow</code>. This is defined as</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[async_trait]
+pub trait Workflow
+where
+    Self: Default,
+{
+    type Action: Debug
+        + Clone
+        + PartialEq
+        + Send
+        + Sync
+        + Sized
+        + 'static
+        + Serialize
+        + for&lt;'a&gt; Deserialize&lt;'a&gt;;
+    type Response: Debug
+        + Clone
+        + PartialEq
+        + Send
+        + Sync
+        + Sized
+        + 'static
+        + Serialize
+        + for&lt;'a&gt; Deserialize&lt;'a&gt;;
+    fn handle_response(visualizer: &amp;mut Visualizer, response: Self::Response);
+    fn exit_action() -&gt; Self::Action;
+    fn exit_response() -&gt; Self::Response;
+    async fn handle_action(engen: Arc&lt;Mutex&lt;Self&gt;&gt;, action: Self::Action) -&gt; Self::Response;
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Lets break this down.</p>
+<h4 id="action--response"><a class="header" href="#action--response">Action | Response</a></h4>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>type Action;
+type Response;
+<span class="boring">}</span></code></pre></pre>
+<p>These associated types define what is considered input to your app (<code>Action</code>) and the
+<code>Response</code>s they generate. Responses are the signals for triggering reactions in the UI. 
+Having these types allows structured input to the app that clarify what can be sent.</p>
+<h4 id="handlers"><a class="header" href="#handlers">Handlers</a></h4>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn handle_action(engen: Arc&lt;Mutex&lt;Self&gt;&gt;, action: Self::Action) -&gt; Self::Response;
+fn handle_response(visualizer: &amp;mut Visualizer, response: Self::Response);
+<span class="boring">}</span></code></pre></pre>
+<p>These define how to handle actions and responses defined above. When the <a href="pages/runner.html"><code>Runner</code></a> starts
+your app, it starts two processes. One for the UI to react to input, and one to run async tasks that
+would otherwise block the UI thread until completed. To handle an action the trait needs to define an async fn.
+This is possible due to a crate <code>async_trait</code> which wraps the async fn in a <code>Pin&lt;Box&lt;Future&lt;...&gt;&gt;</code> to make it
+compatible with the current way traits are defined. Recently a MVP for integrating async fn in traits was announced
+so this will be moot in the coming months. The <code>handle_response</code> is sync because it runs inside the UI thread which is 
+single threaded due to the nature of how receiving events from the system is implemented.</p>
+<h4 id="exit-logic"><a class="header" href="#exit-logic">Exit Logic</a></h4>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn exit_action() -&gt; Self::Action;
+fn exit_response() -&gt; Self::Response;
+<span class="boring">}</span></code></pre></pre>
+<p>These point the visualizer to the actions/responses that signify exiting. This allows the visualizer to 
+stop the UI thread and send a similar response to the application thread to save state and confirm the exit.</p>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<p>Natively this lib uses <a href="https://tokio.rs/"><code>tokio.rs</code></a> to spawn a sophisticated async runtime which efficiently 
+runs asynchronous tasks with performant scheduling. The threads more resemble multi-plexing within a core rather than 
+sending it off to a different core.</p>
+<p>In the browser, native threads cannot be used for security reasons. Web workers are sandboxed processes that can be 
+spawned using javascript to accomplish this need. This has a different trait from the useful crate <code>gloo_worker</code> that needs
+to be implemented. The <code>Workflow</code> mod blanket implements this for any struct that impls <code>Workflow</code>. </p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sender"><a class="header" href="#sender">Sender</a></h1>
+<h3 id="definition"><a class="header" href="#definition">Definition</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Sender&lt;T: Workflow + Default + 'static&gt; { /* private fields */ }
+<span class="boring">}</span></code></pre></pre>
+<p>The sender is used by the application to send actions.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn send(&amp;self, action: &lt;T as Workflow&gt;::Action) {}
+<span class="boring">}</span></code></pre></pre>
+<p>is its only method and can be accessed from a <code>NonSend</code> resource in the visualizer's <a href="pages/job.html"><code>Job</code></a>.</p>
+<h3 id="usage"><a class="header" href="#usage">Usage</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Engen {
+    // your app data
+}
+enum Action {
+    Notify(String),
+}
+impl Workflow for Engen {
+    // ...
+    type Action = Action;
+    // ...
+}
+fn system(sender: NonSend&lt;Sender&lt;App&gt;&gt;, /* other params */) {
+    // do stuff that needs to send action ...
+    sender.send(Action::Notify(...));
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This action will be sent to the application thread and <code>Workflow::handle_action</code> will be run to give you 
+space to respond with what is needed.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="visualizer-1"><a class="header" href="#visualizer-1">Visualizer</a></h1>
+<p>The <code>Visualizer</code> handles displaying visual elements needed by the application. This uses a <a href="pages/job.html"><code>Job</code></a> to create
+an extensible container that holds tasks for running fns on the data. This is used to run a render pass that invokes
+any render fns attached to the visualizer and presents to the surface of window initialized by the <a href="pages/runner.html"><code>Runner</code></a>.
+The visualizer is composed of many parts which build on each other to provide a specific solution of a responsive UI
+and is best explained by delving into each section specifically. The next section is <a href="pages/job.html"><code>Job</code></a> to start us off. </p>
+<h4 id="interface-overview"><a class="header" href="#interface-overview">Interface Overview</a></h4>
+<p>see API doc for full reference</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="job"><a class="header" href="#job">Job</a></h1>
+<p>A <code>Job</code> is a struct for executing <code>Task</code>s which run functions on data in a <code>Container</code>. </p>
+<h3 id="container"><a class="header" href="#container">Container</a></h3>
+<p>A <code>Container</code> can hold <code>Res</code> or resources which have one slot per type, or it can hold
+<code>Entity</code>s composed of many types associating them with a unique id to reference the parts.
+See <a href="pages/"><code>bevy_ecs::World</code></a> for more information.</p>
+<h3 id="task"><a class="header" href="#task">Task</a></h3>
+<p>A <code>Task</code> is a scheduled set of fns to run on the <code>Container</code>. These fns can be grouped into <code>SystemSet</code>s to
+synchronize when parts of the schedule should be done before/after other sets.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(SystemSet)]
+enum Sets {
+    First,
+}
+let task = Task::new();
+task.add_systems((some_fn.in_set(Sets::First)));
+<span class="boring">}</span></code></pre></pre>
+<p>Which would add <code>some_fn</code> to the set <code>First</code>. 
+This is a thin wrapper around <a href="https://docs.rs/bevy/latest/bevy/ecs/prelude/struct.Schedule.html"><code>bevy_ecs::Schedule</code></a>.</p>
+<h5 id="execution-state"><a class="header" href="#execution-state">Execution State</a></h5>
+<p>A <code>Job</code> includes an <code>ExecutionState</code> to allow for <code>Visualizer::suspend()</code> and <code>Visualizer::resume()</code> to be pause execution on
+mobile platforms when minimizing the app. </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>job.suspend();// sets ExecutionState to Suspended
+job.resume();// sets ExecutionState to Resumed
+<span class="boring">}</span></code></pre></pre>
+<h4 id="storing-entities"><a class="header" href="#storing-entities">Storing Entities</a></h4>
+<p>A <code>Job</code> can store entities associated with an id to reference specific entities in systems.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let entity = job.container.spawn(/* bundle */).id();
+job.store_entity(&quot;special&quot;, entity); 
+// ...
+let data = job.get_entity::&lt;Components&gt;(&quot;special&quot;).unwrap();
+<span class="boring">}</span></code></pre></pre>
+<h5 id="exit--idle"><a class="header" href="#exit--idle">Exit | Idle</a></h5>
+<p>On creation a <code>Job</code> inserts <code>Exit</code> and <code>Idle</code> resources to aid in control flow.</p>
+<h6 id="idle"><a class="header" href="#idle">Idle</a></h6>
+<p><code>Idle</code> can be set in systems by bringing in the resource</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(idle: ResMut&lt;Idle&gt;) {
+    idle.can_idle = false;
+}
+<span class="boring">}</span></code></pre></pre>
+<p>When set to <code>false</code> the <code>Runner</code> sets the control flow to poll again.
+When set to <code>true</code> the <code>Runner</code> sets the control flow to wait for user input 
+or hardware events. A system is inserted to attempt to set <code>Idle.can_idle</code> to <code>true</code>
+at the beginning of every frame. You can set this to <code>false</code> any time in your loop to 
+signal that execution should keep running even without input, such as in animations.</p>
+<h6 id="exit"><a class="header" href="#exit">Exit</a></h6>
+<p><code>Exit</code> can be set in a similar way.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(exit: ResMut&lt;Exit&gt;) {
+    exit.request_exit();
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This will signal the event loop that it should exit and send <code>Workflow::exit_action()</code> to 
+your application to gracefully handle shutdown.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="attach"><a class="header" href="#attach">Attach</a></h1>
+<p>The <code>Attach</code> trait helps integrate the various parts needed to make 
+a <code>Visualizer</code> work. Simply put it gives you a ref to the <code>Visualizer</code> and 
+you can do whatever you want with it.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Attach {
+    fn attach(visualizer: &amp;mut Visualizer);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>It formalizes adding things to the extensible <code>Container</code>, and it adds
+an indirection between adding things directly to the <code>Container</code>. There are
+core resources not attached until the <code>Window</code> can be obtained, yet renderers 
+want to use these structs to make textures and bind groups. The <code>Visualizer</code> defers
+these calls by wrapping the needed <code>Attach::attach(...)</code> in an <code>Attachment</code> to 
+be invoked when needed.</p>
+<h3 id="usage-1"><a class="header" href="#usage-1">Usage</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Attachee {}
+impl Attach for Attachee {
+    fn attach(visualizer: &amp;mut Visualizer) {
+        // ...
+    }
+}
+visualizer.add_attachment::&lt;Attachee&gt;();
+<span class="boring">}</span></code></pre></pre>
+<p>Which queues an</p>
+<h4 id="attachment"><a class="header" href="#attachment">Attachment</a></h4>
+<p>You wont use this type directly but here it is for reference.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Attachment(pub Box&lt;fn(&amp;mut Visualizer)&gt;);
+
+impl Attachment {
+    pub fn using&lt;T: Attach&gt;() -&gt; Self {
+        Self(Box::new(T::attach))
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="syncpoints"><a class="header" href="#syncpoints">SyncPoints</a></h1>
+<p>To parallelize as much as possible a <code>Task</code> will run its systems 
+alongside other systems that can be run while preserving order of
+mutable access to components and resources. This can be configured using
+<code>SyncPoint</code>s. </p>
+<h3 id="core-syncpoints"><a class="header" href="#core-syncpoints">Core SyncPoints</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum SyncPoint {
+    Event,
+    Initialization,
+    Config,
+    Preparation,
+    Spawn,
+    Reconfigure,
+    ResolveVisibility,
+    Resolve,
+    PushDiff,
+    Finish,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>There are many stages to the <code>Task</code>s that are run on the visualizer's <code>Job</code>.
+Here is the overview of sync points. </p>
+<ul>
+<li><code>JobSyncPoint::Idle</code> set holds <code>attempt_to_idle</code> to set idling behavior.</li>
+<li><code>SyncPoint::Event</code> set holds all the event updaters to process new events.</li>
+<li><code>SyncPoint::Initialization</code> set is for preparation of resources and entities.</li>
+<li><code>UserSpaceSyncPoint::Initialization</code> set in for user initialization.</li>
+<li><code>SyncPoint::Config</code> set is for configuring the initialized parts.</li>
+<li><code>SyncPoint::Preparation</code> set is for preparing parts according to the config.</li>
+<li><code>UserSpaceSyncPoint::Process</code> set is for user fns.</li>
+<li><code>SyncPoint::Spawn</code> set is for spawning new bundles via <code>Request</code>s.</li>
+<li><code>SyncPoint::Reconfigure</code> set is for config new parts spawned</li>
+<li><code>SyncPoint::ResolveVisibility</code> set is for determining visibility.</li>
+<li><code>SyncPoint::Resolve</code> set is for resolving diffs in parts after changes.</li>
+<li><code>UserSpaceSyncPoint::Resolve</code> set is for resolving user fns.</li>
+<li><code>SyncPoint::PushDiff</code> set is for extracting the differences in element state.</li>
+<li><code>SyncPoint::Finish</code> set is for cleanup after extraction.</li>
+</ul>
+<h3 id="userspace-syncpoints"><a class="header" href="#userspace-syncpoints">UserSpace SyncPoints</a></h3>
+<p>These sync points are put in place to be correct within the context of the 
+core sync points and provide clean sets where the user can add systems. When implementing
+<code>Attach::attach</code> these are the main sets to be concerned with for correct execution.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum UserSpaceSyncPoint {
+    Initialization,
+    Process,
+    Resolve,
+}
+<span class="boring">}</span></code></pre></pre>
+<h6 id="userspacesyncpointinitialization"><a class="header" href="#userspacesyncpointinitialization">UserSpaceSyncPoint::Initialization</a></h6>
+<p>This gives a spot for the user to attach systems that initialize data and is ensured to run
+after core visualizer elements have been initialized.</p>
+<h6 id="userspacesyncpointprocess"><a class="header" href="#userspacesyncpointprocess">UserSpaceSyncPoint::Process</a></h6>
+<p>This should be used to compute and update any values that need doing once per frame.
+This runs after input/events have been processed and focus/visibility set. This is 
+the only spot to request new entities from and have them spawn immediately. This lib
+uses a <a href="pages/request.html"><code>Request</code></a> to wrap any new bundles and when paired with a 
+<code>request::spawn::&lt;Bundle&gt;(...)</code> system inserted in the <code>SyncPoint::Spawn</code> set, it will
+correctly spawn to have all pipelines process appropriately. Due to the nature of 
+ECS pattern it can be hard to recognize when a component will run in a system unintentionally
+before it has all its parts which would opt the entity out of the unintentional system.
+It is clearer to define a boundary when all need to be ready and use <code>Request</code> to wrap 
+your bundles.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let bundle = ...;
+let req = Request::new(bundle);
+visualizer.add_entities(vec![req]);
+visualizer.job.task(/* TaskLabel */)
+    .add_systems((request::spawn::&lt;Bundle&gt;.in_set(SyncPoint::Spawn),));
+<span class="boring">}</span></code></pre></pre>
+<h6 id="userspacesyncpointresolve"><a class="header" href="#userspacesyncpointresolve">UserSpaceSyncPoint::Resolve</a></h6>
+<p>This should be used to read the state after all elements have been spawned and
+processed, but before sending data to the render <code>Extraction</code>s which check a
+<code>Cache</code> and decide what to give to the render task. This is useful for reacting to changes
+made by the system started in <code>UserSpaceSyncPoint::Process</code>.</p>
+<h3 id="labeled-tasks"><a class="header" href="#labeled-tasks">Labeled Tasks</a></h3>
+<p>The <code>Visualizer</code> labels <code>Task</code>s that handle preparation for the system to run. Some of these tasks have
+a limited set of these <code>SyncPoint</code>s as they need to handle less ambiguity of logic. You can
+refer to these by using the associated constants on the <code>Visualizer</code> impl.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>visualizer.job.task(Visualizer::TASK_MAIN).add_systems((...));
+<span class="boring">}</span></code></pre></pre>
+<h6 id="visualizertask_startup"><a class="header" href="#visualizertask_startup">Visualizer::TASK_STARTUP</a></h6>
+<p>This task is run once after initialization of the <code>Attachment</code>s queued in the visualizer.</p>
+<ul>
+<li><code>SyncPoint::Initialization</code></li>
+<li><code>UserSpaceSyncPoint::Initialization</code></li>
+<li><code>SyncPoint::Preparation</code></li>
+<li><code>SyncPoint::Resolve</code></li>
+<li><code>UserSpaceSyncPoint::Resolve</code></li>
+<li><code>SyncPoint::Finish</code></li>
+</ul>
+<h6 id="visualizertask_main"><a class="header" href="#visualizertask_main">Visualizer::TASK_MAIN</a></h6>
+<p>This task is run every iteration of the event loop, while <code>!job.suspended()</code>.</p>
+<ul>
+<li><code>JobSyncPoint::Idle</code></li>
+<li><code>SyncPoint::Event</code></li>
+<li><code>SyncPoint::Initialization</code></li>
+<li><code>UserSpaceSyncPoint::Initialization</code></li>
+<li><code>SyncPoint::Preparation</code></li>
+<li><code>UserSpaceSyncPoint::Process</code></li>
+<li><code>SyncPoint::Spawn</code></li>
+<li><code>SyncPoint::Reconfigure</code></li>
+<li><code>SyncPoint::ResolveVisibility</code></li>
+<li><code>SyncPoint::Resolve</code></li>
+<li><code>UserSpaceSyncPoint::Resolve</code></li>
+<li><code>SyncPoint::PushDiff</code></li>
+<li><code>SyncPoint::Finish</code></li>
+</ul>
+<h6 id="visualizertask_render_startup"><a class="header" href="#visualizertask_render_startup">Visualizer::TASK_RENDER_STARTUP</a></h6>
+<p>This task is run once after the initialization of the <code>Attachment</code>s queued in the visualizer.</p>
+<ul>
+<li><code>SyncPoint::Initialization,</code></li>
+<li><code>UserSpaceSyncPoint::Initialization,</code></li>
+<li><code>SyncPoint::Preparation,</code></li>
+<li><code>SyncPoint::Resolve,</code></li>
+<li><code>UserSpaceSyncPoint::Resolve,</code></li>
+<li><code>SyncPoint::Finish,</code></li>
+</ul>
+<h6 id="visualizertask_render_main"><a class="header" href="#visualizertask_render_main">Visualizer::TASK_RENDER_MAIN</a></h6>
+<p>This task is run every time a redraw is requested.</p>
+<ul>
+<li><code>JobSyncPoint::Idle,</code></li>
+<li><code>SyncPoint::Initialization,</code></li>
+<li><code>UserSpaceSyncPoint::Initialization,</code></li>
+<li><code>SyncPoint::Preparation,</code></li>
+<li><code>SyncPoint::Resolve,</code></li>
+<li><code>UserSpaceSyncPoint::Resolve,</code></li>
+<li><code>SyncPoint::Finish,</code></li>
+</ul>
+<p>The <code>Task</code>s labeled &quot;*_MAIN&quot; have an extra set <code>JobSyncPoint::Idle</code> to communicate with 
+the control_flow of the event loop.</p>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
