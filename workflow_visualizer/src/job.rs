@@ -78,12 +78,15 @@ impl EntityName {
     }
 }
 impl Job {
-    pub fn store_entity(&mut self, id: EntityName, entity: Entity) {
+    pub fn store_entity<T: Into<EntityName>>(&mut self, id: T, entity: Entity) {
         self.container
             .get_resource_mut::<EntityStore>()
             .expect("no entity store")
             .store
-            .insert(id, entity);
+            .insert(id.into(), entity);
+    }
+    pub fn get_entity<T: Into<EntityName>>(&mut self, id: T) {
+        todo!()
     }
     pub(crate) fn new() -> Self {
         Self {
@@ -101,7 +104,7 @@ impl Job {
     pub fn task(&mut self, task_label: TaskLabel) -> &mut Task {
         self.tasks.get_mut(&task_label).expect("no task")
     }
-    pub(crate) fn exec(&mut self, task_label: TaskLabel) {
+    pub fn exec(&mut self, task_label: TaskLabel) {
         if let Some(task) = self.tasks.get_mut(&task_label) {
             task.set_executor_kind(ExecutorKind::MultiThreaded)
                 .run(&mut self.container);

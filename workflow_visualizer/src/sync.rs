@@ -19,24 +19,28 @@ pub enum SyncPoint {
 }
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 pub enum UserSpaceSyncPoint {
+    Initialization,
     Process,
     Resolve,
 }
-pub(crate) fn set_sync_points(engen: &mut Visualizer) {
-    engen.job.task(Visualizer::TASK_STARTUP).configure_sets(
+pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
+    visualizer.job.task(Visualizer::TASK_STARTUP).configure_sets(
         (
             SyncPoint::Initialization,
+            UserSpaceSyncPoint::Initialization,
             SyncPoint::Preparation,
             SyncPoint::Resolve,
+            UserSpaceSyncPoint::Resolve,
             SyncPoint::Finish,
         )
             .chain(),
     );
-    engen.job.task(Visualizer::TASK_MAIN).configure_sets(
+    visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
             JobSyncPoint::Idle,
             SyncPoint::Event,
             SyncPoint::Initialization,
+            UserSpaceSyncPoint::Initialization,
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
@@ -49,7 +53,7 @@ pub(crate) fn set_sync_points(engen: &mut Visualizer) {
         )
             .chain(),
     );
-    engen.job.task(Visualizer::TASK_MAIN).add_systems((
+    visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)
             .before(SyncPoint::Reconfigure),
@@ -57,30 +61,34 @@ pub(crate) fn set_sync_points(engen: &mut Visualizer) {
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::ResolveVisibility),
     ));
-    engen
+    visualizer
         .job
         .task(Visualizer::TASK_RENDER_STARTUP)
         .configure_sets(
             (
                 SyncPoint::Initialization,
+                UserSpaceSyncPoint::Initialization,
                 SyncPoint::Preparation,
                 SyncPoint::Resolve,
+                UserSpaceSyncPoint::Resolve,
                 SyncPoint::Finish,
             )
                 .chain(),
         );
-    engen
+    visualizer
         .job
         .task(Visualizer::TASK_RENDER_STARTUP)
         .add_systems((apply_system_buffers
             .after(SyncPoint::Initialization)
             .before(SyncPoint::Preparation),));
-    engen.job.task(Visualizer::TASK_RENDER_MAIN).configure_sets(
+    visualizer.job.task(Visualizer::TASK_RENDER_MAIN).configure_sets(
         (
             JobSyncPoint::Idle,
             SyncPoint::Initialization,
+            UserSpaceSyncPoint::Initialization,
             SyncPoint::Preparation,
             SyncPoint::Resolve,
+            UserSpaceSyncPoint::Resolve,
             SyncPoint::Finish,
         )
             .chain(),
