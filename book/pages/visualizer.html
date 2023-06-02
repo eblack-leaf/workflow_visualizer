@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html" class="active"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html" class="active"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -149,9 +149,33 @@
 an extensible container that holds tasks for running fns on the data. This is used to run a render pass that invokes
 any render fns attached to the visualizer and presents to the surface of window initialized by the <a href="runner.html"><code>Runner</code></a>.
 The visualizer is composed of many parts which build on each other to provide a specific solution of a responsive UI
-and is best explained by delving into each section specifically. The next section is <a href="job.html"><code>Job</code></a> to start us off. </p>
-<h4 id="interface-overview"><a class="header" href="#interface-overview">Interface Overview</a></h4>
-<p>see API doc for full reference</p>
+and is best explained by delving into each section specifically. The next section is <a href="job.html"><code>Job</code></a> to start us off.</p>
+<h3 id="interface-overview"><a class="header" href="#interface-overview">Interface Overview</a></h3>
+<h5 id="init"><a class="header" href="#init">Init</a></h5>
+<p>First is the <code>Visualizer::new(...)</code>.
+This creates 5 main <code>Task</code>s that help the visualizer handle interactions, and respond accordingly.
+Next is the option to <code>Visualizer::set_gfx_options(...)</code> which can be used to reset the <code>GfxOptions</code>
+after instantiation. There is an <code>async Visualizer::init_gfx(...)</code> which is used to create the <code>Gfx</code> module and <code>Viewport</code>.
+This is the core initialization fn.
+Attachments need to be invoked to insert into the <code>Job</code>. This can be accomplished with
+<code>Visualizer::initialize(...)</code>.</p>
+<h5 id="attachments"><a class="header" href="#attachments">Attachments</a></h5>
+<p>With <code>Visualizer::add_attachment::&lt;impl Attach&gt;()</code> the system can be extended with logic handlers.
+Using <code>Visualizer::register_renderer::&lt;impl Render&gt;()</code> the system can add render fns to the render pass.</p>
+<h5 id="helpers"><a class="header" href="#helpers">Helpers</a></h5>
+<p>You can <code>Visualizer::trigger_resize(...)</code> to resize the viewport and surface configuration.
+The <code>Theme</code> can be changed via <code>Visualizer::set_theme(...)</code>.
+Entities can be added by invoking <code>Visualizer::add_entities(...)</code> or <code>Visualizer::add_named_entities(...)</code>.
+Scale factor can be set via <code>Visualizer::set_scale_factor(...)</code>.</p>
+<h5 id="input"><a class="header" href="#input">Input</a></h5>
+<p>Touch events can be registered with <code>Visualizer::register_touch(...)</code>.
+Mouse clicks can be registered with <code>Visualizer::register_mouse_click(...)</code>.
+Mouse location can be set with <code>Visualizer::set_mouse_location(...)</code>.
+Touches/Clicks can be cancelled with <code>Visualizer::cancel_touches()</code>.</p>
+<h5 id="control-flow"><a class="header" href="#control-flow">Control Flow</a></h5>
+<p>A <code>Visualizer</code> can be controlled with <code>::suspend()</code> | <code>::resume()</code> | <code>::setup()</code> 
+| <code>::exec()</code> | <code>::render()</code> | <code>::teardown()</code></p>
+<p>See <a href="../../doc/workflow_visualizer/index.html">API</a> doc for full reference.</p>
 
                     </main>
 

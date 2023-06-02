@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html" class="active"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html" class="active"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,12 +144,36 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="gfx"><a class="header" href="#gfx">Gfx</a></h1>
+<p>This holds the wgpu <code>Surface</code> | <code>Device</code> | <code>Queue</code> | <code>Config</code>. These parts obtain a drawable
+surface, a gpu device to use for acceleration, a queue to submit commands to this gpu, and the
+configuration of the surface (formats / size). This is needed to power all the render pipelines
+and present to the window created during run. </p>
+<h3 id="gfxoptions"><a class="header" href="#gfxoptions">GfxOptions</a></h3>
+<p>When creating a <code>Visualizer</code>, you will need to pass it <code>GfxOptions</code>. This can be used to configure how
+your application uses the <code>Gfx</code> stack and what environment is needed. Desktop platforms generally can run
+<code>GfxOptions::native_defaults()</code> without concern. Mobile/Web platforms might want to downgrade the limits using
+<code>GfxOptions::limited_environment()</code> which will lower certain aspects commonly not implemented on these platforms.</p>
+<p>Your main interaction with this struct will be extending the visualizer with custom pipelines. </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(gfx: Res&lt;GfxSurface&gt;, config: Res&lt;GfxSurfaceConfiguration&gt;, msaa: Res&lt;MsaaRenderAdapter&gt;) {
+    // ... use parts
+    // gfx.device/surface/queue
+    // config.config.width/height
+    // msaa.requested(); // the requested level of sampling/anti-aliasing from
+}
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>MsaaRenderAdapter</code> can be used to request multi-sampling and anti-aliasing for your renderers e.g.
+<code>GfxOptions::native_defaults().with_msaa(4)</code>.</p>
+<h3 id="learn-more"><a class="header" href="#learn-more">Learn More</a></h3>
+<p>For more information check out the amazing work being done at <a href="https://wgpu.rs/"><code>wgpu.rs</code></a>. </p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../pages/coord.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../pages/grid.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -163,7 +187,7 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../pages/coord.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../pages/grid.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

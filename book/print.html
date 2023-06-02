@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -385,15 +385,39 @@ space to respond with what is needed.</p>
 an extensible container that holds tasks for running fns on the data. This is used to run a render pass that invokes
 any render fns attached to the visualizer and presents to the surface of window initialized by the <a href="pages/runner.html"><code>Runner</code></a>.
 The visualizer is composed of many parts which build on each other to provide a specific solution of a responsive UI
-and is best explained by delving into each section specifically. The next section is <a href="pages/job.html"><code>Job</code></a> to start us off. </p>
-<h4 id="interface-overview"><a class="header" href="#interface-overview">Interface Overview</a></h4>
-<p>see API doc for full reference</p>
+and is best explained by delving into each section specifically. The next section is <a href="pages/job.html"><code>Job</code></a> to start us off.</p>
+<h3 id="interface-overview"><a class="header" href="#interface-overview">Interface Overview</a></h3>
+<h5 id="init"><a class="header" href="#init">Init</a></h5>
+<p>First is the <code>Visualizer::new(...)</code>.
+This creates 5 main <code>Task</code>s that help the visualizer handle interactions, and respond accordingly.
+Next is the option to <code>Visualizer::set_gfx_options(...)</code> which can be used to reset the <code>GfxOptions</code>
+after instantiation. There is an <code>async Visualizer::init_gfx(...)</code> which is used to create the <code>Gfx</code> module and <code>Viewport</code>.
+This is the core initialization fn.
+Attachments need to be invoked to insert into the <code>Job</code>. This can be accomplished with
+<code>Visualizer::initialize(...)</code>.</p>
+<h5 id="attachments"><a class="header" href="#attachments">Attachments</a></h5>
+<p>With <code>Visualizer::add_attachment::&lt;impl Attach&gt;()</code> the system can be extended with logic handlers.
+Using <code>Visualizer::register_renderer::&lt;impl Render&gt;()</code> the system can add render fns to the render pass.</p>
+<h5 id="helpers"><a class="header" href="#helpers">Helpers</a></h5>
+<p>You can <code>Visualizer::trigger_resize(...)</code> to resize the viewport and surface configuration.
+The <code>Theme</code> can be changed via <code>Visualizer::set_theme(...)</code>.
+Entities can be added by invoking <code>Visualizer::add_entities(...)</code> or <code>Visualizer::add_named_entities(...)</code>.
+Scale factor can be set via <code>Visualizer::set_scale_factor(...)</code>.</p>
+<h5 id="input"><a class="header" href="#input">Input</a></h5>
+<p>Touch events can be registered with <code>Visualizer::register_touch(...)</code>.
+Mouse clicks can be registered with <code>Visualizer::register_mouse_click(...)</code>.
+Mouse location can be set with <code>Visualizer::set_mouse_location(...)</code>.
+Touches/Clicks can be cancelled with <code>Visualizer::cancel_touches()</code>.</p>
+<h5 id="control-flow"><a class="header" href="#control-flow">Control Flow</a></h5>
+<p>A <code>Visualizer</code> can be controlled with <code>::suspend()</code> | <code>::resume()</code> | <code>::setup()</code> 
+| <code>::exec()</code> | <code>::render()</code> | <code>::teardown()</code></p>
+<p>See <a href="pages/../../doc/workflow_visualizer/index.html">API</a> doc for full reference.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="job"><a class="header" href="#job">Job</a></h1>
 <p>A <code>Job</code> is a struct for executing <code>Task</code>s which run functions on data in a <code>Container</code>. </p>
 <h3 id="container"><a class="header" href="#container">Container</a></h3>
 <p>A <code>Container</code> can hold <code>Res</code> or resources which have one slot per type, or it can hold
 <code>Entity</code>s composed of many types associating them with a unique id to reference the parts.
-See <a href="pages/"><code>bevy_ecs::World</code></a> for more information.</p>
+See <a href="https://docs.rs/bevy/latest/bevy/ecs/prelude/struct.World.html"><code>bevy_ecs::World</code></a> for more information.</p>
 <h3 id="task"><a class="header" href="#task">Task</a></h3>
 <p>A <code>Task</code> is a scheduled set of fns to run on the <code>Container</code>. These fns can be grouped into <code>SystemSet</code>s to
 synchronize when parts of the schedule should be done before/after other sets.</p>
@@ -427,7 +451,7 @@ let data = job.get_entity::&lt;Components&gt;(&quot;special&quot;).unwrap();
 <span class="boring">}</span></code></pre></pre>
 <h5 id="exit--idle"><a class="header" href="#exit--idle">Exit | Idle</a></h5>
 <p>On creation a <code>Job</code> inserts <code>Exit</code> and <code>Idle</code> resources to aid in control flow.</p>
-<h6 id="idle"><a class="header" href="#idle">Idle</a></h6>
+<h5 id="idle"><a class="header" href="#idle">Idle</a></h5>
 <p><code>Idle</code> can be set in systems by bringing in the resource</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -440,7 +464,7 @@ When set to <code>true</code> the <code>Runner</code> sets the control flow to w
 or hardware events. A system is inserted to attempt to set <code>Idle.can_idle</code> to <code>true</code>
 at the beginning of every frame. You can set this to <code>false</code> any time in your loop to 
 signal that execution should keep running even without input, such as in animations.</p>
-<h6 id="exit"><a class="header" href="#exit">Exit</a></h6>
+<h5 id="exit"><a class="header" href="#exit">Exit</a></h5>
 <p><code>Exit</code> can be set in a similar way.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -576,7 +600,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 </span><span class="boring">fn main() {
 </span>visualizer.job.task(Visualizer::TASK_MAIN).add_systems((...));
 <span class="boring">}</span></code></pre></pre>
-<h6 id="visualizertask_startup"><a class="header" href="#visualizertask_startup">Visualizer::TASK_STARTUP</a></h6>
+<h5 id="visualizertask_startup"><a class="header" href="#visualizertask_startup">Visualizer::TASK_STARTUP</a></h5>
 <p>This task is run once after initialization of the <code>Attachment</code>s queued in the visualizer.</p>
 <ul>
 <li><code>SyncPoint::Initialization</code></li>
@@ -586,7 +610,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>UserSpaceSyncPoint::Resolve</code></li>
 <li><code>SyncPoint::Finish</code></li>
 </ul>
-<h6 id="visualizertask_main"><a class="header" href="#visualizertask_main">Visualizer::TASK_MAIN</a></h6>
+<h5 id="visualizertask_main"><a class="header" href="#visualizertask_main">Visualizer::TASK_MAIN</a></h5>
 <p>This task is run every iteration of the event loop, while <code>!job.suspended()</code>.</p>
 <ul>
 <li><code>JobSyncPoint::Idle</code></li>
@@ -603,7 +627,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>SyncPoint::PushDiff</code></li>
 <li><code>SyncPoint::Finish</code></li>
 </ul>
-<h6 id="visualizertask_render_startup"><a class="header" href="#visualizertask_render_startup">Visualizer::TASK_RENDER_STARTUP</a></h6>
+<h5 id="visualizertask_render_startup"><a class="header" href="#visualizertask_render_startup">Visualizer::TASK_RENDER_STARTUP</a></h5>
 <p>This task is run once after the initialization of the <code>Attachment</code>s queued in the visualizer.</p>
 <ul>
 <li><code>SyncPoint::Initialization,</code></li>
@@ -613,7 +637,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>UserSpaceSyncPoint::Resolve,</code></li>
 <li><code>SyncPoint::Finish,</code></li>
 </ul>
-<h6 id="visualizertask_render_main"><a class="header" href="#visualizertask_render_main">Visualizer::TASK_RENDER_MAIN</a></h6>
+<h5 id="visualizertask_render_main"><a class="header" href="#visualizertask_render_main">Visualizer::TASK_RENDER_MAIN</a></h5>
 <p>This task is run every time a redraw is requested.</p>
 <ul>
 <li><code>JobSyncPoint::Idle,</code></li>
@@ -626,7 +650,311 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 </ul>
 <p>The <code>Task</code>s labeled &quot;*_MAIN&quot; have an extra set <code>JobSyncPoint::Idle</code> to communicate with 
 the control_flow of the event loop.</p>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="coordinates"><a class="header" href="#coordinates">Coordinates</a></h1>
+<p>To position things, the struct <code>Coordinates</code> helps by providing</p>
+<ul>
+<li><code>Position</code> the x/y of the entity</li>
+<li><code>Area</code> the width/height of the entity</li>
+<li><code>Layer</code> the z-value of the entity for ordering depth
+This is all wrapped in a </li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Coordinate&lt;Context: CoordContext&gt; {
+    #[bundle]
+    pub section: Section&lt;Context&gt;,
+    pub layer: Layer,
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="parts"><a class="header" href="#parts">Parts</a></h3>
+<p>The <code>Coordinate</code> struct is a composition of another bundle <code>Section</code> and a <code>Layer</code>. A <code>Section</code> is
+a bundle of <code>Position</code> and <code>Area</code>. This spawns all the components separately for orthogonality in 
+designing systems to utilize these parts.</p>
+<p>A <code>Coordinate</code> uses a <code>CoordinateContext</code> to differentiate different
+types of coordinate values. There are 3 contexts provided by the visualizer.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl CoordinateContext for DeviceContext {}
+impl CoordinateContext for InterfaceContext {}
+impl CoordinateContext for NumericalContext {}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="scale--dpi"><a class="header" href="#scale--dpi">Scale | Dpi</a></h3>
+<p>All UI elements should be assigned coordinates within the <a href="pages/grid.html"><code>Grid</code></a>, but for 
+understanding how coordinates work, UI coordinates use <code>InterfaceContext</code> to display correctly on devices
+that require scaling to present correctly. Mobile devices have high resolution screens yet are
+a fraction of the size of desktop monitors. Drawing a shape at 50x50 on desktop would be very small
+on a device with higher dots per inch (dpi). <code>ScaleFactor</code> holds a f64 to be used to multiply to get the
+needed size of an element in <code>DeviceContext</code>. It is used to divide <code>DeviceContext</code> coordinates to get to
+<code>InterfaceContext</code>. Developers should design for the middle ground of 1920x1080 which is considered a
+scale factor of <code>1</code>. The same <code>InterfaceContext</code> coordinates will be correctly scaled to fit on different
+sized devices. The <code>Viewport</code>'s interface section will be smaller on higher dpi devices however, so using raw 
+coordinates might be off-screen when running the same layout on desktop/mobile. To account for this
+a <a href="pages/grid.html"><code>Grid</code></a> is established and should be the primary way to instruct UI elements where to be.</p>
+<h4 id="devicecontext"><a class="header" href="#devicecontext">DeviceContext</a></h4>
+<p>This context is for coordinates in physical space such as hardware dimensions for the window.
+The <code>desktop_dimensions</code> that are passed to <code>Runner::new().with_desktop_dimensions(...)</code> is an 
+example of <code>DeviceContext</code>.</p>
+<h4 id="interfacecontext"><a class="header" href="#interfacecontext">InterfaceContext</a></h4>
+<p>This context is for coordinates in logical space such as UI positioning. This is needed to 
+account for scale factor of the device being run on. <code>ScaleFactor</code> holds a reference to 
+the platforms info to be used in conversion between contexts.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(scale_factor: Res&lt;ScaleFactor&gt;) {
+    // ...
+    let interface_context_pos = device_context_pos.to_interface(scale_factor.factor);
+}
+<span class="boring">}</span></code></pre></pre>
+<h4 id="numericalcontext"><a class="header" href="#numericalcontext">NumericalContext</a></h4>
+<p>This context is agnostic to device/logical and is used for representing 
+numbers without associating screen positioning semantics. Useful for inheriting the
+methods of <code>Coordinate</code> without it mixing with your interface positioning.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let non_ui_coord = Coordinate::&lt;NumericalContext&gt;::new(...);
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="gfx"><a class="header" href="#gfx">Gfx</a></h1>
+<p>This holds the wgpu <code>Surface</code> | <code>Device</code> | <code>Queue</code> | <code>Config</code>. These parts obtain a drawable
+surface, a gpu device to use for acceleration, a queue to submit commands to this gpu, and the
+configuration of the surface (formats / size). This is needed to power all the render pipelines
+and present to the window created during run. </p>
+<h3 id="gfxoptions"><a class="header" href="#gfxoptions">GfxOptions</a></h3>
+<p>When creating a <code>Visualizer</code>, you will need to pass it <code>GfxOptions</code>. This can be used to configure how
+your application uses the <code>Gfx</code> stack and what environment is needed. Desktop platforms generally can run
+<code>GfxOptions::native_defaults()</code> without concern. Mobile/Web platforms might want to downgrade the limits using
+<code>GfxOptions::limited_environment()</code> which will lower certain aspects commonly not implemented on these platforms.</p>
+<p>Your main interaction with this struct will be extending the visualizer with custom pipelines. </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(gfx: Res&lt;GfxSurface&gt;, config: Res&lt;GfxSurfaceConfiguration&gt;, msaa: Res&lt;MsaaRenderAdapter&gt;) {
+    // ... use parts
+    // gfx.device/surface/queue
+    // config.config.width/height
+    // msaa.requested(); // the requested level of sampling/anti-aliasing from
+}
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>MsaaRenderAdapter</code> can be used to request multi-sampling and anti-aliasing for your renderers e.g.
+<code>GfxOptions::native_defaults().with_msaa(4)</code>.</p>
+<h3 id="learn-more"><a class="header" href="#learn-more">Learn More</a></h3>
+<p>For more information check out the amazing work being done at <a href="https://wgpu.rs/"><code>wgpu.rs</code></a>. </p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="viewport"><a class="header" href="#viewport">Viewport</a></h1>
+<p>The <code>Viewport</code> is central to all rendering as it integral to correctly positioning
+elements. Here is the definition.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Viewport {
+    pub(crate) cpu: CpuViewport,
+    pub(crate) gpu: GpuViewport,
+    pub bind_group: wgpu::BindGroup,
+    pub bind_group_layout: wgpu::BindGroupLayout,
+    pub(crate) uniform: Uniform&lt;GpuViewport&gt;,
+    pub(crate) depth_texture: wgpu::Texture,
+    pub(crate) depth_format: wgpu::TextureFormat,
+    pub(crate) offset: ViewportOffset,
+    pub(crate) offset_uniform: Uniform&lt;ViewportOffset&gt;,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This holds the data for an 
+<a href="https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/orthographic-projection-matrix.html"><code>orthographic</code></a>
+matrix that converts coordinates to NDC coordinates which are limited to -1/1, from screen coordinates such
+as the elements <code>Coordinate</code>. It takes the current window size and creates a logical version (Cpu) and a 
+uniform buffer on the <code>Gpu</code>. This needs to be used via the <code>pub</code> fields <code>bind_group</code> and <code>bind_group_layout</code> 
+in shaders to multiply against to get the correct normalized position.</p>
+<pre><code class="language-wgsl">struct Viewport {
+    view_matrix: mat4x4&lt;f32&gt;,
+};
+@group(0)
+@binding(0)
+var&lt;uniform&gt; viewport: Viewport;
+@group(0)
+@binding(1)
+var&lt;uniform&gt; viewport_offset: vec4&lt;f32&gt;;
+// ... {
+    var offset_coordinates = vec4&lt;f32&gt;(coordinates.rg - viewport_offset.rg, coordinates.ba);
+    let ndc = vec4&lt;f32&gt;(viewport.view_matrix * offset_coordinates);
+// ... }
+</code></pre>
+<p>The <code>viewport</code> is the matrix which needs to be multiplied by your coordinates to return NDC coordinates.
+This is what is expected by the shader vertex output.</p>
+<p>The <code>viewport_offset</code> is the current position of the viewport used to scroll where the UI is looking 
+at. This is set using <code>ViewportHandle</code>. You must first offset your elements x/y before multiplying.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(handle: ResMut&lt;ViewportHandle&gt;) {
+    handle.position_adjust(...);// to change offset
+    let section: Section&lt;InterfaceContext&gt; = handle.section();// for using bounds of Viewport 
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This is in two parts to allow systems running things with the rendering tool <code>Viewport</code> do not
+interfere with the logical handle <code>ViewportHandle</code> and thus have two different uniforms. This is also
+performant for updating position repeatedly as the UI scrolls because the matrix data does not need to be 
+changed as the <code>Viewport</code> is not changing size and thus less sent over to gpu. </p>
+<h3 id="depth"><a class="header" href="#depth">Depth</a></h3>
+<p>The <code>Viewport</code> also holds the depth buffer as it is correlated in size to the <code>Viewport</code> dimensions
+and must be recreated when resized. The near layer is <code>Layer::new(0)</code> and the far is <code>Layer::new(100)</code>.
+All layers should be within this bound to not be clipped by the <code>Viewport</code> during culling by the gpu.</p>
+<h4 id="usage-in-renderers"><a class="header" href="#usage-in-renderers">Usage in Renderers</a></h4>
+<p>Include the bind_group_layout</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let layout_descriptor = wgpu::PipelineLayoutDescriptor {
+        label: Some(&quot;pipeline layout descriptor&quot;),
+        bind_group_layouts: &amp;[
+            &amp;viewport.bind_group_layout,
+            // ...
+        ],
+        push_constant_ranges: &amp;[],
+    };
+<span class="boring">}</span></code></pre></pre>
+<p>Specify the depth format</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let depth_stencil_state = Some(wgpu::DepthStencilState {
+        format: viewport.depth_format(),
+        // ...
+    });
+<span class="boring">}</span></code></pre></pre>
+<p>Set the <code>bind_group</code> in your <code>Render::render</code> fn</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>render_pass_handle
+            .0
+            .set_bind_group(0, &amp;viewport.bind_group, &amp;[]);
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="render"><a class="header" href="#render">Render</a></h1>
+<p>Rendering is the main purpose of the <code>Visualizer</code>. <a href="pages/gfx.html"><code>Gfx</code></a> module points to information
+on how this lib uses <a href="https://wgpu.rs">wgpu.rs</a> to achieve this goal. The core part of rendering is
+the <code>wgpu::RenderPass</code> which allows recording of commands to the gpu available. This loads the memory
+for the surface and rasterizes the draw calls. Presentation of this surface works in FIFO mode (swapping
+surface textures is a chain to not interrupt device rendering) and constrains itself to a single <code>RenderPass</code>
+as loading memory to do a second render pass is very costly on (especially on mobile devices). This centralizes
+where rendering happens and creates an efficient solution for presenting to the device.</p>
+<h3 id="render-trait"><a class="header" href="#render-trait">Render Trait</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Render {
+    fn phase() -&gt; RenderPhase;
+    fn render&lt;'a&gt;(&amp;'a self, render_pass_handle: &amp;mut RenderPassHandle&lt;'a&gt;, viewport: &amp;'a Viewport);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>render</code> fn allows access to the <code>RenderPass</code> via a handle and the <a href="pages/viewport.html"><code>Viewport</code></a> to
+integrate the <code>bind_group</code>/<code>layout</code> into shaders. Access to <code>&amp;self</code> is available to hold any
+data needed to render such as <code>wgpu::Buffer</code>s or <code>wgpu::Texture</code>s.</p>
+<p><code>fn phase() -&gt; RenderPhase</code> is for signaling what phase this <code>render</code> should take place in.
+<code>RenderPhase::Opaque</code> fns are run first as no blending is present.
+<code>RenderPhase::Alpha(priority)</code> is used for renderers that wish to use alpha-blending and 
+happens after opaque renderers to blend correctly with the colors underneath in the depth buffer.</p>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="visibility"><a class="header" href="#visibility">Visibility</a></h1>
+<p>The <code>Visibility</code> struct handles the notion of being on-screen and by what amount with <code>VisibleSection</code>.
+To enable this in an entity add the <code>EnableVisibility</code> bundle which hooks it
+into the <code>calc_visibility</code> system.
+This is run twice every frame; once after initialization, and once after processing completes.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let bundle = (..., EnableVisibility::default());
+// ...
+if visibility.visible() {
+    // ... do something because visible
+}
+<span class="boring">}</span></code></pre></pre>
+<p>When an entity is partially off-screen it can be helpful to read from the <code>VisibleSection</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if let Some(section) = visible_section.section() {
+    // ... react according to actual in-screen pos/area
+}
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="focus"><a class="header" href="#focus">Focus</a></h1>
+<p>This struct is for determining the <code>Focus</code> in the UI. A resource <code>FocusedEntity</code> exists
+that is set when input is set to an entity. It is a simple implementation and put here 
+for reference.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Focus {
+    pub(crate) focused: bool,
+}
+
+impl Focus {
+    pub fn new() -&gt; Self {
+        Self { focused: false }
+    }
+    pub fn focus(&amp;mut self) {
+        self.focused = true;
+    }
+    pub fn blur(&amp;mut self) {
+        self.focused = false;
+    }
+    pub fn focused(&amp;self) -&gt; bool {
+        self.focused
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>A <code>FocusInputListener</code> can be attached to an entity with <code>Focus</code> to signal the 
+<code>VirtualKeyboard</code> to open when receiving focus.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>visualizer.add_entities(vec![(
+    // ... other components
+        Focus::new(),
+        FocusInputListener {},
+    )]);
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="touch"><a class="header" href="#touch">Touch</a></h1>
+<p>This module handles input from mouse clicks/touchscreen touches. Both of these events get
+distilled to a <code>TouchEvent</code> to handle both input methods uniformly. The <code>Visualizer</code> registers
+these events and sends them to the <code>Job</code> to be processed. Any <code>Touch</code> that is not grabbed by a
+<code>TouchListener</code> resets <code>Focus</code> and clears the <code>FocusedEntity</code>. If the <code>Touch</code> is within the bounds
+of the <code>Area</code> of an entity that opt in to have a <code>TouchListener</code>, it is grabbed and prevents any underlying
+entities from receiving that <code>Touch</code>. </p>
+<h3 id="touch-listeners"><a class="header" href="#touch-listeners">Touch Listeners</a></h3>
+<p>Entities can listen to <code>OnPress</code> and <code>OnRelease</code> touch types that trigger when a <code>Touch</code> begins in the area,
+or when both the beginning and end of the <code>Touch</code> are within the bounds. This is to prevent errant presses from
+triggering action when not intended. 3 aspects can be read from this input for each entity.
+<code>TouchedState</code> holds whether it is currently pressed. This lasts for one loop then is reset in <code>SyncPoint::Finish</code>.
+<code>ToggleState</code> tracks toggling of the entity. One press enables and the consecutive press disables.
+<code>TouchLocation</code> can be read to see where the press was received within the <code>Area</code>.</p>
+<h3 id="tracking"><a class="header" href="#tracking">Tracking</a></h3>
+<p>On touchscreens multiple <code>Interactor</code>s can be active at the same time. This can be unintentional such as 
+resting your hand on the phone screen when reaching for a button. This cannot happen on mouse devices as the
+mouse is the only <code>Interactor</code>. To prevent glitch presses due to extra touch interaction, the first interactor
+is set as the <code>Primary</code> interactor and all other presses are tracked but secondary and not considered for
+triggering events. Once the <code>Primary</code> is released, other presses can be activated as the primary again.</p>
+<h3 id="adapters"><a class="header" href="#adapters">Adapters</a></h3>
+<p>Each source has an adapter which can be used to read the current state of presses. <code>TouchAdapter</code> and <code>MouseAdapter</code> fill
+these roles. </p>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="runner-1"><a class="header" href="#runner-1">Runner</a></h1>
+<p>The <code>Visualizer</code> can be used without a <code>Runner</code> to have full control of the event_loop. One would have to 
+call the triggers associated with <code>Visualizer</code> to correctly use the struct and for usability, a <code>Runner</code> is 
+provided as a useful solution to invoke the visualizer's tools.</p>
+<p>A <code>Runner</code> has little data so instantiation is simple</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let runner = Runner::new();
+<span class="boring">}</span></code></pre></pre>
+<p>Natively it temporarily holds <code>desktop_dimensions</code> and <code>AndroidApp</code> to forward to the event
+loop.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Runner::new()
+        .with_desktop_dimensions((400, 600))
+        .native_run::&lt;Engen&gt;(visualizer);
+<span class="boring">}</span></code></pre></pre>
+<p>can be used to set fixed dimensions on desktop.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Runner::new()
+        .with_android_app(android_app)
+        .native_run::&lt;Engen&gt;(visualizer);
+<span class="boring">}</span></code></pre></pre>
+<p>for Android, the system needs to be passed an <code>AndroidApp</code> to interact with the 
+Android OS and invoke commands.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Runner::new().web_run::&lt;Engen&gt;(visualizer, &quot;./worker.js&quot;.to_string());
+<span class="boring">}</span></code></pre></pre>
+<p>To accomplish a background thread in the browser, the <code>Runner</code> must be passed the 
+path to a Web Worker. See <a href="pages/../introduction.html">introduction</a> for web setup.</p>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

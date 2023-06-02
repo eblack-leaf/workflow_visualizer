@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html" class="active"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html" class="active"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,7 +144,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="render"><a class="header" href="#render">Render</a></h1>
+<p>Rendering is the main purpose of the <code>Visualizer</code>. <a href="gfx.html"><code>Gfx</code></a> module points to information
+on how this lib uses <a href="https://wgpu.rs">wgpu.rs</a> to achieve this goal. The core part of rendering is
+the <code>wgpu::RenderPass</code> which allows recording of commands to the gpu available. This loads the memory
+for the surface and rasterizes the draw calls. Presentation of this surface works in FIFO mode (swapping
+surface textures is a chain to not interrupt device rendering) and constrains itself to a single <code>RenderPass</code>
+as loading memory to do a second render pass is very costly on (especially on mobile devices). This centralizes
+where rendering happens and creates an efficient solution for presenting to the device.</p>
+<h3 id="render-trait"><a class="header" href="#render-trait">Render Trait</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Render {
+    fn phase() -&gt; RenderPhase;
+    fn render&lt;'a&gt;(&amp;'a self, render_pass_handle: &amp;mut RenderPassHandle&lt;'a&gt;, viewport: &amp;'a Viewport);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>The <code>render</code> fn allows access to the <code>RenderPass</code> via a handle and the <a href="viewport.html"><code>Viewport</code></a> to
+integrate the <code>bind_group</code>/<code>layout</code> into shaders. Access to <code>&amp;self</code> is available to hold any
+data needed to render such as <code>wgpu::Buffer</code>s or <code>wgpu::Texture</code>s.</p>
+<p><code>fn phase() -&gt; RenderPhase</code> is for signaling what phase this <code>render</code> should take place in.
+<code>RenderPhase::Opaque</code> fns are run first as no blending is present.
+<code>RenderPhase::Alpha(priority)</code> is used for renderers that wish to use alpha-blending and 
+happens after opaque renderers to blend correctly with the colors underneath in the depth buffer.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html" class="active"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html" class="active"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,7 +144,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="touch"><a class="header" href="#touch">Touch</a></h1>
+<p>This module handles input from mouse clicks/touchscreen touches. Both of these events get
+distilled to a <code>TouchEvent</code> to handle both input methods uniformly. The <code>Visualizer</code> registers
+these events and sends them to the <code>Job</code> to be processed. Any <code>Touch</code> that is not grabbed by a
+<code>TouchListener</code> resets <code>Focus</code> and clears the <code>FocusedEntity</code>. If the <code>Touch</code> is within the bounds
+of the <code>Area</code> of an entity that opt in to have a <code>TouchListener</code>, it is grabbed and prevents any underlying
+entities from receiving that <code>Touch</code>. </p>
+<h3 id="touch-listeners"><a class="header" href="#touch-listeners">Touch Listeners</a></h3>
+<p>Entities can listen to <code>OnPress</code> and <code>OnRelease</code> touch types that trigger when a <code>Touch</code> begins in the area,
+or when both the beginning and end of the <code>Touch</code> are within the bounds. This is to prevent errant presses from
+triggering action when not intended. 3 aspects can be read from this input for each entity.
+<code>TouchedState</code> holds whether it is currently pressed. This lasts for one loop then is reset in <code>SyncPoint::Finish</code>.
+<code>ToggleState</code> tracks toggling of the entity. One press enables and the consecutive press disables.
+<code>TouchLocation</code> can be read to see where the press was received within the <code>Area</code>.</p>
+<h3 id="tracking"><a class="header" href="#tracking">Tracking</a></h3>
+<p>On touchscreens multiple <code>Interactor</code>s can be active at the same time. This can be unintentional such as 
+resting your hand on the phone screen when reaching for a button. This cannot happen on mouse devices as the
+mouse is the only <code>Interactor</code>. To prevent glitch presses due to extra touch interaction, the first interactor
+is set as the <code>Primary</code> interactor and all other presses are tracked but secondary and not considered for
+triggering events. Once the <code>Primary</code> is released, other presses can be activated as the primary again.</p>
+<h3 id="adapters"><a class="header" href="#adapters">Adapters</a></h3>
+<p>Each source has an adapter which can be used to read the current state of presses. <code>TouchAdapter</code> and <code>MouseAdapter</code> fill
+these roles. </p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -153,7 +176,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../pages/runner.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../pages/orientation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -167,7 +190,7 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../pages/runner.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../pages/orientation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

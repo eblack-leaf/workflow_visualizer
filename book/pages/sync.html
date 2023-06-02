@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html" class="active"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html" class="active"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -230,7 +230,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 </span><span class="boring">fn main() {
 </span>visualizer.job.task(Visualizer::TASK_MAIN).add_systems((...));
 <span class="boring">}</span></code></pre></pre>
-<h6 id="visualizertask_startup"><a class="header" href="#visualizertask_startup">Visualizer::TASK_STARTUP</a></h6>
+<h5 id="visualizertask_startup"><a class="header" href="#visualizertask_startup">Visualizer::TASK_STARTUP</a></h5>
 <p>This task is run once after initialization of the <code>Attachment</code>s queued in the visualizer.</p>
 <ul>
 <li><code>SyncPoint::Initialization</code></li>
@@ -240,7 +240,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>UserSpaceSyncPoint::Resolve</code></li>
 <li><code>SyncPoint::Finish</code></li>
 </ul>
-<h6 id="visualizertask_main"><a class="header" href="#visualizertask_main">Visualizer::TASK_MAIN</a></h6>
+<h5 id="visualizertask_main"><a class="header" href="#visualizertask_main">Visualizer::TASK_MAIN</a></h5>
 <p>This task is run every iteration of the event loop, while <code>!job.suspended()</code>.</p>
 <ul>
 <li><code>JobSyncPoint::Idle</code></li>
@@ -257,7 +257,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>SyncPoint::PushDiff</code></li>
 <li><code>SyncPoint::Finish</code></li>
 </ul>
-<h6 id="visualizertask_render_startup"><a class="header" href="#visualizertask_render_startup">Visualizer::TASK_RENDER_STARTUP</a></h6>
+<h5 id="visualizertask_render_startup"><a class="header" href="#visualizertask_render_startup">Visualizer::TASK_RENDER_STARTUP</a></h5>
 <p>This task is run once after the initialization of the <code>Attachment</code>s queued in the visualizer.</p>
 <ul>
 <li><code>SyncPoint::Initialization,</code></li>
@@ -267,7 +267,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>UserSpaceSyncPoint::Resolve,</code></li>
 <li><code>SyncPoint::Finish,</code></li>
 </ul>
-<h6 id="visualizertask_render_main"><a class="header" href="#visualizertask_render_main">Visualizer::TASK_RENDER_MAIN</a></h6>
+<h5 id="visualizertask_render_main"><a class="header" href="#visualizertask_render_main">Visualizer::TASK_RENDER_MAIN</a></h5>
 <p>This task is run every time a redraw is requested.</p>
 <ul>
 <li><code>JobSyncPoint::Idle,</code></li>

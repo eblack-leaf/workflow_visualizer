@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `workflow_visualizer/src/instance/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../workflow_visualizer/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `workflow_visualizer/src/instance/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../workflow_visualizer/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -160,6 +160,16 @@
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::marker::PhantomData;
 
@@ -173,14 +183,15 @@
 
 <span class="kw">pub mod </span>index;
 <span class="kw">pub mod </span>key;
-
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// Cpu side buffer for an attribute of instances
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">pub struct </span>CpuAttributeBuffer&lt;T: Default + Clone&gt; {
     <span class="kw">pub </span>buffer: Vec&lt;T&gt;,
 }
 
 <span class="kw">impl</span>&lt;T: Default + Clone&gt; CpuAttributeBuffer&lt;T&gt; {
-    <span class="kw">pub fn </span>new(max: u32) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// creates a new buffer initially filled with ::default()
+    </span><span class="kw">pub fn </span>new(max: u32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             buffer: {
                 <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
@@ -190,8 +201,8 @@
         }
     }
 }
-
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// Temporary storage for staging writes to the Gpu
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">pub struct </span>AttributeWrite&lt;Attribute&gt; {
     <span class="kw">pub </span>write: HashMap&lt;Index, Attribute&gt;,
 }
@@ -208,14 +219,16 @@
         AttributeWrite::new()
     }
 }
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// Gpu side buffer of an attribute of an instance
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">pub struct </span>GpuAttributeBuffer&lt;T&gt; {
     <span class="kw">pub </span>buffer: wgpu::Buffer,
     _phantom_data: PhantomData&lt;T&gt;,
 }
 
 <span class="kw">impl</span>&lt;T&gt; GpuAttributeBuffer&lt;T&gt; {
-    <span class="kw">pub fn </span>new(gfx_surface: <span class="kw-2">&amp;</span>GfxSurface, max: u32, label: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// creates a new buffer on the Gpu with size of max * `size_of&lt;T&gt;`
+    </span><span class="kw">pub fn </span>new(gfx_surface: <span class="kw-2">&amp;</span>GfxSurface, max: u32, label: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             buffer: gfx_surface.device.create_buffer(<span class="kw-2">&amp;</span>wgpu::BufferDescriptor {
                 label: <span class="prelude-val">Some</span>(label),
@@ -227,8 +240,8 @@
         }
     }
 }
-
-<span class="kw">pub struct </span>InstanceAttributeManager&lt;
+<span class="doccomment">/// Combines a cpu/gpu/write for an attribute for full management of the data for an attribute
+</span><span class="kw">pub struct </span>InstanceAttributeManager&lt;
     Attribute: Send + Sync + Default + Clone + Pod + Zeroable + <span class="lifetime">&#39;static</span>,
 &gt; {
     <span class="kw">pub </span>cpu: CpuAttributeBuffer&lt;Attribute&gt;,
@@ -246,17 +259,20 @@
             write: AttributeWrite::new(),
         }
     }
-    <span class="kw">pub fn </span>queue_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: Index, attr: Attribute) {
+    <span class="doccomment">/// queues a write to the staging buffer for writing
+    </span><span class="kw">pub fn </span>queue_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: Index, attr: Attribute) {
         <span class="self">self</span>.write.write.insert(index, attr);
     }
-    <span class="kw">pub fn </span>grow(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_surface: <span class="kw-2">&amp;</span>GfxSurface, max: u32) {
+    <span class="doccomment">/// when needed, the attribute buffers must grow if more instances are requested
+    </span><span class="kw">pub fn </span>grow(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_surface: <span class="kw-2">&amp;</span>GfxSurface, max: u32) {
         <span class="self">self</span>.cpu.buffer.resize(max <span class="kw">as </span>usize, Attribute::default());
         <span class="self">self</span>.gpu = GpuAttributeBuffer::&lt;Attribute&gt;::new(gfx_surface, max, <span class="string">&quot;attribute buffer&quot;</span>);
         gfx_surface
             .queue
             .write_buffer(<span class="kw-2">&amp;</span><span class="self">self</span>.gpu.buffer, <span class="number">0</span>, bytemuck::cast_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.cpu.buffer));
     }
-    <span class="kw">pub fn </span>write_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_surface: <span class="kw-2">&amp;</span>GfxSurface) {
+    <span class="doccomment">/// this writes all the staged data in write, to the gpu
+    </span><span class="kw">pub fn </span>write_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_surface: <span class="kw-2">&amp;</span>GfxSurface) {
         <span class="kw">let </span>attributes = <span class="self">self
             </span>.write
             .write
@@ -292,12 +308,14 @@
         }
     }
 }
-
-<span class="kw">pub fn </span>offset&lt;T&gt;(index: <span class="kw-2">&amp;</span>Index) -&gt; wgpu::BufferAddress {
+<span class="doccomment">/// helper for obtaining an offset sized for a type
+</span><span class="kw">pub fn </span>offset&lt;T&gt;(index: <span class="kw-2">&amp;</span>Index) -&gt; wgpu::BufferAddress {
     (std::mem::size_of::&lt;T&gt;() * index.value <span class="kw">as </span>usize) <span class="kw">as </span>wgpu::BufferAddress
 }
-
-<span class="attr">#[repr(C)]
+<span class="doccomment">/// NullBit is useful for dropping instances without having to resize the buffer or swap elements.
+/// NullBit sets all other attributes to 0 in the shader when multiplied by to cancel one instance
+/// while still having it included in the buffer.
+</span><span class="attr">#[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone)]
 </span><span class="kw">pub struct </span>NullBit {
     bit: u32,
@@ -315,12 +333,14 @@
     <span class="kw">fn </span>new(bit: u32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ bit }
     }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>not_null() -&gt; NullBit {
+    <span class="doccomment">/// creates a NullBit that does not cancel the instance
+    </span><span class="kw">pub fn </span>not_null() -&gt; NullBit {
         <span class="self">Self</span>::new(<span class="self">Self</span>::NOT_NULL)
     }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>null() -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// creates a NullBit that cancels the instance
+    </span><span class="kw">pub fn </span>null() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(<span class="self">Self</span>::NULL)
     }
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="workflow_visualizer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.2 (9eb3afe9e 2023-03-27)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="workflow_visualizer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

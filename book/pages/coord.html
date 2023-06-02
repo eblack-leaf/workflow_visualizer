@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html" class="active"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.3.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.4.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.5.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.5.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.6.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.7.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.8.</strong> Touch</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html" class="active"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,7 +144,70 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="coordinates"><a class="header" href="#coordinates">Coordinates</a></h1>
+<p>To position things, the struct <code>Coordinates</code> helps by providing</p>
+<ul>
+<li><code>Position</code> the x/y of the entity</li>
+<li><code>Area</code> the width/height of the entity</li>
+<li><code>Layer</code> the z-value of the entity for ordering depth
+This is all wrapped in a </li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Coordinate&lt;Context: CoordContext&gt; {
+    #[bundle]
+    pub section: Section&lt;Context&gt;,
+    pub layer: Layer,
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="parts"><a class="header" href="#parts">Parts</a></h3>
+<p>The <code>Coordinate</code> struct is a composition of another bundle <code>Section</code> and a <code>Layer</code>. A <code>Section</code> is
+a bundle of <code>Position</code> and <code>Area</code>. This spawns all the components separately for orthogonality in 
+designing systems to utilize these parts.</p>
+<p>A <code>Coordinate</code> uses a <code>CoordinateContext</code> to differentiate different
+types of coordinate values. There are 3 contexts provided by the visualizer.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl CoordinateContext for DeviceContext {}
+impl CoordinateContext for InterfaceContext {}
+impl CoordinateContext for NumericalContext {}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="scale--dpi"><a class="header" href="#scale--dpi">Scale | Dpi</a></h3>
+<p>All UI elements should be assigned coordinates within the <a href="grid.html"><code>Grid</code></a>, but for 
+understanding how coordinates work, UI coordinates use <code>InterfaceContext</code> to display correctly on devices
+that require scaling to present correctly. Mobile devices have high resolution screens yet are
+a fraction of the size of desktop monitors. Drawing a shape at 50x50 on desktop would be very small
+on a device with higher dots per inch (dpi). <code>ScaleFactor</code> holds a f64 to be used to multiply to get the
+needed size of an element in <code>DeviceContext</code>. It is used to divide <code>DeviceContext</code> coordinates to get to
+<code>InterfaceContext</code>. Developers should design for the middle ground of 1920x1080 which is considered a
+scale factor of <code>1</code>. The same <code>InterfaceContext</code> coordinates will be correctly scaled to fit on different
+sized devices. The <code>Viewport</code>'s interface section will be smaller on higher dpi devices however, so using raw 
+coordinates might be off-screen when running the same layout on desktop/mobile. To account for this
+a <a href="grid.html"><code>Grid</code></a> is established and should be the primary way to instruct UI elements where to be.</p>
+<h4 id="devicecontext"><a class="header" href="#devicecontext">DeviceContext</a></h4>
+<p>This context is for coordinates in physical space such as hardware dimensions for the window.
+The <code>desktop_dimensions</code> that are passed to <code>Runner::new().with_desktop_dimensions(...)</code> is an 
+example of <code>DeviceContext</code>.</p>
+<h4 id="interfacecontext"><a class="header" href="#interfacecontext">InterfaceContext</a></h4>
+<p>This context is for coordinates in logical space such as UI positioning. This is needed to 
+account for scale factor of the device being run on. <code>ScaleFactor</code> holds a reference to 
+the platforms info to be used in conversion between contexts.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(scale_factor: Res&lt;ScaleFactor&gt;) {
+    // ...
+    let interface_context_pos = device_context_pos.to_interface(scale_factor.factor);
+}
+<span class="boring">}</span></code></pre></pre>
+<h4 id="numericalcontext"><a class="header" href="#numericalcontext">NumericalContext</a></h4>
+<p>This context is agnostic to device/logical and is used for representing 
+numbers without associating screen positioning semantics. Useful for inheriting the
+methods of <code>Coordinate</code> without it mixing with your interface positioning.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let non_ui_coord = Coordinate::&lt;NumericalContext&gt;::new(...);
+<span class="boring">}</span></code></pre></pre>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -153,7 +216,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../pages/gfx.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../pages/grid.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -167,7 +230,7 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../pages/gfx.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../pages/grid.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
