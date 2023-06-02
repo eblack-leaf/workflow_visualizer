@@ -18,6 +18,7 @@
   - [Touch](pages/touch.md)
   - [Orientation](pages/orientation.md)
   - [InstanceTools](pages/instance_tools.md)
+  - [Time](pages/time.md)
 - [Runner](pages/runner.md)
 - [Platform Specifics](pages/platform_specifics.md)
 - [Tutorial](tutorial/begin.md)

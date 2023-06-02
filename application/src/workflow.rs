@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tracing::info;
-use workflow_visualizer::{async_trait, start_web_worker, Visualizer, Workflow};
+use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
+use async_trait::async_trait;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {

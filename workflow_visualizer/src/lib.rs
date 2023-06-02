@@ -52,7 +52,6 @@ pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::{WindowAttachment, WindowResize};
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
-pub use async_trait;
 pub use bevy_ecs;
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
