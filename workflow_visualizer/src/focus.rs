@@ -4,6 +4,7 @@ use crate::touch::read_touch_events;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
 use crate::SyncPoint;
+/// Used to set the Focus of an element
 #[derive(Component)]
 pub struct Focus {
     pub(crate) focused: bool,
@@ -28,6 +29,7 @@ impl Default for Focus {
         Focus::new()
     }
 }
+/// used to opt into VirtualKeyboard open functionality
 #[derive(Component, Copy, Clone)]
 pub struct FocusInputListener {}
 pub(crate) fn set_focused(
@@ -60,6 +62,7 @@ pub(crate) fn set_focused(
         }
     }
 }
+/// which entity is currently focused
 #[derive(Resource)]
 pub struct FocusedEntity {
     pub entity: Option<Entity>,

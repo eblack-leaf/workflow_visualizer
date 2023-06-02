@@ -1,7 +1,7 @@
 use bevy_ecs::prelude::{Added, Component, Query, Res};
 
 use crate::{TimeDelta, TimeMarker, Timer};
-
+/// Animation class for running interpolations over time
 #[derive(Component)]
 pub struct Animation<T: Component> {
     pub total_time: TimeDelta,
@@ -29,11 +29,12 @@ impl<T: Component> Animation<T> {
         (delta.as_f32(), done)
     }
 }
-
+/// How to animate the component
 pub trait Animate {
     type Animator: Component;
     fn animate<T: Into<TimeDelta>>(self, total_time: T) -> Animation<Self::Animator>;
 }
+/// starter for the animations. Must be added for animation to run
 #[allow(unused)]
 pub fn start_animations<T: Component>(
     mut uninitialized_animations: Query<&mut Animation<T>, Added<Animation<T>>>,
@@ -44,6 +45,7 @@ pub fn start_animations<T: Component>(
         anim.start.replace(mark);
     }
 }
+/// Interpolates a value over an interval
 pub struct Interpolator {
     pub value: f32,
     total: f32,

@@ -4,7 +4,7 @@ use crate::coord::area::Area;
 use crate::coord::position::Position;
 use crate::coord::CoordinateContext;
 use crate::{DeviceContext, InterfaceContext};
-
+/// A section is a bundle for Position/Area
 #[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Section<Context: CoordinateContext> {
     pub position: Position<Context>,
@@ -18,6 +18,7 @@ impl<Context: CoordinateContext> Section<Context> {
             area: area.into(),
         }
     }
+    /// Can be instantiated with specific points
     pub fn from_left_top_right_bottom(left: f32, top: f32, right: f32, bottom: f32) -> Self {
         Self {
             position: (left, top).into(),
@@ -42,18 +43,21 @@ impl<Context: CoordinateContext> Section<Context> {
     pub fn bottom(&self) -> f32 {
         self.position.y + self.area.height
     }
+    /// returns if any port of this section is touching the other
     pub fn is_touching(&self, other: Self) -> bool {
         self.left() <= other.right()
             && self.right() >= other.left()
             && self.top() <= other.bottom()
             && self.bottom() >= other.top()
     }
+    /// returns true if section overlaps the other
     pub fn is_overlapping(&self, other: Self) -> bool {
         self.left() < other.right()
             && self.right() > other.left()
             && self.top() < other.bottom()
             && self.bottom() > other.top()
     }
+    /// returns true if the position resides in the section
     pub fn contains(&self, position: Position<Context>) -> bool {
         if position.x >= self.left()
             && position.x <= self.right()
@@ -64,6 +68,7 @@ impl<Context: CoordinateContext> Section<Context> {
         }
         false
     }
+    /// returns an Option of the overlap between the sections
     pub fn intersection(&self, other: Self) -> Option<Self> {
         if !self.is_overlapping(other) {
             return None;

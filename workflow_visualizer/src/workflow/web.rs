@@ -31,6 +31,7 @@ impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
         });
     }
 }
+/// spawn a web worker using the types blanket implemented `gloo_worker`
 pub fn start_web_worker<T: Workflow + Default + 'static>() {
     #[cfg(target_family = "wasm")]
     {

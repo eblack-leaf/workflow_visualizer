@@ -21,14 +21,14 @@ impl<T: Send + 'static> Receiver<T> {
     pub(crate) fn receive(&mut self) {}
 }
 
-pub struct Responder<T: Send + 'static + Debug>(pub(crate) EventLoopProxy<T>);
+pub(crate) struct Responder<T: Send + 'static + Debug>(pub(crate) EventLoopProxy<T>);
 
 impl<T: Send + 'static + Debug> Responder<T> {
     pub(crate) fn respond(&self, response: T) {
         self.0.send_event(response).expect("responder");
     }
 }
-
+/// Sender is for sending actions to the app from within the visualizer
 #[cfg(not(target_family = "wasm"))]
 #[derive(Resource)]
 pub struct Sender<T: Workflow + Default + 'static> {
@@ -84,8 +84,8 @@ impl<T: Workflow> NativeSender<T> {
         self.0.send(action).expect("native sender.md");
     }
 }
-
-pub struct OutputWrapper<T: Workflow + Default + 'static> {
+///
+pub(crate) struct OutputWrapper<T: Workflow + Default + 'static> {
     pub(crate) handler_id: HandlerId,
     pub(crate) response: <EngenHandle<T> as Worker>::Output,
 }

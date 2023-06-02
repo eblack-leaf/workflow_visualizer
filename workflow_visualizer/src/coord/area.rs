@@ -6,8 +6,7 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::coord::{CoordinateContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
-/// Area base coordinate class for 2d area
-/// requires setting a context to differentiate and track what the area means
+/// Area is for width/height of an entity
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Area<Context: CoordinateContext> {
     pub width: f32,

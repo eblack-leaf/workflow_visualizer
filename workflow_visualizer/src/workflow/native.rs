@@ -88,6 +88,7 @@ pub(crate) fn initialize_native_window<T>(
     }
     window.replace(Rc::new(builder.build(w_target).expect("window")));
 }
+/// Interface to the Android system
 #[cfg(target_os = "android")]
 #[derive(Resource)]
 pub struct AndroidInterface(pub AndroidApp);

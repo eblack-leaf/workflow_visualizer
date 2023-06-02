@@ -1,4 +1,9 @@
 #![allow(unused, dead_code)]
+//! Workflow Visualizer is a lib for cross-platform declarative UI
+//! It is comprised of three major parts.
+//! trait Workflow to setup application messaging.
+//! Visualizer which handles rendering
+//! Runner which invokes the visualizer's tools for multiple platforms
 mod animate;
 mod color;
 mod coord;
@@ -37,7 +42,7 @@ pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::text::{
     Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure,
-    TextRequest, TextScale, TextScaleAlignment, TextWrapStyle,
+    TextBundle, TextScale, TextScaleAlignment, TextWrapStyle,
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};

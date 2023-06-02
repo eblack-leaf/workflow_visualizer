@@ -8,9 +8,9 @@ use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, Section, VisibleSection,
 };
-
+/// Entry point to spawn a Text element
 #[derive(Bundle)]
-pub struct TextRequest {
+pub struct TextBundle {
     pub pos: Position<InterfaceContext>,
     pub area: Area<InterfaceContext>,
     pub layer: Layer,
@@ -30,7 +30,7 @@ pub struct TextRequest {
     pub(crate) text_scale: TextScale,
     // pub(crate) section: Section<InterfaceContext>,
 }
-impl TextRequest {
+impl TextBundle {
     pub fn new<S: Into<String>, C: Into<Color>>(
         view_position: Position<InterfaceContext>,
         view_area: Area<InterfaceContext>,
@@ -62,6 +62,7 @@ impl TextRequest {
         }
     }
 }
+/// Whether to wrap by Word or Letter
 #[derive(Component)]
 pub struct TextWrapStyle(pub WrapStyle);
 impl TextWrapStyle {
@@ -89,8 +90,10 @@ impl Glyph {
         }
     }
 }
+/// The text to render
 #[derive(Component, Clone)]
 pub struct Text(pub String);
+/// The scale of the Text
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub struct TextScale(pub u32);
 impl TextScale {
@@ -111,6 +114,7 @@ impl TextScale {
         }
     }
 }
+/// What predetermined size category to assign to the Text
 #[derive(Component, Copy, Clone, Eq, Hash, PartialEq)]
 pub enum TextScaleAlignment {
     Small,
@@ -120,8 +124,10 @@ pub enum TextScaleAlignment {
 impl TextScaleAlignment {
     pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [15, 18, 22];
 }
+/// The size of a letter at an alignment
 #[derive(Component, Copy, Clone)]
 pub struct TextLetterDimensions(pub Area<DeviceContext>);
+/// where the letter is in the Text Grid
 #[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Debug)]
 pub struct TextGridLocation {
     pub x: u32,
@@ -141,8 +147,10 @@ impl TextGridLocation {
         Self::new(x, y)
     }
 }
+/// Mapping of what glyphs keys are placed where in the TextGrid
 #[derive(Component, Debug)]
 pub struct TextGridPlacement(pub HashMap<TextGridLocation, Key>);
+/// Lengths of the lines present in the Text
 #[derive(Component, Debug)]
 pub struct TextLineStructure(pub Vec<u32>, pub (u32, u32));
 

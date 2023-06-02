@@ -11,13 +11,14 @@ pub use key::{Key, KeyFactory};
 
 pub mod index;
 pub mod key;
-
+/// Cpu side buffer for an attribute of instances
 #[derive(Component)]
 pub struct CpuAttributeBuffer<T: Default + Clone> {
     pub buffer: Vec<T>,
 }
 
 impl<T: Default + Clone> CpuAttributeBuffer<T> {
+    /// creates a new buffer initially filled with ::default()
     pub fn new(max: u32) -> Self {
         Self {
             buffer: {
@@ -28,7 +29,7 @@ impl<T: Default + Clone> CpuAttributeBuffer<T> {
         }
     }
 }
-
+/// Temporary storage for staging writes to the Gpu
 #[derive(Component)]
 pub struct AttributeWrite<Attribute> {
     pub write: HashMap<Index, Attribute>,
@@ -46,6 +47,7 @@ impl<Attribute> Default for AttributeWrite<Attribute> {
         AttributeWrite::new()
     }
 }
+/// Gpu side buffer of an attribute of an instance
 #[derive(Component)]
 pub struct GpuAttributeBuffer<T> {
     pub buffer: wgpu::Buffer,
@@ -53,6 +55,7 @@ pub struct GpuAttributeBuffer<T> {
 }
 
 impl<T> GpuAttributeBuffer<T> {
+    /// creates a new buffer on the Gpu with size of max * `size_of<T>`
     pub fn new(gfx_surface: &GfxSurface, max: u32, label: &'static str) -> Self {
         Self {
             buffer: gfx_surface.device.create_buffer(&wgpu::BufferDescriptor {
@@ -65,7 +68,7 @@ impl<T> GpuAttributeBuffer<T> {
         }
     }
 }
-
+/// Combines a cpu/gpu/write for an attribute for full management of the data for an attribute
 pub struct InstanceAttributeManager<
     Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static,
 > {
@@ -84,9 +87,11 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
             write: AttributeWrite::new(),
         }
     }
+    /// queues a write to the staging buffer for writing
     pub fn queue_write(&mut self, index: Index, attr: Attribute) {
         self.write.write.insert(index, attr);
     }
+    /// when needed, the attribute buffers must grow if more instances are requested
     pub fn grow(&mut self, gfx_surface: &GfxSurface, max: u32) {
         self.cpu.buffer.resize(max as usize, Attribute::default());
         self.gpu = GpuAttributeBuffer::<Attribute>::new(gfx_surface, max, "attribute buffer");
@@ -94,6 +99,7 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
             .queue
             .write_buffer(&self.gpu.buffer, 0, bytemuck::cast_slice(&self.cpu.buffer));
     }
+    /// this writes all the staged data in write, to the gpu
     pub fn write_attribute(&mut self, gfx_surface: &GfxSurface) {
         let attributes = self
             .write
@@ -130,11 +136,13 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
         }
     }
 }
-
+/// helper for obtaining an offset sized for a type
 pub fn offset<T>(index: &Index) -> wgpu::BufferAddress {
     (std::mem::size_of::<T>() * index.value as usize) as wgpu::BufferAddress
 }
-
+/// NullBit is useful for dropping instances without having to resize the buffer or swap elements.
+/// NullBit sets all other attributes to 0 in the shader when multiplied by to cancel one instance
+/// while still having it included in the buffer.
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone)]
 pub struct NullBit {
@@ -153,10 +161,12 @@ impl NullBit {
     fn new(bit: u32) -> Self {
         Self { bit }
     }
-    pub(crate) fn not_null() -> NullBit {
+    /// creates a NullBit that does not cancel the instance
+    pub fn not_null() -> NullBit {
         Self::new(Self::NOT_NULL)
     }
-    pub(crate) fn null() -> Self {
+    /// creates a NullBit that cancels the instance
+    pub fn null() -> Self {
         Self::new(Self::NULL)
     }
 }

@@ -1,3 +1,4 @@
+/// Key to associate with an index for consistent referencing
 #[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Debug)]
 pub struct Key {
     identifier: u32,
@@ -12,7 +13,7 @@ impl Key {
         self.identifier
     }
 }
-
+/// generator for keys that are unique within a factory
 pub struct KeyFactory {
     current: u32,
 }

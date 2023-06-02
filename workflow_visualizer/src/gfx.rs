@@ -3,7 +3,7 @@ use std::fmt::{Debug, Formatter};
 use tracing::{info, instrument, trace, warn};
 use wgpu::TextureView;
 use winit::window::Window;
-
+/// Options for instantiating the Gfx module
 #[derive(Clone)]
 pub struct GfxOptions {
     pub backends: wgpu::Backends,
@@ -45,7 +45,7 @@ impl GfxOptions {
         self
     }
 }
-
+/// Core structs for interop with wgpu
 #[derive(Resource)]
 pub struct GfxSurface {
     pub instance: wgpu::Instance,
@@ -208,6 +208,7 @@ impl GfxSurfaceConfiguration {
         Self { configuration }
     }
 }
+/// Used for setting the multi-sampling/anti-aliasing
 #[derive(Resource)]
 pub struct MsaaRenderAdapter {
     max: u32,

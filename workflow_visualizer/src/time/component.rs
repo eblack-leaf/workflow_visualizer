@@ -2,7 +2,7 @@ use std::ops::{Add, AddAssign, Div, Sub, SubAssign};
 use std::time::Instant;
 
 use bevy_ecs::prelude::Resource;
-
+/// Access to time on the platform
 #[derive(Resource)]
 pub struct Timer {
     #[cfg(not(target_arch = "wasm32"))]
@@ -34,15 +34,19 @@ impl Timer {
             last: 0.0,
         }
     }
+    /// get the current time as a marker to now
     pub fn mark(&self) -> TimeMarker {
         TimeMarker(self.current)
     }
+    /// return the time since a marker
     pub fn time_since(&self, marker: TimeMarker) -> TimeDelta {
         TimeDelta(self.current - marker.0)
     }
+    /// how long it has been since the last frame
     pub fn frame_diff(&self) -> TimeDelta {
         TimeDelta(self.current - self.last)
     }
+
     pub(crate) fn read(&mut self) -> TimeDelta {
         self.last = self.current;
         self.set_to_now();
@@ -64,10 +68,10 @@ impl Timer {
         }
     }
 }
-
+/// signifies a point in time
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 pub struct TimeMarker(pub f64);
-
+/// signifies a change in time
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 pub struct TimeDelta(pub f64);
 

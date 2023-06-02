@@ -11,6 +11,7 @@ use std::sync::{Arc, Mutex};
 use winit::platform::android::activity::AndroidApp;
 
 pub(crate) struct EngenHandle<T: Workflow + Default>(pub(crate) Arc<Mutex<T>>);
+/// Main struct to run the visualizer's event loop
 pub struct Runner {
     pub(crate) desktop_dimensions: Option<Area<DeviceContext>>,
     #[cfg(not(target_os = "android"))]
@@ -32,15 +33,18 @@ impl Runner {
             android_app: None,
         }
     }
+    /// insert the AndroidApp for interfacing with the Android OS
     #[cfg(target_os = "android")]
     pub fn with_android_app(mut self, android_app: AndroidApp) -> Self {
         self.android_app.replace(android_app);
         self
     }
+    /// set the fixed dimensions on the desktop platforms
     pub fn with_desktop_dimensions<A: Into<Area<DeviceContext>>>(mut self, dim: A) -> Self {
         self.desktop_dimensions.replace(dim.into());
         self
     }
+    /// invoke a native run of the visualizer
     #[cfg(not(target_family = "wasm"))]
     pub fn native_run<T: Workflow + Send + 'static + Default>(
         mut self,
@@ -48,7 +52,7 @@ impl Runner {
     ) {
         internal_native_run::<T>(self, visualizer);
     }
-
+    /// invoke a wasm run of the visualizer
     #[cfg(target_family = "wasm")]
     pub fn web_run<T: Workflow + 'static + Default>(
         mut self,

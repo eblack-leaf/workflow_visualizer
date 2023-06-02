@@ -1,7 +1,7 @@
 use crate::system;
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 use workflow_visualizer::{
-    Area, Color, Focus, FocusInputListener, GfxOptions, Layer, Position, Request, TextRequest,
+    Area, Color, Focus, FocusInputListener, GfxOptions, Layer, Position, Request, TextBundle,
     TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, TouchListener, Touchable,
     UserSpaceSyncPoint, Visualizer,
 };
@@ -13,7 +13,7 @@ pub fn visualizer() -> Visualizer {
         .job
         .task(Visualizer::TASK_MAIN)
         .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process),));
-    visualizer.add_entities(vec![Request::new(TextRequest::new(
+    visualizer.add_entities(vec![Request::new(TextBundle::new(
         Position::new(10.0, 100.0),
         Area::new(100.0, 30.0),
         Layer::new(1.0),
@@ -23,7 +23,7 @@ pub fn visualizer() -> Visualizer {
         TextWrapStyle::word(),
     ))]);
     visualizer.add_entities(vec![(
-        Request::new(TextRequest::new(
+        Request::new(TextBundle::new(
             Position::new(10.0, 130.0),
             Area::new(100.0, 30.0),
             Layer::new(1.0),

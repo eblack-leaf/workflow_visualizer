@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::Component;
-
+/// RGBA colors
 #[repr(C)]
 #[derive(Component, bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, PartialEq)]
 pub struct Color {

@@ -16,6 +16,8 @@
   - [Visibility](pages/visibility.md)
   - [Focus](pages/focus.md)
   - [Touch](pages/touch.md)
+  - [Orientation](pages/orientation.md)
+  - [InstanceTools](pages/instance_tools.md)
 - [Runner](pages/runner.md)
 - [Platform Specifics](pages/platform_specifics.md)
 - [Tutorial](tutorial/begin.md)
