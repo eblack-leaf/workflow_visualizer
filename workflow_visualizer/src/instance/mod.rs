@@ -100,7 +100,7 @@ impl<Attribute: Send + Sync + Default + Clone + Pod + Zeroable + 'static>
             .write_buffer(&self.gpu.buffer, 0, bytemuck::cast_slice(&self.cpu.buffer));
     }
     /// this writes all the staged data in write, to the gpu
-    pub fn write_attribute(&mut self, gfx_surface: &GfxSurface) {
+    pub fn write(&mut self, gfx_surface: &GfxSurface) {
         let attributes = self
             .write
             .write

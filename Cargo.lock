@@ -156,6 +156,7 @@ name = "application"
 version = "0.1.0"
 dependencies = [
  "android_logger",
+ "async-trait",
  "console_error_panic_hook",
  "console_log",
  "gloo-net",

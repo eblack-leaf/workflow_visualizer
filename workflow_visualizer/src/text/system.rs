@@ -645,11 +645,11 @@ pub(crate) fn render_group_differences(
             render_group.glyph_areas.queue_write(index, area.as_raw());
             render_group.glyph_tex_coords.queue_write(index, coords);
         }
-        render_group.glyph_positions.write_attribute(&gfx_surface);
-        render_group.glyph_areas.write_attribute(&gfx_surface);
-        render_group.glyph_colors.write_attribute(&gfx_surface);
-        render_group.glyph_tex_coords.write_attribute(&gfx_surface);
-        render_group.null_bits.write_attribute(&gfx_surface);
+        render_group.glyph_positions.write(&gfx_surface);
+        render_group.glyph_areas.write(&gfx_surface);
+        render_group.glyph_colors.write(&gfx_surface);
+        render_group.glyph_tex_coords.write(&gfx_surface);
+        render_group.null_bits.write(&gfx_surface);
         let mut dirty = false;
         if let Some(position) = render_group.position_write.write.take() {
             render_group.position = position;
