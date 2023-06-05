@@ -4,7 +4,7 @@ use tracing::{trace, warn};
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
 use crate::{Area, InterfaceContext, Position, Section, SyncPoint};
-
+/// Entry point for enabling visibility module on an entity
 #[derive(Bundle)]
 pub struct EnableVisibility {
     pub visibility: Visibility,
@@ -23,6 +23,7 @@ impl Default for EnableVisibility {
         EnableVisibility::new()
     }
 }
+/// Current Visibility
 #[derive(Component, Copy, Clone)]
 pub struct Visibility {
     visible: bool,
@@ -36,7 +37,7 @@ impl Visibility {
         self.visible
     }
 }
-
+/// What part of the entity is visible
 #[derive(Component, Copy, Clone, Default)]
 pub struct VisibleSection {
     pub(crate) section: Option<Section<InterfaceContext>>,

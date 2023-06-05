@@ -5,6 +5,10 @@ an extensible container that holds tasks for running fns on the data. This is us
 any render fns attached to the visualizer and presents to the surface of window initialized by the [`Runner`](runner.md).
 The visualizer is composed of many parts which build on each other to provide a specific solution of a responsive UI
 and is best explained by delving into each section specifically. The next section is [`Job`](job.md) to start us off.
+This is the central glue for all the various parts. Each module attached to the `Visualizer` has been
+vetted to elide repetitive systems from running when no updating has been done that could
+change each aspect thanks to the `Filter` system paired with `ChangeDetection` that tracks 
+mutable access to components. 
 ### Interface Overview
 ##### Init
 First is the `Visualizer::new(...)`.

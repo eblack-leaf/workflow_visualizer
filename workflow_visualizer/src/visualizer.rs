@@ -27,7 +27,7 @@ use tracing::{info, trace, warn};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
-
+/// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
 impl Attachment {
@@ -35,7 +35,7 @@ impl Attachment {
         Self(Box::new(T::attach))
     }
 }
-
+/// Trait for configuring how a part attaches to the Job of a visualizer
 pub trait Attach {
     fn attach(visualizer: &mut Visualizer);
 }
@@ -45,7 +45,7 @@ impl Debug for Visualizer {
         write!(f, "Visualizer")
     }
 }
-
+/// Struct for preparing/configuring/rendering visuals
 pub struct Visualizer {
     pub job: Job,
     pub(crate) render_task_manager: RenderTaskManager,
@@ -54,10 +54,15 @@ pub struct Visualizer {
 }
 
 impl Visualizer {
+    /// Main logic task for UI element reactions
     pub const TASK_MAIN: TaskLabel = TaskLabel("main");
+    /// Preparation for the logic
     pub const TASK_STARTUP: TaskLabel = TaskLabel("startup");
+    /// Teardown for logic
     pub const TASK_TEARDOWN: TaskLabel = TaskLabel("teardown");
+    /// Preparation for rendering
     pub const TASK_RENDER_STARTUP: TaskLabel = TaskLabel("render_startup");
+    /// Render main
     pub const TASK_RENDER_MAIN: TaskLabel = TaskLabel("render_main");
     pub fn new(theme: Theme, gfx_options: GfxOptions) -> Self {
         Self {
@@ -83,6 +88,7 @@ impl Visualizer {
     pub fn set_gfx_options(&mut self, gfx_options: GfxOptions) {
         self.gfx_options = gfx_options;
     }
+    /// Initializes the `GfxSurface` and `Viewport` for a Visualizer
     pub async fn init_gfx(&mut self, window: &Window) {
         info!("initializing gfx.");
         let (surface, config, msaa) = GfxSurface::new(window, self.gfx_options.clone()).await;
@@ -105,6 +111,7 @@ impl Visualizer {
         self.job.container.insert_resource(msaa);
         self.job.container.insert_resource(scale_factor);
     }
+    /// Tells visualizer to send a signal of resizing to be read in systems
     pub fn trigger_resize(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
         let resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
         self.job.container.send_event(resize_event);
@@ -112,6 +119,7 @@ impl Visualizer {
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
     }
+    /// invoke queued attachments after system attachments
     pub fn initialize(&mut self, window: &Window) {
         #[cfg(not(target_family = "wasm"))]
         pollster::block_on(self.init_gfx(window));
@@ -131,6 +139,7 @@ impl Visualizer {
     pub fn set_theme(&mut self, theme: Theme) {
         self.job.container.insert_resource(theme);
     }
+    /// spawn batches of alike components efficiently with names
     pub fn add_named_entities<T: Bundle>(&mut self, mut names: Vec<EntityName>, datum: Vec<T>) {
         let ids = self
             .job
@@ -142,6 +151,7 @@ impl Visualizer {
             self.job.store_entity(names.next().unwrap(), id);
         }
     }
+    /// spawn batches of alike components efficiently
     pub fn add_entities<T: Bundle>(&mut self, datum: Vec<T>) -> Vec<Entity> {
         let ids = self
             .job
@@ -331,10 +341,12 @@ impl Visualizer {
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
     }
+    /// Exec setup tasks
     fn setup(&mut self) {
         self.job.exec(Self::TASK_STARTUP);
         self.job.exec(Self::TASK_RENDER_STARTUP)
     }
+    /// Run MAIN logic
     pub fn exec(&mut self) {
         if !self.job.suspended() {
             self.job.exec(Self::TASK_MAIN);
@@ -343,11 +355,13 @@ impl Visualizer {
     pub fn teardown(&mut self) {
         self.job.exec(Self::TASK_TEARDOWN);
     }
+    /// Tells Job to stop execution of tasks
     pub fn suspend(&mut self) {
         if !self.job.suspended() {
             self.job.suspend();
         }
     }
+    /// Tells Job to resume execution of tasks
     pub fn resume(&mut self, window: &Window) {
         if !self.job.resumed() {
             self.recreate_surface(window);
@@ -370,6 +384,7 @@ impl Visualizer {
         gfx.surface.configure(&gfx.device, &config.configuration);
         self.job.container.insert_resource(config);
     }
+    /// execute RENDER_MAIN then run the render pass
     pub fn render(&mut self) {
         if !self.job.suspended() {
             trace!("starting render main");
@@ -377,9 +392,11 @@ impl Visualizer {
             internal_render(self);
         }
     }
+    /// Job is in state to be awaited
     pub fn can_idle(&self) -> bool {
         self.job.can_idle()
     }
+    /// register render fn with the Visualizer
     pub fn register_renderer<Renderer: Render + Resource>(&mut self) {
         match Renderer::phase() {
             RenderPhase::Opaque => self
@@ -393,6 +410,7 @@ impl Visualizer {
                 .push(Box::new(invoke_render::<Renderer>)),
         }
     }
+    /// queue attachment to the Visualizer
     pub fn add_attachment<Attached: Attach>(&mut self) {
         self.attachment_queue.push(Attachment::using::<Attached>());
     }
