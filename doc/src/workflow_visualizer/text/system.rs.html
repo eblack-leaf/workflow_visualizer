@@ -1379,11 +1379,11 @@
             render_group.glyph_areas.queue_write(index, area.as_raw());
             render_group.glyph_tex_coords.queue_write(index, coords);
         }
-        render_group.glyph_positions.write_attribute(<span class="kw-2">&amp;</span>gfx_surface);
-        render_group.glyph_areas.write_attribute(<span class="kw-2">&amp;</span>gfx_surface);
-        render_group.glyph_colors.write_attribute(<span class="kw-2">&amp;</span>gfx_surface);
-        render_group.glyph_tex_coords.write_attribute(<span class="kw-2">&amp;</span>gfx_surface);
-        render_group.null_bits.write_attribute(<span class="kw-2">&amp;</span>gfx_surface);
+        render_group.glyph_positions.write(<span class="kw-2">&amp;</span>gfx_surface);
+        render_group.glyph_areas.write(<span class="kw-2">&amp;</span>gfx_surface);
+        render_group.glyph_colors.write(<span class="kw-2">&amp;</span>gfx_surface);
+        render_group.glyph_tex_coords.write(<span class="kw-2">&amp;</span>gfx_surface);
+        render_group.null_bits.write(<span class="kw-2">&amp;</span>gfx_surface);
         <span class="kw">let </span><span class="kw-2">mut </span>dirty = <span class="bool-val">false</span>;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(position) = render_group.position_write.write.take() {
             render_group.position = position;

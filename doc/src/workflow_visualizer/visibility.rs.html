@@ -94,14 +94,15 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 <span class="kw">use </span>tracing::{trace, warn};
 
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use crate</span>::{Area, InterfaceContext, Position, Section, SyncPoint};
-
-<span class="attr">#[derive(Bundle)]
+<span class="doccomment">/// Entry point for enabling visibility module on an entity
+</span><span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>EnableVisibility {
     <span class="kw">pub </span>visibility: Visibility,
     <span class="kw">pub </span>visible_section: VisibleSection,
@@ -119,7 +120,8 @@
         EnableVisibility::new()
     }
 }
-<span class="attr">#[derive(Component, Copy, Clone)]
+<span class="doccomment">/// Current Visibility
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>Visibility {
     visible: bool,
 }
@@ -132,8 +134,8 @@
         <span class="self">self</span>.visible
     }
 }
-
-<span class="attr">#[derive(Component, Copy, Clone, Default)]
+<span class="doccomment">/// What part of the entity is visible
+</span><span class="attr">#[derive(Component, Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>VisibleSection {
     <span class="kw">pub</span>(<span class="kw">crate</span>) section: <span class="prelude-ty">Option</span>&lt;Section&lt;InterfaceContext&gt;&gt;,
 }

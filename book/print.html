@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="pages/instance_tools.html"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li><li class="chapter-item expanded "><a href="pages/time.html"><strong aria-hidden="true">4.12.</strong> Time</a></li></ol></li><li class="chapter-item expanded "><a href="pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -385,7 +385,11 @@ space to respond with what is needed.</p>
 an extensible container that holds tasks for running fns on the data. This is used to run a render pass that invokes
 any render fns attached to the visualizer and presents to the surface of window initialized by the <a href="pages/runner.html"><code>Runner</code></a>.
 The visualizer is composed of many parts which build on each other to provide a specific solution of a responsive UI
-and is best explained by delving into each section specifically. The next section is <a href="pages/job.html"><code>Job</code></a> to start us off.</p>
+and is best explained by delving into each section specifically. The next section is <a href="pages/job.html"><code>Job</code></a> to start us off.
+This is the central glue for all the various parts. Each module attached to the <code>Visualizer</code> has been
+vetted to elide repetitive systems from running when no updating has been done that could
+change each aspect thanks to the <code>Filter</code> system paired with <code>ChangeDetection</code> that tracks 
+mutable access to components. </p>
 <h3 id="interface-overview"><a class="header" href="#interface-overview">Interface Overview</a></h3>
 <h5 id="init"><a class="header" href="#init">Init</a></h5>
 <p>First is the <code>Visualizer::new(...)</code>.
@@ -844,7 +848,61 @@ data needed to render such as <code>wgpu::Buffer</code>s or <code>wgpu::Texture<
 <code>RenderPhase::Opaque</code> fns are run first as no blending is present.
 <code>RenderPhase::Alpha(priority)</code> is used for renderers that wish to use alpha-blending and 
 happens after opaque renderers to blend correctly with the colors underneath in the depth buffer.</p>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="visibility"><a class="header" href="#visibility">Visibility</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="text-renderer"><a class="header" href="#text-renderer">Text Renderer</a></h1>
+<p>The text renderer is quite opinionated to enable some memory optimizations.
+This lib uses <a href="https://github.com/mooman219/fontdue"><code>fontdue</code></a> to rasterize glyphs to a <code>Bitmap</code> that contains a 
+coverage value that signifies how much the letter shape covers that location. This
+is stored in an <code>Atlas</code> of glyph bitmaps and sampled from in a shader. Each time a <code>Text</code>
+element updates its <code>String</code> value, the system checks for a differential in the letters
+at each location and obtains the <code>TextureCoords</code> for where in the <code>Atlas</code> that shape exists.
+The shader matches the texture coords to a bbox with dimensions determined by the letter 
+shape and offset. Each letter needs to be stored just once per <code>Text</code> element and can be 
+referenced multiple times without needing to store again. When changing text frequently
+glyphs can be freed from the <code>Atlas</code> if not referenced any longer. This requires removing
+part of the <code>wgpu::Texture</code> contents and when needing to insert a new glyph organization can 
+be tricky if the size of the new glyph is not aligned. Padding is inserted to give each
+glyph a consistent slot to inhabit. With mono-spaced fonts each character has the same
+dimensions which allows this padding to be minimal as each shape size is known/consistent.
+If one shape were bigger we could not know when the <code>Atlas</code> would need to put the bigger shape at a 
+location and have to default to every slot being as big as the largest character. Memory
+can be saved by only using mono-spaced fonts and by limiting the sizes of fonts
+to a set number. 3 sizes of <code>Text</code> can be used which have been calibrated to be reasonable
+on most devices. This fixed number creates consistent UI elements as well by not having
+jitter using fractional sizing differences. This is a perfect symbiosis of performance and
+aligning style to meet functionality. </p>
+<h3 id="usage-2"><a class="header" href="#usage-2">Usage</a></h3>
+<p>To spawn a <code>Text</code> element, use the <code>TextBundle</code> </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct TextBundle {
+    pub pos: Position&lt;InterfaceContext&gt;,
+    pub area: Area&lt;InterfaceContext&gt;,
+    pub layer: Layer,
+    pub text: Text,
+    pub scale_alignment: TextScaleAlignment,
+    pub color: Color,
+    pub wrap_style: TextWrapStyle,
+    /* private fields */
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This will create the required components to hook this entity into the 
+text pipeline. All elements employ <code>Cache</code> and <code>Extraction</code> to keep changes to 
+the gpu minimal. Wrap this bundle in a <code>Request</code> to ensure it gets spawned at the 
+right time.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>visualizer.add_entities(vec![Request::new(TextBundle::new(...))]);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="alignments"><a class="header" href="#alignments">Alignments</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum TextScaleAlignment {
+    Small,
+    Medium,
+    Large,
+}
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="visibility"><a class="header" href="#visibility">Visibility</a></h1>
 <p>The <code>Visibility</code> struct handles the notion of being on-screen and by what amount with <code>VisibleSection</code>.
 To enable this in an entity add the <code>EnableVisibility</code> bundle which hooks it
 into the <code>calc_visibility</code> system.
@@ -922,7 +980,102 @@ triggering events. Once the <code>Primary</code> is released, other presses can 
 <h3 id="adapters"><a class="header" href="#adapters">Adapters</a></h3>
 <p>Each source has an adapter which can be used to read the current state of presses. <code>TouchAdapter</code> and <code>MouseAdapter</code> fill
 these roles. </p>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="runner-1"><a class="header" href="#runner-1">Runner</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="orientation"><a class="header" href="#orientation">Orientation</a></h1>
+<p><code>Orientation</code> is set on window resizing to be read if needing to respond to changes in
+orientation. Available options are </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum Orientation {
+    Portrait(f32),
+    Landscape(f32),
+}
+<span class="boring">}</span></code></pre></pre>
+<p>They hold the aspect ratio of each option for reference. </p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="instance-tools"><a class="header" href="#instance-tools">Instance Tools</a></h1>
+<p>This came to be when I saw a pattern arise from using instances to achieve performant
+rendering. I found I could automate some of the structure needed to have a staging buffer 
+to hold changes and only write changed regions. I also found a way to elide rewriting buffers
+on removal of instances by employing a <code>NullBit</code>. This marks any data for that instance
+as invalid and multiplies any attributes to 0 in a shader conditionally culling the 
+shapes as gpu drivers discard any fragments with 0 area. Otherwise, we would have to 
+remove the element from the drawing range by rewriting all other attributes after the hole.
+Instead, I found it easier to just drop the one instance and mark it as a hole to be filled
+by the next instance that is needed.</p>
+<h3 id="instance-attribute-manager"><a class="header" href="#instance-attribute-manager">Instance Attribute Manager</a></h3>
+<p>All data for an instance is broken into separate buffers to allow different rates of
+writing to the buffer based on how often the data changes. Each has its own gpu resource to
+let it update only the parts needing changes. One attribute could be the <code>Position</code> of an
+element which might be changed frequently when moving, but the color would not change as it
+moves. This architecture elides rewriting the colors as well when just the <code>Position</code> needs
+rewriting. </p>
+<p>Here is an excerpt from the <code>TextRenderer</code> which employs usage of <code>InstanceAttributeManager</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>glyph_positions: InstanceAttributeManager::new::&lt;AttributeType&gt;(&amp;gfx_surface, *max),
+<span class="boring">}</span></code></pre></pre>
+<p>It is passed the <code>GfxSurface</code> and the <code>max</code> elements to hold initially before growing.
+The <code>InstanceAttributeManager</code> uses the <code>size_of&lt;T&gt;</code> * max to get the actual byte size.</p>
+<p>You can queue writes to the buffer using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>InstanceAttributeManage::queue_write(...);
+<span class="boring">}</span></code></pre></pre>
+<p>You can grow the buffer when needed using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>InstanceAttributeManager::grow(...);
+<span class="boring">}</span></code></pre></pre>
+<p>Finally, you can push the writes to the gpu using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>InstanceAttributeManager::write(...);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="key"><a class="header" href="#key">Key</a></h3>
+<p>Sometimes you will need to associate a <code>Key</code> with an instance to keep track of its lifetime.
+This can be accomplished using a <code>KeyFactory</code> and <code>KeyFactory::generate()</code> which will
+get the next free key unique to the factory.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let key = key_factory.generate();
+<span class="boring">}</span></code></pre></pre>
+<h3 id="index"><a class="header" href="#index">Index</a></h3>
+<p>The attributes are stored by <code>Index</code> in a buffer. This is useful for finding the 
+byte offset required by gpu writing commands and for referencing an <code>Instance</code>s data to 
+nullify it or update it. This is stored in an <code>Indexer</code> which takes the <code>Key</code> type to 
+associate with the <code>Index</code>. This is useful because the <code>Index</code> may change but the <code>Key</code>
+reference will point to the right location.</p>
+<h5 id="indexer-overview"><a class="header" href="#indexer-overview">Indexer Overview</a></h5>
+<p>Indexer can be used as such. </p>
+<ul>
+<li><code>::has_instances()</code> to check if anything is present.</li>
+<li><code>::max()</code> for the current max.</li>
+<li><code>::count()</code> for the current number of instances.</li>
+<li><code>::next(key)</code> to get the next index and tie it to the key given.</li>
+<li><code>::remove(key)</code> to remove the index associated with the key.</li>
+<li><code>::get_index(key)</code> to get the index from a key.</li>
+<li><code>::should_grow()</code> to signal more instances than max have been requested. If this should
+grow then the <code>::max()</code> will return the max needed to fit the requested amount.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="time"><a class="header" href="#time">Time</a></h1>
+<p>A <code>Timer</code> is present to mark things that should happen over time.
+One can obtain a <code>TimeMarker</code> at a specific point in time.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn system(timer: Res&lt;Timer&gt;) {
+    let now = timer.mark();
+}
+<span class="boring">}</span></code></pre></pre>
+<p>The difference in <code>TimeMarker</code>s can be obtained by </p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>timer.time_since(...);
+<span class="boring">}</span></code></pre></pre>
+<p>The frame time can be obtained by using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let frame_time = timer.frame_diff();
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="runner-1"><a class="header" href="#runner-1">Runner</a></h1>
 <p>The <code>Visualizer</code> can be used without a <code>Runner</code> to have full control of the event_loop. One would have to 
 call the triggers associated with <code>Visualizer</code> to correctly use the struct and for usability, a <code>Runner</code> is 
 provided as a useful solution to invoke the visualizer's tools.</p>

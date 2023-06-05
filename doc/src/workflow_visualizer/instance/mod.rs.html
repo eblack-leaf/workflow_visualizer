@@ -272,7 +272,7 @@
             .write_buffer(<span class="kw-2">&amp;</span><span class="self">self</span>.gpu.buffer, <span class="number">0</span>, bytemuck::cast_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.cpu.buffer));
     }
     <span class="doccomment">/// this writes all the staged data in write, to the gpu
-    </span><span class="kw">pub fn </span>write_attribute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_surface: <span class="kw-2">&amp;</span>GfxSurface) {
+    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_surface: <span class="kw-2">&amp;</span>GfxSurface) {
         <span class="kw">let </span>attributes = <span class="self">self
             </span>.write
             .write

@@ -406,6 +406,24 @@
 <a href="#406" id="406">406</a>
 <a href="#407" id="407">407</a>
 <a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
@@ -435,16 +453,16 @@
 <span class="kw">use </span>winit::dpi::{PhysicalPosition, PhysicalSize};
 <span class="kw">use </span>winit::event::{ElementState, MouseButton, TouchPhase};
 <span class="kw">use </span>winit::window::Window;
-
-<span class="kw">pub struct </span>Attachment(<span class="kw">pub </span>Box&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>Visualizer)&gt;);
+<span class="doccomment">/// Used to hold queued attachments until ready to invoke attach to the Visualizer
+</span><span class="kw">pub struct </span>Attachment(<span class="kw">pub </span>Box&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>Visualizer)&gt;);
 
 <span class="kw">impl </span>Attachment {
     <span class="kw">pub fn </span>using&lt;T: Attach&gt;() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(Box::new(T::attach))
     }
 }
-
-<span class="kw">pub trait </span>Attach {
+<span class="doccomment">/// Trait for configuring how a part attaches to the Job of a visualizer
+</span><span class="kw">pub trait </span>Attach {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer);
 }
 
@@ -453,8 +471,8 @@
         <span class="macro">write!</span>(f, <span class="string">&quot;Visualizer&quot;</span>)
     }
 }
-
-<span class="kw">pub struct </span>Visualizer {
+<span class="doccomment">/// Struct for preparing/configuring/rendering visuals
+</span><span class="kw">pub struct </span>Visualizer {
     <span class="kw">pub </span>job: Job,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_task_manager: RenderTaskManager,
     attachment_queue: Vec&lt;Attachment&gt;,
@@ -462,11 +480,16 @@
 }
 
 <span class="kw">impl </span>Visualizer {
-    <span class="kw">pub const </span>TASK_MAIN: TaskLabel = TaskLabel(<span class="string">&quot;main&quot;</span>);
-    <span class="kw">pub const </span>TASK_STARTUP: TaskLabel = TaskLabel(<span class="string">&quot;startup&quot;</span>);
-    <span class="kw">pub const </span>TASK_TEARDOWN: TaskLabel = TaskLabel(<span class="string">&quot;teardown&quot;</span>);
-    <span class="kw">pub const </span>TASK_RENDER_STARTUP: TaskLabel = TaskLabel(<span class="string">&quot;render_startup&quot;</span>);
-    <span class="kw">pub const </span>TASK_RENDER_MAIN: TaskLabel = TaskLabel(<span class="string">&quot;render_main&quot;</span>);
+    <span class="doccomment">/// Main logic task for UI element reactions
+    </span><span class="kw">pub const </span>TASK_MAIN: TaskLabel = TaskLabel(<span class="string">&quot;main&quot;</span>);
+    <span class="doccomment">/// Preparation for the logic
+    </span><span class="kw">pub const </span>TASK_STARTUP: TaskLabel = TaskLabel(<span class="string">&quot;startup&quot;</span>);
+    <span class="doccomment">/// Teardown for logic
+    </span><span class="kw">pub const </span>TASK_TEARDOWN: TaskLabel = TaskLabel(<span class="string">&quot;teardown&quot;</span>);
+    <span class="doccomment">/// Preparation for rendering
+    </span><span class="kw">pub const </span>TASK_RENDER_STARTUP: TaskLabel = TaskLabel(<span class="string">&quot;render_startup&quot;</span>);
+    <span class="doccomment">/// Render main
+    </span><span class="kw">pub const </span>TASK_RENDER_MAIN: TaskLabel = TaskLabel(<span class="string">&quot;render_main&quot;</span>);
     <span class="kw">pub fn </span>new(theme: Theme, gfx_options: GfxOptions) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             job: {
@@ -491,7 +514,8 @@
     <span class="kw">pub fn </span>set_gfx_options(<span class="kw-2">&amp;mut </span><span class="self">self</span>, gfx_options: GfxOptions) {
         <span class="self">self</span>.gfx_options = gfx_options;
     }
-    <span class="kw">pub async fn </span>init_gfx(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
+    <span class="doccomment">/// Initializes the `GfxSurface` and `Viewport` for a Visualizer
+    </span><span class="kw">pub async fn </span>init_gfx(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
         <span class="macro">info!</span>(<span class="string">&quot;initializing gfx.&quot;</span>);
         <span class="kw">let </span>(surface, config, msaa) = GfxSurface::new(window, <span class="self">self</span>.gfx_options.clone()).<span class="kw">await</span>;
         <span class="macro">info!</span>(
@@ -513,14 +537,16 @@
         <span class="self">self</span>.job.container.insert_resource(msaa);
         <span class="self">self</span>.job.container.insert_resource(scale_factor);
     }
-    <span class="kw">pub fn </span>trigger_resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: PhysicalSize&lt;u32&gt;, scale_factor: f64) {
+    <span class="doccomment">/// Tells visualizer to send a signal of resizing to be read in systems
+    </span><span class="kw">pub fn </span>trigger_resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: PhysicalSize&lt;u32&gt;, scale_factor: f64) {
         <span class="kw">let </span>resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
         <span class="self">self</span>.job.container.send_event(resize_event);
         <span class="self">self</span>.job
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
     }
-    <span class="kw">pub fn </span>initialize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
+    <span class="doccomment">/// invoke queued attachments after system attachments
+    </span><span class="kw">pub fn </span>initialize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
         <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
         </span>pollster::block_on(<span class="self">self</span>.init_gfx(window));
         set_sync_points(<span class="self">self</span>);
@@ -539,7 +565,8 @@
     <span class="kw">pub fn </span>set_theme(<span class="kw-2">&amp;mut </span><span class="self">self</span>, theme: Theme) {
         <span class="self">self</span>.job.container.insert_resource(theme);
     }
-    <span class="kw">pub fn </span>add_named_entities&lt;T: Bundle&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>names: Vec&lt;EntityName&gt;, datum: Vec&lt;T&gt;) {
+    <span class="doccomment">/// spawn batches of alike components efficiently with names
+    </span><span class="kw">pub fn </span>add_named_entities&lt;T: Bundle&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>names: Vec&lt;EntityName&gt;, datum: Vec&lt;T&gt;) {
         <span class="kw">let </span>ids = <span class="self">self
             </span>.job
             .container
@@ -550,7 +577,8 @@
             <span class="self">self</span>.job.store_entity(names.next().unwrap(), id);
         }
     }
-    <span class="kw">pub fn </span>add_entities&lt;T: Bundle&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, datum: Vec&lt;T&gt;) -&gt; Vec&lt;Entity&gt; {
+    <span class="doccomment">/// spawn batches of alike components efficiently
+    </span><span class="kw">pub fn </span>add_entities&lt;T: Bundle&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, datum: Vec&lt;T&gt;) -&gt; Vec&lt;Entity&gt; {
         <span class="kw">let </span>ids = <span class="self">self
             </span>.job
             .container
@@ -739,11 +767,13 @@
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
     }
-    <span class="kw">fn </span>setup(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="doccomment">/// Exec setup tasks
+    </span><span class="kw">fn </span>setup(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_STARTUP);
         <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_RENDER_STARTUP)
     }
-    <span class="kw">pub fn </span>exec(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="doccomment">/// Run MAIN logic
+    </span><span class="kw">pub fn </span>exec(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>!<span class="self">self</span>.job.suspended() {
             <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_MAIN);
         }
@@ -751,12 +781,14 @@
     <span class="kw">pub fn </span>teardown(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_TEARDOWN);
     }
-    <span class="kw">pub fn </span>suspend(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="doccomment">/// Tells Job to stop execution of tasks
+    </span><span class="kw">pub fn </span>suspend(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>!<span class="self">self</span>.job.suspended() {
             <span class="self">self</span>.job.suspend();
         }
     }
-    <span class="kw">pub fn </span>resume(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
+    <span class="doccomment">/// Tells Job to resume execution of tasks
+    </span><span class="kw">pub fn </span>resume(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
         <span class="kw">if </span>!<span class="self">self</span>.job.resumed() {
             <span class="self">self</span>.recreate_surface(window);
             <span class="self">self</span>.job.resume();
@@ -778,17 +810,20 @@
         </span>gfx.surface.configure(<span class="kw-2">&amp;</span>gfx.device, <span class="kw-2">&amp;</span>config.configuration);
         <span class="self">self</span>.job.container.insert_resource(config);
     }
-    <span class="kw">pub fn </span>render(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="doccomment">/// execute RENDER_MAIN then run the render pass
+    </span><span class="kw">pub fn </span>render(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>!<span class="self">self</span>.job.suspended() {
             <span class="macro">trace!</span>(<span class="string">&quot;starting render main&quot;</span>);
             <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_RENDER_MAIN);
             internal_render(<span class="self">self</span>);
         }
     }
-    <span class="kw">pub fn </span>can_idle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+    <span class="doccomment">/// Job is in state to be awaited
+    </span><span class="kw">pub fn </span>can_idle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.job.can_idle()
     }
-    <span class="kw">pub fn </span>register_renderer&lt;Renderer: Render + Resource&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="doccomment">/// register render fn with the Visualizer
+    </span><span class="kw">pub fn </span>register_renderer&lt;Renderer: Render + Resource&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">match </span>Renderer::phase() {
             RenderPhase::Opaque =&gt; <span class="self">self
                 </span>.render_task_manager
@@ -801,7 +836,8 @@
                 .push(Box::new(invoke_render::&lt;Renderer&gt;)),
         }
     }
-    <span class="kw">pub fn </span>add_attachment&lt;Attached: Attach&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="doccomment">/// queue attachment to the Visualizer
+    </span><span class="kw">pub fn </span>add_attachment&lt;Attached: Attach&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.attachment_queue.push(Attachment::using::&lt;Attached&gt;());
     }
     <span class="kw">fn </span>attach_from_queue(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {

@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html" class="active"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../pages/workflow.html"><strong aria-hidden="true">2.</strong> Workflow Impl</a></li><li class="chapter-item expanded "><a href="../pages/sender.html"><strong aria-hidden="true">3.</strong> Sender</a></li><li class="chapter-item expanded "><a href="../pages/visualizer.html"><strong aria-hidden="true">4.</strong> Visualizer</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/job.html"><strong aria-hidden="true">4.1.</strong> Job</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/attach.html"><strong aria-hidden="true">4.1.1.</strong> Attach</a></li><li class="chapter-item expanded "><a href="../pages/sync.html"><strong aria-hidden="true">4.1.2.</strong> Sync</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/coord.html"><strong aria-hidden="true">4.2.</strong> Coord</a></li><li class="chapter-item expanded "><a href="../pages/grid.html"><strong aria-hidden="true">4.3.</strong> Grid</a></li><li class="chapter-item expanded "><a href="../pages/gfx.html"><strong aria-hidden="true">4.4.</strong> Gfx</a></li><li class="chapter-item expanded "><a href="../pages/viewport.html"><strong aria-hidden="true">4.5.</strong> Viewport</a></li><li class="chapter-item expanded "><a href="../pages/render.html"><strong aria-hidden="true">4.6.</strong> Render</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../pages/text_renderer.html"><strong aria-hidden="true">4.6.1.</strong> TextRenderer</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/visibility.html"><strong aria-hidden="true">4.7.</strong> Visibility</a></li><li class="chapter-item expanded "><a href="../pages/focus.html"><strong aria-hidden="true">4.8.</strong> Focus</a></li><li class="chapter-item expanded "><a href="../pages/touch.html"><strong aria-hidden="true">4.9.</strong> Touch</a></li><li class="chapter-item expanded "><a href="../pages/orientation.html"><strong aria-hidden="true">4.10.</strong> Orientation</a></li><li class="chapter-item expanded "><a href="../pages/instance_tools.html" class="active"><strong aria-hidden="true">4.11.</strong> InstanceTools</a></li><li class="chapter-item expanded "><a href="../pages/time.html"><strong aria-hidden="true">4.12.</strong> Time</a></li></ol></li><li class="chapter-item expanded "><a href="../pages/runner.html"><strong aria-hidden="true">5.</strong> Runner</a></li><li class="chapter-item expanded "><a href="../pages/platform_specifics.html"><strong aria-hidden="true">6.</strong> Platform Specifics</a></li><li class="chapter-item expanded "><a href="../tutorial/begin.html"><strong aria-hidden="true">7.</strong> Tutorial</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,7 +144,72 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="instance-tools"><a class="header" href="#instance-tools">Instance Tools</a></h1>
+<p>This came to be when I saw a pattern arise from using instances to achieve performant
+rendering. I found I could automate some of the structure needed to have a staging buffer 
+to hold changes and only write changed regions. I also found a way to elide rewriting buffers
+on removal of instances by employing a <code>NullBit</code>. This marks any data for that instance
+as invalid and multiplies any attributes to 0 in a shader conditionally culling the 
+shapes as gpu drivers discard any fragments with 0 area. Otherwise, we would have to 
+remove the element from the drawing range by rewriting all other attributes after the hole.
+Instead, I found it easier to just drop the one instance and mark it as a hole to be filled
+by the next instance that is needed.</p>
+<h3 id="instance-attribute-manager"><a class="header" href="#instance-attribute-manager">Instance Attribute Manager</a></h3>
+<p>All data for an instance is broken into separate buffers to allow different rates of
+writing to the buffer based on how often the data changes. Each has its own gpu resource to
+let it update only the parts needing changes. One attribute could be the <code>Position</code> of an
+element which might be changed frequently when moving, but the color would not change as it
+moves. This architecture elides rewriting the colors as well when just the <code>Position</code> needs
+rewriting. </p>
+<p>Here is an excerpt from the <code>TextRenderer</code> which employs usage of <code>InstanceAttributeManager</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>glyph_positions: InstanceAttributeManager::new::&lt;AttributeType&gt;(&amp;gfx_surface, *max),
+<span class="boring">}</span></code></pre></pre>
+<p>It is passed the <code>GfxSurface</code> and the <code>max</code> elements to hold initially before growing.
+The <code>InstanceAttributeManager</code> uses the <code>size_of&lt;T&gt;</code> * max to get the actual byte size.</p>
+<p>You can queue writes to the buffer using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>InstanceAttributeManage::queue_write(...);
+<span class="boring">}</span></code></pre></pre>
+<p>You can grow the buffer when needed using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>InstanceAttributeManager::grow(...);
+<span class="boring">}</span></code></pre></pre>
+<p>Finally, you can push the writes to the gpu using</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>InstanceAttributeManager::write(...);
+<span class="boring">}</span></code></pre></pre>
+<h3 id="key"><a class="header" href="#key">Key</a></h3>
+<p>Sometimes you will need to associate a <code>Key</code> with an instance to keep track of its lifetime.
+This can be accomplished using a <code>KeyFactory</code> and <code>KeyFactory::generate()</code> which will
+get the next free key unique to the factory.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let key = key_factory.generate();
+<span class="boring">}</span></code></pre></pre>
+<h3 id="index"><a class="header" href="#index">Index</a></h3>
+<p>The attributes are stored by <code>Index</code> in a buffer. This is useful for finding the 
+byte offset required by gpu writing commands and for referencing an <code>Instance</code>s data to 
+nullify it or update it. This is stored in an <code>Indexer</code> which takes the <code>Key</code> type to 
+associate with the <code>Index</code>. This is useful because the <code>Index</code> may change but the <code>Key</code>
+reference will point to the right location.</p>
+<h5 id="indexer-overview"><a class="header" href="#indexer-overview">Indexer Overview</a></h5>
+<p>Indexer can be used as such. </p>
+<ul>
+<li><code>::has_instances()</code> to check if anything is present.</li>
+<li><code>::max()</code> for the current max.</li>
+<li><code>::count()</code> for the current number of instances.</li>
+<li><code>::next(key)</code> to get the next index and tie it to the key given.</li>
+<li><code>::remove(key)</code> to remove the index associated with the key.</li>
+<li><code>::get_index(key)</code> to get the index from a key.</li>
+<li><code>::should_grow()</code> to signal more instances than max have been requested. If this should
+grow then the <code>::max()</code> will return the max needed to fit the requested amount.</li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -153,7 +218,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../pages/runner.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../pages/time.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -167,7 +232,7 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../pages/runner.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../pages/time.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
