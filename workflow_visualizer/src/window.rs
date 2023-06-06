@@ -42,7 +42,7 @@ pub(crate) fn gfx_resize(
         );
     }
 }
-pub struct WindowAttachment;
+pub(crate) struct WindowAttachment;
 impl Attach for WindowAttachment {
     fn attach(engen: &mut Visualizer) {
         engen

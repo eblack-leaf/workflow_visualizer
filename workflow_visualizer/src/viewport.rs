@@ -256,7 +256,7 @@ pub(crate) fn viewport_read_offset(
         viewport_handle.position_dirty = false;
     }
 }
-pub struct ViewportAttachment;
+pub(crate) struct ViewportAttachment;
 
 impl Attach for ViewportAttachment {
     fn attach(engen: &mut Visualizer) {

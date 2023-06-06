@@ -55,7 +55,7 @@ pub use crate::time::{TimeDelta, TimeMarker, Timer};
 pub use crate::touch::{TouchListener, Touchable};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
-pub use crate::window::{WindowAttachment, WindowResize};
+pub use crate::window::{WindowResize};
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
 pub use bevy_ecs;
@@ -65,7 +65,7 @@ pub use instance::{
 };
 pub use job::JobSyncPoint;
 pub use render::{Render, RenderPassHandle, RenderPhase};
-pub use viewport::{Viewport, ViewportAttachment, ViewportHandle};
+pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
 pub use wgpu;
 pub use winit;

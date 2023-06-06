@@ -320,7 +320,7 @@ impl MouseAdapter {
         }
     }
 }
-pub struct TouchAttachment;
+pub(crate) struct TouchAttachment;
 impl Attach for TouchAttachment {
     fn attach(engen: &mut Visualizer) {
         engen.job.container.insert_resource(PrimaryTouch::new());

@@ -17,7 +17,7 @@ use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::{
     Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportAttachment, ViewportHandle, WindowAttachment,
+    ScaleFactor, Section, Theme, Viewport, ViewportHandle,
     WindowResize,
 };
 use bevy_ecs::component::Component;
@@ -28,6 +28,8 @@ use tracing::{info, trace, warn};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
+use crate::viewport::ViewportAttachment;
+use crate::window::WindowAttachment;
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);

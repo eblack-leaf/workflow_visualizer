@@ -88,7 +88,7 @@ pub(crate) fn calc_visibility(
         );
     }
 }
-pub struct VisibilityAttachment;
+pub(crate) struct VisibilityAttachment;
 impl Attach for VisibilityAttachment {
     fn attach(engen: &mut Visualizer) {
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
