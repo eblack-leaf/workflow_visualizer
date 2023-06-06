@@ -6,13 +6,12 @@ use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
-    NumericalContext, Position, Section, VisibleSection,
+    NumericalContext, Position, ResponsiveContentView, Section, VisibleSection,
 };
 /// Entry point to spawn a Text element
 #[derive(Bundle)]
 pub struct TextBundle {
-    pub pos: Position<InterfaceContext>,
-    pub area: Area<InterfaceContext>,
+    pub responsive_content_view: ResponsiveContentView,
     pub layer: Layer,
     pub text: Text,
     pub scale_alignment: TextScaleAlignment,
@@ -28,12 +27,11 @@ pub struct TextBundle {
     pub(crate) text_grid_placement: TextGridPlacement,
     pub(crate) text_line_structure: TextLineStructure,
     pub(crate) text_scale: TextScale,
-    // pub(crate) section: Section<InterfaceContext>,
+    pub(crate) section: Section<InterfaceContext>,
 }
 impl TextBundle {
-    pub fn new<S: Into<String>, C: Into<Color>>(
-        view_position: Position<InterfaceContext>,
-        view_area: Area<InterfaceContext>,
+    pub fn new<R: Into<ResponsiveContentView>, S: Into<String>, C: Into<Color>>(
+        responsive_content_view: R,
         layer: Layer,
         text: S,
         scale_alignment: TextScaleAlignment,
@@ -41,8 +39,7 @@ impl TextBundle {
         wrap_style: TextWrapStyle,
     ) -> Self {
         Self {
-            pos: view_position,
-            area: view_area,
+            responsive_content_view: responsive_content_view.into(),
             layer,
             text: Text(text.into()),
             scale_alignment,
@@ -58,7 +55,7 @@ impl TextBundle {
             text_grid_placement: TextGridPlacement(HashMap::new()),
             text_line_structure: TextLineStructure(vec![], (0, 0)),
             text_scale: TextScale(TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[0]),
-            // section: Section::default(),
+            section: Section::default(),
         }
     }
 }

@@ -43,7 +43,9 @@ impl ViewportOffset {
 }
 
 impl Viewport {
-    pub fn depth_format(&self) -> TextureFormat { self.depth_format }
+    pub fn depth_format(&self) -> TextureFormat {
+        self.depth_format
+    }
     pub(crate) fn new(device: &wgpu::Device, area: Area<DeviceContext>, sample_count: u32) -> Self {
         let depth = 100u32.into();
         let cpu_viewport = CpuViewport::new(area, depth);

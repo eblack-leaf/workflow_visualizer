@@ -13,6 +13,7 @@ mod grid;
 mod instance;
 mod job;
 mod orientation;
+mod path;
 mod render;
 mod request;
 mod scale_factor;
@@ -28,24 +29,26 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
-mod path;
 
 pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
-pub use crate::grid::{ResponsiveView, ResponsiveContentView, ResponsivePointView, Grid, Marker, MarkerGrouping, ContentMarker, ContentLocation, ContentRange, ContentView, ContentOffset};
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+pub use crate::grid::{
+    ContentLocation, ContentMarker, ContentOffset, ContentRange, ContentView, Grid, Marker,
+    MarkerGrouping, ResponsiveContentView, ResponsivePointView, ResponsiveView,
+};
 pub use crate::job::{EntityName, Job};
 pub use crate::request::{spawn, Request};
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::text::{
-    Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure,
-    TextBundle, TextScale, TextScaleAlignment, TextWrapStyle,
+    Text, TextBundle, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure,
+    TextScale, TextScaleAlignment, TextWrapStyle,
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};

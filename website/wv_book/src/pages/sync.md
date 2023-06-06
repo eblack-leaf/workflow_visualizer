@@ -102,6 +102,7 @@ This task is run every iteration of the event loop, while `!job.suspended()`.
 - `SyncPoint::Event`
 - `SyncPoint::Initialization`
 - `UserSpaceSyncPoint::Initialization`
+- `SyncPoint::Config`
 - `SyncPoint::Preparation`
 - `UserSpaceSyncPoint::Process`
 - `SyncPoint::Spawn`

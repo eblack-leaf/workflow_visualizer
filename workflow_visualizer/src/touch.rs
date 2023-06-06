@@ -333,7 +333,7 @@ impl Attach for TouchAttachment {
         engen.job.container.insert_resource(MouseAdapter::new());
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
             Events::<TouchEvent>::update_system.in_set(SyncPoint::Event),
-            read_touch_events.in_set(SyncPoint::Config),
+            read_touch_events.in_set(SyncPoint::Preparation),
             reset_touched.in_set(SyncPoint::Finish),
         ));
     }

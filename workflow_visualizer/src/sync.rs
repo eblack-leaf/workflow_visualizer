@@ -24,23 +24,27 @@ pub enum UserSpaceSyncPoint {
     Resolve,
 }
 pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
-    visualizer.job.task(Visualizer::TASK_STARTUP).configure_sets(
-        (
-            SyncPoint::Initialization,
-            UserSpaceSyncPoint::Initialization,
-            SyncPoint::Preparation,
-            SyncPoint::Resolve,
-            UserSpaceSyncPoint::Resolve,
-            SyncPoint::Finish,
-        )
-            .chain(),
-    );
+    visualizer
+        .job
+        .task(Visualizer::TASK_STARTUP)
+        .configure_sets(
+            (
+                SyncPoint::Initialization,
+                UserSpaceSyncPoint::Initialization,
+                SyncPoint::Preparation,
+                SyncPoint::Resolve,
+                UserSpaceSyncPoint::Resolve,
+                SyncPoint::Finish,
+            )
+                .chain(),
+        );
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
             JobSyncPoint::Idle,
             SyncPoint::Event,
             SyncPoint::Initialization,
             UserSpaceSyncPoint::Initialization,
+            SyncPoint::Config,
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
@@ -81,16 +85,19 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
         .add_systems((apply_system_buffers
             .after(SyncPoint::Initialization)
             .before(SyncPoint::Preparation),));
-    visualizer.job.task(Visualizer::TASK_RENDER_MAIN).configure_sets(
-        (
-            JobSyncPoint::Idle,
-            SyncPoint::Initialization,
-            UserSpaceSyncPoint::Initialization,
-            SyncPoint::Preparation,
-            SyncPoint::Resolve,
-            UserSpaceSyncPoint::Resolve,
-            SyncPoint::Finish,
-        )
-            .chain(),
-    );
+    visualizer
+        .job
+        .task(Visualizer::TASK_RENDER_MAIN)
+        .configure_sets(
+            (
+                JobSyncPoint::Idle,
+                SyncPoint::Initialization,
+                UserSpaceSyncPoint::Initialization,
+                SyncPoint::Preparation,
+                SyncPoint::Resolve,
+                UserSpaceSyncPoint::Resolve,
+                SyncPoint::Finish,
+            )
+                .chain(),
+        );
 }

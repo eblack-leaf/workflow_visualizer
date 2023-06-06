@@ -1,9 +1,11 @@
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 use tracing::{trace, warn};
 
+use crate::grid::{grid_response, set_from_view};
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
 use crate::{Area, InterfaceContext, Position, Section, SyncPoint};
+
 /// Entry point for enabling visibility module on an entity
 #[derive(Bundle)]
 pub struct EnableVisibility {
@@ -90,7 +92,10 @@ pub struct VisibilityAttachment;
 impl Attach for VisibilityAttachment {
     fn attach(engen: &mut Visualizer) {
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
-            calc_visibility.in_set(SyncPoint::Config),
+            calc_visibility
+                .in_set(SyncPoint::Config)
+                .after(grid_response)
+                .after(set_from_view),
             calc_visibility.in_set(SyncPoint::ResolveVisibility),
         ));
     }

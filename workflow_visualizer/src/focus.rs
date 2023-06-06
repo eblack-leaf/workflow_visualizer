@@ -85,7 +85,7 @@ impl Attach for FocusAttachment {
             .job
             .task(Visualizer::TASK_MAIN)
             .add_systems((set_focused
-                .in_set(SyncPoint::Config)
+                .in_set(SyncPoint::Preparation)
                 .after(read_touch_events),));
     }
 }

@@ -1,5 +1,6 @@
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
+use crate::grid::GridAttachment;
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::orientation::OrientationAttachment;
 use crate::render::{
@@ -27,6 +28,7 @@ use tracing::{info, trace, warn};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
+
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
 
@@ -126,6 +128,7 @@ impl Visualizer {
         set_sync_points(self);
         self.invoke_attach::<WindowAttachment>();
         self.invoke_attach::<ViewportAttachment>();
+        self.invoke_attach::<GridAttachment>();
         self.invoke_attach::<VisibilityAttachment>();
         self.invoke_attach::<TouchAttachment>();
         self.invoke_attach::<FocusAttachment>();
