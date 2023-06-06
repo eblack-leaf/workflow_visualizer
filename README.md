@@ -1,3 +1,3 @@
-Web/Native UI kit - (in progress)
+Web/Native UI kit in rust. Head on over to the website for overview and usage.
 
-Showcase: https://eblack-leaf.github.io/workflow_visualizer/
+Website: https://eblack-leaf.github.io/workflow_visualizer/

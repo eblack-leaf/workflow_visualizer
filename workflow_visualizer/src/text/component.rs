@@ -30,9 +30,9 @@ pub struct TextBundle {
     pub(crate) section: Section<InterfaceContext>,
 }
 impl TextBundle {
-    pub fn new<R: Into<ResponsiveContentView>, S: Into<String>, C: Into<Color>>(
+    pub fn new<R: Into<ResponsiveContentView>, S: Into<String>, C: Into<Color>, L: Into<Layer>>(
         responsive_content_view: R,
-        layer: Layer,
+        layer: L,
         text: S,
         scale_alignment: TextScaleAlignment,
         color: C,
@@ -40,7 +40,7 @@ impl TextBundle {
     ) -> Self {
         Self {
             responsive_content_view: responsive_content_view.into(),
-            layer,
+            layer: layer.into(),
             text: Text(text.into()),
             scale_alignment,
             color: color.into(),

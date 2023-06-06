@@ -142,6 +142,19 @@ pub enum ContentOffset {
     Near,
     Far,
 }
+pub trait ResponsiveUnit {
+    fn near(self) -> ContentLocation;
+    fn far(self) -> ContentLocation;
+}
+impl ResponsiveUnit for i32 {
+    fn near(self) -> ContentLocation {
+        (self, ContentOffset::Near).into()
+    }
+
+    fn far(self) -> ContentLocation {
+        (self, ContentOffset::Far).into()
+    }
+}
 /// Pair of ContentMarker and Offset to get an exact grid location
 #[derive(Copy, Clone)]
 pub struct ContentLocation {
@@ -223,6 +236,11 @@ impl<T: Into<ContentView>> From<(T, T, T)> for ResponsiveContentView {
         ResponsiveContentView { mapping }
     }
 }
+fn update_section(grid: &Grid, view: &ResponsiveContentView, pos: &mut Position<InterfaceContext>, area: &mut Area<InterfaceContext>) {
+    let section = grid.calc_section(view);
+    *pos = section.position;
+    *area = section.area;
+}
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
     mut queries: ParamSet<(
@@ -245,6 +263,7 @@ pub(crate) fn config_grid(
     if viewport_handle.is_changed() {
         // configure grid configs + span
         *grid = Grid::new(viewport_handle.section.area);
+        // update all views
         for (view, mut pos, mut area) in queries.p0().iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
@@ -253,11 +272,6 @@ pub(crate) fn config_grid(
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
     }
-}
-fn update_section(grid: &Grid, view: &ResponsiveContentView, pos: &mut Position<InterfaceContext>, area: &mut Area<InterfaceContext>) {
-    let section = grid.calc_section(view);
-    *pos = section.position;
-    *area = section.area;
 }
 pub(crate) fn set_from_view(
     grid: Res<Grid>,
