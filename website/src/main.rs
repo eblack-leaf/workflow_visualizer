@@ -12,7 +12,7 @@ fn root(cx: Scope) -> Element {
             class: " text-neutral-300 bg-neutral-800",
             div {
             class: "px-4 py-8",
-                    p { "W-V" }
+                    p { class:"inline", "W-V" }
                     a { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-red-800",
                     href: "book/index.html", "ARCHITECTURE" }
                     a { class: "pl-4 sm:pl-8 text-sm text-neutral-400 underline underline-offset-2 decoration-orange-700",
@@ -120,7 +120,7 @@ fn root(cx: Scope) -> Element {
                                 }
                                 " library for creating responsive web/native UI applications."
                             }
-                            p { class:"py-4", "Demo Application: " a { class:"text-neutral-500", href:"demo/index.html", "OTP-Manager"}}
+                            p { class:"py-4", "Demo Application: " a { class:"text-neutral-500", href:"demo/index.html", "OTP-Manager"} }
                             p{class:"py-4", "See " a {class:"text-neutral-500", href:"book/index.html", "ARCHITECTURE" } " for more."}
                         }
                     }
