@@ -91,3 +91,14 @@ impl AlignedFonts {
         }
     }
 }
+
+#[cfg(test)]
+#[test]
+fn tester() {
+    for x in 0..96u32 {
+        let font = MonoSpacedFont::jet_brains_mono(x);
+        let x = x as f32;
+        let dims = font.character_dimensions('a', x);
+        println!("Scale: {:?} dims: {:?}", x, dims);
+    }
+}

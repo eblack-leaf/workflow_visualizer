@@ -93,6 +93,11 @@ pub struct Text(pub String);
 /// The scale of the Text
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub struct TextScale(pub u32);
+impl From<u32> for TextScale {
+    fn from(value: u32) -> Self {
+        TextScale(value)
+    }
+}
 impl TextScale {
     pub(crate) fn px(&self) -> f32 {
         self.0 as f32
@@ -122,6 +127,8 @@ impl TextScaleAlignment {
     pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [15, 18, 22];
 }
 /// The size of a letter at an alignment
+/// This holds `Area<DeviceContext>` as character dimensions are
+/// scaled before rasterization to prevent visual artifacts of stretching
 #[derive(Component, Copy, Clone)]
 pub struct TextLetterDimensions(pub Area<DeviceContext>);
 /// where the letter is in the Text Grid

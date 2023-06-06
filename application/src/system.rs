@@ -4,7 +4,11 @@ use workflow_visualizer::{Area, InterfaceContext, Position, Sender, Text, Workfl
 
 pub(crate) fn send_event(
     sender: NonSend<Sender<Engen>>,
-    mut text: Query<(&mut Text, &Position<InterfaceContext>, &Area<InterfaceContext>)>,
+    mut text: Query<(
+        &mut Text,
+        &Position<InterfaceContext>,
+        &Area<InterfaceContext>,
+    )>,
     mut limiter: Local<bool>,
 ) {
     if !*limiter {

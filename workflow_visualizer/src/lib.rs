@@ -40,7 +40,7 @@ pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::grid::{
     ContentLocation, ContentMarker, ContentOffset, ContentRange, ContentView, Grid, Marker,
-    MarkerGrouping, ResponsiveContentView, ResponsiveView, ResponsiveUnit
+    MarkerGrouping, ResponsiveContentView, ResponsiveUnit, ResponsiveView,
 };
 pub use crate::job::{EntityName, Job};
 pub use crate::request::{spawn, Request};
@@ -55,7 +55,7 @@ pub use crate::time::{TimeDelta, TimeMarker, Timer};
 pub use crate::touch::{TouchListener, Touchable};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
-pub use crate::window::{WindowResize};
+pub use crate::window::WindowResize;
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
 pub use bevy_ecs;

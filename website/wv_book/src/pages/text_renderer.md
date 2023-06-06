@@ -57,3 +57,9 @@ pub enum TextScaleAlignment {
     Large,
 }
 ```
+
+### Implementation Notes
+
+When rendering on devices with a `ScaleFactor` not equal to `1`, the `Font` size is scaled before rasterization of `Glyph`s as stretching `Bitmap`s of the 
+glyph afterward to account for scaling would cause undesirable visual artifacts. `TextLetterDimensions` holds `Area<DeviceContext>` to illustrate that
+the letter sizes already have scaling accounted for.

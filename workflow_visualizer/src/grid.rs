@@ -42,14 +42,35 @@ pub struct Grid {
     pub(crate) gutter_config: GutterConfig,
 }
 impl Grid {
+    pub(crate) const SPAN_FOUR_EXT_BASE: f32 = 400f32;
+    pub(crate) const SPAN_EIGHT_EXT_BASE: f32 = 720f32;
+    pub(crate) const SPAN_TWELVE_EXT_BASE: f32 = 1168f32;
+    pub(crate) const SPAN_TWELVE_COLUMNS: i32 = 12;
+    pub(crate) const SPAN_EIGHT_COLUMNS: i32 = 8;
+    pub(crate) const SPAN_FOUR_COLUMNS: i32 = 4;
     pub(crate) fn new(area: Area<InterfaceContext>) -> Self {
         let (span, extension) = {
             if area.width > HorizontalSpan::MEDIUM_BREAKPOINT {
-                (HorizontalSpan::Twelve, MarkerGrouping(0))
+                let extension = Self::calc_extension(
+                    area.width,
+                    Self::SPAN_TWELVE_EXT_BASE,
+                    Self::SPAN_TWELVE_COLUMNS,
+                );
+                (HorizontalSpan::Twelve, MarkerGrouping(extension))
             } else if area.width > HorizontalSpan::SMALL_BREAKPOINT {
-                (HorizontalSpan::Eight, MarkerGrouping(0))
+                let extension = Self::calc_extension(
+                    area.width,
+                    Self::SPAN_EIGHT_EXT_BASE,
+                    Self::SPAN_EIGHT_COLUMNS,
+                );
+                (HorizontalSpan::Eight, MarkerGrouping(extension))
             } else {
-                (HorizontalSpan::Four, MarkerGrouping(0))
+                let extension = Self::calc_extension(
+                    area.width,
+                    Self::SPAN_FOUR_EXT_BASE,
+                    Self::SPAN_FOUR_COLUMNS,
+                );
+                (HorizontalSpan::Four, MarkerGrouping(extension))
             }
         };
         Self {
@@ -66,36 +87,64 @@ impl Grid {
             },
         }
     }
+
+    fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
+        ((width - base) / Marker::PX).floor() as i32 / columns
+    }
     pub fn calc_section(&self, view: &ResponsiveContentView) -> Section<InterfaceContext> {
         let current_view = view.mapping.get(&self.span).expect("view mapping");
         let markers_per_column = self.column_config.base.0 + self.column_config.extension.0;
-        let left = current_view.horizontal.begin.marker.0 * markers_per_column
-            + self.gutter_config.base.0 * current_view.horizontal.begin.marker.0;
-        let left = if current_view.horizontal.begin.offset == ContentOffset::Near {
-            left - markers_per_column
-        } else {
-            left
+        let left = match &current_view.horizontal.begin {
+            GridLocation::Raw(marker) => marker.0,
+            GridLocation::ContentAligned(content_location) => {
+                let left = content_location.marker.0 * markers_per_column
+                    + self.gutter_config.base.0 * content_location.marker.0;
+                let left = if content_location.offset == ContentOffset::Near {
+                    left - markers_per_column
+                } else {
+                    left
+                };
+                left
+            }
         };
-        let top = current_view.vertical.begin.marker.0 * self.row_config.base.0
-            + self.gutter_config.base.0 * current_view.vertical.begin.marker.0;
-        let top = if current_view.vertical.begin.offset == ContentOffset::Near {
-            top - self.row_config.base.0
-        } else {
-            top
+        let top = match &current_view.vertical.begin {
+            GridLocation::Raw(marker) => marker.0,
+            GridLocation::ContentAligned(content_location) => {
+                let top = content_location.marker.0 * self.row_config.base.0
+                    + self.gutter_config.base.0 * content_location.marker.0;
+                let top = if content_location.offset == ContentOffset::Near {
+                    top - self.row_config.base.0
+                } else {
+                    top
+                };
+                top
+            }
         };
-        let right = current_view.horizontal.end.marker.0 * markers_per_column
-            + self.gutter_config.base.0 * current_view.horizontal.end.marker.0;
-        let right = if current_view.horizontal.end.offset == ContentOffset::Near {
-            right - markers_per_column
-        } else {
-            right
+        let right = match &current_view.horizontal.end {
+            GridLocation::Raw(marker) => marker.0,
+            GridLocation::ContentAligned(content_location) => {
+                let right = content_location.marker.0 * markers_per_column
+                    + self.gutter_config.base.0 * content_location.marker.0;
+                let right = if content_location.offset == ContentOffset::Near {
+                    right - markers_per_column
+                } else {
+                    right
+                };
+                right
+            }
         };
-        let bottom = current_view.vertical.end.marker.0 * self.row_config.base.0
-            + self.gutter_config.base.0 * current_view.vertical.end.marker.0;
-        let bottom = if current_view.vertical.end.offset == ContentOffset::Near {
-            bottom - self.row_config.base.0
-        } else {
-            bottom
+        let bottom = match &current_view.vertical.end {
+            GridLocation::Raw(marker) => marker.0,
+            GridLocation::ContentAligned(content_location) => {
+                let bottom = content_location.marker.0 * self.row_config.base.0
+                    + self.gutter_config.base.0 * content_location.marker.0;
+                let bottom = if content_location.offset == ContentOffset::Near {
+                    bottom - self.row_config.base.0
+                } else {
+                    bottom
+                };
+                bottom
+            }
         };
         let left = left as f32 * Marker::PX;
         let top = top as f32 * Marker::PX;
@@ -110,9 +159,15 @@ pub(crate) fn setup(viewport_handle: Res<ViewportHandle>, mut cmd: Commands) {
     cmd.insert_resource(grid);
 }
 /// Index of 8px alignment location
+#[derive(Copy, Clone)]
 pub struct Marker(pub i32);
 impl Marker {
     pub const PX: f32 = 8f32;
+}
+impl From<i32> for Marker {
+    fn from(value: i32) -> Self {
+        Marker(value)
+    }
 }
 /// Number of markers to include in a logical group
 pub struct MarkerGrouping(pub i32);
@@ -136,23 +191,42 @@ impl From<i32> for ContentMarker {
         ContentMarker(value)
     }
 }
-/// whether to attach to beginning/end of column
+/// Whether to attach to beginning/end of column
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum ContentOffset {
     Near,
     Far,
 }
+/// Shorthand for specifying a GridLocation using ContentAligned
 pub trait ResponsiveUnit {
-    fn near(self) -> ContentLocation;
-    fn far(self) -> ContentLocation;
+    fn near(self) -> GridLocation;
+    fn far(self) -> GridLocation;
+    fn raw(self) -> GridLocation;
 }
 impl ResponsiveUnit for i32 {
-    fn near(self) -> ContentLocation {
+    fn near(self) -> GridLocation {
         (self, ContentOffset::Near).into()
     }
 
-    fn far(self) -> ContentLocation {
+    fn far(self) -> GridLocation {
         (self, ContentOffset::Far).into()
+    }
+    fn raw(self) -> GridLocation {
+        self.into()
+    }
+}
+/// Description of a Location on the Grid
+#[derive(Copy, Clone)]
+pub enum GridLocation {
+    /// Raw markers of 8px to align to specific spots
+    Raw(Marker),
+    /// Content Aligned description with ContentMarker
+    /// and Offset
+    ContentAligned(ContentLocation),
+}
+impl<T: Into<Marker>> From<T> for GridLocation {
+    fn from(value: T) -> Self {
+        GridLocation::Raw(value.into())
     }
 }
 /// Pair of ContentMarker and Offset to get an exact grid location
@@ -161,21 +235,21 @@ pub struct ContentLocation {
     pub marker: ContentMarker,
     pub offset: ContentOffset,
 }
-impl<T: Into<ContentMarker>> From<(T, ContentOffset)> for ContentLocation {
+impl<T: Into<ContentMarker>> From<(T, ContentOffset)> for GridLocation {
     fn from(value: (T, ContentOffset)) -> Self {
-        ContentLocation {
+        GridLocation::ContentAligned(ContentLocation {
             marker: value.0.into(),
             offset: value.1,
-        }
+        })
     }
 }
 /// Beginning and End GridLocation grouping
 #[derive(Copy, Clone)]
 pub struct ContentRange {
-    pub begin: ContentLocation,
-    pub end: ContentLocation,
+    pub begin: GridLocation,
+    pub end: GridLocation,
 }
-impl<T: Into<ContentLocation>> From<(T, T)> for ContentRange {
+impl<T: Into<GridLocation>> From<(T, T)> for ContentRange {
     fn from(value: (T, T)) -> Self {
         ContentRange {
             begin: value.0.into(),
@@ -202,6 +276,7 @@ impl<T: Into<ContentRange>> From<(T, T)> for ContentView {
 pub struct ResponsiveView<T> {
     pub mapping: HashMap<HorizontalSpan, T>,
 }
+/// Convenience type for mapping to ContentViews
 pub type ResponsiveContentView = ResponsiveView<ContentView>;
 impl ResponsiveContentView {
     pub fn with_span_four<T: Into<ContentView>>(mut self, view: T) -> Self {
@@ -236,7 +311,12 @@ impl<T: Into<ContentView>> From<(T, T, T)> for ResponsiveContentView {
         ResponsiveContentView { mapping }
     }
 }
-fn update_section(grid: &Grid, view: &ResponsiveContentView, pos: &mut Position<InterfaceContext>, area: &mut Area<InterfaceContext>) {
+fn update_section(
+    grid: &Grid,
+    view: &ResponsiveContentView,
+    pos: &mut Position<InterfaceContext>,
+    area: &mut Area<InterfaceContext>,
+) {
     let section = grid.calc_section(view);
     *pos = section.position;
     *area = section.area;
@@ -268,6 +348,7 @@ pub(crate) fn config_grid(
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
     } else {
+        // only update changed views
         for (view, mut pos, mut area) in queries.p1().iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
