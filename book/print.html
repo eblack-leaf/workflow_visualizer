@@ -621,6 +621,7 @@ refer to these by using the associated constants on the <code>Visualizer</code> 
 <li><code>SyncPoint::Event</code></li>
 <li><code>SyncPoint::Initialization</code></li>
 <li><code>UserSpaceSyncPoint::Initialization</code></li>
+<li><code>SyncPoint::Config</code></li>
 <li><code>SyncPoint::Preparation</code></li>
 <li><code>UserSpaceSyncPoint::Process</code></li>
 <li><code>SyncPoint::Spawn</code></li>
@@ -971,6 +972,12 @@ triggering action when not intended. 3 aspects can be read from this input for e
 <code>TouchedState</code> holds whether it is currently pressed. This lasts for one loop then is reset in <code>SyncPoint::Finish</code>.
 <code>ToggleState</code> tracks toggling of the entity. One press enables and the consecutive press disables.
 <code>TouchLocation</code> can be read to see where the press was received within the <code>Area</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Touchable::new(TouchListener::on_press())
+// or
+Touchable::new(TouchListener::on_release())
+<span class="boring">}</span></code></pre></pre>
 <h3 id="tracking"><a class="header" href="#tracking">Tracking</a></h3>
 <p>On touchscreens multiple <code>Interactor</code>s can be active at the same time. This can be unintentional such as 
 resting your hand on the phone screen when reaching for a button. This cannot happen on mouse devices as the
