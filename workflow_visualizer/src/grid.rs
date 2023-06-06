@@ -43,11 +43,11 @@ impl Grid {
     pub(crate) fn new(area: Area<InterfaceContext>) -> Self {
         let (span, extension) = {
             if area.width > HorizontalSpan::MEDIUM_BREAKPOINT {
-                (HorizontalSpan::Twelve, MarkerGrouping(0u8))
+                (HorizontalSpan::Twelve, MarkerGrouping(0))
             } else if area.width > HorizontalSpan::SMALL_BREAKPOINT {
-                (HorizontalSpan::Eight, MarkerGrouping(0u8))
+                (HorizontalSpan::Eight, MarkerGrouping(0))
             } else {
-                (HorizontalSpan::Four, MarkerGrouping(0u8))
+                (HorizontalSpan::Four, MarkerGrouping(0))
             }
         };
         Self {
@@ -113,7 +113,7 @@ impl Marker {
     pub const PX: f32 = 8f32;
 }
 /// Number of markers to include in a logical group
-pub struct MarkerGrouping(pub u8);
+pub struct MarkerGrouping(pub i8);
 pub(crate) struct ColumnConfig {
     pub base: MarkerGrouping,
     pub extension: MarkerGrouping,
