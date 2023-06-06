@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Sub};
 
@@ -8,13 +9,17 @@ use serde::{Deserialize, Serialize};
 use crate::coord::{CoordinateContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
 /// Position denotes 2d coordinates in space with float32 precision
-#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Position<Context: CoordinateContext> {
     pub x: f32,
     pub y: f32,
     _context: PhantomData<Context>,
 }
-
+impl<Context: CoordinateContext> Debug for Position<Context> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Position: x:{:.2} y:{:.2}", self.x, self.y)
+    }
+}
 impl<Context: CoordinateContext> Position<Context> {
     pub fn new(x: f32, y: f32) -> Self {
         Self {

@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::ops::{Add, Mul, Sub};
 
@@ -7,13 +8,17 @@ use bytemuck::{Pod, Zeroable};
 use crate::coord::{CoordinateContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
 /// Area is for width/height of an entity
-#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Area<Context: CoordinateContext> {
     pub width: f32,
     pub height: f32,
     _context: PhantomData<Context>,
 }
-
+impl<Context: CoordinateContext> Debug for Area<Context> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Area: width:{:.2} height:{:.2}", self.width, self.height)
+    }
+}
 impl<Context: CoordinateContext> Area<Context> {
     pub fn new(width: f32, height: f32) -> Self {
         Self {

@@ -3,12 +3,14 @@ use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
 };
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{Commands, DetectChanges, IntoSystemConfig, Query, Res, Resource};
+use bevy_ecs::prelude::{
+    Commands, DetectChanges, IntoSystemConfig, ParamSet, Query, Res, Resource,
+};
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
 use std::collections::HashMap;
 
-#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
 pub enum HorizontalSpan {
     Four,
     Eight,
@@ -113,7 +115,7 @@ impl Marker {
     pub const PX: f32 = 8f32;
 }
 /// Number of markers to include in a logical group
-pub struct MarkerGrouping(pub i8);
+pub struct MarkerGrouping(pub i32);
 pub(crate) struct ColumnConfig {
     pub base: MarkerGrouping,
     pub extension: MarkerGrouping,
@@ -127,27 +129,60 @@ pub(crate) struct RowConfig {
     pub base: MarkerGrouping,
 }
 /// Logical index using groupings to get actual markers then to px
+#[derive(Copy, Clone)]
 pub struct ContentMarker(pub i32);
+impl From<i32> for ContentMarker {
+    fn from(value: i32) -> Self {
+        ContentMarker(value)
+    }
+}
 /// whether to attach to beginning/end of column
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum ContentOffset {
     Near,
     Far,
 }
 /// Pair of ContentMarker and Offset to get an exact grid location
+#[derive(Copy, Clone)]
 pub struct ContentLocation {
     pub marker: ContentMarker,
     pub offset: ContentOffset,
 }
+impl<T: Into<ContentMarker>> From<(T, ContentOffset)> for ContentLocation {
+    fn from(value: (T, ContentOffset)) -> Self {
+        ContentLocation {
+            marker: value.0.into(),
+            offset: value.1,
+        }
+    }
+}
 /// Beginning and End GridLocation grouping
+#[derive(Copy, Clone)]
 pub struct ContentRange {
     pub begin: ContentLocation,
     pub end: ContentLocation,
 }
+impl<T: Into<ContentLocation>> From<(T, T)> for ContentRange {
+    fn from(value: (T, T)) -> Self {
+        ContentRange {
+            begin: value.0.into(),
+            end: value.1.into(),
+        }
+    }
+}
 /// A GridRange for horizontal + vertical aspects
+#[derive(Copy, Clone)]
 pub struct ContentView {
     pub horizontal: ContentRange,
     pub vertical: ContentRange,
+}
+impl<T: Into<ContentRange>> From<(T, T)> for ContentView {
+    fn from(value: (T, T)) -> Self {
+        ContentView {
+            horizontal: value.0.into(),
+            vertical: value.1.into(),
+        }
+    }
 }
 /// A mapping of GridView for each HorizontalSpan Option
 #[derive(Component)]
@@ -155,25 +190,74 @@ pub struct ResponsiveView<T> {
     pub mapping: HashMap<HorizontalSpan, T>,
 }
 pub type ResponsiveContentView = ResponsiveView<ContentView>;
-pub(crate) fn grid_response(
+impl ResponsiveContentView {
+    pub fn with_span_four<T: Into<ContentView>>(mut self, view: T) -> Self {
+        self.mapping.insert(HorizontalSpan::Four, view.into());
+        self
+    }
+    pub fn with_span_eight<T: Into<ContentView>>(mut self, view: T) -> Self {
+        self.mapping.insert(HorizontalSpan::Eight, view.into());
+        self
+    }
+    pub fn with_span_twelve<T: Into<ContentView>>(mut self, view: T) -> Self {
+        self.mapping.insert(HorizontalSpan::Twelve, view.into());
+        self
+    }
+}
+impl<T: Into<ContentView>> From<T> for ResponsiveContentView {
+    fn from(value: T) -> Self {
+        let value = value.into();
+        let mut mapping = HashMap::new();
+        mapping.insert(HorizontalSpan::Four, value);
+        mapping.insert(HorizontalSpan::Eight, value);
+        mapping.insert(HorizontalSpan::Twelve, value);
+        ResponsiveContentView { mapping }
+    }
+}
+impl<T: Into<ContentView>> From<(T, T, T)> for ResponsiveContentView {
+    fn from(value: (T, T, T)) -> Self {
+        let mut mapping = HashMap::new();
+        mapping.insert(HorizontalSpan::Four, value.0.into());
+        mapping.insert(HorizontalSpan::Eight, value.1.into());
+        mapping.insert(HorizontalSpan::Twelve, value.2.into());
+        ResponsiveContentView { mapping }
+    }
+}
+pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
-    mut responsively_viewed: Query<(
-        &ResponsiveContentView,
-        &mut Position<InterfaceContext>,
-        &mut Area<InterfaceContext>,
+    mut queries: ParamSet<(
+        Query<(
+            &ResponsiveContentView,
+            &mut Position<InterfaceContext>,
+            &mut Area<InterfaceContext>,
+        )>,
+        Query<
+            (
+                &ResponsiveContentView,
+                &mut Position<InterfaceContext>,
+                &mut Area<InterfaceContext>,
+            ),
+            Changed<ResponsiveContentView>,
+        >,
     )>,
-    grid: ResMut<Grid>,
+    mut grid: ResMut<Grid>,
 ) {
     if viewport_handle.is_changed() {
         // configure grid configs + span
         *grid = Grid::new(viewport_handle.section.area);
-        // set from view for all
-        for (view, mut pos, mut area) in responsively_viewed.iter_mut() {
-            let section = grid.calc_section(view);
-            *pos = section.pos;
-            *area = section.area;
+        for (view, mut pos, mut area) in queries.p0().iter_mut() {
+            update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
+        }
+    } else {
+        for (view, mut pos, mut area) in queries.p1().iter_mut() {
+            update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
     }
+}
+fn update_section(grid: &Grid, view: &ResponsiveContentView, pos: &mut Position<InterfaceContext>, area: &mut Area<InterfaceContext>) {
+    let section = grid.calc_section(view);
+    *pos = section.position;
+    *area = section.area;
 }
 pub(crate) fn set_from_view(
     grid: Res<Grid>,
@@ -187,9 +271,7 @@ pub(crate) fn set_from_view(
     >,
 ) {
     for (view, mut pos, mut area) in changed.iter_mut() {
-        let section = grid.calc_section(view);
-        *pos = section.pos;
-        *area = section.area;
+        update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
     }
 }
 pub(crate) struct GridAttachment;
@@ -198,10 +280,9 @@ impl Attach for GridAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization)));
+            .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            grid_response.in_set(SyncPoint::Config),
-            set_from_view.in_set(SyncPoint::Config),// if this troubles ordering, combine with SystemParams into grid_response
+            config_grid.in_set(SyncPoint::Config),
             set_from_view.in_set(SyncPoint::Reconfigure),
         ));
     }

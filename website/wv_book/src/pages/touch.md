@@ -16,6 +16,12 @@ triggering action when not intended. 3 aspects can be read from this input for e
 `ToggleState` tracks toggling of the entity. One press enables and the consecutive press disables.
 `TouchLocation` can be read to see where the press was received within the `Area`.
 
+```rust
+Touchable::new(TouchListener::on_press())
+// or
+Touchable::new(TouchListener::on_release())
+```
+
 ### Tracking
 
 On touchscreens multiple `Interactor`s can be active at the same time. This can be unintentional such as 

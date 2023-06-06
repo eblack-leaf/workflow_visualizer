@@ -120,6 +120,7 @@ fn root(cx: Scope) -> Element {
                                 }
                                 " library for creating responsive web/native UI applications."
                             }
+                            p { class:"py-4", "Demo Application: " a { class:"text-neutral-500", href:"demo/index.html", "OTP-Manager"}}
                             p{class:"py-4", "See " a {class:"text-neutral-500", href:"book/index.html", "ARCHITECTURE" } " for more."}
                         }
                     }

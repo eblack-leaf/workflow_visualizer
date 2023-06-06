@@ -1,5 +1,6 @@
 use crate::{Grid, InterfaceContext, Marker, Position, ResponsiveView};
-use bevy_ecs::prelude::{Changed, DetectChanges, Query, Res};
+use bevy_ecs::prelude::{Changed, Component, DetectChanges, Query, Res};
+#[derive(Component)]
 pub struct Path {
     pub points: Vec<Position<InterfaceContext>>,
 }

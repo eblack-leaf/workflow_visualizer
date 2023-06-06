@@ -40,7 +40,7 @@ pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::grid::{
     ContentLocation, ContentMarker, ContentOffset, ContentRange, ContentView, Grid, Marker,
-    MarkerGrouping, ResponsiveContentView, ResponsivePointView, ResponsiveView,
+    MarkerGrouping, ResponsiveContentView, ResponsiveView,
 };
 pub use crate::job::{EntityName, Job};
 pub use crate::request::{spawn, Request};
