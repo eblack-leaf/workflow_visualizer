@@ -28,11 +28,14 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
+mod path;
+
 pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
+pub use crate::grid::{ResponsiveView, ResponsiveContentView, ResponsivePointView, Grid, Marker, MarkerGrouping, ContentMarker, ContentLocation, ContentRange, ContentView, ContentOffset};
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};

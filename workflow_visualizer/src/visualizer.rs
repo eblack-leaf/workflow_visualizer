@@ -119,7 +119,7 @@ impl Visualizer {
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
     }
-    /// invoke queued attachments after system attachments
+    /// invokes queued attachments after system attachments
     pub fn initialize(&mut self, window: &Window) {
         #[cfg(not(target_family = "wasm"))]
         pollster::block_on(self.init_gfx(window));
