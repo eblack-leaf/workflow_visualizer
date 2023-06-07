@@ -1,5 +1,8 @@
 use crate::grid::{config_grid, HorizontalSpan};
-use crate::{Area, Attach, Grid, GridLocation, InterfaceContext, Position, RawMarker, ResponsiveView, SyncPoint, Visualizer};
+use crate::{
+    Area, Attach, Grid, GridLocation, InterfaceContext, Position, RawMarker, ResponsiveView,
+    SyncPoint, Visualizer,
+};
 use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
 use std::collections::HashMap;
 

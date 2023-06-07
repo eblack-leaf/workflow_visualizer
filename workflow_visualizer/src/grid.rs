@@ -87,7 +87,6 @@ impl Grid {
             },
         }
     }
-
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
         ((width - base) / RawMarker::PX).floor() as i32 / columns
     }
@@ -115,11 +114,9 @@ impl Grid {
         let bottom = bottom as f32 * RawMarker::PX;
         Section::from_left_top_right_bottom(left, top, right, bottom)
     }
-
     pub fn markers_per_column(&self) -> i32 {
         self.column_config.base.0 + self.column_config.extension.0
     }
-
     pub fn calc_horizontal_location(&self, grid_location: GridLocation) -> i32 {
         let markers_per_column = self.markers_per_column();
         let content_location = grid_location.location;
@@ -136,7 +133,6 @@ impl Grid {
             location
         }
     }
-
     pub fn calc_vertical_location(&self, grid_location: GridLocation) -> i32 {
         let content_location = grid_location.location;
         let location = content_location.marker.0 * self.row_config.base.0

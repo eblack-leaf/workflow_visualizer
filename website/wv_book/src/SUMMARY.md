@@ -13,6 +13,8 @@
   - [Viewport](pages/viewport.md)
   - [Render](pages/render.md)
     - [TextRenderer](pages/text_renderer.md)
+    - [LineRenderer](pages/line_renderer.md)
+    - [PanelRenderer](pages/panel_renderer.md)
   - [Visibility](pages/visibility.md)
   - [Focus](pages/focus.md)
   - [Touch](pages/touch.md)

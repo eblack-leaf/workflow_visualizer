@@ -11,6 +11,7 @@ pub enum SyncPoint {
     Event,
     Initialization,
     Config,
+    PreProcessVisibility,
     Preparation,
     Spawn,
     Reconfigure,
@@ -27,11 +28,12 @@ Here is the overview of sync points.
 - `SyncPoint::Initialization` set is for preparation of resources and entities.
 - `UserSpaceSyncPoint::Initialization` set in for user initialization.
 - `SyncPoint::Config` set is for configuring the initialized parts.
+- `SyncPoint::PreProcessVisibility` set is for setting visibility before processing begins.
 - `SyncPoint::Preparation` set is for preparing parts according to the config.
 - `UserSpaceSyncPoint::Process` set is for user fns.
 - `SyncPoint::Spawn` set is for spawning new bundles via `Request`s.
 - `SyncPoint::Reconfigure` set is for config new parts spawned
-- `SyncPoint::ResolveVisibility` set is for determining visibility.
+- `SyncPoint::PostProcessVisibility` set is for determining visibility after processing.
 - `SyncPoint::Resolve` set is for resolving diffs in parts after changes.
 - `UserSpaceSyncPoint::Resolve` set is for resolving user fns.
 - `SyncPoint::PushDiff` set is for extracting the differences in element state.
@@ -103,11 +105,12 @@ This task is run every iteration of the event loop, while `!job.suspended()`.
 - `SyncPoint::Initialization`
 - `UserSpaceSyncPoint::Initialization`
 - `SyncPoint::Config`
+- `SyncPoint::PreProcessVisibility`
 - `SyncPoint::Preparation`
 - `UserSpaceSyncPoint::Process`
 - `SyncPoint::Spawn`
 - `SyncPoint::Reconfigure`
-- `SyncPoint::ResolveVisibility`
+- `SyncPoint::PostProcessVisibility`
 - `SyncPoint::Resolve`
 - `UserSpaceSyncPoint::Resolve`
 - `SyncPoint::PushDiff`

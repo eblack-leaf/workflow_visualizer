@@ -14,24 +14,21 @@ pub fn visualizer() -> Visualizer {
         .task(Visualizer::TASK_MAIN)
         .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process),));
     visualizer.add_entities(vec![Request::new(TextBundle::new(
-        ResponsiveGridView::from((
-            (1.near().offset(5), 4.far().offset(-5)),
-            (1.near(), 2.far()),
-        )),
+        ResponsiveGridView::from(((1.near(), 4.far()), (1.near(), 1.far().offset(-4)))),
         1,
         "hello",
         TextScaleAlignment::Small,
         Color::GREEN,
-        TextWrapStyle::letter(),
+        TextWrapStyle::word(),
     ))]);
     visualizer.add_entities(vec![(
         Request::new(TextBundle::new(
-            ResponsiveGridView::from(((1.near(), 4.far()), (3.near(), 5.far()))),
+            ResponsiveGridView::from(((1.near(), 4.far()), (1.far().offset(-3), 2.far()))),
             1,
             "world.",
             TextScaleAlignment::Small,
             Color::GREEN,
-            TextWrapStyle::letter(),
+            TextWrapStyle::word(),
         )),
         Touchable::new(TouchListener::on_press()),
         Focus::new(),

@@ -12,6 +12,7 @@ mod gfx;
 mod grid;
 mod instance;
 mod job;
+mod line;
 mod orientation;
 mod path;
 mod render;

@@ -3,6 +3,7 @@ use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::orientation::OrientationAttachment;
+use crate::path::PathAttachment;
 use crate::render::{
     internal_render, invoke_render, Render, RenderPhase, RenderTaskManager, RenderTasks,
 };
@@ -130,6 +131,7 @@ impl Visualizer {
         self.invoke_attach::<WindowAttachment>();
         self.invoke_attach::<ViewportAttachment>();
         self.invoke_attach::<GridAttachment>();
+        self.invoke_attach::<PathAttachment>();
         self.invoke_attach::<VisibilityAttachment>();
         self.invoke_attach::<TouchAttachment>();
         self.invoke_attach::<FocusAttachment>();
