@@ -9,6 +9,7 @@
     - [Sync](pages/sync.md)
   - [Coord](pages/coord.md)
   - [Grid](pages/grid.md)
+  - [Path](pages/path.md)
   - [Gfx](pages/gfx.md)
   - [Viewport](pages/viewport.md)
   - [Render](pages/render.md)

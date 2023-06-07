@@ -1,11 +1,7 @@
 use crate::viewport::{frontend_area_adjust, ViewportHandle};
-use crate::{
-    Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
-};
+use crate::{Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer, WindowResize};
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{
-    Commands, DetectChanges, IntoSystemConfig, ParamSet, Query, Res, Resource,
-};
+use bevy_ecs::prelude::{Commands, DetectChanges, EventReader, IntoSystemConfig, ParamSet, Query, Res, Resource};
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
 use std::collections::HashMap;
@@ -316,6 +312,7 @@ fn update_section(
 }
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
+    window_resize_events: EventReader<WindowResize>,
     mut responsive: Query<(
         &ResponsiveGridView,
         &mut Position<InterfaceContext>,
@@ -323,7 +320,7 @@ pub(crate) fn config_grid(
     )>,
     mut grid: ResMut<Grid>,
 ) {
-    if viewport_handle.is_changed() {
+    if !window_resize_events.is_empty() {
         // configure grid configs + span
         *grid = Grid::new(viewport_handle.section.area);
         // update all views
