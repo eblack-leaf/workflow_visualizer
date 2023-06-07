@@ -287,6 +287,79 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 <span class="kw">use crate</span>::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
@@ -306,18 +379,18 @@
     Twelve,
 }
 <span class="kw">impl </span>HorizontalSpan {
-    <span class="kw">pub fn </span>gutter_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MarkerGrouping {
+    <span class="kw">pub fn </span>gutter_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarkerGrouping {
         <span class="kw">match </span><span class="self">self </span>{
-            HorizontalSpan::Four =&gt; MarkerGrouping(<span class="number">2</span>),
-            HorizontalSpan::Eight =&gt; MarkerGrouping(<span class="number">2</span>),
-            HorizontalSpan::Twelve =&gt; MarkerGrouping(<span class="number">3</span>),
+            HorizontalSpan::Four =&gt; RawMarkerGrouping(<span class="number">2</span>),
+            HorizontalSpan::Eight =&gt; RawMarkerGrouping(<span class="number">2</span>),
+            HorizontalSpan::Twelve =&gt; RawMarkerGrouping(<span class="number">3</span>),
         }
     }
-    <span class="kw">pub fn </span>content_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MarkerGrouping {
+    <span class="kw">pub fn </span>content_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarkerGrouping {
         <span class="kw">match </span><span class="self">self </span>{
-            HorizontalSpan::Four =&gt; MarkerGrouping(<span class="number">10</span>),
-            HorizontalSpan::Eight =&gt; MarkerGrouping(<span class="number">9</span>),
-            HorizontalSpan::Twelve =&gt; MarkerGrouping(<span class="number">10</span>),
+            HorizontalSpan::Four =&gt; RawMarkerGrouping(<span class="number">10</span>),
+            HorizontalSpan::Eight =&gt; RawMarkerGrouping(<span class="number">9</span>),
+            HorizontalSpan::Twelve =&gt; RawMarkerGrouping(<span class="number">10</span>),
         }
     }
     <span class="kw">pub const </span>SMALL_BREAKPOINT: f32 = <span class="number">720f32</span>;
@@ -331,14 +404,35 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) gutter_config: GutterConfig,
 }
 <span class="kw">impl </span>Grid {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_FOUR_EXT_BASE: f32 = <span class="number">400f32</span>;
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_EIGHT_EXT_BASE: f32 = <span class="number">720f32</span>;
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_TWELVE_EXT_BASE: f32 = <span class="number">1168f32</span>;
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_TWELVE_COLUMNS: i32 = <span class="number">12</span>;
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_EIGHT_COLUMNS: i32 = <span class="number">8</span>;
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_FOUR_COLUMNS: i32 = <span class="number">4</span>;
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(area: Area&lt;InterfaceContext&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(span, extension) = {
             <span class="kw">if </span>area.width &gt; HorizontalSpan::MEDIUM_BREAKPOINT {
-                (HorizontalSpan::Twelve, MarkerGrouping(<span class="number">0</span>))
+                <span class="kw">let </span>extension = <span class="self">Self</span>::calc_extension(
+                    area.width,
+                    <span class="self">Self</span>::SPAN_TWELVE_EXT_BASE,
+                    <span class="self">Self</span>::SPAN_TWELVE_COLUMNS,
+                );
+                (HorizontalSpan::Twelve, RawMarkerGrouping(extension))
             } <span class="kw">else if </span>area.width &gt; HorizontalSpan::SMALL_BREAKPOINT {
-                (HorizontalSpan::Eight, MarkerGrouping(<span class="number">0</span>))
+                <span class="kw">let </span>extension = <span class="self">Self</span>::calc_extension(
+                    area.width,
+                    <span class="self">Self</span>::SPAN_EIGHT_EXT_BASE,
+                    <span class="self">Self</span>::SPAN_EIGHT_COLUMNS,
+                );
+                (HorizontalSpan::Eight, RawMarkerGrouping(extension))
             } <span class="kw">else </span>{
-                (HorizontalSpan::Four, MarkerGrouping(<span class="number">0</span>))
+                <span class="kw">let </span>extension = <span class="self">Self</span>::calc_extension(
+                    area.width,
+                    <span class="self">Self</span>::SPAN_FOUR_EXT_BASE,
+                    <span class="self">Self</span>::SPAN_FOUR_COLUMNS,
+                );
+                (HorizontalSpan::Four, RawMarkerGrouping(extension))
             }
         };
         <span class="self">Self </span>{
@@ -355,42 +449,66 @@
             },
         }
     }
-    <span class="kw">pub fn </span>calc_section(<span class="kw-2">&amp;</span><span class="self">self</span>, view: <span class="kw-2">&amp;</span>ResponsiveContentView) -&gt; Section&lt;InterfaceContext&gt; {
+    <span class="kw">fn </span>calc_extension(width: f32, base: f32, columns: i32) -&gt; i32 {
+        ((width - base) / RawMarker::PX).floor() <span class="kw">as </span>i32 / columns
+    }
+    <span class="kw">pub fn </span>calc_section(<span class="kw-2">&amp;</span><span class="self">self</span>, view: <span class="kw-2">&amp;</span>ResponsiveGridView) -&gt; Section&lt;InterfaceContext&gt; {
         <span class="kw">let </span>current_view = view.mapping.get(<span class="kw-2">&amp;</span><span class="self">self</span>.span).expect(<span class="string">&quot;view mapping&quot;</span>);
-        <span class="kw">let </span>markers_per_column = <span class="self">self</span>.column_config.base.<span class="number">0 </span>+ <span class="self">self</span>.column_config.extension.<span class="number">0</span>;
-        <span class="kw">let </span>left = current_view.horizontal.begin.marker.<span class="number">0 </span>* markers_per_column
-            + <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* current_view.horizontal.begin.marker.<span class="number">0</span>;
-        <span class="kw">let </span>left = <span class="kw">if </span>current_view.horizontal.begin.offset == ContentOffset::Near {
-            left - markers_per_column
-        } <span class="kw">else </span>{
-            left
+        <span class="kw">let </span>left = {
+            <span class="kw">let </span>grid_location = current_view.horizontal.begin;
+            <span class="self">self</span>.calc_horizontal_location(grid_location)
         };
-        <span class="kw">let </span>top = current_view.vertical.begin.marker.<span class="number">0 </span>* <span class="self">self</span>.row_config.base.<span class="number">0
-            </span>+ <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* current_view.vertical.begin.marker.<span class="number">0</span>;
-        <span class="kw">let </span>top = <span class="kw">if </span>current_view.vertical.begin.offset == ContentOffset::Near {
-            top - <span class="self">self</span>.row_config.base.<span class="number">0
-        </span>} <span class="kw">else </span>{
-            top
+        <span class="kw">let </span>top = {
+            <span class="kw">let </span>grid_location = current_view.vertical.begin;
+            <span class="self">self</span>.calc_vertical_location(grid_location)
         };
-        <span class="kw">let </span>right = current_view.horizontal.end.marker.<span class="number">0 </span>* markers_per_column
-            + <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* current_view.horizontal.end.marker.<span class="number">0</span>;
-        <span class="kw">let </span>right = <span class="kw">if </span>current_view.horizontal.end.offset == ContentOffset::Near {
-            right - markers_per_column
-        } <span class="kw">else </span>{
-            right
+        <span class="kw">let </span>right = {
+            <span class="kw">let </span>grid_location = current_view.horizontal.end;
+            <span class="self">self</span>.calc_horizontal_location(grid_location)
         };
-        <span class="kw">let </span>bottom = current_view.vertical.end.marker.<span class="number">0 </span>* <span class="self">self</span>.row_config.base.<span class="number">0
-            </span>+ <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* current_view.vertical.end.marker.<span class="number">0</span>;
-        <span class="kw">let </span>bottom = <span class="kw">if </span>current_view.vertical.end.offset == ContentOffset::Near {
-            bottom - <span class="self">self</span>.row_config.base.<span class="number">0
-        </span>} <span class="kw">else </span>{
-            bottom
+        <span class="kw">let </span>bottom = {
+            <span class="kw">let </span>grid_location = current_view.vertical.end;
+            <span class="self">self</span>.calc_vertical_location(grid_location)
         };
-        <span class="kw">let </span>left = left <span class="kw">as </span>f32 * Marker::PX;
-        <span class="kw">let </span>top = top <span class="kw">as </span>f32 * Marker::PX;
-        <span class="kw">let </span>right = right <span class="kw">as </span>f32 * Marker::PX;
-        <span class="kw">let </span>bottom = bottom <span class="kw">as </span>f32 * Marker::PX;
+        <span class="kw">let </span>left = left <span class="kw">as </span>f32 * RawMarker::PX;
+        <span class="kw">let </span>top = top <span class="kw">as </span>f32 * RawMarker::PX;
+        <span class="kw">let </span>right = right <span class="kw">as </span>f32 * RawMarker::PX;
+        <span class="kw">let </span>bottom = bottom <span class="kw">as </span>f32 * RawMarker::PX;
         Section::from_left_top_right_bottom(left, top, right, bottom)
+    }
+    <span class="kw">pub fn </span>markers_per_column(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
+        <span class="self">self</span>.column_config.base.<span class="number">0 </span>+ <span class="self">self</span>.column_config.extension.<span class="number">0
+    </span>}
+    <span class="kw">pub fn </span>calc_horizontal_location(<span class="kw-2">&amp;</span><span class="self">self</span>, grid_location: GridLocation) -&gt; i32 {
+        <span class="kw">let </span>markers_per_column = <span class="self">self</span>.markers_per_column();
+        <span class="kw">let </span>content_location = grid_location.location;
+        <span class="kw">let </span>location = content_location.marker.<span class="number">0 </span>* markers_per_column
+            + <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* content_location.marker.<span class="number">0</span>;
+        <span class="kw">let </span>location = <span class="kw">if </span>content_location.bias == GridMarkerBias::Near {
+            location - markers_per_column
+        } <span class="kw">else </span>{
+            location
+        };
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = grid_location.offset {
+            location + offset.<span class="number">0 </span>.<span class="number">0
+        </span>} <span class="kw">else </span>{
+            location
+        }
+    }
+    <span class="kw">pub fn </span>calc_vertical_location(<span class="kw-2">&amp;</span><span class="self">self</span>, grid_location: GridLocation) -&gt; i32 {
+        <span class="kw">let </span>content_location = grid_location.location;
+        <span class="kw">let </span>location = content_location.marker.<span class="number">0 </span>* <span class="self">self</span>.row_config.base.<span class="number">0
+            </span>+ <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* content_location.marker.<span class="number">0</span>;
+        <span class="kw">let </span>location = <span class="kw">if </span>content_location.bias == GridMarkerBias::Near {
+            location - <span class="self">self</span>.row_config.base.<span class="number">0
+        </span>} <span class="kw">else </span>{
+            location
+        };
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = grid_location.offset {
+            location + offset.<span class="number">0 </span>.<span class="number">0
+        </span>} <span class="kw">else </span>{
+            location
+        }
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(viewport_handle: Res&lt;ViewportHandle&gt;, <span class="kw-2">mut </span>cmd: Commands) {
@@ -399,61 +517,97 @@
     cmd.insert_resource(grid);
 }
 <span class="doccomment">/// Index of 8px alignment location
-</span><span class="kw">pub struct </span>Marker(<span class="kw">pub </span>i32);
-<span class="kw">impl </span>Marker {
+</span><span class="attr">#[derive(Copy, Clone, PartialEq)]
+</span><span class="kw">pub struct </span>RawMarker(<span class="kw">pub </span>i32);
+<span class="kw">impl </span>RawMarker {
     <span class="kw">pub const </span>PX: f32 = <span class="number">8f32</span>;
 }
+<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>RawMarker {
+    <span class="kw">fn </span>from(value: i32) -&gt; <span class="self">Self </span>{
+        RawMarker(value)
+    }
+}
 <span class="doccomment">/// Number of markers to include in a logical group
-</span><span class="kw">pub struct </span>MarkerGrouping(<span class="kw">pub </span>i32);
+</span><span class="kw">pub struct </span>RawMarkerGrouping(<span class="kw">pub </span>i32);
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ColumnConfig {
-    <span class="kw">pub </span>base: MarkerGrouping,
-    <span class="kw">pub </span>extension: MarkerGrouping,
+    <span class="kw">pub </span>base: RawMarkerGrouping,
+    <span class="kw">pub </span>extension: RawMarkerGrouping,
 }
 <span class="doccomment">/// MarkerGrouping for deciding gutter size
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>GutterConfig {
-    <span class="kw">pub </span>base: MarkerGrouping,
+    <span class="kw">pub </span>base: RawMarkerGrouping,
 }
 <span class="doccomment">/// MarkerGrouping fro deciding row size
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RowConfig {
-    <span class="kw">pub </span>base: MarkerGrouping,
+    <span class="kw">pub </span>base: RawMarkerGrouping,
 }
 <span class="doccomment">/// Logical index using groupings to get actual markers then to px
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>ContentMarker(<span class="kw">pub </span>i32);
-<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>ContentMarker {
+</span><span class="kw">pub struct </span>GridMarker(<span class="kw">pub </span>i32);
+<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>GridMarker {
     <span class="kw">fn </span>from(value: i32) -&gt; <span class="self">Self </span>{
-        ContentMarker(value)
+        GridMarker(value)
     }
 }
-<span class="doccomment">/// whether to attach to beginning/end of column
+<span class="doccomment">/// Whether to attach to beginning/end of column
 </span><span class="attr">#[derive(PartialEq, Eq, Copy, Clone)]
-</span><span class="kw">pub enum </span>ContentOffset {
+</span><span class="kw">pub enum </span>GridMarkerBias {
     Near,
     Far,
 }
+<span class="attr">#[derive(Copy, Clone, PartialEq)]
+</span><span class="kw">pub struct </span>GridLocationOffset(<span class="kw">pub </span>RawMarker);
+<span class="doccomment">/// Shorthand for specifying a GridLocation using ContentAligned
+</span><span class="kw">pub trait </span>ResponsiveUnit {
+    <span class="kw">fn </span>near(<span class="self">self</span>) -&gt; GridLocation;
+    <span class="kw">fn </span>far(<span class="self">self</span>) -&gt; GridLocation;
+}
+<span class="kw">impl </span>ResponsiveUnit <span class="kw">for </span>i32 {
+    <span class="kw">fn </span>near(<span class="self">self</span>) -&gt; GridLocation {
+        (<span class="self">self</span>, GridMarkerBias::Near).into()
+    }
+    <span class="kw">fn </span>far(<span class="self">self</span>) -&gt; GridLocation {
+        (<span class="self">self</span>, GridMarkerBias::Far).into()
+    }
+}
+<span class="doccomment">/// Description of a Location on the Grid
+</span><span class="attr">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>GridLocation {
+    <span class="kw">pub </span>location: GridLocationDescriptor,
+    <span class="kw">pub </span>offset: <span class="prelude-ty">Option</span>&lt;GridLocationOffset&gt;,
+}
+<span class="kw">impl </span>GridLocation {
+    <span class="kw">pub fn </span>offset(<span class="kw-2">mut </span><span class="self">self</span>, offset: i32) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.offset.replace(GridLocationOffset(offset.into()));
+        <span class="self">self
+    </span>}
+}
 <span class="doccomment">/// Pair of ContentMarker and Offset to get an exact grid location
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>ContentLocation {
-    <span class="kw">pub </span>marker: ContentMarker,
-    <span class="kw">pub </span>offset: ContentOffset,
+</span><span class="kw">pub struct </span>GridLocationDescriptor {
+    <span class="kw">pub </span>marker: GridMarker,
+    <span class="kw">pub </span>bias: GridMarkerBias,
 }
-<span class="kw">impl</span>&lt;T: Into&lt;ContentMarker&gt;&gt; From&lt;(T, ContentOffset)&gt; <span class="kw">for </span>ContentLocation {
-    <span class="kw">fn </span>from(value: (T, ContentOffset)) -&gt; <span class="self">Self </span>{
-        ContentLocation {
-            marker: value.<span class="number">0</span>.into(),
-            offset: value.<span class="number">1</span>,
+<span class="kw">impl</span>&lt;T: Into&lt;GridMarker&gt;&gt; From&lt;(T, GridMarkerBias)&gt; <span class="kw">for </span>GridLocation {
+    <span class="kw">fn </span>from(value: (T, GridMarkerBias)) -&gt; <span class="self">Self </span>{
+        GridLocation {
+            location: GridLocationDescriptor {
+                marker: value.<span class="number">0</span>.into(),
+                bias: value.<span class="number">1</span>,
+            },
+            offset: <span class="prelude-val">None</span>,
         }
     }
 }
 <span class="doccomment">/// Beginning and End GridLocation grouping
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>ContentRange {
-    <span class="kw">pub </span>begin: ContentLocation,
-    <span class="kw">pub </span>end: ContentLocation,
+</span><span class="kw">pub struct </span>GridRange {
+    <span class="kw">pub </span>begin: GridLocation,
+    <span class="kw">pub </span>end: GridLocation,
 }
-<span class="kw">impl</span>&lt;T: Into&lt;ContentLocation&gt;&gt; From&lt;(T, T)&gt; <span class="kw">for </span>ContentRange {
+<span class="kw">impl</span>&lt;T: Into&lt;GridLocation&gt;&gt; From&lt;(T, T)&gt; <span class="kw">for </span>GridRange {
     <span class="kw">fn </span>from(value: (T, T)) -&gt; <span class="self">Self </span>{
-        ContentRange {
+        GridRange {
             begin: value.<span class="number">0</span>.into(),
             end: value.<span class="number">1</span>.into(),
         }
@@ -461,13 +615,13 @@
 }
 <span class="doccomment">/// A GridRange for horizontal + vertical aspects
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>ContentView {
-    <span class="kw">pub </span>horizontal: ContentRange,
-    <span class="kw">pub </span>vertical: ContentRange,
+</span><span class="kw">pub struct </span>GridView {
+    <span class="kw">pub </span>horizontal: GridRange,
+    <span class="kw">pub </span>vertical: GridRange,
 }
-<span class="kw">impl</span>&lt;T: Into&lt;ContentRange&gt;&gt; From&lt;(T, T)&gt; <span class="kw">for </span>ContentView {
+<span class="kw">impl</span>&lt;T: Into&lt;GridRange&gt;&gt; From&lt;(T, T)&gt; <span class="kw">for </span>GridView {
     <span class="kw">fn </span>from(value: (T, T)) -&gt; <span class="self">Self </span>{
-        ContentView {
+        GridView {
             horizontal: value.<span class="number">0</span>.into(),
             vertical: value.<span class="number">1</span>.into(),
         }
@@ -478,85 +632,77 @@
 </span><span class="kw">pub struct </span>ResponsiveView&lt;T&gt; {
     <span class="kw">pub </span>mapping: HashMap&lt;HorizontalSpan, T&gt;,
 }
-<span class="kw">pub type </span>ResponsiveContentView = ResponsiveView&lt;ContentView&gt;;
-<span class="kw">impl </span>ResponsiveContentView {
-    <span class="kw">pub fn </span>with_span_four&lt;T: Into&lt;ContentView&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;F&gt; ResponsiveView&lt;F&gt; {
+    <span class="kw">pub fn </span>with_span_four&lt;T: Into&lt;F&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.mapping.insert(HorizontalSpan::Four, view.into());
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>with_span_eight&lt;T: Into&lt;ContentView&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_span_eight&lt;T: Into&lt;F&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.mapping.insert(HorizontalSpan::Eight, view.into());
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>with_span_twelve&lt;T: Into&lt;ContentView&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_span_twelve&lt;T: Into&lt;F&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.mapping.insert(HorizontalSpan::Twelve, view.into());
         <span class="self">self
     </span>}
-}
-<span class="kw">impl</span>&lt;T: Into&lt;ContentView&gt;&gt; From&lt;T&gt; <span class="kw">for </span>ResponsiveContentView {
-    <span class="kw">fn </span>from(value: T) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>value = value.into();
+    <span class="kw">pub fn </span>all_same&lt;T: Into&lt;F&gt;&gt;(view: T) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>F: Clone,
+    {
+        <span class="kw">let </span>value = view.into();
         <span class="kw">let </span><span class="kw-2">mut </span>mapping = HashMap::new();
-        mapping.insert(HorizontalSpan::Four, value);
-        mapping.insert(HorizontalSpan::Eight, value);
+        mapping.insert(HorizontalSpan::Four, value.clone());
+        mapping.insert(HorizontalSpan::Eight, value.clone());
         mapping.insert(HorizontalSpan::Twelve, value);
-        ResponsiveContentView { mapping }
+        <span class="self">Self </span>{ mapping }
+    }
+    <span class="kw">pub fn </span>explicit&lt;T: Into&lt;F&gt;&gt;(four: T, eight: T, twelve: T) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>mapping = HashMap::new();
+        mapping.insert(HorizontalSpan::Four, four.into());
+        mapping.insert(HorizontalSpan::Eight, eight.into());
+        mapping.insert(HorizontalSpan::Twelve, twelve.into());
+        <span class="self">Self </span>{ mapping }
     }
 }
-<span class="kw">impl</span>&lt;T: Into&lt;ContentView&gt;&gt; From&lt;(T, T, T)&gt; <span class="kw">for </span>ResponsiveContentView {
-    <span class="kw">fn </span>from(value: (T, T, T)) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>mapping = HashMap::new();
-        mapping.insert(HorizontalSpan::Four, value.<span class="number">0</span>.into());
-        mapping.insert(HorizontalSpan::Eight, value.<span class="number">1</span>.into());
-        mapping.insert(HorizontalSpan::Twelve, value.<span class="number">2</span>.into());
-        ResponsiveContentView { mapping }
-    }
+<span class="doccomment">/// Convenience type for mapping to ContentViews
+</span><span class="kw">pub type </span>ResponsiveGridView = ResponsiveView&lt;GridView&gt;;
+<span class="kw">fn </span>update_section(
+    grid: <span class="kw-2">&amp;</span>Grid,
+    view: <span class="kw-2">&amp;</span>ResponsiveGridView,
+    pos: <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
+    area: <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
+) {
+    <span class="kw">let </span>section = grid.calc_section(view);
+    <span class="kw-2">*</span>pos = section.position;
+    <span class="kw-2">*</span>area = section.area;
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>config_grid(
     viewport_handle: Res&lt;ViewportHandle&gt;,
-    <span class="kw-2">mut </span>queries: ParamSet&lt;(
-        Query&lt;(
-            <span class="kw-2">&amp;</span>ResponsiveContentView,
-            <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
-            <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
-        )&gt;,
-        Query&lt;
-            (
-                <span class="kw-2">&amp;</span>ResponsiveContentView,
-                <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
-                <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
-            ),
-            Changed&lt;ResponsiveContentView&gt;,
-        &gt;,
+    <span class="kw-2">mut </span>responsive: Query&lt;(
+        <span class="kw-2">&amp;</span>ResponsiveGridView,
+        <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
+        <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
     )&gt;,
     <span class="kw-2">mut </span>grid: ResMut&lt;Grid&gt;,
 ) {
     <span class="kw">if </span>viewport_handle.is_changed() {
         <span class="comment">// configure grid configs + span
         </span><span class="kw-2">*</span>grid = Grid::new(viewport_handle.section.area);
-        <span class="kw">for </span>(view, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>queries.p0().iter_mut() {
-            update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
-        }
-    } <span class="kw">else </span>{
-        <span class="kw">for </span>(view, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>queries.p1().iter_mut() {
+        <span class="comment">// update all views
+        </span><span class="kw">for </span>(view, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>responsive.iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
     }
-}
-<span class="kw">fn </span>update_section(grid: <span class="kw-2">&amp;</span>Grid, view: <span class="kw-2">&amp;</span>ResponsiveContentView, pos: <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;, area: <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;) {
-    <span class="kw">let </span>section = grid.calc_section(view);
-    <span class="kw-2">*</span>pos = section.position;
-    <span class="kw-2">*</span>area = section.area;
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_from_view(
     grid: Res&lt;Grid&gt;,
     <span class="kw-2">mut </span>changed: Query&lt;
         (
-            <span class="kw-2">&amp;</span>ResponsiveContentView,
+            <span class="kw-2">&amp;</span>ResponsiveGridView,
             <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
         ),
-        Changed&lt;ResponsiveContentView&gt;,
+        Changed&lt;ResponsiveGridView&gt;,
     &gt;,
 ) {
     <span class="kw">for </span>(view, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>changed.iter_mut() {

@@ -660,7 +660,7 @@
         }
     }
 }
-<span class="kw">pub struct </span>TouchAttachment;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TouchAttachment;
 <span class="kw">impl </span>Attach <span class="kw">for </span>TouchAttachment {
     <span class="kw">fn </span>attach(engen: <span class="kw-2">&amp;mut </span>Visualizer) {
         engen.job.container.insert_resource(PrimaryTouch::new());

@@ -101,6 +101,8 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 <span class="kw">use </span>bevy_ecs::schedule::apply_system_buffers;
 
@@ -112,10 +114,11 @@
     Event,
     Initialization,
     Config,
+    PreProcessVisibility,
     Preparation,
     Spawn,
     Reconfigure,
-    ResolveVisibility,
+    PostProcessVisibility,
     Resolve,
     PushDiff,
     Finish,
@@ -148,11 +151,12 @@
             SyncPoint::Initialization,
             UserSpaceSyncPoint::Initialization,
             SyncPoint::Config,
+            SyncPoint::PreProcessVisibility,
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
             SyncPoint::Reconfigure,
-            SyncPoint::ResolveVisibility,
+            SyncPoint::PostProcessVisibility,
             SyncPoint::Resolve,
             UserSpaceSyncPoint::Resolve,
             SyncPoint::PushDiff,
@@ -166,7 +170,7 @@
             .before(SyncPoint::Reconfigure),
         apply_system_buffers
             .after(SyncPoint::Reconfigure)
-            .before(SyncPoint::ResolveVisibility),
+            .before(SyncPoint::PostProcessVisibility),
     ));
     visualizer
         .job

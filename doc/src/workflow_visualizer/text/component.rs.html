@@ -277,6 +277,13 @@
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::change_detection::Mut;
@@ -285,12 +292,12 @@
 
 <span class="kw">use crate</span>::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
-    NumericalContext, Position, ResponsiveContentView, Section, VisibleSection,
+    NumericalContext, Position, ResponsiveGridView, Section, VisibleSection,
 };
 <span class="doccomment">/// Entry point to spawn a Text element
 </span><span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>TextBundle {
-    <span class="kw">pub </span>responsive_content_view: ResponsiveContentView,
+    <span class="kw">pub </span>responsive_content_view: ResponsiveGridView,
     <span class="kw">pub </span>layer: Layer,
     <span class="kw">pub </span>text: Text,
     <span class="kw">pub </span>scale_alignment: TextScaleAlignment,
@@ -309,9 +316,9 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) section: Section&lt;InterfaceContext&gt;,
 }
 <span class="kw">impl </span>TextBundle {
-    <span class="kw">pub fn </span>new&lt;R: Into&lt;ResponsiveContentView&gt;, S: Into&lt;String&gt;, C: Into&lt;Color&gt;&gt;(
+    <span class="kw">pub fn </span>new&lt;R: Into&lt;ResponsiveGridView&gt;, S: Into&lt;String&gt;, C: Into&lt;Color&gt;, L: Into&lt;Layer&gt;&gt;(
         responsive_content_view: R,
-        layer: Layer,
+        layer: L,
         text: S,
         scale_alignment: TextScaleAlignment,
         color: C,
@@ -319,7 +326,7 @@
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             responsive_content_view: responsive_content_view.into(),
-            layer,
+            layer: layer.into(),
             text: Text(text.into()),
             scale_alignment,
             color: color.into(),
@@ -372,6 +379,11 @@
 <span class="doccomment">/// The scale of the Text
 </span><span class="attr">#[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 </span><span class="kw">pub struct </span>TextScale(<span class="kw">pub </span>u32);
+<span class="kw">impl </span>From&lt;u32&gt; <span class="kw">for </span>TextScale {
+    <span class="kw">fn </span>from(value: u32) -&gt; <span class="self">Self </span>{
+        TextScale(value)
+    }
+}
 <span class="kw">impl </span>TextScale {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>px(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
         <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>f32
@@ -401,6 +413,8 @@
     <span class="kw">pub const </span>TEXT_SCALE_ALIGNMENT_GUIDE: [u32; <span class="number">3</span>] = [<span class="number">15</span>, <span class="number">18</span>, <span class="number">22</span>];
 }
 <span class="doccomment">/// The size of a letter at an alignment
+/// This holds `Area&lt;DeviceContext&gt;` as character dimensions are
+/// scaled before rasterization to prevent visual artifacts of stretching
 </span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>TextLetterDimensions(<span class="kw">pub </span>Area&lt;DeviceContext&gt;);
 <span class="doccomment">/// where the letter is in the Text Grid

@@ -427,11 +427,15 @@
 <a href="#427" id="427">427</a>
 <a href="#428" id="428">428</a>
 <a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
 <span class="kw">use </span><span class="kw">crate</span>::grid::GridAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
 <span class="kw">use </span><span class="kw">crate</span>::orientation::OrientationAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::path::PathAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::render::{
     internal_render, invoke_render, Render, RenderPhase, RenderTaskManager, RenderTasks,
 };
@@ -442,12 +446,13 @@
     Interactor, MouseAdapter, Touch, TouchAdapter, TouchAttachment, TouchEvent, TouchType,
     TrackedTouch,
 };
+<span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::virtual_keyboard::VirtualKeyboardAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::visibility::VisibilityAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::window::WindowAttachment;
 <span class="kw">use crate</span>::{
     Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportAttachment, ViewportHandle, WindowAttachment,
-    WindowResize,
+    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
 };
 <span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -558,6 +563,7 @@
         <span class="self">self</span>.invoke_attach::&lt;WindowAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ViewportAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;GridAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;PathAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;VisibilityAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;TouchAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;FocusAttachment&gt;();

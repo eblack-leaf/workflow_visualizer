@@ -70,6 +70,7 @@
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -84,6 +85,7 @@
 <span class="kw">mod </span>grid;
 <span class="kw">mod </span>instance;
 <span class="kw">mod </span>job;
+<span class="kw">mod </span>line;
 <span class="kw">mod </span>orientation;
 <span class="kw">mod </span>path;
 <span class="kw">mod </span>render;
@@ -111,8 +113,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">pub use </span><span class="kw">crate</span>::grid::{
-    ContentLocation, ContentMarker, ContentOffset, ContentRange, ContentView, Grid, Marker,
-    MarkerGrouping, ResponsiveContentView, ResponsiveView,
+    Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias, GridRange, GridView,
+    RawMarker, RawMarkerGrouping, ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::job::{EntityName, Job};
 <span class="kw">pub use </span><span class="kw">crate</span>::request::{spawn, Request};
@@ -127,7 +129,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::touch::{TouchListener, Touchable};
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
-<span class="kw">pub use </span><span class="kw">crate</span>::window::{WindowAttachment, WindowResize};
+<span class="kw">pub use </span><span class="kw">crate</span>::window::WindowResize;
 <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
 <span class="kw">pub use </span>bevy_ecs;
@@ -137,7 +139,7 @@
 };
 <span class="kw">pub use </span>job::JobSyncPoint;
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
-<span class="kw">pub use </span>viewport::{Viewport, ViewportAttachment, ViewportHandle};
+<span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
 <span class="kw">pub use </span>wgpu;
 <span class="kw">pub use </span>winit;
