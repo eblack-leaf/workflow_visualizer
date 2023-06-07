@@ -17,6 +17,6 @@ pub(crate) fn send_event(
         *limiter = true;
     }
     for (mut t, pos, area) in text.iter_mut() {
-        *t = Text(format!("pos: {:?}, area: {:?}", pos, area));
+        *t = Text(format!("{:?}, {:?}", pos, area));
     }
 }

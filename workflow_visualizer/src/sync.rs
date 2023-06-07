@@ -9,10 +9,11 @@ pub enum SyncPoint {
     Event,
     Initialization,
     Config,
+    PreProcessVisibility,
     Preparation,
     Spawn,
     Reconfigure,
-    ResolveVisibility,
+    PostProcessVisibility,
     Resolve,
     PushDiff,
     Finish,
@@ -45,11 +46,12 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             SyncPoint::Initialization,
             UserSpaceSyncPoint::Initialization,
             SyncPoint::Config,
+            SyncPoint::PreProcessVisibility,
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
             SyncPoint::Reconfigure,
-            SyncPoint::ResolveVisibility,
+            SyncPoint::PostProcessVisibility,
             SyncPoint::Resolve,
             UserSpaceSyncPoint::Resolve,
             SyncPoint::PushDiff,
@@ -63,7 +65,7 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             .before(SyncPoint::Reconfigure),
         apply_system_buffers
             .after(SyncPoint::Reconfigure)
-            .before(SyncPoint::ResolveVisibility),
+            .before(SyncPoint::PostProcessVisibility),
     ));
     visualizer
         .job

@@ -6,12 +6,12 @@ use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
-    NumericalContext, Position, ResponsiveContentView, Section, VisibleSection,
+    NumericalContext, Position, ResponsiveGridView, Section, VisibleSection,
 };
 /// Entry point to spawn a Text element
 #[derive(Bundle)]
 pub struct TextBundle {
-    pub responsive_content_view: ResponsiveContentView,
+    pub responsive_content_view: ResponsiveGridView,
     pub layer: Layer,
     pub text: Text,
     pub scale_alignment: TextScaleAlignment,
@@ -30,7 +30,7 @@ pub struct TextBundle {
     pub(crate) section: Section<InterfaceContext>,
 }
 impl TextBundle {
-    pub fn new<R: Into<ResponsiveContentView>, S: Into<String>, C: Into<Color>, L: Into<Layer>>(
+    pub fn new<R: Into<ResponsiveGridView>, S: Into<String>, C: Into<Color>, L: Into<Layer>>(
         responsive_content_view: R,
         layer: L,
         text: S,
