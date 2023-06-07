@@ -270,41 +270,40 @@ impl<T: Into<GridRange>> From<(T, T)> for GridView {
 pub struct ResponsiveView<T> {
     pub mapping: HashMap<HorizontalSpan, T>,
 }
-/// Convenience type for mapping to ContentViews
-pub type ResponsiveGridView = ResponsiveView<GridView>;
-impl ResponsiveGridView {
-    pub fn with_span_four<T: Into<GridView>>(mut self, view: T) -> Self {
+impl<F> ResponsiveView<F> {
+    pub fn with_span_four<T: Into<F>>(mut self, view: T) -> Self {
         self.mapping.insert(HorizontalSpan::Four, view.into());
         self
     }
-    pub fn with_span_eight<T: Into<GridView>>(mut self, view: T) -> Self {
+    pub fn with_span_eight<T: Into<F>>(mut self, view: T) -> Self {
         self.mapping.insert(HorizontalSpan::Eight, view.into());
         self
     }
-    pub fn with_span_twelve<T: Into<GridView>>(mut self, view: T) -> Self {
+    pub fn with_span_twelve<T: Into<F>>(mut self, view: T) -> Self {
         self.mapping.insert(HorizontalSpan::Twelve, view.into());
         self
     }
-}
-impl<T: Into<GridView>> From<T> for ResponsiveGridView {
-    fn from(value: T) -> Self {
-        let value = value.into();
+    pub fn all_same<T: Into<F>>(view: T) -> Self
+    where
+        F: Clone,
+    {
+        let value = view.into();
         let mut mapping = HashMap::new();
-        mapping.insert(HorizontalSpan::Four, value);
-        mapping.insert(HorizontalSpan::Eight, value);
+        mapping.insert(HorizontalSpan::Four, value.clone());
+        mapping.insert(HorizontalSpan::Eight, value.clone());
         mapping.insert(HorizontalSpan::Twelve, value);
-        ResponsiveGridView { mapping }
+        Self { mapping }
     }
-}
-impl<T: Into<GridView>> From<(T, T, T)> for ResponsiveGridView {
-    fn from(value: (T, T, T)) -> Self {
+    pub fn explicit<T: Into<F>>(four: T, eight: T, twelve: T) -> Self {
         let mut mapping = HashMap::new();
-        mapping.insert(HorizontalSpan::Four, value.0.into());
-        mapping.insert(HorizontalSpan::Eight, value.1.into());
-        mapping.insert(HorizontalSpan::Twelve, value.2.into());
-        ResponsiveGridView { mapping }
+        mapping.insert(HorizontalSpan::Four, four.into());
+        mapping.insert(HorizontalSpan::Eight, eight.into());
+        mapping.insert(HorizontalSpan::Twelve, twelve.into());
+        Self { mapping }
     }
 }
+/// Convenience type for mapping to ContentViews
+pub type ResponsiveGridView = ResponsiveView<GridView>;
 fn update_section(
     grid: &Grid,
     view: &ResponsiveGridView,
@@ -317,20 +316,10 @@ fn update_section(
 }
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
-    mut queries: ParamSet<(
-        Query<(
-            &ResponsiveGridView,
-            &mut Position<InterfaceContext>,
-            &mut Area<InterfaceContext>,
-        )>,
-        Query<
-            (
-                &ResponsiveGridView,
-                &mut Position<InterfaceContext>,
-                &mut Area<InterfaceContext>,
-            ),
-            Changed<ResponsiveGridView>,
-        >,
+    mut responsive: Query<(
+        &ResponsiveGridView,
+        &mut Position<InterfaceContext>,
+        &mut Area<InterfaceContext>,
     )>,
     mut grid: ResMut<Grid>,
 ) {
@@ -338,12 +327,7 @@ pub(crate) fn config_grid(
         // configure grid configs + span
         *grid = Grid::new(viewport_handle.section.area);
         // update all views
-        for (view, mut pos, mut area) in queries.p0().iter_mut() {
-            update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
-        }
-    } else {
-        // only update changed views
-        for (view, mut pos, mut area) in queries.p1().iter_mut() {
+        for (view, mut pos, mut area) in responsive.iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
     }
