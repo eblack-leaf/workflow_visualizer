@@ -28,7 +28,7 @@ jobs:
           rustup target add wasm32-unknown-unknown
           trunk build ./application/index.html --release --public-url=/workflow_visualizer/demo/ --dist=demo
           cargo rustdoc --package workflow_visualizer
-          cargo install --locked mdbook
+          cargo install mdbook
           mdbook build -d book ./website/wv_book/
           cd ..
           rm -rf website_branch/book
@@ -36,7 +36,7 @@ jobs:
           rm -rf website_branch/doc
           mv master/demo website_branch/demo
           mv master/target/doc website_branch/doc
-          mv master/book website_branch/book
+          mv master/website/wv_book/book website_branch/book
           cd website_branch
           git add .
           git commit -m "website_push"
