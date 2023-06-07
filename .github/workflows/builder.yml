@@ -25,6 +25,7 @@ jobs:
         run: | 
           cd master
           cargo install --locked trunk
+          rustup target add wasm32-unknown-unknown
           trunk build ./application/index.html --release --public-url=/workflow_visualizer/demo/ --dist=demo
           cargo rustdoc --package workflow_visualizer
           cargo install --locked mdbook
