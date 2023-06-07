@@ -1,0 +1,42 @@
+name: Rust
+
+on:
+  push:
+    branches: [ $default-branch ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: website_branch
+          path: website_branch
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+          path: master
+      - name: Steps
+        run: | 
+          cd master
+          cargo install --locked trunk
+          trunk build ./application/index.html --release --public-url=/workflow_visualizer/demo/ --dist=demo
+          cargo rustdoc --package workflow_visualizer
+          cargo install --locked mdbook
+          mdbook build -d book ./website/wv_book/
+          cd ..
+          rm -rf website_branch/book
+          rm -rf website_branch/demo
+          rm -rf website_branch/doc
+          mv master/demo website_branch/demo
+          mv master/target/doc website_branch/doc
+          mv master/book website_branch/book
+          cd website_branch
+          git add .
+          git commit -m "website_push"
+          git push
