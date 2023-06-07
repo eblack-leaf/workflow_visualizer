@@ -39,8 +39,8 @@ pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::grid::{
-    ContentLocation, ContentMarker, ContentOffset, ContentRange, ContentView, Grid, Marker,
-    MarkerGrouping, ResponsiveContentView, ResponsiveUnit, ResponsiveView,
+    ContentBias, ContentLocation, ContentMarker, ContentRange, ContentView, Grid, Marker,
+    MarkerGrouping, RelativeUnit, ResponsiveContentView, ResponsiveUnit, ResponsiveView,
 };
 pub use crate::job::{EntityName, Job};
 pub use crate::request::{spawn, Request};

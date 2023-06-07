@@ -94,55 +94,67 @@ impl Grid {
     pub fn calc_section(&self, view: &ResponsiveContentView) -> Section<InterfaceContext> {
         let current_view = view.mapping.get(&self.span).expect("view mapping");
         let markers_per_column = self.column_config.base.0 + self.column_config.extension.0;
-        let left = match &current_view.horizontal.begin {
-            GridLocation::Raw(marker) => marker.0,
-            GridLocation::ContentAligned(content_location) => {
-                let left = content_location.marker.0 * markers_per_column
-                    + self.gutter_config.base.0 * content_location.marker.0;
-                let left = if content_location.offset == ContentOffset::Near {
-                    left - markers_per_column
-                } else {
-                    left
-                };
+        let left = {
+            let grid_location = current_view.horizontal.begin;
+            let content_location = grid_location.location;
+            let left = content_location.marker.0 * markers_per_column
+                + self.gutter_config.base.0 * content_location.marker.0;
+            let left = if content_location.bias == ContentBias::Near {
+                left - markers_per_column
+            } else {
+                left
+            };
+            if let Some(offset) = grid_location.offset {
+                left + offset.0 .0
+            } else {
                 left
             }
         };
-        let top = match &current_view.vertical.begin {
-            GridLocation::Raw(marker) => marker.0,
-            GridLocation::ContentAligned(content_location) => {
-                let top = content_location.marker.0 * self.row_config.base.0
-                    + self.gutter_config.base.0 * content_location.marker.0;
-                let top = if content_location.offset == ContentOffset::Near {
-                    top - self.row_config.base.0
-                } else {
-                    top
-                };
+        let top = {
+            let grid_location = current_view.vertical.begin;
+            let content_location = grid_location.location;
+            let top = content_location.marker.0 * self.row_config.base.0
+                + self.gutter_config.base.0 * content_location.marker.0;
+            let top = if content_location.bias == ContentBias::Near {
+                top - self.row_config.base.0
+            } else {
+                top
+            };
+            if let Some(offset) = grid_location.offset {
+                top + offset.0 .0
+            } else {
                 top
             }
         };
-        let right = match &current_view.horizontal.end {
-            GridLocation::Raw(marker) => marker.0,
-            GridLocation::ContentAligned(content_location) => {
-                let right = content_location.marker.0 * markers_per_column
-                    + self.gutter_config.base.0 * content_location.marker.0;
-                let right = if content_location.offset == ContentOffset::Near {
-                    right - markers_per_column
-                } else {
-                    right
-                };
+        let right = {
+            let grid_location = current_view.horizontal.end;
+            let content_location = grid_location.location;
+            let right = content_location.marker.0 * markers_per_column
+                + self.gutter_config.base.0 * content_location.marker.0;
+            let right = if content_location.bias == ContentBias::Near {
+                right - markers_per_column
+            } else {
+                right
+            };
+            if let Some(offset) = grid_location.offset {
+                right + offset.0 .0
+            } else {
                 right
             }
         };
-        let bottom = match &current_view.vertical.end {
-            GridLocation::Raw(marker) => marker.0,
-            GridLocation::ContentAligned(content_location) => {
-                let bottom = content_location.marker.0 * self.row_config.base.0
-                    + self.gutter_config.base.0 * content_location.marker.0;
-                let bottom = if content_location.offset == ContentOffset::Near {
-                    bottom - self.row_config.base.0
-                } else {
-                    bottom
-                };
+        let bottom = {
+            let grid_location = current_view.vertical.end;
+            let content_location = grid_location.location;
+            let bottom = content_location.marker.0 * self.row_config.base.0
+                + self.gutter_config.base.0 * content_location.marker.0;
+            let bottom = if content_location.bias == ContentBias::Near {
+                bottom - self.row_config.base.0
+            } else {
+                bottom
+            };
+            if let Some(offset) = grid_location.offset {
+                bottom + offset.0 .0
+            } else {
                 bottom
             }
         };
@@ -159,7 +171,7 @@ pub(crate) fn setup(viewport_handle: Res<ViewportHandle>, mut cmd: Commands) {
     cmd.insert_resource(grid);
 }
 /// Index of 8px alignment location
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Marker(pub i32);
 impl Marker {
     pub const PX: f32 = 8f32;
@@ -193,54 +205,55 @@ impl From<i32> for ContentMarker {
 }
 /// Whether to attach to beginning/end of column
 #[derive(PartialEq, Eq, Copy, Clone)]
-pub enum ContentOffset {
+pub enum ContentBias {
     Near,
     Far,
 }
+#[derive(Copy, Clone, PartialEq)]
+pub struct ContentOffset(pub Marker);
 /// Shorthand for specifying a GridLocation using ContentAligned
 pub trait ResponsiveUnit {
     fn near(self) -> GridLocation;
     fn far(self) -> GridLocation;
-    fn raw(self) -> GridLocation;
+}
+pub trait RelativeUnit {
+    fn relative(self, offset: i32) -> GridLocation;
+}
+impl RelativeUnit for GridLocation {
+    fn relative(mut self, offset: i32) -> GridLocation {
+        self.offset.replace(ContentOffset(offset.into()));
+        self
+    }
 }
 impl ResponsiveUnit for i32 {
     fn near(self) -> GridLocation {
-        (self, ContentOffset::Near).into()
+        (self, ContentBias::Near).into()
     }
-
     fn far(self) -> GridLocation {
-        (self, ContentOffset::Far).into()
-    }
-    fn raw(self) -> GridLocation {
-        self.into()
+        (self, ContentBias::Far).into()
     }
 }
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]
-pub enum GridLocation {
-    /// Raw markers of 8px to align to specific spots
-    Raw(Marker),
-    /// Content Aligned description with ContentMarker
-    /// and Offset
-    ContentAligned(ContentLocation),
-}
-impl<T: Into<Marker>> From<T> for GridLocation {
-    fn from(value: T) -> Self {
-        GridLocation::Raw(value.into())
-    }
+pub struct GridLocation {
+    pub location: ContentLocation,
+    pub offset: Option<ContentOffset>,
 }
 /// Pair of ContentMarker and Offset to get an exact grid location
 #[derive(Copy, Clone)]
 pub struct ContentLocation {
     pub marker: ContentMarker,
-    pub offset: ContentOffset,
+    pub bias: ContentBias,
 }
-impl<T: Into<ContentMarker>> From<(T, ContentOffset)> for GridLocation {
-    fn from(value: (T, ContentOffset)) -> Self {
-        GridLocation::ContentAligned(ContentLocation {
-            marker: value.0.into(),
-            offset: value.1,
-        })
+impl<T: Into<ContentMarker>> From<(T, ContentBias)> for GridLocation {
+    fn from(value: (T, ContentBias)) -> Self {
+        GridLocation {
+            location: ContentLocation {
+                marker: value.0.into(),
+                bias: value.1,
+            },
+            offset: None,
+        }
     }
 }
 /// Beginning and End GridLocation grouping

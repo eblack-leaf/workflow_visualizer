@@ -25,7 +25,7 @@ fn main() {
     let mut visualizer = visualizer::visualizer();
     #[cfg(not(target_family = "wasm"))]
     Runner::new()
-        .with_desktop_dimensions((600, 600))
+        .with_desktop_dimensions((400, 600))
         .native_run::<Engen>(visualizer);
     #[cfg(target_family = "wasm")]
     {
