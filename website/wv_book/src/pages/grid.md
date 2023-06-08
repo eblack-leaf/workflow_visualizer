@@ -74,3 +74,13 @@ extra layout for the `HorizontalSpan::Eight`.
 current `Span`. Similarly, `Grid.calc_horizontal_location(location)` and
 `Grid.calc_vertical_location(location)` can obtain the `RawMarker` that corresponds
 to the given location.
+
+### ResponsiveView<T>
+
+This type is the base for `ResponsiveGridView`
+
+```rust
+pub type ResponsiveGridView = ResponsiveView<GridView>;
+```
+
+Which maps a `GridView` to each `HorizontalSpan`.
