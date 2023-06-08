@@ -1,7 +1,7 @@
 /target/
 /wgpu_traces/
 /.idea/
-Cargo.lock
+./Cargo.lock
 /application/android_src/app/build/
 /application/android_src/.gradle/
 /application/android_src/app/src/main/jniLibs/
@@ -11,3 +11,5 @@ logcat.txt
 /application/android_src/app/build
 /website/public/book/
 /website/public/doc/
+/application/android_run.sh
+/application/web_build.sh

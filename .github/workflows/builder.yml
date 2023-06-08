@@ -2,7 +2,8 @@ name: builder
 
 on:
   push:
-    branches: [ "master" ]
+    tags:
+      - exec_builder
 
 env:
   CARGO_TERM_COLOR: always
