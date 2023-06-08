@@ -38,6 +38,8 @@ jobs:
           mv master/target/doc website_branch/doc
           mv master/website/wv_book/book website_branch/book
           cd website_branch
+          git config user.name eblack-leaf
+          git config user.email eblack.leaf@proton.me
           git add .
           git commit -m "website_push"
           git push

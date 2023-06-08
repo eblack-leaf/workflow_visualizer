@@ -1,11 +1,7 @@
-[alias]
-desktop_build = "build --example app"
-desktop_run = "run --example app"
-web = "run --release --example app --"
 [build]
 rustflags = [
     "--cfg=web_sys_unstable_apis"
 ]
-#[target.x86_64-unknown-linux-gnu]
+#[target.x86_64-unknown-linux-gnu] # put this in home/.cargo/.config.toml
 #linker = "clang"
 #rustflags = ["-C", "link-arg=-fuse-ld=/usr/bin/mold"]
