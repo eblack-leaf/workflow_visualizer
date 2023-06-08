@@ -145,8 +145,71 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="grid"><a class="header" href="#grid">Grid</a></h1>
-<p>The <code>Grid</code> is responsible for handling different screen sizes and giving a reliable interface
-to align to. The</p>
+<p>The <code>Grid</code> is responsible for placing elements consistently across different screen
+sizes and scales. Elements that employ the use of <code>ResponsiveGridView</code> will have the
+views defined there configured to an adaptive grid of 8px <code>Marker</code>s that mark points
+for assigning <code>Position</code>s. The <code>Viewport</code> area is divided by these <code>Marker</code>s and grouped
+to become columns/rows. The <code>ColumnConfig</code> stores a <code>base</code> <code>MarkerGrouping</code> which denotes
+how many <code>Marker</code>s are in a column. The <code>RowConfig</code> takes after the size of the column
+<code>base</code> for consistent alignment. The <code>ColumnConfig</code> also uses another <code>MarkerGrouping</code>
+for an <code>extension</code> which adds space evenly to all columns if the <code>Viewport</code> width is not
+covered by the <code>base</code> column size. Between exist <code>Gutter</code>s that help space content consistently.
+The <code>GutterConfig</code> starts small and then extends the gutter size when more screen space is
+available.</p>
+<h3 id="span"><a class="header" href="#span">Span</a></h3>
+<p>There are 3 <code>Span</code>s to the grid, each of which contains different <code>Grid</code> configuration.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum HorizontalSpan {
+    Four,
+    Eight,
+    Twelve,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>The name denotes the number of logical columns available at that size.
+The <code>Viewport</code> size determines the <code>Span</code>.</p>
+<ul>
+<li>From ~ - 720px the <code>Grid</code> uses <code>HorizontalSpan::Four</code> (Mobile)</li>
+<li>From 721px - 1168px the <code>Grid</code> uses <code>HorizontalSpan::Eight</code> (Tablet)</li>
+<li>From 1169px - ~ the <code>Grid</code> uses <code>HorizontalSpan::Twelve</code> (Desktop)</li>
+</ul>
+<p>This allows predetermined logical spacers to guide placement across a
+valid range of device sizes that need adaptive positioning. Knowing the exact
+column count instead of growing with variable columns as needed keeps the placement consistent.
+This does require that a view be specified for each <code>HorizontalSpan</code> however.</p>
+<h3 id="usage"><a class="header" href="#usage">Usage</a></h3>
+<p>To use the grid, add 'ResponsiveGridView' as a component to an entity.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>visualizer.add_entities(vec![Request::new((
+    ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.far().offset(-4)))),
+    // ... more components
+))]);
+<span class="boring">}</span></code></pre></pre>
+<p>This example sets the same view for each <code>HorizontalSpan</code> with <code>::all_same(view)</code>.
+The notation is {<code>GridMarker</code>}.{<code>GridMarkerBias</code>}(){.offset(<code>RawMarker</code>)}.
+This signifies that the <code>1</code> should be the <code>GridMarker</code> or the index of the logical grouping
+of <code>RawMarker</code>s is the first column. The <code>Column</code> has a <code>.near()</code> and a <code>.far()</code> bias.
+This can be used to latch to either side of the <code>Column</code>. An <code>.offset(...)</code> is used
+for more fine-grained positioning where just a <code>Column</code> and a <code>Bias</code> does not suffice.
+The <code>.offset(...)</code> adds a relative offset of <code>RawMarker</code> using the 8px grid points directly
+instead of a logical column/row grouping index to add to the initial marker placing.
+The points are grouped in two pairs. Horizontal begin/end and Vertical begin/end.
+This constitutes a <code>GridRange</code> when specified for <code>horizontal</code> and <code>vertical</code> it makes
+a <code>GridView</code> that can be calculated to obtain a <code>Position</code> | <code>Area</code>.</p>
+<p>This would be all that is needed except that the <code>Grid</code> has different
+column numbers at different <code>Span</code>s. Setting mobile first guidelines using the
+<code>HorizontalSpan::Four</code> and <code>::all_same(...)</code> is a good starting place and will work
+on larger <code>Span</code>s as four columns exist within 8/12. To maximize benefits of the <code>Grid</code>
+an <code>ResponsiveGridView::explicit(four, eight, twelve)</code> which defines elements using
+the entire available space should be used. If three layouts are not needed, a
+<code>ResponsiveGridView</code> can be used with <code>.with_span_eight(...)</code> to only specify an
+extra layout for the <code>HorizontalSpan::Eight</code>.</p>
+<h3 id="helpers"><a class="header" href="#helpers">Helpers</a></h3>
+<p><code>Grid.calc_section(view)</code> can be used to get the <code>Section&lt;InterfaceContext&gt;</code> for the
+current <code>Span</code>. Similarly, <code>Grid.calc_horizontal_location(location)</code> and
+<code>Grid.calc_vertical_location(location)</code> can obtain the <code>RawMarker</code> that corresponds
+to the given location.</p>
 
                     </main>
 
