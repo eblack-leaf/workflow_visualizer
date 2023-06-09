@@ -983,7 +983,8 @@ right time.</p>
 <p>When rendering on devices with a <code>ScaleFactor</code> not equal to <code>1</code>, the <code>Font</code> size is scaled before rasterization of <code>Glyph</code>s as stretching <code>Bitmap</code>s of the 
 glyph afterward to account for scaling would cause undesirable visual artifacts. <code>TextLetterDimensions</code> holds <code>Area&lt;DeviceContext&gt;</code> to illustrate that
 the letter sizes already have scaling accounted for.</p>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="visibility"><a class="header" href="#visibility">Visibility</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="line-renderer"><a class="header" href="#line-renderer">Line Renderer</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="visibility"><a class="header" href="#visibility">Visibility</a></h1>
 <p>The <code>Visibility</code> struct handles the notion of being on-screen and by what amount with <code>VisibleSection</code>.
 To enable this in an entity add the <code>EnableVisibility</code> bundle which hooks it
 into the <code>calc_visibility</code> system.
