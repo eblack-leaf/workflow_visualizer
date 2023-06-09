@@ -8,12 +8,13 @@ use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, ResponsiveGridView, Section, VisibleSection,
 };
+
 /// Entry point to spawn a Text element
 #[derive(Bundle)]
-pub struct TextBundle {
+pub struct Text {
     pub responsive_content_view: ResponsiveGridView,
     pub layer: Layer,
-    pub text: Text,
+    pub text: TextValue,
     pub scale_alignment: TextScaleAlignment,
     pub color: Color,
     pub wrap_style: TextWrapStyle,
@@ -29,7 +30,8 @@ pub struct TextBundle {
     pub(crate) text_scale: TextScale,
     pub(crate) section: Section<InterfaceContext>,
 }
-impl TextBundle {
+
+impl Text {
     pub fn new<R: Into<ResponsiveGridView>, S: Into<String>, C: Into<Color>, L: Into<Layer>>(
         responsive_content_view: R,
         layer: L,
@@ -41,7 +43,7 @@ impl TextBundle {
         Self {
             responsive_content_view: responsive_content_view.into(),
             layer: layer.into(),
-            text: Text(text.into()),
+            text: TextValue(text.into()),
             scale_alignment,
             color: color.into(),
             wrap_style,
@@ -87,9 +89,11 @@ impl Glyph {
         }
     }
 }
+
 /// The text to render
 #[derive(Component, Clone)]
-pub struct Text(pub String);
+pub struct TextValue(pub String);
+
 /// The scale of the Text
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub struct TextScale(pub u32);

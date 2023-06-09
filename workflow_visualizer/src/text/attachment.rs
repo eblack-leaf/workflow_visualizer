@@ -1,6 +1,7 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::text::component::TextBundle;
+use crate::{Attach, spawn, SyncPoint, Visualizer};
+use crate::text::component::Text;
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
 use crate::text::system::{
@@ -8,7 +9,7 @@ use crate::text::system::{
     position_diff, pull_differences, render_group_differences, resolve_draw_section_on_resize,
     scale_change, setup, visible_section_diff,
 };
-use crate::{spawn, Attach, SyncPoint, Visualizer};
+
 /// Attachment for enabling the `TextRenderer`
 pub struct TextAttachment;
 impl Attach for TextAttachment {
@@ -19,7 +20,7 @@ impl Attach for TextAttachment {
             .task(Visualizer::TASK_STARTUP)
             .add_systems((setup.in_set(SyncPoint::Initialization),));
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
-            spawn::<TextBundle>.in_set(SyncPoint::Spawn),
+            spawn::<Text>.in_set(SyncPoint::Spawn),
             scale_change.in_set(SyncPoint::Reconfigure),
             place.in_set(SyncPoint::Resolve),
             manage.in_set(SyncPoint::Resolve),

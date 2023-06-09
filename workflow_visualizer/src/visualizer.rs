@@ -1,7 +1,22 @@
+use std::fmt::{Debug, Formatter};
+
+use bevy_ecs::component::Component;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::prelude::{Bundle, IntoSystemConfig, Resource};
+use tracing::{info, trace, warn};
+use winit::dpi::{PhysicalPosition, PhysicalSize};
+use winit::event::{ElementState, MouseButton, TouchPhase};
+use winit::window::Window;
+
+use crate::{
+    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
+    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
+};
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
 use crate::job::{attempt_to_idle, Task, TaskLabel};
+use crate::line::LineAttachment;
 use crate::orientation::OrientationAttachment;
 use crate::path::PathAttachment;
 use crate::render::{
@@ -18,18 +33,6 @@ use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
-};
-use bevy_ecs::component::Component;
-use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Bundle, IntoSystemConfig, Resource};
-use std::fmt::{Debug, Formatter};
-use tracing::{info, trace, warn};
-use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{ElementState, MouseButton, TouchPhase};
-use winit::window::Window;
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
@@ -132,6 +135,7 @@ impl Visualizer {
         self.invoke_attach::<ViewportAttachment>();
         self.invoke_attach::<GridAttachment>();
         self.invoke_attach::<PathAttachment>();
+        self.invoke_attach::<LineAttachment>();
         self.invoke_attach::<VisibilityAttachment>();
         self.invoke_attach::<TouchAttachment>();
         self.invoke_attach::<FocusAttachment>();

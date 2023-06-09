@@ -1,13 +1,17 @@
 #![allow(unused, dead_code)]
+
+use tracing::Level;
+
+use workflow_visualizer::GfxOptions;
+use workflow_visualizer::Runner;
+#[cfg(target_os = "android")]
+use workflow_visualizer::winit::platform::android::activity::AndroidApp;
+
+use crate::workflow::Engen;
+
 mod system;
 mod visualizer;
 mod workflow;
-
-use crate::workflow::Engen;
-#[cfg(target_os = "android")]
-use workflow_visualizer::winit::platform::android::activity::AndroidApp;
-use workflow_visualizer::GfxOptions;
-use workflow_visualizer::Runner;
 
 #[cfg(target_os = "android")]
 #[no_mangle]
@@ -21,7 +25,7 @@ fn android_main(android_app: AndroidApp) {
 }
 fn main() {
     #[cfg(not(target_family = "wasm"))]
-    tracing_subscriber::fmt().init();
+    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
     let mut visualizer = visualizer::visualizer();
     #[cfg(not(target_family = "wasm"))]
     Runner::new()

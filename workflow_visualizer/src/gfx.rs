@@ -1,8 +1,10 @@
-use bevy_ecs::prelude::Resource;
 use std::fmt::{Debug, Formatter};
+
+use bevy_ecs::prelude::Resource;
 use tracing::{info, instrument, trace, warn};
 use wgpu::TextureView;
 use winit::window::Window;
+
 /// Options for instantiating the Gfx module
 #[derive(Clone)]
 pub struct GfxOptions {
@@ -225,6 +227,12 @@ impl MsaaRenderAdapter {
     }
     pub fn view(&self) -> Option<&TextureView> {
         self.view.as_ref()
+    }
+    pub fn multisample_state(&self) -> wgpu::MultisampleState {
+        wgpu::MultisampleState {
+            count: self.requested(),
+            ..wgpu::MultisampleState::default()
+        }
     }
     pub(crate) fn new(
         gfx_surface: &GfxSurface,

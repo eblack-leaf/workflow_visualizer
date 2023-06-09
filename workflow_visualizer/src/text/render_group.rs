@@ -2,16 +2,16 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::Component;
 
+use crate::{
+    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
+    RawArea, RawPosition, Section, Uniform, VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReferences, AtlasGlyphs, AtlasTextureDimensions, AtlasWriteQueue, TextureCoordinates,
 };
-use crate::text::component::{GlyphId, Text, TextScaleAlignment};
-use crate::{
-    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
-};
+use crate::text::component::{GlyphId, TextScaleAlignment, TextValue};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq, Component)]
@@ -102,7 +102,7 @@ pub(crate) struct RenderGroupUniqueGlyphs {
 }
 
 impl RenderGroupUniqueGlyphs {
-    pub(crate) fn from_text(text: &Text) -> Self {
+    pub(crate) fn from_text(text: &TextValue) -> Self {
         let length = text.0.len();
         Self {
             unique_glyphs: length.min(1024) as u32,

@@ -1,10 +1,17 @@
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
-use crate::{Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer, WindowResize};
+use std::collections::HashMap;
+
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{Commands, DetectChanges, EventReader, IntoSystemConfig, ParamSet, Query, Res, Resource};
+use bevy_ecs::prelude::{
+    Commands, DetectChanges, EventReader, IntoSystemConfig, ParamSet, Query, Res, Resource,
+};
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
-use std::collections::HashMap;
+
+use crate::{
+    Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
+    WindowResize,
+};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
 pub enum HorizontalSpan {
@@ -104,16 +111,12 @@ impl Grid {
             let grid_location = current_view.vertical.end;
             self.calc_vertical_location(grid_location)
         };
-        let left = left as f32 * RawMarker::PX;
-        let top = top as f32 * RawMarker::PX;
-        let right = right as f32 * RawMarker::PX;
-        let bottom = bottom as f32 * RawMarker::PX;
-        Section::from_left_top_right_bottom(left, top, right, bottom)
+        Section::from_left_top_right_bottom(left.to_pixel(), top.to_pixel(), right.to_pixel(), bottom.to_pixel())
     }
     pub fn markers_per_column(&self) -> i32 {
         self.column_config.base.0 + self.column_config.extension.0
     }
-    pub fn calc_horizontal_location(&self, grid_location: GridLocation) -> i32 {
+    pub fn calc_horizontal_location(&self, grid_location: GridLocation) -> RawMarker {
         let markers_per_column = self.markers_per_column();
         let content_location = grid_location.location;
         let location = content_location.marker.0 * markers_per_column
@@ -123,13 +126,14 @@ impl Grid {
         } else {
             location
         };
-        if let Some(offset) = grid_location.offset {
-            location + offset.0 .0
+        let location = if let Some(offset) = grid_location.offset {
+            location + offset.0.0
         } else {
             location
-        }
+        };
+        location.into()
     }
-    pub fn calc_vertical_location(&self, grid_location: GridLocation) -> i32 {
+    pub fn calc_vertical_location(&self, grid_location: GridLocation) -> RawMarker {
         let content_location = grid_location.location;
         let location = content_location.marker.0 * self.row_config.base.0
             + self.gutter_config.base.0 * content_location.marker.0;
@@ -138,11 +142,12 @@ impl Grid {
         } else {
             location
         };
-        if let Some(offset) = grid_location.offset {
-            location + offset.0 .0
+        let location = if let Some(offset) = grid_location.offset {
+            location + offset.0.0
         } else {
             location
-        }
+        };
+        location.into()
     }
 }
 pub(crate) fn setup(viewport_handle: Res<ViewportHandle>, mut cmd: Commands) {
@@ -155,6 +160,9 @@ pub(crate) fn setup(viewport_handle: Res<ViewportHandle>, mut cmd: Commands) {
 pub struct RawMarker(pub i32);
 impl RawMarker {
     pub const PX: f32 = 8f32;
+    pub fn to_pixel(&self) -> f32 {
+        self.0 as f32 * Self::PX
+    }
 }
 impl From<i32> for RawMarker {
     fn from(value: i32) -> Self {

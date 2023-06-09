@@ -1,23 +1,49 @@
-use crate::grid::{config_grid, HorizontalSpan};
+use std::collections::HashMap;
+
+use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
+
 use crate::{
     Area, Attach, Grid, GridLocation, InterfaceContext, Position, RawMarker, ResponsiveView,
     SyncPoint, Visualizer,
 };
-use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
-use std::collections::HashMap;
+use crate::grid::{config_grid, HorizontalSpan};
 
 #[derive(Component, Clone)]
 pub struct Path {
     pub points: Vec<Position<InterfaceContext>>,
 }
+
+impl Path {
+    pub(crate) fn new(points: Vec<Position<InterfaceContext>>) -> Path {
+        Self { points }
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct PathViewPoint {
     pub x: GridLocation,
     pub y: GridLocation,
 }
+
+impl<T: Into<GridLocation>> From<(T, T)> for PathViewPoint {
+    fn from(value: (T, T)) -> Self {
+        Self {
+            x: value.0.into(),
+            y: value.1.into(),
+        }
+    }
+}
 #[derive(Clone, Component)]
 pub struct PathView {
     pub points: Vec<PathViewPoint>,
+}
+
+impl From<Vec<PathViewPoint>> for PathView {
+    fn from(value: Vec<PathViewPoint>) -> Self {
+        Self {
+            points: value
+        }
+    }
 }
 pub type ResponsivePathView = ResponsiveView<PathView>;
 pub(crate) fn grid_updated_path(
@@ -47,7 +73,7 @@ fn update_path(grid: &Grid, view: &ResponsiveView<PathView>, path: &mut Path) {
     for point in current_view.points.iter() {
         let x = grid.calc_horizontal_location(point.x);
         let y = grid.calc_vertical_location(point.y);
-        path.points.push((x, y).into());
+        path.points.push((x.to_pixel(), y.to_pixel()).into());
     }
 }
 pub(crate) struct PathAttachment;

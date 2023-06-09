@@ -1,11 +1,12 @@
-use crate::workflow::{Engen, TokenName};
+use workflow_visualizer::{Area, InterfaceContext, Position, Sender, TextValue, Workflow};
 use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
-use workflow_visualizer::{Area, InterfaceContext, Position, Sender, Text, Workflow};
+
+use crate::workflow::{Engen, TokenName};
 
 pub(crate) fn send_event(
     sender: NonSend<Sender<Engen>>,
     mut text: Query<(
-        &mut Text,
+        &mut TextValue,
         &Position<InterfaceContext>,
         &Area<InterfaceContext>,
     )>,
@@ -17,6 +18,6 @@ pub(crate) fn send_event(
         *limiter = true;
     }
     for (mut t, pos, area) in text.iter_mut() {
-        *t = Text(format!("{:?}, {:?}", pos, area));
+        *t = TextValue(format!("{:?}, {:?}", pos, area));
     }
 }

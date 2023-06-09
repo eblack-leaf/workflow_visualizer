@@ -1,10 +1,7 @@
-use crate::system;
+use workflow_visualizer::{Area, Color, Focus, FocusInputListener, GfxOptions, GridMarkerBias, Layer, Line, PathViewPoint, Position, Request, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
-use workflow_visualizer::{
-    Area, Color, Focus, FocusInputListener, GfxOptions, GridMarkerBias, Layer, Position, Request,
-    ResponsiveGridView, ResponsiveUnit, TextBundle, TextScaleAlignment, TextWrapStyle, Theme,
-    ThemeDescriptor, TouchListener, Touchable, UserSpaceSyncPoint, Visualizer,
-};
+
+use crate::system;
 
 pub fn visualizer() -> Visualizer {
     let theme_desc = ThemeDescriptor::new().with_background(Color::DARK_CYAN);
@@ -12,19 +9,19 @@ pub fn visualizer() -> Visualizer {
     visualizer
         .job
         .task(Visualizer::TASK_MAIN)
-        .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process),));
-    visualizer.add_entities(vec![Request::new(TextBundle::new(
+        .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process), ));
+    visualizer.add_entities(vec![Request::new(Text::new(
         ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.far().offset(-4)))),
-        1,
+        4,
         "hello",
         TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
         Color::GREEN,
         TextWrapStyle::word(),
     ))]);
     visualizer.add_entities(vec![(
-        Request::new(TextBundle::new(
-            ResponsiveGridView::all_same(((1.near(), 4.far()), (1.far().offset(-3), 2.far()))),
-            1,
+        Request::new(Text::new(
+            ResponsiveGridView::all_same(((1.near(), 4.far()), (1.far().offset(-2), 2.far()))),
+            3,
             "world.",
             TextScaleAlignment::Small,
             Color::GREEN,
@@ -33,6 +30,12 @@ pub fn visualizer() -> Visualizer {
         Touchable::new(TouchListener::on_press()),
         Focus::new(),
         FocusInputListener {},
+    )]);
+    visualizer.add_entities(vec![(
+        Line::new(ResponsivePathView::all_same(vec![
+            (1.near(), 1.far().offset(-3)).into(),
+            (4.far(), 1.far().offset(-3)).into(),
+        ]), 1, Color::MEDIUM_GREEN),
     )]);
     visualizer
 }
