@@ -42,6 +42,7 @@ impl LineRender {
         if let Some(position) = cpu.get_mut(self.head) {
             *position = pos;
         }
+        // TODO need to trigger GPU write somehow maybe moving this out to a system with component hook
     }
     pub fn set_tail_value(
         &mut self,
@@ -51,6 +52,7 @@ impl LineRender {
         if let Some(position) = cpu.get_mut(self.tail) {
             *position = pos;
         }
+        // TODO need to trigger GPU write somehow maybe moving this out to a system with component hook
     }
     pub fn adjust_head(&mut self, amount: usize, towards_tail: bool) {
         if towards_tail {

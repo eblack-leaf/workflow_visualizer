@@ -24,14 +24,13 @@ aligning style to meet functionality.
 
 ### Usage
 
-To spawn a `Text` element, use the `TextBundle` 
+To spawn a `Text` element, use the `Text`
 
 ```rust
-pub struct TextBundle {
-    pub pos: Position<InterfaceContext>,
-    pub area: Area<InterfaceContext>,
+pub struct Text {
+    pub responsive_content_view: ResponsiveGridView,
     pub layer: Layer,
-    pub text: Text,
+    pub text: TextValue,
     pub scale_alignment: TextScaleAlignment,
     pub color: Color,
     pub wrap_style: TextWrapStyle,
@@ -45,7 +44,7 @@ the gpu minimal. Wrap this bundle in a `Request` to ensure it gets spawned at th
 right time.
 
 ```rust
-visualizer.add_entities(vec![Request::new(TextBundle::new(...))]);
+visualizer.add_entities(vec![Request::new(Text::new(...))]);
 ```
 
 ### Alignments
