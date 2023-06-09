@@ -1,4 +1,5 @@
 use bevy_ecs::prelude::Component;
+
 /// RGBA colors
 #[repr(C)]
 #[derive(Component, bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, PartialEq)]
@@ -17,7 +18,7 @@ impl Default for Color {
 
 impl Color {
     pub const WHITE: (f32, f32, f32) = (1.0, 1.0, 1.0);
-    pub const DARK_ORANGE: (f32, f32, f32) = (0.065, 0.025, 0.00);
+    pub const DARK_ORANGE: (f32, f32, f32) = (0.035, 0.0125, 0.00);
     pub const DARK_CYAN: (f32, f32, f32) = (0.0, 0.025, 0.0125);
     pub const CYAN: (f32, f32, f32) = (0.0, 0.75, 0.35);
     pub const CYAN_MEDIUM: (f32, f32, f32) = (0.0, 0.45, 0.145);
@@ -26,9 +27,9 @@ impl Color {
     pub const BLACK: (f32, f32, f32) = (0.0, 0.0, 0.0);
     pub const RED: (f32, f32, f32) = (0.8, 0.01, 0.01);
     pub const RED_ORANGE: (f32, f32, f32) = (0.6, 0.15, 0.15);
-    pub const GREEN: (f32, f32, f32) = (0.01, 0.8, 0.01);
-    pub const MEDIUM_GREEN: (f32, f32, f32) = (0.01, 0.6, 0.01);
-    pub const DARK_GREEN: (f32, f32, f32) = (0.01, 0.4, 0.01);
+    pub const GREEN: (f32, f32, f32) = (0.01, 0.7, 0.01);
+    pub const MEDIUM_GREEN: (f32, f32, f32) = (0.001, 0.36, 0.001);
+    pub const DARK_GREEN: (f32, f32, f32) = (0.0001, 0.004, 0.0001);
     pub const BLUE_DARK: (f32, f32, f32) = (0.0, 0.05, 0.10);
     pub const BLUE: (f32, f32, f32) = (0.1, 0.1, 0.9);
     pub const OFF_BLACK: (f32, f32, f32) = (0.005, 0.005, 0.005);

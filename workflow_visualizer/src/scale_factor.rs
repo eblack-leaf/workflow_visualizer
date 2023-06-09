@@ -9,6 +9,9 @@ impl ScaleFactor {
     pub(crate) fn new(factor: f64) -> Self {
         Self { factor }
     }
+    pub fn factor(&self) -> f64 {
+        self.factor
+    }
 }
 
 impl From<f64> for ScaleFactor {

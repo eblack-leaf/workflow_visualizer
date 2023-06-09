@@ -9,7 +9,7 @@ use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 use crate::system;
 
 pub fn visualizer() -> Visualizer {
-    let theme_desc = ThemeDescriptor::new().with_background(Color::DARK_CYAN);
+    let theme_desc = ThemeDescriptor::new().with_background(Color::DARK_GREEN);
     let mut visualizer = Visualizer::new(Theme::new(theme_desc), GfxOptions::native_defaults());
     visualizer
         .job
@@ -20,7 +20,7 @@ pub fn visualizer() -> Visualizer {
         4,
         "hello",
         TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
-        Color::GREEN,
+        Color::MEDIUM_GREEN,
         TextWrapStyle::word(),
     ))]);
     visualizer.add_entities(vec![(
@@ -29,7 +29,7 @@ pub fn visualizer() -> Visualizer {
             3,
             "world.",
             TextScaleAlignment::Small,
-            Color::GREEN,
+            Color::MEDIUM_GREEN,
             TextWrapStyle::word(),
         )),
         Touchable::new(TouchListener::on_press()),

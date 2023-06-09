@@ -1,4 +1,4 @@
-use workflow_visualizer::{Area, InterfaceContext, Position, Sender, TextValue, Workflow};
+use workflow_visualizer::{Area, InterfaceContext, Position, ScaleFactor, Sender, TextValue, Workflow};
 use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
 
 use crate::workflow::{Engen, TokenName};
@@ -11,6 +11,7 @@ pub(crate) fn send_event(
         &Area<InterfaceContext>,
     )>,
     mut limiter: Local<bool>,
+    scale_factor: Res<ScaleFactor>,
 ) {
     if !*limiter {
         let action = <Engen as Workflow>::Action::GenerateOtp(TokenName("not there".to_string()));
@@ -18,6 +19,6 @@ pub(crate) fn send_event(
         *limiter = true;
     }
     for (mut t, pos, area) in text.iter_mut() {
-        *t = TextValue(format!("{:?}, {:?}", pos, area));
+        *t = TextValue(format!("{:?}, {:?}", pos.to_device(scale_factor.factor()), area.to_device(scale_factor.factor())));
     }
 }
