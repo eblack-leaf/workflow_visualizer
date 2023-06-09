@@ -4,7 +4,10 @@ use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use tracing::trace;
 use wgpu::util::DeviceExt;
 
-use crate::{Color, DeviceContext, GfxSurface, Layer, Position, RawPosition, Render, RenderPassHandle, RenderPhase, Uniform, Viewport};
+use crate::{
+    Color, DeviceContext, GfxSurface, Layer, Position, RawPosition, Render, RenderPassHandle,
+    RenderPhase, Uniform, Viewport,
+};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 
 pub(crate) struct LineRenderGroup {
@@ -215,7 +218,13 @@ impl LineRenderGpu {
                 .device
                 .create_buffer_init(&wgpu::util::BufferInitDescriptor {
                     label: Some("line render gpu buffer"),
-                    contents: bytemuck::cast_slice(points.iter().map(|p| p.as_raw()).collect::<Vec<RawPosition>>().as_slice()),
+                    contents: bytemuck::cast_slice(
+                        points
+                            .iter()
+                            .map(|p| p.as_raw())
+                            .collect::<Vec<RawPosition>>()
+                            .as_slice(),
+                    ),
                     usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                 }),
         }

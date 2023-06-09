@@ -1,4 +1,9 @@
-use workflow_visualizer::{Area, Color, Focus, FocusInputListener, GfxOptions, GridMarkerBias, Layer, Line, PathViewPoint, Position, Request, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint, Visualizer};
+use workflow_visualizer::{
+    Area, Color, Focus, FocusInputListener, GfxOptions, GridMarkerBias, Layer, Line, PathViewPoint,
+    Position, Request, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text,
+    TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener,
+    UserSpaceSyncPoint, Visualizer,
+};
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::system;
@@ -31,11 +36,13 @@ pub fn visualizer() -> Visualizer {
         Focus::new(),
         FocusInputListener {},
     )]);
-    visualizer.add_entities(vec![(
-        Line::new(ResponsivePathView::all_same(vec![
+    visualizer.add_entities(vec![(Line::new(
+        ResponsivePathView::all_same(vec![
             (1.near(), 1.far().offset(-3)).into(),
             (4.far(), 1.far().offset(-3)).into(),
-        ]), 1, Color::MEDIUM_GREEN),
-    )]);
+        ]),
+        1,
+        Color::MEDIUM_GREEN,
+    ), )]);
     visualizer
 }

@@ -111,7 +111,12 @@ impl Grid {
             let grid_location = current_view.vertical.end;
             self.calc_vertical_location(grid_location)
         };
-        Section::from_left_top_right_bottom(left.to_pixel(), top.to_pixel(), right.to_pixel(), bottom.to_pixel())
+        Section::from_left_top_right_bottom(
+            left.to_pixel(),
+            top.to_pixel(),
+            right.to_pixel(),
+            bottom.to_pixel(),
+        )
     }
     pub fn markers_per_column(&self) -> i32 {
         self.column_config.base.0 + self.column_config.extension.0

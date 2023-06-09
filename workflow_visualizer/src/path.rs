@@ -40,9 +40,7 @@ pub struct PathView {
 
 impl From<Vec<PathViewPoint>> for PathView {
     fn from(value: Vec<PathViewPoint>) -> Self {
-        Self {
-            points: value
-        }
+        Self { points: value }
     }
 }
 pub type ResponsivePathView = ResponsiveView<PathView>;

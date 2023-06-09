@@ -57,10 +57,7 @@ pub(crate) fn create_render_group(
             &gfx,
             &line_renderer.bind_group_layout,
         );
-        line_renderer.render_groups.insert(
-            entity,
-            render_group,
-        );
+        line_renderer.render_groups.insert(entity, render_group);
     }
 }
 
