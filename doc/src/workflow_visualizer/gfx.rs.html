@@ -266,11 +266,21 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
-</pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Resource;
-<span class="kw">use </span>std::fmt::{Debug, Formatter};
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+</pre><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
+
+<span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>tracing::{info, instrument, trace, warn};
 <span class="kw">use </span>wgpu::TextureView;
 <span class="kw">use </span>winit::window::Window;
+
 <span class="doccomment">/// Options for instantiating the Gfx module
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>GfxOptions {
@@ -493,6 +503,12 @@
     }
     <span class="kw">pub fn </span>view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TextureView&gt; {
         <span class="self">self</span>.view.as_ref()
+    }
+    <span class="kw">pub fn </span>multisample_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wgpu::MultisampleState {
+        wgpu::MultisampleState {
+            count: <span class="self">self</span>.requested(),
+            ..wgpu::MultisampleState::default()
+        }
     }
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         gfx_surface: <span class="kw-2">&amp;</span>GfxSurface,

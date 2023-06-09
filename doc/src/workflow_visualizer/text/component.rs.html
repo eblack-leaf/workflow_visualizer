@@ -284,6 +284,10 @@
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::change_detection::Mut;
@@ -294,12 +298,13 @@
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, ResponsiveGridView, Section, VisibleSection,
 };
+
 <span class="doccomment">/// Entry point to spawn a Text element
 </span><span class="attr">#[derive(Bundle)]
-</span><span class="kw">pub struct </span>TextBundle {
+</span><span class="kw">pub struct </span>Text {
     <span class="kw">pub </span>responsive_content_view: ResponsiveGridView,
     <span class="kw">pub </span>layer: Layer,
-    <span class="kw">pub </span>text: Text,
+    <span class="kw">pub </span>text: TextValue,
     <span class="kw">pub </span>scale_alignment: TextScaleAlignment,
     <span class="kw">pub </span>color: Color,
     <span class="kw">pub </span>wrap_style: TextWrapStyle,
@@ -315,7 +320,8 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) text_scale: TextScale,
     <span class="kw">pub</span>(<span class="kw">crate</span>) section: Section&lt;InterfaceContext&gt;,
 }
-<span class="kw">impl </span>TextBundle {
+
+<span class="kw">impl </span>Text {
     <span class="kw">pub fn </span>new&lt;R: Into&lt;ResponsiveGridView&gt;, S: Into&lt;String&gt;, C: Into&lt;Color&gt;, L: Into&lt;Layer&gt;&gt;(
         responsive_content_view: R,
         layer: L,
@@ -327,7 +333,7 @@
         <span class="self">Self </span>{
             responsive_content_view: responsive_content_view.into(),
             layer: layer.into(),
-            text: Text(text.into()),
+            text: TextValue(text.into()),
             scale_alignment,
             color: color.into(),
             wrap_style,
@@ -373,9 +379,11 @@
         }
     }
 }
+
 <span class="doccomment">/// The text to render
 </span><span class="attr">#[derive(Component, Clone)]
-</span><span class="kw">pub struct </span>Text(<span class="kw">pub </span>String);
+</span><span class="kw">pub struct </span>TextValue(<span class="kw">pub </span>String);
+
 <span class="doccomment">/// The scale of the Text
 </span><span class="attr">#[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 </span><span class="kw">pub struct </span>TextScale(<span class="kw">pub </span>u32);

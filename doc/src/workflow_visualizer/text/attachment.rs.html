@@ -42,9 +42,11 @@
 <a href="#42" id="42">42</a>
 <a href="#43" id="43">43</a>
 <a href="#44" id="44">44</a>
+<a href="#45" id="45">45</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
-<span class="kw">use </span><span class="kw">crate</span>::text::component::TextBundle;
+<span class="kw">use crate</span>::{Attach, spawn, SyncPoint, Visualizer};
+<span class="kw">use </span><span class="kw">crate</span>::text::component::Text;
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer;
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer::TextRenderer;
 <span class="kw">use </span><span class="kw">crate</span>::text::system::{
@@ -52,7 +54,7 @@
     position_diff, pull_differences, render_group_differences, resolve_draw_section_on_resize,
     scale_change, setup, visible_section_diff,
 };
-<span class="kw">use crate</span>::{spawn, Attach, SyncPoint, Visualizer};
+
 <span class="doccomment">/// Attachment for enabling the `TextRenderer`
 </span><span class="kw">pub struct </span>TextAttachment;
 <span class="kw">impl </span>Attach <span class="kw">for </span>TextAttachment {
@@ -63,7 +65,7 @@
             .task(Visualizer::TASK_STARTUP)
             .add_systems((setup.in_set(SyncPoint::Initialization),));
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
-            spawn::&lt;TextBundle&gt;.in_set(SyncPoint::Spawn),
+            spawn::&lt;Text&gt;.in_set(SyncPoint::Spawn),
             scale_change.in_set(SyncPoint::Reconfigure),
             place.in_set(SyncPoint::Resolve),
             manage.in_set(SyncPoint::Resolve),

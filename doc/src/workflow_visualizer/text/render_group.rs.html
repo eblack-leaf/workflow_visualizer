@@ -143,16 +143,16 @@
 
 <span class="kw">use </span>bevy_ecs::prelude::Component;
 
+<span class="kw">use crate</span>::{
+    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
+    RawArea, RawPosition, Section, Uniform, VisibleSection,
+};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{
     Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
     AtlasGlyphReferences, AtlasGlyphs, AtlasTextureDimensions, AtlasWriteQueue, TextureCoordinates,
 };
-<span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, Text, TextScaleAlignment};
-<span class="kw">use crate</span>::{
-    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
-};
+<span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextScaleAlignment, TextValue};
 
 <span class="attr">#[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq, Component)]
@@ -243,7 +243,7 @@
 }
 
 <span class="kw">impl </span>RenderGroupUniqueGlyphs {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_text(text: <span class="kw-2">&amp;</span>Text) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_text(text: <span class="kw-2">&amp;</span>TextValue) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>length = text.<span class="number">0</span>.len();
         <span class="self">Self </span>{
             unique_glyphs: length.min(<span class="number">1024</span>) <span class="kw">as </span>u32,

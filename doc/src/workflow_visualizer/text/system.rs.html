@@ -741,6 +741,11 @@
 <span class="kw">use </span>fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 <span class="kw">use </span>tracing::{trace, warn};
 
+<span class="kw">use crate</span>::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::instance::key::KeyFactory;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{
@@ -749,9 +754,9 @@
     AtlasTextureDimensions, AtlasWriteQueue, Bitmap, TextureCoordinates,
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{
-    Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, Text,
-    TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
-    TextScaleAlignment, TextWrapStyle,
+    Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, TextGridLocation,
+    TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextScaleAlignment,
+    TextValue, TextWrapStyle,
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::font::{AlignedFonts, MonoSpacedFont};
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{
@@ -760,11 +765,6 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer::{Extraction, TextRenderer};
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowResize;
-<span class="kw">use crate</span>::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(scale_factor: Res&lt;ScaleFactor&gt;, <span class="kw-2">mut </span>cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -775,7 +775,7 @@
         (
             <span class="kw-2">&amp;mut </span>Placer,
             <span class="kw-2">&amp;mut </span>Placement,
-            <span class="kw-2">&amp;</span>Text,
+            <span class="kw-2">&amp;</span>TextValue,
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>TextWrapStyle,
             <span class="kw-2">&amp;</span>TextScale,
@@ -783,7 +783,7 @@
         ),
         Or&lt;(
             Changed&lt;Area&lt;InterfaceContext&gt;&gt;,
-            Changed&lt;Text&gt;,
+            Changed&lt;TextValue&gt;,
             Changed&lt;TextScale&gt;,
         )&gt;,
     &gt;,
@@ -890,7 +890,7 @@
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>TextLetterDimensions,
         ),
-        Or&lt;(Changed&lt;Text&gt;, Changed&lt;VisibleSection&gt;)&gt;,
+        Or&lt;(Changed&lt;TextValue&gt;, Changed&lt;VisibleSection&gt;)&gt;,
     &gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
@@ -971,7 +971,7 @@
         (
             Entity,
             <span class="kw-2">&amp;</span>Visibility,
-            <span class="kw-2">&amp;</span>Text,
+            <span class="kw-2">&amp;</span>TextValue,
             <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>VisibleSection,
             <span class="kw-2">&amp;</span>Layer,
@@ -980,9 +980,9 @@
             <span class="kw-2">&amp;mut </span>Cache,
             <span class="kw-2">&amp;mut </span>Difference,
         ),
-        Or&lt;(Changed&lt;Visibility&gt;, Added&lt;Text&gt;, Changed&lt;TextScale&gt;)&gt;,
+        Or&lt;(Changed&lt;Visibility&gt;, Added&lt;TextValue&gt;, Changed&lt;TextScale&gt;)&gt;,
     &gt;,
-    <span class="kw-2">mut </span>removed: RemovedComponents&lt;Text&gt;,
+    <span class="kw-2">mut </span>removed: RemovedComponents&lt;TextValue&gt;,
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,
     fonts: Res&lt;AlignedFonts&gt;,
 ) {
