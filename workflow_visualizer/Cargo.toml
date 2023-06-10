@@ -4,7 +4,8 @@ version = "0.1.1"
 edition = "2021"
 resolver = "2"
 
-
+[features]
+diagnostics = []
 
 [dependencies]
 winit = { version = "0.28.6", features = ["android-game-activity"]}

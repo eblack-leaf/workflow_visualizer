@@ -48,13 +48,14 @@ visualizer.add_entities(vec![Request::new((
 ```
 
 This example sets the same view for each `HorizontalSpan` with `::all_same(view)`.
-The notation is {`GridMarker`}.{`GridMarkerBias`}(){.offset(`RawMarker`)}.
+The notation is {`GridMarker`}.{`GridMarkerBias`}(){.raw/column_offset(`RawMarker/Column|RowMarker`)}.
 This signifies that the `1` should be the `GridMarker` or the index of the logical grouping
 of `RawMarker`s is the first column. The `Column` has a `.near()` and a `.far()` bias.
 This can be used to latch to either side of the `Column`. An `.offset(...)` is used
 for more fine-grained positioning where just a `Column` and a `Bias` does not suffice.
-The `.offset(...)` adds a relative offset of `RawMarker` using the 8px grid points directly
-instead of a logical column/row grouping index to add to the initial marker placing.
+The `.raw_offset(...)` adds a relative offset of `RawMarker` using the 8px grid points directly
+instead of a logical column/row grouping index to add to the initial marker placing. Adjusting
+a view's logical column/row grouping index can be accomplished using `.column_offset(...)` on a `GridLocation`.
 The points are grouped in two pairs. Horizontal begin/end and Vertical begin/end.
 This constitutes a `GridRange` when specified for `horizontal` and `vertical` it makes
 a `GridView` that can be calculated to obtain a `Position` | `Area`.

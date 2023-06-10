@@ -16,20 +16,20 @@ pub fn visualizer() -> Visualizer {
         .task(Visualizer::TASK_MAIN)
         .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process), ));
     visualizer.add_entities(vec![Request::new(Text::new(
-        ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.far().offset(-4)))),
+        ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.far().raw_offset(-4)))),
         4,
         "hello",
         TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
-        Color::MEDIUM_GREEN,
+        Color::RED_ORANGE,
         TextWrapStyle::word(),
     ))]);
     visualizer.add_entities(vec![(
         Request::new(Text::new(
-            ResponsiveGridView::all_same(((1.near(), 4.far()), (1.far().offset(-2), 2.far()))),
+            ResponsiveGridView::all_same(((1.near(), 4.far()), (1.far().raw_offset(-2), 2.far()))),
             3,
             "world.",
             TextScaleAlignment::Small,
-            Color::MEDIUM_GREEN,
+            Color::RED_ORANGE,
             TextWrapStyle::word(),
         )),
         Touchable::new(TouchListener::on_press()),
@@ -38,11 +38,11 @@ pub fn visualizer() -> Visualizer {
     )]);
     visualizer.add_entities(vec![(Line::new(
         ResponsivePathView::all_same(vec![
-            (1.near(), 1.far().offset(-3)).into(),
-            (4.far(), 1.far().offset(-3)).into(),
+            (1.near(), 1.far().raw_offset(-3)).into(),
+            (4.far(), 1.far().raw_offset(-3)).into(),
         ]),
         1,
-        Color::MEDIUM_GREEN,
+        Color::RED_ORANGE,
     ), )]);
     visualizer
 }

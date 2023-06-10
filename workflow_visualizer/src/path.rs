@@ -8,6 +8,7 @@ use crate::{
 };
 use crate::grid::{config_grid, HorizontalSpan};
 
+/// Collection of specific points rendered from a PathView
 #[derive(Component, Clone)]
 pub struct Path {
     pub points: Vec<Position<InterfaceContext>>,
@@ -19,6 +20,7 @@ impl Path {
     }
 }
 
+/// Point in a PathView with x/y as GridLocations
 #[derive(Copy, Clone)]
 pub struct PathViewPoint {
     pub x: GridLocation,
@@ -33,6 +35,8 @@ impl<T: Into<GridLocation>> From<(T, T)> for PathViewPoint {
         }
     }
 }
+
+/// Collection of PathViewPoints
 #[derive(Clone, Component)]
 pub struct PathView {
     pub points: Vec<PathViewPoint>,
@@ -43,6 +47,8 @@ impl From<Vec<PathViewPoint>> for PathView {
         Self { points: value }
     }
 }
+
+/// Responsive Mapping for PathView
 pub type ResponsivePathView = ResponsiveView<PathView>;
 pub(crate) fn grid_updated_path(
     grid: Res<Grid>,

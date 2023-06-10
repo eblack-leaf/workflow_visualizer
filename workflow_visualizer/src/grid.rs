@@ -1,19 +1,21 @@
 use std::collections::HashMap;
+use std::ops::Add;
 
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{
-    Commands, DetectChanges, EventReader, IntoSystemConfig, ParamSet, Query, Res, Resource,
-};
+use bevy_ecs::prelude::{Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource};
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
+use tracing::trace;
 
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
+use crate::diagnostics::{DiagnosticsHandle, Record};
 use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
-#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
+/// Span used for setting the number of columns available in the Grid
+#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
 pub enum HorizontalSpan {
     Four,
     Eight,
@@ -37,6 +39,8 @@ impl HorizontalSpan {
     pub const SMALL_BREAKPOINT: f32 = 720f32;
     pub const MEDIUM_BREAKPOINT: f32 = 1168f32;
 }
+
+/// Grid configuration of the Span + Column/Row/Gutter Configs
 #[derive(Resource)]
 pub struct Grid {
     pub(crate) span: HorizontalSpan,
@@ -121,6 +125,9 @@ impl Grid {
     pub fn markers_per_column(&self) -> i32 {
         self.column_config.base.0 + self.column_config.extension.0
     }
+    pub fn markers_per_row(&self) -> i32 {
+        self.row_config.base.0
+    }
     pub fn calc_horizontal_location(&self, grid_location: GridLocation) -> RawMarker {
         let markers_per_column = self.markers_per_column();
         let content_location = grid_location.location;
@@ -204,7 +211,8 @@ pub enum GridMarkerBias {
 }
 #[derive(Copy, Clone, PartialEq)]
 pub struct GridLocationOffset(pub RawMarker);
-/// Shorthand for specifying a GridLocation using ContentAligned
+
+/// Shorthand for specifying a GridLocation using near/far bias
 pub trait ResponsiveUnit {
     fn near(self) -> GridLocation;
     fn far(self) -> GridLocation;
@@ -224,12 +232,21 @@ pub struct GridLocation {
     pub offset: Option<GridLocationOffset>,
 }
 impl GridLocation {
-    pub fn offset(mut self, offset: i32) -> Self {
-        self.offset.replace(GridLocationOffset(offset.into()));
+    pub fn raw_offset(mut self, offset: i32) -> Self {
+        if let Some(current_offset) = self.offset.as_mut() {
+            current_offset.0.0 += offset;
+        } else {
+            self.offset.replace(GridLocationOffset(offset.into()));
+        }
+        self
+    }
+    pub fn column_offset(mut self, offset: i32) -> Self {
+        self.location.marker.0 += offset;
         self
     }
 }
-/// Pair of ContentMarker and Offset to get an exact grid location
+
+/// Pair of GridMarker and Bias to get an exact grid location
 #[derive(Copy, Clone)]
 pub struct GridLocationDescriptor {
     pub marker: GridMarker,
@@ -313,6 +330,7 @@ impl<F> ResponsiveView<F> {
 }
 /// Convenience type for mapping to ContentViews
 pub type ResponsiveGridView = ResponsiveView<GridView>;
+
 fn update_section(
     grid: &Grid,
     view: &ResponsiveGridView,
@@ -323,6 +341,35 @@ fn update_section(
     *pos = section.position;
     *area = section.area;
 }
+
+pub(crate) struct GridConfigRecorder {
+    times_span_configured: HashMap<HorizontalSpan, usize>,
+}
+
+impl GridConfigRecorder {
+    pub(crate) fn record_span_configured(&mut self, span: HorizontalSpan) {
+        if let Some(count) = self.times_span_configured.get_mut(&span) {
+            *count += 1;
+        } else {
+            self.times_span_configured.insert(span, 1);
+        }
+    }
+}
+
+impl Record for GridConfigRecorder {
+    fn record(&self, core_record: String) -> String {
+        format!("{:?}:{:?}", core_record, self.times_span_configured)
+    }
+}
+
+impl Default for GridConfigRecorder {
+    fn default() -> Self {
+        Self {
+            times_span_configured: HashMap::new(),
+        }
+    }
+}
+
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
     window_resize_events: EventReader<WindowResize>,
@@ -332,14 +379,20 @@ pub(crate) fn config_grid(
         &mut Area<InterfaceContext>,
     )>,
     mut grid: ResMut<Grid>,
+    #[cfg(feature = "diagnostics")]
+    mut diagnostics: Local<DiagnosticsHandle<GridConfigRecorder>>,
 ) {
     if !window_resize_events.is_empty() {
         // configure grid configs + span
         *grid = Grid::new(viewport_handle.section.area);
+        #[cfg(feature = "diagnostics")]
+        diagnostics.ext.record_span_configured(grid.span);
         // update all views
         for (view, mut pos, mut area) in responsive.iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
+        #[cfg(feature = "diagnostics")]
+        trace!("{:?}", diagnostics.record());
     }
 }
 pub(crate) fn set_from_view(

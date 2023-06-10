@@ -1,9 +1,11 @@
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::visualizer::Visualizer;
-use crate::{GfxSurface, Job, Theme, Viewport};
 use bevy_ecs::prelude::Resource;
 use tracing::{trace, warn};
 
+use crate::{GfxSurface, Job, Theme, Viewport};
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::visualizer::Visualizer;
+
+/// Phase for Rendering
 pub enum RenderPhase {
     Opaque,
     Alpha(u32),
@@ -22,6 +24,7 @@ pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
         .render(render_pass_handle, viewport);
 }
 
+/// Wrapper around wgpu::RenderPass
 pub struct RenderPassHandle<'a>(pub wgpu::RenderPass<'a>);
 
 pub(crate) type RenderTasks = Vec<Box<for<'a> fn(&'a Job, &mut RenderPassHandle<'a>)>>;
@@ -37,6 +40,8 @@ impl RenderTaskManager {
         }
     }
 }
+
+/// Trait to extend the render loop with a new pipeline
 pub trait Render {
     fn phase() -> RenderPhase;
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);

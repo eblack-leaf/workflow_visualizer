@@ -4,17 +4,23 @@ use bevy_ecs::prelude::{Entity, IntoSystemConfig, ResMut, Resource, Schedule, Sy
 use bevy_ecs::schedule::ExecutorKind;
 use compact_str::CompactString;
 
+/// Wrapper around a bevy_ecs::World
 pub type Container = World;
+/// Wrapper around a bevy_ecs::Schedule
 pub type Task = Schedule;
+
+/// Label for a Task
 #[derive(Eq, PartialEq, Hash)]
 pub struct TaskLabel(pub &'static str);
 
+/// State of a Job
 #[derive(PartialEq)]
 pub enum ExecutionState {
     Active,
     Suspended,
 }
 
+/// Idle hook
 #[derive(Copy, Clone, Resource)]
 pub struct Idle {
     pub can_idle: bool,
@@ -26,10 +32,12 @@ impl Idle {
     }
 }
 
+/// System for attempting to idle at the beginning of each loop
 pub fn attempt_to_idle(mut idle: ResMut<Idle>) {
     idle.can_idle = true;
 }
 
+/// Exit hook
 #[derive(Copy, Clone, Resource)]
 pub struct Exit {
     pub exit_requested: bool,
@@ -47,6 +55,7 @@ impl Exit {
     }
 }
 
+/// Store for entity that maps to EntityName
 #[derive(Resource)]
 pub struct EntityStore {
     pub store: HashMap<EntityName, Entity>,
@@ -60,16 +69,20 @@ impl EntityStore {
     }
 }
 
+/// Extensible container + task runner
 pub struct Job {
     pub execution_state: ExecutionState,
     pub container: Container,
     pub tasks: HashMap<TaskLabel, Task>,
 }
 
+/// SyncPoint for Job Idle behaviour
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 pub enum JobSyncPoint {
     Idle,
 }
+
+/// Name for identifying an Entity
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
 pub struct EntityName(pub CompactString);
 impl EntityName {

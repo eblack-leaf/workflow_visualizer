@@ -2,6 +2,7 @@ use bevy_ecs::prelude::Resource;
 
 use crate::color::Color;
 
+/// Describes a Theme
 pub struct ThemeDescriptor {
     pub background: Option<Color>,
     pub primary: Option<Color>,
@@ -28,6 +29,8 @@ impl Default for ThemeDescriptor {
         ThemeDescriptor::new()
     }
 }
+
+/// Color definitions for element types in the Visualizer
 #[derive(Resource, Copy, Clone)]
 pub struct Theme {
     pub background: Color,

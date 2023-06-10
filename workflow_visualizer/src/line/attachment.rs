@@ -3,7 +3,7 @@ use bevy_ecs::prelude::IntoSystemConfig;
 use crate::{Attach, SyncPoint, Visualizer};
 use crate::line::renderer::{LineRenderer, setup};
 use crate::line::system::{
-    calc_section, create_render_group, push_color, push_layer, push_line_render, push_uniforms,
+    calc_section, create_render_group, push_color, push_layer, push_uniforms,
     scale_path,
 };
 use crate::path::view_changed;
@@ -24,7 +24,6 @@ impl Attach for LineAttachment {
             scale_path.in_set(SyncPoint::Resolve),
             push_layer.in_set(SyncPoint::PushDiff),
             push_color.in_set(SyncPoint::PushDiff),
-            push_line_render.in_set(SyncPoint::PushDiff),
         ));
         visualizer
             .job

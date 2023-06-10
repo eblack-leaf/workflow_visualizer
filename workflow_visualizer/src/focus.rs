@@ -1,9 +1,14 @@
-use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemConfig, Query, Res, Resource};
+use std::collections::HashMap;
 
+use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemConfig, Local, Query, Res, Resource};
+use tracing::trace;
+
+use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
+use crate::SyncPoint;
 use crate::touch::read_touch_events;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
-use crate::SyncPoint;
+
 /// Used to set the Focus of an element
 #[derive(Component)]
 pub struct Focus {
@@ -24,22 +29,68 @@ impl Focus {
         self.focused
     }
 }
+
 impl Default for Focus {
     fn default() -> Self {
         Focus::new()
     }
 }
+
+pub(crate) struct FocusRecorder {
+    times_focused: HashMap<Entity, usize>,
+    loops_focused: HashMap<Entity, usize>,
+}
+
+impl FocusRecorder {
+    fn record_time_focus(&mut self, entity: Entity) {
+        if let Some(count) = self.times_focused.get_mut(&entity) {
+            *count += 1;
+        } else {
+            self.times_focused.insert(entity, 1);
+        }
+    }
+    fn record_loop_focused(&mut self, entity: Entity) {
+        if let Some(count) = self.loops_focused.get_mut(&entity) {
+            *count += 1;
+        } else {
+            self.loops_focused.insert(entity, 1);
+        }
+    }
+}
+
+impl Record for FocusRecorder {
+    fn record(&self, core_record: String) -> String {
+        format!("{:?}:@times_focused:{:?}:@loops_focused:{:?}", core_record, self.times_focused, self.loops_focused)
+    }
+}
+
+impl Default for FocusRecorder {
+    fn default() -> Self {
+        Self {
+            times_focused: HashMap::new(),
+            loops_focused: HashMap::new(),
+        }
+    }
+}
+
 /// used to opt into VirtualKeyboard open functionality
 #[derive(Component, Copy, Clone)]
 pub struct FocusInputListener {}
+
 pub(crate) fn set_focused(
     mut focus_listeners: Query<(Entity, &mut Focus)>,
     focus_input_listeners: Query<(Entity, &FocusInputListener)>,
     focused_entity_res: Res<FocusedEntity>,
     virtual_keyboard: Res<VirtualKeyboardAdapter>,
+    #[cfg(feature = "diagnostics")]
+    mut diagnostics: Local<DiagnosticsHandle<FocusRecorder>>,
 ) {
     if focused_entity_res.is_changed() {
         if let Some(f_entity) = focused_entity_res.entity {
+            #[cfg(feature = "diagnostics")] {
+                diagnostics.ext.record_time_focus(f_entity);
+                diagnostics.ext.record_loop_focused(f_entity);
+            }
             if focus_input_listeners.get(f_entity).is_ok() {
                 virtual_keyboard.open(VirtualKeyboardType::Keyboard);
             } else {
@@ -60,7 +111,14 @@ pub(crate) fn set_focused(
                 }
             }
         }
+    } else {
+        #[cfg(feature = "diagnostics")]
+        if let Some(entity) = focused_entity_res.entity {
+            diagnostics.ext.record_loop_focused(entity);
+        }
     }
+    #[cfg(feature = "diagnostics")]
+    trace!("{:?}", diagnostics.record());
 }
 /// which entity is currently focused
 #[derive(Resource)]

@@ -75,3 +75,4 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
+mod diagnostics;

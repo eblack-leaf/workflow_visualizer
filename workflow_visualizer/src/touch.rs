@@ -5,13 +5,14 @@ use bevy_ecs::prelude::{
 };
 use winit::event::{ElementState, MouseButton};
 
-use crate::focus::FocusedEntity;
-use crate::viewport::ViewportHandle;
-use crate::visualizer::{Attach, Visualizer};
 use crate::{
     Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
 };
+use crate::focus::FocusedEntity;
+use crate::viewport::ViewportHandle;
+use crate::visualizer::{Attach, Visualizer};
 
+/// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]
 pub struct TouchEvent {
     pub ty: TouchType,
@@ -25,6 +26,8 @@ impl TouchEvent {
         }
     }
 }
+
+/// Type of TouchEvent received
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum TouchType {
     OnPress,
@@ -32,7 +35,11 @@ pub enum TouchType {
     OnRelease,
     Cancelled,
 }
+
+/// Wrapper for Position<DeviceContext>
 pub type Touch = Position<DeviceContext>;
+
+/// Enables Touch behaviour for an entity
 #[derive(Bundle, Copy, Clone)]
 pub struct Touchable {
     pub(crate) touched: Touched,
@@ -52,6 +59,8 @@ impl Touchable {
         }
     }
 }
+
+/// Listener for receiving touch behaviour
 #[derive(Component, Copy, Clone)]
 pub struct TouchListener {
     pub listened_type: ListenableTouchType,
@@ -69,12 +78,18 @@ impl TouchListener {
         }
     }
 }
+
+/// Where a Touch took place
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq)]
 pub struct TouchLocation(pub Option<Position<DeviceContext>>);
+
+/// Whether received a touch internally
 #[derive(Component, Copy, Clone)]
 pub struct Touched {
     pub(crate) touched: bool,
 }
+
+/// Currently touched or not logically
 #[derive(Component, Copy, Clone)]
 pub struct TouchedState {
     pub currently_pressed: bool,
@@ -86,6 +101,8 @@ impl TouchedState {
         }
     }
 }
+
+/// Tracker for toggle state
 #[derive(Component, Copy, Clone)]
 pub struct ToggleState {
     pub toggle: bool,
@@ -103,12 +120,16 @@ impl Touched {
         self.touched
     }
 }
+
+/// Types of Touches that can be listened to
 #[allow(unused)]
 #[derive(Copy, Clone)]
 pub enum ListenableTouchType {
     OnPress,
     OnRelease,
 }
+
+/// Touch tracked with origin/current/end/cancelled
 #[derive(Copy, Clone)]
 pub struct TrackedTouch {
     pub origin: Touch,
@@ -127,6 +148,8 @@ impl TrackedTouch {
         }
     }
 }
+
+/// Touch that started with the PrimaryInteractor
 #[derive(Resource)]
 pub struct PrimaryTouch {
     pub touch: Option<TrackedTouch>,
@@ -136,6 +159,8 @@ impl PrimaryTouch {
         Self { touch: None }
     }
 }
+
+/// Whether the Touch was grabbed or not
 #[derive(Resource)]
 pub struct TouchGrabState {
     pub(crate) grab_state: Option<(Entity, Layer)>,
@@ -282,6 +307,8 @@ pub(crate) fn reset_touched(mut touch_listeners: Query<&mut Touched>) {
         touched.touched = false;
     }
 }
+
+/// Identifier for an input activator (finger/mouse button)
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Interactor(pub u32);
 impl Interactor {
@@ -292,6 +319,8 @@ impl Interactor {
         })
     }
 }
+
+/// Adapter to manage touch screens
 #[derive(Resource)]
 pub struct TouchAdapter {
     pub tracked: HashMap<Interactor, TrackedTouch>,
@@ -305,7 +334,11 @@ impl TouchAdapter {
         }
     }
 }
+
+/// Where the Cursor is
 pub type CursorLocation = Position<DeviceContext>;
+
+/// Adapter for mice
 #[derive(Resource)]
 pub struct MouseAdapter {
     pub location: Option<CursorLocation>,

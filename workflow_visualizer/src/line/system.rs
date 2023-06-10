@@ -50,8 +50,7 @@ pub(crate) fn create_render_group(
     for (entity, line_render, layer, color, line_render_points) in paths.iter() {
         let render_group = LineRenderGroup::new(
             LineRenderGpu::new(&gfx, &line_render_points.points),
-            line_render.head,
-            line_render.tail,
+            line_render.capacity,
             LayerAndHooks::new(layer.z, 0f32, 0f32, 0f32),
             *color,
             &gfx,
@@ -85,18 +84,6 @@ pub(crate) fn push_color(
     }
 }
 
-pub(crate) fn push_line_render(
-    lines: Query<(Entity, &LineRender)>,
-    mut line_renderer: ResMut<LineRenderer>,
-) {
-    for (entity, line_render) in lines.iter() {
-        if let Some(group) = line_renderer.render_groups.get_mut(&entity) {
-            group.head = line_render.head;
-            group.tail = line_render.tail;
-        }
-    }
-}
-
 pub(crate) fn push_uniforms(mut line_renderer: ResMut<LineRenderer>, gfx: Res<GfxSurface>) {
     for group in line_renderer.render_groups.values_mut() {
         if group.color_dirty {
@@ -111,4 +98,3 @@ pub(crate) fn push_uniforms(mut line_renderer: ResMut<LineRenderer>, gfx: Res<Gf
         }
     }
 }
-// anim could hook in after .scale_path to adjust_head/tail

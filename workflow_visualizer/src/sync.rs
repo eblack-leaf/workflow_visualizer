@@ -1,9 +1,10 @@
 use bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 use bevy_ecs::schedule::apply_system_buffers;
 
-use crate::visualizer::Visualizer;
 use crate::JobSyncPoint;
+use crate::visualizer::Visualizer;
 
+/// Synchronization Points for bucketing systems in a task
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 pub enum SyncPoint {
     Event,
@@ -18,6 +19,8 @@ pub enum SyncPoint {
     PushDiff,
     Finish,
 }
+
+/// User Space Sync Points for clear extension buckets
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 pub enum UserSpaceSyncPoint {
     Initialization,

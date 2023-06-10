@@ -23,5 +23,6 @@
   - [InstanceTools](pages/instance_tools.md)
   - [Time](pages/time.md)
 - [Runner](pages/runner.md)
+- [Diagnostics](pages/diagnostics.md)
 - [Platform Specifics](pages/platform_specifics.md)
 - [Tutorial](tutorial/begin.md)

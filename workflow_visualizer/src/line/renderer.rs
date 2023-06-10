@@ -12,8 +12,7 @@ use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 
 pub(crate) struct LineRenderGroup {
     pub(crate) line_render_gpu: LineRenderGpu,
-    pub(crate) head: usize,
-    pub(crate) tail: usize,
+    pub(crate) capacity: usize,
     pub(crate) color: Color,
     pub(crate) color_dirty: bool,
     pub(crate) layer_and_hooks: LayerAndHooks,
@@ -26,8 +25,7 @@ pub(crate) struct LineRenderGroup {
 impl LineRenderGroup {
     pub(crate) fn new(
         line_render_gpu: LineRenderGpu,
-        head: usize,
-        tail: usize,
+        capacity: usize,
         layer_and_hooks: LayerAndHooks,
         color: Color,
         gfx: &GfxSurface,
@@ -51,8 +49,7 @@ impl LineRenderGroup {
         });
         Self {
             line_render_gpu,
-            head,
-            tail,
+            capacity,
             color,
             color_dirty: false,
             layer_and_hooks,
@@ -188,7 +185,7 @@ impl Render for LineRenderer {
 
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
         for render_group in self.render_groups.values() {
-            if render_group.head != render_group.tail {
+            if render_group.capacity > 0 {
                 render_pass_handle.0.set_pipeline(&self.pipeline);
                 render_pass_handle
                     .0
@@ -201,7 +198,7 @@ impl Render for LineRenderer {
                     .set_vertex_buffer(0, render_group.line_render_gpu.buffer.slice(..));
                 render_pass_handle
                     .0
-                    .draw(render_group.head as u32..render_group.tail as u32 + 1, 0..1);
+                    .draw(0u32..render_group.capacity as u32 + 1, 0..1);
             }
         }
     }

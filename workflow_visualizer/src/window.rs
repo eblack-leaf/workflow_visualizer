@@ -7,6 +7,7 @@ use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::sync::SyncPoint;
 use crate::visualizer::{Attach, Visualizer};
 
+/// Event for triggering Window Resizing behaviour
 #[derive(Clone, Copy)]
 pub struct WindowResize {
     pub size: Area<DeviceContext>,

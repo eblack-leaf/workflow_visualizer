@@ -1,12 +1,13 @@
 use bevy_ecs::prelude::{Component, Resource};
 use tracing::info;
+#[cfg(target_os = "android")]
+use winit::platform::android::activity::AndroidApp;
 
 use crate::visualizer::{Attach, Visualizer};
 #[cfg(target_os = "android")]
 use crate::workflow::AndroidInterface;
-#[cfg(target_os = "android")]
-use winit::platform::android::activity::AndroidApp;
 
+/// Adapter to interface with soft-input (VirtualKeyboard)
 #[derive(Resource)]
 pub struct VirtualKeyboardAdapter {
     #[cfg(target_os = "android")]
@@ -15,6 +16,7 @@ pub struct VirtualKeyboardAdapter {
     android_app: (),
 }
 
+/// VirtualKeyboard Type for opening different pads on web
 #[derive(Component, Copy, Clone)]
 pub enum VirtualKeyboardType {
     Keyboard,
@@ -54,7 +56,7 @@ impl VirtualKeyboardAdapter {
     pub fn open(&self, ty: VirtualKeyboardType) {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::{prelude::*, JsCast};
+            use wasm_bindgen::{JsCast, prelude::*};
             let document = web_sys::window().unwrap().document().unwrap();
             let trigger_element = match ty {
                 VirtualKeyboardType::Keyboard => document
@@ -118,7 +120,8 @@ impl VirtualKeyboardAdapter {
         }
     }
 }
-pub struct VirtualKeyboardAttachment;
+
+pub(crate) struct VirtualKeyboardAttachment;
 impl Attach for VirtualKeyboardAttachment {
     fn attach(visualizer: &mut Visualizer) {
         #[cfg(not(target_os = "android"))]

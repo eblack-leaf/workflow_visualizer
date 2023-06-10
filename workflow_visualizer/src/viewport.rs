@@ -4,17 +4,18 @@ use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
 use nalgebra::matrix;
 use wgpu::TextureFormat;
 
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 use crate::coord::area::Area;
+use crate::coord::DeviceContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
-use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
+/// Viewport Matrix for converting to NDC
 #[derive(Resource)]
 pub struct Viewport {
     pub(crate) cpu: CpuViewport,
@@ -180,6 +181,7 @@ impl CpuViewport {
     }
 }
 
+/// GPU matrix representation as C struct
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Resource)]
 pub struct GpuViewport {
@@ -217,6 +219,8 @@ pub(crate) fn frontend_area_adjust(
         viewport_handle.section.area = event.size.to_ui(scale_factor.factor);
     }
 }
+
+/// Handle to a Viewport to adjust position/get section
 #[derive(Resource)]
 pub struct ViewportHandle {
     pub(crate) section: Section<InterfaceContext>,
