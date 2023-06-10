@@ -19,9 +19,11 @@
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
 <a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Resource;
 
-<span class="attr">#[derive(Resource, Clone, Copy)]
+<span class="doccomment">/// Scale Factor of the device&#39;s Window
+</span><span class="attr">#[derive(Resource, Clone, Copy)]
 </span><span class="kw">pub struct </span>ScaleFactor {
     <span class="kw">pub</span>(<span class="kw">crate</span>) factor: f64,
 }

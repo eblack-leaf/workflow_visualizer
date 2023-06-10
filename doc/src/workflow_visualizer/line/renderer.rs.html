@@ -227,9 +227,6 @@
 <a href="#227" id="227">227</a>
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, Entity, Res, Resource};
@@ -244,8 +241,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LineRenderGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) line_render_gpu: LineRenderGpu,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) head: usize,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) tail: usize,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) capacity: usize,
     <span class="kw">pub</span>(<span class="kw">crate</span>) color: Color,
     <span class="kw">pub</span>(<span class="kw">crate</span>) color_dirty: bool,
     <span class="kw">pub</span>(<span class="kw">crate</span>) layer_and_hooks: LayerAndHooks,
@@ -258,8 +254,7 @@
 <span class="kw">impl </span>LineRenderGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         line_render_gpu: LineRenderGpu,
-        head: usize,
-        tail: usize,
+        capacity: usize,
         layer_and_hooks: LayerAndHooks,
         color: Color,
         gfx: <span class="kw-2">&amp;</span>GfxSurface,
@@ -283,8 +278,7 @@
         });
         <span class="self">Self </span>{
             line_render_gpu,
-            head,
-            tail,
+            capacity,
             color,
             color_dirty: <span class="bool-val">false</span>,
             layer_and_hooks,
@@ -420,7 +414,7 @@
 
     <span class="kw">fn </span>render&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, render_pass_handle: <span class="kw-2">&amp;mut </span>RenderPassHandle&lt;<span class="lifetime">&#39;a</span>&gt;, viewport: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Viewport) {
         <span class="kw">for </span>render_group <span class="kw">in </span><span class="self">self</span>.render_groups.values() {
-            <span class="kw">if </span>render_group.head != render_group.tail {
+            <span class="kw">if </span>render_group.capacity &gt; <span class="number">0 </span>{
                 render_pass_handle.<span class="number">0</span>.set_pipeline(<span class="kw-2">&amp;</span><span class="self">self</span>.pipeline);
                 render_pass_handle
                     .<span class="number">0
@@ -433,7 +427,7 @@
                     </span>.set_vertex_buffer(<span class="number">0</span>, render_group.line_render_gpu.buffer.slice(..));
                 render_pass_handle
                     .<span class="number">0
-                    </span>.draw(render_group.head <span class="kw">as </span>u32..render_group.tail <span class="kw">as </span>u32 + <span class="number">1</span>, <span class="number">0</span>..<span class="number">1</span>);
+                    </span>.draw(<span class="number">0u32</span>..render_group.capacity <span class="kw">as </span>u32 + <span class="number">1</span>, <span class="number">0</span>..<span class="number">1</span>);
             }
         }
     }

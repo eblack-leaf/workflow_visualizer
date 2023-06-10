@@ -17,9 +17,14 @@
 <a href="#17" id="17">17</a>
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
+<a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query};
 
-<span class="attr">#[derive(Component)]
+<span class="doccomment">/// Wrapper for spawning bundles to ensure lifetime safety for
+/// hooking into systems at the right time/place
+</span><span class="attr">#[derive(Component)]
 </span><span class="kw">pub struct </span>Request&lt;B&gt; {
     <span class="kw">pub </span>req: <span class="prelude-ty">Option</span>&lt;B&gt;,
 }
@@ -30,7 +35,8 @@
     }
 }
 
-<span class="kw">pub fn </span>spawn&lt;B: Bundle&gt;(<span class="kw-2">mut </span>requests: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>Request&lt;B&gt;)&gt;, <span class="kw-2">mut </span>cmd: Commands) {
+<span class="doccomment">/// spawner helper to spawn requests added to visualizer
+</span><span class="kw">pub fn </span>spawn&lt;B: Bundle&gt;(<span class="kw-2">mut </span>requests: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>Request&lt;B&gt;)&gt;, <span class="kw-2">mut </span>cmd: Commands) {
     <span class="kw">for </span>(entity, <span class="kw-2">mut </span>request) <span class="kw">in </span>requests.iter_mut() {
         cmd.entity(entity).insert(request.req.take().unwrap());
         cmd.entity(entity).remove::&lt;Request&lt;B&gt;&gt;();

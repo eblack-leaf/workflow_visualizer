@@ -370,22 +370,77 @@
 <a href="#370" id="370">370</a>
 <a href="#371" id="371">371</a>
 <a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
-<span class="kw">use </span>bevy_ecs::prelude::{
-    Commands, DetectChanges, EventReader, IntoSystemConfig, ParamSet, Query, Res, Resource,
-};
+<span class="kw">use </span>bevy_ecs::prelude::{Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource};
 <span class="kw">use </span>bevy_ecs::query::Changed;
 <span class="kw">use </span>bevy_ecs::system::ResMut;
+<span class="kw">use </span>tracing::trace;
 
 <span class="kw">use crate</span>::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
+<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
 <span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 
-<span class="attr">#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
+<span class="doccomment">/// Span used for setting the number of columns available in the Grid
+</span><span class="attr">#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
 </span><span class="kw">pub enum </span>HorizontalSpan {
     Four,
     Eight,
@@ -409,7 +464,9 @@
     <span class="kw">pub const </span>SMALL_BREAKPOINT: f32 = <span class="number">720f32</span>;
     <span class="kw">pub const </span>MEDIUM_BREAKPOINT: f32 = <span class="number">1168f32</span>;
 }
-<span class="attr">#[derive(Resource)]
+
+<span class="doccomment">/// Grid configuration of the Span + Column/Row/Gutter Configs
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>Grid {
     <span class="kw">pub</span>(<span class="kw">crate</span>) span: HorizontalSpan,
     <span class="kw">pub</span>(<span class="kw">crate</span>) column_config: ColumnConfig,
@@ -492,6 +549,9 @@
     }
     <span class="kw">pub fn </span>markers_per_column(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="self">self</span>.column_config.base.<span class="number">0 </span>+ <span class="self">self</span>.column_config.extension.<span class="number">0
+    </span>}
+    <span class="kw">pub fn </span>markers_per_row(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
+        <span class="self">self</span>.row_config.base.<span class="number">0
     </span>}
     <span class="kw">pub fn </span>calc_horizontal_location(<span class="kw-2">&amp;</span><span class="self">self</span>, grid_location: GridLocation) -&gt; RawMarker {
         <span class="kw">let </span>markers_per_column = <span class="self">self</span>.markers_per_column();
@@ -576,7 +636,8 @@
 }
 <span class="attr">#[derive(Copy, Clone, PartialEq)]
 </span><span class="kw">pub struct </span>GridLocationOffset(<span class="kw">pub </span>RawMarker);
-<span class="doccomment">/// Shorthand for specifying a GridLocation using ContentAligned
+
+<span class="doccomment">/// Shorthand for specifying a GridLocation using near/far bias
 </span><span class="kw">pub trait </span>ResponsiveUnit {
     <span class="kw">fn </span>near(<span class="self">self</span>) -&gt; GridLocation;
     <span class="kw">fn </span>far(<span class="self">self</span>) -&gt; GridLocation;
@@ -596,12 +657,21 @@
     <span class="kw">pub </span>offset: <span class="prelude-ty">Option</span>&lt;GridLocationOffset&gt;,
 }
 <span class="kw">impl </span>GridLocation {
-    <span class="kw">pub fn </span>offset(<span class="kw-2">mut </span><span class="self">self</span>, offset: i32) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.offset.replace(GridLocationOffset(offset.into()));
+    <span class="kw">pub fn </span>raw_offset(<span class="kw-2">mut </span><span class="self">self</span>, offset: i32) -&gt; <span class="self">Self </span>{
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(current_offset) = <span class="self">self</span>.offset.as_mut() {
+            current_offset.<span class="number">0.0 </span>+= offset;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.offset.replace(GridLocationOffset(offset.into()));
+        }
+        <span class="self">self
+    </span>}
+    <span class="kw">pub fn </span>column_offset(<span class="kw-2">mut </span><span class="self">self</span>, offset: i32) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.location.marker.<span class="number">0 </span>+= offset;
         <span class="self">self
     </span>}
 }
-<span class="doccomment">/// Pair of ContentMarker and Offset to get an exact grid location
+
+<span class="doccomment">/// Pair of GridMarker and Bias to get an exact grid location
 </span><span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>GridLocationDescriptor {
     <span class="kw">pub </span>marker: GridMarker,
@@ -685,6 +755,7 @@
 }
 <span class="doccomment">/// Convenience type for mapping to ContentViews
 </span><span class="kw">pub type </span>ResponsiveGridView = ResponsiveView&lt;GridView&gt;;
+
 <span class="kw">fn </span>update_section(
     grid: <span class="kw-2">&amp;</span>Grid,
     view: <span class="kw-2">&amp;</span>ResponsiveGridView,
@@ -695,6 +766,35 @@
     <span class="kw-2">*</span>pos = section.position;
     <span class="kw-2">*</span>area = section.area;
 }
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>GridConfigRecorder {
+    times_span_configured: HashMap&lt;HorizontalSpan, usize&gt;,
+}
+
+<span class="kw">impl </span>GridConfigRecorder {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>record_span_configured(<span class="kw-2">&amp;mut </span><span class="self">self</span>, span: HorizontalSpan) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(count) = <span class="self">self</span>.times_span_configured.get_mut(<span class="kw-2">&amp;</span>span) {
+            <span class="kw-2">*</span>count += <span class="number">1</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.times_span_configured.insert(span, <span class="number">1</span>);
+        }
+    }
+}
+
+<span class="kw">impl </span>Record <span class="kw">for </span>GridConfigRecorder {
+    <span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, core_record: String) -&gt; String {
+        <span class="macro">format!</span>(<span class="string">&quot;{:?}:{:?}&quot;</span>, core_record, <span class="self">self</span>.times_span_configured)
+    }
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>GridConfigRecorder {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            times_span_configured: HashMap::new(),
+        }
+    }
+}
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>config_grid(
     viewport_handle: Res&lt;ViewportHandle&gt;,
     window_resize_events: EventReader&lt;WindowResize&gt;,
@@ -704,14 +804,20 @@
         <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
     )&gt;,
     <span class="kw-2">mut </span>grid: ResMut&lt;Grid&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)]
+    </span><span class="kw-2">mut </span>diagnostics: Local&lt;DiagnosticsHandle&lt;GridConfigRecorder&gt;&gt;,
 ) {
     <span class="kw">if </span>!window_resize_events.is_empty() {
         <span class="comment">// configure grid configs + span
         </span><span class="kw-2">*</span>grid = Grid::new(viewport_handle.section.area);
+        <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)]
+        </span>diagnostics.ext.record_span_configured(grid.span);
         <span class="comment">// update all views
         </span><span class="kw">for </span>(view, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>responsive.iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
+        <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)]
+        </span><span class="macro">trace!</span>(<span class="string">&quot;{:?}&quot;</span>, diagnostics.record());
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_from_view(

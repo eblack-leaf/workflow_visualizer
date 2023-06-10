@@ -272,24 +272,29 @@
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::{Res, ResMut};
 <span class="kw">use </span>bevy_ecs::event::EventReader;
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
 <span class="kw">use </span>nalgebra::matrix;
 <span class="kw">use </span>wgpu::TextureFormat;
 
+<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint};
 <span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
+<span class="kw">use </span><span class="kw">crate</span>::coord::DeviceContext;
 <span class="kw">use </span><span class="kw">crate</span>::coord::layer::Layer;
 <span class="kw">use </span><span class="kw">crate</span>::coord::position::Position;
 <span class="kw">use </span><span class="kw">crate</span>::coord::section::Section;
-<span class="kw">use </span><span class="kw">crate</span>::coord::DeviceContext;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::window::{gfx_resize, WindowResize};
-<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint};
 
-<span class="attr">#[derive(Resource)]
+<span class="doccomment">/// Viewport Matrix for converting to NDC
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>Viewport {
     <span class="kw">pub</span>(<span class="kw">crate</span>) cpu: CpuViewport,
     <span class="kw">pub</span>(<span class="kw">crate</span>) gpu: GpuViewport,
@@ -454,7 +459,8 @@
     }
 }
 
-<span class="attr">#[repr(C)]
+<span class="doccomment">/// GPU matrix representation as C struct
+</span><span class="attr">#[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Resource)]
 </span><span class="kw">pub struct </span>GpuViewport {
     <span class="kw">pub </span>matrix: [[f32; <span class="number">4</span>]; <span class="number">4</span>],
@@ -491,7 +497,9 @@
         viewport_handle.section.area = event.size.to_ui(scale_factor.factor);
     }
 }
-<span class="attr">#[derive(Resource)]
+
+<span class="doccomment">/// Handle to a Viewport to adjust position/get section
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>ViewportHandle {
     <span class="kw">pub</span>(<span class="kw">crate</span>) section: Section&lt;InterfaceContext&gt;,
     position_dirty: bool,

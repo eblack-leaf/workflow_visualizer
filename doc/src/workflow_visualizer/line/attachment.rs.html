@@ -34,13 +34,12 @@
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
 <a href="#36" id="36">36</a>
-<a href="#37" id="37">37</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LineRenderer, setup};
 <span class="kw">use </span><span class="kw">crate</span>::line::system::{
-    calc_section, create_render_group, push_color, push_layer, push_line_render, push_uniforms,
+    calc_section, create_render_group, push_color, push_layer, push_uniforms,
     scale_path,
 };
 <span class="kw">use </span><span class="kw">crate</span>::path::view_changed;
@@ -61,7 +60,6 @@
             scale_path.in_set(SyncPoint::Resolve),
             push_layer.in_set(SyncPoint::PushDiff),
             push_color.in_set(SyncPoint::PushDiff),
-            push_line_render.in_set(SyncPoint::PushDiff),
         ));
         visualizer
             .job

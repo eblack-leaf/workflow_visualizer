@@ -59,6 +59,7 @@
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
 <span class="kw">use </span>tracing::{info, trace, warn};
 
@@ -68,7 +69,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::sync::SyncPoint;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 
-<span class="attr">#[derive(Clone, Copy)]
+<span class="doccomment">/// Event for triggering Window Resizing behaviour
+</span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>WindowResize {
     <span class="kw">pub </span>size: Area&lt;DeviceContext&gt;,
     <span class="kw">pub </span>scale_factor: f64,

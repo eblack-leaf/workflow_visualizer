@@ -338,6 +338,39 @@
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -345,14 +378,15 @@
 };
 <span class="kw">use </span>winit::event::{ElementState, MouseButton};
 
-<span class="kw">use </span><span class="kw">crate</span>::focus::FocusedEntity;
-<span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
-<span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use crate</span>::{
     Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
 };
+<span class="kw">use </span><span class="kw">crate</span>::focus::FocusedEntity;
+<span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
+<span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 
-<span class="attr">#[derive(Copy, Clone, Debug)]
+<span class="doccomment">/// Registers a Touch has occurred and metadata
+</span><span class="attr">#[derive(Copy, Clone, Debug)]
 </span><span class="kw">pub struct </span>TouchEvent {
     <span class="kw">pub </span>ty: TouchType,
     <span class="kw">pub </span>touch: Touch,
@@ -365,15 +399,21 @@
         }
     }
 }
-<span class="attr">#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+
+<span class="doccomment">/// Type of TouchEvent received
+</span><span class="attr">#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 </span><span class="kw">pub enum </span>TouchType {
     OnPress,
     OnMove,
     OnRelease,
     Cancelled,
 }
-<span class="kw">pub type </span>Touch = Position&lt;DeviceContext&gt;;
-<span class="attr">#[derive(Bundle, Copy, Clone)]
+
+<span class="doccomment">/// Wrapper for Position&lt;DeviceContext&gt;
+</span><span class="kw">pub type </span>Touch = Position&lt;DeviceContext&gt;;
+
+<span class="doccomment">/// Enables Touch behaviour for an entity
+</span><span class="attr">#[derive(Bundle, Copy, Clone)]
 </span><span class="kw">pub struct </span>Touchable {
     <span class="kw">pub</span>(<span class="kw">crate</span>) touched: Touched,
     <span class="kw">pub</span>(<span class="kw">crate</span>) touched_state: TouchedState,
@@ -392,7 +432,9 @@
         }
     }
 }
-<span class="attr">#[derive(Component, Copy, Clone)]
+
+<span class="doccomment">/// Listener for receiving touch behaviour
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>TouchListener {
     <span class="kw">pub </span>listened_type: ListenableTouchType,
 }
@@ -409,13 +451,19 @@
         }
     }
 }
-<span class="attr">#[derive(Component, Copy, Clone, PartialOrd, PartialEq)]
+
+<span class="doccomment">/// Where a Touch took place
+</span><span class="attr">#[derive(Component, Copy, Clone, PartialOrd, PartialEq)]
 </span><span class="kw">pub struct </span>TouchLocation(<span class="kw">pub </span><span class="prelude-ty">Option</span>&lt;Position&lt;DeviceContext&gt;&gt;);
-<span class="attr">#[derive(Component, Copy, Clone)]
+
+<span class="doccomment">/// Whether received a touch internally
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>Touched {
     <span class="kw">pub</span>(<span class="kw">crate</span>) touched: bool,
 }
-<span class="attr">#[derive(Component, Copy, Clone)]
+
+<span class="doccomment">/// Currently touched or not logically
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>TouchedState {
     <span class="kw">pub </span>currently_pressed: bool,
 }
@@ -426,7 +474,9 @@
         }
     }
 }
-<span class="attr">#[derive(Component, Copy, Clone)]
+
+<span class="doccomment">/// Tracker for toggle state
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>ToggleState {
     <span class="kw">pub </span>toggle: bool,
 }
@@ -443,13 +493,17 @@
         <span class="self">self</span>.touched
     }
 }
-<span class="attr">#[allow(unused)]
+
+<span class="doccomment">/// Types of Touches that can be listened to
+</span><span class="attr">#[allow(unused)]
 #[derive(Copy, Clone)]
 </span><span class="kw">pub enum </span>ListenableTouchType {
     OnPress,
     OnRelease,
 }
-<span class="attr">#[derive(Copy, Clone)]
+
+<span class="doccomment">/// Touch tracked with origin/current/end/cancelled
+</span><span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>TrackedTouch {
     <span class="kw">pub </span>origin: Touch,
     <span class="kw">pub </span>current: Touch,
@@ -467,7 +521,9 @@
         }
     }
 }
-<span class="attr">#[derive(Resource)]
+
+<span class="doccomment">/// Touch that started with the PrimaryInteractor
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>PrimaryTouch {
     <span class="kw">pub </span>touch: <span class="prelude-ty">Option</span>&lt;TrackedTouch&gt;,
 }
@@ -476,7 +532,9 @@
         <span class="self">Self </span>{ touch: <span class="prelude-val">None </span>}
     }
 }
-<span class="attr">#[derive(Resource)]
+
+<span class="doccomment">/// Whether the Touch was grabbed or not
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>TouchGrabState {
     <span class="kw">pub</span>(<span class="kw">crate</span>) grab_state: <span class="prelude-ty">Option</span>&lt;(Entity, Layer)&gt;,
 }
@@ -622,7 +680,9 @@
         touched.touched = <span class="bool-val">false</span>;
     }
 }
-<span class="attr">#[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
+
+<span class="doccomment">/// Identifier for an input activator (finger/mouse button)
+</span><span class="attr">#[derive(Component, Clone, Copy, Hash, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>Interactor(<span class="kw">pub </span>u32);
 <span class="kw">impl </span>Interactor {
     <span class="kw">pub fn </span>from_button(button: MouseButton) -&gt; <span class="self">Self </span>{
@@ -632,7 +692,9 @@
         })
     }
 }
-<span class="attr">#[derive(Resource)]
+
+<span class="doccomment">/// Adapter to manage touch screens
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>TouchAdapter {
     <span class="kw">pub </span>tracked: HashMap&lt;Interactor, TrackedTouch&gt;,
     <span class="kw">pub </span>primary: <span class="prelude-ty">Option</span>&lt;Interactor&gt;,
@@ -645,8 +707,12 @@
         }
     }
 }
-<span class="kw">pub type </span>CursorLocation = Position&lt;DeviceContext&gt;;
-<span class="attr">#[derive(Resource)]
+
+<span class="doccomment">/// Where the Cursor is
+</span><span class="kw">pub type </span>CursorLocation = Position&lt;DeviceContext&gt;;
+
+<span class="doccomment">/// Adapter for mice
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>MouseAdapter {
     <span class="kw">pub </span>location: <span class="prelude-ty">Option</span>&lt;CursorLocation&gt;,
     <span class="kw">pub </span>tracked: HashMap&lt;MouseButton, (ElementState, <span class="prelude-ty">Option</span>&lt;TrackedTouch&gt;)&gt;,

@@ -85,6 +85,12 @@
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
@@ -95,7 +101,8 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::grid::{config_grid, HorizontalSpan};
 
-<span class="attr">#[derive(Component, Clone)]
+<span class="doccomment">/// Collection of specific points rendered from a PathView
+</span><span class="attr">#[derive(Component, Clone)]
 </span><span class="kw">pub struct </span>Path {
     <span class="kw">pub </span>points: Vec&lt;Position&lt;InterfaceContext&gt;&gt;,
 }
@@ -106,7 +113,8 @@
     }
 }
 
-<span class="attr">#[derive(Copy, Clone)]
+<span class="doccomment">/// Point in a PathView with x/y as GridLocations
+</span><span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>PathViewPoint {
     <span class="kw">pub </span>x: GridLocation,
     <span class="kw">pub </span>y: GridLocation,
@@ -120,7 +128,9 @@
         }
     }
 }
-<span class="attr">#[derive(Clone, Component)]
+
+<span class="doccomment">/// Collection of PathViewPoints
+</span><span class="attr">#[derive(Clone, Component)]
 </span><span class="kw">pub struct </span>PathView {
     <span class="kw">pub </span>points: Vec&lt;PathViewPoint&gt;,
 }
@@ -130,7 +140,9 @@
         <span class="self">Self </span>{ points: value }
     }
 }
-<span class="kw">pub type </span>ResponsivePathView = ResponsiveView&lt;PathView&gt;;
+
+<span class="doccomment">/// Responsive Mapping for PathView
+</span><span class="kw">pub type </span>ResponsivePathView = ResponsiveView&lt;PathView&gt;;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>grid_updated_path(
     grid: Res&lt;Grid&gt;,
     <span class="kw-2">mut </span>responsively_viewed: Query&lt;(<span class="kw-2">&amp;</span>ResponsiveView&lt;PathView&gt;, <span class="kw-2">&amp;mut </span>Path)&gt;,

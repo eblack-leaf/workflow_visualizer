@@ -50,11 +50,15 @@
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Resource;
 
 <span class="kw">use </span><span class="kw">crate</span>::color::Color;
 
-<span class="kw">pub struct </span>ThemeDescriptor {
+<span class="doccomment">/// Describes a Theme
+</span><span class="kw">pub struct </span>ThemeDescriptor {
     <span class="kw">pub </span>background: <span class="prelude-ty">Option</span>&lt;Color&gt;,
     <span class="kw">pub </span>primary: <span class="prelude-ty">Option</span>&lt;Color&gt;,
 }
@@ -80,7 +84,9 @@
         ThemeDescriptor::new()
     }
 }
-<span class="attr">#[derive(Resource, Copy, Clone)]
+
+<span class="doccomment">/// Color definitions for element types in the Visualizer
+</span><span class="attr">#[derive(Resource, Copy, Clone)]
 </span><span class="kw">pub struct </span>Theme {
     <span class="kw">pub </span>background: Color,
     <span class="kw">pub </span>primary: Color,

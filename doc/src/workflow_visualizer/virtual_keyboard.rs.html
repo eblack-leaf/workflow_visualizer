@@ -142,16 +142,20 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Component, Resource};
 <span class="kw">use </span>tracing::info;
+<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+</span><span class="kw">use </span>winit::platform::android::activity::AndroidApp;
 
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::workflow::AndroidInterface;
-<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
-</span><span class="kw">use </span>winit::platform::android::activity::AndroidApp;
 
-<span class="attr">#[derive(Resource)]
+<span class="doccomment">/// Adapter to interface with soft-input (VirtualKeyboard)
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>VirtualKeyboardAdapter {
     <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
     </span>android_app: AndroidApp,
@@ -159,7 +163,8 @@
     </span>android_app: (),
 }
 
-<span class="attr">#[derive(Component, Copy, Clone)]
+<span class="doccomment">/// VirtualKeyboard Type for opening different pads on web
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub enum </span>VirtualKeyboardType {
     Keyboard,
     TelephonePad,
@@ -198,7 +203,7 @@
     </span><span class="kw">pub fn </span>open(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: VirtualKeyboardType) {
         <span class="attr">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
         </span>{
-            <span class="kw">use </span>wasm_bindgen::{prelude::<span class="kw-2">*</span>, JsCast};
+            <span class="kw">use </span>wasm_bindgen::{JsCast, prelude::<span class="kw-2">*</span>};
             <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
             <span class="kw">let </span>trigger_element = <span class="kw">match </span>ty {
                 VirtualKeyboardType::Keyboard =&gt; document
@@ -262,7 +267,8 @@
         }
     }
 }
-<span class="kw">pub struct </span>VirtualKeyboardAttachment;
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>VirtualKeyboardAttachment;
 <span class="kw">impl </span>Attach <span class="kw">for </span>VirtualKeyboardAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         <span class="attr">#[cfg(not(target_os = <span class="string">&quot;android&quot;</span>))]

@@ -103,13 +103,17 @@
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 <span class="kw">use </span>bevy_ecs::schedule::apply_system_buffers;
 
-<span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
 <span class="kw">use </span><span class="kw">crate</span>::JobSyncPoint;
+<span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
 
-<span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+<span class="doccomment">/// Synchronization Points for bucketing systems in a task
+</span><span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 </span><span class="kw">pub enum </span>SyncPoint {
     Event,
     Initialization,
@@ -123,7 +127,9 @@
     PushDiff,
     Finish,
 }
-<span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+
+<span class="doccomment">/// User Space Sync Points for clear extension buckets
+</span><span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 </span><span class="kw">pub enum </span>UserSpaceSyncPoint {
     Initialization,
     Process,

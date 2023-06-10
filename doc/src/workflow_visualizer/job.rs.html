@@ -137,24 +137,43 @@
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Entity, IntoSystemConfig, ResMut, Resource, Schedule, SystemSet, World};
 <span class="kw">use </span>bevy_ecs::schedule::ExecutorKind;
 <span class="kw">use </span>compact_str::CompactString;
 
-<span class="kw">pub type </span>Container = World;
-<span class="kw">pub type </span>Task = Schedule;
-<span class="attr">#[derive(Eq, PartialEq, Hash)]
+<span class="doccomment">/// Wrapper around a bevy_ecs::World
+</span><span class="kw">pub type </span>Container = World;
+<span class="doccomment">/// Wrapper around a bevy_ecs::Schedule
+</span><span class="kw">pub type </span>Task = Schedule;
+
+<span class="doccomment">/// Label for a Task
+</span><span class="attr">#[derive(Eq, PartialEq, Hash)]
 </span><span class="kw">pub struct </span>TaskLabel(<span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str);
 
-<span class="attr">#[derive(PartialEq)]
+<span class="doccomment">/// State of a Job
+</span><span class="attr">#[derive(PartialEq)]
 </span><span class="kw">pub enum </span>ExecutionState {
     Active,
     Suspended,
 }
 
-<span class="attr">#[derive(Copy, Clone, Resource)]
+<span class="doccomment">/// Idle hook
+</span><span class="attr">#[derive(Copy, Clone, Resource)]
 </span><span class="kw">pub struct </span>Idle {
     <span class="kw">pub </span>can_idle: bool,
 }
@@ -165,11 +184,13 @@
     }
 }
 
-<span class="kw">pub fn </span>attempt_to_idle(<span class="kw-2">mut </span>idle: ResMut&lt;Idle&gt;) {
+<span class="doccomment">/// System for attempting to idle at the beginning of each loop
+</span><span class="kw">pub fn </span>attempt_to_idle(<span class="kw-2">mut </span>idle: ResMut&lt;Idle&gt;) {
     idle.can_idle = <span class="bool-val">true</span>;
 }
 
-<span class="attr">#[derive(Copy, Clone, Resource)]
+<span class="doccomment">/// Exit hook
+</span><span class="attr">#[derive(Copy, Clone, Resource)]
 </span><span class="kw">pub struct </span>Exit {
     <span class="kw">pub </span>exit_requested: bool,
 }
@@ -186,7 +207,8 @@
     }
 }
 
-<span class="attr">#[derive(Resource)]
+<span class="doccomment">/// Store for entity that maps to EntityName
+</span><span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>EntityStore {
     <span class="kw">pub </span>store: HashMap&lt;EntityName, Entity&gt;,
 }
@@ -199,17 +221,21 @@
     }
 }
 
-<span class="kw">pub struct </span>Job {
+<span class="doccomment">/// Extensible container + task runner
+</span><span class="kw">pub struct </span>Job {
     <span class="kw">pub </span>execution_state: ExecutionState,
     <span class="kw">pub </span>container: Container,
     <span class="kw">pub </span>tasks: HashMap&lt;TaskLabel, Task&gt;,
 }
 
-<span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
+<span class="doccomment">/// SyncPoint for Job Idle behaviour
+</span><span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 </span><span class="kw">pub enum </span>JobSyncPoint {
     Idle,
 }
-<span class="attr">#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
+
+<span class="doccomment">/// Name for identifying an Entity
+</span><span class="attr">#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
 </span><span class="kw">pub struct </span>EntityName(<span class="kw">pub </span>CompactString);
 <span class="kw">impl </span>EntityName {
     <span class="kw">pub fn </span>new(name: String) -&gt; <span class="self">Self </span>{
