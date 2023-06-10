@@ -5,7 +5,7 @@ cargo ndk -t arm64-v8a -o ./android_src/app/src/main/jniLibs/ build --package ap
 # shellcheck disable=SC2164
 cd android_src
 ./gradlew build
-#./gradlew installDebug
-#adb shell am start -n co.workflow.visualizer/.MainActivity
+./gradlew installDebug
+adb shell am start -n co.workflow.visualizer/.MainActivity
+adb shell logcat -v color > logcat1.txt
 #adb shell pidof co.workflow.visualizer
-#adb shell logcat -v color --pid= > logcat1.txt

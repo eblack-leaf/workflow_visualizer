@@ -147,6 +147,7 @@ impl Visualizer {
         self.invoke_attach::<TextAttachment>();
         self.attach_from_queue();
         self.setup();
+        self.job.resume();
     }
     pub fn set_theme(&mut self, theme: Theme) {
         self.job.container.insert_resource(theme);

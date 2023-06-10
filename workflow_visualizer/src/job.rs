@@ -113,7 +113,7 @@ impl Job {
     }
     pub(crate) fn new() -> Self {
         Self {
-            execution_state: ExecutionState::Active,
+            execution_state: ExecutionState::Suspended,
             container: {
                 let mut container = Container::new();
                 container.insert_resource(Exit::new());

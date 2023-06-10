@@ -4,9 +4,9 @@ use std::ops::Deref;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
+use crate::Area;
 use crate::coord::NumericalContext;
 use crate::text::component::{TextScale, TextScaleAlignment};
-use crate::Area;
 
 #[derive(Resource)]
 pub(crate) struct MonoSpacedFont {
@@ -16,7 +16,7 @@ pub(crate) struct MonoSpacedFont {
 impl MonoSpacedFont {
     pub(crate) fn jet_brains_mono<T: Into<TextScale>>(opt_scale: T) -> Self {
         Self::new(
-            include_bytes!("JetBrainsMono-Medium.ttf").as_slice(),
+            include_bytes!("JetBrainsMono-Regular.ttf").as_slice(),
             opt_scale,
         )
     }
