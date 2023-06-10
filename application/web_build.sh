@@ -1,1 +1,0 @@
-trunk build --release --public-url=/workflow_visualizer/demo/
