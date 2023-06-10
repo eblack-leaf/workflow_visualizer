@@ -108,9 +108,9 @@
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>fontdue::{Font <span class="kw">as </span>fdFont, FontSettings};
 
+<span class="kw">use </span><span class="kw">crate</span>::Area;
 <span class="kw">use </span><span class="kw">crate</span>::coord::NumericalContext;
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{TextScale, TextScaleAlignment};
-<span class="kw">use </span><span class="kw">crate</span>::Area;
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>MonoSpacedFont {
@@ -120,7 +120,7 @@
 <span class="kw">impl </span>MonoSpacedFont {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>jet_brains_mono&lt;T: Into&lt;TextScale&gt;&gt;(opt_scale: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(
-            <span class="macro">include_bytes!</span>(<span class="string">&quot;JetBrainsMono-Medium.ttf&quot;</span>).as_slice(),
+            <span class="macro">include_bytes!</span>(<span class="string">&quot;JetBrainsMono-Regular.ttf&quot;</span>).as_slice(),
             opt_scale,
         )
     }

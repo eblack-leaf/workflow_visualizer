@@ -434,6 +434,9 @@
 <a href="#434" id="434">434</a>
 <a href="#435" id="435">435</a>
 <a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -454,6 +457,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
 <span class="kw">use </span><span class="kw">crate</span>::line::LineAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::orientation::OrientationAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::panel::PanelAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::path::PathAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::render::{
     internal_render, invoke_render, Render, RenderPhase, RenderTaskManager, RenderTasks,
@@ -571,6 +575,7 @@
         <span class="self">self</span>.invoke_attach::&lt;ViewportAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;GridAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;PathAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;PanelAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;LineAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;VisibilityAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;TouchAttachment&gt;();
@@ -581,6 +586,7 @@
         <span class="self">self</span>.invoke_attach::&lt;TextAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
         <span class="self">self</span>.setup();
+        <span class="self">self</span>.job.resume();
     }
     <span class="kw">pub fn </span>set_theme(<span class="kw-2">&amp;mut </span><span class="self">self</span>, theme: Theme) {
         <span class="self">self</span>.job.container.insert_resource(theme);

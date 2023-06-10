@@ -144,7 +144,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="panel-renderer"><a class="header" href="#panel-renderer">Panel Renderer</a></h1>
+<p>The <code>PanelRenderer</code> makes a visual container at a location specified by the <a href="grid.html"><code>Grid</code></a> using a <code>Panel</code>.
+Given a <code>ResponsiveGridView</code> this bundle will spawn a rounded corner panel that colors the background with
+<code>PanelColor</code>. This can be augmented with <code>BorderColor</code> and <code>PanelType::BorderedPanel</code> to draw a colored 
+rounded line around the perimeter.</p>
+<h3 id="panel-type"><a class="header" href="#panel-type">Panel Type</a></h3>
+<p>Three <code>PanelType</code>s exist.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum PanelType {
+    Panel,
+    Border,
+    BorderedPanel,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This is done because the same logic for rendering a <code>Border</code> coexists with 
+the systems for <code>Panel</code>. To specify a <code>Border</code> only use <code>PanelType::Border</code>. 
+Specifying a <code>BorderColor</code> when only using <code>PanelType::Panel</code> will ignore the 
+<code>BorderColor</code> component.</p>
+<h3 id="padding"><a class="header" href="#padding">Padding</a></h3>
+<p>The <code>CornerDepth</code> of a <code>Panel</code> is set to <code>5px</code> to give the rounded corner room
+to bend without interfering with the content there. The <code>Panel</code> is adjusted <code>5px</code> to 
+the top/left to adjust for this. </p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

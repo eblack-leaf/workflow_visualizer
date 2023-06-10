@@ -423,21 +423,24 @@
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
-<span class="kw">use </span>bevy_ecs::prelude::{Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource};
+<span class="kw">use </span>bevy_ecs::prelude::{
+    Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource,
+};
 <span class="kw">use </span>bevy_ecs::query::Changed;
 <span class="kw">use </span>bevy_ecs::system::ResMut;
 <span class="kw">use </span>tracing::trace;
 
+<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
+<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 <span class="kw">use crate</span>::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
-<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
-<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 
 <span class="doccomment">/// Span used for setting the number of columns available in the Grid
 </span><span class="attr">#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -564,7 +567,7 @@
             location
         };
         <span class="kw">let </span>location = <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = grid_location.offset {
-            location + offset.<span class="number">0.0
+            location + offset.<span class="number">0 </span>.<span class="number">0
         </span>} <span class="kw">else </span>{
             location
         };
@@ -580,7 +583,7 @@
             location
         };
         <span class="kw">let </span>location = <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = grid_location.offset {
-            location + offset.<span class="number">0.0
+            location + offset.<span class="number">0 </span>.<span class="number">0
         </span>} <span class="kw">else </span>{
             location
         };
@@ -659,7 +662,7 @@
 <span class="kw">impl </span>GridLocation {
     <span class="kw">pub fn </span>raw_offset(<span class="kw-2">mut </span><span class="self">self</span>, offset: i32) -&gt; <span class="self">Self </span>{
         <span class="kw">if let </span><span class="prelude-val">Some</span>(current_offset) = <span class="self">self</span>.offset.as_mut() {
-            current_offset.<span class="number">0.0 </span>+= offset;
+            current_offset.<span class="number">0 </span>.<span class="number">0 </span>+= offset;
         } <span class="kw">else </span>{
             <span class="self">self</span>.offset.replace(GridLocationOffset(offset.into()));
         }
@@ -804,8 +807,7 @@
         <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
     )&gt;,
     <span class="kw-2">mut </span>grid: ResMut&lt;Grid&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)]
-    </span><span class="kw-2">mut </span>diagnostics: Local&lt;DiagnosticsHandle&lt;GridConfigRecorder&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)] </span><span class="kw-2">mut </span>diagnostics: Local&lt;DiagnosticsHandle&lt;GridConfigRecorder&gt;&gt;,
 ) {
     <span class="kw">if </span>!window_resize_events.is_empty() {
         <span class="comment">// configure grid configs + span

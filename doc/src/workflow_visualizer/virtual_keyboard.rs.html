@@ -203,7 +203,7 @@
     </span><span class="kw">pub fn </span>open(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: VirtualKeyboardType) {
         <span class="attr">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
         </span>{
-            <span class="kw">use </span>wasm_bindgen::{JsCast, prelude::<span class="kw-2">*</span>};
+            <span class="kw">use </span>wasm_bindgen::{prelude::<span class="kw-2">*</span>, JsCast};
             <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
             <span class="kw">let </span>trigger_element = <span class="kw">match </span>ty {
                 VirtualKeyboardType::Keyboard =&gt; document

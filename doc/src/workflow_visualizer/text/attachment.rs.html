@@ -45,7 +45,6 @@
 <a href="#45" id="45">45</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
-<span class="kw">use crate</span>::{Attach, spawn, SyncPoint, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::text::component::Text;
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer;
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer::TextRenderer;
@@ -54,6 +53,7 @@
     position_diff, pull_differences, render_group_differences, resolve_draw_section_on_resize,
     scale_change, setup, visible_section_diff,
 };
+<span class="kw">use crate</span>::{spawn, Attach, SyncPoint, Visualizer};
 
 <span class="doccomment">/// Attachment for enabling the `TextRenderer`
 </span><span class="kw">pub struct </span>TextAttachment;

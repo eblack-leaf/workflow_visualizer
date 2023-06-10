@@ -76,16 +76,19 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
 //! trait Workflow to setup application messaging.
 //! Visualizer which handles rendering
 //! Runner which invokes the visualizer&#39;s tools for multiple platforms
-</span><span class="kw">pub use </span>bevy_ecs;
-<span class="kw">pub use </span>wgpu;
-<span class="kw">pub use </span>winit;
-
+</span><span class="kw">pub use </span><span class="kw">crate</span>::animate::Interpolator;
+<span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
+<span class="kw">pub use </span><span class="kw">crate</span>::panel::{BorderColor, Panel, PanelColor, PanelContentArea, PanelType};
+<span class="kw">pub use </span>bevy_ecs;
 <span class="kw">pub use </span>instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
@@ -94,12 +97,14 @@
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
-<span class="kw">pub use </span>workflow::{Runner, Sender, start_web_worker, Workflow};
+<span class="kw">pub use </span>wgpu;
+<span class="kw">pub use </span>winit;
+<span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
-    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
@@ -111,7 +116,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::job::{EntityName, Job};
 <span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender};
 <span class="kw">pub use </span><span class="kw">crate</span>::path::{Path, PathView, PathViewPoint, ResponsivePathView};
-<span class="kw">pub use </span><span class="kw">crate</span>::request::{Request, spawn};
+<span class="kw">pub use </span><span class="kw">crate</span>::request::{spawn, Request};
 <span class="kw">pub use </span><span class="kw">crate</span>::scale_factor::ScaleFactor;
 <span class="kw">pub use </span><span class="kw">crate</span>::sync::{SyncPoint, UserSpaceSyncPoint};
 <span class="kw">pub use </span><span class="kw">crate</span>::text::{
@@ -120,7 +125,7 @@
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
-<span class="kw">pub use </span><span class="kw">crate</span>::touch::{Touchable, TouchListener};
+<span class="kw">pub use </span><span class="kw">crate</span>::touch::{TouchListener, Touchable};
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
 <span class="kw">pub use </span><span class="kw">crate</span>::window::WindowResize;
@@ -130,6 +135,7 @@
 <span class="kw">mod </span>animate;
 <span class="kw">mod </span>color;
 <span class="kw">mod </span>coord;
+<span class="kw">mod </span>diagnostics;
 <span class="kw">mod </span>focus;
 <span class="kw">mod </span>gfx;
 <span class="kw">mod </span>grid;
@@ -137,6 +143,7 @@
 <span class="kw">mod </span>job;
 <span class="kw">mod </span>line;
 <span class="kw">mod </span>orientation;
+<span class="kw">mod </span>panel;
 <span class="kw">mod </span>path;
 <span class="kw">mod </span>render;
 <span class="kw">mod </span>request;
@@ -153,6 +160,5 @@
 <span class="kw">mod </span>visualizer;
 <span class="kw">mod </span>window;
 <span class="kw">mod </span>workflow;
-<span class="kw">mod </span>diagnostics;
 </code></pre></div>
 </section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="workflow_visualizer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

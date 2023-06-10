@@ -29,8 +29,8 @@
 </pre><pre class="rust"><code><span class="kw">use </span>std::marker::PhantomData;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Component, Resource};
-<span class="kw">use </span>wgpu::Buffer;
 <span class="kw">use </span>wgpu::util::DeviceExt;
+<span class="kw">use </span>wgpu::Buffer;
 
 <span class="doccomment">/// Wrapper around wgpu::Buffer for use as a Uniform Buffer
 </span><span class="attr">#[derive(Component, Resource)]

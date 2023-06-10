@@ -100,11 +100,11 @@
 <a href="#100" id="100">100</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Commands, Entity, Query, Res, ResMut};
 
-<span class="kw">use crate</span>::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor};
 <span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
+<span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
 <span class="kw">use </span><span class="kw">crate</span>::line::LineRender;
-<span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LayerAndHooks, LineRenderer, LineRenderGpu, LineRenderGroup};
 <span class="kw">use </span><span class="kw">crate</span>::path::Path;
+<span class="kw">use crate</span>::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor};
 
 <span class="comment">// before ResolveVisibility after Reconfigure.set_path
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calc_section(

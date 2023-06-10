@@ -52,12 +52,12 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::LineAttachment;
 <span class="kw">pub use </span>line_render::LineRender;
 
+<span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
+<span class="kw">use </span><span class="kw">crate</span>::path::ResponsivePathView;
 <span class="kw">use crate</span>::{
     Color, DeviceContext, EnableVisibility, GfxSurface, InterfaceContext, Layer, Path, Position,
     Section,
 };
-<span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
-<span class="kw">use </span><span class="kw">crate</span>::path::ResponsivePathView;
 
 <span class="kw">mod </span>attachment;
 <span class="kw">mod </span>line_render;
