@@ -1,12 +1,11 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, SyncPoint, Visualizer};
-use crate::line::renderer::{LineRenderer, setup};
+use crate::line::renderer::{setup, LineRenderer};
 use crate::line::system::{
-    calc_section, create_render_group, push_color, push_layer, push_uniforms,
-    scale_path,
+    calc_section, create_render_group, push_color, push_layer, push_uniforms, scale_path,
 };
 use crate::path::view_changed;
+use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct LineAttachment;
 
@@ -16,7 +15,7 @@ impl Attach for LineAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization), ));
+            .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_section
                 .in_set(SyncPoint::Reconfigure)

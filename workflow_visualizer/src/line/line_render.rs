@@ -18,8 +18,6 @@ impl LineRender {
         self.capacity
     }
     pub(crate) fn new(capacity: usize) -> Self {
-        Self {
-            capacity,
-        }
+        Self { capacity }
     }
 }

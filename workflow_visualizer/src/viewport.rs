@@ -2,31 +2,31 @@ use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
 use nalgebra::matrix;
-use wgpu::TextureFormat;
+use wgpu::{BindGroup, BindGroupLayout, Texture, TextureFormat};
 
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 use crate::coord::area::Area;
-use crate::coord::DeviceContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
+use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
 /// Viewport Matrix for converting to NDC
 #[derive(Resource)]
 pub struct Viewport {
-    pub(crate) cpu: CpuViewport,
-    pub(crate) gpu: GpuViewport,
-    pub bind_group: wgpu::BindGroup,
-    pub bind_group_layout: wgpu::BindGroupLayout,
-    pub(crate) uniform: Uniform<GpuViewport>,
-    pub(crate) depth_texture: wgpu::Texture,
-    pub(crate) depth_format: wgpu::TextureFormat,
-    pub(crate) offset: ViewportOffset,
-    pub(crate) offset_uniform: Uniform<ViewportOffset>,
+    cpu: CpuViewport,
+    gpu: GpuViewport,
+    bind_group: wgpu::BindGroup,
+    bind_group_layout: wgpu::BindGroupLayout,
+    uniform: Uniform<GpuViewport>,
+    depth_texture: wgpu::Texture,
+    depth_format: wgpu::TextureFormat,
+    offset: ViewportOffset,
+    offset_uniform: Uniform<ViewportOffset>,
 }
 
 #[repr(C)]
@@ -46,6 +46,18 @@ impl ViewportOffset {
 impl Viewport {
     pub fn depth_format(&self) -> TextureFormat {
         self.depth_format
+    }
+    pub fn far_layer(&self) -> f32 {
+        self.cpu.far_layer()
+    }
+    pub(crate) fn depth_texture(&self) -> &Texture {
+        &self.depth_texture
+    }
+    pub fn bind_group_layout(&self) -> &BindGroupLayout {
+        &self.bind_group_layout
+    }
+    pub fn bind_group(&self) -> &BindGroup {
+        &self.bind_group
     }
     pub(crate) fn new(device: &wgpu::Device, area: Area<DeviceContext>, sample_count: u32) -> Self {
         let depth = 100u32.into();

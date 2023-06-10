@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
 };
 use winit::event::{ElementState, MouseButton};
 
-use crate::{
-    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
-};
 use crate::focus::FocusedEntity;
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
+use crate::{
+    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
+};
 
 /// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]

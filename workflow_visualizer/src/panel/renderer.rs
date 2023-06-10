@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAttachment};
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
 use crate::panel::{Difference, Extraction};
 use crate::{
-    Color, Extract, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition,
-    Render, RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
+    Color, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
 
 #[derive(Resource)]
@@ -27,14 +27,14 @@ pub(crate) struct PanelRenderer {
 pub(crate) fn setup(
     gfx_surface: Res<GfxSurface>,
     viewport: Res<Viewport>,
-    msaa: Res<MsaaRenderAttachment>,
+    msaa: Res<MsaaRenderAdapter>,
     gfx_surface_config: Res<GfxSurfaceConfiguration>,
     scale_factor: Res<ScaleFactor>,
     mut cmd: Commands,
 ) {
     let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("content panel pipeline layout descriptor"),
-        bind_group_layouts: &[&viewport.bind_group_layout],
+        bind_group_layouts: &[&viewport.bind_group_layout()],
         push_constant_ranges: &[],
     };
     let pipeline_layout = gfx_surface
@@ -97,14 +97,14 @@ pub(crate) fn setup(
             conservative: false,
         },
         depth_stencil: Some(wgpu::DepthStencilState {
-            format: viewport.depth_format,
+            format: viewport.depth_format(),
             depth_write_enabled: true,
             depth_compare: wgpu::CompareFunction::LessEqual,
             stencil: wgpu::StencilState::default(),
             bias: wgpu::DepthBiasState::default(),
         }),
         multisample: wgpu::MultisampleState {
-            count: msaa.requested,
+            count: msaa.requested(),
             ..wgpu::MultisampleState::default()
         },
         fragment: Some(wgpu::FragmentState {
@@ -139,25 +139,6 @@ pub(crate) fn setup(
     };
     cmd.insert_resource(renderer);
 }
-impl Extract for PanelRenderer {
-    fn extract(frontend: &mut Job, backend: &mut Job) {
-        let extracted_differences = frontend
-            .container
-            .get_resource_mut::<Extraction>()
-            .expect("no extraction")
-            .differences
-            .drain()
-            .collect::<Vec<(Entity, Difference)>>();
-        for (entity, difference) in extracted_differences {
-            backend
-                .container
-                .get_resource_mut::<Extraction>()
-                .expect("no extraction")
-                .differences
-                .insert(entity, difference);
-        }
-    }
-}
 impl Render for PanelRenderer {
     fn phase() -> RenderPhase {
         RenderPhase::Opaque
@@ -167,7 +148,7 @@ impl Render for PanelRenderer {
             render_pass_handle.0.set_pipeline(&self.pipeline);
             render_pass_handle
                 .0
-                .set_bind_group(0, &viewport.bind_group, &[]);
+                .set_bind_group(0, &viewport.bind_group(), &[]);
             render_pass_handle
                 .0
                 .set_vertex_buffer(0, self.panel_vertex_buffer.slice(..));

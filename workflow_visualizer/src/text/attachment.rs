@@ -1,6 +1,5 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, spawn, SyncPoint, Visualizer};
 use crate::text::component::Text;
 use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
@@ -9,6 +8,7 @@ use crate::text::system::{
     position_diff, pull_differences, render_group_differences, resolve_draw_section_on_resize,
     scale_change, setup, visible_section_diff,
 };
+use crate::{spawn, Attach, SyncPoint, Visualizer};
 
 /// Attachment for enabling the `TextRenderer`
 pub struct TextAttachment;

@@ -1,13 +1,15 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Component, DetectChanges, Entity, IntoSystemConfig, Local, Query, Res, Resource};
+use bevy_ecs::prelude::{
+    Component, DetectChanges, Entity, IntoSystemConfig, Local, Query, Res, Resource,
+};
 use tracing::trace;
 
 use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
-use crate::SyncPoint;
 use crate::touch::read_touch_events;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
+use crate::SyncPoint;
 
 /// Used to set the Focus of an element
 #[derive(Component)]
@@ -60,7 +62,10 @@ impl FocusRecorder {
 
 impl Record for FocusRecorder {
     fn record(&self, core_record: String) -> String {
-        format!("{:?}:@times_focused:{:?}:@loops_focused:{:?}", core_record, self.times_focused, self.loops_focused)
+        format!(
+            "{:?}:@times_focused:{:?}:@loops_focused:{:?}",
+            core_record, self.times_focused, self.loops_focused
+        )
     }
 }
 
@@ -82,12 +87,12 @@ pub(crate) fn set_focused(
     focus_input_listeners: Query<(Entity, &FocusInputListener)>,
     focused_entity_res: Res<FocusedEntity>,
     virtual_keyboard: Res<VirtualKeyboardAdapter>,
-    #[cfg(feature = "diagnostics")]
-    mut diagnostics: Local<DiagnosticsHandle<FocusRecorder>>,
+    #[cfg(feature = "diagnostics")] mut diagnostics: Local<DiagnosticsHandle<FocusRecorder>>,
 ) {
     if focused_entity_res.is_changed() {
         if let Some(f_entity) = focused_entity_res.entity {
-            #[cfg(feature = "diagnostics")] {
+            #[cfg(feature = "diagnostics")]
+            {
                 diagnostics.ext.record_time_focus(f_entity);
                 diagnostics.ext.record_loop_focused(f_entity);
             }

@@ -5,8 +5,9 @@ use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 pub use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
-use crate::view::{ViewArea, ViewPosition};
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section};
+use crate::{
+    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, ResponsiveGridView, Section,
+};
 
 mod attachment;
 mod renderer;
@@ -27,9 +28,8 @@ pub struct PanelColor(pub Color);
 pub struct BorderColor(pub Color);
 #[derive(Bundle)]
 pub struct Panel {
+    responsive_grid_view: ResponsiveGridView,
     pub panel_type: PanelType,
-    pub view_position: ViewPosition,
-    pub view_area: ViewArea,
     pub layer: Layer,
     pub content_area: PanelContentArea,
     pub panel_color: PanelColor,
@@ -44,17 +44,15 @@ impl Panel {
     pub const CORNER_DEPTH: f32 = 5f32;
     pub const LINE_WIDTH: f32 = 1f32;
     pub fn new<C: Into<Color>>(
+        responsive_grid_view: ResponsiveGridView,
         panel_type: PanelType,
-        view_position: ViewPosition,
-        view_area: ViewArea,
         layer: Layer,
         panel_color: C,
         border_color: C,
     ) -> Self {
         Self {
+            responsive_grid_view,
             panel_type,
-            view_position,
-            view_area,
             layer,
             border_color: BorderColor(border_color.into()),
             content_area: PanelContentArea(Area::default()),

@@ -2,17 +2,19 @@ use std::collections::HashMap;
 use std::ops::Add;
 
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource};
+use bevy_ecs::prelude::{
+    Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource,
+};
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
 use tracing::trace;
 
+use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 /// Span used for setting the number of columns available in the Grid
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -139,7 +141,7 @@ impl Grid {
             location
         };
         let location = if let Some(offset) = grid_location.offset {
-            location + offset.0.0
+            location + offset.0 .0
         } else {
             location
         };
@@ -155,7 +157,7 @@ impl Grid {
             location
         };
         let location = if let Some(offset) = grid_location.offset {
-            location + offset.0.0
+            location + offset.0 .0
         } else {
             location
         };
@@ -234,7 +236,7 @@ pub struct GridLocation {
 impl GridLocation {
     pub fn raw_offset(mut self, offset: i32) -> Self {
         if let Some(current_offset) = self.offset.as_mut() {
-            current_offset.0.0 += offset;
+            current_offset.0 .0 += offset;
         } else {
             self.offset.replace(GridLocationOffset(offset.into()));
         }
@@ -379,8 +381,7 @@ pub(crate) fn config_grid(
         &mut Area<InterfaceContext>,
     )>,
     mut grid: ResMut<Grid>,
-    #[cfg(feature = "diagnostics")]
-    mut diagnostics: Local<DiagnosticsHandle<GridConfigRecorder>>,
+    #[cfg(feature = "diagnostics")] mut diagnostics: Local<DiagnosticsHandle<GridConfigRecorder>>,
 ) {
     if !window_resize_events.is_empty() {
         // configure grid configs + span

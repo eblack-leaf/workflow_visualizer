@@ -4,11 +4,11 @@ use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use tracing::trace;
 use wgpu::util::DeviceExt;
 
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::{
     Color, DeviceContext, GfxSurface, Layer, Position, RawPosition, Render, RenderPassHandle,
     RenderPhase, Uniform, Viewport,
 };
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 
 pub(crate) struct LineRenderGroup {
     pub(crate) line_render_gpu: LineRenderGpu,
@@ -120,7 +120,7 @@ pub(crate) fn setup(
     let layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("line renderer layout"),
         bind_group_layouts: &[
-            &viewport.bind_group_layout,
+            &viewport.bind_group_layout(),
             &line_renderer_bind_group_layout,
         ],
         push_constant_ranges: &[],
@@ -189,7 +189,7 @@ impl Render for LineRenderer {
                 render_pass_handle.0.set_pipeline(&self.pipeline);
                 render_pass_handle
                     .0
-                    .set_bind_group(0, &viewport.bind_group, &[]);
+                    .set_bind_group(0, &viewport.bind_group(), &[]);
                 render_pass_handle
                     .0
                     .set_bind_group(1, &render_group.bind_group, &[]);

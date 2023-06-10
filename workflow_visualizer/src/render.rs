@@ -1,9 +1,9 @@
 use bevy_ecs::prelude::Resource;
 use tracing::{trace, warn};
 
-use crate::{GfxSurface, Job, Theme, Viewport};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::visualizer::Visualizer;
+use crate::{GfxSurface, Job, Theme, Viewport};
 
 /// Phase for Rendering
 pub enum RenderPhase {
@@ -86,7 +86,7 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
             .create_view(&wgpu::TextureViewDescriptor::default());
         {
             let depth_texture_view = viewport
-                .depth_texture
+                .depth_texture()
                 .create_view(&wgpu::TextureViewDescriptor::default());
             let (v, rt) = match msaa_attachment.view() {
                 Some(view) => (view, Some(&surface_texture_view)),
@@ -107,7 +107,7 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: &depth_texture_view,
                     depth_ops: Some(wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(viewport.cpu.far_layer()),
+                        load: wgpu::LoadOp::Clear(viewport.far_layer()),
                         store: true,
                     }),
                     stencil_ops: Some(wgpu::Operations {

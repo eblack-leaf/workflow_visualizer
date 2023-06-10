@@ -1,29 +1,28 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
+use crate::grid::set_from_view;
 use crate::panel::renderer::PanelRenderer;
 use crate::panel::system::{
     calc_content_area, color_diff, content_area_diff, layer_diff, management, panel_type_diff,
     position_diff, process_extraction, pull_differences,
 };
 use crate::panel::{renderer, Extraction, Panel};
-use crate::view::set_from_view;
-use crate::{spawn, Attach, Engen, SyncPoint};
+use crate::{spawn, Attach, SyncPoint, Visualizer};
 
 pub struct PanelAttachment;
 impl Attach for PanelAttachment {
-    fn attach(engen: &mut Engen) {
-        engen.frontend.container.insert_resource(Extraction::new());
-        engen.backend.container.insert_resource(Extraction::new());
-        engen.add_renderer::<PanelRenderer>();
+    fn attach(engen: &mut Visualizer) {
+        engen.job.container.insert_resource(Extraction::new());
+        engen.register_renderer::<PanelRenderer>();
         engen
-            .backend
-            .startup
-            .add_system(renderer::setup.in_set(SyncPoint::Preparation));
+            .job
+            .task(Visualizer::TASK_RENDER_STARTUP)
+            .add_systems((renderer::setup.in_set(SyncPoint::Preparation),));
         engen
-            .backend
-            .main
-            .add_system(process_extraction.in_set(SyncPoint::Preparation));
-        engen.frontend.main.add_systems((
+            .job
+            .task(Visualizer::TASK_RENDER_MAIN)
+            .add_systems((process_extraction.in_set(SyncPoint::Preparation),));
+        engen.job.task(Visualizer::TASK_MAIN).add_systems((
             spawn::<Panel>.in_set(SyncPoint::Spawn),
             calc_content_area
                 .in_set(SyncPoint::Reconfigure)

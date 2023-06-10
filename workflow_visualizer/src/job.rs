@@ -90,6 +90,16 @@ impl EntityName {
         EntityName(CompactString::new(name))
     }
 }
+impl From<&'static str> for EntityName {
+    fn from(value: &'static str) -> Self {
+        Self::new(value.to_string())
+    }
+}
+impl From<String> for EntityName {
+    fn from(value: String) -> Self {
+        Self::new(value)
+    }
+}
 impl Job {
     pub fn store_entity<T: Into<EntityName>>(&mut self, id: T, entity: Entity) {
         self.container

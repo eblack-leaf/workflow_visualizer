@@ -26,8 +26,7 @@ pub fn calc_content_area(
     >,
 ) {
     for (mut content_area, area) in content_changed.iter_mut() {
-        let calculated_area =
-            *area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
+        let calculated_area = *area;
         content_area.0 = calculated_area;
     }
 }
@@ -67,14 +66,15 @@ pub(crate) fn position_diff(
     >,
 ) {
     for (pos, mut cache, mut diff) in pos_changed.iter_mut() {
+        let pos = *pos - Position::from(Panel::PADDING);
         if let Some(cached) = cache.position {
-            if *pos != cached {
-                cache.position.replace(*pos);
-                diff.position.replace(*pos);
+            if pos != cached {
+                cache.position.replace(pos);
+                diff.position.replace(pos);
             }
         } else {
-            cache.position.replace(*pos);
-            diff.position.replace(*pos);
+            cache.position.replace(pos);
+            diff.position.replace(pos);
         }
     }
 }
@@ -86,7 +86,7 @@ pub(crate) fn content_area_diff(
     >,
 ) {
     for (content_area, mut cache, mut diff) in content_area_changed.iter_mut() {
-        let padded_content_area = content_area.0 + Area::from(Panel::PADDING);
+        let padded_content_area = content_area.0;
         if let Some(cached) = cache.content_area {
             if padded_content_area != cached {
                 cache.content_area.replace(padded_content_area);
@@ -219,11 +219,11 @@ pub(crate) fn process_extraction(
             }
         }
     }
-    renderer.positions.write_attribute(&gfx_surface);
-    renderer.content_area.write_attribute(&gfx_surface);
-    renderer.layers.write_attribute(&gfx_surface);
-    renderer.panel_colors.write_attribute(&gfx_surface);
-    renderer.panel_null_bits.write_attribute(&gfx_surface);
-    renderer.border_null_bits.write_attribute(&gfx_surface);
-    renderer.border_colors.write_attribute(&gfx_surface);
+    renderer.positions.write(&gfx_surface);
+    renderer.content_area.write(&gfx_surface);
+    renderer.layers.write(&gfx_surface);
+    renderer.panel_colors.write(&gfx_surface);
+    renderer.panel_null_bits.write(&gfx_surface);
+    renderer.border_null_bits.write(&gfx_surface);
+    renderer.border_colors.write(&gfx_surface);
 }

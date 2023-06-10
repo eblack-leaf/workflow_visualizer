@@ -7,11 +7,6 @@ use bevy_ecs::prelude::{
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::{trace, warn};
 
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -31,6 +26,11 @@ use crate::text::render_group::{
 };
 use crate::text::renderer::{Extraction, TextRenderer};
 use crate::window::WindowResize;
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());

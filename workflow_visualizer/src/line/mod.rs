@@ -4,12 +4,12 @@ use wgpu::util::DeviceExt;
 pub(crate) use attachment::LineAttachment;
 pub use line_render::LineRender;
 
+use crate::line::line_render::LineRenderPoints;
+use crate::path::ResponsivePathView;
 use crate::{
     Color, DeviceContext, EnableVisibility, GfxSurface, InterfaceContext, Layer, Path, Position,
     Section,
 };
-use crate::line::line_render::LineRenderPoints;
-use crate::path::ResponsivePathView;
 
 mod attachment;
 mod line_render;
