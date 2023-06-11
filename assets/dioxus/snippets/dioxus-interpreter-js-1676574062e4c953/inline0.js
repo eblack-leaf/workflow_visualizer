@@ -1,13 +1,18 @@
-let m,p,ls,lss,sp,d,t,c,s,sl,op,i,e,z,event_name,bubbles,text,id,value,len,field,tmpl_id,index,ptr,many,root,ns,n;const attr = [];const ns_cache = [];const evt = [];
-    class ListenerMap {
-        constructor(root) {
-            // bubbling events can listen at the root element
-            this.global = {};
-            // non bubbling events listen at the element the listener was created at
-            this.local = {};
-            this.root = null;
-            this.handler = null;
-        }
+let m, p, ls, lss, sp, d, t, c, s, sl, op, i, e, z, len, root, tmpl_id, text, ns, many, index, event_name, value, n,
+    bubbles, field, id, ptr;
+const ns_cache = [];
+const evt = [];
+const attr = [];
+
+class ListenerMap {
+    constructor(root) {
+        // bubbling events can listen at the root element
+        this.global = {};
+        // non bubbling events listen at the element the listener was created at
+        this.local = {};
+        this.root = null;
+        this.handler = null;
+    }
 
         create(event_name, element, bubbles) {
             if (bubbles) {
