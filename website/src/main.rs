@@ -49,7 +49,7 @@ fn root(cx: Scope) -> Element {
                     "Impl "
                     a {
                         class:"font-bold text-md text-orange-300",
-                        href:"https://eblack-leaf.github.io/workflow_visualizer/doc/workflow_visualizer/trait.Workflow.html",
+                        href:"book/pages/workflow.html",
                         "Workflow"
                     }
                     " to setup application."
@@ -59,7 +59,7 @@ fn root(cx: Scope) -> Element {
                     "Utilize "
                     a {
                         class:"font-bold text-md text-amber-400",
-                        href:"doc/workflow_visualizer/struct.Visualizer.html",
+                        href:"book/pages/visualizer.html",
                         "Visualizer"
                     }
                     " to define aesthetics & reactions."
@@ -69,13 +69,13 @@ fn root(cx: Scope) -> Element {
                     "Impl "
                     a {
                         class:"font-bold text-md text-indigo-400",
-                        href:"doc/workflow_visualizer/trait.Render.html",
+                        href:"book/pages/render.html",
                         "Render"
                     }
                     " + "
                     a {
                         class:"font-bold text-md text-indigo-400",
-                        href:"doc/workflow_visualizer/trait.Attach.html",
+                        href:"book/pages/attach.html",
                         "Attach"
                     }
                     " to extend rendering."
