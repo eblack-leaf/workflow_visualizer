@@ -1,7 +1,7 @@
-use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
 use workflow_visualizer::{
     Area, InterfaceContext, Position, ScaleFactor, Sender, TextValue, Workflow,
 };
+use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
 
 use crate::workflow::{Engen, TokenName};
 
@@ -20,13 +20,5 @@ pub(crate) fn send_event(
         sender.send(action);
         *limiter = true;
     }
-    for (mut t, pos, area) in text.iter_mut() {
-        if t.0 != "Otp-Manager".to_string() {
-            *t = TextValue(format!(
-                "{:?}, {:?}",
-                pos.to_device(scale_factor.factor()),
-                area.to_device(scale_factor.factor())
-            ));
-        }
-    }
+    for (mut t, pos, area) in text.iter_mut() {}
 }
