@@ -9,12 +9,12 @@ use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
 use tracing::trace;
 
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
+use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 /// Span used for setting the number of columns available in the Grid
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -98,6 +98,9 @@ impl Grid {
     }
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
         ((width - base) / RawMarker::PX).floor() as i32 / columns
+    }
+    pub fn text_height_markers() -> i32 {
+        3
     }
     pub fn calc_section(&self, view: &ResponsiveGridView) -> Section<InterfaceContext> {
         let current_view = view.mapping.get(&self.span).expect("view mapping");
@@ -299,6 +302,9 @@ pub struct ResponsiveView<T> {
     pub mapping: HashMap<HorizontalSpan, T>,
 }
 impl<F> ResponsiveView<F> {
+    pub fn get_span(&self, span: &HorizontalSpan) -> &F {
+        self.mapping.get(span).expect("no view")
+    }
     pub fn with_span_four<T: Into<F>>(mut self, view: T) -> Self {
         self.mapping.insert(HorizontalSpan::Four, view.into());
         self

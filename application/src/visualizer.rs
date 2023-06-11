@@ -1,8 +1,9 @@
 use workflow_visualizer::{
-    Area, Color, EntityName, Focus, FocusInputListener, GfxOptions, GridMarkerBias, Layer, Line,
-    Panel, PanelType, PathViewPoint, Position, Request, ResponsiveGridView, ResponsivePathView,
-    ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Touchable,
-    TouchListener, UserSpaceSyncPoint, Visualizer,
+    Area, Color, EntityName, Focus, FocusInputListener, GfxOptions, Grid, GridMarkerBias,
+    HorizontalSpan, Layer, Line, Panel, PanelType, PathViewPoint, Position, Request,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment,
+    TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint,
+    Visualizer,
 };
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 
@@ -19,14 +20,21 @@ pub fn visualizer() -> Visualizer {
         ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.near().raw_offset(4))));
     let panel_view =
         ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near().raw_offset(5), 4.far())));
-    let credential_text_horizontal_range = (1.near().raw_offset(1), 1.far());
+    let list_text_horizontal_range = (1.near().raw_offset(1), 1.far());
     let first_text_placement = ResponsiveGridView::all_same((
-        credential_text_horizontal_range,
+        list_text_horizontal_range,
         (1.near().raw_offset(6), 1.near().raw_offset(9)),
     ));
     let second_text_placement = ResponsiveGridView::all_same((
-        credential_text_horizontal_range,
-        (1.near().raw_offset(11), 1.near().raw_offset(14)),
+        list_text_horizontal_range,
+        (
+            1.near().raw_offset(11),
+            first_text_placement
+                .get_span(&HorizontalSpan::Four)
+                .vertical
+                .end
+                .raw_offset(Grid::text_height_markers() + 1),
+        ),
     ));
     let line_y = 1.near().raw_offset(10);
     let line_view = ResponsivePathView::all_same(vec![
@@ -47,7 +55,7 @@ pub fn visualizer() -> Visualizer {
             header_placement,
             4,
             "credentials",
-            TextScaleAlignment::Medium, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
+            TextScaleAlignment::Large, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
             Color::GREY,
             TextWrapStyle::word(),
         ))],
@@ -56,7 +64,7 @@ pub fn visualizer() -> Visualizer {
         first_text_placement,
         4,
         "work",
-        TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
+        TextScaleAlignment::Medium, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
         Color::GREY,
         TextWrapStyle::word(),
     ))]);
@@ -66,7 +74,7 @@ pub fn visualizer() -> Visualizer {
             second_text_placement,
             3,
             "school",
-            TextScaleAlignment::Small,
+            TextScaleAlignment::Medium,
             Color::GREY,
             TextWrapStyle::word(),
         )),
