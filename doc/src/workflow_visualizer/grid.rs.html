@@ -424,6 +424,12 @@
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
 <a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::Add;
 
@@ -435,12 +441,12 @@
 <span class="kw">use </span>bevy_ecs::system::ResMut;
 <span class="kw">use </span>tracing::trace;
 
-<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
-<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 <span class="kw">use crate</span>::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
+<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
+<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 
 <span class="doccomment">/// Span used for setting the number of columns available in the Grid
 </span><span class="attr">#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -525,6 +531,9 @@
     <span class="kw">fn </span>calc_extension(width: f32, base: f32, columns: i32) -&gt; i32 {
         ((width - base) / RawMarker::PX).floor() <span class="kw">as </span>i32 / columns
     }
+    <span class="kw">pub fn </span>text_height_markers() -&gt; i32 {
+        <span class="number">3
+    </span>}
     <span class="kw">pub fn </span>calc_section(<span class="kw-2">&amp;</span><span class="self">self</span>, view: <span class="kw-2">&amp;</span>ResponsiveGridView) -&gt; Section&lt;InterfaceContext&gt; {
         <span class="kw">let </span>current_view = view.mapping.get(<span class="kw-2">&amp;</span><span class="self">self</span>.span).expect(<span class="string">&quot;view mapping&quot;</span>);
         <span class="kw">let </span>left = {
@@ -725,6 +734,9 @@
     <span class="kw">pub </span>mapping: HashMap&lt;HorizontalSpan, T&gt;,
 }
 <span class="kw">impl</span>&lt;F&gt; ResponsiveView&lt;F&gt; {
+    <span class="kw">pub fn </span>get_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>HorizontalSpan) -&gt; <span class="kw-2">&amp;</span>F {
+        <span class="self">self</span>.mapping.get(span).expect(<span class="string">&quot;no view&quot;</span>)
+    }
     <span class="kw">pub fn </span>with_span_four&lt;T: Into&lt;F&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.mapping.insert(HorizontalSpan::Four, view.into());
         <span class="self">self
