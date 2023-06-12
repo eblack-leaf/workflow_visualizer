@@ -384,30 +384,6 @@
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, Resource};
@@ -421,6 +397,10 @@
     RenderPhase, Section, Viewport,
 };
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+<span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::{
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData, TextureCoordinates,
+};
+<span class="kw">use </span><span class="kw">crate</span>::icon::component::{ColorInvert, IconId};
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconRenderer {
@@ -428,8 +408,8 @@
     vertex_quad: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     <span class="kw">pub</span>(<span class="kw">crate</span>) pos_attribute: InstanceAttributeManager&lt;RawPosition&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) area_attribute: InstanceAttributeManager&lt;RawArea&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) coords_attribute: InstanceAttributeManager&lt;TextureCoordinates&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) area_and_layer_attribute: InstanceAttributeManager&lt;AreaAndLayer&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) tex_coords_attribute: InstanceAttributeManager&lt;TextureCoordinates&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) positive_space_color_attribute: InstanceAttributeManager&lt;Color&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) negative_space_color_attribute: InstanceAttributeManager&lt;Color&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) layer_attribute: InstanceAttributeManager&lt;Layer&gt;,
@@ -459,10 +439,10 @@
                 </span>.set_vertex_buffer(<span class="number">1</span>, <span class="self">self</span>.pos_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .<span class="number">0
-                </span>.set_vertex_buffer(<span class="number">2</span>, <span class="self">self</span>.area_attribute.gpu.buffer.slice(..));
+                </span>.set_vertex_buffer(<span class="number">2</span>, <span class="self">self</span>.area_and_layer_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .<span class="number">0
-                </span>.set_vertex_buffer(<span class="number">3</span>, <span class="self">self</span>.coords_attribute.gpu.buffer.slice(..));
+                </span>.set_vertex_buffer(<span class="number">3</span>, <span class="self">self</span>.tex_coords_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .<span class="number">0
                 </span>.set_vertex_buffer(<span class="number">4</span>, <span class="self">self</span>.positive_space_color_attribute.gpu.buffer.slice(..));
@@ -471,13 +451,10 @@
                 </span>.set_vertex_buffer(<span class="number">5</span>, <span class="self">self</span>.negative_space_color_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .<span class="number">0
-                </span>.set_vertex_buffer(<span class="number">6</span>, <span class="self">self</span>.layer_attribute.gpu.buffer.slice(..));
+                </span>.set_vertex_buffer(<span class="number">6</span>, <span class="self">self</span>.color_invert_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .<span class="number">0
-                </span>.set_vertex_buffer(<span class="number">7</span>, <span class="self">self</span>.color_invert_attribute.gpu.buffer.slice(..));
-            render_pass_handle
-                .<span class="number">0
-                </span>.set_vertex_buffer(<span class="number">8</span>, <span class="self">self</span>.null_bit_attribute.gpu.buffer.slice(..));
+                </span>.set_vertex_buffer(<span class="number">7</span>, <span class="self">self</span>.null_bit_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .<span class="number">0
                 </span>.draw(<span class="number">0</span>..AABB.len() <span class="kw">as </span>u32, <span class="number">0</span>..<span class="self">self</span>.indexer.count());
@@ -486,89 +463,22 @@
 }
 
 <span class="attr">#[repr(C)]
-#[derive(Component, Copy, Clone, Pod, Zeroable, Default)]
-</span><span class="kw">pub struct </span>ColorInvert {
-    <span class="kw">pub </span>signal: u32,
+#[derive(Pod, Zeroable, Copy, Clone, Component)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>AreaAndLayer {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) data: [f32; <span class="number">3</span>],
 }
 
-<span class="kw">impl </span>ColorInvert {
-    <span class="kw">pub fn </span>on() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ signal: <span class="number">1 </span>}
-    }
-    <span class="kw">pub fn </span>off() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ signal: <span class="number">0 </span>}
+<span class="kw">impl </span>AreaAndLayer {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ data: [<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>] }
     }
 }
 
-<span class="attr">#[derive(Clone, Hash, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>IconId(<span class="kw">pub </span>CompactString);
-
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; <span class="kw">for </span>IconId {
-    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="self">Self </span>{
-        IconId(CompactString::new(value))
+<span class="kw">impl </span>Default <span class="kw">for </span>AreaAndLayer {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        AreaAndLayer::new()
     }
 }
-
-<span class="attr">#[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
-</span><span class="kw">pub struct </span>IconPixelData {
-    <span class="kw">pub </span>data: [f32; <span class="number">4</span>],
-}
-
-<span class="kw">impl </span>From&lt;(f32, f32, f32)&gt; <span class="kw">for </span>IconPixelData {
-    <span class="kw">fn </span>from(value: (f32, f32, f32)) -&gt; <span class="self">Self </span>{
-        IconPixelData {
-            data: [value.<span class="number">0</span>, value.<span class="number">1</span>, value.<span class="number">2</span>, <span class="number">1.0</span>],
-        }
-    }
-}
-
-<span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>IconBitmap {
-    data: Vec&lt;IconPixelData&gt;,
-}
-
-<span class="kw">impl </span>IconBitmap {
-    <span class="kw">pub fn </span>new&lt;T: Into&lt;IconPixelData&gt;&gt;(<span class="kw-2">mut </span>data: Vec&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="macro">assert_eq!</span>(
-            data.len() <span class="kw">as </span>u32,
-            ICON_BITMAP_DIMENSION * ICON_BITMAP_DIMENSION
-        );
-        <span class="self">Self </span>{
-            data: data
-                .drain(..)
-                .map(|d| d.into())
-                .collect::&lt;Vec&lt;IconPixelData&gt;&gt;(),
-        }
-    }
-}
-
-<span class="attr">#[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TextureCoordinates {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) data: [f32; <span class="number">4</span>],
-}
-
-<span class="attr">#[derive(Component, Clone)]
-</span><span class="kw">pub struct </span>IconBitmapRequest {
-    <span class="kw">pub </span>id: IconId,
-    <span class="kw">pub </span>bitmap: IconBitmap,
-}
-
-<span class="attr">#[derive(Resource)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconBitmapLayout {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) bitmap_locations: HashMap&lt;IconId, TextureCoordinates&gt;,
-}
-
-<span class="kw">impl </span>IconBitmapLayout {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            bitmap_locations: HashMap::new(),
-        }
-    }
-}
-
-<span class="kw">const </span>ICON_BITMAP_DIMENSION: u32 = <span class="number">20</span>;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(
     gfx: Res&lt;GfxSurface&gt;,
@@ -610,6 +520,7 @@
     <span class="kw">let </span>dimension = (writes.len() <span class="kw">as </span>f32 / <span class="number">2f32</span>).ceil() <span class="kw">as </span>u32;
     <span class="kw">let </span>byte_dimension =
         dimension * ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32;
+    <span class="kw">let </span>byte_dimension = byte_dimension.max(<span class="number">1</span>);
     <span class="kw">let </span>texture_descriptor = wgpu::TextureDescriptor {
         label: <span class="prelude-val">Some</span>(<span class="string">&quot;icon texture descriptor&quot;</span>),
         size: wgpu::Extent3d {
@@ -732,7 +643,48 @@
     <span class="kw">let </span>vertex_state = wgpu::VertexState {
         module: <span class="kw-2">&amp;</span>shader,
         entry_point: <span class="string">&quot;vertex_entry&quot;</span>,
-        buffers: <span class="kw-2">&amp;</span>[],
+        buffers: <span class="kw-2">&amp;</span>[
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;Vertex&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Vertex,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x2],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;RawPosition&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">1 </span>=&gt; Float32x2],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;AreaAndLayer&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">2 </span>=&gt; Float32x3],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;TextureCoordinates&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">3 </span>=&gt; Float32x4],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;Color&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">4 </span>=&gt; Float32x4],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;Color&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">5 </span>=&gt; Float32x4],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;ColorInvert&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">6 </span>=&gt; Uint32],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::&lt;NullBit&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">7 </span>=&gt; Uint32],
+            }
+        ],
     };
     <span class="kw">let </span>primitive_state = wgpu::PrimitiveState {
         topology: wgpu::PrimitiveTopology::TriangleList,
@@ -777,8 +729,8 @@
         vertex_quad,
         bind_group,
         pos_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
-        area_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
-        coords_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
+        area_and_layer_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
+        tex_coords_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
         positive_space_color_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
         negative_space_color_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
         layer_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),

@@ -449,12 +449,50 @@
 <a href="#449" id="449">449</a>
 <a href="#450" id="450">450</a>
 <a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::prelude::{
     Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource,
+    Without,
 };
 <span class="kw">use </span>bevy_ecs::query::Changed;
 <span class="kw">use </span>bevy_ecs::system::ResMut;
@@ -832,11 +870,18 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>config_grid(
     viewport_handle: Res&lt;ViewportHandle&gt;,
     window_resize_events: EventReader&lt;WindowResize&gt;,
-    <span class="kw-2">mut </span>responsive: Query&lt;(
-        <span class="kw-2">&amp;</span>ResponsiveGridView,
-        <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
-        <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
-    )&gt;,
+    <span class="kw-2">mut </span>responsive: Query&lt;
+        (
+            <span class="kw-2">&amp;</span>ResponsiveGridView,
+            <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
+            <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
+        ),
+        Without&lt;ResponsiveGridPoint&gt;,
+    &gt;,
+    <span class="kw-2">mut </span>responsive_points: Query&lt;
+        (<span class="kw-2">&amp;</span>ResponsiveGridPoint, <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;),
+        Without&lt;ResponsiveGridView&gt;,
+    &gt;,
     <span class="kw-2">mut </span>grid: ResMut&lt;Grid&gt;,
     <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)] </span><span class="kw-2">mut </span>diagnostics: Local&lt;DiagnosticsHandle&lt;GridConfigRecorder&gt;&gt;,
 ) {
@@ -849,10 +894,38 @@
         </span><span class="kw">for </span>(view, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>responsive.iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
+        <span class="kw">for </span>(view, <span class="kw-2">mut </span>pos) <span class="kw">in </span>responsive_points.iter_mut() {
+            <span class="kw">let </span>x = grid
+                .calc_horizontal_location(view.mapping.get(<span class="kw-2">&amp;</span>grid.span).expect(<span class="string">&quot;mapping&quot;</span>).x)
+                .to_pixel();
+            <span class="kw">let </span>y = grid
+                .calc_horizontal_location(view.mapping.get(<span class="kw-2">&amp;</span>grid.span).expect(<span class="string">&quot;mapping&quot;</span>).y)
+                .to_pixel();
+            <span class="kw-2">*</span>pos = Position::new(x, y);
+        }
         <span class="attr">#[cfg(feature = <span class="string">&quot;diagnostics&quot;</span>)]
         </span><span class="macro">trace!</span>(<span class="string">&quot;{:?}&quot;</span>, diagnostics.record());
     }
 }
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_point_from_view(
+    grid: Res&lt;Grid&gt;,
+    <span class="kw-2">mut </span>changed: Query&lt;
+        (<span class="kw-2">&amp;</span>ResponsiveGridPoint, <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;),
+        Changed&lt;ResponsiveGridPoint&gt;,
+    &gt;,
+) {
+    <span class="kw">for </span>(view, <span class="kw-2">mut </span>pos) <span class="kw">in </span>changed.iter_mut() {
+        <span class="kw">let </span>x = grid
+            .calc_horizontal_location(view.mapping.get(<span class="kw-2">&amp;</span>grid.span).expect(<span class="string">&quot;mapping&quot;</span>).x)
+            .to_pixel();
+        <span class="kw">let </span>y = grid
+            .calc_horizontal_location(view.mapping.get(<span class="kw-2">&amp;</span>grid.span).expect(<span class="string">&quot;mapping&quot;</span>).y)
+            .to_pixel();
+        <span class="kw-2">*</span>pos = Position::new(x, y);
+    }
+}
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_from_view(
     grid: Res&lt;Grid&gt;,
     <span class="kw-2">mut </span>changed: Query&lt;
@@ -877,7 +950,8 @@
             .add_systems((setup.in_set(SyncPoint::Initialization), ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             config_grid.in_set(SyncPoint::Config),
-            set_from_view.in_set(SyncPoint::Reconfigure),
+            set_from_view.in_set(SyncPoint::Grid),
+            set_point_from_view.in_set(SyncPoint::Grid),
         ));
     }
 }

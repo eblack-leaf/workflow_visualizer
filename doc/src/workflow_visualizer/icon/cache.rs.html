@@ -27,15 +27,13 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
-<a href="#30" id="30">30</a>
-<a href="#31" id="31">31</a>
-<a href="#32" id="32">32</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Component, Entity, Resource};
 
 <span class="kw">use crate</span>::{Area, Color, InterfaceContext, Layer, Position};
-<span class="kw">use </span><span class="kw">crate</span>::icon::renderer::{ColorInvert, IconId, TextureCoordinates};
+<span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::TextureCoordinates;
+<span class="kw">use </span><span class="kw">crate</span>::icon::component::{ColorInvert, IconId};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Attributes {
     <span class="kw">pub</span>(<span class="kw">crate</span>) icon_id: <span class="prelude-ty">Option</span>&lt;IconId&gt;,
@@ -55,11 +53,8 @@
 <span class="attr">#[derive(Component)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Difference {
     <span class="kw">pub</span>(<span class="kw">crate</span>) attributes: Attributes,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) create: bool,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) remove: bool,
 }
-
-<span class="attr">#[derive(Resource)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Extraction {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) ext: HashMap&lt;Entity, Difference&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) removed: HashSet&lt;Entity&gt;,
-}</code></pre></div>
+</code></pre></div>
 </section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="workflow_visualizer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

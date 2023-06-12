@@ -106,11 +106,13 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 <span class="kw">use </span>bevy_ecs::schedule::apply_system_buffers;
 
-<span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
 <span class="kw">use </span><span class="kw">crate</span>::JobSyncPoint;
+<span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
 
 <span class="doccomment">/// Synchronization Points for bucketing systems in a task
 </span><span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
@@ -121,6 +123,7 @@
     PreProcessVisibility,
     Preparation,
     Spawn,
+    Grid,
     Reconfigure,
     PostProcessVisibility,
     Resolve,
@@ -161,15 +164,16 @@
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
+            SyncPoint::Grid,
             SyncPoint::Reconfigure,
             SyncPoint::PostProcessVisibility,
             SyncPoint::Resolve,
             UserSpaceSyncPoint::Resolve,
             SyncPoint::PushDiff,
-            SyncPoint::Finish,
         )
             .chain(),
     );
+    visualizer.job.task(Visualizer::TASK_MAIN).configure_sets((SyncPoint::Finish, ).chain().after(SyncPoint::PushDiff));
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)
