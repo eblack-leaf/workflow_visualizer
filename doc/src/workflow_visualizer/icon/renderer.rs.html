@@ -400,6 +400,14 @@
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
 <a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, Resource};
@@ -504,13 +512,13 @@
 <span class="attr">#[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 </span><span class="kw">pub struct </span>IconPixelData {
-    <span class="kw">pub </span>data: [f32; <span class="number">3</span>],
+    <span class="kw">pub </span>data: [f32; <span class="number">4</span>],
 }
 
 <span class="kw">impl </span>From&lt;(f32, f32, f32)&gt; <span class="kw">for </span>IconPixelData {
     <span class="kw">fn </span>from(value: (f32, f32, f32)) -&gt; <span class="self">Self </span>{
         IconPixelData {
-            data: [value.<span class="number">0</span>, value.<span class="number">1</span>, value.<span class="number">2</span>],
+            data: [value.<span class="number">0</span>, value.<span class="number">1</span>, value.<span class="number">2</span>, <span class="number">1.0</span>],
         }
     }
 }
@@ -600,12 +608,13 @@
         cmd.entity(entity).despawn();
     }
     <span class="kw">let </span>dimension = (writes.len() <span class="kw">as </span>f32 / <span class="number">2f32</span>).ceil() <span class="kw">as </span>u32;
-    <span class="kw">let </span>px_dimension = dimension * ICON_BITMAP_DIMENSION;
+    <span class="kw">let </span>byte_dimension =
+        dimension * ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32;
     <span class="kw">let </span>texture_descriptor = wgpu::TextureDescriptor {
         label: <span class="prelude-val">Some</span>(<span class="string">&quot;icon texture descriptor&quot;</span>),
         size: wgpu::Extent3d {
-            width: px_dimension,
-            height: px_dimension,
+            width: byte_dimension,
+            height: byte_dimension,
             depth_or_array_layers: <span class="number">1</span>,
         },
         mip_level_count: <span class="number">1</span>,
@@ -624,20 +633,24 @@
             texture: <span class="kw-2">&amp;</span>texture,
             mip_level: <span class="number">0</span>,
             origin: wgpu::Origin3d {
-                x: x_index * ICON_BITMAP_DIMENSION,
-                y: y_index * ICON_BITMAP_DIMENSION,
+                x: x_index * ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32,
+                y: y_index * ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32,
                 z: <span class="number">0</span>,
             },
             aspect: wgpu::TextureAspect::All,
         };
         <span class="kw">let </span>image_data_layout = wgpu::ImageDataLayout {
             offset: <span class="number">0</span>,
-            bytes_per_row: <span class="prelude-val">Some</span>(ICON_BITMAP_DIMENSION),
-            rows_per_image: <span class="prelude-val">Some</span>(ICON_BITMAP_DIMENSION),
+            bytes_per_row: <span class="prelude-val">Some</span>(
+                ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32,
+            ),
+            rows_per_image: <span class="prelude-val">Some</span>(
+                ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32,
+            ),
         };
         <span class="kw">let </span>extent = wgpu::Extent3d {
-            width: ICON_BITMAP_DIMENSION,
-            height: ICON_BITMAP_DIMENSION,
+            width: ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32,
+            height: ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32,
             depth_or_array_layers: <span class="number">1</span>,
         };
         gfx.queue.write_texture(
@@ -646,10 +659,13 @@
             image_data_layout,
             extent,
         );
-        <span class="kw">let </span>l = x_index * ICON_BITMAP_DIMENSION / px_dimension;
-        <span class="kw">let </span>t = y_index * ICON_BITMAP_DIMENSION / px_dimension;
+        <span class="kw">let </span>l = x_index * ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32
+            / byte_dimension;
+        <span class="kw">let </span>t = y_index * ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32
+            / byte_dimension;
         <span class="kw">let </span>pos = Position::from((l, t));
-        <span class="kw">let </span>normalized_width_height = ICON_BITMAP_DIMENSION / px_dimension;
+        <span class="kw">let </span>normalized_width_height =
+            ICON_BITMAP_DIMENSION * std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32 / byte_dimension;
         <span class="kw">let </span>area = Area::from((normalized_width_height, normalized_width_height));
         <span class="kw">let </span>section = Section::&lt;NumericalContext&gt;::new(pos, area);
         <span class="kw">let </span>coordinates = TextureCoordinates {
