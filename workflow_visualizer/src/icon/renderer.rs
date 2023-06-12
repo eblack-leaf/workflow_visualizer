@@ -102,13 +102,13 @@ impl From<&'static str> for IconId {
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 pub struct IconPixelData {
-    pub data: [f32; 3],
+    pub data: [f32; 4],
 }
 
 impl From<(f32, f32, f32)> for IconPixelData {
     fn from(value: (f32, f32, f32)) -> Self {
         IconPixelData {
-            data: [value.0, value.1, value.2],
+            data: [value.0, value.1, value.2, 1.0],
         }
     }
 }
@@ -198,12 +198,13 @@ pub(crate) fn setup(
         cmd.entity(entity).despawn();
     }
     let dimension = (writes.len() as f32 / 2f32).ceil() as u32;
-    let px_dimension = dimension * ICON_BITMAP_DIMENSION;
+    let byte_dimension =
+        dimension * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32;
     let texture_descriptor = wgpu::TextureDescriptor {
         label: Some("icon texture descriptor"),
         size: wgpu::Extent3d {
-            width: px_dimension,
-            height: px_dimension,
+            width: byte_dimension,
+            height: byte_dimension,
             depth_or_array_layers: 1,
         },
         mip_level_count: 1,
@@ -222,20 +223,24 @@ pub(crate) fn setup(
             texture: &texture,
             mip_level: 0,
             origin: wgpu::Origin3d {
-                x: x_index * ICON_BITMAP_DIMENSION,
-                y: y_index * ICON_BITMAP_DIMENSION,
+                x: x_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+                y: y_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
                 z: 0,
             },
             aspect: wgpu::TextureAspect::All,
         };
         let image_data_layout = wgpu::ImageDataLayout {
             offset: 0,
-            bytes_per_row: Some(ICON_BITMAP_DIMENSION),
-            rows_per_image: Some(ICON_BITMAP_DIMENSION),
+            bytes_per_row: Some(
+                ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+            ),
+            rows_per_image: Some(
+                ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+            ),
         };
         let extent = wgpu::Extent3d {
-            width: ICON_BITMAP_DIMENSION,
-            height: ICON_BITMAP_DIMENSION,
+            width: ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+            height: ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
             depth_or_array_layers: 1,
         };
         gfx.queue.write_texture(
@@ -244,10 +249,13 @@ pub(crate) fn setup(
             image_data_layout,
             extent,
         );
-        let l = x_index * ICON_BITMAP_DIMENSION / px_dimension;
-        let t = y_index * ICON_BITMAP_DIMENSION / px_dimension;
+        let l = x_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32
+            / byte_dimension;
+        let t = y_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32
+            / byte_dimension;
         let pos = Position::from((l, t));
-        let normalized_width_height = ICON_BITMAP_DIMENSION / px_dimension;
+        let normalized_width_height =
+            ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32 / byte_dimension;
         let area = Area::from((normalized_width_height, normalized_width_height));
         let section = Section::<NumericalContext>::new(pos, area);
         let coordinates = TextureCoordinates {
