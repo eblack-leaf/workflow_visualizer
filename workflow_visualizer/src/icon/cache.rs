@@ -3,7 +3,8 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Component, Entity, Resource};
 
 use crate::{Area, Color, InterfaceContext, Layer, Position};
-use crate::icon::renderer::{ColorInvert, IconId, TextureCoordinates};
+use crate::icon::bitmap::TextureCoordinates;
+use crate::icon::component::{ColorInvert, IconId};
 
 pub(crate) struct Attributes {
     pub(crate) icon_id: Option<IconId>,
@@ -23,10 +24,6 @@ pub(crate) struct Cache {
 #[derive(Component)]
 pub(crate) struct Difference {
     pub(crate) attributes: Attributes,
-}
-
-#[derive(Resource)]
-pub(crate) struct Extraction {
-    pub(crate) ext: HashMap<Entity, Difference>,
-    pub(crate) removed: HashSet<Entity>,
+    pub(crate) create: bool,
+    pub(crate) remove: bool,
 }

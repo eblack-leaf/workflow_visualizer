@@ -27,12 +27,13 @@ pub use crate::coord::{
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
-pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::grid::{
     Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias, GridPoint, GridRange,
-    GridView, HorizontalSpan, RawMarker, RawMarkerGrouping, ResponsiveGridView, ResponsiveUnit,
-    ResponsiveView,
+    GridView, HorizontalSpan, RawMarker, RawMarkerGrouping, ResponsiveGridPoint, ResponsiveGridView,
+    ResponsiveUnit, ResponsiveView,
 };
+pub use crate::icon::{BundledIcon, ColorInvert, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale, NegativeSpaceColor};
 pub use crate::job::{EntityName, Job};
 pub use crate::line::{Line, LineRender};
 pub use crate::panel::{BorderColor, Panel, PanelColor, PanelContentArea, PanelType};

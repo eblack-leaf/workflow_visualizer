@@ -15,6 +15,7 @@ use crate::{
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
+use crate::icon::IconAttachment;
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::line::LineAttachment;
 use crate::orientation::OrientationAttachment;
@@ -145,6 +146,7 @@ impl Visualizer {
         self.invoke_attach::<TimerAttachment>();
         self.invoke_attach::<VirtualKeyboardAttachment>();
         self.invoke_attach::<TextAttachment>();
+        self.invoke_attach::<IconAttachment>();
         self.attach_from_queue();
         self.setup();
         self.job.resume();

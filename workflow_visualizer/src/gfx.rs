@@ -201,7 +201,7 @@ impl GfxSurface {
 }
 
 #[derive(Resource)]
-pub(crate) struct GfxSurfaceConfiguration {
+pub struct GfxSurfaceConfiguration {
     pub(crate) configuration: wgpu::SurfaceConfiguration,
 }
 

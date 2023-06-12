@@ -4,6 +4,7 @@ use std::ops::Add;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::{
     Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource,
+    Without,
 };
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
@@ -381,11 +382,18 @@ impl Default for GridConfigRecorder {
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
     window_resize_events: EventReader<WindowResize>,
-    mut responsive: Query<(
-        &ResponsiveGridView,
-        &mut Position<InterfaceContext>,
-        &mut Area<InterfaceContext>,
-    )>,
+    mut responsive: Query<
+        (
+            &ResponsiveGridView,
+            &mut Position<InterfaceContext>,
+            &mut Area<InterfaceContext>,
+        ),
+        Without<ResponsiveGridPoint>,
+    >,
+    mut responsive_points: Query<
+        (&ResponsiveGridPoint, &mut Position<InterfaceContext>),
+        Without<ResponsiveGridView>,
+    >,
     mut grid: ResMut<Grid>,
     #[cfg(feature = "diagnostics")] mut diagnostics: Local<DiagnosticsHandle<GridConfigRecorder>>,
 ) {
@@ -398,10 +406,38 @@ pub(crate) fn config_grid(
         for (view, mut pos, mut area) in responsive.iter_mut() {
             update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
         }
+        for (view, mut pos) in responsive_points.iter_mut() {
+            let x = grid
+                .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").x)
+                .to_pixel();
+            let y = grid
+                .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").y)
+                .to_pixel();
+            *pos = Position::new(x, y);
+        }
         #[cfg(feature = "diagnostics")]
         trace!("{:?}", diagnostics.record());
     }
 }
+
+pub(crate) fn set_point_from_view(
+    grid: Res<Grid>,
+    mut changed: Query<
+        (&ResponsiveGridPoint, &mut Position<InterfaceContext>),
+        Changed<ResponsiveGridPoint>,
+    >,
+) {
+    for (view, mut pos) in changed.iter_mut() {
+        let x = grid
+            .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").x)
+            .to_pixel();
+        let y = grid
+            .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").y)
+            .to_pixel();
+        *pos = Position::new(x, y);
+    }
+}
+
 pub(crate) fn set_from_view(
     grid: Res<Grid>,
     mut changed: Query<
@@ -426,7 +462,8 @@ impl Attach for GridAttachment {
             .add_systems((setup.in_set(SyncPoint::Initialization), ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             config_grid.in_set(SyncPoint::Config),
-            set_from_view.in_set(SyncPoint::Reconfigure),
+            set_from_view.in_set(SyncPoint::Grid),
+            set_point_from_view.in_set(SyncPoint::Grid),
         ));
     }
 }

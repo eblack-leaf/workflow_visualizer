@@ -11,6 +11,10 @@ use crate::{
     RenderPhase, Section, Viewport,
 };
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::icon::bitmap::{
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData, TextureCoordinates,
+};
+use crate::icon::component::{ColorInvert, IconId};
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {
@@ -18,8 +22,8 @@ pub(crate) struct IconRenderer {
     vertex_quad: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     pub(crate) pos_attribute: InstanceAttributeManager<RawPosition>,
-    pub(crate) area_attribute: InstanceAttributeManager<RawArea>,
-    pub(crate) coords_attribute: InstanceAttributeManager<TextureCoordinates>,
+    pub(crate) area_and_layer_attribute: InstanceAttributeManager<AreaAndLayer>,
+    pub(crate) tex_coords_attribute: InstanceAttributeManager<TextureCoordinates>,
     pub(crate) positive_space_color_attribute: InstanceAttributeManager<Color>,
     pub(crate) negative_space_color_attribute: InstanceAttributeManager<Color>,
     pub(crate) layer_attribute: InstanceAttributeManager<Layer>,
@@ -49,10 +53,10 @@ impl Render for IconRenderer {
                 .set_vertex_buffer(1, self.pos_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(2, self.area_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(2, self.area_and_layer_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(3, self.coords_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(3, self.tex_coords_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
                 .set_vertex_buffer(4, self.positive_space_color_attribute.gpu.buffer.slice(..));
@@ -61,13 +65,10 @@ impl Render for IconRenderer {
                 .set_vertex_buffer(5, self.negative_space_color_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(6, self.layer_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(6, self.color_invert_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(7, self.color_invert_attribute.gpu.buffer.slice(..));
-            render_pass_handle
-                .0
-                .set_vertex_buffer(8, self.null_bit_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(7, self.null_bit_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
                 .draw(0..AABB.len() as u32, 0..self.indexer.count());
@@ -76,89 +77,22 @@ impl Render for IconRenderer {
 }
 
 #[repr(C)]
-#[derive(Component, Copy, Clone, Pod, Zeroable, Default)]
-pub struct ColorInvert {
-    pub signal: u32,
+#[derive(Pod, Zeroable, Copy, Clone, Component)]
+pub(crate) struct AreaAndLayer {
+    pub(crate) data: [f32; 3],
 }
 
-impl ColorInvert {
-    pub fn on() -> Self {
-        Self { signal: 1 }
-    }
-    pub fn off() -> Self {
-        Self { signal: 0 }
+impl AreaAndLayer {
+    pub fn new() -> Self {
+        Self { data: [0.0, 0.0, 0.0] }
     }
 }
 
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct IconId(pub CompactString);
-
-impl From<&'static str> for IconId {
-    fn from(value: &'static str) -> Self {
-        IconId(CompactString::new(value))
+impl Default for AreaAndLayer {
+    fn default() -> Self {
+        AreaAndLayer::new()
     }
 }
-
-#[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
-pub struct IconPixelData {
-    pub data: [f32; 4],
-}
-
-impl From<(f32, f32, f32)> for IconPixelData {
-    fn from(value: (f32, f32, f32)) -> Self {
-        IconPixelData {
-            data: [value.0, value.1, value.2, 1.0],
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct IconBitmap {
-    data: Vec<IconPixelData>,
-}
-
-impl IconBitmap {
-    pub fn new<T: Into<IconPixelData>>(mut data: Vec<T>) -> Self {
-        assert_eq!(
-            data.len() as u32,
-            ICON_BITMAP_DIMENSION * ICON_BITMAP_DIMENSION
-        );
-        Self {
-            data: data
-                .drain(..)
-                .map(|d| d.into())
-                .collect::<Vec<IconPixelData>>(),
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
-pub(crate) struct TextureCoordinates {
-    pub(crate) data: [f32; 4],
-}
-
-#[derive(Component, Clone)]
-pub struct IconBitmapRequest {
-    pub id: IconId,
-    pub bitmap: IconBitmap,
-}
-
-#[derive(Resource)]
-pub(crate) struct IconBitmapLayout {
-    pub(crate) bitmap_locations: HashMap<IconId, TextureCoordinates>,
-}
-
-impl IconBitmapLayout {
-    fn new() -> Self {
-        Self {
-            bitmap_locations: HashMap::new(),
-        }
-    }
-}
-
-const ICON_BITMAP_DIMENSION: u32 = 20;
 
 pub(crate) fn setup(
     gfx: Res<GfxSurface>,
@@ -200,6 +134,7 @@ pub(crate) fn setup(
     let dimension = (writes.len() as f32 / 2f32).ceil() as u32;
     let byte_dimension =
         dimension * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32;
+    let byte_dimension = byte_dimension.max(1);
     let texture_descriptor = wgpu::TextureDescriptor {
         label: Some("icon texture descriptor"),
         size: wgpu::Extent3d {
@@ -322,7 +257,48 @@ pub(crate) fn setup(
     let vertex_state = wgpu::VertexState {
         module: &shader,
         entry_point: "vertex_entry",
-        buffers: &[],
+        buffers: &[
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Vertex,
+                attributes: &wgpu::vertex_attr_array![0 => Float32x2],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<RawPosition>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![1 => Float32x2],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<AreaAndLayer>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![2 => Float32x3],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<TextureCoordinates>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![3 => Float32x4],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![4 => Float32x4],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![5 => Float32x4],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<ColorInvert>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![6 => Uint32],
+            },
+            wgpu::VertexBufferLayout {
+                array_stride: std::mem::size_of::<NullBit>() as wgpu::BufferAddress,
+                step_mode: wgpu::VertexStepMode::Instance,
+                attributes: &wgpu::vertex_attr_array![7 => Uint32],
+            }
+        ],
     };
     let primitive_state = wgpu::PrimitiveState {
         topology: wgpu::PrimitiveTopology::TriangleList,
@@ -367,8 +343,8 @@ pub(crate) fn setup(
         vertex_quad,
         bind_group,
         pos_attribute: InstanceAttributeManager::new(&gfx, max),
-        area_attribute: InstanceAttributeManager::new(&gfx, max),
-        coords_attribute: InstanceAttributeManager::new(&gfx, max),
+        area_and_layer_attribute: InstanceAttributeManager::new(&gfx, max),
+        tex_coords_attribute: InstanceAttributeManager::new(&gfx, max),
         positive_space_color_attribute: InstanceAttributeManager::new(&gfx, max),
         negative_space_color_attribute: InstanceAttributeManager::new(&gfx, max),
         layer_attribute: InstanceAttributeManager::new(&gfx, max),
