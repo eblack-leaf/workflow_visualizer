@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
 
-use crate::grid::{config_grid, HorizontalSpan};
 use crate::{
     Area, Attach, Grid, GridLocation, InterfaceContext, Position, RawMarker, ResponsiveView,
     SyncPoint, Visualizer,
 };
+use crate::grid::{config_grid, GridPoint, HorizontalSpan};
 
 /// Collection of specific points rendered from a PathView
 #[derive(Component, Clone)]
@@ -20,30 +20,14 @@ impl Path {
     }
 }
 
-/// Point in a PathView with x/y as GridLocations
-#[derive(Copy, Clone)]
-pub struct PathViewPoint {
-    pub x: GridLocation,
-    pub y: GridLocation,
-}
-
-impl<T: Into<GridLocation>> From<(T, T)> for PathViewPoint {
-    fn from(value: (T, T)) -> Self {
-        Self {
-            x: value.0.into(),
-            y: value.1.into(),
-        }
-    }
-}
-
 /// Collection of PathViewPoints
 #[derive(Clone, Component)]
 pub struct PathView {
-    pub points: Vec<PathViewPoint>,
+    pub points: Vec<GridPoint>,
 }
 
-impl From<Vec<PathViewPoint>> for PathView {
-    fn from(value: Vec<PathViewPoint>) -> Self {
+impl From<Vec<GridPoint>> for PathView {
+    fn from(value: Vec<GridPoint>) -> Self {
         Self { points: value }
     }
 }

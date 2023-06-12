@@ -423,10 +423,29 @@ impl Attach for GridAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization),));
+            .add_systems((setup.in_set(SyncPoint::Initialization), ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             config_grid.in_set(SyncPoint::Config),
             set_from_view.in_set(SyncPoint::Reconfigure),
         ));
     }
 }
+
+/// Point in a Grid with x/y as GridLocations
+#[derive(Copy, Clone)]
+pub struct GridPoint {
+    pub x: GridLocation,
+    pub y: GridLocation,
+}
+
+impl<T: Into<GridLocation>> From<(T, T)> for GridPoint {
+    fn from(value: (T, T)) -> Self {
+        Self {
+            x: value.0.into(),
+            y: value.1.into(),
+        }
+    }
+}
+
+/// Convenience type for ResponsiveView<GridPoint>;
+pub type ResponsiveGridPoint = ResponsiveView<GridPoint>;

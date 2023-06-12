@@ -29,14 +29,14 @@ pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub(crate) use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::grid::{
-    Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias, GridRange, GridView,
-    HorizontalSpan, RawMarker, RawMarkerGrouping, ResponsiveGridView, ResponsiveUnit,
+    Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias, GridPoint, GridRange,
+    GridView, HorizontalSpan, RawMarker, RawMarkerGrouping, ResponsiveGridView, ResponsiveUnit,
     ResponsiveView,
 };
 pub use crate::job::{EntityName, Job};
 pub use crate::line::{Line, LineRender};
 pub use crate::panel::{BorderColor, Panel, PanelColor, PanelContentArea, PanelType};
-pub use crate::path::{Path, PathView, PathViewPoint, ResponsivePathView};
+pub use crate::path::{Path, PathView, ResponsivePathView};
 pub use crate::request::{Request, spawn};
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
@@ -60,6 +60,7 @@ mod diagnostics;
 mod focus;
 mod gfx;
 mod grid;
+mod icon;
 mod instance;
 mod job;
 mod line;

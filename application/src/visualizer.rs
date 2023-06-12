@@ -1,9 +1,8 @@
 use workflow_visualizer::{
     Area, Color, EntityName, Focus, FocusInputListener, GfxOptions, Grid, GridMarkerBias,
-    HorizontalSpan, Layer, Line, Panel, PanelType, PathViewPoint, Position, Request,
-    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment,
-    TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint,
-    Visualizer,
+    HorizontalSpan, Layer, Line, Panel, PanelType, Position, Request, ResponsiveGridView,
+    ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme,
+    ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint, Visualizer,
 };
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 
