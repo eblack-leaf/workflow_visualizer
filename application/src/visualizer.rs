@@ -1,4 +1,10 @@
-use workflow_visualizer::{Area, BundledIcon, Color, EntityName, Focus, FocusInputListener, GfxOptions, Grid, GridMarkerBias, HorizontalSpan, Icon, IconBitmap, IconBitmapRequest, IconScale, Layer, Line, Panel, PanelType, Position, Request, ResponsiveGridPoint, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint, Visualizer};
+use workflow_visualizer::{
+    Area, BundledIcon, Color, EntityName, Focus, FocusInputListener, GfxOptions, Grid,
+    GridMarkerBias, HorizontalSpan, Icon, IconBitmap, IconBitmapRequest, IconScale, Layer, Line,
+    Panel, PanelType, Position, Request, ResponsiveGridPoint, ResponsiveGridView,
+    ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme,
+    ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint, Visualizer,
+};
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::system;
@@ -77,7 +83,10 @@ pub fn visualizer() -> Visualizer {
         Focus::new(),
         FocusInputListener {},
     )]);
-    visualizer.add_entities(vec![IconBitmapRequest::from(("something", IconBitmap::bundled(BundledIcon::Something)))]);
+    visualizer.add_entities(vec![IconBitmapRequest::from((
+        "something",
+        IconBitmap::bundled(BundledIcon::Something),
+    ))]);
     visualizer.add_entities(vec![Request::new(Icon::new(
         "something",
         icon_point,

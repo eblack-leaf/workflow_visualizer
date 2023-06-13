@@ -63,7 +63,10 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
         )
             .chain(),
     );
-    visualizer.job.task(Visualizer::TASK_MAIN).configure_sets((SyncPoint::Finish, ).chain().after(SyncPoint::PushDiff));
+    visualizer
+        .job
+        .task(Visualizer::TASK_MAIN)
+        .configure_sets((SyncPoint::Finish, ).chain().after(SyncPoint::PushDiff));
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)

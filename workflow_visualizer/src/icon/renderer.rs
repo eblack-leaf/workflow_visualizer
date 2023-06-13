@@ -84,7 +84,9 @@ pub(crate) struct AreaAndLayer {
 
 impl AreaAndLayer {
     pub fn new() -> Self {
-        Self { data: [0.0, 0.0, 0.0] }
+        Self {
+            data: [0.0, 0.0, 0.0],
+        }
     }
 }
 
@@ -137,8 +139,7 @@ pub(crate) fn setup(
         cmd.entity(entity).despawn();
     }
     let dimension = (writes.len() as f32 / 2f32).ceil() as u32;
-    let total_dimension =
-        dimension * ICON_BITMAP_DIMENSION;
+    let total_dimension = dimension * ICON_BITMAP_DIMENSION;
     let total_dimension = total_dimension.max(1);
     let texture_descriptor = wgpu::TextureDescriptor {
         label: Some("icon texture descriptor"),
@@ -172,9 +173,7 @@ pub(crate) fn setup(
         };
         let image_data_layout = wgpu::ImageDataLayout {
             offset: 0,
-            bytes_per_row: Some(
-                bytes,
-            ),
+            bytes_per_row: Some(bytes),
             rows_per_image: Some(bytes),
         };
         let extent = wgpu::Extent3d {
@@ -192,13 +191,10 @@ pub(crate) fn setup(
             image_data_layout,
             extent,
         );
-        let l = x_index * ICON_BITMAP_DIMENSION
-            / total_dimension;
-        let t = y_index * ICON_BITMAP_DIMENSION
-            / total_dimension;
+        let l = x_index * ICON_BITMAP_DIMENSION / total_dimension;
+        let t = y_index * ICON_BITMAP_DIMENSION / total_dimension;
         let pos = Position::from((l, t));
-        let normalized_width_height =
-            ICON_BITMAP_DIMENSION / total_dimension;
+        let normalized_width_height = ICON_BITMAP_DIMENSION / total_dimension;
         let area = Area::from((normalized_width_height, normalized_width_height));
         let section = Section::<NumericalContext>::new(pos, area);
         let coordinates = TextureCoordinates {
@@ -305,7 +301,7 @@ pub(crate) fn setup(
                 array_stride: std::mem::size_of::<NullBit>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &wgpu::vertex_attr_array![7 => Uint32],
-            }
+            },
         ],
     };
     let primitive_state = wgpu::PrimitiveState {

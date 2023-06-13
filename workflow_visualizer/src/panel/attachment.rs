@@ -9,6 +9,7 @@ use crate::panel::system::{
 };
 
 pub struct PanelAttachment;
+
 impl Attach for PanelAttachment {
     fn attach(engen: &mut Visualizer) {
         engen.job.container.insert_resource(Extraction::new());
@@ -16,7 +17,7 @@ impl Attach for PanelAttachment {
         engen
             .job
             .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((renderer::setup.in_set(SyncPoint::Preparation),));
+            .add_systems((renderer::setup.in_set(SyncPoint::Preparation), ));
         engen
             .job
             .task(Visualizer::TASK_RENDER_MAIN)

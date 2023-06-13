@@ -197,7 +197,11 @@ pub(crate) fn read_differences(
         let mut area_or_layer_dirty = false;
         if let Some(area) = difference.attributes.area.take() {
             let device_area = area.to_device(scale_factor.factor);
-            area_and_layer.data = [device_area.width, device_area.height, area_and_layer.data[2]];
+            area_and_layer.data = [
+                device_area.width,
+                device_area.height,
+                area_and_layer.data[2],
+            ];
             area_or_layer_dirty = true;
         }
         if let Some(layer) = difference.attributes.layer.take() {
