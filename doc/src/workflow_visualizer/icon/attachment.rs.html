@@ -34,9 +34,10 @@
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
 <a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
-<span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
+<span class="kw">use crate</span>::{Attach, Icon, spawn, SyncPoint, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::icon::renderer::{IconRenderer, setup};
 <span class="kw">use </span><span class="kw">crate</span>::icon::system::{
     area_diff, calc_area, color_invert_diff, icon_id_diff, layer_diff, management,
@@ -53,6 +54,7 @@
             .task(Visualizer::TASK_RENDER_STARTUP)
             .add_systems((setup.in_set(SyncPoint::Initialization), ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            spawn::&lt;Icon&gt;.in_set(SyncPoint::Spawn),
             calc_area.in_set(SyncPoint::Reconfigure),
             calc_area.in_set(SyncPoint::Config),
             management.in_set(SyncPoint::Resolve),

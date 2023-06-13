@@ -94,6 +94,11 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::prelude::Bundle;
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
@@ -101,6 +106,7 @@
 
 <span class="kw">use crate</span>::{Color, EnableVisibility, InterfaceContext, Layer, Section};
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveGridPoint;
+<span class="kw">use </span><span class="kw">crate</span>::icon::cache::{Cache, Difference};
 <span class="kw">use </span><span class="kw">crate</span>::icon::renderer::AreaAndLayer;
 
 <span class="attr">#[derive(Component, Copy, Clone, PartialEq)]
@@ -135,6 +141,8 @@
     section: Section&lt;InterfaceContext&gt;,
     visibility: EnableVisibility,
     area_and_layer: AreaAndLayer,
+    cache: Cache,
+    difference: Difference,
 }
 
 <span class="kw">impl </span>Icon {
@@ -163,6 +171,8 @@
             section: Section::default(),
             visibility: EnableVisibility::default(),
             area_and_layer: AreaAndLayer::new(),
+            cache: Cache::new(),
+            difference: Difference::new(),
         }
     }
 }
