@@ -86,8 +86,8 @@ pub enum JobSyncPoint {
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
 pub struct EntityName(pub CompactString);
 impl EntityName {
-    pub fn new(name: String) -> Self {
-        EntityName(CompactString::new(name))
+    pub fn new<S: Into<String>>(name: S) -> Self {
+        EntityName(CompactString::new(name.into()))
     }
 }
 impl From<&'static str> for EntityName {

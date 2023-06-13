@@ -43,17 +43,17 @@ impl Panel {
     pub const PADDING: (f32, f32) = (5.0, 5.0);
     pub const CORNER_DEPTH: f32 = 5f32;
     pub const LINE_WIDTH: f32 = 1f32;
-    pub fn new<C: Into<Color>>(
+    pub fn new<C: Into<Color>, L: Into<Layer>>(
         responsive_grid_view: ResponsiveGridView,
         panel_type: PanelType,
-        layer: Layer,
+        layer: L,
         panel_color: C,
         border_color: C,
     ) -> Self {
         Self {
             responsive_grid_view,
             panel_type,
-            layer,
+            layer: layer.into(),
             border_color: BorderColor(border_color.into()),
             content_area: PanelContentArea(Area::default()),
             panel_color: PanelColor(panel_color.into()),

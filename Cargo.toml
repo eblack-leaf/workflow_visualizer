@@ -1,5 +1,5 @@
 [workspace]
-members = ["workflow_visualizer", "application", "website"]
+members = ["workflow_visualizer", "application", "website", "icon_editor"]
 resolver = "2"
 [profile.release]
 debug = 1

@@ -100,9 +100,6 @@ impl Grid {
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
         ((width - base) / RawMarker::PX).floor() as i32 / columns
     }
-    pub fn text_height_markers() -> i32 {
-        3
-    }
     pub fn calc_section(&self, view: &ResponsiveGridView) -> Section<InterfaceContext> {
         let current_view = view.mapping.get(&self.span).expect("view mapping");
         let left = {

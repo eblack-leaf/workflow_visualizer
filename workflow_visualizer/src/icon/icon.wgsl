@@ -77,5 +77,6 @@ var icon_texture: texture_2d<f32>;
 var icon_sampler: sampler;
 @fragment
 fn fragment_entry(fragment_input: VertexOutput) -> @location(0) vec4<f32> {
+    let hooks = textureSample(icon_texture, icon_sampler, fragment_input.sample_coords);
     return fragment_input.positive_space_color;
 }

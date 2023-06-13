@@ -3,19 +3,42 @@ use std::collections::HashMap;
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
 use bytemuck::{Pod, Zeroable};
+use serde::{Deserialize, Serialize};
 
 use crate::icon::component::IconId;
 
 #[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
+#[derive(
+bytemuck::Pod,
+bytemuck::Zeroable,
+Copy,
+Clone,
+Default,
+Debug,
+Serialize,
+Deserialize,
+PartialEq,
+)]
 pub struct IconPixelData {
     pub data: [u8; 4],
 }
 
-impl From<(u8, u8, u8)> for IconPixelData {
-    fn from(value: (u8, u8, u8)) -> Self {
+impl IconPixelData {
+    pub const FULL_COVERAGE: u8 = 255u8;
+    pub const NO_COVERAGE: u8 = 0u8;
+    pub const POSITIVE_SPACE: u8 = 255u8;
+    pub const NEGATIVE_SPACE: u8 = 0u8;
+    pub const LISTENABLE: u8 = 255u8;
+    pub const NOT_LISTENABLE: u8 = 0u8;
+    pub fn new<T: Into<Self>>(data: T) -> Self {
+        data.into()
+    }
+}
+
+impl From<(u8, u8, u8, u8)> for IconPixelData {
+    fn from(value: (u8, u8, u8, u8)) -> Self {
         IconPixelData {
-            data: [value.0, value.1, value.2, 1u8],
+            data: [value.0, value.1, value.2, value.3],
         }
     }
 }
@@ -50,11 +73,7 @@ impl IconBitmap {
         }
     }
     fn read_icon_file(file: &str) -> Vec<IconPixelData> {
-        serde_json::from_str::<Vec<(u8, u8, u8)>>(file)
-            .expect("file parsing")
-            .drain(..)
-            .map(|d| d.into())
-            .collect::<Vec<IconPixelData>>()
+        serde_json::from_str::<Vec<IconPixelData>>(file).expect("file parsing")
     }
 }
 

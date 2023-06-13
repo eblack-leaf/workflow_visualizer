@@ -3,7 +3,7 @@ use bevy_ecs::prelude::Bundle;
 use bytemuck::{Pod, Zeroable};
 use compact_str::CompactString;
 
-use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section};
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 use crate::grid::ResponsiveGridPoint;
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::renderer::AreaAndLayer;
@@ -16,6 +16,7 @@ pub enum IconScale {
     Small,
     Medium,
     Large,
+    Custom(u32),
 }
 
 impl IconScale {
@@ -24,6 +25,7 @@ impl IconScale {
             IconScale::Small => 16f32,
             IconScale::Medium => 20f32,
             IconScale::Large => 24f32,
+            IconScale::Custom(dim) => *dim as f32,
         }
     }
 }

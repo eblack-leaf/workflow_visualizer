@@ -34,7 +34,7 @@ pub fn visualizer() -> Visualizer {
                 .get_span(&HorizontalSpan::Four)
                 .vertical
                 .end
-                .raw_offset(Grid::text_height_markers() + 1),
+                .raw_offset(4),
         ),
     ));
     let line_y = 1.near().raw_offset(10);
@@ -43,13 +43,13 @@ pub fn visualizer() -> Visualizer {
         (4.far().raw_offset(-1), line_y).into(),
     ]);
     let second_line_y = 4.near();
-    visualizer.add_entities(vec![Panel::new(
+    visualizer.add_entities(vec![Request::new(Panel::new(
         panel_view,
         PanelType::Panel,
         Layer::new(5.0),
         Color::DARK_GREY,
         Color::GREY,
-    )]);
+    ))]);
     visualizer.add_named_entities(
         vec!["header".into()],
         vec![Request::new(Text::new(
@@ -81,7 +81,7 @@ pub fn visualizer() -> Visualizer {
         )),
         Touchable::new(TouchListener::on_press()),
         Focus::new(),
-        FocusInputListener {},
+        FocusInputListener::default(),
     )]);
     visualizer.add_entities(vec![IconBitmapRequest::from((
         "something",

@@ -21,7 +21,7 @@ impl Attach for PanelAttachment {
         engen
             .job
             .task(Visualizer::TASK_RENDER_MAIN)
-            .add_systems((process_extraction.in_set(SyncPoint::Preparation),));
+            .add_systems((process_extraction.in_set(SyncPoint::Preparation), ));
         engen.job.task(Visualizer::TASK_MAIN).add_systems((
             spawn::<Panel>.in_set(SyncPoint::Spawn),
             calc_content_area.in_set(SyncPoint::Reconfigure),

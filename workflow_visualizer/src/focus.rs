@@ -6,10 +6,10 @@ use bevy_ecs::prelude::{
 use tracing::trace;
 
 use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
+use crate::SyncPoint;
 use crate::touch::read_touch_events;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
-use crate::SyncPoint;
 
 /// Used to set the Focus of an element
 #[derive(Component)]
@@ -81,7 +81,11 @@ impl Default for FocusRecorder {
 /// used to opt into VirtualKeyboard open functionality
 #[derive(Component, Copy, Clone)]
 pub struct FocusInputListener {}
-
+impl Default for FocusInputListener {
+    fn default() -> Self {
+        FocusInputListener {}
+    }
+}
 pub(crate) fn set_focused(
     mut focus_listeners: Query<(Entity, &mut Focus)>,
     focus_input_listeners: Query<(Entity, &FocusInputListener)>,

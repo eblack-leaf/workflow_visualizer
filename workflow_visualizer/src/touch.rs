@@ -5,12 +5,12 @@ use bevy_ecs::prelude::{
 };
 use winit::event::{ElementState, MouseButton};
 
-use crate::focus::FocusedEntity;
-use crate::viewport::ViewportHandle;
-use crate::visualizer::{Attach, Visualizer};
 use crate::{
     Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
 };
+use crate::focus::FocusedEntity;
+use crate::viewport::ViewportHandle;
+use crate::visualizer::{Attach, Visualizer};
 
 /// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]
@@ -333,6 +333,12 @@ impl TouchAdapter {
             primary: None,
         }
     }
+    pub fn current_primary_info(&self) -> Option<TrackedTouch> {
+        if let Some(prime) = self.primary.as_ref() {
+            return self.tracked.get(prime).copied();
+        }
+        None
+    }
 }
 
 /// Where the Cursor is
@@ -346,11 +352,18 @@ pub struct MouseAdapter {
 }
 impl MouseAdapter {
     pub const PRIMARY_INTERACTOR: Interactor = Interactor(0u32);
+    pub const PRIMARY_BUTTON: MouseButton = MouseButton::Left;
     pub(crate) fn new() -> Self {
         Self {
             location: None,
             tracked: HashMap::new(),
         }
+    }
+    pub fn current_primary_info(&self) -> Option<TrackedTouch> {
+        if let Some(info) = self.tracked.get(&Self::PRIMARY_BUTTON) {
+            return info.1;
+        }
+        None
     }
 }
 pub(crate) struct TouchAttachment;
