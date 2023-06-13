@@ -5,6 +5,7 @@ use compact_str::CompactString;
 
 use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section};
 use crate::grid::ResponsiveGridPoint;
+use crate::icon::cache::{Cache, Difference};
 use crate::icon::renderer::AreaAndLayer;
 
 #[derive(Component, Copy, Clone, PartialEq)]
@@ -39,6 +40,8 @@ pub struct Icon {
     section: Section<InterfaceContext>,
     visibility: EnableVisibility,
     area_and_layer: AreaAndLayer,
+    cache: Cache,
+    difference: Difference,
 }
 
 impl Icon {
@@ -67,6 +70,8 @@ impl Icon {
             section: Section::default(),
             visibility: EnableVisibility::default(),
             area_and_layer: AreaAndLayer::new(),
+            cache: Cache::new(),
+            difference: Difference::new(),
         }
     }
 }

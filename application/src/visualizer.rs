@@ -19,6 +19,7 @@ pub fn visualizer() -> Visualizer {
         list_text_horizontal_range,
         (1.near().raw_offset(6), 1.near().raw_offset(9)),
     ));
+    let icon_point = ResponsiveGridPoint::all_same((2.near(), 1.near().raw_offset(6)));
     let second_text_placement = ResponsiveGridView::all_same((
         list_text_horizontal_range,
         (
@@ -56,7 +57,7 @@ pub fn visualizer() -> Visualizer {
     );
     visualizer.add_entities(vec![Request::new(Text::new(
         first_text_placement,
-        4,
+        3,
         "work",
         TextScaleAlignment::Medium, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
         Color::GREY,
@@ -79,7 +80,7 @@ pub fn visualizer() -> Visualizer {
     visualizer.add_entities(vec![IconBitmapRequest::from(("something", IconBitmap::bundled(BundledIcon::Something)))]);
     visualizer.add_entities(vec![Request::new(Icon::new(
         "something",
-        ResponsiveGridPoint::all_same((1.near(), 1.near())),
+        icon_point,
         IconScale::Medium,
         3,
         Color::OFF_WHITE,

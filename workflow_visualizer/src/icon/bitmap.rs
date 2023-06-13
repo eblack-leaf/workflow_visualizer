@@ -43,7 +43,14 @@ impl IconBitmap {
         }
     }
     pub fn bundled(icon: BundledIcon) -> Self {
-        todo!()
+        match icon {
+            BundledIcon::Something => {
+                Self::new(Self::read_icon_file(include_str!("bundled_icons/something.icon")))
+            }
+        }
+    }
+    fn read_icon_file(file: &str) -> Vec<IconPixelData> {
+        serde_json::from_str::<Vec<(u8, u8, u8)>>(file).expect("file parsing").drain(..).map(|d| d.into()).collect::<Vec<IconPixelData>>()
     }
 }
 
@@ -82,3 +89,11 @@ impl IconBitmapLayout {
 }
 
 pub(crate) const ICON_BITMAP_DIMENSION: u32 = 20;
+
+#[cfg(test)]
+#[test]
+fn sample() {
+    // let value = (0,0,0);
+    // let string =  serde_json::to_string(&value).unwrap();
+    println!("{:?}", 1 << 9);
+}

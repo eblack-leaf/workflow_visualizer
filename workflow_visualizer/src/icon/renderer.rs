@@ -93,6 +93,11 @@ impl Default for AreaAndLayer {
         AreaAndLayer::new()
     }
 }
+fn icon_bitmap_bytes() -> u32 {
+    let mem = std::mem::size_of::<IconPixelData>() as u32;
+    let val = ICON_BITMAP_DIMENSION * mem;
+    val
+}
 
 pub(crate) fn setup(
     gfx: Res<GfxSurface>,
@@ -132,14 +137,14 @@ pub(crate) fn setup(
         cmd.entity(entity).despawn();
     }
     let dimension = (writes.len() as f32 / 2f32).ceil() as u32;
-    let byte_dimension =
-        dimension * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32;
-    let byte_dimension = byte_dimension.max(1);
+    let total_dimension =
+        dimension * ICON_BITMAP_DIMENSION;
+    let total_dimension = total_dimension.max(1);
     let texture_descriptor = wgpu::TextureDescriptor {
         label: Some("icon texture descriptor"),
         size: wgpu::Extent3d {
-            width: byte_dimension,
-            height: byte_dimension,
+            width: total_dimension,
+            height: total_dimension,
             depth_or_array_layers: 1,
         },
         mip_level_count: 1,
@@ -153,13 +158,14 @@ pub(crate) fn setup(
     let mut x_index = 0;
     let mut y_index = 0;
     let mut icon_bitmap_layout = IconBitmapLayout::new();
-    for write in writes {
+    for mut write in writes {
+        let bytes = icon_bitmap_bytes();
         let image_copy_texture = wgpu::ImageCopyTexture {
             texture: &texture,
             mip_level: 0,
             origin: wgpu::Origin3d {
-                x: x_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
-                y: y_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+                x: x_index * bytes,
+                y: y_index * bytes,
                 z: 0,
             },
             aspect: wgpu::TextureAspect::All,
@@ -167,30 +173,32 @@ pub(crate) fn setup(
         let image_data_layout = wgpu::ImageDataLayout {
             offset: 0,
             bytes_per_row: Some(
-                ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+                bytes,
             ),
-            rows_per_image: Some(
-                ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
-            ),
+            rows_per_image: Some(bytes),
         };
         let extent = wgpu::Extent3d {
-            width: ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
-            height: ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32,
+            width: ICON_BITMAP_DIMENSION,
+            height: ICON_BITMAP_DIMENSION,
             depth_or_array_layers: 1,
         };
+        let mut raw_data = Vec::new();
+        for d in write.bitmap.data.drain(..) {
+            raw_data.extend(vec![d.data[0], d.data[1], d.data[2], d.data[3]]);
+        }
         gfx.queue.write_texture(
             image_copy_texture,
-            bytemuck::cast_slice(&write.bitmap.data),
+            raw_data.as_slice(),
             image_data_layout,
             extent,
         );
-        let l = x_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32
-            / byte_dimension;
-        let t = y_index * ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32
-            / byte_dimension;
+        let l = x_index * ICON_BITMAP_DIMENSION
+            / total_dimension;
+        let t = y_index * ICON_BITMAP_DIMENSION
+            / total_dimension;
         let pos = Position::from((l, t));
         let normalized_width_height =
-            ICON_BITMAP_DIMENSION * std::mem::size_of::<IconPixelData>() as u32 / byte_dimension;
+            ICON_BITMAP_DIMENSION / total_dimension;
         let area = Area::from((normalized_width_height, normalized_width_height));
         let section = Section::<NumericalContext>::new(pos, area);
         let coordinates = TextureCoordinates {
