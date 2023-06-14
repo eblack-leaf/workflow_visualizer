@@ -30,7 +30,10 @@ pub(crate) fn setup_orientation(
     scale_factor: Res<ScaleFactor>,
 ) {
     cmd.insert_resource(Orientation::new(
-        viewport_handle.section.area.to_device(scale_factor.factor()),
+        viewport_handle
+            .section
+            .area
+            .to_device(scale_factor.factor()),
     ));
 }
 

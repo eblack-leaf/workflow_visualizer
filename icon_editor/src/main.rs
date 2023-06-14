@@ -5,7 +5,10 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, Level, trace};
 
-use workflow_visualizer::{bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint};
+use workflow_visualizer::{
+    bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, Sender,
+    TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
+};
 use workflow_visualizer::{
     Attach, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap, IconBitmapRequest,
     IconPixelData, IconScale, Panel, PanelType, RawMarker, Request, ResponsiveGridPoint,
@@ -13,7 +16,7 @@ use workflow_visualizer::{
     ThemeDescriptor, Touchable, TouchListener, Visualizer, Workflow,
 };
 use workflow_visualizer::bevy_ecs::prelude::{
-    Entity, IntoSystemConfig, Query, Res, ResMut, Resource,
+    Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
 };
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -51,6 +54,8 @@ struct BitmapRepr {
     fill_data: IconPixelData,
     bitmap_repr: HashMap<BitmapLocation, Entity>,
     queue: Vec<(BitmapLocation, IconPixelData)>,
+    written_out: bool,
+    updates_saved: bool,
 }
 
 impl BitmapRepr {
@@ -60,7 +65,7 @@ impl BitmapRepr {
     fn new() -> Self {
         Self {
             fill_data: (
-                IconPixelData::FULL_COVERAGE,
+                IconPixelData::NO_COVERAGE,
                 IconPixelData::POSITIVE_SPACE,
                 IconPixelData::LISTENABLE,
                 1u8,
@@ -68,6 +73,8 @@ impl BitmapRepr {
                 .into(),
             bitmap_repr: HashMap::new(),
             queue: vec![],
+            written_out: false,
+            updates_saved: false,
         }
     }
 }
@@ -79,6 +86,7 @@ fn update(
     mut text: Query<(&mut TextValue)>,
     mut icons: Query<(Entity, &mut Color)>,
     scale_factor: Res<ScaleFactor>,
+    sender: NonSend<Sender<Engen>>,
     touchables: Query<(Entity, &TouchTrigger, &TouchLocation, &CurrentlyPressed)>,
 ) {
     let coverage_up_entity = entity_store.get("coverage-up").unwrap();
@@ -113,6 +121,16 @@ fn update(
     if let Ok(mut coverage_text_value) = text.get_mut(coverage_display_entity) {
         coverage_text_value.0 = bitmap_repr.fill_data.data[0].to_string();
     }
+    let write_out_entity = entity_store.get("write-out").unwrap();
+    let written_out_requested = if let Ok((_, trigger, _, _)) = touchables.get(write_out_entity) {
+        trigger.touched()
+    } else {
+        false
+    };
+    if written_out_requested {
+        sender.send(Action::SendUpdates(bitmap_repr.queue.drain(..).collect()));
+        sender.send(Action::WriteOut);
+    }
     let bitmap_panel_entity = entity_store.get("bitmap-panel").unwrap();
     let panel_currently_pressed =
         if let Ok((_, _, location, pressed)) = touchables.get(bitmap_panel_entity) {
@@ -121,11 +139,19 @@ fn update(
             false
         };
     if panel_currently_pressed {
-        let panel_touch_location = primary_touch.touch.unwrap().current.to_interface(scale_factor.factor());
-        let logical_location = panel_touch_location - Position::new(RawMarker::PX * 5f32, RawMarker::PX * 17f32);
-        let logical_location = logical_location / Position::new(RawMarker::PX * 2f32, RawMarker::PX * 2f32);
-        let bitmap_location = BitmapLocation::new(logical_location.x as u32, logical_location.y as u32);
-        let new_color = Color::from(Color::OFF_WHITE).with_alpha(bitmap_repr.fill_data.data[0] as f32 / 255f32);
+        let panel_touch_location = primary_touch
+            .touch
+            .unwrap()
+            .current
+            .to_interface(scale_factor.factor());
+        let logical_location =
+            panel_touch_location - Position::new(RawMarker::PX * 5f32, RawMarker::PX * 17f32);
+        let logical_location =
+            logical_location / Position::new(RawMarker::PX * 2f32, RawMarker::PX * 2f32);
+        let bitmap_location =
+            BitmapLocation::new(logical_location.x as u32, logical_location.y as u32);
+        let new_color =
+            Color::from(Color::OFF_WHITE).with_alpha(bitmap_repr.fill_data.data[0] as f32 / 255f32);
         if let Some(entity) = bitmap_repr.bitmap_repr.get(&bitmap_location).copied() {
             // send fill data to queue
             let fill_data = bitmap_repr.fill_data;
@@ -163,8 +189,8 @@ impl Attach for BitmapRepr {
                     )),
                     IconScale::Custom(RawMarker::PX as u32 * 2),
                     2,
-                    Color::OFF_WHITE,
-                    Color::OFF_BLACK,
+                    Color::from(Color::OFF_WHITE).with_alpha(0.0),
+                    Color::from(Color::OFF_BLACK),
                 );
                 bitmap_repr_data.push(Request::new(bundle));
             }
@@ -308,7 +334,30 @@ impl Attach for BitmapRepr {
             vec![EntityName::new("pos-neg-space-button-text")],
             vec![pos_neg_space_button_text],
         );
-        // need to add other button for listen/not-listen
+        let write_out_horizontal = (
+            bitmap_panel_left.raw_offset(1),
+            bitmap_panel_left.raw_offset(3),
+        );
+        let write_out_vertical = (
+            bitmap_panel_bottom.raw_offset(1),
+            bitmap_panel_bottom.raw_offset(3),
+        );
+        let write_out_view =
+            ResponsiveGridView::all_same((write_out_horizontal, write_out_vertical));
+        let write_out = Panel::new(
+            write_out_view,
+            PanelType::Panel,
+            3,
+            Color::BLUE,
+            Color::OFF_WHITE,
+        );
+        visualizer.add_named_entities(
+            vec!["write-out".into()],
+            vec![(
+                Request::new(write_out),
+                Touchable::new(TouchListener::on_press()),
+            )],
+        );
         visualizer.job.container.insert_resource(bitmap_repr);
     }
 }
@@ -332,7 +381,27 @@ impl Workflow for Engen {
     type Action = Action;
     type Response = Response;
 
-    fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {}
+    fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
+        match response {
+            Response::ExitConfirmed => {}
+            Response::UpdatesSaved => {
+                visualizer
+                    .job
+                    .container
+                    .get_resource_mut::<BitmapRepr>()
+                    .unwrap()
+                    .updates_saved = true;
+            }
+            Response::WrittenOut => {
+                visualizer
+                    .job
+                    .container
+                    .get_resource_mut::<BitmapRepr>()
+                    .unwrap()
+                    .written_out = true;
+            }
+        }
+    }
 
     fn exit_action() -> Self::Action {
         Action::ExitRequest
