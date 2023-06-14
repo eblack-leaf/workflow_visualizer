@@ -28,7 +28,7 @@ impl Color {
     pub const GREY: (f32, f32, f32) = (0.25, 0.25, 0.25);
     pub const BLACK: (f32, f32, f32) = (0.0, 0.0, 0.0);
     pub const RED: (f32, f32, f32) = (0.8, 0.01, 0.01);
-    pub const RED_ORANGE: (f32, f32, f32) = (0.7, 0.15, 0.15);
+    pub const RED_ORANGE: (f32, f32, f32) = (0.8, 0.25, 0.05);
     pub const GREEN: (f32, f32, f32) = (0.01, 0.7, 0.01);
     pub const MEDIUM_GREEN: (f32, f32, f32) = (0.001, 0.16, 0.001);
     pub const DARK_GREEN: (f32, f32, f32) = (0.0001, 0.004, 0.0001);

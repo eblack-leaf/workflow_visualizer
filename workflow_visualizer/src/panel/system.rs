@@ -2,12 +2,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
+use crate::{Area, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility};
 use crate::gfx::GfxSurface;
-use crate::panel::renderer::PanelRenderer;
 use crate::panel::{
     BorderColor, Cache, Difference, Extraction, PanelColor, PanelContentArea, PanelType,
 };
-use crate::{Area, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility};
+use crate::panel::renderer::PanelRenderer;
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -26,7 +26,8 @@ pub fn calc_content_area(
     >,
 ) {
     for (mut content_area, area) in content_changed.iter_mut() {
-        let calculated_area = *area;
+        let calculated_area =
+            *area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
         content_area.0 = calculated_area;
     }
 }
@@ -66,7 +67,7 @@ pub(crate) fn position_diff(
     >,
 ) {
     for (pos, mut cache, mut diff) in pos_changed.iter_mut() {
-        let pos = *pos - Position::from(Panel::PADDING);
+        let pos = *pos; // - Position::from(Panel::PADDING);
         if let Some(cached) = cache.position {
             if pos != cached {
                 cache.position.replace(pos);

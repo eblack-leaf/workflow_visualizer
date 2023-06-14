@@ -5,13 +5,18 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use workflow_visualizer::{
+    bevy_ecs, CurrentlyPressed, EntityStore, PrimaryTouch, TextValue, TouchLocation, TouchTrigger,
+    UserSpaceSyncPoint,
+};
+use workflow_visualizer::{
     Attach, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap, IconBitmapRequest,
     IconPixelData, IconScale, Panel, PanelType, RawMarker, Request, ResponsiveGridPoint,
     ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
     ThemeDescriptor, Touchable, TouchListener, Visualizer, Workflow,
 };
-use workflow_visualizer::bevy_ecs;
-use workflow_visualizer::bevy_ecs::prelude::{Entity, Resource};
+use workflow_visualizer::bevy_ecs::prelude::{
+    Entity, IntoSystemConfig, Query, Res, ResMut, Resource,
+};
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone, Debug, Serialize, Deserialize)]
 struct BitmapLocation {
@@ -46,7 +51,6 @@ impl Default for Engen {
 #[derive(Resource)]
 struct BitmapRepr {
     fill_data: IconPixelData,
-    currently_drawing: bool,
     bitmap_repr: HashMap<BitmapLocation, Entity>,
 }
 
@@ -63,20 +67,76 @@ impl BitmapRepr {
                 1u8,
             )
                 .into(),
-            currently_drawing: false,
             bitmap_repr: HashMap::new(),
         }
     }
 }
 
+fn update(
+    mut bitmap_repr: ResMut<BitmapRepr>,
+    entity_store: Res<EntityStore>,
+    primary_touch: Res<PrimaryTouch>,
+    mut text: Query<(&mut TextValue)>,
+    mut icons: Query<(Entity, &mut Color)>,
+    touchables: Query<(Entity, &TouchTrigger, &TouchLocation, &CurrentlyPressed)>,
+) {
+    let coverage_up_entity = entity_store.get("coverage-up").unwrap();
+    let coverage_display_entity = entity_store.get("coverage-display").unwrap();
+    let up_touched =
+        if let Ok((_, trigger, _, currently_pressed)) = touchables.get(coverage_up_entity) {
+            currently_pressed.currently_pressed()
+        } else {
+            false
+        };
+    if up_touched {
+        let new_coverage = bitmap_repr.fill_data.data[0].checked_add(1);
+        bitmap_repr.fill_data.data[0] = match new_coverage {
+            None => 255u8,
+            Some(new_fill) => new_fill,
+        }
+    }
+    let coverage_down_entity = entity_store.get("coverage-down").unwrap();
+    let down_touched =
+        if let Ok((_, trigger, _, currently_pressed)) = touchables.get(coverage_down_entity) {
+            currently_pressed.currently_pressed()
+        } else {
+            false
+        };
+    if down_touched {
+        let new_coverage = bitmap_repr.fill_data.data[0].checked_sub(1);
+        bitmap_repr.fill_data.data[0] = match new_coverage {
+            None => 0u8,
+            Some(new_fill) => new_fill,
+        }
+    }
+    if let Ok(mut coverage_text_value) = text.get_mut(coverage_display_entity) {
+        coverage_text_value.0 = bitmap_repr.fill_data.data[0].to_string();
+    }
+    let bitmap_panel_entity = entity_store.get("bitmap-panel").unwrap();
+    let panel_currently_touched =
+        if let Ok((_, _, location, pressed)) = touchables.get(bitmap_panel_entity) {
+            pressed.currently_pressed()
+        } else {
+            false
+        };
+    if panel_currently_touched {
+        // send fill data to queue
+        // send color change to entity
+        let panel_touch_location = primary_touch.touch;
+    }
+}
 impl Attach for BitmapRepr {
     fn attach(visualizer: &mut Visualizer) {
+        visualizer
+            .job
+            .task(Visualizer::TASK_MAIN)
+            .add_systems((update.in_set(UserSpaceSyncPoint::Process), ));
         let mut bitmap_repr_data = vec![];
         // map entity to location in the grid offset from left/top
-        let bitmap_panel_left = 1.near().raw_offset(3);
-        let bitmap_panel_right = 4.far().raw_offset(-3);
-        let bitmap_panel_top = 2.near().raw_offset(3);
-        let bitmap_panel_bottom = 5.far().raw_offset(-3);
+        let bitmap_panel_left = 1.near().raw_offset(2);
+        let bitmap_panel_right = 4.far().raw_offset(-2);
+        let bitmap_panel_top = 2.near().raw_offset(2);
+        let bitmap_panel_bottom = 5.far().raw_offset(-2);
         let increment_amount = 2;
         visualizer.add_entities(vec![IconBitmapRequest::from((
             "something",
@@ -87,8 +147,8 @@ impl Attach for BitmapRepr {
                 let bundle = Icon::new(
                     "something",
                     ResponsiveGridPoint::all_same((
-                        bitmap_panel_left.raw_offset(increment_amount * x),
-                        bitmap_panel_top.raw_offset(increment_amount * y),
+                        bitmap_panel_left.raw_offset(increment_amount * x + 1),
+                        bitmap_panel_top.raw_offset(increment_amount * y + 1),
                     )),
                     IconScale::Custom(RawMarker::PX as u32 * 2),
                     2,
@@ -129,8 +189,8 @@ impl Attach for BitmapRepr {
             bitmap_panel_left.raw_offset(6),
         );
         let coverage_display_vertical = (
-            bitmap_panel_top.raw_offset(-5),
-            bitmap_panel_top.raw_offset(-2),
+            bitmap_panel_top.raw_offset(-4),
+            bitmap_panel_top.raw_offset(1),
         );
         let coverage_display_location =
             ResponsiveGridView::all_same((coverage_display_horizontal, coverage_display_vertical));
@@ -140,24 +200,19 @@ impl Attach for BitmapRepr {
                 coverage_display_location,
                 3,
                 "255",
-                TextScaleAlignment::Small,
+                TextScaleAlignment::Medium,
                 Color::GREY,
                 TextWrapStyle::word(),
             ))],
         );
-        let coverage_up_horizontal = ();
-        let coverage_up_vertical = ();
-        let coverage_up_location =
-            ResponsiveGridView::all_same((coverage_up_horizontal, coverage_up_vertical));
-        let coverage_up = Panel::new(
-            coverage_up_location,
-            PanelType::Panel,
-            3,
-            Color::GREEN,
-            Color::OFF_WHITE,
+        let coverage_down_horizontal = (
+            coverage_display_horizontal.1.raw_offset(1),
+            coverage_display_horizontal.1.raw_offset(3),
         );
-        let coverage_down_horizontal = ();
-        let coverage_down_vertical = ();
+        let coverage_down_vertical = (
+            coverage_display_vertical.0.raw_offset(0),
+            coverage_display_vertical.0.raw_offset(2),
+        );
         let coverage_down_location =
             ResponsiveGridView::all_same((coverage_down_horizontal, coverage_down_vertical));
         let coverage_down = Panel::new(
@@ -165,6 +220,20 @@ impl Attach for BitmapRepr {
             PanelType::Panel,
             3,
             Color::RED_ORANGE,
+            Color::OFF_WHITE,
+        );
+        let coverage_up_horizontal = (
+            coverage_down_horizontal.1.raw_offset(1),
+            coverage_down_horizontal.1.raw_offset(3),
+        );
+        let coverage_up_vertical = coverage_down_vertical;
+        let coverage_up_location =
+            ResponsiveGridView::all_same((coverage_up_horizontal, coverage_up_vertical));
+        let coverage_up = Panel::new(
+            coverage_up_location,
+            PanelType::Panel,
+            3,
+            Color::GREEN,
             Color::OFF_WHITE,
         );
         visualizer.add_named_entities(
@@ -181,12 +250,12 @@ impl Attach for BitmapRepr {
             ],
         );
         let pos_neg_space_button_horizontal = (
-            coverage_up_horizontal.1.raw_offset(1),
-            coverage_up_horizontal.1.raw_offset(4),
+            coverage_up_horizontal.1.raw_offset(10),
+            coverage_up_horizontal.1.raw_offset(12),
         );
         let pos_neg_space_button_vertical = (
-            coverage_display_vertical.1.raw_offset(-4),
-            coverage_display_vertical.1,
+            coverage_display_vertical.0.raw_offset(0),
+            coverage_display_vertical.0.raw_offset(2),
         );
         let pos_neg_space_button_location = ResponsiveGridView::all_same((
             pos_neg_space_button_horizontal,
@@ -194,18 +263,18 @@ impl Attach for BitmapRepr {
         ));
         let pos_neg_space_button = Request::new(Panel::new(
             pos_neg_space_button_location,
-            PanelType::Border,
+            PanelType::Panel,
             3,
             Color::MEDIUM_GREY,
             Color::OFF_WHITE,
         ));
         let pos_neg_space_button_text_horizontal = (
-            pos_neg_space_button_horizontal.0.raw_offset(1),
-            pos_neg_space_button_horizontal.0.raw_offset(2),
+            pos_neg_space_button_horizontal.1.raw_offset(2),
+            pos_neg_space_button_horizontal.1.raw_offset(12),
         );
         let pos_neg_space_button_text_vertical = (
-            pos_neg_space_button_vertical.0.raw_offset(1),
-            pos_neg_space_button_vertical.1.raw_offset(-1),
+            pos_neg_space_button_vertical.0.raw_offset(0),
+            pos_neg_space_button_vertical.0.raw_offset(2),
         );
         let pos_neg_space_button_text_location = ResponsiveGridView::all_same((
             pos_neg_space_button_text_horizontal,
@@ -214,7 +283,7 @@ impl Attach for BitmapRepr {
         let pos_neg_space_button_text = Request::new(Text::new(
             pos_neg_space_button_text_location,
             2,
-            "P",
+            "positive",
             TextScaleAlignment::Small,
             Color::OFF_WHITE,
             TextWrapStyle::word(),
@@ -228,6 +297,7 @@ impl Attach for BitmapRepr {
             vec![pos_neg_space_button_text],
         );
         // need to add other button for listen/not-listen
+        visualizer.job.container.insert_resource(bitmap_repr);
     }
 }
 
@@ -278,7 +348,7 @@ impl Workflow for Engen {
 fn main() {
     let mut visualizer = Visualizer::new(
         Theme::new(ThemeDescriptor::new().with_background(Color::OFF_BLACK)),
-        GfxOptions::native_defaults(),
+        GfxOptions::native_defaults().with_msaa(4),
     );
     visualizer.add_attachment::<BitmapRepr>();
     Runner::new()

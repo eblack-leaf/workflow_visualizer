@@ -67,6 +67,9 @@ impl EntityStore {
             store: HashMap::new(),
         }
     }
+    pub fn get<T: Into<EntityName>>(&self, name: T) -> Option<Entity> {
+        self.store.get(&name.into()).copied()
+    }
 }
 
 /// Extensible container + task runner

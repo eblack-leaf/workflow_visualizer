@@ -37,7 +37,7 @@ pub use crate::icon::{
     BundledIcon, ColorInvert, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData,
     IconScale, NegativeSpaceColor,
 };
-pub use crate::job::{EntityName, Job};
+pub use crate::job::{EntityName, EntityStore, Job};
 pub use crate::line::{Line, LineRender};
 pub use crate::panel::{BorderColor, Panel, PanelColor, PanelContentArea, PanelType};
 pub use crate::path::{Path, PathView, ResponsivePathView};
@@ -50,7 +50,10 @@ pub use crate::text::{
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};
-pub use crate::touch::{Touchable, TouchListener};
+pub use crate::touch::{
+    CurrentlyPressed, PrimaryTouch, ToggleState, Touchable, TouchListener, TouchLocation,
+    TouchTrigger,
+};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::WindowResize;
