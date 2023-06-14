@@ -4,16 +4,16 @@ use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
 use nalgebra::matrix;
 use wgpu::{BindGroup, BindGroupLayout, Texture, TextureFormat};
 
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 use crate::coord::area::Area;
+use crate::coord::DeviceContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
-use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
 /// Viewport Matrix for converting to NDC
 #[derive(Resource)]
@@ -228,7 +228,7 @@ pub(crate) fn frontend_area_adjust(
     scale_factor: Res<ScaleFactor>,
 ) {
     for event in resize_events.iter() {
-        viewport_handle.section.area = event.size.to_ui(scale_factor.factor);
+        viewport_handle.section.area = event.size.to_ui(scale_factor.factor());
     }
 }
 
@@ -267,7 +267,7 @@ pub(crate) fn viewport_read_offset(
             viewport_handle
                 .section
                 .position
-                .to_device(scale_factor.factor),
+                .to_device(scale_factor.factor()),
         );
         viewport_handle.position_dirty = false;
     }

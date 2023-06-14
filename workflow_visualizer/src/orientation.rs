@@ -2,10 +2,10 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Commands, IntoSystemConfig, Res, Resource};
 
+use crate::{Area, DeviceContext, ScaleFactor, SyncPoint};
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::WindowResize;
-use crate::{Area, DeviceContext, ScaleFactor, SyncPoint};
 
 #[derive(Resource, Copy, Clone)]
 pub enum Orientation {
@@ -30,7 +30,7 @@ pub(crate) fn setup_orientation(
     scale_factor: Res<ScaleFactor>,
 ) {
     cmd.insert_resource(Orientation::new(
-        viewport_handle.section.area.to_device(scale_factor.factor),
+        viewport_handle.section.area.to_device(scale_factor.factor()),
     ));
 }
 

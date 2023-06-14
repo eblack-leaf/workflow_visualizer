@@ -9,3 +9,5 @@ edition = "2021"
 workflow_visualizer = { path = "../workflow_visualizer" }
 async-trait = "0.1.68"
 serde = { version = "1.0.163", features = ["derive"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"

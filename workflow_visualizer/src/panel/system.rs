@@ -177,12 +177,12 @@ pub(crate) fn process_extraction(
         if let Some(pos) = difference.position {
             renderer
                 .positions
-                .queue_write(index, pos.to_device(scale_factor.factor).as_raw());
+                .queue_write(index, pos.to_device(scale_factor.factor()).as_raw());
         }
         if let Some(content_area) = difference.content_area {
             renderer
                 .content_area
-                .queue_write(index, content_area.to_device(scale_factor.factor).as_raw())
+                .queue_write(index, content_area.to_device(scale_factor.factor()).as_raw())
         }
         if let Some(layer) = difference.layer {
             renderer.layers.queue_write(index, layer);

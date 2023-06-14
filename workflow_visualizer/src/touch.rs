@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{
     Bundle, Component, Entity, EventReader, Events, IntoSystemConfig, Query, Res, ResMut, Resource,
 };
+use tracing::{debug, trace};
 use winit::event::{ElementState, MouseButton};
 
 use crate::{
@@ -210,6 +211,7 @@ pub(crate) fn read_touch_events(
                 }
                 TouchType::OnMove => {
                     if let Some(prime) = primary_touch.touch.as_mut() {
+                        trace!("setting current touch ??????????????????????????????????????????????????????????????????");
                         prime.current = touch.touch;
                     }
                     if let Some(entity) = focused_entity.entity {
@@ -217,6 +219,7 @@ pub(crate) fn read_touch_events(
                             touch_listeners.get_mut(entity)
                         {
                             if let Some(mut tracked) = touch_location.0 {
+                                trace!("setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                                 tracked.current = touch.touch;
                             }
                         }
@@ -246,7 +249,7 @@ pub(crate) fn read_touch_events(
                 ListenableTouchType::OnPress => {
                     if trigger_on_press {
                         if let Some(prime) = primary_touch.touch {
-                            let touch_origin = prime.origin.to_interface(scale_factor.factor)
+                            let touch_origin = prime.origin.to_interface(scale_factor.factor())
                                 - viewport_handle.section.position;
                             if section.contains(touch_origin) {
                                 if let Some(grab_state) = touch_grab_state.grab_state.as_mut() {
@@ -265,9 +268,9 @@ pub(crate) fn read_touch_events(
                     if trigger_on_release {
                         if let Some(prime) = primary_touch.touch {
                             if let Some(end) = prime.end {
-                                let touch_origin = prime.origin.to_interface(scale_factor.factor)
+                                let touch_origin = prime.origin.to_interface(scale_factor.factor())
                                     - viewport_handle.section.position;
-                                let touch_end = end.to_interface(scale_factor.factor)
+                                let touch_end = end.to_interface(scale_factor.factor())
                                     - viewport_handle.section.position;
                                 if section.contains(touch_origin) && section.contains(touch_end) {
                                     if let Some(grab_state) = touch_grab_state.grab_state.as_mut() {

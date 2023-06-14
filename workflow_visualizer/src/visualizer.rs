@@ -112,7 +112,7 @@ impl Visualizer {
         let viewport = Viewport::new(&surface.device, area, msaa.requested());
         let scale_factor = ScaleFactor::new(window.scale_factor());
         let viewport_handle =
-            ViewportHandle::new(Section::new((0, 0), area.to_ui(scale_factor.factor)));
+            ViewportHandle::new(Section::new((0, 0), area.to_ui(scale_factor.factor())));
         self.job.container.insert_resource(viewport);
         self.job.container.insert_resource(viewport_handle);
         self.job.container.insert_resource(surface);
@@ -255,7 +255,7 @@ impl Visualizer {
             .container
             .get_resource::<ScaleFactor>()
             .expect("no scale factor")
-            .factor;
+            .factor();
         let mut mouse_adapter = self
             .job
             .container
@@ -333,6 +333,9 @@ impl Visualizer {
             if *button == MouseButton::Left {
                 click_events.push(TouchEvent::new(TouchType::OnMove, mouse_position));
             }
+        }
+        for e in click_events {
+            self.job.container.send_event(e);
         }
     }
     pub fn cancel_touches(&mut self) {

@@ -40,8 +40,7 @@ pub struct Panel {
     pub(crate) section: Section<InterfaceContext>,
 }
 impl Panel {
-    pub const PADDING: (f32, f32) = (5.0, 5.0);
-    pub const CORNER_DEPTH: f32 = 5f32;
+    pub const CORNER_DEPTH: f32 = 10f32;
     pub const LINE_WIDTH: f32 = 1f32;
     pub fn new<C: Into<Color>, L: Into<Layer>>(
         responsive_grid_view: ResponsiveGridView,

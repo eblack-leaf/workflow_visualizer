@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
-use crate::panel::{Difference, Extraction};
 use crate::{
     Color, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::panel::{Difference, Extraction};
+use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, PanelVertex, vertex_buffer};
 
 #[derive(Resource)]
 pub(crate) struct PanelRenderer {
@@ -115,10 +115,10 @@ pub(crate) fn setup(
         multiview: None,
     };
     let pipeline = gfx_surface.device.create_render_pipeline(&descriptor);
-    let mesh = generate_panel_mesh(64, scale_factor.factor);
+    let mesh = generate_panel_mesh(16, scale_factor.factor());
     let mesh_len = mesh.len() as u32;
     let buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
-    let border_mesh = generate_border_mesh(64, scale_factor.factor);
+    let border_mesh = generate_border_mesh(16, scale_factor.factor());
     let border_mesh_len = border_mesh.len() as u32;
     let border_vertex_buffer = vertex_buffer(&gfx_surface, border_mesh);
     let initial_max = 5;

@@ -4,15 +4,15 @@ use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use tracing::{instrument, trace, warn};
 use wgpu::util::DeviceExt;
 
+use crate::{
+    Color, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
+};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::text::atlas::{AtlasBlock, TextureCoordinates};
 use crate::text::component::{Difference, TextScaleAlignment};
 use crate::text::font::AlignedFonts;
 use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
-use crate::{
-    Color, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
-};
 
 pub(crate) const AABB: [Vertex; 6] = [
     Vertex::new(RawPosition { x: 0.0, y: 0.0 }),
@@ -232,7 +232,7 @@ pub(crate) fn setup(
     };
     cmd.insert_resource(renderer);
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
 }
 #[derive(Resource, Clone)]
 pub(crate) struct Extraction {

@@ -3,7 +3,7 @@ use bevy_ecs::prelude::Resource;
 /// Scale Factor of the device's Window
 #[derive(Resource, Clone, Copy)]
 pub struct ScaleFactor {
-    pub(crate) factor: f64,
+    factor: f64,
 }
 
 impl ScaleFactor {

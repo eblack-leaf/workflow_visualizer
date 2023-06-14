@@ -7,6 +7,11 @@ use bevy_ecs::prelude::{
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::{trace, warn};
 
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -26,15 +31,10 @@ use crate::text::render_group::{
 };
 use crate::text::renderer::{Extraction, TextRenderer};
 use crate::window::WindowResize;
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
 }
 pub(crate) fn place(
     mut text_query: Query<
@@ -59,7 +59,7 @@ pub(crate) fn place(
     for (mut placer, mut placement, text, area, wrap_style, text_scale, text_scale_alignment) in
         text_query.iter_mut()
     {
-        let area = area.to_device(scale_factor.factor);
+        let area = area.to_device(scale_factor.factor());
         placer.0.reset(&LayoutSettings {
             max_width: Some(area.width),
             max_height: Some(area.height),
@@ -175,8 +175,8 @@ pub(crate) fn filter(
             filtered_placement.0 = placement.0.clone();
             grid_placement.0 = HashMap::new();
             let mut filter_queue = HashSet::new();
-            let position = pos.to_device(scale_factor.factor);
-            let v_sec = v_sec.as_device(scale_factor.factor);
+            let position = pos.to_device(scale_factor.factor());
+            let v_sec = v_sec.as_device(scale_factor.factor());
             for (key, glyph_pos) in placement.0.iter() {
                 if glyph_pos.parent.is_ascii_control() {
                     filter_queue.insert(*key);
@@ -202,7 +202,7 @@ pub(crate) fn filter(
                 &grid_placement,
                 area,
                 text_letter_dimensions,
-                scale_factor.factor,
+                scale_factor.factor(),
             );
         }
     }
@@ -221,7 +221,7 @@ pub(crate) fn scale_change(
 ) {
     for (mut text_scale, mut text_letter_dimensions, text_scale_alignment) in text_query.iter_mut()
     {
-        *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor);
+        *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor());
         let letter_dimensions = fonts
             .fonts
             .get(text_scale_alignment)
@@ -365,7 +365,7 @@ pub(crate) fn create_render_groups(
         (max, pos, visible_section, layer, unique_glyphs, text_scale_alignment, atlas_block),
     ) in extraction.added.iter()
     {
-        let position = pos.to_device(scale_factor.factor);
+        let position = pos.to_device(scale_factor.factor());
         let text_placement = TextPlacement::new(position, *layer);
         let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
         let render_group_bind_group = RenderGroupBindGroup::new(
@@ -433,7 +433,7 @@ pub(crate) fn render_group_differences(
             render_group
                 .position_write
                 .write
-                .replace(position.to_device(scale_factor.factor));
+                .replace(position.to_device(scale_factor.factor()));
             draw_section_resize_needed = true;
         }
         if let Some(layer) = difference.layer {
@@ -701,7 +701,7 @@ pub(crate) fn render_group_differences(
         }
         if draw_section_resize_needed {
             if let Some(v_sec) = render_group.visible_section.section {
-                let v_sec = v_sec.as_device(scale_factor.factor);
+                let v_sec = v_sec.as_device(scale_factor.factor());
                 let draw_bound = Section::<DeviceContext>::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,
@@ -722,7 +722,7 @@ pub(crate) fn resolve_draw_section_on_resize(
     for _event in event_reader.iter() {
         for (_, render_group) in renderer.render_groups.iter_mut() {
             if let Some(v_sec) = render_group.visible_section.section {
-                let v_sec = v_sec.as_device(scale_factor.factor);
+                let v_sec = v_sec.as_device(scale_factor.factor());
                 let draw_bound = Section::<DeviceContext>::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,

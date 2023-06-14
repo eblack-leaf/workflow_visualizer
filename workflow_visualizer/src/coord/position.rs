@@ -1,13 +1,14 @@
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
-use std::ops::{Add, AddAssign, Sub};
+use std::ops::{Add, AddAssign, Div, Sub};
 
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use crate::coord::{CoordinateContext, NumericalContext};
 use crate::{DeviceContext, InterfaceContext};
+use crate::coord::{CoordinateContext, NumericalContext};
+
 /// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Position<Context: CoordinateContext> {
@@ -67,6 +68,14 @@ impl<Context: CoordinateContext> Sub for Position<Context> {
     type Output = Position<Context>;
     fn sub(self, rhs: Self) -> Self::Output {
         Position::<Context>::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl<Context: CoordinateContext> Div for Position<Context> {
+    type Output = Position<Context>;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        Position::<Context>::new(self.x / rhs.x, self.y / rhs.y)
     }
 }
 /// Raw position for interacting with C

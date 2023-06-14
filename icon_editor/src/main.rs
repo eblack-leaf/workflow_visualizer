@@ -3,11 +3,9 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use tracing::{debug, Level, trace};
 
-use workflow_visualizer::{
-    bevy_ecs, CurrentlyPressed, EntityStore, PrimaryTouch, TextValue, TouchLocation, TouchTrigger,
-    UserSpaceSyncPoint,
-};
+use workflow_visualizer::{bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint};
 use workflow_visualizer::{
     Attach, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap, IconBitmapRequest,
     IconPixelData, IconScale, Panel, PanelType, RawMarker, Request, ResponsiveGridPoint,
@@ -52,6 +50,7 @@ impl Default for Engen {
 struct BitmapRepr {
     fill_data: IconPixelData,
     bitmap_repr: HashMap<BitmapLocation, Entity>,
+    queue: Vec<(BitmapLocation, IconPixelData)>,
 }
 
 impl BitmapRepr {
@@ -68,6 +67,7 @@ impl BitmapRepr {
             )
                 .into(),
             bitmap_repr: HashMap::new(),
+            queue: vec![],
         }
     }
 }
@@ -78,6 +78,7 @@ fn update(
     primary_touch: Res<PrimaryTouch>,
     mut text: Query<(&mut TextValue)>,
     mut icons: Query<(Entity, &mut Color)>,
+    scale_factor: Res<ScaleFactor>,
     touchables: Query<(Entity, &TouchTrigger, &TouchLocation, &CurrentlyPressed)>,
 ) {
     let coverage_up_entity = entity_store.get("coverage-up").unwrap();
@@ -113,16 +114,26 @@ fn update(
         coverage_text_value.0 = bitmap_repr.fill_data.data[0].to_string();
     }
     let bitmap_panel_entity = entity_store.get("bitmap-panel").unwrap();
-    let panel_currently_touched =
+    let panel_currently_pressed =
         if let Ok((_, _, location, pressed)) = touchables.get(bitmap_panel_entity) {
             pressed.currently_pressed()
         } else {
             false
         };
-    if panel_currently_touched {
-        // send fill data to queue
-        // send color change to entity
-        let panel_touch_location = primary_touch.touch;
+    if panel_currently_pressed {
+        let panel_touch_location = primary_touch.touch.unwrap().current.to_interface(scale_factor.factor());
+        let logical_location = panel_touch_location - Position::new(RawMarker::PX * 5f32, RawMarker::PX * 17f32);
+        let logical_location = logical_location / Position::new(RawMarker::PX * 2f32, RawMarker::PX * 2f32);
+        let bitmap_location = BitmapLocation::new(logical_location.x as u32, logical_location.y as u32);
+        let new_color = Color::from(Color::OFF_WHITE).with_alpha(bitmap_repr.fill_data.data[0] as f32 / 255f32);
+        if let Some(entity) = bitmap_repr.bitmap_repr.get(&bitmap_location).copied() {
+            // send fill data to queue
+            let fill_data = bitmap_repr.fill_data;
+            bitmap_repr.queue.push((bitmap_location, fill_data));
+            if let Ok((entity, mut color)) = icons.get_mut(entity) {
+                *color = new_color;
+            }
+        }
     }
 }
 impl Attach for BitmapRepr {
@@ -166,6 +177,7 @@ impl Attach for BitmapRepr {
                 bitmap_repr
                     .bitmap_repr
                     .insert(BitmapLocation::new(x, y), *ids.get(index).unwrap());
+                index += 1;
             }
         }
         visualizer.add_named_entities(
@@ -335,10 +347,13 @@ impl Workflow for Engen {
             Action::ExitRequest => return Response::ExitConfirmed,
             Action::SendUpdates(data) => {
                 // add to engen.
+                for d in data {
+                    engen.lock().unwrap().bitmap_panel.insert(d.0, d.1);
+                }
                 Response::UpdatesSaved
             }
             Action::WriteOut => {
-                // engen.write_out();
+                engen.lock().unwrap().write_out();
                 Response::WrittenOut
             }
         }
@@ -346,6 +361,7 @@ impl Workflow for Engen {
 }
 
 fn main() {
+    // tracing_subscriber::fmt().with_max_level(Level::TRACE).init();
     let mut visualizer = Visualizer::new(
         Theme::new(ThemeDescriptor::new().with_background(Color::OFF_BLACK)),
         GfxOptions::native_defaults().with_msaa(4),

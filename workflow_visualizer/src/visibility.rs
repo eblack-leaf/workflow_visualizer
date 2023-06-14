@@ -81,12 +81,12 @@ pub(crate) fn calc_visibility(
         if vis.visible() != visible {
             vis.visible = visible;
         }
-        trace!(
-            "establishing visibility for {:?}, {:?}, {:?}",
-            pos,
-            area,
-            vis.visible()
-        );
+        // trace!(
+        //     "establishing visibility for {:?}, {:?}, {:?}",
+        //     pos,
+        //     area,
+        //     vis.visible()
+        // );
     }
 }
 pub(crate) struct VisibilityAttachment;

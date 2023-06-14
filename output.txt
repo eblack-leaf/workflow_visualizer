@@ -1,0 +1,1261 @@
+[2m2023-06-14T20:36:18.429899Z[0m [32m INFO[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m initializing gfx.
+[2m2023-06-14T20:36:18.429911Z[0m [35mTRACE[0m [1mnew[0m[1m{[0m[3mwindow[0m[2m=[0mWindow { .. } [3moptions[0m[2m=[0mGfxOptions[1m}[0m[2m:[0m [2mworkflow_visualizer::gfx[0m[2m:[0m obtaining gfx stack. Backends: Backends(VULKAN | METAL | DX12 | BROWSER_WEBGPU), Features: Features(0x0)
+[2m2023-06-14T20:36:18.458453Z[0m [35mTRACE[0m [1mnew[0m[1m{[0m[3mwindow[0m[2m=[0mWindow { .. } [3moptions[0m[2m=[0mGfxOptions[1m}[0m[2m:[0m [2mworkflow_visualizer::gfx[0m[2m:[0m creating surface
+[2m2023-06-14T20:36:18.458492Z[0m [35mTRACE[0m [1mnew[0m[1m{[0m[3mwindow[0m[2m=[0mWindow { .. } [3moptions[0m[2m=[0mGfxOptions[1m}[0m[2m:[0m [2mworkflow_visualizer::gfx[0m[2m:[0m requesting adapter with LowPower fallback_adapter: false
+[2m2023-06-14T20:36:18.487744Z[0m [32m INFO[0m [1mnew[0m[1m{[0m[3mwindow[0m[2m=[0mWindow { .. } [3moptions[0m[2m=[0mGfxOptions[1m}[0m[2m:[0m [2mworkflow_visualizer::gfx[0m[2m:[0m requesting device/queue
+[2m2023-06-14T20:36:18.527359Z[0m [35mTRACE[0m [1mnew[0m[1m{[0m[3mwindow[0m[2m=[0mWindow { .. } [3moptions[0m[2m=[0mGfxOptions[1m}[0m[2m:[0m [2mworkflow_visualizer::gfx[0m[2m:[0m surface format: Bgra8UnormSrgb
+[2m2023-06-14T20:36:18.605129Z[0m [32m INFO[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m gfx -> surface: 400/600
+[2m2023-06-14T20:36:18.618491Z[0m [35mTRACE[0m [2mworkflow_visualizer::line::renderer[0m[2m:[0m setup line renderer
+[2m2023-06-14T20:36:18.632175Z[0m [32m INFO[0m [2mworkflow_visualizer::workflow::run[0m[2m:[0m resuming
+[2m2023-06-14T20:36:18.669609Z[0m [32m INFO[0m [2mworkflow_visualizer::workflow::run[0m[2m:[0m resizing: PhysicalSize { width: 400, height: 600 }
+[2m2023-06-14T20:36:18.672434Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.672577Z[0m [35mTRACE[0m [2mworkflow_visualizer::window[0m[2m:[0m resizing event: Area: width:400.00 height:600.00
+[2m2023-06-14T20:36:18.704417Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.704437Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.704438Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.704442Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.704444Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.704446Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.704447Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.705799Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.706015Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::system[0m[2m:[0m processing differences for 402v0
+[2m2023-06-14T20:36:18.706070Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::system[0m[2m:[0m processing differences for 406v0
+[2m2023-06-14T20:36:18.706154Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.706167Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.706169Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.706171Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.706173Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.706174Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.706177Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.706561Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.706577Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.706589Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.706590Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.706593Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.706595Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.706596Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.706598Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.706901Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.736695Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.736779Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.736789Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.736815Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.736825Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.736833Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.736851Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.738778Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.753344Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.753438Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.753448Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.753468Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.753479Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.753488Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.753507Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.755466Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.770051Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.770138Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.770147Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.770166Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.770176Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.770186Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.770203Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.772102Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.786661Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.786713Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.786718Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.786730Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.786735Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.786740Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.786750Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.787838Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.802906Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.802934Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.802936Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.802944Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.802947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.802950Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.802956Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.803539Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.819507Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.819522Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.819523Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.819527Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.819528Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.819530Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.819533Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.820296Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.836691Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.836714Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.836716Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.836723Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.836725Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.836727Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.836731Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.837179Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.852924Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.852969Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.852970Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.852977Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.852979Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.852981Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.852986Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.853449Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.869569Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.869592Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.869593Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.869599Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.869602Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.869604Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.869608Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.870045Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.886230Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.886256Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.886258Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.886264Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.886266Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.886268Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.886274Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.886727Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.902914Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.902939Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.902941Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.902948Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.902950Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.902953Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.902960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.903403Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.919561Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.919585Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.919586Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.919593Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.919595Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.919597Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.919602Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.920427Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.936765Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.936792Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.936793Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.936801Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.936803Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.936807Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.936811Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.937268Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.952926Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.952952Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.952954Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.952960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.952962Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.952964Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.952970Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.953427Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.969564Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.969588Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.969590Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.969597Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.969600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.969602Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.969608Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.970057Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:18.986221Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:18.986245Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:18.986247Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.986252Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:18.986254Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.986256Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:18.986261Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:18.986684Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.002877Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.002903Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.002904Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.002911Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.002913Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.002914Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.002920Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.003370Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.019653Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.019676Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.019678Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.019684Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.019687Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.019688Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.019693Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.020514Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.036309Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.036326Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.036327Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.036331Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.036333Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.036334Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.036337Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.036700Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.052991Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.053007Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.053008Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.053011Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.053013Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.053014Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.053038Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.053407Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.069725Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.069746Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.069747Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.069752Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.069755Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.069757Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.069762Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.070200Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.086311Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.086336Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.086339Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.086345Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.086348Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.086351Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.086356Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.086947Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.103104Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.103155Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.103161Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.103173Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.103180Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.103185Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.103196Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.104363Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.120017Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.120093Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.120103Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.120120Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.120131Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.120140Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.120169Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.122464Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.136712Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.136797Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.136807Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.136825Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.136834Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.136843Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.136857Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.138638Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.153374Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.153474Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.153484Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.153506Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.153516Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.153527Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.153546Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.155468Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.170127Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.170215Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.170224Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.170246Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.170256Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.170265Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.170284Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.172170Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.186466Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.186525Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.186530Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.186543Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.186548Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.186553Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.186563Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.187611Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.203257Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.203289Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.203293Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.203302Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.203305Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.203308Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.203315Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.203911Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.219586Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.219614Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.219616Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.219622Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.219625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.219627Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.219633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.220147Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.236222Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.236249Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.236250Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.236258Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.236260Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.236262Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.236268Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.237147Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.252901Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.252930Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.252931Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.252939Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.252941Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.252943Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.252947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.253426Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.269600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.269625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.269626Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.269633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.269635Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.269637Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.269642Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.270102Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.286266Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.286293Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.286295Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.286302Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.286306Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.286308Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.286313Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.286774Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.302938Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.302965Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.302967Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.302975Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.302977Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.302981Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.302986Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.303467Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.319623Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.319649Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.319650Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.319657Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.319659Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.319661Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.319667Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.320135Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.336255Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.336281Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.336283Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.336291Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.336293Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.336295Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.336301Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.337167Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.352908Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.352935Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.352936Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.352944Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.352947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.352949Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.352953Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.353955Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.369581Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.369606Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.369607Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.369618Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.369621Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.369623Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.369628Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.370067Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.386260Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.386287Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.386289Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.386296Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.386298Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.386302Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.386308Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.386760Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.402879Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.402904Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.402905Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.402913Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.402915Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.402917Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.402923Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.403380Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.419596Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.419624Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.419625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.419633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.419635Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.419638Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.419645Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.420113Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.436252Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.436279Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.436280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.436288Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.436290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.436294Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.436299Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.437174Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.452870Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.452898Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.452900Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.452908Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.452910Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.452913Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.452918Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.453403Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.469598Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.469624Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.469625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.469633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.469636Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.469637Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.469642Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.470117Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.486275Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.486302Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.486303Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.486311Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.486314Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.486316Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.486322Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.486809Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.502915Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.502942Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.502943Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.502951Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.502953Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.502955Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.502961Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.503438Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.519656Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.519702Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.519707Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.519722Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.519728Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.519733Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.519743Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.520675Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.536205Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.536232Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.536233Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.536241Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.536244Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.536246Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.536253Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.536741Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.552928Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.552953Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.552954Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.552962Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.552964Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.552966Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.552972Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.553833Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.569590Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.569615Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.569617Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.569625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.569627Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.569631Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.569636Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.570111Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.586209Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.586238Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.586240Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.586250Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.586252Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.586254Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.586260Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.586748Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.602935Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.602960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.602962Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.602972Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.602974Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.602977Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.602985Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.603468Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.619599Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.619625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.619626Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.619634Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.619636Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.619638Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.619644Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.620122Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.636270Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.636295Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.636297Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.636306Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.636308Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.636310Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.636317Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.636811Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.652951Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.652978Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.652979Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.652988Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.652990Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.652992Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.652999Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.653889Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.669605Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.669632Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.669633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.669642Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.669644Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.669646Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.669652Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.670154Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.686236Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.686261Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.686263Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.686270Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.686272Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.686274Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.686280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.686745Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.702939Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.702966Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.702968Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.702976Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.702979Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.702981Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.702989Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.703462Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.719590Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.719615Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.719617Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.719624Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.719626Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.719628Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.719634Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.720112Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.736226Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.736251Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.736252Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.736260Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.736262Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.736264Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.736270Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.736745Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.752909Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.752937Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.752939Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.752947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.752950Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.752952Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.752959Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.753470Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.769594Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.769620Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.769621Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.769629Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.769631Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.769634Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.769640Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.770535Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.786217Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.786242Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.786243Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.786251Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.786253Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.786256Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.786260Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.786733Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.802925Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.802951Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.802952Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.802961Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.802964Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.802966Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.802973Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.803442Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.819597Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.819623Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.819625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.819633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.819636Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.819638Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.819644Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.820129Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.836253Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.836280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.836281Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.836290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.836292Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.836294Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.836300Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.836798Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.852932Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.852958Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.852960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.852968Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.852970Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.852972Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.852979Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.853652Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.869601Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.869628Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.869629Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.869641Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.869644Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.869646Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.869651Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.870557Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.888084Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.888116Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.888117Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.888128Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.888131Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.888133Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.888141Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.888916Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.902910Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.902938Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.902940Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.902949Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.902951Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.902953Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.902960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.903455Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.919590Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.919614Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.919616Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.919623Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.919625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.919627Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.919633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.920121Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.936264Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.936289Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.936290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.936299Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.936301Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.936305Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.936310Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.936805Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.952938Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.952963Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.952965Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.952973Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.952975Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.952977Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.952983Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.953469Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.969600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.969626Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.969628Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.969636Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.969639Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.969641Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.969646Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.970139Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:19.986264Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:19.986290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:19.986292Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.986300Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:19.986304Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.986306Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:19.986312Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:19.987210Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.002931Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.002956Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.002957Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.002964Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.002966Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.002968Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.002973Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.003457Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.019572Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.019599Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.019600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.019608Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.019610Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.019612Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.019619Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.020099Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.036196Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.036222Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.036223Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.036231Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.036233Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.036235Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.036240Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.036707Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.052922Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.052949Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.052950Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.052957Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.052959Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.052961Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.052968Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.053732Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.069580Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.069606Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.069607Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.069614Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.069616Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.069618Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.069624Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.070077Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.086250Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.086274Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.086276Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.086282Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.086284Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.086286Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.086291Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.086752Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.102916Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.102941Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.102942Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.102949Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.102951Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.102953Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.102959Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.103809Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.119583Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.119607Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.119608Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.119615Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.119617Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.119619Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.119623Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.120098Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.136251Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.136275Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.136276Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.136283Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.136285Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.136287Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.136292Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.136771Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.152936Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.152960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.152962Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.152969Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.152971Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.152973Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.152981Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.153457Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.169582Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.169605Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.169607Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.169614Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.169616Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.169618Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.169624Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.170094Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.186254Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.186279Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.186280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.186288Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.186290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.186293Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.186299Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.186825Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.202964Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.203009Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.203011Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.203019Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.203021Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.203023Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.203029Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.203965Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.219593Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.219618Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.219619Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.219627Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.219629Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.219631Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.219635Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.220312Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.236265Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.236291Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.236292Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.236299Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.236301Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.236303Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.236309Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.236945Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.252998Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.253041Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.253043Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.253050Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.253053Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.253055Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.253061Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.253602Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.269570Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.269595Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.269596Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.269603Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.269605Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.269607Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.269612Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.270141Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.286253Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.286278Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.286280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.286287Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.286289Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.286291Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.286297Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.286762Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.302925Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.302952Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.302953Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.302961Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.302964Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.302966Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.302973Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.303441Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.319601Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.319625Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.319627Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.319633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.319635Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.319638Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.319643Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.320494Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.336249Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.336274Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.336275Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.336282Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.336285Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.336287Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.336291Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.336757Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.352934Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.352960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.352961Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.352969Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.352971Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.352973Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.352978Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.353458Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.369606Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.369633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.369634Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.369641Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.369643Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.369645Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.369651Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.370144Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.386249Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.386275Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.386277Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.386286Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.386290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.386293Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.386299Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.386789Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.402934Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.402959Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.402961Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.402968Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.402972Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.402973Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.402980Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.403461Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.419605Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.419631Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.419633Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.419641Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.419643Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.419645Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.419650Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.420544Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.436276Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.436302Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.436304Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.436312Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.436314Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.436316Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.436321Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.436817Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.452938Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.452966Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.452968Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.452975Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.452978Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.452980Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.452986Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.453463Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.469600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.469627Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.469629Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.469637Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.469640Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.469642Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.469648Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.470119Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.486261Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.486287Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.486288Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.486296Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.486298Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.486300Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.486307Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.486769Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.502913Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.502937Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.502938Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.502945Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.502947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.502949Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.502955Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.503414Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.519562Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.519586Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.519588Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.519594Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.519596Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.519599Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.519603Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.520046Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.536220Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.536245Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.536247Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.536252Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.536254Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.536256Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.536261Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.537108Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.552927Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.552953Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.552954Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.552962Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.552964Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.552966Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.552971Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.553431Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.569563Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.569588Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.569589Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.569595Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.569597Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.569599Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.569604Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.570035Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.586250Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.586278Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.586279Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.586286Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.586288Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.586290Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.586296Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.586777Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.602922Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.602947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.602948Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.602955Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.602958Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.602961Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.602966Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.603452Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.619562Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.619585Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.619586Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.619591Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.619593Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.619595Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.619600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.620055Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.636220Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.636244Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.636245Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.636251Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.636253Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.636255Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.636260Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.636681Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.652898Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.652924Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.652926Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.652933Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.652935Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.652937Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.652943Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.653849Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.669581Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.669606Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.669607Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.669614Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.669616Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.669618Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.669622Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.671040Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.686245Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.686270Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.686271Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.686278Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.686280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.686283Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.686287Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.686718Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.702895Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.702919Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.702921Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.702926Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.702928Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.702930Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.702935Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.703357Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.719542Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.719565Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.719567Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.719573Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.719575Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.719577Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.719582Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.720003Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.736253Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.736279Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.736280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.736288Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.736290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.736293Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.736297Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.736786Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.752906Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.752931Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.752932Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.752939Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.752941Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.752943Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.752949Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.753870Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.769566Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.769590Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.769591Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.769598Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.769600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.769602Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.769606Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.770294Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.786249Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.786273Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.786274Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.786280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.786282Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.786284Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.786290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.786739Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.802912Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.802937Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.802938Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.802945Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.802947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.802949Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.802956Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.803397Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.819588Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.819615Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.819617Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.819624Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.819627Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.819629Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.819635Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.820123Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.836244Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.836268Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.836270Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.836277Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.836279Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.836281Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.836286Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.836770Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.852934Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.852959Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.852960Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.852968Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.852970Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.852972Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.852979Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.853958Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.869602Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.869627Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.869629Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.869636Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.869638Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.869640Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.869645Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.870130Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.886264Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.886290Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.886292Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.886300Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.886302Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.886305Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.886310Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.886800Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.902940Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.902967Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.902969Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.902977Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.902980Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.902982Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.902989Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.903527Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.919570Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.919595Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.919596Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.919604Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.919606Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.919608Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.919614Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.920088Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.936249Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.936271Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.936273Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.936278Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.936280Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.936282Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.936288Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.936732Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.952959Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.952982Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.952984Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.952990Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.952992Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.952994Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.953000Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.953409Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.953411Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.953412Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.953414Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.953415Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.953416Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.953465Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.969570Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.969594Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.969595Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.969601Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.969603Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.969605Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.969610Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.970475Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.970478Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.970479Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.970481Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.970482Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.970483Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.970485Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.970486Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.970487Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.970489Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.970539Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:20.986197Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:20.986219Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:20.986221Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.986227Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:20.986229Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.986231Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:20.986235Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:20.986656Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986658Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986660Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986661Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986662Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986663Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986665Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986666Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986667Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986668Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986669Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986670Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986671Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:20.986672Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:20.986752Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.002946Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.002970Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.002971Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.002979Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.002981Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.002983Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.002988Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.003509Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003512Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003513Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003514Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003516Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003517Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003518Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003520Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003521Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003522Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003523Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003524Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003525Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.003527Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.003597Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.019587Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.019611Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.019613Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.019619Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.019621Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.019623Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.019629Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.020055Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.020058Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.020059Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.020061Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.020062Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.020063Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.020065Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.020066Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.020067Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.020069Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.020119Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.036249Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.036274Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.036275Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.036282Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.036285Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.036287Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.036292Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.036748Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.036750Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.036752Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.036753Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.036754Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.036756Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.036757Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.036758Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.036839Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.052962Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.052986Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.052987Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.052994Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.052996Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.052997Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.053003Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.053412Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.053415Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.053416Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.053417Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.053469Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.069554Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.069577Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.069578Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.069584Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.069586Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.069588Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.069593Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.069974Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.069976Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.070055Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.086247Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.086272Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.086273Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.086279Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.086282Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.086283Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.086289Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.087102Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.087105Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.087171Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.102915Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.102939Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.102941Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.102947Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.102949Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.102951Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.102955Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.103361Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ??????????????????????????????????????????????????????????????????
+[2m2023-06-14T20:36:21.103363Z[0m [35mTRACE[0m [2mworkflow_visualizer::touch[0m[2m:[0m setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[2m2023-06-14T20:36:21.103413Z[0m [35mTRACE[0m [2mworkflow_visualizer::visualizer[0m[2m:[0m starting render main
+[2m2023-06-14T20:36:21.119577Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m obtained surface texture
+[2m2023-06-14T20:36:21.119600Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m beginning render pass
+[2m2023-06-14T20:36:21.119601Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.119608Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking opaque render fn
+[2m2023-06-14T20:36:21.119610Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn
+[2m2023-06-14T20:36:21.119612Z[0m [35mTRACE[0m [2mworkflow_visualizer::text::renderer[0m[2m:[0m starting text render fn
+[2m2023-06-14T20:36:21.119617Z[0m [35mTRACE[0m [2mworkflow_visualizer::render[0m[2m:[0m invoking transparent render fn

@@ -191,12 +191,12 @@ pub(crate) fn read_differences(
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
                 icon_renderer
                     .pos_attribute
-                    .queue_write(index, pos.to_device(scale_factor.factor).as_raw());
+                    .queue_write(index, pos.to_device(scale_factor.factor()).as_raw());
             }
         }
         let mut area_or_layer_dirty = false;
         if let Some(area) = difference.attributes.area.take() {
-            let device_area = area.to_device(scale_factor.factor);
+            let device_area = area.to_device(scale_factor.factor());
             area_and_layer.data = [
                 device_area.width,
                 device_area.height,
