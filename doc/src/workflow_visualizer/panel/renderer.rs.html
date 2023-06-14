@@ -187,13 +187,13 @@
 <a href="#187" id="187">187</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
-<span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-<span class="kw">use </span><span class="kw">crate</span>::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
-<span class="kw">use </span><span class="kw">crate</span>::panel::{Difference, Extraction};
 <span class="kw">use crate</span>::{
     Color, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
+<span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
+<span class="kw">use </span><span class="kw">crate</span>::panel::{Difference, Extraction};
+<span class="kw">use </span><span class="kw">crate</span>::panel::vertex::{generate_border_mesh, generate_panel_mesh, PanelVertex, vertex_buffer};
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PanelRenderer {
@@ -302,10 +302,10 @@
         multiview: <span class="prelude-val">None</span>,
     };
     <span class="kw">let </span>pipeline = gfx_surface.device.create_render_pipeline(<span class="kw-2">&amp;</span>descriptor);
-    <span class="kw">let </span>mesh = generate_panel_mesh(<span class="number">64</span>, scale_factor.factor);
+    <span class="kw">let </span>mesh = generate_panel_mesh(<span class="number">16</span>, scale_factor.factor());
     <span class="kw">let </span>mesh_len = mesh.len() <span class="kw">as </span>u32;
     <span class="kw">let </span>buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
-    <span class="kw">let </span>border_mesh = generate_border_mesh(<span class="number">64</span>, scale_factor.factor);
+    <span class="kw">let </span>border_mesh = generate_border_mesh(<span class="number">16</span>, scale_factor.factor());
     <span class="kw">let </span>border_mesh_len = border_mesh.len() <span class="kw">as </span>u32;
     <span class="kw">let </span>border_vertex_buffer = vertex_buffer(<span class="kw-2">&amp;</span>gfx_surface, border_mesh);
     <span class="kw">let </span>initial_max = <span class="number">5</span>;

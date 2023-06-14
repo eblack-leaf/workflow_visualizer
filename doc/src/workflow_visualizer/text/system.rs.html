@@ -741,6 +741,11 @@
 <span class="kw">use </span>fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 <span class="kw">use </span>tracing::{trace, warn};
 
+<span class="kw">use crate</span>::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::instance::key::KeyFactory;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{
@@ -760,15 +765,10 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer::{Extraction, TextRenderer};
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowResize;
-<span class="kw">use crate</span>::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(scale_factor: Res&lt;ScaleFactor&gt;, <span class="kw-2">mut </span>cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>place(
     <span class="kw-2">mut </span>text_query: Query&lt;
@@ -793,7 +793,7 @@
     <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, text, area, wrap_style, text_scale, text_scale_alignment) <span class="kw">in
         </span>text_query.iter_mut()
     {
-        <span class="kw">let </span>area = area.to_device(scale_factor.factor);
+        <span class="kw">let </span>area = area.to_device(scale_factor.factor());
         placer.<span class="number">0</span>.reset(<span class="kw-2">&amp;</span>LayoutSettings {
             max_width: <span class="prelude-val">Some</span>(area.width),
             max_height: <span class="prelude-val">Some</span>(area.height),
@@ -909,8 +909,8 @@
             filtered_placement.<span class="number">0 </span>= placement.<span class="number">0</span>.clone();
             grid_placement.<span class="number">0 </span>= HashMap::new();
             <span class="kw">let </span><span class="kw-2">mut </span>filter_queue = HashSet::new();
-            <span class="kw">let </span>position = pos.to_device(scale_factor.factor);
-            <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor);
+            <span class="kw">let </span>position = pos.to_device(scale_factor.factor());
+            <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor());
             <span class="kw">for </span>(key, glyph_pos) <span class="kw">in </span>placement.<span class="number">0</span>.iter() {
                 <span class="kw">if </span>glyph_pos.parent.is_ascii_control() {
                     filter_queue.insert(<span class="kw-2">*</span>key);
@@ -936,7 +936,7 @@
                 <span class="kw-2">&amp;</span>grid_placement,
                 area,
                 text_letter_dimensions,
-                scale_factor.factor,
+                scale_factor.factor(),
             );
         }
     }
@@ -955,7 +955,7 @@
 ) {
     <span class="kw">for </span>(<span class="kw-2">mut </span>text_scale, <span class="kw-2">mut </span>text_letter_dimensions, text_scale_alignment) <span class="kw">in </span>text_query.iter_mut()
     {
-        <span class="kw-2">*</span>text_scale = TextScale::from_alignment(<span class="kw-2">*</span>text_scale_alignment, scale_factor.factor);
+        <span class="kw-2">*</span>text_scale = TextScale::from_alignment(<span class="kw-2">*</span>text_scale_alignment, scale_factor.factor());
         <span class="kw">let </span>letter_dimensions = fonts
             .fonts
             .get(text_scale_alignment)
@@ -1099,7 +1099,7 @@
         (max, pos, visible_section, layer, unique_glyphs, text_scale_alignment, atlas_block),
     ) <span class="kw">in </span>extraction.added.iter()
     {
-        <span class="kw">let </span>position = pos.to_device(scale_factor.factor);
+        <span class="kw">let </span>position = pos.to_device(scale_factor.factor());
         <span class="kw">let </span>text_placement = TextPlacement::new(position, <span class="kw-2">*</span>layer);
         <span class="kw">let </span>text_placement_uniform = Uniform::new(<span class="kw-2">&amp;</span>gfx_surface.device, text_placement);
         <span class="kw">let </span>render_group_bind_group = RenderGroupBindGroup::new(
@@ -1167,7 +1167,7 @@
             render_group
                 .position_write
                 .write
-                .replace(position.to_device(scale_factor.factor));
+                .replace(position.to_device(scale_factor.factor()));
             draw_section_resize_needed = <span class="bool-val">true</span>;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(layer) = difference.layer {
@@ -1435,7 +1435,7 @@
         }
         <span class="kw">if </span>draw_section_resize_needed {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = render_group.visible_section.section {
-                <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor);
+                <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor());
                 <span class="kw">let </span>draw_bound = Section::&lt;DeviceContext&gt;::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,
@@ -1456,7 +1456,7 @@
     <span class="kw">for </span>_event <span class="kw">in </span>event_reader.iter() {
         <span class="kw">for </span>(<span class="kw">_</span>, render_group) <span class="kw">in </span>renderer.render_groups.iter_mut() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = render_group.visible_section.section {
-                <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor);
+                <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor());
                 <span class="kw">let </span>draw_bound = Section::&lt;DeviceContext&gt;::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,

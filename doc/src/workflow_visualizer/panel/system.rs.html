@@ -407,12 +407,12 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = difference.position {
             renderer
                 .positions
-                .queue_write(index, pos.to_device(scale_factor.factor).as_raw());
+                .queue_write(index, pos.to_device(scale_factor.factor()).as_raw());
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(content_area) = difference.content_area {
             renderer
                 .content_area
-                .queue_write(index, content_area.to_device(scale_factor.factor).as_raw())
+                .queue_write(index, content_area.to_device(scale_factor.factor()).as_raw())
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(layer) = difference.layer {
             renderer.layers.queue_write(index, layer);

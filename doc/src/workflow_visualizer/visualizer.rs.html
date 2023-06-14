@@ -439,6 +439,9 @@
 <a href="#439" id="439">439</a>
 <a href="#440" id="440">440</a>
 <a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -553,7 +556,7 @@
         <span class="kw">let </span>viewport = Viewport::new(<span class="kw-2">&amp;</span>surface.device, area, msaa.requested());
         <span class="kw">let </span>scale_factor = ScaleFactor::new(window.scale_factor());
         <span class="kw">let </span>viewport_handle =
-            ViewportHandle::new(Section::new((<span class="number">0</span>, <span class="number">0</span>), area.to_ui(scale_factor.factor)));
+            ViewportHandle::new(Section::new((<span class="number">0</span>, <span class="number">0</span>), area.to_ui(scale_factor.factor())));
         <span class="self">self</span>.job.container.insert_resource(viewport);
         <span class="self">self</span>.job.container.insert_resource(viewport_handle);
         <span class="self">self</span>.job.container.insert_resource(surface);
@@ -696,7 +699,7 @@
             .container
             .get_resource::&lt;ScaleFactor&gt;()
             .expect(<span class="string">&quot;no scale factor&quot;</span>)
-            .factor;
+            .factor();
         <span class="kw">let </span><span class="kw-2">mut </span>mouse_adapter = <span class="self">self
             </span>.job
             .container
@@ -774,6 +777,9 @@
             <span class="kw">if </span><span class="kw-2">*</span>button == MouseButton::Left {
                 click_events.push(TouchEvent::new(TouchType::OnMove, mouse_position));
             }
+        }
+        <span class="kw">for </span>e <span class="kw">in </span>click_events {
+            <span class="self">self</span>.job.container.send_event(e);
         }
     }
     <span class="kw">pub fn </span>cancel_touches(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {

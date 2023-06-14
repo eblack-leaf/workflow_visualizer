@@ -100,11 +100,11 @@
 <a href="#100" id="100">100</a>
 </pre><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Commands, Entity, Query, Res, ResMut};
 
-<span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
-<span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
-<span class="kw">use </span><span class="kw">crate</span>::line::LineRender;
-<span class="kw">use </span><span class="kw">crate</span>::path::Path;
 <span class="kw">use crate</span>::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor};
+<span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
+<span class="kw">use </span><span class="kw">crate</span>::line::LineRender;
+<span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LayerAndHooks, LineRenderer, LineRenderGpu, LineRenderGroup};
+<span class="kw">use </span><span class="kw">crate</span>::path::Path;
 
 <span class="comment">// before ResolveVisibility after Reconfigure.set_path
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calc_section(
@@ -132,7 +132,7 @@
     <span class="kw">for </span>(entity, path, <span class="kw-2">mut </span>line_render, <span class="kw-2">mut </span>line_render_points) <span class="kw">in </span>paths.iter_mut() {
         <span class="kw">let </span><span class="kw-2">mut </span>scaled = Vec::new();
         <span class="kw">for </span>point <span class="kw">in </span>path.points.iter() {
-            scaled.push(point.to_device(scale_factor.factor));
+            scaled.push(point.to_device(scale_factor.factor()));
         }
         <span class="kw-2">*</span>line_render = LineRender::new(scaled.len() - <span class="number">1</span>);
         <span class="kw-2">*</span>line_render_points = LineRenderPoints { points: scaled };

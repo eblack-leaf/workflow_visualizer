@@ -332,15 +332,15 @@
 <span class="kw">use </span>tracing::{instrument, trace, warn};
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
+<span class="kw">use crate</span>::{
+    Color, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
+};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{AtlasBlock, TextureCoordinates};
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{Difference, TextScaleAlignment};
 <span class="kw">use </span><span class="kw">crate</span>::text::font::AlignedFonts;
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
-<span class="kw">use crate</span>::{
-    Color, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
-};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>AABB: [Vertex; <span class="number">6</span>] = [
     Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">0.0 </span>}),
@@ -560,7 +560,7 @@
     };
     cmd.insert_resource(renderer);
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor));
+    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
 }
 <span class="attr">#[derive(Resource, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Extraction {

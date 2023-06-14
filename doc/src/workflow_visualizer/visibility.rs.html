@@ -181,13 +181,13 @@
         <span class="kw">if </span>vis.visible() != visible {
             vis.visible = visible;
         }
-        <span class="macro">trace!</span>(
-            <span class="string">&quot;establishing visibility for {:?}, {:?}, {:?}&quot;</span>,
-            pos,
-            area,
-            vis.visible()
-        );
-    }
+        <span class="comment">// trace!(
+        //     &quot;establishing visibility for {:?}, {:?}, {:?}&quot;,
+        //     pos,
+        //     area,
+        //     vis.visible()
+        // );
+    </span>}
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>VisibilityAttachment;
 <span class="kw">impl </span>Attach <span class="kw">for </span>VisibilityAttachment {
