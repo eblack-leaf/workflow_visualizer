@@ -20,30 +20,33 @@ pub fn visualizer() -> Visualizer {
         .task(Visualizer::TASK_MAIN)
         .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process), ));
     let header_placement =
-        ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.near().raw_offset(4))));
+        ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.near().raw_offset(8))));
     let panel_view =
-        ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near().raw_offset(5), 4.far())));
-    let list_text_horizontal_range = (1.near().raw_offset(1), 1.far());
+        ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near().raw_offset(10), 4.far())));
+    let list_text_horizontal_range = (1.near().raw_offset(2), 1.far());
+    let first_text_vertical = (1.near().raw_offset(12), 1.near().raw_offset(18));
     let first_text_placement = ResponsiveGridView::all_same((
         list_text_horizontal_range,
-        (1.near().raw_offset(6), 1.near().raw_offset(9)),
+        first_text_vertical,
     ));
-    let icon_point = ResponsiveGridPoint::all_same((2.near(), 1.near().raw_offset(6)));
+    let icon_point = ResponsiveGridPoint::all_same((2.near(), first_text_vertical.0.raw_offset(1)));
+    let second_text_vertical = (
+        1.near().raw_offset(22),
+        first_text_placement
+            .get_span(&HorizontalSpan::Four)
+            .vertical
+            .end
+            .raw_offset(10),
+    );
+    let icon_point_2 = ResponsiveGridPoint::all_same((2.near(), second_text_vertical.0.raw_offset(1)));
     let second_text_placement = ResponsiveGridView::all_same((
         list_text_horizontal_range,
-        (
-            1.near().raw_offset(11),
-            first_text_placement
-                .get_span(&HorizontalSpan::Four)
-                .vertical
-                .end
-                .raw_offset(4),
-        ),
+        second_text_vertical,
     ));
-    let line_y = 1.near().raw_offset(10);
+    let line_y = 1.near().raw_offset(20);
     let line_view = ResponsivePathView::all_same(vec![
-        (1.near().raw_offset(1), line_y).into(),
-        (4.far().raw_offset(-1), line_y).into(),
+        (1.near().raw_offset(2), line_y).into(),
+        (4.far().raw_offset(-2), line_y).into(),
     ]);
     let second_line_y = 4.near();
     visualizer.add_entities(vec![Request::new(Panel::new(
@@ -68,7 +71,7 @@ pub fn visualizer() -> Visualizer {
         first_text_placement,
         3,
         "work",
-        TextScaleAlignment::Medium, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
+        TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
         Color::GREY,
         TextWrapStyle::word(),
     ))]);
@@ -78,7 +81,7 @@ pub fn visualizer() -> Visualizer {
             second_text_placement,
             3,
             "school",
-            TextScaleAlignment::Small,
+            TextScaleAlignment::Medium,
             Color::GREY,
             TextWrapStyle::word(),
         )),
@@ -90,10 +93,21 @@ pub fn visualizer() -> Visualizer {
         "edit",
         IconBitmap::bundled(BundledIcon::Edit),
     ))]);
+    // visualizer.add_entities(vec![IconBitmapRequest::from((
+    //     "square",
+    //     IconBitmap::bundled(BundledIcon::Square),
+    // ))]);
     visualizer.add_entities(vec![Request::new(Icon::new(
         "edit",
         icon_point,
         IconScale::Small,
+        3,
+        Color::GREY,
+    ))]);
+    visualizer.add_entities(vec![Request::new(Icon::new(
+        "edit",
+        icon_point_2,
+        IconScale::Medium,
         3,
         Color::GREY,
     ))]);

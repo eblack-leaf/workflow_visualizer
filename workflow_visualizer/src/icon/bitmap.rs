@@ -44,7 +44,7 @@ pub struct IconBitmap {
 }
 
 pub enum BundledIcon {
-    Something,
+    Square,
     Edit,
 }
 
@@ -63,7 +63,7 @@ impl IconBitmap {
     }
     pub fn bundled(icon: BundledIcon) -> Self {
         match icon {
-            BundledIcon::Something => Self::new(Self::read_icon_file(include_str!(
+            BundledIcon::Square => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/something.icon"
             ))),
             BundledIcon::Edit => Self::new(Self::read_icon_file(include_str!(

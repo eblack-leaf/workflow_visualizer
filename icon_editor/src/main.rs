@@ -160,9 +160,9 @@ fn update(
             .current
             .to_interface(scale_factor.factor());
         let logical_location =
-            panel_touch_location - Position::new(RawMarker::PX * 5f32, RawMarker::PX * 17f32);
+            panel_touch_location - Position::new(RawMarker::PX * 10f32, RawMarker::PX * 34f32);
         let logical_location =
-            logical_location / Position::new(RawMarker::PX * 2f32, RawMarker::PX * 2f32);
+            logical_location / Position::new(RawMarker::PX * 4f32, RawMarker::PX * 4f32);
         let bitmap_location =
             BitmapLocation::new(logical_location.x as u32, logical_location.y as u32);
         let new_color =
@@ -185,24 +185,24 @@ impl Attach for BitmapRepr {
             .add_systems((update.in_set(UserSpaceSyncPoint::Process), ));
         let mut bitmap_repr_data = vec![];
         // map entity to location in the grid offset from left/top
-        let bitmap_panel_left = 1.near().raw_offset(2);
-        let bitmap_panel_right = 4.far().raw_offset(-2);
-        let bitmap_panel_top = 2.near().raw_offset(2);
-        let bitmap_panel_bottom = 5.far().raw_offset(-2);
-        let increment_amount = 2;
+        let bitmap_panel_left = 1.near().raw_offset(4);
+        let bitmap_panel_right = 4.far().raw_offset(-4);
+        let bitmap_panel_top = 2.near().raw_offset(4);
+        let bitmap_panel_bottom = 5.far().raw_offset(-4);
+        let increment_amount = 4;
         visualizer.add_entities(vec![IconBitmapRequest::from((
-            "something",
-            IconBitmap::bundled(BundledIcon::Something),
+            "square",
+            IconBitmap::bundled(BundledIcon::Square),
         ))]);
         for y in 0..20 {
             for x in 0..20 {
                 let bundle = Icon::new(
-                    "something",
+                    "square",
                     ResponsiveGridPoint::all_same((
-                        bitmap_panel_left.raw_offset(increment_amount * x + 1),
-                        bitmap_panel_top.raw_offset(increment_amount * y + 1),
+                        bitmap_panel_left.raw_offset(increment_amount * x + 2),
+                        bitmap_panel_top.raw_offset(increment_amount * y + 2),
                     )),
-                    IconScale::Custom(RawMarker::PX as u32 * 2),
+                    IconScale::Custom(RawMarker::PX as u32 * 4),
                     2,
                     Color::from(Color::OFF_WHITE).with_alpha(0.0),
                 );
@@ -237,12 +237,12 @@ impl Attach for BitmapRepr {
             )],
         );
         let coverage_display_horizontal = (
-            bitmap_panel_left.raw_offset(2),
-            bitmap_panel_left.raw_offset(6),
+            bitmap_panel_left.raw_offset(4),
+            bitmap_panel_left.raw_offset(12),
         );
         let coverage_display_vertical = (
-            bitmap_panel_top.raw_offset(-4),
-            bitmap_panel_top.raw_offset(1),
+            bitmap_panel_top.raw_offset(-7),
+            bitmap_panel_top.raw_offset(-2),
         );
         let coverage_display_location =
             ResponsiveGridView::all_same((coverage_display_horizontal, coverage_display_vertical));
@@ -252,18 +252,18 @@ impl Attach for BitmapRepr {
                 coverage_display_location,
                 3,
                 "255",
-                TextScaleAlignment::Medium,
+                TextScaleAlignment::Small,
                 Color::GREY,
                 TextWrapStyle::word(),
             ))],
         );
         let coverage_down_horizontal = (
-            coverage_display_horizontal.1.raw_offset(1),
-            coverage_display_horizontal.1.raw_offset(3),
+            coverage_display_horizontal.1.raw_offset(2),
+            coverage_display_horizontal.1.raw_offset(6),
         );
         let coverage_down_vertical = (
             coverage_display_vertical.0.raw_offset(0),
-            coverage_display_vertical.0.raw_offset(2),
+            coverage_display_vertical.0.raw_offset(4),
         );
         let coverage_down_location =
             ResponsiveGridView::all_same((coverage_down_horizontal, coverage_down_vertical));
@@ -275,8 +275,8 @@ impl Attach for BitmapRepr {
             Color::OFF_WHITE,
         );
         let coverage_up_horizontal = (
-            coverage_down_horizontal.1.raw_offset(1),
-            coverage_down_horizontal.1.raw_offset(3),
+            coverage_down_horizontal.1.raw_offset(2),
+            coverage_down_horizontal.1.raw_offset(6),
         );
         let coverage_up_vertical = coverage_down_vertical;
         let coverage_up_location =
@@ -302,12 +302,12 @@ impl Attach for BitmapRepr {
             ],
         );
         let pos_neg_space_button_horizontal = (
-            coverage_up_horizontal.1.raw_offset(10),
-            coverage_up_horizontal.1.raw_offset(12),
+            coverage_up_horizontal.1.raw_offset(20),
+            coverage_up_horizontal.1.raw_offset(24),
         );
         let pos_neg_space_button_vertical = (
             coverage_display_vertical.0.raw_offset(0),
-            coverage_display_vertical.0.raw_offset(2),
+            coverage_display_vertical.0.raw_offset(4),
         );
         let pos_neg_space_button_location = ResponsiveGridView::all_same((
             pos_neg_space_button_horizontal,
@@ -321,12 +321,12 @@ impl Attach for BitmapRepr {
             Color::OFF_WHITE,
         ));
         let pos_neg_space_button_text_horizontal = (
-            pos_neg_space_button_horizontal.1.raw_offset(2),
-            pos_neg_space_button_horizontal.1.raw_offset(12),
+            pos_neg_space_button_horizontal.1.raw_offset(4),
+            pos_neg_space_button_horizontal.1.raw_offset(24),
         );
         let pos_neg_space_button_text_vertical = (
             pos_neg_space_button_vertical.0.raw_offset(0),
-            pos_neg_space_button_vertical.0.raw_offset(2),
+            pos_neg_space_button_vertical.0.raw_offset(4),
         );
         let pos_neg_space_button_text_location = ResponsiveGridView::all_same((
             pos_neg_space_button_text_horizontal,
@@ -349,12 +349,12 @@ impl Attach for BitmapRepr {
             vec![pos_neg_space_button_text],
         );
         let write_out_horizontal = (
-            bitmap_panel_left.raw_offset(1),
-            bitmap_panel_left.raw_offset(3),
+            bitmap_panel_left.raw_offset(2),
+            bitmap_panel_left.raw_offset(6),
         );
         let write_out_vertical = (
-            bitmap_panel_bottom.raw_offset(1),
-            bitmap_panel_bottom.raw_offset(3),
+            bitmap_panel_bottom.raw_offset(2),
+            bitmap_panel_bottom.raw_offset(6),
         );
         let write_out_view =
             ResponsiveGridView::all_same((write_out_horizontal, write_out_vertical));

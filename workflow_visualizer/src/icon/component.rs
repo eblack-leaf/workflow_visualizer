@@ -18,9 +18,9 @@ pub enum IconScale {
 impl IconScale {
     pub fn px(&self) -> f32 {
         match &self {
-            IconScale::Small => 16f32,
-            IconScale::Medium => 20f32,
-            IconScale::Large => 24f32,
+            IconScale::Small => 13f32,
+            IconScale::Medium => 16f32,
+            IconScale::Large => 20f32,
             IconScale::Custom(dim) => *dim as f32,
         }
     }

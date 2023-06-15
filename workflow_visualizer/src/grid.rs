@@ -27,16 +27,16 @@ pub enum HorizontalSpan {
 impl HorizontalSpan {
     pub fn gutter_base(&self) -> RawMarkerGrouping {
         match self {
-            HorizontalSpan::Four => RawMarkerGrouping(2),
-            HorizontalSpan::Eight => RawMarkerGrouping(2),
-            HorizontalSpan::Twelve => RawMarkerGrouping(3),
+            HorizontalSpan::Four => RawMarkerGrouping(4),
+            HorizontalSpan::Eight => RawMarkerGrouping(4),
+            HorizontalSpan::Twelve => RawMarkerGrouping(6),
         }
     }
     pub fn content_base(&self) -> RawMarkerGrouping {
         match self {
-            HorizontalSpan::Four => RawMarkerGrouping(10),
-            HorizontalSpan::Eight => RawMarkerGrouping(9),
-            HorizontalSpan::Twelve => RawMarkerGrouping(10),
+            HorizontalSpan::Four => RawMarkerGrouping(20),
+            HorizontalSpan::Eight => RawMarkerGrouping(18),
+            HorizontalSpan::Twelve => RawMarkerGrouping(20),
         }
     }
     pub const SMALL_BREAKPOINT: f32 = 720f32;
@@ -174,7 +174,7 @@ pub(crate) fn setup(viewport_handle: Res<ViewportHandle>, mut cmd: Commands) {
 #[derive(Copy, Clone, PartialEq)]
 pub struct RawMarker(pub i32);
 impl RawMarker {
-    pub const PX: f32 = 8f32;
+    pub const PX: f32 = 4f32;
     pub fn to_pixel(&self) -> f32 {
         self.0 as f32 * Self::PX
     }
