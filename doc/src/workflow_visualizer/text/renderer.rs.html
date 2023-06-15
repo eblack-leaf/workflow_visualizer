@@ -318,14 +318,6 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, Entity, Res, Resource};
@@ -337,10 +329,11 @@
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
 };
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-<span class="kw">use </span><span class="kw">crate</span>::text::atlas::{AtlasBlock, TextureCoordinates};
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{Difference, TextScaleAlignment};
 <span class="kw">use </span><span class="kw">crate</span>::text::font::AlignedFonts;
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasBindGroup, AtlasBlock, TextureAtlas};
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::TextureCoordinates;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>AABB: [Vertex; <span class="number">6</span>] = [
     Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">0.0 </span>}),
@@ -445,16 +438,7 @@
         .create_bind_group_layout(<span class="kw-2">&amp;</span>render_group_bind_group_layout_descriptor);
     <span class="kw">let </span>atlas_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: <span class="prelude-val">Some</span>(<span class="string">&quot;atlas bind group layout descriptor&quot;</span>),
-        entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupLayoutEntry {
-            binding: <span class="number">0</span>,
-            visibility: wgpu::ShaderStages::FRAGMENT,
-            ty: wgpu::BindingType::Texture {
-                sample_type: wgpu::TextureSampleType::Float { filterable: <span class="bool-val">true </span>},
-                view_dimension: wgpu::TextureViewDimension::D2,
-                multisampled: <span class="bool-val">false</span>,
-            },
-            count: <span class="prelude-val">None</span>,
-        }],
+        entries: <span class="kw-2">&amp;</span>[AtlasBindGroup::entry(<span class="number">0</span>)],
     };
     <span class="kw">let </span>atlas_bind_group_layout = gfx_surface
         .device

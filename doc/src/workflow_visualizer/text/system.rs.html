@@ -712,26 +712,6 @@
 <a href="#712" id="712">712</a>
 <a href="#713" id="713">713</a>
 <a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::num::NonZeroU32;
 
@@ -749,9 +729,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::instance::key::KeyFactory;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{
-    Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
-    AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
-    AtlasTextureDimensions, AtlasWriteQueue, Bitmap, TextureCoordinates,
+    AtlasAddQueue, AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue, Bitmap,
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{
     Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, TextGridLocation,
@@ -764,6 +742,10 @@
     RenderGroupUniqueGlyphs, TextPlacement,
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer::{Extraction, TextRenderer};
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasLocation, AtlasPosition,
+    AtlasTexture, AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+};
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowResize;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(scale_factor: Res&lt;ScaleFactor&gt;, <span class="kw-2">mut </span>cmd: Commands) {
@@ -1014,7 +996,13 @@
                     <span class="kw-2">*</span>layer,
                     RenderGroupUniqueGlyphs::from_text(text),
                     <span class="kw-2">*</span>text_scale_alignment,
-                    AtlasBlock::new(fonts.fonts.get(text_scale_alignment).unwrap(), text_scale),
+                    AtlasBlock::new(
+                        fonts
+                            .fonts
+                            .get(text_scale_alignment)
+                            .unwrap()
+                            .character_dimensions(<span class="string">&#39;a&#39;</span>, text_scale.px()),
+                    ),
                 ),
             );
         } <span class="kw">else </span>{
@@ -1108,10 +1096,12 @@
             <span class="kw-2">&amp;</span>text_placement_uniform,
         );
         <span class="kw">let </span>atlas_dimension = AtlasDimension::from_unique_glyphs(unique_glyphs.unique_glyphs);
-        <span class="kw">let </span>atlas_texture_dimensions = AtlasTextureDimensions::new(<span class="kw-2">*</span>atlas_block, atlas_dimension);
-        <span class="kw">let </span>atlas = Atlas::new(<span class="kw-2">&amp;</span>gfx_surface, atlas_texture_dimensions);
-        <span class="kw">let </span>atlas_bind_group =
-            AtlasBindGroup::new(<span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">&amp;</span>renderer.atlas_bind_group_layout, <span class="kw-2">&amp;</span>atlas);
+        <span class="kw">let </span>atlas = TextureAtlas::new(<span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">*</span>atlas_block, atlas_dimension);
+        <span class="kw">let </span>atlas_bind_group = AtlasBindGroup::new(
+            <span class="kw-2">&amp;</span>gfx_surface,
+            <span class="kw-2">&amp;</span>renderer.atlas_bind_group_layout,
+            atlas.view(),
+        );
         renderer.render_groups.insert(
             <span class="kw-2">*</span>entity,
             RenderGroup {
@@ -1135,14 +1125,10 @@
                 render_group_bind_group,
                 atlas,
                 atlas_bind_group,
-                atlas_texture_dimensions,
-                atlas_dimension,
-                atlas_free_locations: AtlasFreeLocations::new(atlas_dimension),
                 atlas_glyph_references: AtlasGlyphReferences::new(),
                 atlas_write_queue: AtlasWriteQueue::new(),
                 atlas_add_queue: AtlasAddQueue::new(),
                 atlas_glyphs: AtlasGlyphs::new(),
-                atlas_block: <span class="kw-2">*</span>atlas_block,
             },
         );
     }
@@ -1236,7 +1222,7 @@
         // free
         </span><span class="kw">for </span>glyph_id <span class="kw">in </span>orphaned_glyphs {
             <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>, location, <span class="kw">_</span>) = render_group.atlas_glyphs.glyphs.remove(<span class="kw-2">&amp;</span>glyph_id).unwrap();
-            render_group.atlas_free_locations.free.insert(location);
+            render_group.atlas.free_locations.free.insert(location);
             render_group
                 .atlas_glyph_references
                 .references
@@ -1246,9 +1232,9 @@
             <span class="kw">let </span><span class="kw-2">mut </span>adjusted_glyphs = HashSet::new();
             <span class="kw">let </span>num_new_glyphs = render_group.atlas_add_queue.queue.len() <span class="kw">as </span>u32;
             <span class="kw">if </span>num_new_glyphs != <span class="number">0
-                </span>&amp;&amp; num_new_glyphs &gt; render_group.atlas_free_locations.free.len() <span class="kw">as </span>u32
+                </span>&amp;&amp; num_new_glyphs &gt; render_group.atlas.free_locations.free.len() <span class="kw">as </span>u32
             {
-                <span class="kw">let </span>current_dimension = render_group.atlas_dimension.dimension;
+                <span class="kw">let </span>current_dimension = render_group.atlas.dimension.dimension;
                 <span class="kw">let </span>current_total = current_dimension.pow(<span class="number">2</span>);
                 <span class="kw">let </span><span class="kw-2">mut </span>incremental_dimension_add = <span class="number">1</span>;
                 <span class="kw">let </span><span class="kw-2">mut </span>next_size_up_total = (current_dimension + incremental_dimension_add).pow(<span class="number">2</span>);
@@ -1258,13 +1244,13 @@
                 }
                 <span class="kw">let </span>new_dimension =
                     AtlasDimension::new(current_dimension + incremental_dimension_add);
-                <span class="kw">let </span>texture_dimensions =
-                    AtlasTextureDimensions::new(render_group.atlas_block, new_dimension);
-                <span class="kw">let </span>atlas = Atlas::new(<span class="kw-2">&amp;</span>gfx_surface, texture_dimensions);
-                <span class="kw">let </span>atlas_bind_group =
-                    AtlasBindGroup::new(<span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">&amp;</span>renderer.atlas_bind_group_layout, <span class="kw-2">&amp;</span>atlas);
-                render_group.atlas_bind_group = atlas_bind_group;
-                <span class="kw">let </span><span class="kw-2">mut </span>free_locations = AtlasFreeLocations::new(new_dimension);
+                render_group.atlas =
+                    TextureAtlas::new(<span class="kw-2">&amp;</span>gfx_surface, render_group.atlas.block, new_dimension);
+                render_group.atlas_bind_group = AtlasBindGroup::new(
+                    <span class="kw-2">&amp;</span>gfx_surface,
+                    <span class="kw-2">&amp;</span>renderer.atlas_bind_group_layout,
+                    render_group.atlas.view(),
+                );
                 <span class="kw">let </span><span class="kw-2">mut </span>writes = Vec::&lt;(
                     GlyphId,
                     AtlasLocation,
@@ -1273,12 +1259,14 @@
                     Bitmap,
                 )&gt;::new();
                 <span class="kw">for </span>(glyph_id, (<span class="kw">_</span>, glyph_area, atlas_location, bitmap)) <span class="kw">in
-                    </span>render_group.atlas_glyphs.glyphs.iter()
+                </span>render_group.atlas_glyphs.glyphs.iter()
                 {
-                    <span class="kw">let </span>position = AtlasPosition::new(<span class="kw-2">*</span>atlas_location, render_group.atlas_block);
+                    <span class="kw">let </span>position = AtlasPosition::new(<span class="kw-2">*</span>atlas_location, render_group.atlas.block);
                     <span class="kw">let </span>glyph_section = Section::new(position.position, <span class="kw-2">*</span>glyph_area);
-                    <span class="kw">let </span>coords =
-                        TextureCoordinates::from_section(glyph_section, texture_dimensions);
+                    <span class="kw">let </span>coords = TextureCoordinates::from_section(
+                        glyph_section,
+                        render_group.atlas.texture_dimensions,
+                    );
                     writes.push((
                         <span class="kw-2">*</span>glyph_id,
                         <span class="kw-2">*</span>atlas_location,
@@ -1286,7 +1274,11 @@
                         <span class="kw-2">*</span>glyph_area,
                         bitmap.clone(),
                     ));
-                    free_locations.free.remove(atlas_location);
+                    render_group
+                        .atlas
+                        .free_locations
+                        .free
+                        .remove(atlas_location);
                     adjusted_glyphs.insert(<span class="kw-2">*</span>glyph_id);
                 }
                 <span class="kw">for </span>write <span class="kw">in </span>writes {
@@ -1301,10 +1293,6 @@
                         .queue
                         .insert(write.<span class="number">1</span>, (write.<span class="number">2</span>, write.<span class="number">3</span>, write.<span class="number">4</span>));
                 }
-                render_group.atlas = atlas;
-                render_group.atlas_texture_dimensions = texture_dimensions;
-                render_group.atlas_free_locations = free_locations;
-                render_group.atlas_dimension = new_dimension;
             }
             adjusted_glyphs
         };
@@ -1333,12 +1321,12 @@
             <span class="comment">// TODO since subpixel , combine them here to save space
             </span><span class="kw">let </span>glyph_area: Area&lt;NumericalContext&gt; =
                 (rasterization.<span class="number">0</span>.width, rasterization.<span class="number">0</span>.height).into();
-            <span class="kw">let </span>location = render_group.atlas_free_locations.next();
-            <span class="kw">let </span>position = AtlasPosition::new(location, render_group.atlas_block);
+            <span class="kw">let </span>location = render_group.atlas.free_locations.next();
+            <span class="kw">let </span>position = AtlasPosition::new(location, render_group.atlas.block);
             <span class="kw">let </span>glyph_section = Section::new(position.position, glyph_area);
             <span class="kw">let </span>coords = TextureCoordinates::from_section(
                 glyph_section,
-                render_group.atlas_texture_dimensions,
+                render_group.atlas.texture_dimensions,
             );
             render_group
                 .atlas_write_queue
@@ -1401,37 +1389,9 @@
                 .update(<span class="kw-2">&amp;</span>gfx_surface.queue, render_group.text_placement);
         }
         <span class="kw">for </span>(location, (<span class="kw">_</span>, glyph_area, bitmap)) <span class="kw">in </span>render_group.atlas_write_queue.queue.iter() {
-            <span class="kw">let </span>atlas = <span class="kw-2">&amp;</span>render_group.atlas;
-            <span class="kw">let </span>atlas_block = render_group.atlas_block;
-            <span class="kw">let </span>position = AtlasPosition::new(<span class="kw-2">*</span>location, atlas_block).position;
-            <span class="kw">let </span>image_copy_texture = wgpu::ImageCopyTexture {
-                texture: <span class="kw-2">&amp;</span>atlas.texture,
-                mip_level: <span class="number">0</span>,
-                origin: wgpu::Origin3d {
-                    x: position.x <span class="kw">as </span>u32,
-                    y: position.y <span class="kw">as </span>u32,
-                    z: <span class="number">0</span>,
-                },
-                aspect: wgpu::TextureAspect::All,
-            };
-            <span class="kw">let </span>extent_w = glyph_area.width <span class="kw">as </span>u32;
-            <span class="kw">let </span>extent_h = glyph_area.height <span class="kw">as </span>u32;
-            <span class="kw">let </span>image_data_layout = wgpu::ImageDataLayout {
-                offset: <span class="number">0</span>,
-                bytes_per_row: <span class="prelude-val">Some</span>(extent_w),
-                rows_per_image: <span class="prelude-val">Some</span>(extent_h),
-            };
-            <span class="kw">let </span>extent = wgpu::Extent3d {
-                width: extent_w,
-                height: extent_h,
-                depth_or_array_layers: <span class="number">1</span>,
-            };
-            gfx_surface.queue.write_texture(
-                image_copy_texture,
-                bitmap.as_slice(),
-                image_data_layout,
-                extent,
-            );
+            render_group
+                .atlas
+                .write::&lt;u8&gt;(location, bitmap.as_slice(), <span class="kw-2">*</span>glyph_area, <span class="kw-2">&amp;</span>gfx_surface);
         }
         <span class="kw">if </span>draw_section_resize_needed {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = render_group.visible_section.section {

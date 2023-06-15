@@ -89,6 +89,10 @@
 <a href="#89" id="89">89</a>
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -125,8 +129,7 @@
     ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData,
-    IconScale,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::job::{EntityName, EntityStore, Job};
 <span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender};
@@ -138,6 +141,10 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::text::{
     Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
     TextScaleAlignment, TextValue, TextWrapStyle,
+};
+<span class="kw">pub use </span><span class="kw">crate</span>::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
@@ -170,6 +177,7 @@
 <span class="kw">mod </span>scale_factor;
 <span class="kw">mod </span>sync;
 <span class="kw">mod </span>text;
+<span class="kw">mod </span>texture_atlas;
 <span class="kw">mod </span>theme;
 <span class="kw">mod </span>time;
 <span class="kw">mod </span>touch;

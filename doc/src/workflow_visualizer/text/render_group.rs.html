@@ -136,22 +136,20 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::Component;
 
-<span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
-<span class="kw">use </span><span class="kw">crate</span>::text::atlas::{
-    Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
-    AtlasGlyphReferences, AtlasGlyphs, AtlasTextureDimensions, AtlasWriteQueue, TextureCoordinates,
-};
-<span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextScaleAlignment, TextValue};
 <span class="kw">use crate</span>::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
     RawArea, RawPosition, Section, Uniform, VisibleSection,
+};
+<span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
+<span class="kw">use </span><span class="kw">crate</span>::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
+<span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextScaleAlignment, TextValue};
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
 };
 
 <span class="attr">#[repr(C)]
@@ -269,15 +267,11 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) null_bits: InstanceAttributeManager&lt;NullBit&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) glyph_tex_coords: InstanceAttributeManager&lt;TextureCoordinates&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_bind_group: RenderGroupBindGroup,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas: Atlas,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas: TextureAtlas,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_bind_group: AtlasBindGroup,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_texture_dimensions: AtlasTextureDimensions,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_dimension: AtlasDimension,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_free_locations: AtlasFreeLocations,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_glyph_references: AtlasGlyphReferences,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_write_queue: AtlasWriteQueue,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_add_queue: AtlasAddQueue,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_glyphs: AtlasGlyphs,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_block: AtlasBlock,
 }
 </code></pre></div></section></main></body></html>

@@ -494,8 +494,8 @@
             texture: <span class="kw-2">&amp;</span>texture,
             mip_level: <span class="number">0</span>,
             origin: wgpu::Origin3d {
-                x: x_index * bytes,
-                y: y_index * bytes,
+                x: x_index * ICON_BITMAP_DIMENSION,
+                y: y_index * ICON_BITMAP_DIMENSION,
                 z: <span class="number">0</span>,
             },
             aspect: wgpu::TextureAspect::All,
