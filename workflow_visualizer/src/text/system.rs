@@ -677,7 +677,7 @@ pub(crate) fn render_group_differences(
         for (location, (_, glyph_area, bitmap)) in render_group.atlas_write_queue.queue.iter() {
             render_group
                 .atlas
-                .write::<u8>(location, bitmap.as_slice(), *glyph_area, &gfx_surface);
+                .write::<u8>(*location, bitmap.as_slice(), *glyph_area, &gfx_surface);
         }
         if draw_section_resize_needed {
             if let Some(v_sec) = render_group.visible_section.section {

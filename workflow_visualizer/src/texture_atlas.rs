@@ -33,12 +33,12 @@ impl TextureAtlas {
     }
     pub fn write<TexelData: Sized>(
         &self,
-        location: &AtlasLocation,
+        location: AtlasLocation,
         data: &[u8],
         extent_dim: Area<NumericalContext>,
         gfx: &GfxSurface,
-    ) {
-        let position = AtlasPosition::new(*location, self.block).position;
+    ) -> TextureCoordinates {
+        let position = AtlasPosition::new(location, self.block).position;
         let image_copy_texture = wgpu::ImageCopyTexture {
             texture: self.texture(),
             mip_level: 0,
@@ -63,6 +63,11 @@ impl TextureAtlas {
         };
         gfx.queue
             .write_texture(image_copy_texture, data, image_data_layout, size);
+        let position = AtlasPosition::new(location, self.block).position;
+        TextureCoordinates::from_section(
+            Section::new(position, extent_dim),
+            self.texture_dimensions,
+        )
     }
 }
 

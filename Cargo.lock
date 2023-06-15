@@ -1408,18 +1408,18 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
 dependencies = [
-    "cc",
+ "cc",
 ]
 
 [[package]]
 name = "icon_editor"
 version = "0.1.0"
 dependencies = [
-    "async-trait",
-    "serde",
-    "tracing",
-    "tracing-subscriber",
-    "workflow_visualizer",
+ "async-trait",
+ "serde",
+ "tracing",
+ "tracing-subscriber",
+ "workflow_visualizer",
 ]
 
 [[package]]

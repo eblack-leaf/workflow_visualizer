@@ -6,6 +6,7 @@ use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
 use crate::icon::component::IconId;
+use crate::TextureCoordinates;
 
 #[repr(C)]
 #[derive(
@@ -77,12 +78,6 @@ impl IconBitmap {
             .map(|d| d.into())
             .collect()
     }
-}
-
-#[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
-pub(crate) struct TextureCoordinates {
-    pub(crate) data: [f32; 4],
 }
 
 #[derive(Component, Clone)]

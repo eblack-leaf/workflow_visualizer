@@ -3,7 +3,6 @@ use std::collections::{HashMap, HashSet};
 use bevy_ecs::prelude::{Component, Entity, Resource};
 
 use crate::{Area, Color, InterfaceContext, Layer, Position};
-use crate::icon::bitmap::TextureCoordinates;
 use crate::icon::component::IconId;
 
 pub(crate) struct Attributes {
