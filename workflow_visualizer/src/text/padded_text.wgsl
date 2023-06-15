@@ -26,10 +26,10 @@ struct VertexOutput {
 };
 fn adjust_coords_of(vertex_index: u32, tex_coords: vec4<f32>) -> vec2<f32> {
     var adjusted_coords = vec2<f32>(0.0, 0.0);
-    var top = tex_coords.g;
     var left = tex_coords.r;
-    var bottom = tex_coords.a;
+    var top = tex_coords.g;
     var right = tex_coords.b;
+    var bottom = tex_coords.a;
     switch (i32(vertex_index)) {
         case 0: {
             adjusted_coords = vec2<f32>(left, top);

@@ -38,13 +38,13 @@ struct Engen {
 
 impl Engen {
     fn write_out(&self) {
-        let mut write_data = self.bitmap_panel.iter().map(|(bit, pix)| (*bit, *pix)).collect::<Vec<(BitmapLocation, IconPixelData)>>();
-        write_data.sort_by(|lhs, rhs| -> Ordering {
-            lhs.0.partial_cmp(&rhs.0).unwrap()
-        });
-        for (_loc, data) in write_data {
-            println!("{:?},", data.data);
+        println!("[");
+        for y in 0..20 {
+            for x in 0..20 {
+                println!("{:?},", self.bitmap_panel.get(&BitmapLocation::new(x, y)).unwrap().data);
+            }
         }
+        println!("]");
     }
 }
 
@@ -188,8 +188,8 @@ impl Attach for BitmapRepr {
             "something",
             IconBitmap::bundled(BundledIcon::Something),
         ))]);
-        for x in 0..20 {
-            for y in 0..20 {
+        for y in 0..20 {
+            for x in 0..20 {
                 let bundle = Icon::new(
                     "something",
                     ResponsiveGridPoint::all_same((
@@ -206,8 +206,8 @@ impl Attach for BitmapRepr {
         let mut bitmap_repr = BitmapRepr::new();
         let ids = visualizer.add_entities(bitmap_repr_data);
         let mut index = 0;
-        for x in 0..20 {
-            for y in 0..20 {
+        for y in 0..20 {
+            for x in 0..20 {
                 bitmap_repr
                     .bitmap_repr
                     .insert(BitmapLocation::new(x, y), *ids.get(index).unwrap());
