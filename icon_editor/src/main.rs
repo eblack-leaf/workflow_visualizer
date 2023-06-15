@@ -75,17 +75,11 @@ struct BitmapRepr {
 
 impl BitmapRepr {
     fn color(&self) -> Color {
-        Color::from(Color::OFF_WHITE).with_alpha(self.fill_data.data[0] as f32 / 255f32)
+        Color::from(Color::OFF_WHITE).with_alpha(self.fill_data.data as f32 / 255f32)
     }
     fn new() -> Self {
         Self {
-            fill_data: (
-                IconPixelData::NO_COVERAGE,
-                IconPixelData::POSITIVE_SPACE,
-                IconPixelData::LISTENABLE,
-                1u8,
-            )
-                .into(),
+            fill_data: IconPixelData::NO_COVERAGE.into(),
             bitmap_repr: HashMap::new(),
             queue: vec![],
             written_out: false,
@@ -113,9 +107,9 @@ fn update(
             false
         };
     if up_touched {
-        let new_coverage = bitmap_repr.fill_data.data[0].checked_add(1);
-        bitmap_repr.fill_data.data[0] = match new_coverage {
-            None => 255u8,
+        let new_coverage = bitmap_repr.fill_data.data.checked_add(1);
+        bitmap_repr.fill_data.data = match new_coverage {
+            None => IconPixelData::FULL_COVERAGE,
             Some(new_fill) => new_fill,
         }
     }
@@ -127,14 +121,14 @@ fn update(
             false
         };
     if down_touched {
-        let new_coverage = bitmap_repr.fill_data.data[0].checked_sub(1);
-        bitmap_repr.fill_data.data[0] = match new_coverage {
-            None => 0u8,
+        let new_coverage = bitmap_repr.fill_data.data.checked_sub(1);
+        bitmap_repr.fill_data.data = match new_coverage {
+            None => IconPixelData::NO_COVERAGE,
             Some(new_fill) => new_fill,
         }
     }
     if let Ok(mut coverage_text_value) = text.get_mut(coverage_display_entity) {
-        coverage_text_value.0 = bitmap_repr.fill_data.data[0].to_string();
+        coverage_text_value.0 = bitmap_repr.fill_data.data.to_string();
     }
     let write_out_entity = entity_store.get("write-out").unwrap();
     let written_out_requested = if let Ok((_, trigger, _, _)) = touchables.get(write_out_entity) {
@@ -166,7 +160,7 @@ fn update(
         let bitmap_location =
             BitmapLocation::new(logical_location.x as u32, logical_location.y as u32);
         let new_color =
-            Color::from(Color::OFF_WHITE).with_alpha(bitmap_repr.fill_data.data[0] as f32 / 255f32);
+            Color::from(Color::OFF_WHITE).with_alpha(bitmap_repr.fill_data.data as f32 / 255f32);
         if let Some(entity) = bitmap_repr.bitmap_repr.get(&bitmap_location).copied() {
             // send fill data to queue
             let fill_data = bitmap_repr.fill_data;
@@ -205,7 +199,6 @@ impl Attach for BitmapRepr {
                     IconScale::Custom(RawMarker::PX as u32 * 2),
                     2,
                     Color::from(Color::OFF_WHITE).with_alpha(0.0),
-                    Color::from(Color::OFF_BLACK),
                 );
                 bitmap_repr_data.push(Request::new(bundle));
             }

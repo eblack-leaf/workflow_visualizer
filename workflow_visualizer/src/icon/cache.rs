@@ -4,16 +4,14 @@ use bevy_ecs::prelude::{Component, Entity, Resource};
 
 use crate::{Area, Color, InterfaceContext, Layer, Position};
 use crate::icon::bitmap::TextureCoordinates;
-use crate::icon::component::{ColorInvert, IconId};
+use crate::icon::component::IconId;
 
 pub(crate) struct Attributes {
     pub(crate) icon_id: Option<IconId>,
     pub(crate) position: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) positive_space_color: Option<Color>,
-    pub(crate) negative_space_color: Option<Color>,
     pub(crate) layer: Option<Layer>,
-    pub(crate) color_invert: Option<ColorInvert>,
 }
 
 impl Attributes {
@@ -23,9 +21,7 @@ impl Attributes {
             position: None,
             area: None,
             positive_space_color: None,
-            negative_space_color: None,
             layer: None,
-            color_invert: None,
         }
     }
 }

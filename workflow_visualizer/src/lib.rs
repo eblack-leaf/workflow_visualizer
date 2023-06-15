@@ -34,8 +34,8 @@ pub use crate::grid::{
     ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
 pub use crate::icon::{
-    BundledIcon, ColorInvert, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData,
-    IconScale, NegativeSpaceColor,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData,
+    IconScale,
 };
 pub use crate::job::{EntityName, EntityStore, Job};
 pub use crate::line::{Line, LineRender};

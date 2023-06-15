@@ -20,25 +20,21 @@ Deserialize,
 PartialEq,
 )]
 pub struct IconPixelData {
-    pub data: [u8; 4],
+    pub data: u8,
 }
 
 impl IconPixelData {
     pub const FULL_COVERAGE: u8 = 255u8;
     pub const NO_COVERAGE: u8 = 0u8;
-    pub const POSITIVE_SPACE: u8 = 255u8;
-    pub const NEGATIVE_SPACE: u8 = 0u8;
-    pub const LISTENABLE: u8 = 255u8;
-    pub const NOT_LISTENABLE: u8 = 0u8;
     pub fn new<T: Into<Self>>(data: T) -> Self {
         data.into()
     }
 }
 
-impl From<(u8, u8, u8, u8)> for IconPixelData {
-    fn from(value: (u8, u8, u8, u8)) -> Self {
+impl From<u8> for IconPixelData {
+    fn from(value: u8) -> Self {
         IconPixelData {
-            data: [value.0, value.1, value.2, value.3],
+            data: value,
         }
     }
 }
@@ -50,6 +46,7 @@ pub struct IconBitmap {
 
 pub enum BundledIcon {
     Something,
+    Edit,
 }
 
 impl IconBitmap {
@@ -70,10 +67,13 @@ impl IconBitmap {
             BundledIcon::Something => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/something.icon"
             ))),
+            BundledIcon::Edit => {
+                Self::new(Self::read_icon_file(include_str!("bundled_icons/edit.icon")))
+            }
         }
     }
     fn read_icon_file(file: &str) -> Vec<IconPixelData> {
-        serde_json::from_str::<Vec<IconPixelData>>(file).expect("file parsing")
+        serde_json::from_str::<Vec<u8>>(file).expect("file parsing").drain(..).map(|d| d.into()).collect()
     }
 }
 

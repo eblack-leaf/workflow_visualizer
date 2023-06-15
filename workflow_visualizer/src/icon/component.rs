@@ -6,10 +6,6 @@ use compact_str::CompactString;
 use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 use crate::grid::ResponsiveGridPoint;
 use crate::icon::cache::{Cache, Difference};
-use crate::icon::renderer::AreaAndLayer;
-
-#[derive(Component, Copy, Clone, PartialEq)]
-pub struct NegativeSpaceColor(pub Color);
 
 #[derive(Component)]
 pub enum IconScale {
@@ -37,11 +33,8 @@ pub struct Icon {
     icon_scale: IconScale,
     layer: Layer,
     pos_color: Color,
-    neg_color: NegativeSpaceColor,
-    color_invert: ColorInvert,
     section: Section<InterfaceContext>,
     visibility: EnableVisibility,
-    area_and_layer: AreaAndLayer,
     cache: Cache,
     difference: Difference,
 }
@@ -59,7 +52,6 @@ impl Icon {
         scale: S,
         layer: L,
         pos_color: C,
-        neg_color: C,
     ) -> Self {
         Self {
             id: id.into(),
@@ -67,31 +59,14 @@ impl Icon {
             icon_scale: scale.into(),
             layer: layer.into(),
             pos_color: pos_color.into(),
-            neg_color: NegativeSpaceColor(neg_color.into()),
-            color_invert: ColorInvert::off(),
             section: Section::default(),
             visibility: EnableVisibility::default(),
-            area_and_layer: AreaAndLayer::new(),
             cache: Cache::new(),
             difference: Difference::new(),
         }
     }
 }
 
-#[repr(C)]
-#[derive(Component, Copy, Clone, Pod, Zeroable, Default, PartialEq)]
-pub struct ColorInvert {
-    pub signal: u32,
-}
-
-impl ColorInvert {
-    pub fn on() -> Self {
-        Self { signal: 1 }
-    }
-    pub fn off() -> Self {
-        Self { signal: 0 }
-    }
-}
 
 #[derive(Component, Clone, Hash, Eq, PartialEq)]
 pub struct IconId(pub CompactString);

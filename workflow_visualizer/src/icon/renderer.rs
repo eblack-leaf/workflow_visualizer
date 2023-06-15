@@ -14,7 +14,7 @@ use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::icon::bitmap::{
     ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData, TextureCoordinates,
 };
-use crate::icon::component::{ColorInvert, IconId};
+use crate::icon::component::IconId;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {
@@ -22,12 +22,10 @@ pub(crate) struct IconRenderer {
     vertex_quad: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     pub(crate) pos_attribute: InstanceAttributeManager<RawPosition>,
-    pub(crate) area_and_layer_attribute: InstanceAttributeManager<AreaAndLayer>,
-    pub(crate) tex_coords_attribute: InstanceAttributeManager<TextureCoordinates>,
-    pub(crate) positive_space_color_attribute: InstanceAttributeManager<Color>,
-    pub(crate) negative_space_color_attribute: InstanceAttributeManager<Color>,
+    pub(crate) area_attribute: InstanceAttributeManager<RawArea>,
     pub(crate) layer_attribute: InstanceAttributeManager<Layer>,
-    pub(crate) color_invert_attribute: InstanceAttributeManager<ColorInvert>,
+    pub(crate) color_attribute: InstanceAttributeManager<Color>,
+    pub(crate) tex_coords_attribute: InstanceAttributeManager<TextureCoordinates>,
     pub(crate) null_bit_attribute: InstanceAttributeManager<NullBit>,
     pub(crate) indexer: Indexer<Entity>,
 }
@@ -53,46 +51,23 @@ impl Render for IconRenderer {
                 .set_vertex_buffer(1, self.pos_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(2, self.area_and_layer_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(2, self.area_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(3, self.tex_coords_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(3, self.layer_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(4, self.positive_space_color_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(4, self.color_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(5, self.negative_space_color_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(5, self.tex_coords_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
-                .set_vertex_buffer(6, self.color_invert_attribute.gpu.buffer.slice(..));
-            render_pass_handle
-                .0
-                .set_vertex_buffer(7, self.null_bit_attribute.gpu.buffer.slice(..));
+                .set_vertex_buffer(6, self.null_bit_attribute.gpu.buffer.slice(..));
             render_pass_handle
                 .0
                 .draw(0..AABB.len() as u32, 0..self.indexer.count());
         }
-    }
-}
-
-#[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Component)]
-pub(crate) struct AreaAndLayer {
-    pub(crate) data: [f32; 3],
-}
-
-impl AreaAndLayer {
-    pub fn new() -> Self {
-        Self {
-            data: [0.0, 0.0, 0.0],
-        }
-    }
-}
-
-impl Default for AreaAndLayer {
-    fn default() -> Self {
-        AreaAndLayer::new()
     }
 }
 fn icon_bitmap_bytes() -> u32 {
@@ -151,9 +126,9 @@ pub(crate) fn setup(
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Rgba8Unorm,
+        format: wgpu::TextureFormat::R8Unorm,
         usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-        view_formats: &[wgpu::TextureFormat::Rgba8Unorm],
+        view_formats: &[wgpu::TextureFormat::R8Unorm],
     };
     let texture = gfx.device.create_texture(&texture_descriptor);
     let mut x_index = 0;
@@ -181,13 +156,9 @@ pub(crate) fn setup(
             height: ICON_BITMAP_DIMENSION,
             depth_or_array_layers: 1,
         };
-        let mut raw_data = Vec::new();
-        for d in write.bitmap.data.drain(..) {
-            raw_data.extend(vec![d.data[0], d.data[1], d.data[2], d.data[3]]);
-        }
         gfx.queue.write_texture(
             image_copy_texture,
-            raw_data.as_slice(),
+            bytemuck::cast_slice(&write.bitmap.data),
             image_data_layout,
             extent,
         );
@@ -273,14 +244,14 @@ pub(crate) fn setup(
                 attributes: &wgpu::vertex_attr_array![1 => Float32x2],
             },
             wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<AreaAndLayer>() as wgpu::BufferAddress,
+                array_stride: std::mem::size_of::<RawArea>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
-                attributes: &wgpu::vertex_attr_array![2 => Float32x3],
+                attributes: &wgpu::vertex_attr_array![2 => Float32x2],
             },
             wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<TextureCoordinates>() as wgpu::BufferAddress,
+                array_stride: std::mem::size_of::<Layer>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
-                attributes: &wgpu::vertex_attr_array![3 => Float32x4],
+                attributes: &wgpu::vertex_attr_array![3 => Float32],
             },
             wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
@@ -288,19 +259,14 @@ pub(crate) fn setup(
                 attributes: &wgpu::vertex_attr_array![4 => Float32x4],
             },
             wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<Color>() as wgpu::BufferAddress,
+                array_stride: std::mem::size_of::<TextureCoordinates>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
                 attributes: &wgpu::vertex_attr_array![5 => Float32x4],
             },
             wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<ColorInvert>() as wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Instance,
-                attributes: &wgpu::vertex_attr_array![6 => Uint32],
-            },
-            wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<NullBit>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Instance,
-                attributes: &wgpu::vertex_attr_array![7 => Uint32],
+                attributes: &wgpu::vertex_attr_array![6 => Uint32],
             },
         ],
     };
@@ -347,12 +313,10 @@ pub(crate) fn setup(
         vertex_quad,
         bind_group,
         pos_attribute: InstanceAttributeManager::new(&gfx, max),
-        area_and_layer_attribute: InstanceAttributeManager::new(&gfx, max),
+        area_attribute: InstanceAttributeManager::new(&gfx, max),
         tex_coords_attribute: InstanceAttributeManager::new(&gfx, max),
-        positive_space_color_attribute: InstanceAttributeManager::new(&gfx, max),
-        negative_space_color_attribute: InstanceAttributeManager::new(&gfx, max),
+        color_attribute: InstanceAttributeManager::new(&gfx, max),
         layer_attribute: InstanceAttributeManager::new(&gfx, max),
-        color_invert_attribute: InstanceAttributeManager::new(&gfx, max),
         null_bit_attribute: InstanceAttributeManager::new(&gfx, max),
         indexer: Indexer::new(max),
     });

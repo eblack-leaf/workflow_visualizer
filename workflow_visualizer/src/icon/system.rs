@@ -5,8 +5,8 @@ use crate::{
 };
 use crate::icon::bitmap::IconBitmapLayout;
 use crate::icon::cache::{Cache, Difference};
-use crate::icon::component::{ColorInvert, IconId, IconScale, NegativeSpaceColor};
-use crate::icon::renderer::{AreaAndLayer, IconRenderer};
+use crate::icon::component::{IconId, IconScale};
+use crate::icon::renderer::IconRenderer;
 
 pub(crate) fn calc_area(
     mut icons: Query<(&mut Area<InterfaceContext>, &IconScale), Changed<IconScale>>,
@@ -25,8 +25,6 @@ pub(crate) fn management(
             &Area<InterfaceContext>,
             &Layer,
             &Color,
-            &NegativeSpaceColor,
-            &ColorInvert,
             &IconId,
             &Visibility,
             &mut Difference,
@@ -40,8 +38,6 @@ pub(crate) fn management(
         area,
         layer,
         color,
-        neg_color,
-        color_invert,
         id,
         visibility,
         mut difference,
@@ -52,11 +48,6 @@ pub(crate) fn management(
             difference.attributes.area.replace(*area);
             difference.attributes.layer.replace(*layer);
             difference.attributes.positive_space_color.replace(*color);
-            difference
-                .attributes
-                .negative_space_color
-                .replace(neg_color.0);
-            difference.attributes.color_invert.replace(*color_invert);
             difference.attributes.icon_id.replace(id.clone());
             difference.create = true;
         } else {
@@ -121,34 +112,6 @@ pub(crate) fn positive_space_color_diff(
     }
 }
 
-pub(crate) fn negative_space_color_diff(
-    mut icons: Query<
-        (&NegativeSpaceColor, &mut Cache, &mut Difference),
-        Changed<NegativeSpaceColor>,
-    >,
-) {
-    for (color, mut cache, mut difference) in icons.iter_mut() {
-        if let Some(cached_neg_color) = cache.attributes.negative_space_color.as_ref() {
-            if *cached_neg_color != color.0 {
-                difference.attributes.negative_space_color.replace(color.0);
-            }
-        }
-        cache.attributes.negative_space_color.replace(color.0);
-    }
-}
-
-pub(crate) fn color_invert_diff(
-    mut icons: Query<(&ColorInvert, &mut Cache, &mut Difference), Changed<ColorInvert>>,
-) {
-    for (invert, mut cache, mut difference) in icons.iter_mut() {
-        if let Some(cached_invert) = cache.attributes.color_invert.as_ref() {
-            if *cached_invert != *invert {
-                difference.attributes.color_invert.replace(*invert);
-            }
-        }
-        cache.attributes.color_invert.replace(*invert);
-    }
-}
 
 pub(crate) fn icon_id_diff(
     mut icons: Query<(&IconId, &mut Cache, &mut Difference), Changed<IconId>>,
@@ -164,13 +127,13 @@ pub(crate) fn icon_id_diff(
 }
 
 pub(crate) fn read_differences(
-    mut icons: Query<(Entity, &mut Difference, &mut AreaAndLayer), Changed<Difference>>,
+    mut icons: Query<(Entity, &mut Difference), Changed<Difference>>,
     mut icon_renderer: ResMut<IconRenderer>,
     scale_factor: Res<ScaleFactor>,
     icon_bitmap_layout: Res<IconBitmapLayout>,
     gfx: Res<GfxSurface>,
 ) {
-    for (entity, mut difference, mut area_and_layer) in icons.iter_mut() {
+    for (entity, mut difference) in icons.iter_mut() {
         if difference.remove {
             let index = icon_renderer.indexer.remove(entity);
             if let Some(i) = index {
@@ -194,55 +157,34 @@ pub(crate) fn read_differences(
                     .queue_write(index, pos.to_device(scale_factor.factor()).as_raw());
             }
         }
-        let mut area_or_layer_dirty = false;
         if let Some(area) = difference.attributes.area.take() {
-            let device_area = area.to_device(scale_factor.factor());
-            area_and_layer.data = [
-                device_area.width,
-                device_area.height,
-                area_and_layer.data[2],
-            ];
-            area_or_layer_dirty = true;
-        }
-        if let Some(layer) = difference.attributes.layer.take() {
-            area_and_layer.data[2] = layer.z;
-            area_or_layer_dirty = true;
-        }
-        if area_or_layer_dirty {
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
                 icon_renderer
-                    .area_and_layer_attribute
-                    .queue_write(index, *area_and_layer);
+                    .area_attribute
+                    .queue_write(index, area.to_device(scale_factor.factor()).as_raw());
+            }
+        }
+        if let Some(layer) = difference.attributes.layer.take() {
+            if let Some(index) = icon_renderer.indexer.get_index(entity) {
+                icon_renderer
+                    .layer_attribute
+                    .queue_write(index, layer);
             }
         }
         if let Some(color) = difference.attributes.positive_space_color.take() {
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
                 icon_renderer
-                    .positive_space_color_attribute
+                    .color_attribute
                     .queue_write(index, color);
             }
         }
-        if let Some(color) = difference.attributes.negative_space_color.take() {
-            if let Some(index) = icon_renderer.indexer.get_index(entity) {
-                icon_renderer
-                    .negative_space_color_attribute
-                    .queue_write(index, color);
-            }
-        }
-        if let Some(invert) = difference.attributes.color_invert.take() {
-            if let Some(index) = icon_renderer.indexer.get_index(entity) {
-                icon_renderer
-                    .color_invert_attribute
-                    .queue_write(index, invert);
-            }
-        }
-        if let Some(color) = difference.attributes.icon_id.take() {
+        if let Some(id) = difference.attributes.icon_id.take() {
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
                 icon_renderer.tex_coords_attribute.queue_write(
                     index,
                     icon_bitmap_layout
                         .bitmap_locations
-                        .get(&color)
+                        .get(&id)
                         .copied()
                         .expect("icon bitmap layout"),
                 );
@@ -252,20 +194,16 @@ pub(crate) fn read_differences(
     if icon_renderer.indexer.should_grow() {
         let max = icon_renderer.indexer.max();
         icon_renderer.pos_attribute.grow(&gfx, max);
-        icon_renderer.area_and_layer_attribute.grow(&gfx, max);
+        icon_renderer.area_attribute.grow(&gfx, max);
         icon_renderer.layer_attribute.grow(&gfx, max);
-        icon_renderer.positive_space_color_attribute.grow(&gfx, max);
-        icon_renderer.negative_space_color_attribute.grow(&gfx, max);
-        icon_renderer.color_invert_attribute.grow(&gfx, max);
+        icon_renderer.color_attribute.grow(&gfx, max);
         icon_renderer.tex_coords_attribute.grow(&gfx, max);
         icon_renderer.null_bit_attribute.grow(&gfx, max);
     }
     icon_renderer.pos_attribute.write(&gfx);
-    icon_renderer.area_and_layer_attribute.write(&gfx);
+    icon_renderer.area_attribute.write(&gfx);
     icon_renderer.layer_attribute.write(&gfx);
-    icon_renderer.positive_space_color_attribute.write(&gfx);
-    icon_renderer.negative_space_color_attribute.write(&gfx);
-    icon_renderer.color_invert_attribute.write(&gfx);
+    icon_renderer.color_attribute.write(&gfx);
     icon_renderer.tex_coords_attribute.write(&gfx);
     icon_renderer.null_bit_attribute.write(&gfx);
 }

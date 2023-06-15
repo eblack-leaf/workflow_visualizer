@@ -11,7 +11,7 @@ use crate::system;
 
 pub fn visualizer() -> Visualizer {
     let theme_desc = ThemeDescriptor::new().with_background(Color::OFF_BLACK);
-    let mut visualizer = Visualizer::new(Theme::new(theme_desc), GfxOptions::native_defaults());
+    let mut visualizer = Visualizer::new(Theme::new(theme_desc), GfxOptions::native_defaults().with_msaa(1));
     visualizer
         .job
         .task(Visualizer::TASK_MAIN)
@@ -84,16 +84,15 @@ pub fn visualizer() -> Visualizer {
         FocusInputListener::default(),
     )]);
     visualizer.add_entities(vec![IconBitmapRequest::from((
-        "something",
-        IconBitmap::bundled(BundledIcon::Something),
+        "edit",
+        IconBitmap::bundled(BundledIcon::Edit),
     ))]);
     visualizer.add_entities(vec![Request::new(Icon::new(
-        "something",
+        "edit",
         icon_point,
-        IconScale::Medium,
+        IconScale::Large,
         3,
         Color::OFF_WHITE,
-        Color::OFF_BLACK,
     ))]);
     visualizer
 }
