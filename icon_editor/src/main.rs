@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
@@ -19,7 +20,7 @@ use workflow_visualizer::bevy_ecs::prelude::{
     Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
 };
 
-#[derive(Hash, Eq, PartialEq, Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
 struct BitmapLocation {
     x: u32,
     y: u32,
@@ -37,14 +38,28 @@ struct Engen {
 
 impl Engen {
     fn write_out(&self) {
-        println!("{:?}", self.bitmap_panel);
+        let mut write_data = self.bitmap_panel.iter().map(|(bit, pix)| (*bit, *pix)).collect::<Vec<(BitmapLocation, IconPixelData)>>();
+        write_data.sort_by(|lhs, rhs| -> Ordering {
+            lhs.0.partial_cmp(&rhs.0).unwrap()
+        });
+        for (_loc, data) in write_data {
+            println!("{:?},", data.data);
+        }
     }
 }
 
 impl Default for Engen {
     fn default() -> Self {
         Engen {
-            bitmap_panel: HashMap::new(),
+            bitmap_panel: {
+                let mut mapping = HashMap::new();
+                for x in 0..20 {
+                    for y in 0..20 {
+                        mapping.insert(BitmapLocation::new(x, y), IconPixelData::default());
+                    }
+                }
+                mapping
+            },
         }
     }
 }
