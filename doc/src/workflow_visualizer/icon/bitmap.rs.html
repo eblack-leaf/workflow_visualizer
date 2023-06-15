@@ -117,11 +117,6 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -130,6 +125,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::IconId;
+<span class="kw">use </span><span class="kw">crate</span>::TextureCoordinates;
 
 <span class="attr">#[repr(C)]
 #[derive(
@@ -201,12 +197,6 @@ PartialEq,
             .map(|d| d.into())
             .collect()
     }
-}
-
-<span class="attr">#[repr(C)]
-#[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TextureCoordinates {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) data: [f32; <span class="number">4</span>],
 }
 
 <span class="attr">#[derive(Component, Clone)]

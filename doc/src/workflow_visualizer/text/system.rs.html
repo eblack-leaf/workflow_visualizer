@@ -1391,7 +1391,7 @@
         <span class="kw">for </span>(location, (<span class="kw">_</span>, glyph_area, bitmap)) <span class="kw">in </span>render_group.atlas_write_queue.queue.iter() {
             render_group
                 .atlas
-                .write::&lt;u8&gt;(location, bitmap.as_slice(), <span class="kw-2">*</span>glyph_area, <span class="kw-2">&amp;</span>gfx_surface);
+                .write::&lt;u8&gt;(<span class="kw-2">*</span>location, bitmap.as_slice(), <span class="kw-2">*</span>glyph_area, <span class="kw-2">&amp;</span>gfx_surface);
         }
         <span class="kw">if </span>draw_section_resize_needed {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = render_group.visible_section.section {

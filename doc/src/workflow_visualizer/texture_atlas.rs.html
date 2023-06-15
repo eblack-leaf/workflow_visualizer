@@ -294,6 +294,11 @@
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
 <a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashSet;
 
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
@@ -329,12 +334,12 @@
     }
     <span class="kw">pub fn </span>write&lt;TexelData: Sized&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        location: <span class="kw-2">&amp;</span>AtlasLocation,
+        location: AtlasLocation,
         data: <span class="kw-2">&amp;</span>[u8],
         extent_dim: Area&lt;NumericalContext&gt;,
         gfx: <span class="kw-2">&amp;</span>GfxSurface,
-    ) {
-        <span class="kw">let </span>position = AtlasPosition::new(<span class="kw-2">*</span>location, <span class="self">self</span>.block).position;
+    ) -&gt; TextureCoordinates {
+        <span class="kw">let </span>position = AtlasPosition::new(location, <span class="self">self</span>.block).position;
         <span class="kw">let </span>image_copy_texture = wgpu::ImageCopyTexture {
             texture: <span class="self">self</span>.texture(),
             mip_level: <span class="number">0</span>,
@@ -359,6 +364,11 @@
         };
         gfx.queue
             .write_texture(image_copy_texture, data, image_data_layout, size);
+        <span class="kw">let </span>position = AtlasPosition::new(location, <span class="self">self</span>.block).position;
+        TextureCoordinates::from_section(
+            Section::new(position, extent_dim),
+            <span class="self">self</span>.texture_dimensions,
+        )
     }
 }
 

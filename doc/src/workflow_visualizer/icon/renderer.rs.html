@@ -292,66 +292,6 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, Resource};
@@ -360,15 +300,17 @@
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
 <span class="kw">use crate</span>::{
-    Area, Color, GfxSurface, Indexer, InstanceAttributeManager, InterfaceContext, Key, KeyFactory,
-    Layer, NullBit, NumericalContext, Position, RawArea, RawPosition, Render, RenderPassHandle,
-    RenderPhase, Section, Viewport,
+    Area, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasPosition, Color, GfxSurface, Indexer,
+    InstanceAttributeManager, InterfaceContext, Key, KeyFactory, Layer, NullBit, NumericalContext,
+    Position, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, Section, TextureAtlas,
+    TextureCoordinates, Viewport,
 };
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::{
-    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData, TextureCoordinates,
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
 };
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::IconId;
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::AtlasLocation;
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconRenderer {
@@ -382,6 +324,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) tex_coords_attribute: InstanceAttributeManager&lt;TextureCoordinates&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) null_bit_attribute: InstanceAttributeManager&lt;NullBit&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) indexer: Indexer&lt;Entity&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas: TextureAtlas,
 }
 
 <span class="kw">impl </span>Render <span class="kw">for </span>IconRenderer {
@@ -424,11 +367,6 @@
         }
     }
 }
-<span class="kw">fn </span>icon_bitmap_bytes() -&gt; u32 {
-    <span class="kw">let </span>mem = std::mem::size_of::&lt;IconPixelData&gt;() <span class="kw">as </span>u32;
-    <span class="kw">let </span>val = ICON_BITMAP_DIMENSION * mem;
-    val
-}
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(
     gfx: Res&lt;GfxSurface&gt;,
@@ -441,16 +379,7 @@
     <span class="kw">let </span>bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: <span class="prelude-val">Some</span>(<span class="string">&quot;icon renderer bind group layout&quot;</span>),
         entries: <span class="kw-2">&amp;</span>[
-            wgpu::BindGroupLayoutEntry {
-                binding: <span class="number">0</span>,
-                visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Texture {
-                    sample_type: wgpu::TextureSampleType::Float { filterable: <span class="bool-val">true </span>},
-                    view_dimension: wgpu::TextureViewDimension::D2,
-                    multisampled: <span class="bool-val">false</span>,
-                },
-                count: <span class="prelude-val">None</span>,
-            },
+            AtlasBindGroup::entry(<span class="number">0</span>),
             wgpu::BindGroupLayoutEntry {
                 binding: <span class="number">1</span>,
                 visibility: wgpu::ShaderStages::FRAGMENT,
@@ -467,73 +396,24 @@
         writes.push(request.clone());
         cmd.entity(entity).despawn();
     }
-    <span class="kw">let </span>dimension = (writes.len() <span class="kw">as </span>f32 / <span class="number">2f32</span>).ceil() <span class="kw">as </span>u32;
-    <span class="kw">let </span>total_dimension = dimension * ICON_BITMAP_DIMENSION;
-    <span class="kw">let </span>total_dimension = total_dimension.max(<span class="number">1</span>);
-    <span class="kw">let </span>texture_descriptor = wgpu::TextureDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;icon texture descriptor&quot;</span>),
-        size: wgpu::Extent3d {
-            width: total_dimension,
-            height: total_dimension,
-            depth_or_array_layers: <span class="number">1</span>,
-        },
-        mip_level_count: <span class="number">1</span>,
-        sample_count: <span class="number">1</span>,
-        dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::R8Unorm,
-        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-        view_formats: <span class="kw-2">&amp;</span>[wgpu::TextureFormat::R8Unorm],
-    };
-    <span class="kw">let </span>texture = gfx.device.create_texture(<span class="kw-2">&amp;</span>texture_descriptor);
+    <span class="kw">let </span>dimension = AtlasDimension::new((writes.len() <span class="kw">as </span>f32 / <span class="number">2f32</span>).ceil() <span class="kw">as </span>u32);
+    <span class="kw">let </span>block = AtlasBlock::new((ICON_BITMAP_DIMENSION, ICON_BITMAP_DIMENSION));
+    <span class="kw">let </span>atlas = TextureAtlas::new(<span class="kw-2">&amp;</span>gfx, block, dimension);
     <span class="kw">let </span><span class="kw-2">mut </span>x_index = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>y_index = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>icon_bitmap_layout = IconBitmapLayout::new();
     <span class="kw">for </span><span class="kw-2">mut </span>write <span class="kw">in </span>writes {
-        <span class="kw">let </span>bytes = icon_bitmap_bytes();
-        <span class="kw">let </span>image_copy_texture = wgpu::ImageCopyTexture {
-            texture: <span class="kw-2">&amp;</span>texture,
-            mip_level: <span class="number">0</span>,
-            origin: wgpu::Origin3d {
-                x: x_index * ICON_BITMAP_DIMENSION,
-                y: y_index * ICON_BITMAP_DIMENSION,
-                z: <span class="number">0</span>,
-            },
-            aspect: wgpu::TextureAspect::All,
-        };
-        <span class="kw">let </span>image_data_layout = wgpu::ImageDataLayout {
-            offset: <span class="number">0</span>,
-            bytes_per_row: <span class="prelude-val">Some</span>(bytes),
-            rows_per_image: <span class="prelude-val">Some</span>(bytes),
-        };
-        <span class="kw">let </span>extent = wgpu::Extent3d {
-            width: ICON_BITMAP_DIMENSION,
-            height: ICON_BITMAP_DIMENSION,
-            depth_or_array_layers: <span class="number">1</span>,
-        };
-        gfx.queue.write_texture(
-            image_copy_texture,
+        <span class="kw">let </span>atlas_location = AtlasLocation::new(x_index, y_index);
+        <span class="kw">let </span>coordinates = atlas.write::&lt;IconPixelData&gt;(
+            atlas_location,
             bytemuck::cast_slice(<span class="kw-2">&amp;</span>write.bitmap.data),
-            image_data_layout,
-            extent,
+            block.block,
+            <span class="kw-2">&amp;</span>gfx,
         );
-        <span class="kw">let </span>l = x_index * ICON_BITMAP_DIMENSION / total_dimension;
-        <span class="kw">let </span>t = y_index * ICON_BITMAP_DIMENSION / total_dimension;
-        <span class="kw">let </span>pos = Position::from((l, t));
-        <span class="kw">let </span>normalized_width_height = ICON_BITMAP_DIMENSION / total_dimension;
-        <span class="kw">let </span>area = Area::from((normalized_width_height, normalized_width_height));
-        <span class="kw">let </span>section = Section::&lt;NumericalContext&gt;::new(pos, area);
-        <span class="kw">let </span>coordinates = TextureCoordinates {
-            data: [
-                section.left(),
-                section.top(),
-                section.right(),
-                section.bottom(),
-            ],
-        };
         icon_bitmap_layout
             .bitmap_locations
             .insert(write.id, coordinates);
-        <span class="kw">if </span>x_index + <span class="number">1 </span>&gt;= dimension {
+        <span class="kw">if </span>x_index + <span class="number">1 </span>&gt;= dimension.dimension {
             x_index = <span class="number">0</span>;
             y_index += <span class="number">1</span>;
         } <span class="kw">else </span>{
@@ -541,7 +421,6 @@
         }
     }
     cmd.insert_resource(icon_bitmap_layout);
-    <span class="kw">let </span>texture_view = texture.create_view(<span class="kw-2">&amp;</span>wgpu::TextureViewDescriptor::default());
     <span class="kw">let </span>sampler_descriptor = wgpu::SamplerDescriptor {
         label: <span class="prelude-val">Some</span>(<span class="string">&quot;icon renderer sampler&quot;</span>),
         address_mode_u: wgpu::AddressMode::ClampToEdge,
@@ -563,7 +442,7 @@
         entries: <span class="kw-2">&amp;</span>[
             wgpu::BindGroupEntry {
                 binding: <span class="number">0</span>,
-                resource: wgpu::BindingResource::TextureView(<span class="kw-2">&amp;</span>texture_view),
+                resource: wgpu::BindingResource::TextureView(<span class="kw-2">&amp;</span>atlas.view()),
             },
             wgpu::BindGroupEntry {
                 binding: <span class="number">1</span>,
@@ -673,6 +552,7 @@
         layer_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
         null_bit_attribute: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx, max),
         indexer: Indexer::new(max),
+        atlas,
     });
 }
 
