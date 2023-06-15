@@ -15,9 +15,7 @@ use crate::{
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
-    Atlas, AtlasAddQueue, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations,
-    AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasLocation, AtlasPosition,
-    AtlasTextureDimensions, AtlasWriteQueue, Bitmap, TextureCoordinates,
+    AtlasAddQueue, AtlasGlyphReference, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue, Bitmap,
 };
 use crate::text::component::{
     Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, TextGridLocation,
@@ -30,6 +28,10 @@ use crate::text::render_group::{
     RenderGroupUniqueGlyphs, TextPlacement,
 };
 use crate::text::renderer::{Extraction, TextRenderer};
+use crate::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasLocation, AtlasPosition,
+    AtlasTexture, AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+};
 use crate::window::WindowResize;
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
@@ -280,7 +282,13 @@ pub(crate) fn manage(
                     *layer,
                     RenderGroupUniqueGlyphs::from_text(text),
                     *text_scale_alignment,
-                    AtlasBlock::new(fonts.fonts.get(text_scale_alignment).unwrap(), text_scale),
+                    AtlasBlock::new(
+                        fonts
+                            .fonts
+                            .get(text_scale_alignment)
+                            .unwrap()
+                            .character_dimensions('a', text_scale.px()),
+                    ),
                 ),
             );
         } else {
@@ -374,10 +382,12 @@ pub(crate) fn create_render_groups(
             &text_placement_uniform,
         );
         let atlas_dimension = AtlasDimension::from_unique_glyphs(unique_glyphs.unique_glyphs);
-        let atlas_texture_dimensions = AtlasTextureDimensions::new(*atlas_block, atlas_dimension);
-        let atlas = Atlas::new(&gfx_surface, atlas_texture_dimensions);
-        let atlas_bind_group =
-            AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
+        let atlas = TextureAtlas::new(&gfx_surface, *atlas_block, atlas_dimension);
+        let atlas_bind_group = AtlasBindGroup::new(
+            &gfx_surface,
+            &renderer.atlas_bind_group_layout,
+            atlas.view(),
+        );
         renderer.render_groups.insert(
             *entity,
             RenderGroup {
@@ -401,14 +411,10 @@ pub(crate) fn create_render_groups(
                 render_group_bind_group,
                 atlas,
                 atlas_bind_group,
-                atlas_texture_dimensions,
-                atlas_dimension,
-                atlas_free_locations: AtlasFreeLocations::new(atlas_dimension),
                 atlas_glyph_references: AtlasGlyphReferences::new(),
                 atlas_write_queue: AtlasWriteQueue::new(),
                 atlas_add_queue: AtlasAddQueue::new(),
                 atlas_glyphs: AtlasGlyphs::new(),
-                atlas_block: *atlas_block,
             },
         );
     }
@@ -502,7 +508,7 @@ pub(crate) fn render_group_differences(
         // free
         for glyph_id in orphaned_glyphs {
             let (_, _, location, _) = render_group.atlas_glyphs.glyphs.remove(&glyph_id).unwrap();
-            render_group.atlas_free_locations.free.insert(location);
+            render_group.atlas.free_locations.free.insert(location);
             render_group
                 .atlas_glyph_references
                 .references
@@ -512,9 +518,9 @@ pub(crate) fn render_group_differences(
             let mut adjusted_glyphs = HashSet::new();
             let num_new_glyphs = render_group.atlas_add_queue.queue.len() as u32;
             if num_new_glyphs != 0
-                && num_new_glyphs > render_group.atlas_free_locations.free.len() as u32
+                && num_new_glyphs > render_group.atlas.free_locations.free.len() as u32
             {
-                let current_dimension = render_group.atlas_dimension.dimension;
+                let current_dimension = render_group.atlas.dimension.dimension;
                 let current_total = current_dimension.pow(2);
                 let mut incremental_dimension_add = 1;
                 let mut next_size_up_total = (current_dimension + incremental_dimension_add).pow(2);
@@ -524,13 +530,13 @@ pub(crate) fn render_group_differences(
                 }
                 let new_dimension =
                     AtlasDimension::new(current_dimension + incremental_dimension_add);
-                let texture_dimensions =
-                    AtlasTextureDimensions::new(render_group.atlas_block, new_dimension);
-                let atlas = Atlas::new(&gfx_surface, texture_dimensions);
-                let atlas_bind_group =
-                    AtlasBindGroup::new(&gfx_surface, &renderer.atlas_bind_group_layout, &atlas);
-                render_group.atlas_bind_group = atlas_bind_group;
-                let mut free_locations = AtlasFreeLocations::new(new_dimension);
+                render_group.atlas =
+                    TextureAtlas::new(&gfx_surface, render_group.atlas.block, new_dimension);
+                render_group.atlas_bind_group = AtlasBindGroup::new(
+                    &gfx_surface,
+                    &renderer.atlas_bind_group_layout,
+                    render_group.atlas.view(),
+                );
                 let mut writes = Vec::<(
                     GlyphId,
                     AtlasLocation,
@@ -539,12 +545,14 @@ pub(crate) fn render_group_differences(
                     Bitmap,
                 )>::new();
                 for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in
-                    render_group.atlas_glyphs.glyphs.iter()
+                render_group.atlas_glyphs.glyphs.iter()
                 {
-                    let position = AtlasPosition::new(*atlas_location, render_group.atlas_block);
+                    let position = AtlasPosition::new(*atlas_location, render_group.atlas.block);
                     let glyph_section = Section::new(position.position, *glyph_area);
-                    let coords =
-                        TextureCoordinates::from_section(glyph_section, texture_dimensions);
+                    let coords = TextureCoordinates::from_section(
+                        glyph_section,
+                        render_group.atlas.texture_dimensions,
+                    );
                     writes.push((
                         *glyph_id,
                         *atlas_location,
@@ -552,7 +560,11 @@ pub(crate) fn render_group_differences(
                         *glyph_area,
                         bitmap.clone(),
                     ));
-                    free_locations.free.remove(atlas_location);
+                    render_group
+                        .atlas
+                        .free_locations
+                        .free
+                        .remove(atlas_location);
                     adjusted_glyphs.insert(*glyph_id);
                 }
                 for write in writes {
@@ -567,10 +579,6 @@ pub(crate) fn render_group_differences(
                         .queue
                         .insert(write.1, (write.2, write.3, write.4));
                 }
-                render_group.atlas = atlas;
-                render_group.atlas_texture_dimensions = texture_dimensions;
-                render_group.atlas_free_locations = free_locations;
-                render_group.atlas_dimension = new_dimension;
             }
             adjusted_glyphs
         };
@@ -599,12 +607,12 @@ pub(crate) fn render_group_differences(
             // TODO since subpixel , combine them here to save space
             let glyph_area: Area<NumericalContext> =
                 (rasterization.0.width, rasterization.0.height).into();
-            let location = render_group.atlas_free_locations.next();
-            let position = AtlasPosition::new(location, render_group.atlas_block);
+            let location = render_group.atlas.free_locations.next();
+            let position = AtlasPosition::new(location, render_group.atlas.block);
             let glyph_section = Section::new(position.position, glyph_area);
             let coords = TextureCoordinates::from_section(
                 glyph_section,
-                render_group.atlas_texture_dimensions,
+                render_group.atlas.texture_dimensions,
             );
             render_group
                 .atlas_write_queue
@@ -667,37 +675,9 @@ pub(crate) fn render_group_differences(
                 .update(&gfx_surface.queue, render_group.text_placement);
         }
         for (location, (_, glyph_area, bitmap)) in render_group.atlas_write_queue.queue.iter() {
-            let atlas = &render_group.atlas;
-            let atlas_block = render_group.atlas_block;
-            let position = AtlasPosition::new(*location, atlas_block).position;
-            let image_copy_texture = wgpu::ImageCopyTexture {
-                texture: &atlas.texture,
-                mip_level: 0,
-                origin: wgpu::Origin3d {
-                    x: position.x as u32,
-                    y: position.y as u32,
-                    z: 0,
-                },
-                aspect: wgpu::TextureAspect::All,
-            };
-            let extent_w = glyph_area.width as u32;
-            let extent_h = glyph_area.height as u32;
-            let image_data_layout = wgpu::ImageDataLayout {
-                offset: 0,
-                bytes_per_row: Some(extent_w),
-                rows_per_image: Some(extent_h),
-            };
-            let extent = wgpu::Extent3d {
-                width: extent_w,
-                height: extent_h,
-                depth_or_array_layers: 1,
-            };
-            gfx_surface.queue.write_texture(
-                image_copy_texture,
-                bitmap.as_slice(),
-                image_data_layout,
-                extent,
-            );
+            render_group
+                .atlas
+                .write::<u8>(location, bitmap.as_slice(), *glyph_area, &gfx_surface);
         }
         if draw_section_resize_needed {
             if let Some(v_sec) = render_group.visible_section.section {

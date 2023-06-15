@@ -140,8 +140,8 @@ pub(crate) fn setup(
             texture: &texture,
             mip_level: 0,
             origin: wgpu::Origin3d {
-                x: x_index * bytes,
-                y: y_index * bytes,
+                x: x_index * ICON_BITMAP_DIMENSION,
+                y: y_index * ICON_BITMAP_DIMENSION,
                 z: 0,
             },
             aspect: wgpu::TextureAspect::All,

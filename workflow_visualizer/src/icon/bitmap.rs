@@ -33,9 +33,7 @@ impl IconPixelData {
 
 impl From<u8> for IconPixelData {
     fn from(value: u8) -> Self {
-        IconPixelData {
-            data: value,
-        }
+        IconPixelData { data: value }
     }
 }
 
@@ -67,13 +65,17 @@ impl IconBitmap {
             BundledIcon::Something => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/something.icon"
             ))),
-            BundledIcon::Edit => {
-                Self::new(Self::read_icon_file(include_str!("bundled_icons/edit.icon")))
-            }
+            BundledIcon::Edit => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/edit.icon"
+            ))),
         }
     }
     fn read_icon_file(file: &str) -> Vec<IconPixelData> {
-        serde_json::from_str::<Vec<u8>>(file).expect("file parsing").drain(..).map(|d| d.into()).collect()
+        serde_json::from_str::<Vec<u8>>(file)
+            .expect("file parsing")
+            .drain(..)
+            .map(|d| d.into())
+            .collect()
     }
 }
 

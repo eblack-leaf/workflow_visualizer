@@ -41,7 +41,13 @@ impl Engen {
         println!("[");
         for y in 0..20 {
             for x in 0..20 {
-                println!("{:?},", self.bitmap_panel.get(&BitmapLocation::new(x, y)).unwrap().data);
+                println!(
+                    "{:?},",
+                    self.bitmap_panel
+                        .get(&BitmapLocation::new(x, y))
+                        .unwrap()
+                        .data
+                );
             }
         }
         println!("]");

@@ -67,7 +67,6 @@ impl Icon {
     }
 }
 
-
 #[derive(Component, Clone, Hash, Eq, PartialEq)]
 pub struct IconId(pub CompactString);
 

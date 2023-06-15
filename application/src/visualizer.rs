@@ -11,11 +11,14 @@ use crate::system;
 
 pub fn visualizer() -> Visualizer {
     let theme_desc = ThemeDescriptor::new().with_background(Color::OFF_BLACK);
-    let mut visualizer = Visualizer::new(Theme::new(theme_desc), GfxOptions::native_defaults().with_msaa(1));
+    let mut visualizer = Visualizer::new(
+        Theme::new(theme_desc),
+        GfxOptions::native_defaults().with_msaa(1),
+    );
     visualizer
         .job
         .task(Visualizer::TASK_MAIN)
-        .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process),));
+        .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process), ));
     let header_placement =
         ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near(), 1.near().raw_offset(4))));
     let panel_view =

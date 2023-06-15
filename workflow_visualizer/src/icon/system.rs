@@ -32,17 +32,7 @@ pub(crate) fn management(
         Changed<Visibility>,
     >,
 ) {
-    for (
-        entity,
-        pos,
-        area,
-        layer,
-        color,
-        id,
-        visibility,
-        mut difference,
-    ) in icons.iter_mut()
-    {
+    for (entity, pos, area, layer, color, id, visibility, mut difference) in icons.iter_mut() {
         if visibility.visible() {
             difference.attributes.position.replace(*pos);
             difference.attributes.area.replace(*area);
@@ -112,7 +102,6 @@ pub(crate) fn positive_space_color_diff(
     }
 }
 
-
 pub(crate) fn icon_id_diff(
     mut icons: Query<(&IconId, &mut Cache, &mut Difference), Changed<IconId>>,
 ) {
@@ -166,16 +155,12 @@ pub(crate) fn read_differences(
         }
         if let Some(layer) = difference.attributes.layer.take() {
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
-                icon_renderer
-                    .layer_attribute
-                    .queue_write(index, layer);
+                icon_renderer.layer_attribute.queue_write(index, layer);
             }
         }
         if let Some(color) = difference.attributes.positive_space_color.take() {
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
-                icon_renderer
-                    .color_attribute
-                    .queue_write(index, color);
+                icon_renderer.color_attribute.queue_write(index, color);
             }
         }
         if let Some(id) = difference.attributes.icon_id.take() {

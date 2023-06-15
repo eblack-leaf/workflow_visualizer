@@ -4,11 +4,11 @@ use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use tracing::trace;
 use wgpu::util::DeviceExt;
 
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::{
     Color, DeviceContext, GfxSurface, Layer, Position, RawPosition, Render, RenderPassHandle,
     RenderPhase, Uniform, Viewport,
 };
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 
 pub(crate) struct LineRenderGroup {
     pub(crate) line_render_gpu: LineRenderGpu,
@@ -139,7 +139,7 @@ pub(crate) fn setup(
         }],
     };
     let primitive_state = wgpu::PrimitiveState {
-        topology: wgpu::PrimitiveTopology::LineStrip,
+        topology: wgpu::PrimitiveTopology::LineList,
         front_face: wgpu::FrontFace::Ccw,
         ..wgpu::PrimitiveState::default()
     };

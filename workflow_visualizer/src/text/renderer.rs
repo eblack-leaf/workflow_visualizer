@@ -9,10 +9,11 @@ use crate::{
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
 };
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::text::atlas::{AtlasBlock, TextureCoordinates};
 use crate::text::component::{Difference, TextScaleAlignment};
 use crate::text::font::AlignedFonts;
 use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
+use crate::texture_atlas::{AtlasBindGroup, AtlasBlock, TextureAtlas};
+use crate::texture_atlas::TextureCoordinates;
 
 pub(crate) const AABB: [Vertex; 6] = [
     Vertex::new(RawPosition { x: 0.0, y: 0.0 }),
@@ -117,16 +118,7 @@ pub(crate) fn setup(
         .create_bind_group_layout(&render_group_bind_group_layout_descriptor);
     let atlas_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("atlas bind group layout descriptor"),
-        entries: &[wgpu::BindGroupLayoutEntry {
-            binding: 0,
-            visibility: wgpu::ShaderStages::FRAGMENT,
-            ty: wgpu::BindingType::Texture {
-                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                view_dimension: wgpu::TextureViewDimension::D2,
-                multisampled: false,
-            },
-            count: None,
-        }],
+        entries: &[AtlasBindGroup::entry(0)],
     };
     let atlas_bind_group_layout = gfx_surface
         .device

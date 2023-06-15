@@ -34,8 +34,7 @@ pub use crate::grid::{
     ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
 pub use crate::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData,
-    IconScale,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
 };
 pub use crate::job::{EntityName, EntityStore, Job};
 pub use crate::line::{Line, LineRender};
@@ -47,6 +46,10 @@ pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
 pub use crate::text::{
     Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
     TextScaleAlignment, TextValue, TextWrapStyle,
+};
+pub use crate::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};
@@ -79,6 +82,7 @@ mod request;
 mod scale_factor;
 mod sync;
 mod text;
+mod texture_atlas;
 mod theme;
 mod time;
 mod touch;

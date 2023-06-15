@@ -3,8 +3,8 @@ use bevy_ecs::prelude::IntoSystemConfig;
 use crate::{Attach, Icon, spawn, SyncPoint, Visualizer};
 use crate::icon::renderer::{IconRenderer, setup};
 use crate::icon::system::{
-    area_diff, calc_area, icon_id_diff, layer_diff, management,
-    position_diff, positive_space_color_diff, read_differences,
+    area_diff, calc_area, icon_id_diff, layer_diff, management, position_diff,
+    positive_space_color_diff, read_differences,
 };
 
 pub(crate) struct IconAttachment;
