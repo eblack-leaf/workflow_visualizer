@@ -128,7 +128,7 @@ pub enum TextScaleAlignment {
     Large,
 }
 impl TextScaleAlignment {
-    pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [13, 18, 24];
+    pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [13, 17, 20];
 }
 /// The size of a letter at an alignment
 /// This holds `Area<DeviceContext>` as character dimensions are

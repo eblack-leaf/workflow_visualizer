@@ -241,7 +241,7 @@ impl Attach for BitmapRepr {
             bitmap_panel_left.raw_offset(12),
         );
         let coverage_display_vertical = (
-            bitmap_panel_top.raw_offset(-7),
+            bitmap_panel_top.raw_offset(-8),
             bitmap_panel_top.raw_offset(-2),
         );
         let coverage_display_location =
@@ -259,11 +259,11 @@ impl Attach for BitmapRepr {
         );
         let coverage_down_horizontal = (
             coverage_display_horizontal.1.raw_offset(2),
-            coverage_display_horizontal.1.raw_offset(6),
+            coverage_display_horizontal.1.raw_offset(7),
         );
         let coverage_down_vertical = (
             coverage_display_vertical.0.raw_offset(0),
-            coverage_display_vertical.0.raw_offset(4),
+            coverage_display_vertical.0.raw_offset(5),
         );
         let coverage_down_location =
             ResponsiveGridView::all_same((coverage_down_horizontal, coverage_down_vertical));
@@ -276,7 +276,7 @@ impl Attach for BitmapRepr {
         );
         let coverage_up_horizontal = (
             coverage_down_horizontal.1.raw_offset(2),
-            coverage_down_horizontal.1.raw_offset(6),
+            coverage_down_horizontal.1.raw_offset(7),
         );
         let coverage_up_vertical = coverage_down_vertical;
         let coverage_up_location =
@@ -303,11 +303,11 @@ impl Attach for BitmapRepr {
         );
         let pos_neg_space_button_horizontal = (
             coverage_up_horizontal.1.raw_offset(20),
-            coverage_up_horizontal.1.raw_offset(24),
+            coverage_up_horizontal.1.raw_offset(25),
         );
         let pos_neg_space_button_vertical = (
             coverage_display_vertical.0.raw_offset(0),
-            coverage_display_vertical.0.raw_offset(4),
+            coverage_display_vertical.0.raw_offset(5),
         );
         let pos_neg_space_button_location = ResponsiveGridView::all_same((
             pos_neg_space_button_horizontal,
@@ -326,7 +326,7 @@ impl Attach for BitmapRepr {
         );
         let pos_neg_space_button_text_vertical = (
             pos_neg_space_button_vertical.0.raw_offset(0),
-            pos_neg_space_button_vertical.0.raw_offset(4),
+            pos_neg_space_button_vertical.0.raw_offset(5),
         );
         let pos_neg_space_button_text_location = ResponsiveGridView::all_same((
             pos_neg_space_button_text_horizontal,
@@ -447,7 +447,7 @@ fn main() {
     // tracing_subscriber::fmt().with_max_level(Level::TRACE).init();
     let mut visualizer = Visualizer::new(
         Theme::new(ThemeDescriptor::new().with_background(Color::OFF_BLACK)),
-        GfxOptions::native_defaults().with_msaa(4),
+        GfxOptions::native_defaults().with_msaa(2),
     );
     visualizer.add_attachment::<BitmapRepr>();
     Runner::new()
