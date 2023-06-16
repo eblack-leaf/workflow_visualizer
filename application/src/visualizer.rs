@@ -25,10 +25,8 @@ pub fn visualizer() -> Visualizer {
         ResponsiveGridView::all_same(((1.near(), 4.far()), (1.near().raw_offset(10), 4.far())));
     let list_text_horizontal_range = (1.near().raw_offset(2), 1.far());
     let first_text_vertical = (1.near().raw_offset(12), 1.near().raw_offset(18));
-    let first_text_placement = ResponsiveGridView::all_same((
-        list_text_horizontal_range,
-        first_text_vertical,
-    ));
+    let first_text_placement =
+        ResponsiveGridView::all_same((list_text_horizontal_range, first_text_vertical));
     let icon_point = ResponsiveGridPoint::all_same((2.near(), first_text_vertical.0.raw_offset(1)));
     let second_text_vertical = (
         1.near().raw_offset(22),
@@ -38,11 +36,10 @@ pub fn visualizer() -> Visualizer {
             .end
             .raw_offset(10),
     );
-    let icon_point_2 = ResponsiveGridPoint::all_same((2.near(), second_text_vertical.0.raw_offset(1)));
-    let second_text_placement = ResponsiveGridView::all_same((
-        list_text_horizontal_range,
-        second_text_vertical,
-    ));
+    let icon_point_2 =
+        ResponsiveGridPoint::all_same((2.near(), second_text_vertical.0.raw_offset(1)));
+    let second_text_placement =
+        ResponsiveGridView::all_same((list_text_horizontal_range, second_text_vertical));
     let line_y = 1.near().raw_offset(20);
     let line_view = ResponsivePathView::all_same(vec![
         (1.near().raw_offset(2), line_y).into(),
