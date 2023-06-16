@@ -512,16 +512,16 @@
 <span class="kw">impl </span>HorizontalSpan {
     <span class="kw">pub fn </span>gutter_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarkerGrouping {
         <span class="kw">match </span><span class="self">self </span>{
-            HorizontalSpan::Four =&gt; RawMarkerGrouping(<span class="number">2</span>),
-            HorizontalSpan::Eight =&gt; RawMarkerGrouping(<span class="number">2</span>),
-            HorizontalSpan::Twelve =&gt; RawMarkerGrouping(<span class="number">3</span>),
+            HorizontalSpan::Four =&gt; RawMarkerGrouping(<span class="number">4</span>),
+            HorizontalSpan::Eight =&gt; RawMarkerGrouping(<span class="number">4</span>),
+            HorizontalSpan::Twelve =&gt; RawMarkerGrouping(<span class="number">6</span>),
         }
     }
     <span class="kw">pub fn </span>content_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarkerGrouping {
         <span class="kw">match </span><span class="self">self </span>{
-            HorizontalSpan::Four =&gt; RawMarkerGrouping(<span class="number">10</span>),
-            HorizontalSpan::Eight =&gt; RawMarkerGrouping(<span class="number">9</span>),
-            HorizontalSpan::Twelve =&gt; RawMarkerGrouping(<span class="number">10</span>),
+            HorizontalSpan::Four =&gt; RawMarkerGrouping(<span class="number">20</span>),
+            HorizontalSpan::Eight =&gt; RawMarkerGrouping(<span class="number">18</span>),
+            HorizontalSpan::Twelve =&gt; RawMarkerGrouping(<span class="number">20</span>),
         }
     }
     <span class="kw">pub const </span>SMALL_BREAKPOINT: f32 = <span class="number">720f32</span>;
@@ -659,7 +659,7 @@
 </span><span class="attr">#[derive(Copy, Clone, PartialEq)]
 </span><span class="kw">pub struct </span>RawMarker(<span class="kw">pub </span>i32);
 <span class="kw">impl </span>RawMarker {
-    <span class="kw">pub const </span>PX: f32 = <span class="number">8f32</span>;
+    <span class="kw">pub const </span>PX: f32 = <span class="number">4f32</span>;
     <span class="kw">pub fn </span>to_pixel(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
         <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>f32 * <span class="self">Self</span>::PX
     }

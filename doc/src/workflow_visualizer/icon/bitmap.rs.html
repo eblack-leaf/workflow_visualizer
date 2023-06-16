@@ -163,7 +163,7 @@ PartialEq,
 }
 
 <span class="kw">pub enum </span>BundledIcon {
-    Something,
+    Square,
     Edit,
 }
 
@@ -182,7 +182,7 @@ PartialEq,
     }
     <span class="kw">pub fn </span>bundled(icon: BundledIcon) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>icon {
-            BundledIcon::Something =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
+            BundledIcon::Square =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/something.icon&quot;
             </span>))),
             BundledIcon::Edit =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
