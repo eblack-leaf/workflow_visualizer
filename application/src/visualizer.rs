@@ -78,7 +78,7 @@ pub fn visualizer() -> Visualizer {
             second_text_placement,
             3,
             "school",
-            TextScaleAlignment::Medium,
+            TextScaleAlignment::Small,
             Color::GREY,
             TextWrapStyle::word(),
         )),
@@ -104,7 +104,7 @@ pub fn visualizer() -> Visualizer {
     visualizer.add_entities(vec![Request::new(Icon::new(
         "edit",
         icon_point_2,
-        IconScale::Medium,
+        IconScale::Small,
         3,
         Color::GREY,
     ))]);
