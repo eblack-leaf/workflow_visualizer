@@ -481,5 +481,5 @@ impl<T: Into<GridLocation>> From<(T, T)> for GridPoint {
     }
 }
 
-/// Convenience type for ResponsiveView<GridPoint>;
+/// Convenience type for `ResponsiveView<GridPoint>;`
 pub type ResponsiveGridPoint = ResponsiveView<GridPoint>;
