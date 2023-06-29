@@ -39,7 +39,7 @@ pub use crate::icon::{
 };
 pub use crate::job::{EntityName, EntityStore, Job};
 pub use crate::line::{Line, LineRender};
-pub use crate::panel::{BorderColor, Panel, PanelColor, PanelContentArea, PanelType};
+pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelType};
 pub use crate::path::{Path, PathView, ResponsivePathView};
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};

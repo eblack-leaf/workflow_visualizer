@@ -1,8 +1,9 @@
 use crate::{
-    Color, Icon, IconId, IconScale, InterfaceContext, Layer, Panel, PanelType,
-    ResponsiveGridView, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
+    Color, CurrentlyPressed, Icon, IconId, IconScale, InterfaceContext, Layer, Panel, PanelType,
+    ResponsiveGridView, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState,
+    Touchable,
 };
-use bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query};
+use bevy_ecs::prelude::{Added, Bundle, Changed, Commands, Component, Entity, Or, Query};
 #[derive(Bundle, Clone)]
 pub struct Button {
     layer: Layer,
@@ -15,6 +16,7 @@ pub struct Button {
     panel_entity: PanelEntity,
     icon_entity: IconEntity,
     text_entity: TextEntity,
+    touchable: Touchable,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -45,6 +47,7 @@ impl Button {
             panel_entity: PanelEntity(None),
             icon_entity: IconEntity(None),
             text_entity: TextEntity(None),
+            touchable: Touchable::on_press(),
         }
     }
 }
@@ -53,8 +56,35 @@ pub enum ButtonType {
     Press,
     Toggle,
 }
-pub(crate) fn spawn(mut buttons: Query<(Entity, &Layer, &BackgroundColor, &Color, &IconId, &TextValue, &mut PanelEntity, &mut IconEntity, &mut TextEntity)>, mut cmd: Commands) {
-    for (entity, layer, background_color, color, icon_id, button_text, mut panel_entity, mut icon_entity, mut text_entity) in buttons.iter_mut() {
+pub(crate) fn spawn(
+    mut buttons: Query<
+        (
+            Entity,
+            &Layer,
+            &BackgroundColor,
+            &Color,
+            &IconId,
+            &TextValue,
+            &mut PanelEntity,
+            &mut IconEntity,
+            &mut TextEntity,
+        ),
+        Added<PanelEntity>,
+    >,
+    mut cmd: Commands,
+) {
+    for (
+        entity,
+        layer,
+        background_color,
+        color,
+        icon_id,
+        button_text,
+        mut panel_entity,
+        mut icon_entity,
+        mut text_entity,
+    ) in buttons.iter_mut()
+    {
         let panel = cmd
             .spawn(Panel::new(
                 PanelType::Panel,
@@ -64,12 +94,7 @@ pub(crate) fn spawn(mut buttons: Query<(Entity, &Layer, &BackgroundColor, &Color
             ))
             .id();
         let icon = cmd
-            .spawn(Icon::new(
-                icon_id.clone(),
-                IconScale::Small,
-                *layer,
-                *color,
-            ))
+            .spawn(Icon::new(icon_id.clone(), IconScale::Small, *layer, *color))
             .id();
         let text = cmd
             .spawn(Text::new(
@@ -83,5 +108,28 @@ pub(crate) fn spawn(mut buttons: Query<(Entity, &Layer, &BackgroundColor, &Color
         panel_entity.0.replace(panel);
         icon_entity.0.replace(icon);
         text_entity.0.replace(text);
+    }
+}
+pub(crate) fn color_invert(
+    buttons: Query<
+        (
+            &CurrentlyPressed,
+            &ToggleState,
+            &ButtonType,
+            &Color,
+            &BackgroundColor,
+            &PanelEntity,
+            &IconEntity,
+            &TextEntity,
+        ),
+        Or<(Changed<CurrentlyPressed>, Changed<ToggleState>)>,
+    >,
+) {
+    for (pressed, toggle, button_type, foreground, background, panel, icon, text) in buttons.iter()
+    {
+        match button_type {
+            ButtonType::Press => {}
+            ButtonType::Toggle => {}
+        }
     }
 }

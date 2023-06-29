@@ -2,9 +2,9 @@ use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 use workflow_visualizer::{
     Area, BundlePlacement, BundledIcon, Color, EntityName, Focus, FocusInputListener, GfxOptions,
     Grid, GridMarkerBias, HorizontalSpan, Icon, IconBitmap, IconBitmapRequest, IconScale, Layer,
-    Line, Panel, PanelType, Position, ResponsiveGridPoint, ResponsiveGridView,
-    ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme,
-    ThemeDescriptor, TouchListener, Touchable, UserSpaceSyncPoint, Visualizer,
+    Line, Panel, PanelType, Position, ResponsiveGridPoint, ResponsiveGridView, ResponsivePathView,
+    ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, TouchListener,
+    Touchable, UserSpaceSyncPoint, Visualizer,
 };
 
 use crate::system;
@@ -46,49 +46,42 @@ pub fn visualizer() -> Visualizer {
         (4.far().raw_offset(-2), line_y).into(),
     ]);
     let second_line_y = 4.near();
-    visualizer.add_entities(vec![
-        Panel::new(
-            PanelType::Panel,
-            Layer::new(5.0),
-            Color::DARK_GREY,
-            Color::GREY,
-        )
-        .responsively_viewed(panel_view),
-    ]);
+    visualizer.add_entities(vec![Panel::new(
+        PanelType::Panel,
+        Layer::new(5.0),
+        Color::DARK_GREY,
+        Color::GREY,
+    )
+    .responsively_viewed(panel_view)]);
     visualizer.add_named_entities(
         vec!["header".into()],
-        vec![
-            Text::new(
-                4,
-                "credentials",
-                TextScaleAlignment::Large, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
-                Color::GREY,
-                TextWrapStyle::word(),
-            )
-            .responsively_viewed(header_placement),
-        ],
-    );
-    visualizer.add_entities(vec![
-        Text::new(
-            3,
-            "work",
-            TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
+        vec![Text::new(
+            4,
+            "credentials",
+            TextScaleAlignment::Large, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
             Color::GREY,
             TextWrapStyle::word(),
         )
-        .responsively_viewed(first_text_placement),
-    ]);
+        .responsively_viewed(header_placement)],
+    );
+    visualizer.add_entities(vec![Text::new(
+        3,
+        "work",
+        TextScaleAlignment::Small, // need to add pub type ResponsiveTextScaleAlignment = ResponsiveView<TextScaleAlignment>; + handler
+        Color::GREY,
+        TextWrapStyle::word(),
+    )
+    .responsively_viewed(first_text_placement)]);
     visualizer.add_entities(vec![(Line::new(line_view, 1, Color::MEDIUM_GREY),)]);
     visualizer.add_entities(vec![(
-
-            Text::new(
-                3,
-                "school",
-                TextScaleAlignment::Small,
-                Color::GREY,
-                TextWrapStyle::word(),
-            )
-            .responsively_viewed(second_text_placement),
+        Text::new(
+            3,
+            "school",
+            TextScaleAlignment::Small,
+            Color::GREY,
+            TextWrapStyle::word(),
+        )
+        .responsively_viewed(second_text_placement),
         Touchable::new(TouchListener::on_press()),
         Focus::new(),
         FocusInputListener::default(),
@@ -101,11 +94,11 @@ pub fn visualizer() -> Visualizer {
     //     "square",
     //     IconBitmap::bundled(BundledIcon::Square),
     // ))]);
-    visualizer.add_entities(vec![
-        Icon::new("edit", IconScale::Small, 3, Color::GREY).responsively_point_viewed(icon_point),
-    ]);
-    visualizer.add_entities(vec![
-        Icon::new("edit", IconScale::Small, 3, Color::GREY).responsively_point_viewed(icon_point_2),
-    ]);
+    visualizer
+        .add_entities(vec![Icon::new("edit", IconScale::Small, 3, Color::GREY)
+            .responsively_point_viewed(icon_point)]);
+    visualizer
+        .add_entities(vec![Icon::new("edit", IconScale::Small, 3, Color::GREY)
+            .responsively_point_viewed(icon_point_2)]);
     visualizer
 }

@@ -22,8 +22,6 @@ pub enum PanelType {
     Border,
     BorderedPanel,
 }
-#[derive(Component, Copy, Clone, PartialEq)]
-pub struct PanelColor(pub Color);
 #[derive(Component, Copy, Clone)]
 pub struct BorderColor(pub Color);
 #[derive(Bundle)]
@@ -31,7 +29,7 @@ pub struct Panel {
     pub panel_type: PanelType,
     pub layer: Layer,
     pub content_area: PanelContentArea,
-    pub panel_color: PanelColor,
+    pub panel_color: Color,
     pub border_color: BorderColor,
     pub(crate) cache: Cache,
     pub(crate) difference: Difference,
@@ -52,7 +50,7 @@ impl Panel {
             layer: layer.into(),
             border_color: BorderColor(border_color.into()),
             content_area: PanelContentArea(Area::default()),
-            panel_color: PanelColor(panel_color.into()),
+            panel_color: panel_color.into(),
             visibility: EnableVisibility::new(),
             cache: Cache::new(),
             difference: Difference::new(),

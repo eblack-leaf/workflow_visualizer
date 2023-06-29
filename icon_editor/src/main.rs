@@ -15,9 +15,9 @@ use workflow_visualizer::{
 };
 use workflow_visualizer::{
     Attach, BundlePlacement, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap,
-    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, RawMarker,
-    ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment,
-    TextWrapStyle, Theme, ThemeDescriptor, TouchListener, Touchable, Visualizer, Workflow,
+    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, RawMarker, ResponsiveGridPoint,
+    ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
+    ThemeDescriptor, TouchListener, Touchable, Visualizer, Workflow,
 };
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -223,11 +223,11 @@ impl Attach for BitmapRepr {
         visualizer.add_named_entities(
             vec![EntityName::new("bitmap-panel")],
             vec![(
-                    Panel::new(PanelType::Border, 3, Color::MEDIUM_GREY, Color::OFF_WHITE)
-                        .responsively_viewed(ResponsiveGridView::all_same((
-                            (bitmap_panel_left, bitmap_panel_right),
-                            (bitmap_panel_top, bitmap_panel_bottom),
-                        ))),
+                Panel::new(PanelType::Border, 3, Color::MEDIUM_GREY, Color::OFF_WHITE)
+                    .responsively_viewed(ResponsiveGridView::all_same((
+                        (bitmap_panel_left, bitmap_panel_right),
+                        (bitmap_panel_top, bitmap_panel_bottom),
+                    ))),
                 Touchable::new(TouchListener::on_press()),
             )],
         );
@@ -243,15 +243,14 @@ impl Attach for BitmapRepr {
             ResponsiveGridView::all_same((coverage_display_horizontal, coverage_display_vertical));
         visualizer.add_named_entities(
             vec![EntityName::new("coverage-display")],
-            vec![
-                Text::new(
-                    3,
-                    "255",
-                    TextScaleAlignment::Small,
-                    Color::GREY,
-                    TextWrapStyle::word(),
-                )
-                .responsively_viewed(coverage_display_location),],
+            vec![Text::new(
+                3,
+                "255",
+                TextScaleAlignment::Small,
+                Color::GREY,
+                TextWrapStyle::word(),
+            )
+            .responsively_viewed(coverage_display_location)],
         );
         let coverage_down_horizontal = (
             coverage_display_horizontal.1.raw_offset(2),
@@ -277,14 +276,8 @@ impl Attach for BitmapRepr {
         visualizer.add_named_entities(
             vec!["coverage-up".into(), "coverage-down".into()],
             vec![
-                (
-                    coverage_up,
-                    Touchable::new(TouchListener::on_press()),
-                ),
-                (
-                    coverage_down,
-                    Touchable::new(TouchListener::on_press()),
-                ),
+                (coverage_up, Touchable::new(TouchListener::on_press())),
+                (coverage_down, Touchable::new(TouchListener::on_press())),
             ],
         );
         let pos_neg_space_button_horizontal = (
@@ -314,15 +307,14 @@ impl Attach for BitmapRepr {
             pos_neg_space_button_text_horizontal,
             pos_neg_space_button_text_vertical,
         ));
-        let pos_neg_space_button_text =
-            Text::new(
-                2,
-                "positive",
-                TextScaleAlignment::Small,
-                Color::OFF_WHITE,
-                TextWrapStyle::word(),
-            )
-            .responsively_viewed(pos_neg_space_button_text_location);
+        let pos_neg_space_button_text = Text::new(
+            2,
+            "positive",
+            TextScaleAlignment::Small,
+            Color::OFF_WHITE,
+            TextWrapStyle::word(),
+        )
+        .responsively_viewed(pos_neg_space_button_text_location);
         visualizer.add_named_entities(
             vec![EntityName::new("pos-neg-space-button")],
             vec![pos_neg_space_button],
@@ -345,10 +337,7 @@ impl Attach for BitmapRepr {
             .responsively_viewed(write_out_view);
         visualizer.add_named_entities(
             vec!["write-out".into()],
-            vec![(
-                write_out,
-                Touchable::new(TouchListener::on_press()),
-            )],
+            vec![(write_out, Touchable::new(TouchListener::on_press()))],
         );
         visualizer.job.container.insert_resource(bitmap_repr);
     }

@@ -4,10 +4,10 @@ use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
 use crate::gfx::GfxSurface;
 use crate::panel::renderer::PanelRenderer;
-use crate::panel::{
-    BorderColor, Cache, Difference, Extraction, PanelColor, PanelContentArea, PanelType,
+use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
+use crate::{
+    Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
-use crate::{Area, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility};
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -118,19 +118,19 @@ pub(crate) fn layer_diff(
 
 pub(crate) fn color_diff(
     mut color_changed: Query<
-        (&PanelColor, &BorderColor, &mut Cache, &mut Difference),
-        Or<(Changed<PanelColor>, Changed<BorderColor>)>,
+        (&Color, &BorderColor, &mut Cache, &mut Difference),
+        Or<(Changed<Color>, Changed<BorderColor>)>,
     >,
 ) {
     for (panel_color, border_color, mut cache, mut diff) in color_changed.iter_mut() {
         if let Some(cached) = cache.panel_color {
-            if panel_color.0 != cached {
-                cache.panel_color.replace(panel_color.0);
-                diff.panel_color.replace(panel_color.0);
+            if *panel_color != cached {
+                cache.panel_color.replace(*panel_color);
+                diff.panel_color.replace(*panel_color);
             }
         } else {
-            cache.panel_color.replace(panel_color.0);
-            diff.panel_color.replace(panel_color.0);
+            cache.panel_color.replace(*panel_color);
+            diff.panel_color.replace(*panel_color);
         }
         if let Some(cached) = cache.border_color {
             if border_color.0 != cached {

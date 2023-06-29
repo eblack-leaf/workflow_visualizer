@@ -217,7 +217,7 @@ pub(crate) fn read_touch_events(
                 }
                 TouchType::OnMove => {
                     if let Some(prime) = primary_touch.touch.as_mut() {
-                        trace!("setting current touch ??????????????????????????????????????????????????????????????????");
+                        trace!("setting current touch");
                         prime.current = touch.touch;
                     }
                     if let Some(entity) = focused_entity.entity {
@@ -225,7 +225,7 @@ pub(crate) fn read_touch_events(
                             touch_listeners.get_mut(entity)
                         {
                             if let Some(mut tracked) = touch_location.0 {
-                                trace!("setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                                trace!("setting current touch");
                                 tracked.current = touch.touch;
                             }
                         }
