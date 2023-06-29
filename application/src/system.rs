@@ -1,7 +1,7 @@
+use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
 use workflow_visualizer::{
     Area, InterfaceContext, Position, ScaleFactor, Sender, TextValue, Workflow,
 };
-use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
 
 use crate::workflow::{Engen, TokenName};
 

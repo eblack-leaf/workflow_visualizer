@@ -12,7 +12,6 @@ use crate::{
 /// Entry point to spawn a Text element
 #[derive(Bundle)]
 pub struct Text {
-    pub responsive_content_view: ResponsiveGridView,
     pub layer: Layer,
     pub text: TextValue,
     pub scale_alignment: TextScaleAlignment,
@@ -32,8 +31,7 @@ pub struct Text {
 }
 
 impl Text {
-    pub fn new<R: Into<ResponsiveGridView>, S: Into<String>, C: Into<Color>, L: Into<Layer>>(
-        responsive_content_view: R,
+    pub fn new<S: Into<String>, C: Into<Color>, L: Into<Layer>>(
         layer: L,
         text: S,
         scale_alignment: TextScaleAlignment,
@@ -41,7 +39,6 @@ impl Text {
         wrap_style: TextWrapStyle,
     ) -> Self {
         Self {
-            responsive_content_view: responsive_content_view.into(),
             layer: layer.into(),
             text: TextValue(text.into()),
             scale_alignment,

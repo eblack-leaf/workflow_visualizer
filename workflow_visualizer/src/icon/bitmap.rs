@@ -10,15 +10,15 @@ use crate::TextureCoordinates;
 
 #[repr(C)]
 #[derive(
-bytemuck::Pod,
-bytemuck::Zeroable,
-Copy,
-Clone,
-Default,
-Debug,
-Serialize,
-Deserialize,
-PartialEq,
+    bytemuck::Pod,
+    bytemuck::Zeroable,
+    Copy,
+    Clone,
+    Default,
+    Debug,
+    Serialize,
+    Deserialize,
+    PartialEq,
 )]
 pub struct IconPixelData {
     pub data: u8,

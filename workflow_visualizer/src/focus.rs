@@ -6,10 +6,10 @@ use bevy_ecs::prelude::{
 use tracing::trace;
 
 use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
-use crate::SyncPoint;
 use crate::touch::read_touch_events;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
+use crate::SyncPoint;
 
 /// Used to set the Focus of an element
 #[derive(Component)]

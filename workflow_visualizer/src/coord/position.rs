@@ -6,8 +6,8 @@ use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use crate::{DeviceContext, InterfaceContext};
 use crate::coord::{CoordinateContext, NumericalContext};
+use crate::{DeviceContext, InterfaceContext};
 
 /// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]

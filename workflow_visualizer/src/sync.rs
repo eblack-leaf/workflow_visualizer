@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 use bevy_ecs::schedule::apply_system_buffers;
 
-use crate::JobSyncPoint;
 use crate::visualizer::Visualizer;
+use crate::JobSyncPoint;
 
 /// Synchronization Points for bucketing systems in a task
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
@@ -66,7 +66,7 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
     visualizer
         .job
         .task(Visualizer::TASK_MAIN)
-        .configure_sets((SyncPoint::Finish, ).chain().after(SyncPoint::PushDiff));
+        .configure_sets((SyncPoint::Finish,).chain().after(SyncPoint::PushDiff));
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)

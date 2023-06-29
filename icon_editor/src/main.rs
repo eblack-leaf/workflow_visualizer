@@ -4,20 +4,20 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, Level, trace};
+use tracing::{debug, trace, Level};
 
+use workflow_visualizer::bevy_ecs::prelude::{
+    Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
+};
 use workflow_visualizer::{
     bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, Sender,
     TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
 };
 use workflow_visualizer::{
-    Attach, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap, IconBitmapRequest,
-    IconPixelData, IconScale, Panel, PanelType, RawMarker, Request, ResponsiveGridPoint,
-    ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
-    ThemeDescriptor, Touchable, TouchListener, Visualizer, Workflow,
-};
-use workflow_visualizer::bevy_ecs::prelude::{
-    Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
+    Attach, BundlePlacement, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap,
+    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, RawMarker,
+    ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment,
+    TextWrapStyle, Theme, ThemeDescriptor, TouchListener, Touchable, Visualizer, Workflow,
 };
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -182,7 +182,7 @@ impl Attach for BitmapRepr {
         visualizer
             .job
             .task(Visualizer::TASK_MAIN)
-            .add_systems((update.in_set(UserSpaceSyncPoint::Process), ));
+            .add_systems((update.in_set(UserSpaceSyncPoint::Process),));
         let mut bitmap_repr_data = vec![];
         // map entity to location in the grid offset from left/top
         let bitmap_panel_left = 1.near().raw_offset(4);
@@ -198,15 +198,15 @@ impl Attach for BitmapRepr {
             for x in 0..20 {
                 let bundle = Icon::new(
                     "square",
-                    ResponsiveGridPoint::all_same((
-                        bitmap_panel_left.raw_offset(increment_amount * x + 2),
-                        bitmap_panel_top.raw_offset(increment_amount * y + 2),
-                    )),
                     IconScale::Custom(RawMarker::PX as u32 * 4),
                     2,
                     Color::from(Color::OFF_WHITE).with_alpha(0.0),
-                );
-                bitmap_repr_data.push(Request::new(bundle));
+                )
+                .responsively_point_viewed(ResponsiveGridPoint::all_same((
+                    bitmap_panel_left.raw_offset(increment_amount * x + 2),
+                    bitmap_panel_top.raw_offset(increment_amount * y + 2),
+                )));
+                bitmap_repr_data.push(bundle);
             }
         }
         let mut bitmap_repr = BitmapRepr::new();
@@ -223,16 +223,11 @@ impl Attach for BitmapRepr {
         visualizer.add_named_entities(
             vec![EntityName::new("bitmap-panel")],
             vec![(
-                Request::new(Panel::new(
-                    ResponsiveGridView::all_same((
-                        (bitmap_panel_left, bitmap_panel_right),
-                        (bitmap_panel_top, bitmap_panel_bottom),
-                    )),
-                    PanelType::Border,
-                    3,
-                    Color::MEDIUM_GREY,
-                    Color::OFF_WHITE,
-                )),
+                    Panel::new(PanelType::Border, 3, Color::MEDIUM_GREY, Color::OFF_WHITE)
+                        .responsively_viewed(ResponsiveGridView::all_same((
+                            (bitmap_panel_left, bitmap_panel_right),
+                            (bitmap_panel_top, bitmap_panel_bottom),
+                        ))),
                 Touchable::new(TouchListener::on_press()),
             )],
         );
@@ -248,14 +243,15 @@ impl Attach for BitmapRepr {
             ResponsiveGridView::all_same((coverage_display_horizontal, coverage_display_vertical));
         visualizer.add_named_entities(
             vec![EntityName::new("coverage-display")],
-            vec![Request::new(Text::new(
-                coverage_display_location,
-                3,
-                "255",
-                TextScaleAlignment::Small,
-                Color::GREY,
-                TextWrapStyle::word(),
-            ))],
+            vec![
+                Text::new(
+                    3,
+                    "255",
+                    TextScaleAlignment::Small,
+                    Color::GREY,
+                    TextWrapStyle::word(),
+                )
+                .responsively_viewed(coverage_display_location),],
         );
         let coverage_down_horizontal = (
             coverage_display_horizontal.1.raw_offset(2),
@@ -267,13 +263,8 @@ impl Attach for BitmapRepr {
         );
         let coverage_down_location =
             ResponsiveGridView::all_same((coverage_down_horizontal, coverage_down_vertical));
-        let coverage_down = Panel::new(
-            coverage_down_location,
-            PanelType::Panel,
-            3,
-            Color::RED_ORANGE,
-            Color::OFF_WHITE,
-        );
+        let coverage_down = Panel::new(PanelType::Panel, 3, Color::RED_ORANGE, Color::OFF_WHITE)
+            .responsively_viewed(coverage_down_location);
         let coverage_up_horizontal = (
             coverage_down_horizontal.1.raw_offset(2),
             coverage_down_horizontal.1.raw_offset(7),
@@ -281,22 +272,17 @@ impl Attach for BitmapRepr {
         let coverage_up_vertical = coverage_down_vertical;
         let coverage_up_location =
             ResponsiveGridView::all_same((coverage_up_horizontal, coverage_up_vertical));
-        let coverage_up = Panel::new(
-            coverage_up_location,
-            PanelType::Panel,
-            3,
-            Color::GREEN,
-            Color::OFF_WHITE,
-        );
+        let coverage_up = Panel::new(PanelType::Panel, 3, Color::GREEN, Color::OFF_WHITE)
+            .responsively_viewed(coverage_up_location);
         visualizer.add_named_entities(
             vec!["coverage-up".into(), "coverage-down".into()],
             vec![
                 (
-                    Request::new(coverage_up),
+                    coverage_up,
                     Touchable::new(TouchListener::on_press()),
                 ),
                 (
-                    Request::new(coverage_down),
+                    coverage_down,
                     Touchable::new(TouchListener::on_press()),
                 ),
             ],
@@ -313,13 +299,9 @@ impl Attach for BitmapRepr {
             pos_neg_space_button_horizontal,
             pos_neg_space_button_vertical,
         ));
-        let pos_neg_space_button = Request::new(Panel::new(
-            pos_neg_space_button_location,
-            PanelType::Panel,
-            3,
-            Color::MEDIUM_GREY,
-            Color::OFF_WHITE,
-        ));
+        let pos_neg_space_button =
+            Panel::new(PanelType::Panel, 3, Color::MEDIUM_GREY, Color::OFF_WHITE)
+                .responsively_viewed(pos_neg_space_button_location);
         let pos_neg_space_button_text_horizontal = (
             pos_neg_space_button_horizontal.1.raw_offset(4),
             pos_neg_space_button_horizontal.1.raw_offset(24),
@@ -332,14 +314,15 @@ impl Attach for BitmapRepr {
             pos_neg_space_button_text_horizontal,
             pos_neg_space_button_text_vertical,
         ));
-        let pos_neg_space_button_text = Request::new(Text::new(
-            pos_neg_space_button_text_location,
-            2,
-            "positive",
-            TextScaleAlignment::Small,
-            Color::OFF_WHITE,
-            TextWrapStyle::word(),
-        ));
+        let pos_neg_space_button_text =
+            Text::new(
+                2,
+                "positive",
+                TextScaleAlignment::Small,
+                Color::OFF_WHITE,
+                TextWrapStyle::word(),
+            )
+            .responsively_viewed(pos_neg_space_button_text_location);
         visualizer.add_named_entities(
             vec![EntityName::new("pos-neg-space-button")],
             vec![pos_neg_space_button],
@@ -358,17 +341,12 @@ impl Attach for BitmapRepr {
         );
         let write_out_view =
             ResponsiveGridView::all_same((write_out_horizontal, write_out_vertical));
-        let write_out = Panel::new(
-            write_out_view,
-            PanelType::Panel,
-            3,
-            Color::BLUE,
-            Color::OFF_WHITE,
-        );
+        let write_out = Panel::new(PanelType::Panel, 3, Color::BLUE, Color::OFF_WHITE)
+            .responsively_viewed(write_out_view);
         visualizer.add_named_entities(
             vec!["write-out".into()],
             vec![(
-                Request::new(write_out),
+                write_out,
                 Touchable::new(TouchListener::on_press()),
             )],
         );

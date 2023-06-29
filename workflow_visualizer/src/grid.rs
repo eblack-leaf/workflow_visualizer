@@ -3,19 +3,19 @@ use std::ops::Add;
 
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::{
-    Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res, Resource,
-    Without,
+    Bundle, Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res,
+    Resource, Without,
 };
 use bevy_ecs::query::Changed;
 use bevy_ecs::system::ResMut;
 use tracing::trace;
 
+use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 /// Span used for setting the number of columns available in the Grid
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -456,7 +456,7 @@ impl Attach for GridAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization), ));
+            .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             config_grid.in_set(SyncPoint::Config),
             set_from_view.in_set(SyncPoint::Grid),
@@ -483,3 +483,48 @@ impl<T: Into<GridLocation>> From<(T, T)> for GridPoint {
 
 /// Convenience type for `ResponsiveView<GridPoint>;`
 pub type ResponsiveGridPoint = ResponsiveView<GridPoint>;
+pub trait BundlePlacement
+where
+    Self: Sized + Bundle,
+{
+    fn responsively_viewed<R: Into<ResponsiveGridView>>(self, view: R) -> ResponsiveBundle<Self> {
+        ResponsiveBundle {
+            original: self,
+            view: view.into(),
+        }
+    }
+    fn responsively_point_viewed<R: Into<ResponsiveGridPoint>>(
+        self,
+        view: R,
+    ) -> ResponsivePointBundle<Self> {
+        ResponsivePointBundle {
+            original: self,
+            view: view.into(),
+        }
+    }
+    fn absolute<S: Into<Section<InterfaceContext>>>(self, section: S) -> AbsoluteBundle<Self> {
+        AbsoluteBundle {
+            original: self,
+            section: section.into(),
+        }
+    }
+}
+impl<T: Bundle + Sized> BundlePlacement for T {}
+#[derive(Bundle)]
+pub struct ResponsiveBundle<T: Bundle> {
+    #[bundle]
+    original: T,
+    view: ResponsiveGridView,
+}
+#[derive(Bundle)]
+pub struct ResponsivePointBundle<T: Bundle> {
+    #[bundle]
+    original: T,
+    view: ResponsiveGridPoint,
+}
+#[derive(Bundle)]
+pub struct AbsoluteBundle<T: Bundle> {
+    #[bundle]
+    original: T,
+    section: Section<InterfaceContext>,
+}

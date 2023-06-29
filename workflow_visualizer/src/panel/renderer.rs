@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
+use crate::panel::{Difference, Extraction};
 use crate::{
     Color, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::panel::{Difference, Extraction};
-use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, PanelVertex, vertex_buffer};
 
 #[derive(Resource)]
 pub(crate) struct PanelRenderer {

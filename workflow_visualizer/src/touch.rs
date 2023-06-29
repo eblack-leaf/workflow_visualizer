@@ -6,12 +6,12 @@ use bevy_ecs::prelude::{
 use tracing::{debug, trace};
 use winit::event::{ElementState, MouseButton};
 
-use crate::{
-    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
-};
 use crate::focus::FocusedEntity;
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
+use crate::{
+    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
+};
 
 /// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]
@@ -58,6 +58,12 @@ impl Touchable {
             listener,
             touch_location: TouchLocation(None),
         }
+    }
+    pub fn on_press() -> Self {
+        Self::new(TouchListener::on_press())
+    }
+    pub fn on_release() -> Self {
+        Self::new(TouchListener::on_release())
     }
 }
 
@@ -288,16 +294,16 @@ pub(crate) fn read_touch_events(
         }
         if let Some(grabbed) = touch_grab_state.grab_state.take() {
             if let Ok((
-                          _,
-                          _,
-                          _,
-                          _,
-                          listener,
-                          mut touch_trigger,
-                          mut currently_pressed,
-                          mut toggle_state,
-                          mut touch_location,
-                      )) = touch_listeners.get_mut(grabbed.0)
+                _,
+                _,
+                _,
+                _,
+                listener,
+                mut touch_trigger,
+                mut currently_pressed,
+                mut toggle_state,
+                mut touch_location,
+            )) = touch_listeners.get_mut(grabbed.0)
             {
                 if trigger_on_press {
                     currently_pressed.currently_pressed = true;

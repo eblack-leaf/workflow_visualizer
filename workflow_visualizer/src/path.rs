@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
 
+use crate::grid::{config_grid, GridPoint, HorizontalSpan};
 use crate::{
     Area, Attach, Grid, GridLocation, InterfaceContext, Position, RawMarker, ResponsiveView,
     SyncPoint, Visualizer,
 };
-use crate::grid::{config_grid, GridPoint, HorizontalSpan};
 
 /// Collection of specific points rendered from a PathView
 #[derive(Component, Clone)]

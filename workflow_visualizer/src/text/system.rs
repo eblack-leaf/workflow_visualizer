@@ -7,11 +7,6 @@ use bevy_ecs::prelude::{
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::{trace, warn};
 
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -33,6 +28,11 @@ use crate::texture_atlas::{
     AtlasTexture, AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
 };
 use crate::window::WindowResize;
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -545,7 +545,7 @@ pub(crate) fn render_group_differences(
                     Bitmap,
                 )>::new();
                 for (glyph_id, (_, glyph_area, atlas_location, bitmap)) in
-                render_group.atlas_glyphs.glyphs.iter()
+                    render_group.atlas_glyphs.glyphs.iter()
                 {
                     let position = AtlasPosition::new(*atlas_location, render_group.atlas.block);
                     let glyph_section = Section::new(position.position, *glyph_area);

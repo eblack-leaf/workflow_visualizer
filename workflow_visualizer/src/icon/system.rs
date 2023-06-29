@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Changed, Entity, Or, Query, Res, ResMut};
 
-use crate::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
-};
 use crate::icon::bitmap::IconBitmapLayout;
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::component::{IconId, IconScale};
 use crate::icon::renderer::IconRenderer;
+use crate::{
+    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+};
 
 pub(crate) fn calc_area(
     mut icons: Query<(&mut Area<InterfaceContext>, &IconScale), Changed<IconScale>>,

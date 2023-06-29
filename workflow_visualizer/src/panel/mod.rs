@@ -28,7 +28,6 @@ pub struct PanelColor(pub Color);
 pub struct BorderColor(pub Color);
 #[derive(Bundle)]
 pub struct Panel {
-    responsive_grid_view: ResponsiveGridView,
     pub panel_type: PanelType,
     pub layer: Layer,
     pub content_area: PanelContentArea,
@@ -43,14 +42,12 @@ impl Panel {
     pub const CORNER_DEPTH: f32 = 3f32;
     pub const LINE_WIDTH: f32 = 1f32;
     pub fn new<C: Into<Color>, L: Into<Layer>>(
-        responsive_grid_view: ResponsiveGridView,
         panel_type: PanelType,
         layer: L,
         panel_color: C,
         border_color: C,
     ) -> Self {
         Self {
-            responsive_grid_view,
             panel_type,
             layer: layer.into(),
             border_color: BorderColor(border_color.into()),

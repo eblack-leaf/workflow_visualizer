@@ -3,9 +3,9 @@ use bevy_ecs::prelude::Bundle;
 use bytemuck::{Pod, Zeroable};
 use compact_str::CompactString;
 
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 use crate::grid::ResponsiveGridPoint;
 use crate::icon::cache::{Cache, Difference};
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 
 #[derive(Component)]
 pub enum IconScale {
@@ -29,7 +29,6 @@ impl IconScale {
 #[derive(Bundle)]
 pub struct Icon {
     id: IconId,
-    responsive_grid_point: ResponsiveGridPoint,
     icon_scale: IconScale,
     layer: Layer,
     pos_color: Color,
@@ -40,22 +39,14 @@ pub struct Icon {
 }
 
 impl Icon {
-    pub fn new<
-        Id: Into<IconId>,
-        ResGridPnt: Into<ResponsiveGridPoint>,
-        S: Into<IconScale>,
-        L: Into<Layer>,
-        C: Into<Color>,
-    >(
+    pub fn new<Id: Into<IconId>, S: Into<IconScale>, L: Into<Layer>, C: Into<Color>>(
         id: Id,
-        gp: ResGridPnt,
         scale: S,
         layer: L,
         pos_color: C,
     ) -> Self {
         Self {
             id: id.into(),
-            responsive_grid_point: gp.into(),
             icon_scale: scale.into(),
             layer: layer.into(),
             pos_color: pos_color.into(),
