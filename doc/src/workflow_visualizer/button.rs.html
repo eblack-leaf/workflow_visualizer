@@ -85,11 +85,60 @@
 <a href="#85" id="85">85</a>
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
-    Color, Icon, IconId, IconScale, InterfaceContext, Layer, Panel, PanelType,
-    ResponsiveGridView, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
+    Color, CurrentlyPressed, Icon, IconId, IconScale, InterfaceContext, Layer, Panel, PanelType,
+    ResponsiveGridView, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState,
+    Touchable,
 };
-<span class="kw">use </span>bevy_ecs::prelude::{Bundle, Commands, Component, Entity, Query};
+<span class="kw">use </span>bevy_ecs::prelude::{Added, Bundle, Changed, Commands, Component, Entity, Or, Query};
 <span class="attr">#[derive(Bundle, Clone)]
 </span><span class="kw">pub struct </span>Button {
     layer: Layer,
@@ -102,6 +151,7 @@
     panel_entity: PanelEntity,
     icon_entity: IconEntity,
     text_entity: TextEntity,
+    touchable: Touchable,
 }
 
 <span class="attr">#[derive(Component, Copy, Clone)]
@@ -132,6 +182,7 @@
             panel_entity: PanelEntity(<span class="prelude-val">None</span>),
             icon_entity: IconEntity(<span class="prelude-val">None</span>),
             text_entity: TextEntity(<span class="prelude-val">None</span>),
+            touchable: Touchable::on_press(),
         }
     }
 }
@@ -140,8 +191,35 @@
     Press,
     Toggle,
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>spawn(<span class="kw-2">mut </span>buttons: Query&lt;(Entity, <span class="kw-2">&amp;</span>Layer, <span class="kw-2">&amp;</span>BackgroundColor, <span class="kw-2">&amp;</span>Color, <span class="kw-2">&amp;</span>IconId, <span class="kw-2">&amp;</span>TextValue, <span class="kw-2">&amp;mut </span>PanelEntity, <span class="kw-2">&amp;mut </span>IconEntity, <span class="kw-2">&amp;mut </span>TextEntity)&gt;, <span class="kw-2">mut </span>cmd: Commands) {
-    <span class="kw">for </span>(entity, layer, background_color, color, icon_id, button_text, <span class="kw-2">mut </span>panel_entity, <span class="kw-2">mut </span>icon_entity, <span class="kw-2">mut </span>text_entity) <span class="kw">in </span>buttons.iter_mut() {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>spawn(
+    <span class="kw-2">mut </span>buttons: Query&lt;
+        (
+            Entity,
+            <span class="kw-2">&amp;</span>Layer,
+            <span class="kw-2">&amp;</span>BackgroundColor,
+            <span class="kw-2">&amp;</span>Color,
+            <span class="kw-2">&amp;</span>IconId,
+            <span class="kw-2">&amp;</span>TextValue,
+            <span class="kw-2">&amp;mut </span>PanelEntity,
+            <span class="kw-2">&amp;mut </span>IconEntity,
+            <span class="kw-2">&amp;mut </span>TextEntity,
+        ),
+        Added&lt;PanelEntity&gt;,
+    &gt;,
+    <span class="kw-2">mut </span>cmd: Commands,
+) {
+    <span class="kw">for </span>(
+        entity,
+        layer,
+        background_color,
+        color,
+        icon_id,
+        button_text,
+        <span class="kw-2">mut </span>panel_entity,
+        <span class="kw-2">mut </span>icon_entity,
+        <span class="kw-2">mut </span>text_entity,
+    ) <span class="kw">in </span>buttons.iter_mut()
+    {
         <span class="kw">let </span>panel = cmd
             .spawn(Panel::new(
                 PanelType::Panel,
@@ -151,12 +229,7 @@
             ))
             .id();
         <span class="kw">let </span>icon = cmd
-            .spawn(Icon::new(
-                icon_id.clone(),
-                IconScale::Small,
-                <span class="kw-2">*</span>layer,
-                <span class="kw-2">*</span>color,
-            ))
+            .spawn(Icon::new(icon_id.clone(), IconScale::Small, <span class="kw-2">*</span>layer, <span class="kw-2">*</span>color))
             .id();
         <span class="kw">let </span>text = cmd
             .spawn(Text::new(
@@ -170,6 +243,29 @@
         panel_entity.<span class="number">0</span>.replace(panel);
         icon_entity.<span class="number">0</span>.replace(icon);
         text_entity.<span class="number">0</span>.replace(text);
+    }
+}
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>color_invert(
+    buttons: Query&lt;
+        (
+            <span class="kw-2">&amp;</span>CurrentlyPressed,
+            <span class="kw-2">&amp;</span>ToggleState,
+            <span class="kw-2">&amp;</span>ButtonType,
+            <span class="kw-2">&amp;</span>Color,
+            <span class="kw-2">&amp;</span>BackgroundColor,
+            <span class="kw-2">&amp;</span>PanelEntity,
+            <span class="kw-2">&amp;</span>IconEntity,
+            <span class="kw-2">&amp;</span>TextEntity,
+        ),
+        Or&lt;(Changed&lt;CurrentlyPressed&gt;, Changed&lt;ToggleState&gt;)&gt;,
+    &gt;,
+) {
+    <span class="kw">for </span>(pressed, toggle, button_type, foreground, background, panel, icon, text) <span class="kw">in </span>buttons.iter()
+    {
+        <span class="kw">match </span>button_type {
+            ButtonType::Press =&gt; {}
+            ButtonType::Toggle =&gt; {}
+        }
     }
 }
 </code></pre></div></section></main></body></html>

@@ -113,8 +113,6 @@
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
@@ -139,8 +137,6 @@
     Border,
     BorderedPanel,
 }
-<span class="attr">#[derive(Component, Copy, Clone, PartialEq)]
-</span><span class="kw">pub struct </span>PanelColor(<span class="kw">pub </span>Color);
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>BorderColor(<span class="kw">pub </span>Color);
 <span class="attr">#[derive(Bundle)]
@@ -148,7 +144,7 @@
     <span class="kw">pub </span>panel_type: PanelType,
     <span class="kw">pub </span>layer: Layer,
     <span class="kw">pub </span>content_area: PanelContentArea,
-    <span class="kw">pub </span>panel_color: PanelColor,
+    <span class="kw">pub </span>panel_color: Color,
     <span class="kw">pub </span>border_color: BorderColor,
     <span class="kw">pub</span>(<span class="kw">crate</span>) cache: Cache,
     <span class="kw">pub</span>(<span class="kw">crate</span>) difference: Difference,
@@ -169,7 +165,7 @@
             layer: layer.into(),
             border_color: BorderColor(border_color.into()),
             content_area: PanelContentArea(Area::default()),
-            panel_color: PanelColor(panel_color.into()),
+            panel_color: panel_color.into(),
             visibility: EnableVisibility::new(),
             cache: Cache::new(),
             difference: Difference::new(),

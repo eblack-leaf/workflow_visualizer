@@ -235,10 +235,10 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
-<span class="kw">use </span><span class="kw">crate</span>::panel::{
-    BorderColor, Cache, Difference, Extraction, PanelColor, PanelContentArea, PanelType,
+<span class="kw">use </span><span class="kw">crate</span>::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
+<span class="kw">use crate</span>::{
+    Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
-<span class="kw">use crate</span>::{Area, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>pull_differences(
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,
@@ -349,19 +349,19 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>color_diff(
     <span class="kw-2">mut </span>color_changed: Query&lt;
-        (<span class="kw-2">&amp;</span>PanelColor, <span class="kw-2">&amp;</span>BorderColor, <span class="kw-2">&amp;mut </span>Cache, <span class="kw-2">&amp;mut </span>Difference),
-        Or&lt;(Changed&lt;PanelColor&gt;, Changed&lt;BorderColor&gt;)&gt;,
+        (<span class="kw-2">&amp;</span>Color, <span class="kw-2">&amp;</span>BorderColor, <span class="kw-2">&amp;mut </span>Cache, <span class="kw-2">&amp;mut </span>Difference),
+        Or&lt;(Changed&lt;Color&gt;, Changed&lt;BorderColor&gt;)&gt;,
     &gt;,
 ) {
     <span class="kw">for </span>(panel_color, border_color, <span class="kw-2">mut </span>cache, <span class="kw-2">mut </span>diff) <span class="kw">in </span>color_changed.iter_mut() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cached) = cache.panel_color {
-            <span class="kw">if </span>panel_color.<span class="number">0 </span>!= cached {
-                cache.panel_color.replace(panel_color.<span class="number">0</span>);
-                diff.panel_color.replace(panel_color.<span class="number">0</span>);
+            <span class="kw">if </span><span class="kw-2">*</span>panel_color != cached {
+                cache.panel_color.replace(<span class="kw-2">*</span>panel_color);
+                diff.panel_color.replace(<span class="kw-2">*</span>panel_color);
             }
         } <span class="kw">else </span>{
-            cache.panel_color.replace(panel_color.<span class="number">0</span>);
-            diff.panel_color.replace(panel_color.<span class="number">0</span>);
+            cache.panel_color.replace(<span class="kw-2">*</span>panel_color);
+            diff.panel_color.replace(<span class="kw-2">*</span>panel_color);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cached) = cache.border_color {
             <span class="kw">if </span>border_color.<span class="number">0 </span>!= cached {

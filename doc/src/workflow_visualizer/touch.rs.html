@@ -631,7 +631,7 @@
                 }
                 TouchType::OnMove =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(prime) = primary_touch.touch.as_mut() {
-                        <span class="macro">trace!</span>(<span class="string">&quot;setting current touch ??????????????????????????????????????????????????????????????????&quot;</span>);
+                        <span class="macro">trace!</span>(<span class="string">&quot;setting current touch&quot;</span>);
                         prime.current = touch.touch;
                     }
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(entity) = focused_entity.entity {
@@ -639,7 +639,7 @@
                             touch_listeners.get_mut(entity)
                         {
                             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>tracked) = touch_location.<span class="number">0 </span>{
-                                <span class="macro">trace!</span>(<span class="string">&quot;setting current touch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++&quot;</span>);
+                                <span class="macro">trace!</span>(<span class="string">&quot;setting current touch&quot;</span>);
                                 tracked.current = touch.touch;
                             }
                         }
