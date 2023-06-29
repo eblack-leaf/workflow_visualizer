@@ -115,9 +115,6 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
@@ -148,7 +145,6 @@
 </span><span class="kw">pub struct </span>BorderColor(<span class="kw">pub </span>Color);
 <span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>Panel {
-    responsive_grid_view: ResponsiveGridView,
     <span class="kw">pub </span>panel_type: PanelType,
     <span class="kw">pub </span>layer: Layer,
     <span class="kw">pub </span>content_area: PanelContentArea,
@@ -163,14 +159,12 @@
     <span class="kw">pub const </span>CORNER_DEPTH: f32 = <span class="number">3f32</span>;
     <span class="kw">pub const </span>LINE_WIDTH: f32 = <span class="number">1f32</span>;
     <span class="kw">pub fn </span>new&lt;C: Into&lt;Color&gt;, L: Into&lt;Layer&gt;&gt;(
-        responsive_grid_view: ResponsiveGridView,
         panel_type: PanelType,
         layer: L,
         panel_color: C,
         border_color: C,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            responsive_grid_view,
             panel_type,
             layer: layer.into(),
             border_color: BorderColor(border_color.into()),

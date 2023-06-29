@@ -299,18 +299,18 @@
 <span class="kw">use </span>compact_str::CompactString;
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
+<span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+<span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::{
+    IconBitmapLayout, IconBitmapRequest, IconPixelData, ICON_BITMAP_DIMENSION,
+};
+<span class="kw">use </span><span class="kw">crate</span>::icon::component::IconId;
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::AtlasLocation;
 <span class="kw">use crate</span>::{
     Area, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasPosition, Color, GfxSurface, Indexer,
     InstanceAttributeManager, InterfaceContext, Key, KeyFactory, Layer, NullBit, NumericalContext,
     Position, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, Section, TextureAtlas,
     TextureCoordinates, Viewport,
 };
-<span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-<span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::{
-    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
-};
-<span class="kw">use </span><span class="kw">crate</span>::icon::component::IconId;
-<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::AtlasLocation;
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconRenderer {

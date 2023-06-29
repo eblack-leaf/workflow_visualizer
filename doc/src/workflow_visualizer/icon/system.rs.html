@@ -194,13 +194,13 @@
 <a href="#194" id="194">194</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Or, Query, Res, ResMut};
 
-<span class="kw">use crate</span>::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
-};
 <span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::IconBitmapLayout;
 <span class="kw">use </span><span class="kw">crate</span>::icon::cache::{Cache, Difference};
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::{IconId, IconScale};
 <span class="kw">use </span><span class="kw">crate</span>::icon::renderer::IconRenderer;
+<span class="kw">use crate</span>::{
+    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calc_area(
     <span class="kw-2">mut </span>icons: Query&lt;(<span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;, <span class="kw-2">&amp;</span>IconScale), Changed&lt;IconScale&gt;&gt;,

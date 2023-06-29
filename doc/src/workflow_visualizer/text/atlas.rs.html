@@ -83,11 +83,11 @@
 
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
 
-<span class="kw">use crate</span>::{Area, GfxOptions, NumericalContext, Position, Section};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{Glyph, GlyphId, TextScale};
 <span class="kw">use </span><span class="kw">crate</span>::text::font::MonoSpacedFont;
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasBlock, AtlasLocation, TextureCoordinates};
+<span class="kw">use crate</span>::{Area, GfxOptions, NumericalContext, Position, Section};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>AtlasGlyphReference {
     <span class="kw">pub</span>(<span class="kw">crate</span>) count: u32,

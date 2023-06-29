@@ -233,11 +233,11 @@
 <span class="kw">use </span>tracing::trace;
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
+<span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use crate</span>::{
     Color, DeviceContext, GfxSurface, Layer, Position, RawPosition, Render, RenderPassHandle,
     RenderPhase, Uniform, Viewport,
 };
-<span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LineRenderGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) line_render_gpu: LineRenderGpu,

@@ -294,16 +294,16 @@
 <span class="kw">use </span>nalgebra::matrix;
 <span class="kw">use </span>wgpu::{BindGroup, BindGroupLayout, Texture, TextureFormat};
 
-<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint};
 <span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
-<span class="kw">use </span><span class="kw">crate</span>::coord::DeviceContext;
 <span class="kw">use </span><span class="kw">crate</span>::coord::layer::Layer;
 <span class="kw">use </span><span class="kw">crate</span>::coord::position::Position;
 <span class="kw">use </span><span class="kw">crate</span>::coord::section::Section;
+<span class="kw">use </span><span class="kw">crate</span>::coord::DeviceContext;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::window::{gfx_resize, WindowResize};
+<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint};
 
 <span class="doccomment">/// Viewport Matrix for converting to NDC
 </span><span class="attr">#[derive(Resource)]

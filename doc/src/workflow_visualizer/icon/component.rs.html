@@ -66,23 +66,14 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::prelude::Bundle;
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
 <span class="kw">use </span>compact_str::CompactString;
 
-<span class="kw">use crate</span>::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveGridPoint;
 <span class="kw">use </span><span class="kw">crate</span>::icon::cache::{Cache, Difference};
+<span class="kw">use crate</span>::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 
 <span class="attr">#[derive(Component)]
 </span><span class="kw">pub enum </span>IconScale {
@@ -106,7 +97,6 @@
 <span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>Icon {
     id: IconId,
-    responsive_grid_point: ResponsiveGridPoint,
     icon_scale: IconScale,
     layer: Layer,
     pos_color: Color,
@@ -117,22 +107,14 @@
 }
 
 <span class="kw">impl </span>Icon {
-    <span class="kw">pub fn </span>new&lt;
-        Id: Into&lt;IconId&gt;,
-        ResGridPnt: Into&lt;ResponsiveGridPoint&gt;,
-        S: Into&lt;IconScale&gt;,
-        L: Into&lt;Layer&gt;,
-        C: Into&lt;Color&gt;,
-    &gt;(
+    <span class="kw">pub fn </span>new&lt;Id: Into&lt;IconId&gt;, S: Into&lt;IconScale&gt;, L: Into&lt;Layer&gt;, C: Into&lt;Color&gt;&gt;(
         id: Id,
-        gp: ResGridPnt,
         scale: S,
         layer: L,
         pos_color: C,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             id: id.into(),
-            responsive_grid_point: gp.into(),
             icon_scale: scale.into(),
             layer: layer.into(),
             pos_color: pos_color.into(),

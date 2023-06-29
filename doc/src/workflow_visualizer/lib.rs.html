@@ -111,22 +111,23 @@
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
-<span class="kw">pub use </span>workflow::{Runner, Sender, start_web_worker, Workflow};
+<span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::animate::Interpolator;
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
-    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">pub use </span><span class="kw">crate</span>::grid::{
-    Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias, GridPoint, GridRange,
-    GridView, HorizontalSpan, RawMarker, RawMarkerGrouping, ResponsiveGridPoint,
-    ResponsiveGridView, ResponsiveUnit, ResponsiveView,
+    AbsoluteBundle, BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker,
+    GridMarkerBias, GridPoint, GridRange, GridView, HorizontalSpan, RawMarker, RawMarkerGrouping,
+    ResponsiveBundle, ResponsiveGridPoint, ResponsiveGridView, ResponsivePointBundle,
+    ResponsiveUnit, ResponsiveView,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
@@ -135,7 +136,6 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender};
 <span class="kw">pub use </span><span class="kw">crate</span>::panel::{BorderColor, Panel, PanelColor, PanelContentArea, PanelType};
 <span class="kw">pub use </span><span class="kw">crate</span>::path::{Path, PathView, ResponsivePathView};
-<span class="kw">pub use </span><span class="kw">crate</span>::request::{Request, spawn};
 <span class="kw">pub use </span><span class="kw">crate</span>::scale_factor::ScaleFactor;
 <span class="kw">pub use </span><span class="kw">crate</span>::sync::{SyncPoint, UserSpaceSyncPoint};
 <span class="kw">pub use </span><span class="kw">crate</span>::text::{
@@ -149,8 +149,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
 <span class="kw">pub use </span><span class="kw">crate</span>::touch::{
-    CurrentlyPressed, PrimaryTouch, ToggleState, Touchable, TouchListener, TouchLocation,
-    TouchTrigger,
+    CurrentlyPressed, PrimaryTouch, ToggleState, TouchListener, TouchLocation, TouchTrigger,
+    Touchable,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
@@ -159,6 +159,7 @@
 </span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
 
 <span class="kw">mod </span>animate;
+<span class="kw">mod </span>button;
 <span class="kw">mod </span>color;
 <span class="kw">mod </span>coord;
 <span class="kw">mod </span>diagnostics;
@@ -173,7 +174,6 @@
 <span class="kw">mod </span>panel;
 <span class="kw">mod </span>path;
 <span class="kw">mod </span>render;
-<span class="kw">mod </span>request;
 <span class="kw">mod </span>scale_factor;
 <span class="kw">mod </span>sync;
 <span class="kw">mod </span>text;

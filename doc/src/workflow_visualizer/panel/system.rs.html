@@ -233,12 +233,12 @@
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
-<span class="kw">use crate</span>::{Area, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
+<span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
 <span class="kw">use </span><span class="kw">crate</span>::panel::{
     BorderColor, Cache, Difference, Extraction, PanelColor, PanelContentArea, PanelType,
 };
-<span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
+<span class="kw">use crate</span>::{Area, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>pull_differences(
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,

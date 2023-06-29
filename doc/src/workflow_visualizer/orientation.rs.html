@@ -62,10 +62,10 @@
 <span class="kw">use </span>bevy_ecs::event::EventReader;
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfig, Res, Resource};
 
-<span class="kw">use crate</span>::{Area, DeviceContext, ScaleFactor, SyncPoint};
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowResize;
+<span class="kw">use crate</span>::{Area, DeviceContext, ScaleFactor, SyncPoint};
 
 <span class="attr">#[derive(Resource, Copy, Clone)]
 </span><span class="kw">pub enum </span>Orientation {

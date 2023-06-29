@@ -114,8 +114,8 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 <span class="kw">use </span>bevy_ecs::schedule::apply_system_buffers;
 
-<span class="kw">use </span><span class="kw">crate</span>::JobSyncPoint;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
+<span class="kw">use </span><span class="kw">crate</span>::JobSyncPoint;
 
 <span class="doccomment">/// Synchronization Points for bucketing systems in a task
 </span><span class="attr">#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
@@ -179,7 +179,7 @@
     visualizer
         .job
         .task(Visualizer::TASK_MAIN)
-        .configure_sets((SyncPoint::Finish, ).chain().after(SyncPoint::PushDiff));
+        .configure_sets((SyncPoint::Finish,).chain().after(SyncPoint::PushDiff));
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)

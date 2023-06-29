@@ -79,11 +79,11 @@
 
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
 
+<span class="kw">use </span><span class="kw">crate</span>::grid::{config_grid, GridPoint, HorizontalSpan};
 <span class="kw">use crate</span>::{
     Area, Attach, Grid, GridLocation, InterfaceContext, Position, RawMarker, ResponsiveView,
     SyncPoint, Visualizer,
 };
-<span class="kw">use </span><span class="kw">crate</span>::grid::{config_grid, GridPoint, HorizontalSpan};
 
 <span class="doccomment">/// Collection of specific points rendered from a PathView
 </span><span class="attr">#[derive(Component, Clone)]

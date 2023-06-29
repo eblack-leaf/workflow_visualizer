@@ -140,16 +140,16 @@
 
 <span class="kw">use </span>bevy_ecs::prelude::Component;
 
-<span class="kw">use crate</span>::{
-    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
-};
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextScaleAlignment, TextValue};
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{
     AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasTexture,
     AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+};
+<span class="kw">use crate</span>::{
+    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
+    RawArea, RawPosition, Section, Uniform, VisibleSection,
 };
 
 <span class="attr">#[repr(C)]

@@ -101,11 +101,11 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 <span class="kw">use </span>tracing::{trace, warn};
 
-<span class="kw">use crate</span>::{Area, InterfaceContext, Position, Section, SyncPoint};
 <span class="kw">use </span><span class="kw">crate</span>::grid::config_grid;
 <span class="kw">use </span><span class="kw">crate</span>::path::grid_updated_path;
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
+<span class="kw">use crate</span>::{Area, InterfaceContext, Position, Section, SyncPoint};
 
 <span class="doccomment">/// Entry point for enabling visibility module on an entity
 </span><span class="attr">#[derive(Bundle)]
