@@ -93,6 +93,7 @@
 <a href="#93" id="93">93</a>
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -103,6 +104,7 @@
 <span class="kw">pub use </span>wgpu;
 <span class="kw">pub use </span>winit;
 
+<span class="kw">pub use </span>button::{Button, ButtonType};
 <span class="kw">pub use </span>instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
@@ -111,13 +113,13 @@
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
-<span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
+<span class="kw">pub use </span>workflow::{Runner, Sender, start_web_worker, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::animate::Interpolator;
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
+    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
@@ -149,8 +151,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
 <span class="kw">pub use </span><span class="kw">crate</span>::touch::{
-    CurrentlyPressed, PrimaryTouch, ToggleState, TouchListener, TouchLocation, TouchTrigger,
-    Touchable,
+    CurrentlyPressed, PrimaryTouch, ToggleState, Touchable, TouchListener, TouchLocation,
+    TouchTrigger,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};

@@ -104,12 +104,19 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 
-<span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
-<span class="kw">use </span><span class="kw">crate</span>::coord::position::Position;
-<span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateContext;
 <span class="kw">use crate</span>::{DeviceContext, InterfaceContext};
+<span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
+<span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateContext;
+<span class="kw">use </span><span class="kw">crate</span>::coord::position::Position;
+
 <span class="doccomment">/// A section is a bundle for Position/Area
 </span><span class="attr">#[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 </span><span class="kw">pub struct </span>Section&lt;Context: CoordinateContext&gt; {
@@ -123,6 +130,11 @@
             position: position.into(),
             area: area.into(),
         }
+    }
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>center(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Position&lt;Context&gt; {
+        <span class="kw">let </span>x = <span class="self">self</span>.position.x + <span class="self">self</span>.width() / <span class="number">2f32</span>;
+        <span class="kw">let </span>y = <span class="self">self</span>.position.y + <span class="self">self</span>.height() / <span class="number">2f32</span>;
+        Position::new(x, y)
     }
     <span class="doccomment">/// Can be instantiated with specific points
     </span><span class="kw">pub fn </span>from_left_top_right_bottom(left: f32, top: f32, right: f32, bottom: f32) -&gt; <span class="self">Self </span>{
