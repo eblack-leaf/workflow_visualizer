@@ -4,20 +4,20 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, trace, Level};
+use tracing::{debug, Level, trace};
 
-use workflow_visualizer::bevy_ecs::prelude::{
-    Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
-};
 use workflow_visualizer::{
     bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, Sender,
     TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
 };
 use workflow_visualizer::{
-    Attach, BundlePlacement, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap,
+    Attach, BundledIcon, BundlePlacement, Color, EntityName, GfxOptions, Icon, IconBitmap,
     IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, RawMarker, ResponsiveGridPoint,
     ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
-    ThemeDescriptor, TouchListener, Touchable, Visualizer, Workflow,
+    ThemeDescriptor, Touchable, TouchListener, Visualizer, Workflow,
+};
+use workflow_visualizer::bevy_ecs::prelude::{
+    Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
 };
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -138,7 +138,7 @@ fn update(
     }
     let write_out_entity = entity_store.get("write-out").unwrap();
     let written_out_requested = if let Ok((_, trigger, _, _)) = touchables.get(write_out_entity) {
-        trigger.touched()
+        trigger.triggered()
     } else {
         false
     };

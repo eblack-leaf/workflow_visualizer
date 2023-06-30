@@ -1,11 +1,12 @@
-use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 use workflow_visualizer::{
-    Area, BundlePlacement, BundledIcon, Color, EntityName, Focus, FocusInputListener, GfxOptions,
-    Grid, GridMarkerBias, HorizontalSpan, Icon, IconBitmap, IconBitmapRequest, IconScale, Layer,
-    Line, Panel, PanelType, Position, ResponsiveGridPoint, ResponsiveGridView, ResponsivePathView,
-    ResponsiveUnit, Text, TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, TouchListener,
-    Touchable, UserSpaceSyncPoint, Visualizer,
+    Area, BundledIcon, BundlePlacement, Button, ButtonType, Color, EntityName, Focus,
+    FocusInputListener, GfxOptions, Grid, GridMarkerBias, HorizontalSpan, Icon, IconBitmap,
+    IconBitmapRequest, IconScale, Layer, Line, Panel, PanelType, Position, ResponsiveGridPoint,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment,
+    TextWrapStyle, Theme, ThemeDescriptor, Touchable, TouchListener, UserSpaceSyncPoint,
+    Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 
 use crate::system;
 
@@ -81,7 +82,7 @@ pub fn visualizer() -> Visualizer {
             Color::GREY,
             TextWrapStyle::word(),
         )
-        .responsively_viewed(second_text_placement),
+            .responsively_viewed(second_text_placement),
         Touchable::new(TouchListener::on_press()),
         Focus::new(),
         FocusInputListener::default(),
@@ -90,13 +91,26 @@ pub fn visualizer() -> Visualizer {
         "edit",
         IconBitmap::bundled(BundledIcon::Edit),
     ))]);
+    let btn_horizontal = (2.near(), 2.far().raw_offset(0));
+    let btn_vertical = (first_text_vertical.0, first_text_vertical.0.raw_offset(6));
+    let btn_view = (btn_horizontal, btn_vertical);
+    let button_view = ResponsiveGridView::all_same(btn_view);
+    visualizer.add_named_entities(
+        vec!["edit-button".into()],
+        vec![Button::new(
+            ButtonType::Press,
+            3,
+            Color::GREY,
+            Color::DARK_GREY,
+            "edit",
+            "edit",
+        )
+            .responsively_viewed(button_view)],
+    );
     // visualizer.add_entities(vec![IconBitmapRequest::from((
     //     "square",
     //     IconBitmap::bundled(BundledIcon::Square),
     // ))]);
-    visualizer
-        .add_entities(vec![Icon::new("edit", IconScale::Small, 3, Color::GREY)
-            .responsively_point_viewed(icon_point)]);
     visualizer
         .add_entities(vec![Icon::new("edit", IconScale::Small, 3, Color::GREY)
             .responsively_point_viewed(icon_point_2)]);

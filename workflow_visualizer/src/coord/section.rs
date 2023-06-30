@@ -1,9 +1,10 @@
 use bevy_ecs::bundle::Bundle;
 
-use crate::coord::area::Area;
-use crate::coord::position::Position;
-use crate::coord::CoordinateContext;
 use crate::{DeviceContext, InterfaceContext};
+use crate::coord::area::Area;
+use crate::coord::CoordinateContext;
+use crate::coord::position::Position;
+
 /// A section is a bundle for Position/Area
 #[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct Section<Context: CoordinateContext> {
@@ -17,6 +18,11 @@ impl<Context: CoordinateContext> Section<Context> {
             position: position.into(),
             area: area.into(),
         }
+    }
+    pub(crate) fn center(&self) -> Position<Context> {
+        let x = self.position.x + self.width() / 2f32;
+        let y = self.position.y + self.height() / 2f32;
+        Position::new(x, y)
     }
     /// Can be instantiated with specific points
     pub fn from_left_top_right_bottom(left: f32, top: f32, right: f32, bottom: f32) -> Self {

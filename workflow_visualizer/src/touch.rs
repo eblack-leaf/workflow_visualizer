@@ -6,12 +6,12 @@ use bevy_ecs::prelude::{
 use tracing::{debug, trace};
 use winit::event::{ElementState, MouseButton};
 
-use crate::focus::FocusedEntity;
-use crate::viewport::ViewportHandle;
-use crate::visualizer::{Attach, Visualizer};
 use crate::{
     Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
 };
+use crate::focus::FocusedEntity;
+use crate::viewport::ViewportHandle;
+use crate::visualizer::{Attach, Visualizer};
 
 /// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]
@@ -99,7 +99,7 @@ pub struct TouchTrigger {
 /// Currently touched or not logically
 #[derive(Component, Copy, Clone)]
 pub struct CurrentlyPressed {
-    pub(crate) currently_pressed: bool,
+    currently_pressed: bool,
 }
 
 impl CurrentlyPressed {
@@ -116,12 +116,15 @@ impl CurrentlyPressed {
 /// Tracker for toggle state
 #[derive(Component, Copy, Clone)]
 pub struct ToggleState {
-    pub toggle: bool,
+    toggle: bool,
 }
 
 impl ToggleState {
     pub fn new() -> Self {
         Self { toggle: false }
+    }
+    pub(crate) fn toggled(&self) -> bool {
+        self.toggle
     }
 }
 
@@ -129,7 +132,7 @@ impl TouchTrigger {
     pub(crate) fn new() -> Self {
         Self { touched: false }
     }
-    pub fn touched(&self) -> bool {
+    pub fn triggered(&self) -> bool {
         self.touched
     }
 }

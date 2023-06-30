@@ -1,7 +1,5 @@
+use workflow_visualizer::{Area, EntityStore, InterfaceContext, Position, ScaleFactor, Sender, TextValue, TouchTrigger, Workflow};
 use workflow_visualizer::bevy_ecs::prelude::{Local, NonSend, Query, Res};
-use workflow_visualizer::{
-    Area, InterfaceContext, Position, ScaleFactor, Sender, TextValue, Workflow,
-};
 
 use crate::workflow::{Engen, TokenName};
 
@@ -12,6 +10,8 @@ pub(crate) fn send_event(
         &Position<InterfaceContext>,
         &Area<InterfaceContext>,
     )>,
+    buttons: Query<(&TouchTrigger)>,
+    entity_store: Res<EntityStore>,
     mut limiter: Local<bool>,
     scale_factor: Res<ScaleFactor>,
 ) {
@@ -21,4 +21,12 @@ pub(crate) fn send_event(
         *limiter = true;
     }
     for (mut t, pos, area) in text.iter_mut() {}
+    if let Some(btn) = entity_store.get("edit-button") {
+        if let Ok(btn_trigger) = buttons.get(btn) {
+            if btn_trigger.triggered() {
+                let action = <Engen as Workflow>::Action::GenerateOtp(TokenName("editing token".to_string()));
+                sender.send(action);
+            }
+        }
+    }
 }

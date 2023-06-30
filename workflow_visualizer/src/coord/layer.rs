@@ -1,7 +1,8 @@
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
+
 /// Layer represents what plane this entity resides on. Used to differentiate z coords in
 /// rendering.
 #[repr(C)]
@@ -25,9 +26,18 @@ impl From<i32> for Layer {
         Layer::new(value as f32)
     }
 }
+
 impl Add for Layer {
     type Output = Layer;
     fn add(self, rhs: Self) -> Self::Output {
         Layer::new(self.z + rhs.z)
+    }
+}
+
+impl Sub for Layer {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Layer::new(self.z - rhs.z)
     }
 }
