@@ -91,7 +91,7 @@ pub fn visualizer() -> Visualizer {
         "edit",
         IconBitmap::bundled(BundledIcon::Edit),
     ))]);
-    let btn_horizontal = (2.near(), 2.far().raw_offset(0));
+    let btn_horizontal = (2.near(), 2.near().raw_offset(16));
     let btn_vertical = (first_text_vertical.0, first_text_vertical.0.raw_offset(6));
     let btn_view = (btn_horizontal, btn_vertical);
     let button_view = ResponsiveGridView::all_same(btn_view);
@@ -100,7 +100,7 @@ pub fn visualizer() -> Visualizer {
         vec![Button::new(
             ButtonType::Press,
             3,
-            Color::GREY,
+            Color::RED_ORANGE,
             Color::DARK_GREY,
             "edit",
             "edit",

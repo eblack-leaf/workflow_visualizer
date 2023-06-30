@@ -25,7 +25,7 @@ fn android_main(android_app: AndroidApp) {
 }
 fn main() {
     #[cfg(not(target_family = "wasm"))]
-    tracing_subscriber::fmt().with_max_level(Level::TRACE).init();
+    tracing_subscriber::fmt().with_max_level(Level::WARN).init();
     let mut visualizer = visualizer::visualizer();
     #[cfg(not(target_family = "wasm"))]
     Runner::new()
