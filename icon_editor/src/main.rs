@@ -12,13 +12,16 @@ use workflow_visualizer::{
 };
 use workflow_visualizer::{
     Attach, BundledIcon, BundlePlacement, Color, EntityName, GfxOptions, Icon, IconBitmap,
-    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, RawMarker, ResponsiveGridPoint,
-    ResponsiveGridView, ResponsiveUnit, Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
+    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType,
+    Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
     ThemeDescriptor, Touchable, TouchListener, Visualizer, Workflow,
 };
+use workflow_visualizer::{ResponsiveGridPoint, ResponsiveGridView};
 use workflow_visualizer::bevy_ecs::prelude::{
     Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
 };
+use workflow_visualizer::RawMarker;
+use workflow_visualizer::ResponsiveUnit;
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
 struct BitmapLocation {

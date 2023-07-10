@@ -5,10 +5,12 @@ use bevy_ecs::query::With;
 
 use crate::{
     Area, Attach, BundlePlacement, Color, CurrentlyPressed, Icon, IconId, IconScale,
-    InterfaceContext, Layer, Panel, PanelType, Position, RawMarker, ResponsiveGridView, Section,
+    InterfaceContext, Layer, Panel, PanelType, Position, Section,
     SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState, Touchable,
     Visualizer,
 };
+use crate::grid::RawMarker;
+use crate::grid::ResponsiveGridView;
 
 #[derive(Bundle, Clone)]
 pub struct Button {

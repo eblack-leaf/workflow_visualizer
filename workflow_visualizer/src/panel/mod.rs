@@ -6,8 +6,9 @@ pub use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
 use crate::{
-    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, ResponsiveGridView, Section,
+    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section,
 };
+use crate::grid::ResponsiveGridView;
 
 mod attachment;
 mod renderer;

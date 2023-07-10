@@ -4,9 +4,9 @@ use std::ops::Deref;
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
+use crate::Area;
 use crate::coord::NumericalContext;
 use crate::text::component::{TextScale, TextScaleAlignment};
-use crate::Area;
 
 #[derive(Resource)]
 pub(crate) struct MonoSpacedFont {
@@ -61,6 +61,17 @@ pub(crate) struct AlignedFonts {
 }
 
 impl AlignedFonts {
+    pub(crate) fn get(&self, text_scale_alignment: &TextScaleAlignment) -> &MonoSpacedFont {
+        match text_scale_alignment
+        {
+            TextScaleAlignment::Custom(val) => {
+                self.fonts.get(&TextScaleAlignment::Medium).expect("no font")
+            }
+            _ => {
+                self.fonts.get(&text_scale_alignment).expect("no font")
+            }
+        }
+    }
     pub(crate) fn new(scale_factor: f64) -> Self {
         Self {
             fonts: {

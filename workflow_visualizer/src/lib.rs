@@ -8,7 +8,21 @@ pub use bevy_ecs;
 pub use wgpu;
 pub use winit;
 
+pub use bundling::{BundleBuilder, BundleExtension};
 pub use button::{Button, ButtonType};
+pub use grid::GridLocation;
+pub use grid::GridLocationDescriptor;
+pub use grid::GridMarker;
+pub use grid::GridMarkerBias;
+pub use grid::GridPoint;
+pub use grid::GridRange;
+pub use grid::GridView;
+pub use grid::RawMarker;
+pub use grid::RawMarkerGrouping;
+pub use grid::ResponsiveGridPoint;
+pub use grid::ResponsiveGridView;
+pub use grid::ResponsiveUnit;
+pub use grid::ResponsiveView;
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
@@ -30,10 +44,8 @@ pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::grid::{
-    AbsoluteBundle, BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker,
-    GridMarkerBias, GridPoint, GridRange, GridView, HorizontalSpan, RawMarker, RawMarkerGrouping,
-    ResponsiveBundle, ResponsiveGridPoint, ResponsiveGridView, ResponsivePointBundle,
-    ResponsiveUnit, ResponsiveView,
+    BundlePlacement, Grid,
+    HorizontalSpan,
 };
 pub use crate::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
@@ -94,3 +106,4 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
+mod bundling;

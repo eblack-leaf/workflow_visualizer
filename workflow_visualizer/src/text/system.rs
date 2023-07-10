@@ -7,6 +7,11 @@ use bevy_ecs::prelude::{
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::{trace, warn};
 
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -28,11 +33,6 @@ use crate::texture_atlas::{
     AtlasTexture, AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
 };
 use crate::window::WindowResize;
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -69,7 +69,7 @@ pub(crate) fn place(
             ..LayoutSettings::default()
         });
         placer.0.append(
-            fonts.fonts.get(text_scale_alignment).unwrap().font_slice(),
+            fonts.get(text_scale_alignment).font_slice(),
             &TextStyle::new(text.0.as_str(), text_scale.px(), MonoSpacedFont::index()),
         );
         let mut key_factory = KeyFactory::new();
@@ -225,9 +225,7 @@ pub(crate) fn scale_change(
     {
         *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor());
         let letter_dimensions = fonts
-            .fonts
             .get(text_scale_alignment)
-            .unwrap()
             .character_dimensions('a', text_scale.px());
         let letter_dimensions =
             Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
@@ -284,9 +282,7 @@ pub(crate) fn manage(
                     *text_scale_alignment,
                     AtlasBlock::new(
                         fonts
-                            .fonts
                             .get(text_scale_alignment)
-                            .unwrap()
                             .character_dimensions('a', text_scale.px()),
                     ),
                 ),
@@ -599,9 +595,7 @@ pub(crate) fn render_group_differences(
                 .unwrap()
                 .increment();
             let rasterization = font
-                .fonts
                 .get(&render_group.text_scale_alignment)
-                .unwrap()
                 .font()
                 .rasterize(add.character, add.scale.px());
             // TODO since subpixel , combine them here to save space
