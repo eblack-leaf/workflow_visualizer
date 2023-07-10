@@ -94,6 +94,19 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -104,7 +117,21 @@
 <span class="kw">pub use </span>wgpu;
 <span class="kw">pub use </span>winit;
 
+<span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension};
 <span class="kw">pub use </span>button::{Button, ButtonType};
+<span class="kw">pub use </span>grid::GridLocation;
+<span class="kw">pub use </span>grid::GridLocationDescriptor;
+<span class="kw">pub use </span>grid::GridMarker;
+<span class="kw">pub use </span>grid::GridMarkerBias;
+<span class="kw">pub use </span>grid::GridPoint;
+<span class="kw">pub use </span>grid::GridRange;
+<span class="kw">pub use </span>grid::GridView;
+<span class="kw">pub use </span>grid::RawMarker;
+<span class="kw">pub use </span>grid::RawMarkerGrouping;
+<span class="kw">pub use </span>grid::ResponsiveGridPoint;
+<span class="kw">pub use </span>grid::ResponsiveGridView;
+<span class="kw">pub use </span>grid::ResponsiveUnit;
+<span class="kw">pub use </span>grid::ResponsiveView;
 <span class="kw">pub use </span>instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
@@ -126,10 +153,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">pub use </span><span class="kw">crate</span>::grid::{
-    AbsoluteBundle, BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker,
-    GridMarkerBias, GridPoint, GridRange, GridView, HorizontalSpan, RawMarker, RawMarkerGrouping,
-    ResponsiveBundle, ResponsiveGridPoint, ResponsiveGridView, ResponsivePointBundle,
-    ResponsiveUnit, ResponsiveView,
+    BundlePlacement, Grid,
+    HorizontalSpan,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
@@ -190,4 +215,5 @@
 <span class="kw">mod </span>visualizer;
 <span class="kw">mod </span>window;
 <span class="kw">mod </span>workflow;
+<span class="kw">mod </span>bundling;
 </code></pre></div></section></main></body></html>
