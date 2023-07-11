@@ -26,6 +26,9 @@
 <a href="#26" id="26">26</a>
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
+<a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Bundle;
 
 <span class="attr">#[derive(Bundle)]
@@ -45,12 +48,16 @@
     }
 }
 
-<span class="kw">pub trait </span>BundleExtension <span class="kw">where </span><span class="self">Self</span>: Bundle + Sized {
-    <span class="kw">fn </span>extend&lt;E: Bundle, H: Into&lt;E&gt;&gt;(<span class="self">self</span>, handle: H) -&gt; BundleBuilder&lt;<span class="self">Self</span>, E&gt;;
+<span class="kw">pub trait </span>BundleExtension
+<span class="kw">where
+    </span><span class="self">Self</span>: Bundle + Sized,
+{
+    <span class="kw">fn </span>extend&lt;E: Bundle&gt;(<span class="self">self</span>, handle: E) -&gt; BundleBuilder&lt;<span class="self">Self</span>, E&gt;;
 }
 
 <span class="kw">impl</span>&lt;I: Bundle&gt; BundleExtension <span class="kw">for </span>I {
-    <span class="kw">fn </span>extend&lt;E: Bundle, H: Into&lt;E&gt;&gt;(<span class="self">self</span>, handle: H) -&gt; BundleBuilder&lt;I, E&gt; {
-        BundleBuilder::new(<span class="self">self</span>, handle.into())
+    <span class="kw">fn </span>extend&lt;E: Bundle&gt;(<span class="self">self</span>, handle: E) -&gt; BundleBuilder&lt;I, E&gt; {
+        BundleBuilder::new(<span class="self">self</span>, handle)
     }
-}</code></pre></div></section></main></body></html>
+}
+</code></pre></div></section></main></body></html>

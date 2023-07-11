@@ -251,20 +251,18 @@
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{
     Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Without,
 };
 <span class="kw">use </span>bevy_ecs::query::With;
 
-<span class="kw">use crate</span>::{
-    Area, Attach, BundlePlacement, Color, CurrentlyPressed, Icon, IconId, IconScale,
-    InterfaceContext, Layer, Panel, PanelType, Position, Section,
-    SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState, Touchable,
-    Visualizer,
-};
 <span class="kw">use </span><span class="kw">crate</span>::grid::RawMarker;
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveGridView;
+<span class="kw">use crate</span>::{
+    Area, Attach, BundlePlacement, Color, CurrentlyPressed, Icon, IconId, IconScale,
+    InterfaceContext, Layer, Panel, PanelType, Position, Section, SyncPoint, Text,
+    TextScaleAlignment, TextValue, TextWrapStyle, ToggleState, Touchable, Visualizer,
+};
 
 <span class="attr">#[derive(Bundle, Clone)]
 </span><span class="kw">pub struct </span>Button {

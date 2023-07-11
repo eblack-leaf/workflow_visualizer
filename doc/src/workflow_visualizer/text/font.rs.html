@@ -111,17 +111,15 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::Deref;
 
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>fontdue::{Font <span class="kw">as </span>fdFont, FontSettings};
 
-<span class="kw">use </span><span class="kw">crate</span>::Area;
 <span class="kw">use </span><span class="kw">crate</span>::coord::NumericalContext;
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{TextScale, TextScaleAlignment};
+<span class="kw">use </span><span class="kw">crate</span>::Area;
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>MonoSpacedFont {
@@ -177,14 +175,12 @@
 
 <span class="kw">impl </span>AlignedFonts {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, text_scale_alignment: <span class="kw-2">&amp;</span>TextScaleAlignment) -&gt; <span class="kw-2">&amp;</span>MonoSpacedFont {
-        <span class="kw">match </span>text_scale_alignment
-        {
-            TextScaleAlignment::Custom(val) =&gt; {
-                <span class="self">self</span>.fonts.get(<span class="kw-2">&amp;</span>TextScaleAlignment::Medium).expect(<span class="string">&quot;no font&quot;</span>)
-            }
-            <span class="kw">_ </span>=&gt; {
-                <span class="self">self</span>.fonts.get(<span class="kw-2">&amp;</span>text_scale_alignment).expect(<span class="string">&quot;no font&quot;</span>)
-            }
+        <span class="kw">match </span>text_scale_alignment {
+            TextScaleAlignment::Custom(val) =&gt; <span class="self">self
+                </span>.fonts
+                .get(<span class="kw-2">&amp;</span>TextScaleAlignment::Medium)
+                .expect(<span class="string">&quot;no font&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="self">self</span>.fonts.get(<span class="kw-2">&amp;</span>text_scale_alignment).expect(<span class="string">&quot;no font&quot;</span>),
         }
     }
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(scale_factor: f64) -&gt; <span class="self">Self </span>{

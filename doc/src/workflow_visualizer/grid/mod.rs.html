@@ -202,6 +202,15 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::Add;
 
@@ -222,21 +231,24 @@
 <span class="kw">use </span>marker::RowConfig;
 <span class="kw">pub use </span>responsive::{ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, ResponsiveView};
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>system::config_grid;
-<span class="kw">pub use </span>view::{GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias, GridPoint, GridRange, GridView, GridViewBuilder};
+<span class="kw">pub use </span>view::{
+    GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
+    GridPoint, GridRange, GridView, GridViewBuilder, PlacementBuilder,
+};
 
+<span class="kw">use </span><span class="kw">crate</span>::bundling::{BundleBuilder, BundleExtension};
+<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
+<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 <span class="kw">use crate</span>::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
-<span class="kw">use </span><span class="kw">crate</span>::bundling::{BundleBuilder, BundleExtension};
-<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
-<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
 
 <span class="kw">mod </span>attachment;
 <span class="kw">mod </span>marker;
-<span class="kw">mod </span>view;
 <span class="kw">mod </span>responsive;
 <span class="kw">mod </span>system;
+<span class="kw">mod </span>view;
 
 <span class="doccomment">/// Span used for setting the number of columns available in the Grid
 </span><span class="attr">#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -392,17 +404,23 @@
 <span class="kw">where
     </span><span class="self">Self</span>: Sized + Bundle,
 {
-    <span class="kw">fn </span>responsively_viewed&lt;R: Into&lt;ResponsiveGridView&gt;&gt;(<span class="self">self</span>, view: R) -&gt; BundleBuilder&lt;<span class="self">Self</span>, ResponsiveGridView&gt; {
-        <span class="self">self</span>.extend(view)
+    <span class="kw">fn </span>responsively_viewed&lt;R: Into&lt;ResponsiveGridView&gt;&gt;(
+        <span class="self">self</span>,
+        view: R,
+    ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, ResponsiveGridView&gt; {
+        <span class="self">self</span>.extend(view.into())
     }
     <span class="kw">fn </span>responsively_point_viewed&lt;R: Into&lt;ResponsiveGridPoint&gt;&gt;(
         <span class="self">self</span>,
         view: R,
     ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, ResponsiveGridPoint&gt; {
-        <span class="self">self</span>.extend(view)
+        <span class="self">self</span>.extend(view.into())
     }
-    <span class="kw">fn </span>absolute&lt;S: Into&lt;Section&lt;InterfaceContext&gt;&gt;&gt;(<span class="self">self</span>, section: S) -&gt; BundleBuilder&lt;<span class="self">Self</span>, Section&lt;InterfaceContext&gt;&gt; {
-        <span class="self">self</span>.extend(section)
+    <span class="kw">fn </span>absolute&lt;S: Into&lt;Section&lt;InterfaceContext&gt;&gt;&gt;(
+        <span class="self">self</span>,
+        section: S,
+    ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, Section&lt;InterfaceContext&gt;&gt; {
+        <span class="self">self</span>.extend(section.into())
     }
 }
 <span class="kw">impl</span>&lt;T: Bundle + Sized&gt; BundlePlacement <span class="kw">for </span>T {}

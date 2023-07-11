@@ -104,9 +104,6 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -140,22 +137,19 @@
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
-<span class="kw">pub use </span>workflow::{Runner, Sender, start_web_worker, Workflow};
+<span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::animate::Interpolator;
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
-    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-<span class="kw">pub use </span><span class="kw">crate</span>::grid::{
-    BundlePlacement, Grid,
-    HorizontalSpan,
-};
+<span class="kw">pub use </span><span class="kw">crate</span>::grid::{BundlePlacement, Grid, GridViewBuilder, HorizontalSpan, PlacementBuilder};
 <span class="kw">pub use </span><span class="kw">crate</span>::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
 };
@@ -176,8 +170,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
 <span class="kw">pub use </span><span class="kw">crate</span>::touch::{
-    CurrentlyPressed, PrimaryTouch, ToggleState, Touchable, TouchListener, TouchLocation,
-    TouchTrigger,
+    CurrentlyPressed, PrimaryTouch, ToggleState, TouchListener, TouchLocation, TouchTrigger,
+    Touchable,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
@@ -186,6 +180,7 @@
 </span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
 
 <span class="kw">mod </span>animate;
+<span class="kw">mod </span>bundling;
 <span class="kw">mod </span>button;
 <span class="kw">mod </span>color;
 <span class="kw">mod </span>coord;
@@ -215,5 +210,4 @@
 <span class="kw">mod </span>visualizer;
 <span class="kw">mod </span>window;
 <span class="kw">mod </span>workflow;
-<span class="kw">mod </span>bundling;
 </code></pre></div></section></main></body></html>

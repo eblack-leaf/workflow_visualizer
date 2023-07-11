@@ -71,8 +71,8 @@
 
 <span class="kw">use </span>bevy_ecs::component::Component;
 
-<span class="kw">use crate</span>::{GridLocation, GridPoint, GridRange, GridView, HorizontalSpan};
 <span class="kw">use </span><span class="kw">crate</span>::grid::view::GridMarkerBias;
+<span class="kw">use crate</span>::{GridLocation, GridPoint, GridRange, GridView, HorizontalSpan};
 
 <span class="doccomment">/// A mapping of GridView for each HorizontalSpan Option
 </span><span class="attr">#[derive(Component)]
@@ -97,8 +97,8 @@
         <span class="self">self
     </span>}
     <span class="kw">pub fn </span>all_same&lt;T: Into&lt;F&gt;&gt;(view: T) -&gt; <span class="self">Self
-        </span><span class="kw">where
-            </span>F: Clone,
+    </span><span class="kw">where
+        </span>F: Clone,
     {
         <span class="kw">let </span>value = view.into();
         <span class="kw">let </span><span class="kw-2">mut </span>mapping = HashMap::new();

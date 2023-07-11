@@ -75,21 +75,15 @@
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
 
-<span class="kw">use crate</span>::{
-    Area, Attach, Grid, InterfaceContext, Position,
-    SyncPoint, Visualizer,
-};
-<span class="kw">use </span><span class="kw">crate</span>::grid::{config_grid, HorizontalSpan};
-<span class="kw">use </span><span class="kw">crate</span>::grid::{GridLocation, GridPoint};
 <span class="kw">use </span><span class="kw">crate</span>::grid::RawMarker;
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveView;
+<span class="kw">use </span><span class="kw">crate</span>::grid::{config_grid, HorizontalSpan};
+<span class="kw">use </span><span class="kw">crate</span>::grid::{GridLocation, GridPoint};
+<span class="kw">use crate</span>::{Area, Attach, Grid, InterfaceContext, Position, SyncPoint, Visualizer};
 
 <span class="doccomment">/// Collection of specific points rendered from a PathView
 </span><span class="attr">#[derive(Component, Clone)]

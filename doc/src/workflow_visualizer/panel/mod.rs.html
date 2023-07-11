@@ -112,8 +112,6 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
@@ -121,10 +119,8 @@
 <span class="kw">pub use </span>attachment::PanelAttachment;
 <span class="kw">pub use </span>system::calc_content_area;
 
-<span class="kw">use crate</span>::{
-    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section,
-};
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveGridView;
+<span class="kw">use crate</span>::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section};
 
 <span class="kw">mod </span>attachment;
 <span class="kw">mod </span>renderer;

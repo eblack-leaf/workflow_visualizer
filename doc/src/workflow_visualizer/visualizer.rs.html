@@ -444,7 +444,13 @@
 <a href="#444" id="444">444</a>
 <a href="#445" id="445">445</a>
 <a href="#446" id="446">446</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -454,10 +460,6 @@
 <span class="kw">use </span>winit::event::{ElementState, MouseButton, TouchPhase};
 <span class="kw">use </span>winit::window::Window;
 
-<span class="kw">use crate</span>::{
-    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
-};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
@@ -482,6 +484,10 @@
 <span class="kw">use </span><span class="kw">crate</span>::virtual_keyboard::VirtualKeyboardAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::visibility::VisibilityAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowAttachment;
+<span class="kw">use crate</span>::{
+    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
+    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
+};
 
 <span class="doccomment">/// Used to hold queued attachments until ready to invoke attach to the Visualizer
 </span><span class="kw">pub struct </span>Attachment(<span class="kw">pub </span>Box&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>Visualizer)&gt;);
@@ -603,7 +609,11 @@
         <span class="self">self</span>.job.container.insert_resource(theme);
     }
     <span class="doccomment">/// spawn batches of alike components efficiently with names
-    </span><span class="kw">pub fn </span>add_named_entities&lt;T: Bundle&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>names: Vec&lt;EntityName&gt;, datum: Vec&lt;T&gt;) {
+    </span><span class="kw">pub fn </span>add_named_entities&lt;T: Bundle, S: Into&lt;EntityName&gt;&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">mut </span>names: Vec&lt;S&gt;,
+        datum: Vec&lt;T&gt;,
+    ) {
         <span class="kw">let </span>ids = <span class="self">self
             </span>.job
             .container
@@ -611,7 +621,7 @@
             .collect::&lt;Vec&lt;Entity&gt;&gt;();
         <span class="kw">let </span><span class="kw-2">mut </span>names = names.drain(..);
         <span class="kw">for </span>id <span class="kw">in </span>ids {
-            <span class="self">self</span>.job.store_entity(names.next().unwrap(), id);
+            <span class="self">self</span>.job.store_entity(names.next().unwrap().into(), id);
         }
     }
     <span class="doccomment">/// spawn batches of alike components efficiently
