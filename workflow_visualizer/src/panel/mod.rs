@@ -5,10 +5,8 @@ use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 pub use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
-use crate::{
-    Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section,
-};
 use crate::grid::ResponsiveGridView;
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section};
 
 mod attachment;
 mod renderer;

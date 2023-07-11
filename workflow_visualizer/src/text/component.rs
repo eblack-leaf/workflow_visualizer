@@ -4,11 +4,11 @@ use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
+use crate::grid::ResponsiveGridView;
 use crate::{
     Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, Section, VisibleSection,
 };
-use crate::grid::ResponsiveGridView;
 
 /// Entry point to spawn a Text element
 #[derive(Bundle)]
@@ -115,9 +115,7 @@ impl TextScale {
             TextScaleAlignment::Large => Self(
                 (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[2] as f64 * scale_factor) as u32,
             ),
-            TextScaleAlignment::Custom(val) => {
-                Self((val as f64 * scale_factor) as u32)
-            }
+            TextScaleAlignment::Custom(val) => Self((val as f64 * scale_factor) as u32),
         }
     }
 }
@@ -127,7 +125,7 @@ pub enum TextScaleAlignment {
     Small,
     Medium,
     Large,
-    Custom(u32)
+    Custom(u32),
 }
 impl TextScaleAlignment {
     pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [13, 17, 20];

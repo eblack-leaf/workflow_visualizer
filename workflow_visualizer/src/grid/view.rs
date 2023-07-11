@@ -1,4 +1,5 @@
-use crate::RawMarker;
+use crate::{EntityName, RawMarker};
+use std::collections::HashMap;
 
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]
@@ -10,7 +11,7 @@ pub struct GridLocation {
 impl GridLocation {
     pub fn raw_offset(mut self, offset: i32) -> Self {
         if let Some(current_offset) = self.offset.as_mut() {
-            current_offset.0.0 += offset;
+            current_offset.0 .0 += offset;
         } else {
             self.offset.replace(GridLocationOffset(offset.into()));
         }
@@ -72,7 +73,6 @@ impl<T: Into<GridRange>> From<(T, T)> for GridView {
         }
     }
 }
-
 /// Point in a Grid with x/y as GridLocations
 #[derive(Copy, Clone)]
 pub struct GridPoint {
@@ -116,6 +116,12 @@ pub struct GridViewBuilder {
 }
 
 impl GridViewBuilder {
+    pub fn new() -> Self {
+        Self {
+            horizontal: None,
+            vertical: None,
+        }
+    }
     pub fn with_horizontal<T: Into<GridRange>>(mut self, range: T) -> Self {
         self.horizontal.replace(range.into());
         self
@@ -129,5 +135,48 @@ impl GridViewBuilder {
     }
     pub fn vertical(&self) -> Option<GridRange> {
         self.vertical
+    }
+    pub fn build(&mut self) -> Option<GridView> {
+        if let Some(hor) = self.horizontal {
+            if let Some(ver) = self.vertical {
+                return Some(GridView::from((hor, ver)));
+            }
+        }
+        None
+    }
+}
+impl<T: Into<GridRange>> From<(T, T)> for GridViewBuilder {
+    fn from(value: (T, T)) -> Self {
+        GridViewBuilder {
+            horizontal: Some(value.0.into()),
+            vertical: Some(value.1.into()),
+        }
+    }
+}
+pub struct PlacementBuilder {
+    pub views: HashMap<EntityName, GridViewBuilder>,
+    pub points: HashMap<EntityName, GridPoint>,
+}
+impl PlacementBuilder {
+    pub fn new() -> Self {
+        Self {
+            views: HashMap::new(),
+            points: HashMap::new(),
+        }
+    }
+    pub fn add<T: Into<EntityName>, G: Into<GridViewBuilder>>(&mut self, name: T, view: G) {
+        self.views.insert(name.into(), view.into());
+    }
+    pub fn add_point<T: Into<EntityName>, G: Into<GridPoint>>(&mut self, name: T, point: G) {
+        self.points.insert(name.into(), point.into());
+    }
+    pub fn view_get_mut<T: Into<EntityName>>(&mut self, name: T) -> &mut GridViewBuilder {
+        self.views.get_mut(&name.into()).expect("no view")
+    }
+    pub fn view_get<T: Into<EntityName>>(&self, name: T) -> GridViewBuilder {
+        self.views.get(&name.into()).copied().expect("no view")
+    }
+    pub fn point_get<T: Into<EntityName>>(&self, name: T) -> GridPoint {
+        self.points.get(&name.into()).copied().expect("no point")
     }
 }

@@ -17,12 +17,15 @@ impl<T: Bundle, S: Bundle> BundleBuilder<T, S> {
     }
 }
 
-pub trait BundleExtension where Self: Bundle + Sized {
-    fn extend<E: Bundle, H: Into<E>>(self, handle: H) -> BundleBuilder<Self, E>;
+pub trait BundleExtension
+where
+    Self: Bundle + Sized,
+{
+    fn extend<E: Bundle>(self, handle: E) -> BundleBuilder<Self, E>;
 }
 
 impl<I: Bundle> BundleExtension for I {
-    fn extend<E: Bundle, H: Into<E>>(self, handle: H) -> BundleBuilder<I, E> {
-        BundleBuilder::new(self, handle.into())
+    fn extend<E: Bundle>(self, handle: E) -> BundleBuilder<I, E> {
+        BundleBuilder::new(self, handle)
     }
 }

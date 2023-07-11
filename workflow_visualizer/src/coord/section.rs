@@ -1,9 +1,9 @@
 use bevy_ecs::bundle::Bundle;
 
-use crate::{DeviceContext, InterfaceContext};
 use crate::coord::area::Area;
-use crate::coord::CoordinateContext;
 use crate::coord::position::Position;
+use crate::coord::CoordinateContext;
+use crate::{DeviceContext, InterfaceContext};
 
 /// A section is a bundle for Position/Area
 #[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]

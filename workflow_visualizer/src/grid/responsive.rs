@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use bevy_ecs::component::Component;
 
-use crate::{GridLocation, GridPoint, GridRange, GridView, HorizontalSpan};
 use crate::grid::view::GridMarkerBias;
+use crate::{GridLocation, GridPoint, GridRange, GridView, HorizontalSpan};
 
 /// A mapping of GridView for each HorizontalSpan Option
 #[derive(Component)]
@@ -28,8 +28,8 @@ impl<F> ResponsiveView<F> {
         self
     }
     pub fn all_same<T: Into<F>>(view: T) -> Self
-        where
-            F: Clone,
+    where
+        F: Clone,
     {
         let value = view.into();
         let mut mapping = HashMap::new();

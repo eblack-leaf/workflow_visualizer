@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::component::Component;
@@ -8,10 +9,6 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
 
-use crate::{
-    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
-};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
@@ -36,6 +33,10 @@ use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
+use crate::{
+    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
+    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
+};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
@@ -157,7 +158,11 @@ impl Visualizer {
         self.job.container.insert_resource(theme);
     }
     /// spawn batches of alike components efficiently with names
-    pub fn add_named_entities<T: Bundle>(&mut self, mut names: Vec<EntityName>, datum: Vec<T>) {
+    pub fn add_named_entities<T: Bundle, S: Into<EntityName>>(
+        &mut self,
+        mut names: Vec<S>,
+        datum: Vec<T>,
+    ) {
         let ids = self
             .job
             .container
@@ -165,7 +170,7 @@ impl Visualizer {
             .collect::<Vec<Entity>>();
         let mut names = names.drain(..);
         for id in ids {
-            self.job.store_entity(names.next().unwrap(), id);
+            self.job.store_entity(names.next().unwrap().into(), id);
         }
     }
     /// spawn batches of alike components efficiently

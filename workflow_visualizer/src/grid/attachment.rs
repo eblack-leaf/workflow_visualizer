@@ -1,8 +1,8 @@
 use bevy_ecs::change_detection::Res;
 use bevy_ecs::prelude::{Commands, IntoSystemConfig};
 
-use crate::{Attach, grid, Grid, SyncPoint, ViewportHandle, Visualizer};
 use crate::grid::system;
+use crate::{grid, Attach, Grid, SyncPoint, ViewportHandle, Visualizer};
 
 pub(crate) struct GridAttachment;
 
@@ -11,7 +11,7 @@ impl Attach for GridAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization), ));
+            .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::config_grid.in_set(SyncPoint::Config),
             system::set_from_view.in_set(SyncPoint::Grid),

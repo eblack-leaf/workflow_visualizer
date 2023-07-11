@@ -4,24 +4,24 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, Level, trace};
+use tracing::{debug, trace, Level};
 
-use workflow_visualizer::{
-    bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, Sender,
-    TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
-};
-use workflow_visualizer::{
-    Attach, BundledIcon, BundlePlacement, Color, EntityName, GfxOptions, Icon, IconBitmap,
-    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType,
-    Runner, Text, TextScaleAlignment, TextWrapStyle, Theme,
-    ThemeDescriptor, Touchable, TouchListener, Visualizer, Workflow,
-};
-use workflow_visualizer::{ResponsiveGridPoint, ResponsiveGridView};
 use workflow_visualizer::bevy_ecs::prelude::{
     Entity, IntoSystemConfig, NonSend, Query, Res, ResMut, Resource,
 };
 use workflow_visualizer::RawMarker;
 use workflow_visualizer::ResponsiveUnit;
+use workflow_visualizer::{
+    bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, Sender,
+    TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
+};
+use workflow_visualizer::{
+    Attach, BundlePlacement, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap,
+    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, Runner, Text,
+    TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, TouchListener, Touchable,
+    Visualizer, Workflow,
+};
+use workflow_visualizer::{ResponsiveGridPoint, ResponsiveGridView};
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
 struct BitmapLocation {

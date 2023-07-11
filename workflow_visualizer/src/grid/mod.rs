@@ -18,21 +18,24 @@ pub use marker::RawMarkerGrouping;
 use marker::RowConfig;
 pub use responsive::{ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, ResponsiveView};
 pub(crate) use system::config_grid;
-pub use view::{GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias, GridPoint, GridRange, GridView, GridViewBuilder};
+pub use view::{
+    GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
+    GridPoint, GridRange, GridView, GridViewBuilder, PlacementBuilder,
+};
 
+use crate::bundling::{BundleBuilder, BundleExtension};
+use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
-use crate::bundling::{BundleBuilder, BundleExtension};
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 mod attachment;
 mod marker;
-mod view;
 mod responsive;
 mod system;
+mod view;
 
 /// Span used for setting the number of columns available in the Grid
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -188,17 +191,23 @@ pub trait BundlePlacement
 where
     Self: Sized + Bundle,
 {
-    fn responsively_viewed<R: Into<ResponsiveGridView>>(self, view: R) -> BundleBuilder<Self, ResponsiveGridView> {
-        self.extend(view)
+    fn responsively_viewed<R: Into<ResponsiveGridView>>(
+        self,
+        view: R,
+    ) -> BundleBuilder<Self, ResponsiveGridView> {
+        self.extend(view.into())
     }
     fn responsively_point_viewed<R: Into<ResponsiveGridPoint>>(
         self,
         view: R,
     ) -> BundleBuilder<Self, ResponsiveGridPoint> {
-        self.extend(view)
+        self.extend(view.into())
     }
-    fn absolute<S: Into<Section<InterfaceContext>>>(self, section: S) -> BundleBuilder<Self, Section<InterfaceContext>> {
-        self.extend(section)
+    fn absolute<S: Into<Section<InterfaceContext>>>(
+        self,
+        section: S,
+    ) -> BundleBuilder<Self, Section<InterfaceContext>> {
+        self.extend(section.into())
     }
 }
 impl<T: Bundle + Sized> BundlePlacement for T {}

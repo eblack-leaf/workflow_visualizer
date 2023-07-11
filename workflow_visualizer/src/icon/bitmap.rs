@@ -64,7 +64,7 @@ impl IconBitmap {
     pub fn bundled(icon: BundledIcon) -> Self {
         match icon {
             BundledIcon::Square => Self::new(Self::read_icon_file(include_str!(
-                "bundled_icons/something.icon"
+                "bundled_icons/square.icon"
             ))),
             BundledIcon::Edit => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/edit.icon"

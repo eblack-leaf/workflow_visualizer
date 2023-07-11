@@ -2,10 +2,10 @@
 
 use tracing::Level;
 
-use workflow_visualizer::GfxOptions;
-use workflow_visualizer::Runner;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
+use workflow_visualizer::GfxOptions;
+use workflow_visualizer::Runner;
 
 use crate::workflow::Engen;
 
