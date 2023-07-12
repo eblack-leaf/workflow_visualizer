@@ -1,5 +1,6 @@
-use crate::{EntityName, RawMarker};
 use std::collections::HashMap;
+
+use crate::{EntityName, RawMarker};
 
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]
@@ -109,74 +110,45 @@ pub enum GridMarkerBias {
 #[derive(Copy, Clone, PartialEq)]
 pub struct GridLocationOffset(pub RawMarker);
 
-#[derive(Copy, Clone)]
-pub struct GridViewBuilder {
-    horizontal: Option<GridRange>,
-    vertical: Option<GridRange>,
+pub struct PlacementReference {
+    pub locations: HashMap<&'static str, GridLocation>,
+    pub horizontal_ranges: HashMap<EntityName, GridRange>,
+    pub vertical_ranges: HashMap<EntityName, GridRange>,
+    pub points: HashMap<EntityName, GridPoint>,
 }
 
-impl GridViewBuilder {
+impl PlacementReference {
     pub fn new() -> Self {
         Self {
-            horizontal: None,
-            vertical: None,
+            locations: HashMap::new(),
+            horizontal_ranges: HashMap::new(),
+            vertical_ranges: HashMap::new(),
+            points: HashMap::new(),
         }
     }
-    pub fn with_horizontal<T: Into<GridRange>>(mut self, range: T) -> Self {
-        self.horizontal.replace(range.into());
-        self
-    }
-    pub fn with_vertical<T: Into<GridRange>>(mut self, range: T) -> Self {
-        self.vertical.replace(range.into());
-        self
-    }
-    pub fn horizontal(&self) -> Option<GridRange> {
-        self.horizontal
-    }
-    pub fn vertical(&self) -> Option<GridRange> {
-        self.vertical
-    }
-    pub fn build(&mut self) -> Option<GridView> {
-        if let Some(hor) = self.horizontal {
-            if let Some(ver) = self.vertical {
-                return Some(GridView::from((hor, ver)));
+    pub fn add_location<L: Into<GridLocation>>(&mut self, id: &'static str, location: L) {}
+    pub fn add_horizontal_range<T: Into<EntityName>, R: Into<GridRange>>(&mut self, name: T, range: R) {}
+    pub fn add_vertical_range<T: Into<EntityName>, R: Into<GridRange>>(&mut self, name: T, range: R) {}
+    pub fn add_view<V: Into<GridView>, N: Into<EntityName>>(&mut self, name: N, view: V) {}
+    pub fn view<T: Into<EntityName>>(&self, name: T) -> Option<GridView> {
+        let name = name.into();
+        if let Some(horiz) = self.horizontal_ranges.get(&name).copied() {
+            if let Some(vert) = self.vertical_ranges.get(&name).copied() {
+                return Some((horiz, vert).into())
             }
         }
         None
     }
-}
-impl<T: Into<GridRange>> From<(T, T)> for GridViewBuilder {
-    fn from(value: (T, T)) -> Self {
-        GridViewBuilder {
-            horizontal: Some(value.0.into()),
-            vertical: Some(value.1.into()),
-        }
+    pub fn point<T: Into<EntityName>>(&self, name: T) -> Option<GridPoint> {
+        self.points.get(&name.into()).copied()
     }
-}
-pub struct PlacementBuilder {
-    pub views: HashMap<EntityName, GridViewBuilder>,
-    pub points: HashMap<EntityName, GridPoint>,
-}
-impl PlacementBuilder {
-    pub fn new() -> Self {
-        Self {
-            views: HashMap::new(),
-            points: HashMap::new(),
-        }
+    pub fn location(&self, id: &'static str) -> Option<GridLocation> {
+        self.locations.get(id).copied()
     }
-    pub fn add<T: Into<EntityName>, G: Into<GridViewBuilder>>(&mut self, name: T, view: G) {
-        self.views.insert(name.into(), view.into());
+    pub fn horizontal<N: Into<EntityName>>(&self, name: N) -> GridRange {
+        self.horizontal_ranges.get(&name.into()).copied().expect("no horizontal")
     }
-    pub fn add_point<T: Into<EntityName>, G: Into<GridPoint>>(&mut self, name: T, point: G) {
-        self.points.insert(name.into(), point.into());
-    }
-    pub fn view_get_mut<T: Into<EntityName>>(&mut self, name: T) -> &mut GridViewBuilder {
-        self.views.get_mut(&name.into()).expect("no view")
-    }
-    pub fn view_get<T: Into<EntityName>>(&self, name: T) -> GridViewBuilder {
-        self.views.get(&name.into()).copied().expect("no view")
-    }
-    pub fn point_get<T: Into<EntityName>>(&self, name: T) -> GridPoint {
-        self.points.get(&name.into()).copied().expect("no point")
+    pub fn vertical<N: Into<EntityName>>(&self, name: N) -> GridRange {
+        self.vertical_ranges.get(&name.into()).copied().expect("no horizontal")
     }
 }

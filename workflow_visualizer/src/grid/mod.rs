@@ -20,16 +20,16 @@ pub use responsive::{ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Re
 pub(crate) use system::config_grid;
 pub use view::{
     GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, GridViewBuilder, PlacementBuilder,
+    GridPoint, GridRange, GridView, GridViewBuilder, PlacementReference,
 };
 
-use crate::bundling::{BundleBuilder, BundleExtension};
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
+use crate::bundling::{BundleBuilder, BundleExtension};
+use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 mod attachment;
 mod marker;

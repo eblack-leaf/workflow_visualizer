@@ -1,8 +1,10 @@
-use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+
+use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 use tracing::info;
+
 use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -11,6 +13,7 @@ pub enum Response {
     TokenAdded(TokenName),
     TokenRemoved(TokenName),
     TokenOtp((TokenName, TokenOtp)),
+    RequestedTokenNames(Vec<TokenName>)
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -19,6 +22,7 @@ pub enum Action {
     AddToken((TokenName, Token)),
     GenerateOtp(TokenName),
     RemoveToken(TokenName),
+    RequestTokenNames
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TokenOtp(pub String);
@@ -32,7 +36,7 @@ pub struct Engen {
 impl Engen {
     pub fn new() -> Self {
         Self {
-            tokens: HashMap::new(),
+            tokens: HashMap::new(),// include from file to generate hashmap
         }
     }
 }
@@ -60,6 +64,9 @@ impl Workflow for Engen {
             Response::TokenOtp((name, otp)) => {
                 info!("token otp: {:?}:{:?}", name, otp);
             }
+            Response::RequestedTokenNames(tokens) => {
+                // put into visualizer
+            }
         }
     }
 
@@ -80,6 +87,9 @@ impl Workflow for Engen {
                 Response::TokenOtp((name, TokenOtp(otp)))
             }
             Action::RemoveToken(name) => Response::TokenRemoved(name),
+            Action::RequestTokenNames => {
+                // get tokens from engen
+            }
         }
     }
 }

@@ -9,6 +9,10 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
 
+use crate::{
+    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
+    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
+};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
@@ -33,10 +37,6 @@ use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
-};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
@@ -157,8 +157,15 @@ impl Visualizer {
     pub fn set_theme(&mut self, theme: Theme) {
         self.job.container.insert_resource(theme);
     }
-    /// spawn batches of alike components efficiently with names
-    pub fn add_named_entities<T: Bundle, S: Into<EntityName>>(
+    pub fn spawn_named<T: Bundle, SQ: Into<NamedSpawnQueue<T>>>(&mut self, spawn_queue: SQ) {
+        let queue = spawn_queue.into();
+        self.add_named_entities(queue.names, queue.datum);
+    }
+    pub fn spawn<T: Bundle, SQ: Into<SpawnQueue<T>>>(&mut self, spawn_queue: SQ) {
+        let queue = spawn_queue.into();
+        self.add_entities(queue.datum);
+    }
+    fn add_named_entities<T: Bundle, S: Into<EntityName>>(
         &mut self,
         mut names: Vec<S>,
         datum: Vec<T>,
@@ -173,8 +180,7 @@ impl Visualizer {
             self.job.store_entity(names.next().unwrap().into(), id);
         }
     }
-    /// spawn batches of alike components efficiently
-    pub fn add_entities<T: Bundle>(&mut self, datum: Vec<T>) -> Vec<Entity> {
+    fn add_entities<T: Bundle>(&mut self, datum: Vec<T>) -> Vec<Entity> {
         let ids = self
             .job
             .container
@@ -447,5 +453,74 @@ impl Visualizer {
     }
     fn invoke_attach<Attachment: Attach>(&mut self) {
         Attachment::attach(self);
+    }
+}
+
+pub struct SpawnQueue<T: Bundle> {
+    datum: Vec<T>,
+}
+
+impl<T: Bundle> SpawnQueue<T> {
+    pub fn new() -> Self {
+        Self {
+            datum: vec![]
+        }
+    }
+    pub fn queue(&mut self, data: T) {
+        self.datum.push(data);
+    }
+}
+
+impl<T: Bundle> From<T> for SpawnQueue<T> {
+    fn from(value: T) -> Self {
+        SpawnQueue {
+            datum: vec![value],
+        }
+    }
+}
+
+impl<T: Bundle> From<Vec<T>> for SpawnQueue<T> {
+    fn from(value: Vec<T>) -> Self {
+        SpawnQueue {
+            datum: value
+        }
+    }
+}
+
+pub struct NamedSpawnQueue<T: Bundle> {
+    names: Vec<EntityName>,
+    datum: Vec<T>,
+}
+
+impl<T: Bundle> NamedSpawnQueue<T> {
+    pub fn new() -> Self {
+        Self {
+            names: vec![],
+            datum: vec![],
+        }
+    }
+    pub fn queue<N: Into<EntityName>>(&mut self, name: N, data: T) {
+        self.names.push(name.into());
+        self.datum.push(data);
+    }
+}
+
+impl<T: Bundle, N: Into<EntityName>> From<(N, T)> for NamedSpawnQueue<T> {
+    fn from(value: (N, T)) -> Self {
+        NamedSpawnQueue {
+            names: vec![value.0.into()],
+            datum: vec![value.1],
+
+        }
+    }
+}
+
+impl<T: Bundle, N: Into<EntityName>> From<(Vec<N>, Vec<T>)> for NamedSpawnQueue<T> {
+    fn from(mut value: (Vec<N>, Vec<T>)) -> Self {
+        NamedSpawnQueue {
+            names: value.0.drain(..).map(|n| n.into()).collect::<Vec<EntityName>>(),
+            datum: value.1,
+
+        }
     }
 }

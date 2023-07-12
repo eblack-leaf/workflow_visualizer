@@ -31,19 +31,19 @@ pub use job::JobSyncPoint;
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
-pub use workflow::{start_web_worker, Runner, Sender, Workflow};
+pub use workflow::{Runner, Sender, start_web_worker, Workflow};
 
 pub use crate::animate::Interpolator;
 pub use crate::color::Color;
 pub use crate::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
+    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-pub use crate::grid::{BundlePlacement, Grid, GridViewBuilder, HorizontalSpan, PlacementBuilder};
+pub use crate::grid::{BundlePlacement, Grid, GridViewBuilder, HorizontalSpan, PlacementReference};
 pub use crate::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
 };
@@ -64,8 +64,8 @@ pub use crate::texture_atlas::{
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};
 pub use crate::touch::{
-    CurrentlyPressed, PrimaryTouch, ToggleState, TouchListener, TouchLocation, TouchTrigger,
-    Touchable,
+    CurrentlyPressed, PrimaryTouch, ToggleState, Touchable, TouchListener, TouchLocation,
+    TouchTrigger,
 };
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};

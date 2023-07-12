@@ -70,6 +70,9 @@ impl EntityStore {
     pub fn get<T: Into<EntityName>>(&self, name: T) -> Option<Entity> {
         self.store.get(&name.into()).copied()
     }
+    pub fn store<T: Into<EntityName>>(&mut self, name: T, entity: Entity) {
+        self.store.insert(name.into(), entity);
+    }
 }
 
 /// Extensible container + task runner

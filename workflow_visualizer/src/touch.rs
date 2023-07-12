@@ -6,12 +6,12 @@ use bevy_ecs::prelude::{
 use tracing::{debug, trace};
 use winit::event::{ElementState, MouseButton};
 
-use crate::focus::FocusedEntity;
-use crate::viewport::ViewportHandle;
-use crate::visualizer::{Attach, Visualizer};
 use crate::{
     Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, SyncPoint,
 };
+use crate::focus::FocusedEntity;
+use crate::viewport::ViewportHandle;
+use crate::visualizer::{Attach, Visualizer};
 
 /// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]
@@ -93,7 +93,7 @@ pub struct TouchLocation(pub Option<TrackedTouch>);
 /// Whether received a touch internally
 #[derive(Component, Copy, Clone)]
 pub struct TouchTrigger {
-    pub(crate) touched: bool,
+    touched: bool,
 }
 
 /// Currently touched or not logically
