@@ -5,18 +5,18 @@ use bytemuck::{Pod, Zeroable};
 use compact_str::CompactString;
 use wgpu::util::DeviceExt;
 
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::icon::bitmap::{
-    IconBitmapLayout, IconBitmapRequest, IconPixelData, ICON_BITMAP_DIMENSION,
-};
-use crate::icon::component::IconId;
-use crate::texture_atlas::AtlasLocation;
 use crate::{
     Area, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasPosition, Color, GfxSurface, Indexer,
     InstanceAttributeManager, InterfaceContext, Key, KeyFactory, Layer, NullBit, NumericalContext,
     Position, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, Section, TextureAtlas,
     TextureCoordinates, Viewport,
 };
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::icon::bitmap::{
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
+};
+use crate::icon::component::IconId;
+use crate::texture_atlas::AtlasLocation;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {
@@ -102,12 +102,12 @@ pub(crate) fn setup(
         writes.push(request.clone());
         cmd.entity(entity).despawn();
     }
-    let dimension = AtlasDimension::new((writes.len() as f32 / 2f32).ceil() as u32);
+    let mut icon_bitmap_layout = IconBitmapLayout::new();
+    let dimension = AtlasDimension::new(((writes.len() as f32 / 2f32).ceil() as u32).max(1));
     let block = AtlasBlock::new((ICON_BITMAP_DIMENSION, ICON_BITMAP_DIMENSION));
     let atlas = TextureAtlas::new(&gfx, block, dimension);
     let mut x_index = 0;
     let mut y_index = 0;
-    let mut icon_bitmap_layout = IconBitmapLayout::new();
     for mut write in writes {
         let atlas_location = AtlasLocation::new(x_index, y_index);
         let coordinates = atlas.write::<IconPixelData>(

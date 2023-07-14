@@ -1,15 +1,18 @@
-#[cfg(target_family = "wasm")]
-use crate::workflow::bridge::WebSender;
-use crate::workflow::bridge::{add_exit_signal_handler, OutputWrapper};
-use crate::workflow::run::internal_loop;
-use crate::workflow::runner::EngenHandle;
-use crate::{Runner, Sender, Visualizer, Workflow};
-use gloo_worker::{HandlerId, Worker, WorkerScope};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+
+use gloo_worker::{HandlerId, Worker, WorkerScope};
 use winit::dpi::PhysicalSize;
 use winit::event_loop::EventLoopBuilder;
 use winit::window::{Window, WindowBuilder};
+
+use crate::{Runner, Sender, Visualizer, Workflow};
+use crate::workflow::bridge::OutputWrapper;
+#[cfg(target_family = "wasm")]
+use crate::workflow::bridge::WebSender;
+use crate::workflow::run::internal_loop;
+use crate::workflow::runner::EngenHandle;
+
 impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
     type Message = OutputWrapper<T>;
     type Input = T::Action;
@@ -70,7 +73,7 @@ fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
 
 #[cfg(target_arch = "wasm32")]
 fn web_resizing(window: &Rc<Window>) {
-    use wasm_bindgen::{prelude::*, JsCast};
+    use wasm_bindgen::{JsCast, prelude::*};
     let w_window = window.clone();
     let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
         let scale_factor = w_window.scale_factor();
@@ -123,7 +126,6 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
         .container
         .insert_non_send_resource(Sender::new(WebSender(bridge)));
     let mut initialized = true;
-    add_exit_signal_handler::<T>(&mut visualizer);
     use winit::platform::web::EventLoopExtWebSys;
     event_loop.spawn(move |event, event_loop_window_target, control_flow| {
         internal_loop::<T>(

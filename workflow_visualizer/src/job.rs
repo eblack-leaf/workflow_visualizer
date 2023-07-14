@@ -55,26 +55,6 @@ impl Exit {
     }
 }
 
-/// Store for entity that maps to EntityName
-#[derive(Resource)]
-pub struct EntityStore {
-    pub store: HashMap<EntityName, Entity>,
-}
-
-impl EntityStore {
-    pub fn new() -> Self {
-        Self {
-            store: HashMap::new(),
-        }
-    }
-    pub fn get<T: Into<EntityName>>(&self, name: T) -> Option<Entity> {
-        self.store.get(&name.into()).copied()
-    }
-    pub fn store<T: Into<EntityName>>(&mut self, name: T, entity: Entity) {
-        self.store.insert(name.into(), entity);
-    }
-}
-
 /// Extensible container + task runner
 pub struct Job {
     pub execution_state: ExecutionState,
@@ -87,36 +67,7 @@ pub struct Job {
 pub enum JobSyncPoint {
     Idle,
 }
-
-/// Name for identifying an Entity
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
-pub struct EntityName(pub CompactString);
-impl EntityName {
-    pub fn new<S: Into<String>>(name: S) -> Self {
-        EntityName(CompactString::new(name.into()))
-    }
-}
-impl From<&'static str> for EntityName {
-    fn from(value: &'static str) -> Self {
-        Self::new(value.to_string())
-    }
-}
-impl From<String> for EntityName {
-    fn from(value: String) -> Self {
-        Self::new(value)
-    }
-}
 impl Job {
-    pub fn store_entity<T: Into<EntityName>>(&mut self, id: T, entity: Entity) {
-        self.container
-            .get_resource_mut::<EntityStore>()
-            .expect("no entity store")
-            .store
-            .insert(id.into(), entity);
-    }
-    pub fn get_entity<T: Into<EntityName>>(&mut self, id: T) {
-        todo!()
-    }
     pub(crate) fn new() -> Self {
         Self {
             execution_state: ExecutionState::Suspended,
@@ -124,7 +75,6 @@ impl Job {
                 let mut container = Container::new();
                 container.insert_resource(Exit::new());
                 container.insert_resource(Idle::new());
-                container.insert_resource(EntityStore::new());
                 container
             },
             tasks: HashMap::new(),

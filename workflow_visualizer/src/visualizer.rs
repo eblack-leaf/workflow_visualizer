@@ -10,8 +10,8 @@ use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
 
 use crate::{
-    Area, DeviceContext, EntityName, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
-    ScaleFactor, Section, Theme, Viewport, ViewportHandle, WindowResize,
+    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
+    Theme, Viewport, ViewportHandle, WindowResize,
 };
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
@@ -157,36 +157,12 @@ impl Visualizer {
     pub fn set_theme(&mut self, theme: Theme) {
         self.job.container.insert_resource(theme);
     }
-    pub fn spawn_named<T: Bundle, SQ: Into<NamedSpawnQueue<T>>>(&mut self, spawn_queue: SQ) {
+    pub fn spawn<T: Bundle, SQ: Into<SpawnQueue<T>>>(&mut self, spawn_queue: SQ) -> Vec<Entity> {
         let queue = spawn_queue.into();
-        self.add_named_entities(queue.names, queue.datum);
-    }
-    pub fn spawn<T: Bundle, SQ: Into<SpawnQueue<T>>>(&mut self, spawn_queue: SQ) {
-        let queue = spawn_queue.into();
-        self.add_entities(queue.datum);
-    }
-    fn add_named_entities<T: Bundle, S: Into<EntityName>>(
-        &mut self,
-        mut names: Vec<S>,
-        datum: Vec<T>,
-    ) {
-        let ids = self
-            .job
+        self.job
             .container
-            .spawn_batch(datum)
-            .collect::<Vec<Entity>>();
-        let mut names = names.drain(..);
-        for id in ids {
-            self.job.store_entity(names.next().unwrap().into(), id);
-        }
-    }
-    fn add_entities<T: Bundle>(&mut self, datum: Vec<T>) -> Vec<Entity> {
-        let ids = self
-            .job
-            .container
-            .spawn_batch(datum)
-            .collect::<Vec<Entity>>();
-        ids
+            .spawn_batch(queue.datum)
+            .collect::<Vec<Entity>>()
     }
     pub fn register_touch(&mut self, touch: winit::event::Touch) {
         let viewport_section = self
@@ -462,9 +438,7 @@ pub struct SpawnQueue<T: Bundle> {
 
 impl<T: Bundle> SpawnQueue<T> {
     pub fn new() -> Self {
-        Self {
-            datum: vec![]
-        }
+        Self { datum: vec![] }
     }
     pub fn queue(&mut self, data: T) {
         self.datum.push(data);
@@ -473,54 +447,12 @@ impl<T: Bundle> SpawnQueue<T> {
 
 impl<T: Bundle> From<T> for SpawnQueue<T> {
     fn from(value: T) -> Self {
-        SpawnQueue {
-            datum: vec![value],
-        }
+        SpawnQueue { datum: vec![value] }
     }
 }
 
 impl<T: Bundle> From<Vec<T>> for SpawnQueue<T> {
     fn from(value: Vec<T>) -> Self {
-        SpawnQueue {
-            datum: value
-        }
-    }
-}
-
-pub struct NamedSpawnQueue<T: Bundle> {
-    names: Vec<EntityName>,
-    datum: Vec<T>,
-}
-
-impl<T: Bundle> NamedSpawnQueue<T> {
-    pub fn new() -> Self {
-        Self {
-            names: vec![],
-            datum: vec![],
-        }
-    }
-    pub fn queue<N: Into<EntityName>>(&mut self, name: N, data: T) {
-        self.names.push(name.into());
-        self.datum.push(data);
-    }
-}
-
-impl<T: Bundle, N: Into<EntityName>> From<(N, T)> for NamedSpawnQueue<T> {
-    fn from(value: (N, T)) -> Self {
-        NamedSpawnQueue {
-            names: vec![value.0.into()],
-            datum: vec![value.1],
-
-        }
-    }
-}
-
-impl<T: Bundle, N: Into<EntityName>> From<(Vec<N>, Vec<T>)> for NamedSpawnQueue<T> {
-    fn from(mut value: (Vec<N>, Vec<T>)) -> Self {
-        NamedSpawnQueue {
-            names: value.0.drain(..).map(|n| n.into()).collect::<Vec<EntityName>>(),
-            datum: value.1,
-
-        }
+        SpawnQueue { datum: value }
     }
 }

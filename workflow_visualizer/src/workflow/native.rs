@@ -1,17 +1,20 @@
-#[cfg(not(target_family = "wasm"))]
-use crate::workflow::bridge::NativeSender;
-use crate::workflow::bridge::{add_exit_signal_handler, Receiver, Responder};
-use crate::workflow::run::internal_loop;
-use crate::workflow::runner::EngenHandle;
-use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
-use bevy_ecs::prelude::Resource;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+
+use bevy_ecs::prelude::Resource;
 use winit::dpi::PhysicalSize;
 use winit::event_loop::{EventLoopBuilder, EventLoopWindowTarget};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Window, WindowBuilder};
+
+use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
+use crate::workflow::bridge::{Receiver, Responder};
+#[cfg(not(target_family = "wasm"))]
+use crate::workflow::bridge::NativeSender;
+use crate::workflow::run::internal_loop;
+use crate::workflow::runner::EngenHandle;
+
 #[cfg(not(target_family = "wasm"))]
 pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
     mut runner: Runner,
@@ -53,7 +56,6 @@ pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
             .insert_non_send_resource(Sender::new(NativeSender::<T>::new(sender)));
         let mut window: Option<Rc<Window>> = None;
         let mut initialized = false;
-        add_exit_signal_handler::<T>(&mut visualizer);
         let desktop_dimensions = runner.desktop_dimensions;
         event_loop.run(move |event, event_loop_window_target, control_flow| {
             internal_loop::<T>(

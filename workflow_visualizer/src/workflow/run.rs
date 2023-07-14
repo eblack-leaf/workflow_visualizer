@@ -1,11 +1,13 @@
-use crate::workflow::bridge::ExitSignal;
-use crate::workflow::native::initialize_native_window;
-use crate::{Area, DeviceContext, Visualizer, Workflow};
 use std::rc::Rc;
+
 use tracing::{info, trace};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
+
+use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
+use crate::job::Exit;
+use crate::workflow::native::initialize_native_window;
 
 pub(crate) fn internal_loop<T: Workflow + 'static>(
     mut visualizer: &mut Visualizer,
@@ -32,7 +34,12 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
         },
         Event::WindowEvent { event, .. } => match event {
             WindowEvent::CloseRequested => {
-                visualizer.job.container.send_event(ExitSignal {});
+                visualizer
+                    .job
+                    .container
+                    .get_non_send_resource_mut::<Sender<T>>()
+                    .expect("sender")
+                    .send(T::exit_action());
             }
             WindowEvent::Resized(size) => {
                 info!("resizing: {:?}", size);
@@ -71,7 +78,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             info!(message);
             #[cfg(target_family = "wasm")]
             gloo_console::info!(wasm_bindgen::JsValue::from_str(message.as_str()));
-            if event == T::exit_response() {
+            if T::is_exit_response(&event) {
                 control_flow.set_exit();
             }
             T::handle_response(visualizer, event);
@@ -79,7 +86,12 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
         Event::MainEventsCleared => {
             visualizer.exec();
             if visualizer.job.should_exit() {
-                visualizer.job.container.send_event(ExitSignal {});
+                visualizer
+                    .job
+                    .container
+                    .get_non_send_resource_mut::<Sender<T>>()
+                    .expect("sender")
+                    .send(T::exit_action());
             }
         }
         Event::RedrawRequested(_) => {

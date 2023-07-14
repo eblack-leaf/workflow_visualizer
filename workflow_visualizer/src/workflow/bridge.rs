@@ -1,10 +1,12 @@
-use crate::workflow::runner::EngenHandle;
-use crate::{SyncPoint, Visualizer, Workflow};
+use std::fmt::Debug;
+
 use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, NonSend, Resource};
 use gloo_worker::{HandlerId, Worker, WorkerBridge};
-use std::fmt::Debug;
 use winit::event_loop::EventLoopProxy;
-pub(crate) struct ExitSignal {}
+
+use crate::{SyncPoint, Visualizer, Workflow};
+use crate::workflow::runner::EngenHandle;
+
 pub(crate) struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
     pub(crate) receiver: tokio::sync::mpsc::UnboundedReceiver<T>,
@@ -99,25 +101,5 @@ where
             handler_id,
             response,
         }
-    }
-}
-pub(crate) fn add_exit_signal_handler<T: Workflow + Default + 'static>(
-    visualizer: &mut Visualizer,
-) {
-    visualizer
-        .job
-        .container
-        .insert_resource(Events::<ExitSignal>::default());
-    visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-        Events::<ExitSignal>::update_system.in_set(SyncPoint::Event),
-        send_exit_request::<T>.in_set(SyncPoint::Initialization),
-    ));
-}
-fn send_exit_request<T: Workflow + 'static + Default>(
-    sender: NonSend<Sender<T>>,
-    mut exit_requests: EventReader<ExitSignal>,
-) {
-    if !exit_requests.is_empty() {
-        sender.send(T::exit_action());
     }
 }

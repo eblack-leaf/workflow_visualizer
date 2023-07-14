@@ -43,11 +43,11 @@ pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-pub use crate::grid::{BundlePlacement, Grid, GridViewBuilder, HorizontalSpan, PlacementReference};
+pub use crate::grid::{BundlePlacement, Grid, HorizontalSpan, PlacementReference};
 pub use crate::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
 };
-pub use crate::job::{EntityName, EntityStore, Job};
+pub use crate::job::Job;
 pub use crate::line::{Line, LineRender};
 pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelType};
 pub use crate::path::{Path, PathView, ResponsivePathView};

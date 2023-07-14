@@ -13,7 +13,7 @@ pub enum Response {
     TokenAdded(TokenName),
     TokenRemoved(TokenName),
     TokenOtp((TokenName, TokenOtp)),
-    RequestedTokenNames(Vec<TokenName>)
+    RequestedTokenNames(Vec<TokenName>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -22,7 +22,7 @@ pub enum Action {
     AddToken((TokenName, Token)),
     GenerateOtp(TokenName),
     RemoveToken(TokenName),
-    RequestTokenNames
+    RequestTokenNames,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TokenOtp(pub String);
@@ -36,7 +36,7 @@ pub struct Engen {
 impl Engen {
     pub fn new() -> Self {
         Self {
-            tokens: HashMap::new(),// include from file to generate hashmap
+            tokens: HashMap::new(), // include from file to generate hashmap
         }
     }
 }
@@ -52,9 +52,6 @@ impl Workflow for Engen {
 
     fn handle_response(_visualizer: &mut Visualizer, response: Self::Response) {
         match response {
-            Response::ExitConfirmed => {
-                // save?
-            }
             Response::TokenAdded(name) => {
                 info!("token added: {:?}", name);
             }
@@ -67,20 +64,12 @@ impl Workflow for Engen {
             Response::RequestedTokenNames(tokens) => {
                 // put into visualizer
             }
+            Response::ExitConfirmed => {}
         }
-    }
-
-    fn exit_action() -> Self::Action {
-        Action::ExitRequest
-    }
-
-    fn exit_response() -> Self::Response {
-        Response::ExitConfirmed
     }
 
     async fn handle_action(_engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
         match action {
-            Action::ExitRequest => <Engen as Workflow>::exit_response(),
             Action::AddToken((name, _token)) => Response::TokenAdded(name),
             Action::GenerateOtp(name) => {
                 let otp = "".to_string();
@@ -89,7 +78,20 @@ impl Workflow for Engen {
             Action::RemoveToken(name) => Response::TokenRemoved(name),
             Action::RequestTokenNames => {
                 // get tokens from engen
+                Response::RequestedTokenNames(vec![])
             }
+            Action::ExitRequest => Response::ExitConfirmed,
+        }
+    }
+
+    fn exit_action() -> Self::Action {
+        Action::ExitRequest
+    }
+
+    fn is_exit_response(res: &Self::Response) -> bool {
+        match res {
+            Response::ExitConfirmed => true,
+            _ => false,
         }
     }
 }

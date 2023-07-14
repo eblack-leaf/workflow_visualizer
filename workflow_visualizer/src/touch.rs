@@ -399,16 +399,28 @@ impl MouseAdapter {
 }
 pub(crate) struct TouchAttachment;
 impl Attach for TouchAttachment {
-    fn attach(engen: &mut Visualizer) {
-        engen.job.container.insert_resource(PrimaryTouch::new());
-        engen.job.container.insert_resource(TouchGrabState::new());
-        engen
+    fn attach(visualizer: &mut Visualizer) {
+        visualizer
+            .job
+            .container
+            .insert_resource(PrimaryTouch::new());
+        visualizer
+            .job
+            .container
+            .insert_resource(TouchGrabState::new());
+        visualizer
             .job
             .container
             .insert_resource(Events::<TouchEvent>::default());
-        engen.job.container.insert_resource(TouchAdapter::new());
-        engen.job.container.insert_resource(MouseAdapter::new());
-        engen.job.task(Visualizer::TASK_MAIN).add_systems((
+        visualizer
+            .job
+            .container
+            .insert_resource(TouchAdapter::new());
+        visualizer
+            .job
+            .container
+            .insert_resource(MouseAdapter::new());
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             Events::<TouchEvent>::update_system.in_set(SyncPoint::Event),
             read_touch_events.in_set(SyncPoint::Preparation),
             reset_touched.in_set(SyncPoint::Finish),

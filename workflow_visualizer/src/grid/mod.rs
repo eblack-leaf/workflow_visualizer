@@ -20,7 +20,7 @@ pub use responsive::{ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Re
 pub(crate) use system::config_grid;
 pub use view::{
     GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, GridViewBuilder, PlacementReference,
+    GridPoint, GridRange, GridView, PlacementReference,
 };
 
 use crate::{
