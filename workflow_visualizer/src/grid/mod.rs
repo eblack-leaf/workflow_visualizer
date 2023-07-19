@@ -71,6 +71,7 @@ pub struct Grid {
     pub(crate) column_config: ColumnConfig,
     pub(crate) row_config: RowConfig,
     pub(crate) gutter_config: GutterConfig,
+    pub(crate) vertical_markers: u32,
 }
 impl Grid {
     pub(crate) const SPAN_FOUR_EXT_BASE: f32 = 400f32;
@@ -116,7 +117,11 @@ impl Grid {
             gutter_config: GutterConfig {
                 base: span.gutter_base(),
             },
+            vertical_markers: (area.height / RawMarker::PX).floor() as u32,
         }
+    }
+    pub fn vertical_markers(&self) -> i32 {
+        self.vertical_markers as i32
     }
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
         ((width - base) / RawMarker::PX).floor() as i32 / columns
@@ -152,6 +157,7 @@ impl Grid {
     pub fn markers_per_row(&self) -> i32 {
         self.row_config.base.0
     }
+    pub fn markers_per_gutter(&self) -> i32 { self.gutter_config.base.0 }
     pub fn calc_horizontal_location(&self, grid_location: GridLocation) -> RawMarker {
         let markers_per_column = self.markers_per_column();
         let content_location = grid_location.location;

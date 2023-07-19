@@ -1,19 +1,13 @@
-use workflow_visualizer::{
-    Area, BundledIcon, BundleExtension, BundlePlacement, Button, ButtonType, Color, Focus,
-    FocusInputListener, Icon, IconBitmap, IconBitmapRequest, IconScale, InterfaceContext, Layer,
-    Line, Panel, PanelType, PlacementReference, Position, ResponsiveGridPoint, ResponsiveGridView,
-    ResponsivePathView, ResponsiveUnit, ScaleFactor, Sender, Text, TextScaleAlignment, TextValue,
-    TextWrapStyle, Touchable, TouchListener, TouchTrigger, ViewportHandle, Workflow,
-};
+use workflow_visualizer::{Area, BundledIcon, BundleExtension, BundlePlacement, Button, ButtonType, Color, Focus, FocusInputListener, Grid, Icon, IconBitmap, IconBitmapRequest, IconScale, InterfaceContext, Layer, Line, Panel, PanelType, PlacementReference, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, ScaleFactor, Sender, Text, TextScale, TextScaleAlignment, TextValue, TextWrapStyle, Touchable, TouchListener, TouchTrigger, ViewportHandle, Workflow};
 use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Res};
 
-use crate::controller::SlotController;
-use crate::workflow::{Engen, TokenName};
+use crate::controller::{SlotBlueprint, SlotController};
+use crate::workflow::{Action, Engen, TokenName};
 
-pub(crate) fn setup(mut cmd: Commands, viewport: Res<ViewportHandle>) {
-    let mut placement_ref = PlacementReference::new();
-    let slot_markers = ();
-    let num_slots = ();
+pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
+    let slot_controller = SlotController::new(&grid);
+    sender.send(Action::RequestTokenNames);
+    cmd.insert_resource(slot_controller);
 }
 
 pub(crate) fn send_event(

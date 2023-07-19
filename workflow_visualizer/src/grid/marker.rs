@@ -4,7 +4,7 @@ pub struct RawMarker(pub i32);
 
 impl RawMarker {
     pub const PX: f32 = 4f32;
-    pub fn to_pixel(&self) -> f32 {
+    pub fn to_pixel(self) -> f32 {
         self.0 as f32 * Self::PX
     }
 }

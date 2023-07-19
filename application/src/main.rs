@@ -38,7 +38,7 @@ fn visualizer() -> Visualizer {
 fn main() {
     #[cfg(not(target_family = "wasm"))]
     tracing_subscriber::fmt().with_max_level(Level::WARN).init();
-    let visualizer = visualizer();
+    let mut visualizer = visualizer();
     #[cfg(not(target_family = "wasm"))]
     Runner::new()
         .with_desktop_dimensions((400, 600))

@@ -12,11 +12,11 @@ use workflow_visualizer::bevy_ecs::prelude::{
 use workflow_visualizer::RawMarker;
 use workflow_visualizer::ResponsiveUnit;
 use workflow_visualizer::{
-    bevy_ecs, CurrentlyPressed, EntityStore, Position, PrimaryTouch, ScaleFactor, Sender,
+    bevy_ecs, CurrentlyPressed, Position, PrimaryTouch, ScaleFactor, Sender,
     TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
 };
 use workflow_visualizer::{
-    Attach, BundlePlacement, BundledIcon, Color, EntityName, GfxOptions, Icon, IconBitmap,
+    Attach, BundlePlacement, BundledIcon, Color, GfxOptions, Icon, IconBitmap,
     IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, Runner, Text,
     TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, TouchListener, Touchable,
     Visualizer, Workflow,
@@ -99,7 +99,6 @@ impl BitmapRepr {
 
 fn update(
     mut bitmap_repr: ResMut<BitmapRepr>,
-    entity_store: Res<EntityStore>,
     primary_touch: Res<PrimaryTouch>,
     mut text: Query<(&mut TextValue)>,
     mut icons: Query<(Entity, &mut Color)>,
@@ -391,10 +390,6 @@ impl Workflow for Engen {
         Action::ExitRequest
     }
 
-    fn exit_response() -> Self::Response {
-        Response::ExitConfirmed
-    }
-
     async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
         match action {
             Action::ExitRequest => return Response::ExitConfirmed,
@@ -409,6 +404,13 @@ impl Workflow for Engen {
                 engen.lock().unwrap().write_out();
                 Response::WrittenOut
             }
+        }
+    }
+
+    fn is_exit_response(res: &Self::Response) -> bool {
+        match res {
+            Response::ExitConfirmed => true,
+            _ => false
         }
     }
 }

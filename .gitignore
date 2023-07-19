@@ -13,3 +13,4 @@ logcat.txt
 /website/public/doc/
 /application/android_run.sh
 /application/web_build.sh
+/output.txt

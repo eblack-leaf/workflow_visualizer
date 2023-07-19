@@ -126,18 +126,32 @@ impl PlacementReference {
             points: HashMap::new(),
         }
     }
-    pub fn add_location<L: Into<GridLocation>>(&mut self, id: &'static str, location: L) {}
+    pub fn add_point<P: Into<GridPoint>>(&mut self, id: &'static str, point: P) {
+        self.points.insert(id, point.into());
+    }
+    pub fn add_location<L: Into<GridLocation>>(&mut self, id: &'static str, location: L) {
+        self.locations.insert(id, location.into());
+    }
     pub fn add_horizontal_range<T: Into<&'static str>, R: Into<GridRange>>(
         &mut self,
         name: T,
         range: R,
-    ) {}
+    ) {
+        self.horizontal_ranges.insert(name.into(), range.into());
+    }
     pub fn add_vertical_range<T: Into<&'static str>, R: Into<GridRange>>(
         &mut self,
         name: T,
         range: R,
-    ) {}
-    pub fn add_view<V: Into<GridView>, N: Into<&'static str>>(&mut self, name: N, view: V) {}
+    ) {
+        self.vertical_ranges.insert(name.into(), range.into());
+    }
+    pub fn add_view<V: Into<GridView>, N: Into<&'static str>>(&mut self, name: N, view: V) {
+        let view = view.into();
+        let name = name.into();
+        self.horizontal_ranges.insert(name, view.horizontal);
+        self.vertical_ranges.insert(name, view.vertical);
+    }
     pub fn view<T: Into<&'static str>>(&self, name: T) -> Option<GridView> {
         let name = name.into();
         if let Some(horiz) = self.horizontal_ranges.get(&name).copied() {
