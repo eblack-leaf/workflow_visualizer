@@ -7,7 +7,7 @@ use workflow_visualizer::Runner;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
 
-use crate::controller::SlotController;
+use crate::controller::Slots;
 use crate::workflow::Engen;
 
 mod controller;
@@ -31,7 +31,7 @@ fn visualizer() -> Visualizer {
         Theme::new(theme_desc),
         GfxOptions::native_defaults().with_msaa(1),
     );
-    visualizer.add_attachment::<SlotController>();
+    visualizer.add_attachment::<Slots>();
     visualizer
 }
 

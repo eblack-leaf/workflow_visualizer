@@ -1,4 +1,5 @@
-use workflow_visualizer::{Attach, Grid, RawMarker, TextScale, UserSpaceSyncPoint, Visualizer};
+use std::collections::HashMap;
+use workflow_visualizer::{Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, TextScale, UserSpaceSyncPoint, Visualizer};
 use workflow_visualizer::bevy_ecs;
 use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
@@ -10,10 +11,12 @@ pub(crate) struct Slot {
     pub(crate) otp_text: Entity,
     pub(crate) generate_button: Entity,
     pub(crate) delete_button: Entity,
-    pub(crate) token_name: TokenName,
+    pub(crate) name: TokenName,
 }
 pub(crate) struct SlotBlueprint {
-
+    pub(crate) slots_per_page: usize,
+    pub(crate) anchor: GridPoint,
+    pub(crate) slot_offset_markers: RawMarker,
 }
 impl SlotBlueprint {
     pub(crate) fn new(grid: &Grid) -> Self {
@@ -44,28 +47,60 @@ impl SlotBlueprint {
             num_slots += 1;
         }
         Self {
-
+            slots_per_page: num_slots as usize,
+            anchor: (begin_horizontal, begin_vertical).into(),
+            slot_offset_markers: slot_offset.into()
+        }
+    }
+    pub(crate) fn placements(&self, offset: usize) -> PlacementReference {
+        let mut placement_reference = PlacementReference::new();
+        let slot_left_top = (self.anchor.x, self.anchor.y.raw_offset(self.slot_offset_markers.0));
+        // use dimensions to offset from slot_anchor
+        placement_reference
+    }
+}
+pub(crate) struct VisibleSlots {
+    pub(crate) start: usize,
+    pub(crate) end: usize
+}
+impl VisibleSlots {
+    pub(crate) fn new() -> Self {
+        Self {
+            start: 0,
+            end: 0,
         }
     }
 }
 #[derive(Resource)]
-pub(crate) struct SlotController {
+pub(crate) struct Slots {
     pub(crate) slots: Vec<Slot>,
+    pub(crate) visible_slots: VisibleSlots,
     pub(crate) blueprint: SlotBlueprint,
 }
 
-impl SlotController {
+impl Slots {
     pub(crate) fn new(grid: &Grid) -> Self {
         Self {
-            slots: vec![],
+            slots: Vec::new(),
+            visible_slots: VisibleSlots::new(),
             blueprint: SlotBlueprint::new(grid),
         }
     }
-    pub(crate) fn fill_slot<N: Into<TokenName>>(&mut self, name: N) {
-        // use blueprint to place elements and return PlacementReference of views for elements
+    pub(crate) fn reconfigure(&mut self, grid: &Grid) {
+        // update blueprint
     }
 }
-impl Attach for SlotController {
+pub(crate) struct SlotFillEvent {
+    tokens: Vec<TokenName>,
+}
+impl SlotFillEvent {
+    pub(crate) fn new(tokens: Vec<TokenName>) -> Self {
+        Self {
+            tokens
+        }
+    }
+}
+impl Attach for Slots {
     fn attach(visualizer: &mut Visualizer) {
         visualizer
             .job

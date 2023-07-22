@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 
 use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
+use crate::controller::Slots;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -50,7 +51,7 @@ impl Workflow for Engen {
     type Action = Action;
     type Response = Response;
 
-    fn handle_response(_visualizer: &mut Visualizer, response: Self::Response) {
+    fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
         match response {
             Response::TokenAdded(name) => {
                 info!("token added: {:?}", name);
@@ -62,7 +63,7 @@ impl Workflow for Engen {
                 info!("token otp: {:?}:{:?}", name, otp);
             }
             Response::RequestedTokenNames(tokens) => {
-                // put into visualizer
+                visualizer.job.container.send_event(SlotFillEvent::new(tokens));
             }
             Response::ExitConfirmed => {}
         }
