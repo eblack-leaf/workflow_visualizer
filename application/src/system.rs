@@ -1,8 +1,15 @@
 use application::controller::{Slot, SlotFillEvent};
-use workflow_visualizer::{Area, BundledIcon, BundleExtension, BundlePlacement, Button, ButtonType, Color, Focus, FocusInputListener, Grid, Icon, IconBitmap, IconBitmapRequest, IconScale, InterfaceContext, Layer, Line, Panel, PanelType, PlacementReference, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, ScaleFactor, Sender, Text, TextScale, TextScaleAlignment, TextValue, TextWrapStyle, Touchable, TouchListener, TouchTrigger, ViewportHandle, Workflow};
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
+use workflow_visualizer::{
+    Area, BundleExtension, BundlePlacement, BundledIcon, Button, ButtonType, Color, Focus,
+    FocusInputListener, Grid, Icon, IconBitmap, IconBitmapRequest, IconScale, InterfaceContext,
+    Layer, Line, Panel, PanelType, PlacementReference, Position, RawMarker, ResponsiveGridPoint,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, ScaleFactor, Sender, Text, TextScale,
+    TextScaleAlignment, TextValue, TextWrapStyle, TouchListener, TouchTrigger, Touchable,
+    ViewportHandle, Workflow,
+};
 
 use crate::controller::{SlotBlueprint, Slots};
 use crate::workflow::{Action, Engen, TokenName};
@@ -12,12 +19,13 @@ pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<E
     sender.send(Action::RequestTokenNames);
     cmd.insert_resource(slot_controller);
 }
-pub(crate) fn read_fill_event(mut cmd: Commands, mut events: EventReader<SlotFillEvent>, mut slots: ResMut<Slots>) {
+pub(crate) fn read_fill_event(
+    mut cmd: Commands,
+    mut events: EventReader<SlotFillEvent>,
+    mut slots: ResMut<Slots>,
+) {
     for event in events.iter() {
-        for token in event.tokens.iter() {
-
-            let slot = Slot::new(token, );
-        }
+        slots.fill(event.tokens.clone());
     }
 }
 pub(crate) fn send_event(

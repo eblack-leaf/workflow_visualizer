@@ -8,12 +8,12 @@ use winit::event_loop::{EventLoopBuilder, EventLoopWindowTarget};
 use winit::platform::android::activity::AndroidApp;
 use winit::window::{Window, WindowBuilder};
 
-use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
-use crate::workflow::bridge::{Receiver, Responder};
 #[cfg(not(target_family = "wasm"))]
 use crate::workflow::bridge::NativeSender;
+use crate::workflow::bridge::{Receiver, Responder};
 use crate::workflow::run::internal_loop;
 use crate::workflow::runner::EngenHandle;
+use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
 
 #[cfg(not(target_family = "wasm"))]
 pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(

@@ -5,18 +5,18 @@ use bytemuck::{Pod, Zeroable};
 use compact_str::CompactString;
 use wgpu::util::DeviceExt;
 
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::icon::bitmap::{
+    IconBitmapLayout, IconBitmapRequest, IconPixelData, ICON_BITMAP_DIMENSION,
+};
+use crate::icon::component::IconId;
+use crate::texture_atlas::AtlasLocation;
 use crate::{
     Area, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasPosition, Color, GfxSurface, Indexer,
     InstanceAttributeManager, InterfaceContext, Key, KeyFactory, Layer, NullBit, NumericalContext,
     Position, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, Section, TextureAtlas,
     TextureCoordinates, Viewport,
 };
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::icon::bitmap::{
-    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
-};
-use crate::icon::component::IconId;
-use crate::texture_atlas::AtlasLocation;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {

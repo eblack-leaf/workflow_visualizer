@@ -27,13 +27,13 @@ where
     type Action: Debug + Clone + Send + Sync + Sized + 'static + Serialize + for<'a> Deserialize<'a>;
     /// Output from the app
     type Response: Debug
-    + Clone
-    + Send
-    + Sync
-    + Sized
-    + 'static
-    + Serialize
-    + for<'a> Deserialize<'a>;
+        + Clone
+        + Send
+        + Sync
+        + Sized
+        + 'static
+        + Serialize
+        + for<'a> Deserialize<'a>;
     /// configure triggers to the visualizer from responses
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response);
     /// handle actions input to the app

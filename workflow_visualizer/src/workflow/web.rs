@@ -6,12 +6,12 @@ use winit::dpi::PhysicalSize;
 use winit::event_loop::EventLoopBuilder;
 use winit::window::{Window, WindowBuilder};
 
-use crate::{Runner, Sender, Visualizer, Workflow};
 use crate::workflow::bridge::OutputWrapper;
 #[cfg(target_family = "wasm")]
 use crate::workflow::bridge::WebSender;
 use crate::workflow::run::internal_loop;
 use crate::workflow::runner::EngenHandle;
+use crate::{Runner, Sender, Visualizer, Workflow};
 
 impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
     type Message = OutputWrapper<T>;
@@ -73,7 +73,7 @@ fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
 
 #[cfg(target_arch = "wasm32")]
 fn web_resizing(window: &Rc<Window>) {
-    use wasm_bindgen::{JsCast, prelude::*};
+    use wasm_bindgen::{prelude::*, JsCast};
     let w_window = window.clone();
     let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
         let scale_factor = w_window.scale_factor();

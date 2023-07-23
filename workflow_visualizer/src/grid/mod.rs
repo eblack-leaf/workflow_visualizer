@@ -23,13 +23,13 @@ pub use view::{
     GridPoint, GridRange, GridView, PlacementReference,
 };
 
+use crate::bundling::{BundleBuilder, BundleExtension};
+use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
     Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
     WindowResize,
 };
-use crate::bundling::{BundleBuilder, BundleExtension};
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 
 mod attachment;
 mod marker;
@@ -157,7 +157,9 @@ impl Grid {
     pub fn markers_per_row(&self) -> i32 {
         self.row_config.base.0
     }
-    pub fn markers_per_gutter(&self) -> i32 { self.gutter_config.base.0 }
+    pub fn markers_per_gutter(&self) -> i32 {
+        self.gutter_config.base.0
+    }
     pub fn calc_horizontal_location(&self, grid_location: GridLocation) -> RawMarker {
         let markers_per_column = self.markers_per_column();
         let content_location = grid_location.location;

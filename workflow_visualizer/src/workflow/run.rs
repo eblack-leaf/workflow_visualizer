@@ -5,9 +5,9 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
 
-use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
 use crate::job::Exit;
 use crate::workflow::native::initialize_native_window;
+use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
 
 pub(crate) fn internal_loop<T: Workflow + 'static>(
     mut visualizer: &mut Visualizer,

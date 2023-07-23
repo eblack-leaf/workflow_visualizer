@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+use application::controller::SlotFillEvent;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
 use crate::controller::Slots;
+use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -63,7 +64,10 @@ impl Workflow for Engen {
                 info!("token otp: {:?}:{:?}", name, otp);
             }
             Response::RequestedTokenNames(tokens) => {
-                visualizer.job.container.send_event(SlotFillEvent::new(tokens));
+                visualizer
+                    .job
+                    .container
+                    .send_event(SlotFillEvent::new(tokens));
             }
             Response::ExitConfirmed => {}
         }

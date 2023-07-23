@@ -12,14 +12,13 @@ use workflow_visualizer::bevy_ecs::prelude::{
 use workflow_visualizer::RawMarker;
 use workflow_visualizer::ResponsiveUnit;
 use workflow_visualizer::{
-    bevy_ecs, CurrentlyPressed, Position, PrimaryTouch, ScaleFactor, Sender,
-    TextValue, TouchLocation, TouchTrigger, UserSpaceSyncPoint,
+    bevy_ecs, CurrentlyPressed, Position, PrimaryTouch, ScaleFactor, Sender, TextValue,
+    TouchLocation, TouchTrigger, UserSpaceSyncPoint,
 };
 use workflow_visualizer::{
-    Attach, BundlePlacement, BundledIcon, Color, GfxOptions, Icon, IconBitmap,
-    IconBitmapRequest, IconPixelData, IconScale, Panel, PanelType, Runner, Text,
-    TextScaleAlignment, TextWrapStyle, Theme, ThemeDescriptor, TouchListener, Touchable,
-    Visualizer, Workflow,
+    Attach, BundlePlacement, BundledIcon, Color, GfxOptions, Icon, IconBitmap, IconBitmapRequest,
+    IconPixelData, IconScale, Panel, PanelType, Runner, Text, TextScaleAlignment, TextWrapStyle,
+    Theme, ThemeDescriptor, TouchListener, Touchable, Visualizer, Workflow,
 };
 use workflow_visualizer::{ResponsiveGridPoint, ResponsiveGridView};
 
@@ -410,7 +409,7 @@ impl Workflow for Engen {
     fn is_exit_response(res: &Self::Response) -> bool {
         match res {
             Response::ExitConfirmed => true,
-            _ => false
+            _ => false,
         }
     }
 }

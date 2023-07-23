@@ -1,7 +1,10 @@
 use std::collections::HashMap;
-use workflow_visualizer::{Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, TextScale, UserSpaceSyncPoint, Visualizer};
 use workflow_visualizer::bevy_ecs;
 use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
+use workflow_visualizer::{
+    Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, TextScale,
+    UserSpaceSyncPoint, Visualizer,
+};
 
 use crate::system;
 use crate::workflow::TokenName;
@@ -11,7 +14,6 @@ pub(crate) struct Slot {
     pub(crate) otp_text: Entity,
     pub(crate) generate_button: Entity,
     pub(crate) delete_button: Entity,
-    pub(crate) name: TokenName,
 }
 pub(crate) struct SlotBlueprint {
     pub(crate) slots_per_page: usize,
@@ -35,11 +37,14 @@ impl SlotBlueprint {
         let slot_height = 10;
         let slot_content_height = slot_height - 2;
         let info_content_height_px = RawMarker(slot_content_height).to_pixel();
-        let info_content_text_scale = TextScale(24u32);// programmatically pull from mapping using from_height(info_content_height_px)
+        let info_content_text_scale = TextScale(24u32); // programmatically pull from mapping using from_height(info_content_height_px)
         let button_content_height = slot_content_height - 2;
         let button_content_height_px = RawMarker(button_content_height).to_pixel();
-        let button_text_scale = TextScale(18u32);// programmatically pull from mapping using from_height(button_content_height_px)
-        let total_vertical_markers = grid.vertical_markers() - grid.markers_per_gutter() * 2 - button_markers - 2 * segment_padding;
+        let button_text_scale = TextScale(18u32); // programmatically pull from mapping using from_height(button_content_height_px)
+        let total_vertical_markers = grid.vertical_markers()
+            - grid.markers_per_gutter() * 2
+            - button_markers
+            - 2 * segment_padding;
         let slot_padding = 2;
         let slot_offset = slot_padding + slot_height;
         let mut num_slots = total_vertical_markers / (slot_offset);
@@ -49,55 +54,62 @@ impl SlotBlueprint {
         Self {
             slots_per_page: num_slots as usize,
             anchor: (begin_horizontal, begin_vertical).into(),
-            slot_offset_markers: slot_offset.into()
+            slot_offset_markers: slot_offset.into(),
         }
     }
     pub(crate) fn placements(&self, offset: usize) -> PlacementReference {
         let mut placement_reference = PlacementReference::new();
-        let slot_left_top = (self.anchor.x, self.anchor.y.raw_offset(self.slot_offset_markers.0));
+        let slot_left_top = (
+            self.anchor.x,
+            self.anchor.y.raw_offset(self.slot_offset_markers.0),
+        );
         // use dimensions to offset from slot_anchor
         placement_reference
     }
 }
-pub(crate) struct VisibleSlots {
-    pub(crate) start: usize,
-    pub(crate) end: usize
-}
-impl VisibleSlots {
-    pub(crate) fn new() -> Self {
-        Self {
-            start: 0,
-            end: 0,
-        }
-    }
+pub(crate) struct FilledSlot {
+    pub(crate) name: TokenName,
+    pub(crate) slot: Slot,
 }
 #[derive(Resource)]
 pub(crate) struct Slots {
-    pub(crate) slots: Vec<Slot>,
-    pub(crate) visible_slots: VisibleSlots,
+    pub(crate) slots: Vec<FilledSlot>,
+    pub(crate) tokens: Vec<TokenName>,
     pub(crate) blueprint: SlotBlueprint,
+    pub(crate) current_page: u32,
 }
 
 impl Slots {
     pub(crate) fn new(grid: &Grid) -> Self {
         Self {
             slots: Vec::new(),
-            visible_slots: VisibleSlots::new(),
+            tokens: vec![],
             blueprint: SlotBlueprint::new(grid),
+            current_page: 0,
         }
     }
     pub(crate) fn reconfigure(&mut self, grid: &Grid) {
         // update blueprint
+        // if slots != blueprint.num_slots { change slots }
+    }
+    pub(crate) fn fill(&mut self, tokens: Vec<TokenName>) {
+        // add tokens
+        // use blueprint to fill slots with current page
+    }
+    pub(crate) fn page_right(&mut self) {}
+    pub(crate) fn page_left(&mut self) {}
+    fn current_page_tokens(&mut self) -> Vec<TokenName> {
+        let start = self.current_page * self.blueprint.slots_per_page;
+        let end = start + self.blueprint.slots_per_page;
+        self.tokens[start..end]
     }
 }
 pub(crate) struct SlotFillEvent {
-    tokens: Vec<TokenName>,
+    pub(crate) tokens: Vec<TokenName>,
 }
 impl SlotFillEvent {
     pub(crate) fn new(tokens: Vec<TokenName>) -> Self {
-        Self {
-            tokens
-        }
+        Self { tokens }
     }
 }
 impl Attach for Slots {
@@ -105,10 +117,10 @@ impl Attach for Slots {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization), ));
+            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization),));
         visualizer
             .job
             .task(Visualizer::TASK_MAIN)
-            .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process), ));
+            .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process),));
     }
 }
