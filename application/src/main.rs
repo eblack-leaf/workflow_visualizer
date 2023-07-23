@@ -2,15 +2,15 @@
 
 use tracing::Level;
 
+use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
+use workflow_visualizer::Runner;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
-use workflow_visualizer::Runner;
-use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
 
-use crate::controller::Slots;
+use crate::slots::Slots;
 use crate::workflow::Engen;
 
-mod controller;
+mod slots;
 mod system;
 mod workflow;
 

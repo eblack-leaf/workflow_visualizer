@@ -1,13 +1,37 @@
-use std::collections::HashMap;
-use workflow_visualizer::bevy_ecs;
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 use workflow_visualizer::{
-    Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, TextScale,
+    Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
 use crate::workflow::TokenName;
+
+#[derive(Resource)]
+pub(crate) struct SlotPool(pub(crate) Vec<TokenName>);
+
+#[derive(Resource)]
+pub(crate) struct SlotFills(pub(crate) Vec<TokenName>);
+
+#[derive(Resource)]
+pub(crate) struct Slots(pub(crate) Vec<Slot>);
+
+impl Attach for Slots {
+    fn attach(visualizer: &mut Visualizer) {
+        visualizer
+            .job
+            .task(Visualizer::TASK_STARTUP)
+            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization), ));
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            system::update_blueprint.in_set(SyncPoint::Preparation),
+            system::read_fill_event.in_set(SyncPoint::Preparation),
+            system::fill_slots.in_set(UserSpaceSyncPoint::Process),
+            system::process
+                .in_set(UserSpaceSyncPoint::Process)
+                .after(system::fill_slots),
+        ));
+    }
+}
 
 pub(crate) struct Slot {
     pub(crate) name_text: Entity,
@@ -15,11 +39,14 @@ pub(crate) struct Slot {
     pub(crate) generate_button: Entity,
     pub(crate) delete_button: Entity,
 }
+
+#[derive(Resource)]
 pub(crate) struct SlotBlueprint {
     pub(crate) slots_per_page: usize,
     pub(crate) anchor: GridPoint,
     pub(crate) slot_offset_markers: RawMarker,
 }
+
 impl SlotBlueprint {
     pub(crate) fn new(grid: &Grid) -> Self {
         let begin_vertical = grid.calc_vertical_location(1.near());
@@ -67,60 +94,13 @@ impl SlotBlueprint {
         placement_reference
     }
 }
-pub(crate) struct FilledSlot {
-    pub(crate) name: TokenName,
-    pub(crate) slot: Slot,
-}
-#[derive(Resource)]
-pub(crate) struct Slots {
-    pub(crate) slots: Vec<FilledSlot>,
-    pub(crate) tokens: Vec<TokenName>,
-    pub(crate) blueprint: SlotBlueprint,
-    pub(crate) current_page: u32,
-}
 
-impl Slots {
-    pub(crate) fn new(grid: &Grid) -> Self {
-        Self {
-            slots: Vec::new(),
-            tokens: vec![],
-            blueprint: SlotBlueprint::new(grid),
-            current_page: 0,
-        }
-    }
-    pub(crate) fn reconfigure(&mut self, grid: &Grid) {
-        // update blueprint
-        // if slots != blueprint.num_slots { change slots }
-    }
-    pub(crate) fn fill(&mut self, tokens: Vec<TokenName>) {
-        // add tokens
-        // use blueprint to fill slots with current page
-    }
-    pub(crate) fn page_right(&mut self) {}
-    pub(crate) fn page_left(&mut self) {}
-    fn current_page_tokens(&mut self) -> Vec<TokenName> {
-        let start = self.current_page * self.blueprint.slots_per_page;
-        let end = start + self.blueprint.slots_per_page;
-        self.tokens[start..end]
-    }
-}
 pub(crate) struct SlotFillEvent {
     pub(crate) tokens: Vec<TokenName>,
 }
+
 impl SlotFillEvent {
     pub(crate) fn new(tokens: Vec<TokenName>) -> Self {
         Self { tokens }
-    }
-}
-impl Attach for Slots {
-    fn attach(visualizer: &mut Visualizer) {
-        visualizer
-            .job
-            .task(Visualizer::TASK_STARTUP)
-            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization),));
-        visualizer
-            .job
-            .task(Visualizer::TASK_MAIN)
-            .add_systems((system::send_event.in_set(UserSpaceSyncPoint::Process),));
     }
 }

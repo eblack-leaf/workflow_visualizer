@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use application::controller::SlotFillEvent;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-use crate::controller::Slots;
 use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
+
+use crate::slots::SlotFillEvent;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
