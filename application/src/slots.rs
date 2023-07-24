@@ -1,11 +1,11 @@
+use crate::system;
+use crate::workflow::TokenName;
+use workflow_visualizer::bevy_ecs;
+use workflow_visualizer::bevy_ecs::prelude::{Entity, Events, IntoSystemConfig, Resource};
 use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
-
-use crate::system;
-use crate::workflow::TokenName;
 
 #[derive(Resource)]
 pub(crate) struct SlotPool(pub(crate) Vec<TokenName>);
@@ -21,7 +21,8 @@ impl Attach for Slots {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization), ));
+            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization),));
+        visualizer.add_event::<SlotFillEvent>();
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::update_blueprint.in_set(SyncPoint::Preparation),
             system::read_fill_event.in_set(SyncPoint::Preparation),
@@ -80,7 +81,7 @@ impl SlotBlueprint {
         }
         Self {
             slots_per_page: num_slots as usize,
-            anchor: (begin_horizontal, begin_vertical).into(),
+            anchor: (1.near(), 1.near()).into(),
             slot_offset_markers: slot_offset.into(),
         }
     }

@@ -3,7 +3,7 @@ use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Bundle, IntoSystemConfig, Resource};
+use bevy_ecs::prelude::{Bundle, Events, IntoSystemConfig, Resource};
 use tracing::{info, trace, warn};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
@@ -35,7 +35,7 @@ use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
 use crate::{
     Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
-    Theme, Viewport, ViewportHandle, WindowResize,
+    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
 };
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
@@ -163,6 +163,14 @@ impl Visualizer {
             .container
             .spawn_batch(queue.datum)
             .collect::<Vec<Entity>>()
+    }
+    pub fn add_event<Event: Sync + Send + 'static>(&mut self) {
+        self.job
+            .task(Self::TASK_MAIN)
+            .add_systems((Events::<Event>::update_system.in_set(SyncPoint::Event),));
+        self.job
+            .container
+            .insert_resource(Events::<Event>::default());
     }
     pub fn register_touch(&mut self, touch: winit::event::Touch) {
         let viewport_section = self

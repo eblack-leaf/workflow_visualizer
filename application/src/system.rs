@@ -1,7 +1,7 @@
-use workflow_visualizer::{Grid, Sender, TextValue, TouchTrigger};
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
+use workflow_visualizer::{Grid, Sender, TextValue, TouchTrigger};
 
 use crate::slots::{SlotBlueprint, SlotFillEvent, SlotFills, SlotPool, Slots};
 use crate::workflow::{Action, Engen};
@@ -15,7 +15,12 @@ pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<E
     cmd.insert_resource(SlotFills(vec![]));
 }
 
-pub(crate) fn update_blueprint(mut blueprint: ResMut<SlotBlueprint>, grid: Res<Grid>) {
+pub(crate) fn update_blueprint(
+    mut blueprint: ResMut<SlotBlueprint>,
+    grid: Res<Grid>,
+    mut slots: ResMut<Slots>,
+    mut cmd: Commands,
+) {
     if grid.is_changed() {
         *blueprint = SlotBlueprint::new(&grid);
         let current = slots.0.len();
@@ -23,8 +28,25 @@ pub(crate) fn update_blueprint(mut blueprint: ResMut<SlotBlueprint>, grid: Res<G
         let diff = needed as i32 - current as i32;
         if diff > 0 {
             // create slot and entities
+            for i in 0..diff {
+                let placements = blueprint.placements(current + i as usize);
+                // cmd.spawn();// info panel
+                // cmd.spawn();// delete panel
+                // cmd.spawn();// name
+                // cmd.spawn();// otp
+                // cmd.spawn();// line
+                // cmd.spawn();// generate
+                // cmd.spawn();// delete
+            }
         } else {
-            // remove slot and entities
+            for i in diff..0 {
+                // remove slot and entities
+                let slot = slots.0.remove((current as i32 + i) as usize);
+                cmd.entity(slot.name_text).despawn();
+                cmd.entity(slot.otp_text).despawn();
+                cmd.entity(slot.generate_button).despawn();
+                cmd.entity(slot.delete_button).despawn();
+            }
         }
     }
 }
@@ -45,7 +67,7 @@ pub(crate) fn fill_slots(
     // paging: Res<SlotPaging>,
 ) {
     if slot_pool.is_changed() || slot_blueprint.is_changed() { // or paging changed
-        // align names to current slots
+         // align names to current slots
     }
 }
 

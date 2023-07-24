@@ -44,6 +44,12 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             )
                 .chain(),
         );
+    visualizer
+        .job
+        .task(Visualizer::TASK_STARTUP)
+        .add_systems((apply_system_buffers
+            .after(SyncPoint::Initialization)
+            .before(UserSpaceSyncPoint::Initialization),));
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
             JobSyncPoint::Idle,
