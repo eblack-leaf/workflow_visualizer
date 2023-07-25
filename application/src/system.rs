@@ -227,10 +227,39 @@ pub(crate) fn fill_slots(
 
 pub(crate) fn process(
     slots: Res<Slots>,
+    slot_fills: Res<SlotFills>,
     sender: NonSend<Sender<Engen>>,
     buttons: Query<(&TouchTrigger)>,
     text: Query<(&mut TextValue)>,
 ) {
     // check buttons and send actions of each slot
+    let mut index = 0;
+    for slot in slots.0.iter() {
+        if let Ok(trigger) = buttons.get(slot.generate_button) {
+            if trigger.triggered() {
+                if let Some(name) = slot_fills.0.get(index) {
+                    sender.send(Action::GenerateOtp(name.clone()));
+                }
+            }
+        }
+        if let Ok(trigger) = buttons.get(slot.delete_button) {
+            if trigger.triggered() {
+                if let Some(name) = slot_fills.0.get(index) {
+                    // invalidate slot at index
+                    // 
+                    // sender.send(Action::RemoveToken(name.clone()));
+                }
+            }
+        }
+        if let Ok(trigger) = buttons.get(slot.edit_button) {
+            if trigger.triggered() {
+                if let Some(name) = slot_fills.0.get(index) {
+                    // move info panel
+                    // spawn edit elements
+                }
+            }
+        }
+        index += 1;
+    }
     // update text value with responses
 }
