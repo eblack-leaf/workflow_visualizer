@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::RawMarker;
+use crate::{PathView, RawMarker};
 
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]
@@ -115,6 +115,7 @@ pub struct PlacementReference {
     pub horizontal_ranges: HashMap<&'static str, GridRange>,
     pub vertical_ranges: HashMap<&'static str, GridRange>,
     pub points: HashMap<&'static str, GridPoint>,
+    pub path_views: HashMap<&'static str, PathView>,
 }
 
 impl PlacementReference {
@@ -124,6 +125,7 @@ impl PlacementReference {
             horizontal_ranges: HashMap::new(),
             vertical_ranges: HashMap::new(),
             points: HashMap::new(),
+            path_views: HashMap::new(),
         }
     }
     pub fn add_point<P: Into<GridPoint>>(&mut self, id: &'static str, point: P) {
@@ -131,6 +133,9 @@ impl PlacementReference {
     }
     pub fn add_location<L: Into<GridLocation>>(&mut self, id: &'static str, location: L) {
         self.locations.insert(id, location.into());
+    }
+    pub fn add_path_view<P: Into<PathView>>(&mut self, id: &'static str, path_view: P) {
+        self.path_views.insert(id, path_view.into());
     }
     pub fn add_horizontal_range<T: Into<&'static str>, R: Into<GridRange>>(
         &mut self,
@@ -152,20 +157,17 @@ impl PlacementReference {
         self.horizontal_ranges.insert(name, view.horizontal);
         self.vertical_ranges.insert(name, view.vertical);
     }
-    pub fn view<T: Into<&'static str>>(&self, name: T) -> Option<GridView> {
+    pub fn view<T: Into<&'static str>>(&self, name: T) -> GridView {
         let name = name.into();
-        if let Some(horiz) = self.horizontal_ranges.get(&name).copied() {
-            if let Some(vert) = self.vertical_ranges.get(&name).copied() {
-                return Some((horiz, vert).into());
-            }
-        }
-        None
+        let horiz = self.horizontal_ranges.get(&name).copied().expect("horiz");
+        let vert = self.vertical_ranges.get(&name).copied().expect("vert");
+        (horiz, vert).into()
     }
-    pub fn point<T: Into<&'static str>>(&self, name: T) -> Option<GridPoint> {
-        self.points.get(&name.into()).copied()
+    pub fn point<T: Into<&'static str>>(&self, name: T) -> GridPoint {
+        self.points.get(&name.into()).copied().expect("point")
     }
-    pub fn location(&self, id: &'static str) -> Option<GridLocation> {
-        self.locations.get(id).copied()
+    pub fn location(&self, id: &'static str) -> GridLocation {
+        self.locations.get(id).copied().expect("location")
     }
     pub fn horizontal<N: Into<&'static str>>(&self, name: N) -> GridRange {
         self.horizontal_ranges
@@ -178,5 +180,8 @@ impl PlacementReference {
             .get(&name.into())
             .copied()
             .expect("no horizontal")
+    }
+    pub fn path_view(&self, name: &str) -> PathView {
+        self.path_views.get(name).cloned().expect("no path view")
     }
 }

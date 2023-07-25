@@ -1,13 +1,11 @@
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Bundle;
-use bytemuck::{Pod, Zeroable};
 use compact_str::CompactString;
 
-use crate::grid::ResponsiveGridPoint;
+use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section};
 use crate::icon::cache::{Cache, Difference};
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Section};
 
-#[derive(Component)]
+#[derive(Component, Copy, Clone)]
 pub enum IconScale {
     Small,
     Medium,
@@ -26,6 +24,16 @@ impl IconScale {
     }
 }
 
+impl From<u32> for IconScale {
+    fn from(value: u32) -> Self {
+        match value {
+            13u32 => IconScale::Small,
+            17u32 => IconScale::Medium,
+            20u32 => IconScale::Large,
+            val => IconScale::Custom(val),
+        }
+    }
+}
 #[derive(Bundle)]
 pub struct Icon {
     id: IconId,

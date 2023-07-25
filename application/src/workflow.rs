@@ -38,13 +38,15 @@ pub struct Engen {
 impl Engen {
     pub fn new() -> Self {
         Self {
-            tokens: HashMap::new(), // include from file to generate hashmap
+            tokens: HashMap::new(),
         }
     }
 }
 impl Default for Engen {
     fn default() -> Self {
-        Engen::new()
+        let mut engen = Engen::new();
+        // include from file to generate hashmap
+        engen
     }
 }
 #[async_trait]

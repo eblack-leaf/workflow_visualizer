@@ -1,15 +1,14 @@
 use bevy_ecs::prelude::{
-    Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Without,
+    Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Res, Without,
 };
-use bevy_ecs::query::With;
 
-use crate::grid::RawMarker;
-use crate::grid::ResponsiveGridView;
 use crate::{
-    Area, Attach, BundlePlacement, Color, CurrentlyPressed, Icon, IconId, IconScale,
-    InterfaceContext, Layer, Panel, PanelType, Position, Section, SyncPoint, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle, ToggleState, Touchable, Visualizer,
+    Area, Attach, Color, CurrentlyPressed, DeviceContext, Icon, IconId, IconScale,
+    InterfaceContext, Layer, Panel, PanelType, Position, ScaleFactor, Section, SyncPoint, Text,
+    TextScale, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState, Touchable, Visualizer,
 };
+use crate::grid::RawMarker;
+use crate::text::AlignedFonts;
 
 #[derive(Bundle, Clone)]
 pub struct Button {
@@ -24,6 +23,13 @@ pub struct Button {
     icon_entity: IconEntity,
     text_entity: TextEntity,
     touchable: Touchable,
+    scaling: Scaling,
+}
+
+#[derive(Component, Copy, Clone)]
+pub struct Scaling {
+    pub text: TextScale,
+    pub icon: IconScale,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -35,13 +41,22 @@ pub(crate) struct IconEntity(pub(crate) Option<Entity>);
 #[derive(Component, Copy, Clone)]
 pub(crate) struct TextEntity(pub(crate) Option<Entity>);
 impl Button {
-    pub fn new<L: Into<Layer>, C: Into<Color>, S: Into<String>, ID: Into<IconId>>(
+    pub fn new<
+        L: Into<Layer>,
+        C: Into<Color>,
+        S: Into<String>,
+        ID: Into<IconId>,
+        TS: Into<TextScale>,
+        IS: Into<IconScale>,
+    >(
         button_type: ButtonType,
         layer: L,
         foreground_color: C,
         background_color: C,
         icon_id: ID,
         button_text: S,
+        text_scale: TS,
+        icon_scale: IS,
     ) -> Self {
         Self {
             layer: layer.into(),
@@ -55,6 +70,10 @@ impl Button {
             icon_entity: IconEntity(None),
             text_entity: TextEntity(None),
             touchable: Touchable::on_press(),
+            scaling: Scaling {
+                text: text_scale.into(),
+                icon: icon_scale.into(),
+            },
         }
     }
 }
@@ -75,6 +94,7 @@ pub(crate) fn spawn(
             &mut PanelEntity,
             &mut IconEntity,
             &mut TextEntity,
+            &Scaling,
         ),
         Added<PanelEntity>,
     >,
@@ -90,6 +110,7 @@ pub(crate) fn spawn(
         mut panel_entity,
         mut icon_entity,
         mut text_entity,
+        scaling,
     ) in buttons.iter_mut()
     {
         let panel = cmd
@@ -103,7 +124,7 @@ pub(crate) fn spawn(
         let icon = cmd
             .spawn(Icon::new(
                 icon_id.clone(),
-                IconScale::Small,
+                scaling.icon,
                 *layer - Layer::from(1),
                 *color,
             ))
@@ -112,7 +133,7 @@ pub(crate) fn spawn(
             .spawn(Text::new(
                 *layer - Layer::from(1),
                 button_text.0.clone(),
-                TextScaleAlignment::Small,
+                TextScaleAlignment::Custom(scaling.text.0),
                 *color,
                 TextWrapStyle::letter(),
             ))
@@ -188,6 +209,7 @@ pub(crate) fn placement(
             &IconEntity,
             &TextEntity,
             &TextValue,
+            &Scaling,
         ),
         Or<(
             Changed<Position<InterfaceContext>>,
@@ -198,8 +220,12 @@ pub(crate) fn placement(
         (&mut Position<InterfaceContext>, &mut Area<InterfaceContext>),
         Without<PanelEntity>,
     >,
+    aligned_fonts: Res<AlignedFonts>,
+    scale_factor: Res<ScaleFactor>,
 ) {
-    for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text) in buttons.iter() {
+    for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, scaling) in
+    buttons.iter()
+    {
         if let Some(panel_entity) = panel_ref.0 {
             if let Ok((mut pos, mut area)) = listeners.get_mut(panel_entity) {
                 *pos = *button_pos;
@@ -211,14 +237,25 @@ pub(crate) fn placement(
         let (text_placement, icon_placement) = if button_text.0.is_empty() {
             (
                 None,
-                Position::new(center.x - 13f32 / 2f32, center.y - 13f32 / 2f32),
+                Position::new(
+                    center.x - scaling.icon.px() / 2f32,
+                    center.y - scaling.icon.px() / 2f32,
+                ),
             )
         } else {
+            let dimensions = aligned_fonts
+                .get(&TextScaleAlignment::Custom(scaling.text.0))
+                .character_dimensions('a', scaling.text.px());
+            let logical_dimensions =
+                Area::<DeviceContext>::new(dimensions.width, dimensions.height)
+                    .to_ui(scale_factor.factor());
             let len = button_text.0.len() as f32;
-            let x = center.x - 8f32 * (len / 2f32).ceil() - 13f32 / 2f32;
-            let y = center.y - 18f32 / 2f32;
-            let width = 8f32 * len;
-            let height = 18f32;
+            let x = center.x
+                - logical_dimensions.width * (len / 2f32).ceil()
+                - scaling.icon.px() / 2f32;
+            let y = center.y - logical_dimensions.height / 2f32;
+            let width = logical_dimensions.width * len;
+            let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
             let icon_x = text_section.right() + RawMarker::PX;
             let icon_y = text_section.top() + RawMarker::PX;
