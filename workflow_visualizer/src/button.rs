@@ -3,12 +3,13 @@ use bevy_ecs::prelude::{
 };
 
 use crate::{
-    Area, Attach, Color, CurrentlyPressed, DeviceContext, Icon, IconId, IconScale,
+    Area, Attach, Color, DeviceContext, Icon, IconId, IconScale,
     InterfaceContext, Layer, Panel, PanelType, Position, ScaleFactor, Section, SyncPoint, Text,
-    TextScale, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState, Touchable, Visualizer,
+    TextScale, TextScaleAlignment, TextValue, TextWrapStyle, Visualizer,
 };
 use crate::grid::RawMarker;
 use crate::text::AlignedFonts;
+use crate::touch::{CurrentlyPressed, ToggleState, Touchable};
 
 #[derive(Bundle, Clone)]
 pub struct Button {

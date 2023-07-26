@@ -1,12 +1,10 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::change_detection::Mut;
 use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
-use crate::grid::ResponsiveGridView;
 use crate::{
-    Area, Color, Coordinate, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
+    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
     NumericalContext, Position, Section, VisibleSection,
 };
 
@@ -91,7 +89,6 @@ impl Glyph {
 /// The text to render
 #[derive(Component, Clone)]
 pub struct TextValue(pub String);
-
 /// The scale of the Text
 #[derive(Component, Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub struct TextScale(pub u32);

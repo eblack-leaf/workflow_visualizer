@@ -1,13 +1,14 @@
 use workflow_visualizer::{
     BundlePlacement, Button, ButtonType, Color, Grid,
     Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger,
+    TextScaleAlignment, TextValue, TextWrapStyle,
 };
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
+use workflow_visualizer::TouchTrigger;
 
-use crate::slots::{AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotPaging, SlotPool, Slots};
+use crate::slots::{AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots};
 use crate::workflow::{Action, Engen};
 
 pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
@@ -182,7 +183,7 @@ pub(crate) fn update_blueprint(
         } else {
             for i in diff..0 {
                 // remove slot and entities
-                let slot = slots.0.remove((current as i32 + i) as usize);
+                // let slot = slots.0.remove((current as i32 + i) as usize);
                 cmd.entity(slot.name_text).despawn();
                 cmd.entity(slot.otp_text).despawn();
                 cmd.entity(slot.generate_button).despawn();
@@ -211,6 +212,8 @@ pub(crate) fn fill_slots(
     slot_pool: Res<SlotPool>,
     slot_blueprint: Res<SlotBlueprint>,
     paging: Res<SlotPaging>,
+    mut cache: ResMut<SlotFillsCache>,
+    mut slots: ResMut<Slots>,
 ) {
     if slot_pool.is_changed() || slot_blueprint.is_changed() || paging.is_changed() {
         slot_fills.0.clear();
@@ -219,6 +222,32 @@ pub(crate) fn fill_slots(
             let name = slot_pool.0.get(i);
             if let Some(token_name) = name {
                 slot_fills.0.push(token_name.clone());
+                let mut index = 0;
+                for fill in slot_fills.0.iter() {
+                    let mut slot_needed = false;
+                    if let Some(cached) = cache.0.get_mut(index) {
+                        if *cached != *fill {
+                            // change slot name-text to fill && create slot if not exist
+                            // fade-in start anim
+                        } else {
+                            // if no slot make with name-text
+                        }
+                        *cached = fill.clone();
+                    } else {
+                        // create slot && fade-in with name-text
+                        // create cache entry
+                    }
+                    if slot_needed {}
+                }
+            } else {
+                let mut should_remove = false;
+                if let Some(old) = slots.0.get(i) {
+                    should_remove = true;
+                    // despawn slot entities
+                }
+                if should_remove {
+                    // remove from slots
+                }
             }
         }
     }
@@ -238,10 +267,12 @@ pub(crate) fn read_otp(
             index += 1;
         }
         let slot = slots.0.get(index).expect("slot");
-        if let Ok(text_val) = text.get_mut(slot.otp_text) {
-            *text_val = event.otp.0;
+        if let Ok(mut text_val) = text.get_mut(slot.otp_text) {
+            text_val.0 = event.otp.0.clone();
             // start 30 second timer to change back
-            // event with time marker
+            // circle timer element
+            // for now just have to re-generate to get correct info
+            // anim when done changes text back
         }
     }
 }

@@ -1,14 +1,16 @@
-use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 
-use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Bundle, Events, IntoSystemConfig, Resource};
-use tracing::{info, trace, warn};
+use tracing::{info, trace};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
 
+use crate::{
+    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
+    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
+};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
@@ -20,23 +22,18 @@ use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
 use crate::path::PathAttachment;
 use crate::render::{
-    internal_render, invoke_render, Render, RenderPhase, RenderTaskManager, RenderTasks,
+    internal_render, invoke_render, Render, RenderPhase, RenderTaskManager,
 };
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;
-use crate::touch::{
-    Interactor, MouseAdapter, Touch, TouchAdapter, TouchAttachment, TouchEvent, TouchType,
-    TrackedTouch,
-};
+use crate::touch::{Interactor, MouseAdapter, TouchAdapter, TrackedTouch};
+use crate::touch::{Touch, TouchEvent, TouchType};
+use crate::touch::TouchAttachment;
 use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
-    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
-};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
