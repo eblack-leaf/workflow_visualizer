@@ -6,7 +6,7 @@ use workflow_visualizer::{
 use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
-use crate::workflow::TokenName;
+use crate::workflow::{TokenName, TokenOtp};
 
 #[derive(Resource)]
 pub(crate) struct AddButton(pub(crate) Entity);
@@ -16,7 +16,8 @@ pub(crate) struct SlotPool(pub(crate) Vec<TokenName>);
 
 #[derive(Resource)]
 pub(crate) struct SlotFills(pub(crate) Vec<TokenName>);
-
+#[derive(Resource)]
+pub(crate) struct SlotFillsCache(pub(crate) Vec<TokenName>);
 #[derive(Resource)]
 pub(crate) struct Slots(pub(crate) Vec<Slot>);
 
@@ -30,7 +31,10 @@ impl SlotPaging {
         (start, end)
     }
 }
-
+pub(crate) struct OtpRead {
+    pub(crate) name: TokenName,
+    pub(crate) otp: TokenOtp,
+}
 impl Attach for Slots {
     fn attach(visualizer: &mut Visualizer) {
         visualizer

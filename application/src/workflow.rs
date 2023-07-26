@@ -7,7 +7,7 @@ use tracing::info;
 
 use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
 
-use crate::slots::SlotFillEvent;
+use crate::slots::{OtpRead, SlotFillEvent};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -63,7 +63,7 @@ impl Workflow for Engen {
                 info!("token removed: {:?}", name);
             }
             Response::TokenOtp((name, otp)) => {
-                info!("token otp: {:?}:{:?}", name, otp);
+                visualizer.job.container.send_event(OtpRead{ name, otp });
             }
             Response::RequestedTokenNames(tokens) => {
                 visualizer

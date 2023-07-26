@@ -7,9 +7,7 @@ use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
 
-use crate::slots::{
-    AddButton, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotPaging, SlotPool, Slots,
-};
+use crate::slots::{AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotPaging, SlotPool, Slots};
 use crate::workflow::{Action, Engen};
 
 pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
@@ -18,6 +16,7 @@ pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<E
     cmd.insert_resource(SlotPool(vec![]));
     cmd.insert_resource(Slots(vec![]));
     cmd.insert_resource(SlotFills(vec![]));
+    cmd.insert_resource(SlotFillsCache(vec![]));
     cmd.insert_resource(SlotPaging(0));
     let add_button_id = cmd
         .spawn(
@@ -218,13 +217,34 @@ pub(crate) fn fill_slots(
         let (start, end) = paging.range(slot_blueprint.slots_per_page);
         for i in start..end {
             let name = slot_pool.0.get(i);
-            if let Some(name) = name {
-                slot_fills.0.push(name.clone());
+            if let Some(token_name) = name {
+                slot_fills.0.push(token_name.clone());
             }
         }
     }
 }
-
+pub(crate) fn read_otp(
+    mut events: EventReader<OtpRead>,
+    slots: Res<Slots>,
+    slot_fills: Res<SlotFills>,
+    mut text: Query<(&mut TextValue)>,
+) {
+    for event in events.iter() {
+        let mut index = 0;
+        for fill in slot_fills.0.iter() {
+            if fill.0 == event.name.0 {
+                break;
+            }
+            index += 1;
+        }
+        let slot = slots.0.get(index).expect("slot");
+        if let Ok(text_val) = text.get_mut(slot.otp_text) {
+            *text_val = event.otp.0;
+            // start 30 second timer to change back
+            // event with time marker
+        }
+    }
+}
 pub(crate) fn process(
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
@@ -245,8 +265,9 @@ pub(crate) fn process(
         if let Ok(trigger) = buttons.get(slot.delete_button) {
             if trigger.triggered() {
                 if let Some(name) = slot_fills.0.get(index) {
-                    // invalidate slot at index
-                    // 
+                    // invalidate last slot
+                    // remove slot fill for slot
+                    // if filled replace last with replaced
                     // sender.send(Action::RemoveToken(name.clone()));
                 }
             }
@@ -254,7 +275,7 @@ pub(crate) fn process(
         if let Ok(trigger) = buttons.get(slot.edit_button) {
             if trigger.triggered() {
                 if let Some(name) = slot_fills.0.get(index) {
-                    // move info panel
+                    // move info panel + invalidate elements
                     // spawn edit elements
                 }
             }
