@@ -218,30 +218,28 @@ pub(crate) fn fill_slots(
     if slot_pool.is_changed() || slot_blueprint.is_changed() || paging.is_changed() {
         slot_fills.0.clear();
         let (start, end) = paging.range(slot_blueprint.slots_per_page);
-        for i in start..end {
-            let name = slot_pool.0.get(i);
+        let mut zero_based_index = 0;
+        for paged_index in start..end {
+            let name = slot_pool.0.get(paged_index);
             if let Some(token_name) = name {
                 slot_fills.0.push(token_name.clone());
-                let mut index = 0;
-                for fill in slot_fills.0.iter() {
-                    let mut slot_needed = false;
-                    if let Some(cached) = cache.0.get_mut(index) {
-                        if *cached != *fill {
-                            // change slot name-text to fill && create slot if not exist
-                            // fade-in start anim
-                        } else {
-                            // if no slot make with name-text
-                        }
-                        *cached = fill.clone();
+                let mut slot_needed = false;
+                if let Some(cached) = cache.0.get_mut(zero_based_index) {
+                    if *cached != token_name {
+                        // change slot name-text to fill && create slot if not exist
+                        // fade-in start anim
                     } else {
-                        // create slot && fade-in with name-text
-                        // create cache entry
+                        // if no slot make with name-text
                     }
-                    if slot_needed {}
+                    *cached = fill.clone();
+                } else {
+                    // create slot && fade-in with name-text
+                    // create cache entry
                 }
+                if slot_needed {}
             } else {
                 let mut should_remove = false;
-                if let Some(old) = slots.0.get(i) {
+                if let Some(old) = slots.0.get(zero_based_index) {
                     should_remove = true;
                     // despawn slot entities
                 }
@@ -249,6 +247,7 @@ pub(crate) fn fill_slots(
                     // remove from slots
                 }
             }
+            zero_based_index += 1;
         }
     }
 }
