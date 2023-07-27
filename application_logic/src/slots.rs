@@ -109,9 +109,10 @@ impl SlotBlueprint {
         let begin_horizontal = grid.calc_horizontal_location(1.near());
         let end_horizontal = grid.calc_horizontal_location(4.far());
         let total_horizontal_markers = end_horizontal.0 - begin_horizontal.0;
-        let segment_markers = (total_horizontal_markers as f32 * 0.10f32).ceil() as i32;
+        let segment_markers = 10;
         let segment_padding = 2;
-        let button_markers = segment_markers - 2 * segment_padding;
+        let slot_height = 10;
+        let button_markers = slot_height - 2 * segment_padding;
         let info_panel_offset = total_horizontal_markers - 2 * segment_markers;
         let edit_panel_offset = total_horizontal_markers - segment_markers;
         let info_panel_midpoint = (info_panel_offset as f32 / 2f32).ceil() as i32;
@@ -126,7 +127,7 @@ impl SlotBlueprint {
         let delete_button_near_horizontal = edit_panel_offset + segment_padding;
         let delete_button_far_horizontal = delete_button_near_horizontal + button_markers;
         let line_x = info_panel_midpoint;
-        let slot_height = 10;
+
         let slot_content_height = slot_height - 2 * segment_padding;
         let line_y_top = segment_padding;
         let line_y_bottom = segment_padding + slot_content_height;

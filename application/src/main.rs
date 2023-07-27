@@ -1,19 +1,20 @@
 #![allow(unused, dead_code)]
 
 use tracing::Level;
-use application_logic::{Engen, Slots};
 
+use application_logic::{Engen, Slots};
+use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
+use workflow_visualizer::Runner;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
-use workflow_visualizer::Runner;
-use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
+
 mod web_worker;
 
 #[cfg(target_os = "android")]
 #[no_mangle]
 fn android_main(android_app: AndroidApp) {
     tracing_subscriber::fmt().with_max_level(Level::WARN).init();
-    let visualizer = visualizer();
+    let mut visualizer = visualizer();
     visualizer.set_gfx_options(GfxOptions::limited_environment());
     Runner::new()
         .with_android_app(android_app)
