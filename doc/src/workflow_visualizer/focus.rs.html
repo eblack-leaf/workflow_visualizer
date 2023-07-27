@@ -147,15 +147,6 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -196,7 +187,8 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FocusRecorder {
+<span class="attr">#[derive(Default)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FocusRecorder {
     times_focused: HashMap&lt;Entity, usize&gt;,
     loops_focused: HashMap&lt;Entity, usize&gt;,
 }
@@ -227,23 +219,13 @@
     }
 }
 
-<span class="kw">impl </span>Default <span class="kw">for </span>FocusRecorder {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            times_focused: HashMap::new(),
-            loops_focused: HashMap::new(),
-        }
-    }
-}
+
 
 <span class="doccomment">/// used to opt into VirtualKeyboard open functionality
 </span><span class="attr">#[derive(Component, Copy, Clone)]
+#[derive(Default)]
 </span><span class="kw">pub struct </span>FocusInputListener {}
-<span class="kw">impl </span>Default <span class="kw">for </span>FocusInputListener {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        FocusInputListener {}
-    }
-}
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_focused(
     <span class="kw-2">mut </span>focus_listeners: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>Focus)&gt;,
     focus_input_listeners: Query&lt;(Entity, <span class="kw-2">&amp;</span>FocusInputListener)&gt;,

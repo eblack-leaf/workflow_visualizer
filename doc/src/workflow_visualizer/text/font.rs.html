@@ -180,7 +180,7 @@
                 </span>.fonts
                 .get(<span class="kw-2">&amp;</span>TextScaleAlignment::Medium)
                 .expect(<span class="string">&quot;no font&quot;</span>),
-            <span class="kw">_ </span>=&gt; <span class="self">self</span>.fonts.get(<span class="kw-2">&amp;</span>text_scale_alignment).expect(<span class="string">&quot;no font&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="self">self</span>.fonts.get(text_scale_alignment).expect(<span class="string">&quot;no font&quot;</span>),
         }
     }
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(scale_factor: f64) -&gt; <span class="self">Self </span>{

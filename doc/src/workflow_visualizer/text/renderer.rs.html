@@ -446,7 +446,7 @@
     <span class="kw">let </span>layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: <span class="prelude-val">Some</span>(<span class="string">&quot;text pipeline layout descriptor&quot;</span>),
         bind_group_layouts: <span class="kw-2">&amp;</span>[
-            <span class="kw-2">&amp;</span>viewport.bind_group_layout(),
+            (viewport.bind_group_layout()),
             <span class="kw-2">&amp;</span>sampler_bind_group_layout,
             <span class="kw-2">&amp;</span>render_group_bind_group_layout,
             <span class="kw-2">&amp;</span>atlas_bind_group_layout,
@@ -584,7 +584,7 @@
             </span>.set_vertex_buffer(<span class="number">0</span>, <span class="self">self</span>.vertex_buffer.slice(..));
         render_pass_handle
             .<span class="number">0
-            </span>.set_bind_group(<span class="number">0</span>, <span class="kw-2">&amp;</span>viewport.bind_group(), <span class="kw-2">&amp;</span>[]);
+            </span>.set_bind_group(<span class="number">0</span>, viewport.bind_group(), <span class="kw-2">&amp;</span>[]);
         render_pass_handle
             .<span class="number">0
             </span>.set_bind_group(<span class="number">1</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sampler_bind_group, <span class="kw-2">&amp;</span>[]);
