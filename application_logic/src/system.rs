@@ -120,7 +120,7 @@ fn create_slot(
                 Color::DARK_GREEN,
                 "edit",
                 "",
-                0,
+                15,
                 blueprint.button_icon_scale,
             )
                 .responsively_viewed(ResponsiveGridView::all_same(
@@ -137,7 +137,7 @@ fn create_slot(
                 Color::DARK_RED_ORANGE,
                 "edit",
                 "",
-                0,
+                15,
                 blueprint.button_icon_scale,
             )
                 .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-button"))),
@@ -152,7 +152,7 @@ fn create_slot(
                 Color::DARK_RED,
                 "edit",
                 "",
-                0,
+                15,
                 blueprint.button_icon_scale,
             )
                 .responsively_viewed(ResponsiveGridView::all_same(
@@ -211,33 +211,35 @@ pub fn fill_slots(
         for paged_index in start..end {
             let name = slot_pool.0.get(paged_index);
             if let Some(token_name) = name {
-                slot_fills.0.push(token_name.clone());
-                let mut slot_needed = false;
-                if let Some(cached) = cache.0.get_mut(zero_based_index) {
-                    if *cached != *token_name {
-                        if let Some(slot) = slots.0.get(zero_based_index) {
-                            if let Ok(mut text_val) = text_vals.get_mut(slot.name_text) {
-                                text_val.0 = token_name.0.clone();
+                if !token_name.0.is_empty() {
+                    slot_fills.0.push(token_name.clone());
+                    let mut slot_needed = false;
+                    if let Some(cached) = cache.0.get_mut(zero_based_index) {
+                        if *cached != *token_name {
+                            if let Some(slot) = slots.0.get(zero_based_index) {
+                                if let Ok(mut text_val) = text_vals.get_mut(slot.name_text) {
+                                    text_val.0 = token_name.0.clone();
+                                }
+                            } else {
+                                slot_needed = true;
                             }
-                        } else {
+                        } else if slots.0.get(zero_based_index).is_none() {
                             slot_needed = true;
                         }
-                    } else if slots.0.get(zero_based_index).is_none() {
-                        slot_needed = true;
+                        *cached = token_name.clone();
+                    } else {
+                        if slots.0.get(zero_based_index).is_none() { slot_needed = true; }
+                        cache.0.insert(zero_based_index, token_name.clone());
                     }
-                    *cached = token_name.clone();
-                } else {
-                    slot_needed = true;
-                    cache.0.insert(zero_based_index, token_name.clone());
-                }
-                if slot_needed {
-                    let slot = create_slot(
-                        &mut cmd,
-                        &slot_blueprint,
-                        zero_based_index,
-                        token_name.0.clone(),
-                    );
-                    slots.0.insert(zero_based_index, slot);
+                    if slot_needed {
+                        let slot = create_slot(
+                            &mut cmd,
+                            &slot_blueprint,
+                            zero_based_index,
+                            token_name.0.clone(),
+                        );
+                        slots.0.insert(zero_based_index, slot);
+                    }
                 }
             } else {
                 let mut should_remove = false;

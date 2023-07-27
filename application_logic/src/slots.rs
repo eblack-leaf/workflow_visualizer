@@ -138,10 +138,7 @@ impl SlotBlueprint {
             - 2 * segment_padding;
         let slot_padding = 2;
         let slot_offset = slot_padding + slot_height;
-        let mut num_slots = total_vertical_markers / (slot_offset);
-        if total_vertical_markers % (slot_offset) >= slot_height {
-            num_slots += 1;
-        }
+        let num_slots = total_vertical_markers / slot_offset;
         let add_button_vertical_start = total_vertical_markers + segment_padding;
         let add_button_view_vertical = (
             1.near().raw_offset(add_button_vertical_start),
