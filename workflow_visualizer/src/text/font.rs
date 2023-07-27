@@ -67,7 +67,7 @@ impl AlignedFonts {
                 .fonts
                 .get(&TextScaleAlignment::Medium)
                 .expect("no font"),
-            _ => self.fonts.get(&text_scale_alignment).expect("no font"),
+            _ => self.fonts.get(text_scale_alignment).expect("no font"),
         }
     }
     pub(crate) fn new(scale_factor: f64) -> Self {

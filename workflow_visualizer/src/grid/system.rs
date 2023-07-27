@@ -22,6 +22,7 @@ fn update_section(
     *area = section.area;
 }
 
+#[derive(Default)]
 pub(crate) struct GridConfigRecorder {
     times_span_configured: HashMap<HorizontalSpan, usize>,
 }
@@ -42,13 +43,7 @@ impl Record for GridConfigRecorder {
     }
 }
 
-impl Default for GridConfigRecorder {
-    fn default() -> Self {
-        Self {
-            times_span_configured: HashMap::new(),
-        }
-    }
-}
+
 
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,

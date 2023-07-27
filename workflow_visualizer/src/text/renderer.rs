@@ -126,7 +126,7 @@ pub(crate) fn setup(
     let layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("text pipeline layout descriptor"),
         bind_group_layouts: &[
-            &viewport.bind_group_layout(),
+            (viewport.bind_group_layout()),
             &sampler_bind_group_layout,
             &render_group_bind_group_layout,
             &atlas_bind_group_layout,
@@ -264,7 +264,7 @@ impl Render for TextRenderer {
             .set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass_handle
             .0
-            .set_bind_group(0, &viewport.bind_group(), &[]);
+            .set_bind_group(0, viewport.bind_group(), &[]);
         render_pass_handle
             .0
             .set_bind_group(1, &self.sampler_bind_group, &[]);

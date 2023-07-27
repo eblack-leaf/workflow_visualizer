@@ -38,6 +38,7 @@ impl Default for Focus {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct FocusRecorder {
     times_focused: HashMap<Entity, usize>,
     loops_focused: HashMap<Entity, usize>,
@@ -69,23 +70,13 @@ impl Record for FocusRecorder {
     }
 }
 
-impl Default for FocusRecorder {
-    fn default() -> Self {
-        Self {
-            times_focused: HashMap::new(),
-            loops_focused: HashMap::new(),
-        }
-    }
-}
+
 
 /// used to opt into VirtualKeyboard open functionality
 #[derive(Component, Copy, Clone)]
+#[derive(Default)]
 pub struct FocusInputListener {}
-impl Default for FocusInputListener {
-    fn default() -> Self {
-        FocusInputListener {}
-    }
-}
+
 pub(crate) fn set_focused(
     mut focus_listeners: Query<(Entity, &mut Focus)>,
     focus_input_listeners: Query<(Entity, &FocusInputListener)>,

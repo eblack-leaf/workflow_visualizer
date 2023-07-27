@@ -148,7 +148,7 @@ pub(crate) fn setup(
         entries: &[
             wgpu::BindGroupEntry {
                 binding: 0,
-                resource: wgpu::BindingResource::TextureView(&atlas.view()),
+                resource: wgpu::BindingResource::TextureView(atlas.view()),
             },
             wgpu::BindGroupEntry {
                 binding: 1,

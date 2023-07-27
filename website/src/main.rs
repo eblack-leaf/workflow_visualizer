@@ -1,4 +1,4 @@
-use dioxus::html::h1;
+
 use dioxus::prelude::*;
 use dioxus_free_icons::Icon;
 

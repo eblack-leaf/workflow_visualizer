@@ -34,7 +34,7 @@ pub(crate) fn setup(
 ) {
     let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("content panel pipeline layout descriptor"),
-        bind_group_layouts: &[&viewport.bind_group_layout()],
+        bind_group_layouts: &[(viewport.bind_group_layout())],
         push_constant_ranges: &[],
     };
     let pipeline_layout = gfx_surface
@@ -148,7 +148,7 @@ impl Render for PanelRenderer {
             render_pass_handle.0.set_pipeline(&self.pipeline);
             render_pass_handle
                 .0
-                .set_bind_group(0, &viewport.bind_group(), &[]);
+                .set_bind_group(0, viewport.bind_group(), &[]);
             render_pass_handle
                 .0
                 .set_vertex_buffer(0, self.panel_vertex_buffer.slice(..));

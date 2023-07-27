@@ -160,7 +160,8 @@ fn create_slot(
                 )),
         )
         .id();
-    let slot = Slot {
+    
+    Slot {
         name_text,
         otp_text,
         generate_button,
@@ -170,8 +171,7 @@ fn create_slot(
         info_panel,
         edit_panel,
         delete_panel,
-    };
-    slot
+    }
 }
 
 fn delete_slot(cmd: &mut Commands, slot: &Slot) {
@@ -222,10 +222,8 @@ pub fn fill_slots(
                         } else {
                             slot_needed = true;
                         }
-                    } else {
-                        if let None = slots.0.get(zero_based_index) {
-                            slot_needed = true;
-                        }
+                    } else if slots.0.get(zero_based_index).is_none() {
+                        slot_needed = true;
                     }
                     *cached = token_name.clone();
                 } else {
