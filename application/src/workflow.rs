@@ -53,8 +53,13 @@ impl Default for Engen {
     fn default() -> Self {
         let mut engen = Engen::new();
         // include from file to generate hashmap
-        engen.tokens.insert("something".into(), Token("245215".to_string()));
-        engen.tokens.insert("hccc".into(), Token("245215".to_string()));
+        engen.tokens.insert("school".into(), Token("245215".to_string()));
+        engen.tokens.insert("work".into(), Token("245215".to_string()));
+        engen.tokens.insert("home".into(), Token("245215".to_string()));
+        engen.tokens.insert("personal".into(), Token("245215".to_string()));
+        engen.tokens.insert("bank".into(), Token("245215".to_string()));
+        engen.tokens.insert("email".into(), Token("245215".to_string()));
+        engen.tokens.insert("phone".into(), Token("245215".to_string()));
         engen
     }
 }
@@ -88,7 +93,7 @@ impl Workflow for Engen {
         match action {
             Action::AddToken((name, _token)) => Response::TokenAdded(name),
             Action::GenerateOtp(name) => {
-                let otp = "".to_string();
+                let otp = "143647".to_string();
                 Response::TokenOtp((name, TokenOtp(otp)))
             }
             Action::RemoveToken(name) => Response::TokenRemoved(name),

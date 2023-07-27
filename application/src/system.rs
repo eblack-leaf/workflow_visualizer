@@ -27,7 +27,7 @@ pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<E
                 ButtonType::Press,
                 4,
                 Color::RED_ORANGE,
-                Color::OFF_WHITE,
+                Color::OFF_BLACK,
                 "edit",
                 "",
                 0,
@@ -71,13 +71,13 @@ fn create_slot(
         .id();
     let edit_panel = cmd
         .spawn(
-            Panel::new(PanelType::Panel, 6, Color::RED_ORANGE, Color::RED_ORANGE)
+            Panel::new(PanelType::Panel, 6, Color::MEDIUM_RED_ORANGE, Color::MEDIUM_RED_ORANGE)
                 .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-panel"))),
         )
         .id();
     let delete_panel = cmd
         .spawn(
-            Panel::new(PanelType::Panel, 7, Color::RED, Color::RED).responsively_viewed(
+            Panel::new(PanelType::Panel, 7, Color::MEDIUM_RED, Color::MEDIUM_RED).responsively_viewed(
                 ResponsiveGridView::all_same(placements.view("delete-panel")),
             ),
         )
@@ -118,8 +118,8 @@ fn create_slot(
             Button::new(
                 ButtonType::Press,
                 4,
-                Color::GREEN,
-                Color::OFF_WHITE,
+                Color::LIGHT_GREEN,
+                Color::DARK_GREEN,
                 "edit",
                 "",
                 0,
@@ -135,8 +135,8 @@ fn create_slot(
             Button::new(
                 ButtonType::Press,
                 4,
-                Color::RED_ORANGE,
-                Color::OFF_WHITE,
+                Color::LIGHT_RED_ORANGE,
+                Color::DARK_RED_ORANGE,
                 "edit",
                 "",
                 0,
@@ -150,8 +150,8 @@ fn create_slot(
             Button::new(
                 ButtonType::Press,
                 4,
-                Color::RED,
-                Color::OFF_WHITE,
+                Color::LIGHT_RED,
+                Color::DARK_RED,
                 "edit",
                 "",
                 0,
