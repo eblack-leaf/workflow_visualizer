@@ -43,8 +43,6 @@ pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>)
 pub fn update_blueprint(
     mut blueprint: ResMut<SlotBlueprint>,
     grid: Res<Grid>,
-    mut slots: ResMut<Slots>,
-    mut cmd: Commands,
 ) {
     if grid.is_changed() {
         *blueprint = SlotBlueprint::new(&grid);
@@ -52,7 +50,7 @@ pub fn update_blueprint(
 }
 
 fn create_slot(
-    mut cmd: &mut Commands,
+    cmd: &mut Commands,
     blueprint: &SlotBlueprint,
     index: usize,
     name: String,
@@ -176,7 +174,7 @@ fn create_slot(
     slot
 }
 
-fn delete_slot(mut cmd: &mut Commands, slot: &Slot) {
+fn delete_slot(cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.name_text).despawn();
     cmd.entity(slot.otp_text).despawn();
     cmd.entity(slot.generate_button).despawn();
@@ -204,7 +202,7 @@ pub fn fill_slots(
     mut cache: ResMut<SlotFillsCache>,
     mut slots: ResMut<Slots>,
     mut cmd: Commands,
-    mut text_vals: Query<(&mut TextValue)>,
+    mut text_vals: Query<&mut TextValue>,
 ) {
     if slot_pool.is_changed() || slot_blueprint.is_changed() || paging.is_changed() {
         slot_fills.0.clear();
@@ -262,7 +260,7 @@ pub fn read_otp(
     mut events: EventReader<OtpRead>,
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
-    mut text: Query<(&mut TextValue)>,
+    mut text: Query<&mut TextValue>,
 ) {
     for event in events.iter() {
         let mut index = 0;
@@ -286,8 +284,8 @@ pub fn process(
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
     sender: NonSend<Sender<Engen>>,
-    buttons: Query<(&TouchTrigger)>,
-    text: Query<(&mut TextValue)>,
+    buttons: Query<&TouchTrigger>,
+    _text: Query<&mut TextValue>,
 ) {
     // check buttons and send actions of each slot
     let mut index = 0;
@@ -301,7 +299,7 @@ pub fn process(
         }
         if let Ok(trigger) = buttons.get(slot.delete_button) {
             if trigger.triggered() {
-                if let Some(name) = slot_fills.0.get(index) {
+                if let Some(_name) = slot_fills.0.get(index) {
                     // invalidate last slot
                     // remove slot fill for slot
                     // if filled replace last with replaced
@@ -311,7 +309,7 @@ pub fn process(
         }
         if let Ok(trigger) = buttons.get(slot.edit_button) {
             if trigger.triggered() {
-                if let Some(name) = slot_fills.0.get(index) {
+                if let Some(_name) = slot_fills.0.get(index) {
                     // move info panel + invalidate elements
                     // spawn edit elements
                 }

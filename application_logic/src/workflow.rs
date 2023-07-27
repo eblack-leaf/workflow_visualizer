@@ -69,9 +69,9 @@ impl Workflow for Engen {
 
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
         match response {
-            Response::TokenAdded(name) => {
+            Response::TokenAdded(_name) => {
             }
-            Response::TokenRemoved(name) => {
+            Response::TokenRemoved(_name) => {
             }
             Response::TokenOtp((name, otp)) => {
                 visualizer.job.container.send_event(OtpRead { name, otp });
@@ -96,7 +96,7 @@ impl Workflow for Engen {
             Action::RemoveToken(name) => Response::TokenRemoved(name),
             Action::RequestTokenNames => {
                 // get tokens from engen
-                Response::RequestedTokenNames(engen.lock().unwrap().tokens.iter().map(|(k, v)| k.clone()).collect())
+                Response::RequestedTokenNames(engen.lock().unwrap().tokens.keys().map(|k| k.clone()).collect())
             }
             Action::ExitRequest => Response::ExitConfirmed,
         }

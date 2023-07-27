@@ -95,7 +95,6 @@ pub struct SlotBlueprint {
     otp_far_horizontal: i32,
     slot_content_height: i32,
     segment_padding: i32,
-    button_content_height: i32,
     generate_button_near_horizontal: i32,
     generate_button_far_horizontal: i32,
     edit_button_near_horizontal: i32,
@@ -107,7 +106,6 @@ pub struct SlotBlueprint {
 
 impl SlotBlueprint {
     pub fn new(grid: &Grid) -> Self {
-        let begin_vertical = grid.calc_vertical_location(1.near());
         let begin_horizontal = grid.calc_horizontal_location(1.near());
         let end_horizontal = grid.calc_horizontal_location(4.far());
         let total_horizontal_markers = end_horizontal.0 - begin_horizontal.0;
@@ -133,8 +131,6 @@ impl SlotBlueprint {
         let line_y_top = segment_padding;
         let line_y_bottom = segment_padding + slot_content_height;
         let info_content_text_scale = TextScale(18u32); // programmatically pull from mapping using from_height(info_content_height_px)
-        let button_content_height = slot_content_height - 2;
-        let button_content_height_px = RawMarker(button_content_height).to_pixel();
         let button_text_scale = 16u32; // programmatically pull from mapping using from_height(button_content_height_px)
         let total_vertical_markers = grid.vertical_markers()
             - grid.markers_per_gutter() * 2
@@ -179,7 +175,6 @@ impl SlotBlueprint {
             otp_far_horizontal,
             slot_content_height,
             segment_padding,
-            button_content_height,
             generate_button_near_horizontal,
             generate_button_far_horizontal,
             edit_button_near_horizontal,
