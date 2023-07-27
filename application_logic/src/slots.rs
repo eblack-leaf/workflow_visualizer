@@ -11,31 +11,31 @@ use crate::system;
 use crate::workflow::{TokenName, TokenOtp};
 
 #[derive(Resource)]
-pub(crate) struct AddButton(pub(crate) Entity);
+pub struct AddButton(pub Entity);
 
 #[derive(Resource)]
-pub(crate) struct SlotPool(pub(crate) Vec<TokenName>);
+pub struct SlotPool(pub Vec<TokenName>);
 
 #[derive(Resource)]
-pub(crate) struct SlotFills(pub(crate) Vec<TokenName>);
+pub struct SlotFills(pub Vec<TokenName>);
 #[derive(Resource)]
-pub(crate) struct SlotFillsCache(pub(crate) Vec<TokenName>);
+pub struct SlotFillsCache(pub Vec<TokenName>);
 #[derive(Resource)]
-pub(crate) struct Slots(pub(crate) Vec<Slot>);
+pub struct Slots(pub Vec<Slot>);
 
 #[derive(Resource)]
-pub(crate) struct SlotPaging(pub(crate) u32);
+pub struct SlotPaging(pub u32);
 
 impl SlotPaging {
-    pub(crate) fn range(&self, slots_per_page: usize) -> (usize, usize) {
+    pub fn range(&self, slots_per_page: usize) -> (usize, usize) {
         let start = self.0 as usize * slots_per_page;
         let end = start + slots_per_page - 1;
         (start, end)
     }
 }
-pub(crate) struct OtpRead {
-    pub(crate) name: TokenName,
-    pub(crate) otp: TokenOtp,
+pub struct OtpRead {
+    pub name: TokenName,
+    pub otp: TokenOtp,
 }
 impl Attach for Slots {
     fn attach(visualizer: &mut Visualizer) {
@@ -61,29 +61,29 @@ impl Attach for Slots {
     }
 }
 
-pub(crate) struct Slot {
-    pub(crate) name_text: Entity,
-    pub(crate) otp_text: Entity,
-    pub(crate) generate_button: Entity,
-    pub(crate) delete_button: Entity,
-    pub(crate) info_line: Entity,
-    pub(crate) edit_button: Entity,
-    pub(crate) info_panel: Entity,
-    pub(crate) edit_panel: Entity,
-    pub(crate) delete_panel: Entity,
+pub struct Slot {
+    pub name_text: Entity,
+    pub otp_text: Entity,
+    pub generate_button: Entity,
+    pub delete_button: Entity,
+    pub info_line: Entity,
+    pub edit_button: Entity,
+    pub info_panel: Entity,
+    pub edit_panel: Entity,
+    pub delete_panel: Entity,
 }
 
 #[derive(Resource)]
-pub(crate) struct SlotBlueprint {
-    pub(crate) slots_per_page: usize,
-    pub(crate) anchor: GridPoint,
-    pub(crate) slot_offset_markers: RawMarker,
-    pub(crate) add_button_view: GridView,
-    pub(crate) info_text_scale: TextScale,
-    pub(crate) button_icon_scale: u32,
-    pub(crate) slot_height: RawMarker,
-    pub(crate) total_width_markers: RawMarker,
-    pub(crate) total_vertical_markers: RawMarker,
+pub struct SlotBlueprint {
+    pub slots_per_page: usize,
+    pub anchor: GridPoint,
+    pub slot_offset_markers: RawMarker,
+    pub add_button_view: GridView,
+    pub info_text_scale: TextScale,
+    pub button_icon_scale: u32,
+    pub slot_height: RawMarker,
+    pub total_width_markers: RawMarker,
+    pub total_vertical_markers: RawMarker,
     info_panel_offset: i32,
     edit_panel_offset: i32,
     line_x: i32,
@@ -106,7 +106,7 @@ pub(crate) struct SlotBlueprint {
 }
 
 impl SlotBlueprint {
-    pub(crate) fn new(grid: &Grid) -> Self {
+    pub fn new(grid: &Grid) -> Self {
         let begin_vertical = grid.calc_vertical_location(1.near());
         let begin_horizontal = grid.calc_horizontal_location(1.near());
         let end_horizontal = grid.calc_horizontal_location(4.far());
@@ -189,7 +189,7 @@ impl SlotBlueprint {
             button_markers,
         }
     }
-    pub(crate) fn placements(&self, offset: usize) -> PlacementReference {
+    pub fn placements(&self, offset: usize) -> PlacementReference {
         let mut placement_reference = PlacementReference::new();
         let slot_left_top = (
             self.anchor.x,
@@ -337,12 +337,12 @@ impl SlotBlueprint {
     }
 }
 
-pub(crate) struct SlotFillEvent {
-    pub(crate) tokens: Vec<TokenName>,
+pub struct SlotFillEvent {
+    pub tokens: Vec<TokenName>,
 }
 
 impl SlotFillEvent {
-    pub(crate) fn new(tokens: Vec<TokenName>) -> Self {
+    pub fn new(tokens: Vec<TokenName>) -> Self {
         Self { tokens }
     }
 }

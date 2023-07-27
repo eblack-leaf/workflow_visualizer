@@ -3,9 +3,8 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tracing::info;
 
-use workflow_visualizer::{start_web_worker, Visualizer, Workflow};
+use workflow_visualizer::{Visualizer, Workflow};
 
 use crate::slots::{OtpRead, SlotFillEvent};
 
@@ -71,10 +70,8 @@ impl Workflow for Engen {
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
         match response {
             Response::TokenAdded(name) => {
-                info!("token added: {:?}", name);
             }
             Response::TokenRemoved(name) => {
-                info!("token removed: {:?}", name);
             }
             Response::TokenOtp((name, otp)) => {
                 visualizer.job.container.send_event(OtpRead { name, otp });
@@ -115,7 +112,4 @@ impl Workflow for Engen {
             _ => false,
         }
     }
-}
-fn main() {
-    start_web_worker::<Engen>();
 }

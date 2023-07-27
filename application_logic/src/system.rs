@@ -13,7 +13,7 @@ use crate::slots::{
 };
 use crate::workflow::{Action, Engen};
 
-pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
+pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
     let blueprint = SlotBlueprint::new(&grid);
     sender.send(Action::RequestTokenNames);
     cmd.insert_resource(SlotPool(vec![]));
@@ -40,7 +40,7 @@ pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<E
     cmd.insert_resource(blueprint);
 }
 
-pub(crate) fn update_blueprint(
+pub fn update_blueprint(
     mut blueprint: ResMut<SlotBlueprint>,
     grid: Res<Grid>,
     mut slots: ResMut<Slots>,
@@ -187,7 +187,7 @@ fn delete_slot(mut cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.edit_panel).despawn();
     cmd.entity(slot.delete_panel).despawn();
 }
-pub(crate) fn read_fill_event(
+pub fn read_fill_event(
     mut events: EventReader<SlotFillEvent>,
     mut slot_pool: ResMut<SlotPool>,
 ) {
@@ -196,7 +196,7 @@ pub(crate) fn read_fill_event(
     }
 }
 
-pub(crate) fn fill_slots(
+pub fn fill_slots(
     mut slot_fills: ResMut<SlotFills>,
     slot_pool: Res<SlotPool>,
     slot_blueprint: Res<SlotBlueprint>,
@@ -258,7 +258,7 @@ pub(crate) fn fill_slots(
         }
     }
 }
-pub(crate) fn read_otp(
+pub fn read_otp(
     mut events: EventReader<OtpRead>,
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
@@ -282,7 +282,7 @@ pub(crate) fn read_otp(
         }
     }
 }
-pub(crate) fn process(
+pub fn process(
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
     sender: NonSend<Sender<Engen>>,
