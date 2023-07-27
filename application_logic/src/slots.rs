@@ -183,11 +183,12 @@ impl SlotBlueprint {
     }
     pub fn placements(&self, offset: usize) -> PlacementReference {
         let mut placement_reference = PlacementReference::new();
+        let offset_for_slots = self.slot_offset_markers.0 * offset as i32;
         let slot_left_top = (
             self.anchor.x,
             self.anchor
                 .y
-                .raw_offset(self.slot_offset_markers.0 * offset as i32),
+                .raw_offset(offset_for_slots),
         );
         // use dimensions to offset from slot_anchor
         placement_reference.add_view(
