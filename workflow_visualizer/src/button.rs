@@ -3,9 +3,9 @@ use bevy_ecs::prelude::{
 };
 
 use crate::{
-    Area, Attach, Color, DeviceContext, Icon, IconId, IconScale,
-    InterfaceContext, Layer, Panel, PanelType, Position, ScaleFactor, Section, SyncPoint, Text,
-    TextScale, TextScaleAlignment, TextValue, TextWrapStyle, Visualizer,
+    Area, Attach, Color, DeviceContext, Icon, IconId, IconScale, InterfaceContext, Layer, Panel,
+    PanelType, Position, ScaleFactor, Section, SyncPoint, Text, TextScale, TextScaleAlignment,
+    TextValue, TextWrapStyle, Visualizer,
 };
 use crate::grid::RawMarker;
 use crate::text::AlignedFonts;

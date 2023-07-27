@@ -21,9 +21,7 @@ use crate::line::LineAttachment;
 use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
 use crate::path::PathAttachment;
-use crate::render::{
-    internal_render, invoke_render, Render, RenderPhase, RenderTaskManager,
-};
+use crate::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;

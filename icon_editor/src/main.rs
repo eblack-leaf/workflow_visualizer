@@ -4,10 +4,7 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use workflow_visualizer::{
-    bevy_ecs, Position, ScaleFactor, Sender, TextValue,
-    UserSpaceSyncPoint,
-};
+use workflow_visualizer::{bevy_ecs, Position, ScaleFactor, Sender, TextValue, UserSpaceSyncPoint};
 use workflow_visualizer::{
     Attach, BundledIcon, BundlePlacement, Color, GfxOptions, Icon, IconBitmap, IconBitmapRequest,
     IconPixelData, IconScale, Panel, PanelType, Runner, Text, TextScaleAlignment, TextWrapStyle,
@@ -20,7 +17,9 @@ use workflow_visualizer::bevy_ecs::prelude::{
 use workflow_visualizer::RawMarker;
 use workflow_visualizer::ResponsiveUnit;
 use workflow_visualizer::touch::adapter::{PrimaryTouch, TouchLocation};
-use workflow_visualizer::touch::component::{CurrentlyPressed, Touchable, TouchListener, TouchTrigger};
+use workflow_visualizer::touch::component::{
+    CurrentlyPressed, Touchable, TouchListener, TouchTrigger,
+};
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Copy, Clone, Debug, Serialize, Deserialize)]
 struct BitmapLocation {

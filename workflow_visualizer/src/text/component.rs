@@ -4,8 +4,8 @@ use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::{
-    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer,
-    NumericalContext, Position, Section, VisibleSection,
+    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, NumericalContext,
+    Position, Section, VisibleSection,
 };
 
 /// Entry point to spawn a Text element

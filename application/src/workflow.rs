@@ -28,8 +28,15 @@ pub enum Action {
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TokenOtp(pub String);
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Hash, Eq)]
 pub struct TokenName(pub String);
+
+impl<T: Into<String>> From<T> for TokenName {
+    fn from(value: T) -> Self {
+        TokenName(value.into())
+    }
+}
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Token(pub String);
 pub struct Engen {
@@ -46,6 +53,8 @@ impl Default for Engen {
     fn default() -> Self {
         let mut engen = Engen::new();
         // include from file to generate hashmap
+        engen.tokens.insert("something".into(), Token("245215".to_string()));
+        engen.tokens.insert("hccc".into(), Token("245215".to_string()));
         engen
     }
 }
@@ -63,7 +72,7 @@ impl Workflow for Engen {
                 info!("token removed: {:?}", name);
             }
             Response::TokenOtp((name, otp)) => {
-                visualizer.job.container.send_event(OtpRead{ name, otp });
+                visualizer.job.container.send_event(OtpRead { name, otp });
             }
             Response::RequestedTokenNames(tokens) => {
                 visualizer
@@ -75,7 +84,7 @@ impl Workflow for Engen {
         }
     }
 
-    async fn handle_action(_engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
+    async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
         match action {
             Action::AddToken((name, _token)) => Response::TokenAdded(name),
             Action::GenerateOtp(name) => {
@@ -85,7 +94,7 @@ impl Workflow for Engen {
             Action::RemoveToken(name) => Response::TokenRemoved(name),
             Action::RequestTokenNames => {
                 // get tokens from engen
-                Response::RequestedTokenNames(vec![])
+                Response::RequestedTokenNames(engen.lock().unwrap().tokens.iter().map(|(k, v)| k.clone()).collect())
             }
             Action::ExitRequest => Response::ExitConfirmed,
         }

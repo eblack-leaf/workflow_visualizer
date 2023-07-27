@@ -1,14 +1,16 @@
 use workflow_visualizer::{
-    BundlePlacement, Button, ButtonType, Color, Grid,
-    Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle,
+    BundlePlacement, Button, ButtonType, Color, Grid, Line, Panel, PanelType, ResponsiveGridView,
+    ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue, TextWrapStyle,
 };
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
 
-use crate::slots::{AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots};
+use crate::slots::{
+    AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging,
+    SlotPool, Slots,
+};
 use crate::workflow::{Action, Engen};
 
 pub(crate) fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
@@ -46,158 +48,145 @@ pub(crate) fn update_blueprint(
 ) {
     if grid.is_changed() {
         *blueprint = SlotBlueprint::new(&grid);
-        let current = slots.0.len();
-        let needed = blueprint.slots_per_page;
-        let diff = needed as i32 - current as i32;
-        if diff > 0 {
-            for i in 0..diff {
-                let placements = blueprint.placements(current + i as usize);
-                let info_panel = cmd
-                    .spawn(
-                        Panel::new(
-                            PanelType::Panel,
-                            5,
-                            Color::MEDIUM_GREEN,
-                            Color::MEDIUM_GREEN,
-                        )
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("info-panel"),
-                            )),
-                    )
-                    .id();
-                let edit_panel = cmd
-                    .spawn(
-                        Panel::new(PanelType::Panel, 6, Color::RED_ORANGE, Color::RED_ORANGE)
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("edit-panel"),
-                            )),
-                    )
-                    .id();
-                let delete_panel = cmd
-                    .spawn(
-                        Panel::new(PanelType::Panel, 7, Color::RED, Color::RED)
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("delete-panel"),
-                            )),
-                    )
-                    .id();
-                let name_text = cmd
-                    .spawn(
-                        Text::new(
-                            4,
-                            "",
-                            TextScaleAlignment::Custom(blueprint.info_text_scale.0),
-                            Color::OFF_WHITE,
-                            TextWrapStyle::letter(),
-                        )
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("name-text"),
-                            )),
-                    )
-                    .id();
-                let otp_text = cmd
-                    .spawn(
-                        Text::new(
-                            4,
-                            "",
-                            TextScaleAlignment::Custom(blueprint.info_text_scale.0),
-                            Color::OFF_WHITE,
-                            TextWrapStyle::letter(),
-                        )
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("otp-text"),
-                            )),
-                    )
-                    .id();
-                let info_line = cmd
-                    .spawn(Line::new(
-                        ResponsivePathView::all_same(placements.path_view("info-line")),
-                        4,
-                        Color::OFF_WHITE,
-                    ))
-                    .id();
-                let generate_button = cmd
-                    .spawn(
-                        Button::new(
-                            ButtonType::Press,
-                            4,
-                            Color::GREEN,
-                            Color::OFF_WHITE,
-                            "edit",
-                            "",
-                            0,
-                            blueprint.button_icon_scale,
-                        )
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("generate-button"),
-                            )),
-                    )
-                    .id();
-                let edit_button = cmd
-                    .spawn(
-                        Button::new(
-                            ButtonType::Press,
-                            4,
-                            Color::RED_ORANGE,
-                            Color::OFF_WHITE,
-                            "edit",
-                            "",
-                            0,
-                            blueprint.button_icon_scale,
-                        )
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("edit-button"),
-                            )),
-                    )
-                    .id();
-                let delete_button = cmd
-                    .spawn(
-                        Button::new(
-                            ButtonType::Press,
-                            4,
-                            Color::RED,
-                            Color::OFF_WHITE,
-                            "edit",
-                            "",
-                            0,
-                            blueprint.button_icon_scale,
-                        )
-                            .responsively_viewed(ResponsiveGridView::all_same(
-                                placements.view("delete-button"),
-                            )),
-                    )
-                    .id();
-                let slot = Slot {
-                    name_text,
-                    otp_text,
-                    generate_button,
-                    delete_button,
-                    info_line,
-                    edit_button,
-                    info_panel,
-                    edit_panel,
-                    delete_panel,
-                };
-                slots.0.push(slot);
-            }
-        } else {
-            for i in diff..0 {
-                // remove slot and entities
-                // let slot = slots.0.remove((current as i32 + i) as usize);
-                cmd.entity(slot.name_text).despawn();
-                cmd.entity(slot.otp_text).despawn();
-                cmd.entity(slot.generate_button).despawn();
-                cmd.entity(slot.delete_button).despawn();
-                cmd.entity(slot.edit_button).despawn();
-                cmd.entity(slot.info_line).despawn();
-                cmd.entity(slot.info_panel).despawn();
-                cmd.entity(slot.edit_panel).despawn();
-                cmd.entity(slot.delete_panel).despawn();
-            }
-        }
     }
 }
 
+fn create_slot(
+    mut cmd: &mut Commands,
+    blueprint: &SlotBlueprint,
+    index: usize,
+    name: String,
+) -> Slot {
+    let placements = blueprint.placements(index);
+    let info_panel = cmd
+        .spawn(
+            Panel::new(
+                PanelType::Panel,
+                5,
+                Color::MEDIUM_GREEN,
+                Color::MEDIUM_GREEN,
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(placements.view("info-panel"))),
+        )
+        .id();
+    let edit_panel = cmd
+        .spawn(
+            Panel::new(PanelType::Panel, 6, Color::RED_ORANGE, Color::RED_ORANGE)
+                .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-panel"))),
+        )
+        .id();
+    let delete_panel = cmd
+        .spawn(
+            Panel::new(PanelType::Panel, 7, Color::RED, Color::RED).responsively_viewed(
+                ResponsiveGridView::all_same(placements.view("delete-panel")),
+            ),
+        )
+        .id();
+    let name_text = cmd
+        .spawn(
+            Text::new(
+                4,
+                name,
+                TextScaleAlignment::Custom(blueprint.info_text_scale.0),
+                Color::OFF_WHITE,
+                TextWrapStyle::letter(),
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(placements.view("name-text"))),
+        )
+        .id();
+    let otp_text = cmd
+        .spawn(
+            Text::new(
+                4,
+                "------",
+                TextScaleAlignment::Custom(blueprint.info_text_scale.0),
+                Color::OFF_WHITE,
+                TextWrapStyle::letter(),
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(placements.view("otp-text"))),
+        )
+        .id();
+    let info_line = cmd
+        .spawn(Line::new(
+            ResponsivePathView::all_same(placements.path_view("info-line")),
+            4,
+            Color::OFF_WHITE,
+        ))
+        .id();
+    let generate_button = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                4,
+                Color::GREEN,
+                Color::OFF_WHITE,
+                "edit",
+                "",
+                0,
+                blueprint.button_icon_scale,
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(
+                    placements.view("generate-button"),
+                )),
+        )
+        .id();
+    let edit_button = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                4,
+                Color::RED_ORANGE,
+                Color::OFF_WHITE,
+                "edit",
+                "",
+                0,
+                blueprint.button_icon_scale,
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-button"))),
+        )
+        .id();
+    let delete_button = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                4,
+                Color::RED,
+                Color::OFF_WHITE,
+                "edit",
+                "",
+                0,
+                blueprint.button_icon_scale,
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(
+                    placements.view("delete-button"),
+                )),
+        )
+        .id();
+    let slot = Slot {
+        name_text,
+        otp_text,
+        generate_button,
+        delete_button,
+        info_line,
+        edit_button,
+        info_panel,
+        edit_panel,
+        delete_panel,
+    };
+    slot
+}
+
+fn delete_slot(mut cmd: &mut Commands, slot: &Slot) {
+    cmd.entity(slot.name_text).despawn();
+    cmd.entity(slot.otp_text).despawn();
+    cmd.entity(slot.generate_button).despawn();
+    cmd.entity(slot.delete_button).despawn();
+    cmd.entity(slot.edit_button).despawn();
+    cmd.entity(slot.info_line).despawn();
+    cmd.entity(slot.info_panel).despawn();
+    cmd.entity(slot.edit_panel).despawn();
+    cmd.entity(slot.delete_panel).despawn();
+}
 pub(crate) fn read_fill_event(
     mut events: EventReader<SlotFillEvent>,
     mut slot_pool: ResMut<SlotPool>,
@@ -214,6 +203,8 @@ pub(crate) fn fill_slots(
     paging: Res<SlotPaging>,
     mut cache: ResMut<SlotFillsCache>,
     mut slots: ResMut<Slots>,
+    mut cmd: Commands,
+    mut text_vals: Query<(&mut TextValue)>,
 ) {
     if slot_pool.is_changed() || slot_blueprint.is_changed() || paging.is_changed() {
         slot_fills.0.clear();
@@ -225,26 +216,42 @@ pub(crate) fn fill_slots(
                 slot_fills.0.push(token_name.clone());
                 let mut slot_needed = false;
                 if let Some(cached) = cache.0.get_mut(zero_based_index) {
-                    if *cached != token_name {
-                        // change slot name-text to fill && create slot if not exist
-                        // fade-in start anim
+                    if *cached != *token_name {
+                        if let Some(slot) = slots.0.get(zero_based_index) {
+                            if let Ok(mut text_val) = text_vals.get_mut(slot.name_text) {
+                                text_val.0 = token_name.0.clone();
+                            }
+                        } else {
+                            slot_needed = true;
+                        }
                     } else {
-                        // if no slot make with name-text
+                        if let None = slots.0.get(zero_based_index) {
+                            slot_needed = true;
+                        }
                     }
-                    *cached = fill.clone();
+                    *cached = token_name.clone();
                 } else {
-                    // create slot && fade-in with name-text
-                    // create cache entry
+                    slot_needed = true;
+                    cache.0.insert(zero_based_index, token_name.clone());
                 }
-                if slot_needed {}
+                if slot_needed {
+                    let slot = create_slot(
+                        &mut cmd,
+                        &slot_blueprint,
+                        zero_based_index,
+                        token_name.0.clone(),
+                    );
+                    slots.0.insert(zero_based_index, slot);
+                }
             } else {
                 let mut should_remove = false;
                 if let Some(old) = slots.0.get(zero_based_index) {
                     should_remove = true;
-                    // despawn slot entities
+                    delete_slot(&mut cmd, old);
                 }
                 if should_remove {
-                    // remove from slots
+                    slots.0.remove(zero_based_index);
+                    cache.0.remove(zero_based_index);
                 }
             }
             zero_based_index += 1;

@@ -4,7 +4,10 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::Query;
 use tracing::trace;
 
-use crate::{Area, CurrentlyPressed, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor, Section, ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle};
+use crate::{
+    Area, CurrentlyPressed, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor, Section,
+    ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle,
+};
 use crate::focus::FocusedEntity;
 use crate::touch::adapter::{TouchGrabState, TrackedTouch};
 use crate::touch::component::{ListenableTouchType, TouchEvent, TouchType};
@@ -101,12 +104,16 @@ pub(crate) fn read_touch_events(
                         if trigger_on_release {
                             if let Some(prime) = primary_touch.touch {
                                 if let Some(end) = prime.end {
-                                    let touch_origin = prime.origin.to_interface(scale_factor.factor())
-                                        - viewport_handle.section.position;
+                                    let touch_origin =
+                                        prime.origin.to_interface(scale_factor.factor())
+                                            - viewport_handle.section.position;
                                     let touch_end = end.to_interface(scale_factor.factor())
                                         - viewport_handle.section.position;
-                                    if section.contains(touch_origin) && section.contains(touch_end) {
-                                        if let Some(grab_state) = touch_grab_state.grab_state.as_mut() {
+                                    if section.contains(touch_origin) && section.contains(touch_end)
+                                    {
+                                        if let Some(grab_state) =
+                                            touch_grab_state.grab_state.as_mut()
+                                        {
                                             if *layer > grab_state.1 {
                                                 grab_state.0 = entity;
                                                 grab_state.1 = *layer;
