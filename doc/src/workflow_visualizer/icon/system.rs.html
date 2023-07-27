@@ -192,22 +192,24 @@
 <a href="#192" id="192">192</a>
 <a href="#193" id="193">193</a>
 <a href="#194" id="194">194</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Or, Query, Res, ResMut};
+<a href="#195" id="195">195</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Query, Res, ResMut};
 
+<span class="kw">use crate</span>::{
+    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+};
 <span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::IconBitmapLayout;
 <span class="kw">use </span><span class="kw">crate</span>::icon::cache::{Cache, Difference};
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::{IconId, IconScale};
 <span class="kw">use </span><span class="kw">crate</span>::icon::renderer::IconRenderer;
-<span class="kw">use crate</span>::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
-};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calc_area(
     <span class="kw-2">mut </span>icons: Query&lt;(<span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;, <span class="kw-2">&amp;</span>IconScale), Changed&lt;IconScale&gt;&gt;,
 ) {
     <span class="kw">for </span>(<span class="kw-2">mut </span>area, scale) <span class="kw">in </span>icons.iter_mut() {
         <span class="kw">let </span>px = scale.px();
-        <span class="kw-2">*</span>area = Area::new(px, px);
+        <span class="kw">let </span>new_area = Area::new(px, px);
+        <span class="kw-2">*</span>area = new_area;
     }
 }
 
