@@ -2,8 +2,8 @@ use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Bundle;
 use compact_str::CompactString;
 
-use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section};
 use crate::icon::cache::{Cache, Difference};
+use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section};
 
 #[derive(Component, Copy, Clone)]
 pub enum IconScale {

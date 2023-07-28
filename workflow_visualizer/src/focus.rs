@@ -70,11 +70,8 @@ impl Record for FocusRecorder {
     }
 }
 
-
-
 /// used to opt into VirtualKeyboard open functionality
-#[derive(Component, Copy, Clone)]
-#[derive(Default)]
+#[derive(Component, Copy, Clone, Default)]
 pub struct FocusInputListener {}
 
 pub(crate) fn set_focused(

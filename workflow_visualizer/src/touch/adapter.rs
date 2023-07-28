@@ -5,8 +5,8 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Resource;
 use winit::event::{ElementState, MouseButton};
 
-use crate::{DeviceContext, Layer, Position};
 use crate::touch::component::Touch;
+use crate::{DeviceContext, Layer, Position};
 
 /// Where a Touch took place
 #[derive(Component, Clone)]

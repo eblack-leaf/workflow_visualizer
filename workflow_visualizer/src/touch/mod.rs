@@ -4,8 +4,8 @@ pub use adapter::{
 };
 pub(crate) use attachment::TouchAttachment;
 pub use component::{
-    CurrentlyPressed, ListenableTouchType, ToggleState, Touch, Touchable, TouchEvent,
-    TouchListener, TouchTrigger, TouchType,
+    CurrentlyPressed, ListenableTouchType, ToggleState, Touch, TouchEvent, TouchListener,
+    TouchTrigger, TouchType, Touchable,
 };
 pub(crate) use system::read_touch_events;
 

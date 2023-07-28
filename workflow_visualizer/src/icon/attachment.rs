@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, SyncPoint, Visualizer};
-use crate::icon::renderer::{IconRenderer, setup};
+use crate::icon::renderer::{setup, IconRenderer};
 use crate::icon::system::{
     area_diff, calc_area, icon_id_diff, layer_diff, management, position_diff,
     positive_space_color_diff, read_differences,
 };
+use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct IconAttachment;
 
@@ -18,7 +18,9 @@ impl Attach for IconAttachment {
             .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_area.in_set(SyncPoint::Reconfigure),
-            calc_area.in_set(SyncPoint::Config).after(crate::grid::config_grid),
+            calc_area
+                .in_set(SyncPoint::Config)
+                .after(crate::grid::config_grid),
             management.in_set(SyncPoint::Resolve),
             position_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),

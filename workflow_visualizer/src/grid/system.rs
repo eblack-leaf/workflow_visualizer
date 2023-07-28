@@ -43,8 +43,6 @@ impl Record for GridConfigRecorder {
     }
 }
 
-
-
 pub(crate) fn config_grid(
     viewport_handle: Res<ViewportHandle>,
     window_resize_events: EventReader<WindowResize>,

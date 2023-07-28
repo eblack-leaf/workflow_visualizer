@@ -1,10 +1,10 @@
 use bevy_ecs::event::Events;
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, PrimaryTouch, SyncPoint, Visualizer};
 use crate::touch::adapter::{MouseAdapter, TouchAdapter, TouchGrabState};
 use crate::touch::component::TouchEvent;
 use crate::touch::system;
+use crate::{Attach, PrimaryTouch, SyncPoint, Visualizer};
 
 pub(crate) struct TouchAttachment;
 

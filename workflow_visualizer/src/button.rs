@@ -1,15 +1,16 @@
 use bevy_ecs::prelude::{
-    Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Res, Without,
+    Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Res, With,
+    Without,
 };
 
+use crate::grid::RawMarker;
+use crate::text::AlignedFonts;
+use crate::touch::{CurrentlyPressed, ToggleState, Touchable};
 use crate::{
     Area, Attach, Color, DeviceContext, Icon, IconId, IconScale, InterfaceContext, Layer, Panel,
     PanelType, Position, ScaleFactor, Section, SyncPoint, Text, TextScale, TextScaleAlignment,
     TextValue, TextWrapStyle, Visualizer,
 };
-use crate::grid::RawMarker;
-use crate::text::AlignedFonts;
-use crate::touch::{CurrentlyPressed, ToggleState, Touchable};
 
 #[derive(Bundle, Clone)]
 pub struct Button {
@@ -26,7 +27,30 @@ pub struct Button {
     touchable: Touchable,
     scaling: Scaling,
 }
-
+#[derive(Component, Copy, Clone)]
+pub struct ButtonDespawn {}
+impl Default for ButtonDespawn {
+    fn default() -> Self {
+        ButtonDespawn {}
+    }
+}
+pub(crate) fn despawn(
+    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<ButtonDespawn>>,
+    mut cmd: Commands,
+) {
+    for (entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {
+        cmd.entity(entity).despawn();
+        if let Some(ent) = panel_entity.0 {
+            cmd.entity(ent).despawn();
+        }
+        if let Some(ent) = text_entity.0 {
+            cmd.entity(ent).despawn();
+        }
+        if let Some(ent) = icon_entity.0 {
+            cmd.entity(ent).despawn();
+        }
+    }
+}
 #[derive(Component, Copy, Clone)]
 pub struct Scaling {
     pub text: TextScale,
@@ -225,7 +249,7 @@ pub(crate) fn placement(
     scale_factor: Res<ScaleFactor>,
 ) {
     for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, scaling) in
-    buttons.iter()
+        buttons.iter()
     {
         if let Some(panel_entity) = panel_ref.0 {
             if let Ok((mut pos, mut area)) = listeners.get_mut(panel_entity) {
@@ -286,6 +310,7 @@ impl Attach for ButtonAttachment {
             spawn.in_set(SyncPoint::Spawn),
             placement.in_set(SyncPoint::SecondaryPlacement),
             color_invert.in_set(SyncPoint::Reconfigure),
+            despawn.in_set(SyncPoint::Reconfigure),
         ));
     }
 }

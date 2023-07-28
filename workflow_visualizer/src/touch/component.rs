@@ -1,8 +1,8 @@
 use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 
-use crate::{DeviceContext, Position};
 use crate::touch::adapter::TouchLocation;
+use crate::{DeviceContext, Position};
 
 /// Registers a Touch has occurred and metadata
 #[derive(Copy, Clone, Debug)]

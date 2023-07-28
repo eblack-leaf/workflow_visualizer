@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Changed, Commands, Entity, Query, Res, ResMut};
+use bevy_ecs::prelude::{Changed, Commands, Entity, Query, RemovedComponents, Res, ResMut};
 
 use crate::line::line_render::LineRenderPoints;
 use crate::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
@@ -45,6 +45,7 @@ pub(crate) fn create_render_group(
         Changed<LineRenderPoints>,
     >,
     gfx: Res<GfxSurface>,
+    mut removed: RemovedComponents<LineRender>,
     mut line_renderer: ResMut<LineRenderer>,
 ) {
     for (entity, line_render, layer, color, line_render_points) in paths.iter() {
@@ -57,6 +58,9 @@ pub(crate) fn create_render_group(
             &line_renderer.bind_group_layout,
         );
         line_renderer.render_groups.insert(entity, render_group);
+    }
+    for entity in removed.iter() {
+        line_renderer.render_groups.remove(&entity);
     }
 }
 

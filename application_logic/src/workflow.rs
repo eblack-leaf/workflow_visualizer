@@ -52,13 +52,27 @@ impl Default for Engen {
     fn default() -> Self {
         let mut engen = Engen::new();
         // include from file to generate hashmap
-        engen.tokens.insert("school".into(), Token("245215".to_string()));
-        engen.tokens.insert("work".into(), Token("245215".to_string()));
-        engen.tokens.insert("home".into(), Token("245215".to_string()));
-        engen.tokens.insert("personal".into(), Token("245215".to_string()));
-        engen.tokens.insert("bank".into(), Token("245215".to_string()));
-        engen.tokens.insert("email".into(), Token("245215".to_string()));
-        engen.tokens.insert("phone".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("school".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("work".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("home".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("personal".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("bank".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("email".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone".into(), Token("245215".to_string()));
         engen
     }
 }
@@ -69,10 +83,8 @@ impl Workflow for Engen {
 
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
         match response {
-            Response::TokenAdded(_name) => {
-            }
-            Response::TokenRemoved(_name) => {
-            }
+            Response::TokenAdded(_name) => {}
+            Response::TokenRemoved(_name) => {}
             Response::TokenOtp((name, otp)) => {
                 visualizer.job.container.send_event(OtpRead { name, otp });
             }
@@ -96,7 +108,9 @@ impl Workflow for Engen {
             Action::RemoveToken(name) => Response::TokenRemoved(name),
             Action::RequestTokenNames => {
                 // get tokens from engen
-                Response::RequestedTokenNames(engen.lock().unwrap().tokens.keys().cloned().collect())
+                Response::RequestedTokenNames(
+                    engen.lock().unwrap().tokens.keys().cloned().collect(),
+                )
             }
             Action::ExitRequest => Response::ExitConfirmed,
         }

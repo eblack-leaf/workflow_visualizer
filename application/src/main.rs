@@ -3,10 +3,10 @@
 use tracing::Level;
 
 use application_logic::{Engen, Slots};
-use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
-use workflow_visualizer::Runner;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
+use workflow_visualizer::Runner;
+use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
 
 mod web_worker;
 

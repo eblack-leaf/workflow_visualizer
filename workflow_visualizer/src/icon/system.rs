@@ -1,12 +1,12 @@
-use bevy_ecs::prelude::{Changed, Entity, Query, Res, ResMut};
+use bevy_ecs::prelude::{Changed, Entity, Query, RemovedComponents, Res, ResMut};
 
-use crate::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
-};
 use crate::icon::bitmap::IconBitmapLayout;
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::component::{IconId, IconScale};
 use crate::icon::renderer::IconRenderer;
+use crate::{
+    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+};
 
 pub(crate) fn calc_area(
     mut icons: Query<(&mut Area<InterfaceContext>, &IconScale), Changed<IconScale>>,
@@ -32,6 +32,8 @@ pub(crate) fn management(
         ),
         Changed<Visibility>,
     >,
+    mut removed: RemovedComponents<IconScale>,
+    mut icon_renderer: ResMut<IconRenderer>,
 ) {
     for (entity, pos, area, layer, color, id, visibility, mut difference) in icons.iter_mut() {
         if visibility.visible() {
@@ -43,6 +45,14 @@ pub(crate) fn management(
             difference.create = true;
         } else {
             difference.remove = true;
+        }
+    }
+    for entity in removed.iter() {
+        let index = icon_renderer.indexer.remove(entity);
+        if let Some(i) = index {
+            icon_renderer
+                .null_bit_attribute
+                .queue_write(i, NullBit::null());
         }
     }
 }

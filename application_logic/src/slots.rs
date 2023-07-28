@@ -1,11 +1,9 @@
-use workflow_visualizer::{
-    bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest,
-};
+use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
+use workflow_visualizer::{bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest};
 use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
 use crate::workflow::{TokenName, TokenOtp};
@@ -20,6 +18,12 @@ pub struct SlotPool(pub Vec<TokenName>);
 pub struct SlotFills(pub Vec<TokenName>);
 #[derive(Resource)]
 pub struct SlotFillsCache(pub Vec<TokenName>);
+// TODO integrate these
+#[derive(Resource)]
+pub struct CurrentOtpValue(pub Vec<TokenOtp>);
+#[derive(Resource)]
+pub struct CachedOptValue(pub Vec<TokenOtp>);
+// TODO done integration
 #[derive(Resource)]
 pub struct Slots(pub Vec<Slot>);
 
@@ -42,7 +46,7 @@ impl Attach for Slots {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization), ));
+            .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization),));
         visualizer.add_event::<SlotFillEvent>();
         visualizer.add_event::<OtpRead>();
         visualizer.spawn(IconBitmapRequest::from((
@@ -185,12 +189,7 @@ impl SlotBlueprint {
     pub fn placements(&self, offset: usize) -> PlacementReference {
         let mut placement_reference = PlacementReference::new();
         let offset_for_slots = self.slot_offset_markers.0 * offset as i32;
-        let slot_left_top = (
-            self.anchor.x,
-            self.anchor
-                .y
-                .raw_offset(offset_for_slots),
-        );
+        let slot_left_top = (self.anchor.x, self.anchor.y.raw_offset(offset_for_slots));
         // use dimensions to offset from slot_anchor
         placement_reference.add_view(
             "info-panel",

@@ -4,13 +4,13 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::Query;
 use tracing::trace;
 
+use crate::focus::FocusedEntity;
+use crate::touch::adapter::{TouchGrabState, TrackedTouch};
+use crate::touch::component::{ListenableTouchType, TouchEvent, TouchType};
 use crate::{
     Area, CurrentlyPressed, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor, Section,
     ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle,
 };
-use crate::focus::FocusedEntity;
-use crate::touch::adapter::{TouchGrabState, TrackedTouch};
-use crate::touch::component::{ListenableTouchType, TouchEvent, TouchType};
 
 pub(crate) fn read_touch_events(
     mut event_reader: EventReader<TouchEvent>,
@@ -129,16 +129,16 @@ pub(crate) fn read_touch_events(
         }
         if let Some(grabbed) = touch_grab_state.grab_state.take() {
             if let Ok((
-                          _,
-                          _,
-                          _,
-                          _,
-                          listener,
-                          mut touch_trigger,
-                          mut currently_pressed,
-                          mut toggle_state,
-                          mut touch_location,
-                      )) = touch_listeners.get_mut(grabbed.0)
+                _,
+                _,
+                _,
+                _,
+                listener,
+                mut touch_trigger,
+                mut currently_pressed,
+                mut toggle_state,
+                mut touch_location,
+            )) = touch_listeners.get_mut(grabbed.0)
             {
                 if trigger_on_press {
                     currently_pressed.currently_pressed = true;

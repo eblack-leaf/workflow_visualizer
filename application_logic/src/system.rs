@@ -1,11 +1,12 @@
-use workflow_visualizer::{
-    BundlePlacement, Button, ButtonType, Color, Grid, Line, Panel, PanelType, ResponsiveGridView,
-    ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue, TextWrapStyle,
-};
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
+use workflow_visualizer::{
+    BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel, PanelType,
+    ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
+    TextWrapStyle,
+};
 
 use crate::slots::{
     AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging,
@@ -33,28 +34,20 @@ pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>)
                 0,
                 blueprint.button_icon_scale,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(blueprint.add_button_view)),
+            .responsively_viewed(ResponsiveGridView::all_same(blueprint.add_button_view)),
         )
         .id();
     cmd.insert_resource(AddButton(add_button_id));
     cmd.insert_resource(blueprint);
 }
 
-pub fn update_blueprint(
-    mut blueprint: ResMut<SlotBlueprint>,
-    grid: Res<Grid>,
-) {
+pub fn update_blueprint(mut blueprint: ResMut<SlotBlueprint>, grid: Res<Grid>) {
     if grid.is_changed() {
         *blueprint = SlotBlueprint::new(&grid);
     }
 }
 
-fn create_slot(
-    cmd: &mut Commands,
-    blueprint: &SlotBlueprint,
-    index: usize,
-    name: String,
-) -> Slot {
+fn create_slot(cmd: &mut Commands, blueprint: &SlotBlueprint, index: usize, name: String) -> Slot {
     let placements = blueprint.placements(index);
     let info_panel = cmd
         .spawn(
@@ -64,20 +57,26 @@ fn create_slot(
                 Color::MEDIUM_GREEN,
                 Color::MEDIUM_GREEN,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(placements.view("info-panel"))),
+            .responsively_viewed(ResponsiveGridView::all_same(placements.view("info-panel"))),
         )
         .id();
     let edit_panel = cmd
         .spawn(
-            Panel::new(PanelType::Panel, 6, Color::MEDIUM_RED_ORANGE, Color::MEDIUM_RED_ORANGE)
-                .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-panel"))),
+            Panel::new(
+                PanelType::Panel,
+                6,
+                Color::MEDIUM_RED_ORANGE,
+                Color::MEDIUM_RED_ORANGE,
+            )
+            .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-panel"))),
         )
         .id();
     let delete_panel = cmd
         .spawn(
-            Panel::new(PanelType::Panel, 7, Color::MEDIUM_RED, Color::MEDIUM_RED).responsively_viewed(
-                ResponsiveGridView::all_same(placements.view("delete-panel")),
-            ),
+            Panel::new(PanelType::Panel, 7, Color::MEDIUM_RED, Color::MEDIUM_RED)
+                .responsively_viewed(ResponsiveGridView::all_same(
+                    placements.view("delete-panel"),
+                )),
         )
         .id();
     let name_text = cmd
@@ -89,7 +88,7 @@ fn create_slot(
                 Color::OFF_WHITE,
                 TextWrapStyle::letter(),
             )
-                .responsively_viewed(ResponsiveGridView::all_same(placements.view("name-text"))),
+            .responsively_viewed(ResponsiveGridView::all_same(placements.view("name-text"))),
         )
         .id();
     let otp_text = cmd
@@ -101,7 +100,7 @@ fn create_slot(
                 Color::OFF_WHITE,
                 TextWrapStyle::letter(),
             )
-                .responsively_viewed(ResponsiveGridView::all_same(placements.view("otp-text"))),
+            .responsively_viewed(ResponsiveGridView::all_same(placements.view("otp-text"))),
         )
         .id();
     let info_line = cmd
@@ -123,9 +122,9 @@ fn create_slot(
                 15,
                 blueprint.button_icon_scale,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(
-                    placements.view("generate-button"),
-                )),
+            .responsively_viewed(ResponsiveGridView::all_same(
+                placements.view("generate-button"),
+            )),
         )
         .id();
     let edit_button = cmd
@@ -140,7 +139,7 @@ fn create_slot(
                 15,
                 blueprint.button_icon_scale,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-button"))),
+            .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-button"))),
         )
         .id();
     let delete_button = cmd
@@ -155,12 +154,12 @@ fn create_slot(
                 15,
                 blueprint.button_icon_scale,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(
-                    placements.view("delete-button"),
-                )),
+            .responsively_viewed(ResponsiveGridView::all_same(
+                placements.view("delete-button"),
+            )),
         )
         .id();
-    
+
     Slot {
         name_text,
         otp_text,
@@ -177,18 +176,18 @@ fn create_slot(
 fn delete_slot(cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.name_text).despawn();
     cmd.entity(slot.otp_text).despawn();
-    cmd.entity(slot.generate_button).despawn();
-    cmd.entity(slot.delete_button).despawn();
-    cmd.entity(slot.edit_button).despawn();
+    cmd.entity(slot.generate_button)
+        .insert(ButtonDespawn::default());
+    cmd.entity(slot.delete_button)
+        .insert(ButtonDespawn::default());
+    cmd.entity(slot.edit_button)
+        .insert(ButtonDespawn::default());
     cmd.entity(slot.info_line).despawn();
     cmd.entity(slot.info_panel).despawn();
     cmd.entity(slot.edit_panel).despawn();
     cmd.entity(slot.delete_panel).despawn();
 }
-pub fn read_fill_event(
-    mut events: EventReader<SlotFillEvent>,
-    mut slot_pool: ResMut<SlotPool>,
-) {
+pub fn read_fill_event(mut events: EventReader<SlotFillEvent>, mut slot_pool: ResMut<SlotPool>) {
     for event in events.iter() {
         slot_pool.0 = event.tokens.clone();
     }
@@ -228,7 +227,9 @@ pub fn fill_slots(
                         }
                         *cached = token_name.clone();
                     } else {
-                        if slots.0.get(zero_based_index).is_none() { slot_needed = true; }
+                        if slots.0.get(zero_based_index).is_none() {
+                            slot_needed = true;
+                        }
                         cache.0.insert(zero_based_index, token_name.clone());
                     }
                     if slot_needed {
@@ -285,6 +286,7 @@ pub fn process(
     slot_fills: Res<SlotFills>,
     sender: NonSend<Sender<Engen>>,
     buttons: Query<&TouchTrigger>,
+    mut slot_pool: ResMut<SlotPool>,
     _text: Query<&mut TextValue>,
 ) {
     // check buttons and send actions of each slot
@@ -299,11 +301,9 @@ pub fn process(
         }
         if let Ok(trigger) = buttons.get(slot.delete_button) {
             if trigger.triggered() {
-                if let Some(_name) = slot_fills.0.get(index) {
-                    // invalidate last slot
-                    // remove slot fill for slot
-                    // if filled replace last with replaced
-                    // sender.send(Action::RemoveToken(name.clone()));
+                if let Some(name) = slot_fills.0.get(index) {
+                    slot_pool.0.retain(|e| !(*e == *name));
+                    sender.send(Action::RemoveToken(name.clone()));
                 }
             }
         }

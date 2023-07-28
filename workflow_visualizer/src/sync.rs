@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 use bevy_ecs::schedule::apply_system_buffers;
 
-use crate::JobSyncPoint;
 use crate::visualizer::Visualizer;
+use crate::JobSyncPoint;
 
 /// Synchronization Points for bucketing systems in a task
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
@@ -44,13 +44,14 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             )
                 .chain(),
         );
-    visualizer
-        .job
-        .task(Visualizer::TASK_STARTUP)
-        .add_systems((apply_system_buffers
+    visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
+        apply_system_buffers
             .after(SyncPoint::Initialization)
-                          .before(UserSpaceSyncPoint::Initialization),
-                      apply_system_buffers.after(UserSpaceSyncPoint::Initialization).before(SyncPoint::Preparation)));
+            .before(UserSpaceSyncPoint::Initialization),
+        apply_system_buffers
+            .after(UserSpaceSyncPoint::Initialization)
+            .before(SyncPoint::Preparation),
+    ));
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
             JobSyncPoint::Idle,
@@ -83,7 +84,9 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
         apply_system_buffers
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::PostProcessVisibility),
-        apply_system_buffers.after(UserSpaceSyncPoint::Process).before(SyncPoint::Spawn),
+        apply_system_buffers
+            .after(UserSpaceSyncPoint::Process)
+            .before(SyncPoint::Spawn),
     ));
     visualizer
         .job

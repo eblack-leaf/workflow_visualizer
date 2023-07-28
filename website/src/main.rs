@@ -1,4 +1,3 @@
-
 use dioxus::prelude::*;
 use dioxus_free_icons::Icon;
 
