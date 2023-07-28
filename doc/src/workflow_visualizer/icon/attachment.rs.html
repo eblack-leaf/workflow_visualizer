@@ -32,14 +32,16 @@
 <a href="#32" id="32">32</a>
 <a href="#33" id="33">33</a>
 <a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
-<span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
-<span class="kw">use </span><span class="kw">crate</span>::icon::renderer::{IconRenderer, setup};
+<span class="kw">use </span><span class="kw">crate</span>::icon::renderer::{setup, IconRenderer};
 <span class="kw">use </span><span class="kw">crate</span>::icon::system::{
     area_diff, calc_area, icon_id_diff, layer_diff, management, position_diff,
     positive_space_color_diff, read_differences,
 };
+<span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconAttachment;
 
@@ -52,7 +54,9 @@
             .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_area.in_set(SyncPoint::Reconfigure),
-            calc_area.in_set(SyncPoint::Config).after(<span class="kw">crate</span>::grid::config_grid),
+            calc_area
+                .in_set(SyncPoint::Config)
+                .after(<span class="kw">crate</span>::grid::config_grid),
             management.in_set(SyncPoint::Resolve),
             position_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),

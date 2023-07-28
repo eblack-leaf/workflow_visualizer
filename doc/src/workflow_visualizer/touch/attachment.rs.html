@@ -40,10 +40,10 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::event::Events;
 <span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
-<span class="kw">use crate</span>::{Attach, PrimaryTouch, SyncPoint, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::touch::adapter::{MouseAdapter, TouchAdapter, TouchGrabState};
 <span class="kw">use </span><span class="kw">crate</span>::touch::component::TouchEvent;
 <span class="kw">use </span><span class="kw">crate</span>::touch::system;
+<span class="kw">use crate</span>::{Attach, PrimaryTouch, SyncPoint, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TouchAttachment;
 

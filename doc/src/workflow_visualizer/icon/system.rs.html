@@ -193,15 +193,25 @@
 <a href="#193" id="193">193</a>
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Query, Res, ResMut};
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Query, RemovedComponents, Res, ResMut};
 
-<span class="kw">use crate</span>::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
-};
 <span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::IconBitmapLayout;
 <span class="kw">use </span><span class="kw">crate</span>::icon::cache::{Cache, Difference};
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::{IconId, IconScale};
 <span class="kw">use </span><span class="kw">crate</span>::icon::renderer::IconRenderer;
+<span class="kw">use crate</span>::{
+    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calc_area(
     <span class="kw-2">mut </span>icons: Query&lt;(<span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;, <span class="kw-2">&amp;</span>IconScale), Changed&lt;IconScale&gt;&gt;,
@@ -227,6 +237,8 @@
         ),
         Changed&lt;Visibility&gt;,
     &gt;,
+    <span class="kw-2">mut </span>removed: RemovedComponents&lt;IconScale&gt;,
+    <span class="kw-2">mut </span>icon_renderer: ResMut&lt;IconRenderer&gt;,
 ) {
     <span class="kw">for </span>(entity, pos, area, layer, color, id, visibility, <span class="kw-2">mut </span>difference) <span class="kw">in </span>icons.iter_mut() {
         <span class="kw">if </span>visibility.visible() {
@@ -238,6 +250,14 @@
             difference.create = <span class="bool-val">true</span>;
         } <span class="kw">else </span>{
             difference.remove = <span class="bool-val">true</span>;
+        }
+    }
+    <span class="kw">for </span>entity <span class="kw">in </span>removed.iter() {
+        <span class="kw">let </span>index = icon_renderer.indexer.remove(entity);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(i) = index {
+            icon_renderer
+                .null_bit_attribute
+                .queue_write(i, NullBit::null());
         }
     }
 }
