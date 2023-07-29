@@ -1,16 +1,16 @@
-use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
-use workflow_visualizer::bevy_ecs::system::ResMut;
-use workflow_visualizer::TouchTrigger;
 use workflow_visualizer::{
     BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel, PanelType,
     ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
     TextWrapStyle,
 };
+use workflow_visualizer::bevy_ecs::event::EventReader;
+use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
+use workflow_visualizer::bevy_ecs::system::ResMut;
+use workflow_visualizer::TouchTrigger;
 
 use crate::slots::{
-    AddButton, OtpRead, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging,
-    SlotPool, Slots,
+    AddButton, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint, SlotFillEvent,
+    SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
 };
 use crate::workflow::{Action, Engen};
 
@@ -37,7 +37,39 @@ pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>)
             .responsively_viewed(ResponsiveGridView::all_same(blueprint.add_button_view)),
         )
         .id();
+    let page_left_button_id = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                4,
+                Color::OFF_WHITE,
+                Color::OFF_BLACK,
+                "edit",
+                "",
+                0,
+                blueprint.button_icon_scale,
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(blueprint.page_left_view)),
+        )
+        .id();
+    let page_right_button_id = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                4,
+                Color::OFF_WHITE,
+                Color::OFF_BLACK,
+                "edit",
+                "",
+                0,
+                blueprint.button_icon_scale,
+            )
+                .responsively_viewed(ResponsiveGridView::all_same(blueprint.page_right_view)),
+        )
+        .id();
     cmd.insert_resource(AddButton(add_button_id));
+    cmd.insert_resource(PageLeftButton(page_left_button_id));
+    cmd.insert_resource(PageRightButton(page_right_button_id));
     cmd.insert_resource(blueprint);
 }
 
@@ -207,6 +239,7 @@ pub fn fill_slots(
         slot_fills.0.clear();
         let (start, end) = paging.range(slot_blueprint.slots_per_page);
         let mut zero_based_index = 0;
+        let mut slot_despawns = vec![];
         for paged_index in start..end {
             let name = slot_pool.0.get(paged_index);
             if let Some(token_name) = name {
@@ -218,6 +251,9 @@ pub fn fill_slots(
                             if let Some(slot) = slots.0.get(zero_based_index) {
                                 if let Ok(mut text_val) = text_vals.get_mut(slot.name_text) {
                                     text_val.0 = token_name.0.clone();
+                                }
+                                if let Ok(mut text_val) = text_vals.get_mut(slot.otp_text) {
+                                    text_val.0 = "------".to_string();
                                 }
                             } else {
                                 slot_needed = true;
@@ -243,17 +279,18 @@ pub fn fill_slots(
                     }
                 }
             } else {
-                let mut should_remove = false;
                 if let Some(old) = slots.0.get(zero_based_index) {
-                    should_remove = true;
+                    slot_despawns.push(zero_based_index);
                     delete_slot(&mut cmd, old);
-                }
-                if should_remove {
-                    slots.0.remove(zero_based_index);
-                    cache.0.remove(zero_based_index);
                 }
             }
             zero_based_index += 1;
+        }
+        slot_despawns.sort();
+        slot_despawns.reverse();
+        for index in slot_despawns {
+            slots.0.remove(index);
+            cache.0.remove(index);
         }
     }
 }
@@ -281,15 +318,41 @@ pub fn read_otp(
         }
     }
 }
-pub fn process(
+
+pub(crate) fn process(
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
     sender: NonSend<Sender<Engen>>,
     buttons: Query<&TouchTrigger>,
+    add_button: Res<AddButton>,
+    page_left_button: Res<PageLeftButton>,
+    page_right_button: Res<PageRightButton>,
     mut slot_pool: ResMut<SlotPool>,
+    mut paging: ResMut<SlotPaging>,
+    slot_blueprint: Res<SlotBlueprint>,
     _text: Query<&mut TextValue>,
 ) {
     // check buttons and send actions of each slot
+    if let Ok(trigger) = buttons.get(add_button.0) {
+        // spawn input prompt for name / token + confirm_button
+        // confirm button trigger despawns all these elements
+    }
+    if let Ok(trigger) = buttons.get(page_left_button.0) {
+        if trigger.triggered() {
+            if paging.0 > 0 {
+                paging.0 -= 1;
+            }
+        }
+    }
+    if let Ok(trigger) = buttons.get(page_right_button.0) {
+        if trigger.triggered() {
+            let max_page = slot_pool.0.len() as f32 / slot_blueprint.slots_per_page as f32;
+            let max_page = max_page.ceil() - 1f32;
+            if paging.0 < max_page as u32 {
+                paging.0 += 1;
+            }
+        }
+    }
     let mut index = 0;
     for slot in slots.0.iter() {
         if let Ok(trigger) = buttons.get(slot.generate_button) {
@@ -317,5 +380,4 @@ pub fn process(
         }
         index += 1;
     }
-    // update text value with responses
 }

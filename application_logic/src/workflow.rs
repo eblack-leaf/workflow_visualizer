@@ -74,6 +74,27 @@ impl Default for Engen {
             .tokens
             .insert("phone".into(), Token("245215".to_string()));
         engen
+            .tokens
+            .insert("phone1".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone2".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone3".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone4".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone5".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone6".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone7".into(), Token("245215".to_string()));
+        engen
     }
 }
 #[async_trait]

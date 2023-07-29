@@ -1,9 +1,9 @@
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 use workflow_visualizer::{bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest};
 use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
 use crate::workflow::{TokenName, TokenOtp};
@@ -65,6 +65,11 @@ impl Attach for Slots {
     }
 }
 
+#[derive(Resource, Copy, Clone)]
+pub(crate) struct PageLeftButton(pub(crate) Entity);
+
+#[derive(Resource, Copy, Clone)]
+pub(crate) struct PageRightButton(pub(crate) Entity);
 pub struct Slot {
     pub name_text: Entity,
     pub otp_text: Entity,
@@ -83,6 +88,8 @@ pub struct SlotBlueprint {
     pub anchor: GridPoint,
     pub slot_offset_markers: RawMarker,
     pub add_button_view: GridView,
+    pub page_left_view: GridView,
+    pub page_right_view: GridView,
     pub info_text_scale: TextScale,
     pub button_icon_scale: u32,
     pub slot_height: RawMarker,
@@ -156,11 +163,32 @@ impl SlotBlueprint {
             1.near()
                 .raw_offset(add_button_horizontal_start + button_markers),
         );
+        let page_left_horizontal_start =
+            add_button_horizontal_start - 2 * segment_padding - button_markers;
+        let page_left_horizontal_end = page_left_horizontal_start + button_markers;
+        let page_left_horizontal = (
+            1.near().raw_offset(page_left_horizontal_start),
+            1.near().raw_offset(page_left_horizontal_end),
+        );
+        let page_left_vertical = (
+            1.near().raw_offset(add_button_vertical_start),
+            1.near()
+                .raw_offset(add_button_vertical_start + button_markers),
+        );
+        let page_right_horizontal_start =
+            add_button_horizontal_start + button_markers + 2 * segment_padding;
+        let page_right_horizontal = (
+            1.near().raw_offset(page_right_horizontal_start),
+            1.near()
+                .raw_offset(page_right_horizontal_start + button_markers),
+        );
         Self {
             slots_per_page: num_slots as usize,
             anchor: (1.near(), 1.near()).into(),
             slot_offset_markers: slot_offset.into(),
             add_button_view: (add_button_view_horizontal, add_button_view_vertical).into(),
+            page_left_view: (page_left_horizontal, page_left_vertical).into(),
+            page_right_view: (page_right_horizontal, add_button_view_vertical).into(),
             info_text_scale: info_content_text_scale,
             button_icon_scale: button_text_scale,
             slot_height: RawMarker(slot_height),
