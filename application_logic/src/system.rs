@@ -10,7 +10,10 @@ use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Q
 use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
 
-use crate::slots::{AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots};
+use crate::slots::{
+    AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
+    SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
+};
 use crate::workflow::{Action, Engen};
 
 pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
@@ -79,7 +82,13 @@ pub fn update_blueprint(mut blueprint: ResMut<SlotBlueprint>, grid: Res<Grid>) {
     }
 }
 
-fn create_slot(cmd: &mut Commands, blueprint: &SlotBlueprint, index: usize, name: String, otp_val: String) -> Slot {
+fn create_slot(
+    cmd: &mut Commands,
+    blueprint: &SlotBlueprint,
+    index: usize,
+    name: String,
+    otp_val: String,
+) -> Slot {
     let placements = blueprint.placements(index);
     let info_panel = cmd
         .spawn(
@@ -245,6 +254,11 @@ pub fn fill_slots(
             let name = slot_pool.0.get(paged_index);
             if let Some(token_name) = name {
                 if !token_name.0.is_empty() {
+                    let otp_val = if let Some(current) = current_otps.0.get(token_name) {
+                        current.0.clone()
+                    } else {
+                        "------".to_string()
+                    };
                     slot_fills.0.push(token_name.clone());
                     let mut slot_needed = false;
                     if let Some(cached) = cache.0.get_mut(zero_based_index) {
@@ -254,12 +268,7 @@ pub fn fill_slots(
                                     text_val.0 = token_name.0.clone();
                                 }
                                 if let Ok(mut text_val) = text_vals.get_mut(slot.otp_text) {
-                                    let new_val = if let Some(current) = current_otps.0.get(token_name) {
-                                        current.0.clone()
-                                    } else {
-                                        "------".to_string()
-                                    };
-                                    text_val.0 = new_val;
+                                    text_val.0 = otp_val.clone();
                                 }
                             } else {
                                 slot_needed = true;
@@ -275,17 +284,12 @@ pub fn fill_slots(
                         cache.0.insert(zero_based_index, token_name.clone());
                     }
                     if slot_needed {
-                        let otp_val = if let Some(current) = current_otps.0.get(token_name) {
-                            current.0.clone()
-                        } else {
-                            "------".to_string()
-                        };
                         let slot = create_slot(
                             &mut cmd,
                             &slot_blueprint,
                             zero_based_index,
                             token_name.0.clone(),
-                            otp_val
+                            otp_val,
                         );
                         slots.0.insert(zero_based_index, slot);
                     }
@@ -344,6 +348,7 @@ pub(crate) fn process(
     mut slot_pool: ResMut<SlotPool>,
     mut paging: ResMut<SlotPaging>,
     slot_blueprint: Res<SlotBlueprint>,
+    mut current_otps: ResMut<CurrentOtpValue>,
     _text: Query<&mut TextValue>,
 ) {
     // check buttons and send actions of each slot
@@ -380,6 +385,7 @@ pub(crate) fn process(
             if trigger.triggered() {
                 if let Some(name) = slot_fills.0.get(index) {
                     slot_pool.0.retain(|e| !(*e == *name));
+                    current_otps.0.remove(name);
                     sender.send(Action::RemoveToken(name.clone()));
                 }
             }
