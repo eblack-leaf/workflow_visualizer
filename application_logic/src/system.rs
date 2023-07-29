@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use workflow_visualizer::{
     BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel, PanelType,
     ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
@@ -8,10 +10,7 @@ use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Q
 use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
 
-use crate::slots::{
-    AddButton, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint, SlotFillEvent,
-    SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
-};
+use crate::slots::{AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots};
 use crate::workflow::{Action, Engen};
 
 pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>) {
@@ -71,6 +70,7 @@ pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>)
     cmd.insert_resource(PageLeftButton(page_left_button_id));
     cmd.insert_resource(PageRightButton(page_right_button_id));
     cmd.insert_resource(blueprint);
+    cmd.insert_resource(CurrentOtpValue(HashMap::new()));
 }
 
 pub fn update_blueprint(mut blueprint: ResMut<SlotBlueprint>, grid: Res<Grid>) {
@@ -79,7 +79,7 @@ pub fn update_blueprint(mut blueprint: ResMut<SlotBlueprint>, grid: Res<Grid>) {
     }
 }
 
-fn create_slot(cmd: &mut Commands, blueprint: &SlotBlueprint, index: usize, name: String) -> Slot {
+fn create_slot(cmd: &mut Commands, blueprint: &SlotBlueprint, index: usize, name: String, otp_val: String) -> Slot {
     let placements = blueprint.placements(index);
     let info_panel = cmd
         .spawn(
@@ -127,7 +127,7 @@ fn create_slot(cmd: &mut Commands, blueprint: &SlotBlueprint, index: usize, name
         .spawn(
             Text::new(
                 4,
-                "------",
+                otp_val,
                 TextScaleAlignment::Custom(blueprint.info_text_scale.0),
                 Color::OFF_WHITE,
                 TextWrapStyle::letter(),
@@ -234,6 +234,7 @@ pub fn fill_slots(
     mut slots: ResMut<Slots>,
     mut cmd: Commands,
     mut text_vals: Query<&mut TextValue>,
+    current_otps: Res<CurrentOtpValue>,
 ) {
     if slot_pool.is_changed() || slot_blueprint.is_changed() || paging.is_changed() {
         slot_fills.0.clear();
@@ -253,7 +254,12 @@ pub fn fill_slots(
                                     text_val.0 = token_name.0.clone();
                                 }
                                 if let Ok(mut text_val) = text_vals.get_mut(slot.otp_text) {
-                                    text_val.0 = "------".to_string();
+                                    let new_val = if let Some(current) = current_otps.0.get(token_name) {
+                                        current.0.clone()
+                                    } else {
+                                        "------".to_string()
+                                    };
+                                    text_val.0 = new_val;
                                 }
                             } else {
                                 slot_needed = true;
@@ -269,11 +275,17 @@ pub fn fill_slots(
                         cache.0.insert(zero_based_index, token_name.clone());
                     }
                     if slot_needed {
+                        let otp_val = if let Some(current) = current_otps.0.get(token_name) {
+                            current.0.clone()
+                        } else {
+                            "------".to_string()
+                        };
                         let slot = create_slot(
                             &mut cmd,
                             &slot_blueprint,
                             zero_based_index,
                             token_name.0.clone(),
+                            otp_val
                         );
                         slots.0.insert(zero_based_index, slot);
                     }
@@ -298,9 +310,11 @@ pub fn read_otp(
     mut events: EventReader<OtpRead>,
     slots: Res<Slots>,
     slot_fills: Res<SlotFills>,
+    mut current_otps: ResMut<CurrentOtpValue>,
     mut text: Query<&mut TextValue>,
 ) {
     for event in events.iter() {
+        current_otps.0.insert(event.name.clone(), event.otp.clone());
         let mut index = 0;
         for fill in slot_fills.0.iter() {
             if fill.0 == event.name.0 {

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use workflow_visualizer::{bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest};
 use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
@@ -10,26 +12,18 @@ use crate::workflow::{TokenName, TokenOtp};
 
 #[derive(Resource)]
 pub struct AddButton(pub Entity);
-
 #[derive(Resource)]
 pub struct SlotPool(pub Vec<TokenName>);
-
 #[derive(Resource)]
 pub struct SlotFills(pub Vec<TokenName>);
 #[derive(Resource)]
 pub struct SlotFillsCache(pub Vec<TokenName>);
-// TODO integrate these
 #[derive(Resource)]
-pub struct CurrentOtpValue(pub Vec<TokenOtp>);
-#[derive(Resource)]
-pub struct CachedOptValue(pub Vec<TokenOtp>);
-// TODO done integration
+pub struct CurrentOtpValue(pub HashMap<TokenName, TokenOtp>);
 #[derive(Resource)]
 pub struct Slots(pub Vec<Slot>);
-
 #[derive(Resource)]
 pub struct SlotPaging(pub u32);
-
 impl SlotPaging {
     pub fn range(&self, slots_per_page: usize) -> (usize, usize) {
         let start = self.0 as usize * slots_per_page;
