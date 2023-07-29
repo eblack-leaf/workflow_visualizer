@@ -3,7 +3,7 @@ use bevy_ecs::prelude::Bundle;
 use compact_str::CompactString;
 
 use crate::icon::cache::{Cache, Difference};
-use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section};
+use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section, Tag};
 
 #[derive(Component, Copy, Clone)]
 pub enum IconScale {
@@ -34,8 +34,10 @@ impl From<u32> for IconScale {
         }
     }
 }
+pub type IconTag = Tag<Icon>;
 #[derive(Bundle)]
 pub struct Icon {
+    tag: IconTag,
     id: IconId,
     icon_scale: IconScale,
     layer: Layer,
@@ -54,6 +56,7 @@ impl Icon {
         pos_color: C,
     ) -> Self {
         Self {
+            tag: IconTag::new(),
             id: id.into(),
             icon_scale: scale.into(),
             layer: layer.into(),

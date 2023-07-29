@@ -1,48 +1,65 @@
-use bevy_ecs::prelude::{Added, Component, Query, Res};
+use bevy_ecs::prelude::{Added, Commands, Component, Entity, Query, Res};
 
 use crate::{TimeDelta, TimeMarker, Timer};
 /// Animation class for running interpolations over time
 #[derive(Component)]
-pub struct Animation<T: Component> {
+pub struct Animation<T> {
     pub total_time: TimeDelta,
     pub start: Option<TimeMarker>,
     pub animator: T,
+    done: bool,
 }
 
-impl<T: Component> Animation<T> {
-    pub fn new(total_time: TimeDelta, animator: T) -> Self {
+impl<T> Animation<T> {
+    pub fn new<TD: Into<TimeDelta>>(animator: T, total_time: TD) -> Self {
         Self {
-            total_time,
+            total_time: total_time.into(),
             start: None,
             animator,
+            done: false,
         }
     }
     pub fn calc_delta_factor(&mut self, timer: &Timer) -> (f32, bool) {
-        let total = timer.time_since(self.start.unwrap());
-        let done = total >= self.total_time;
-        let past_total = total - self.total_time;
-        let mut delta = timer.frame_diff();
-        if done {
-            delta -= past_total;
+        if let Some(start) = self.start {
+            let total = timer.time_since(start);
+            let done = total >= self.total_time;
+            let past_total = total - self.total_time;
+            let mut delta = timer.frame_diff();
+            if done {
+                delta -= past_total;
+                self.done = true;
+            }
+            let delta = delta / self.total_time;
+            (delta.as_f32(), done)
+        } else {
+            (0f32, false)
         }
-        let delta = delta / self.total_time;
-        (delta.as_f32(), done)
     }
-}
-/// How to animate the component
-pub trait Animate {
-    type Animator: Component;
-    fn animate<T: Into<TimeDelta>>(self, total_time: T) -> Animation<Self::Animator>;
+    pub fn done(&self) -> bool {
+        self.done
+    }
 }
 /// starter for the animations. Must be added for animation to run
 #[allow(unused)]
-pub fn start_animations<T: Component>(
+pub fn start_animations<T: Send + Sync + 'static>(
     mut uninitialized_animations: Query<&mut Animation<T>, Added<Animation<T>>>,
     timer: Res<Timer>,
 ) {
     for mut anim in uninitialized_animations.iter_mut() {
         let mark = timer.mark();
         anim.start.replace(mark);
+    }
+}
+pub fn end_animations<T: Send + Sync + 'static>(
+    mut ended: Query<(Entity, &Animation<T>)>,
+    timer: Res<Timer>,
+    mut cmd: Commands,
+) {
+    for (entity, anim) in ended.iter() {
+        if anim.done() {
+            cmd.entity(entity).remove::<Animation<T>>();
+            // send done signal
+        }
     }
 }
 /// Interpolates a value over an interval

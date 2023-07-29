@@ -119,3 +119,8 @@ impl From<f32> for TimeDelta {
         Self(value as f64)
     }
 }
+impl From<i32> for TimeDelta {
+    fn from(value: i32) -> Self {
+        Self(value as f64)
+    }
+}

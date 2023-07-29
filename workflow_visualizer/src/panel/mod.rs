@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 
-pub use attachment::PanelAttachment;
+pub(crate) use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
 use crate::grid::ResponsiveGridView;
-use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section};
+use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag};
 
 mod attachment;
 mod renderer;
@@ -23,8 +23,10 @@ pub enum PanelType {
 }
 #[derive(Component, Copy, Clone)]
 pub struct BorderColor(pub Color);
+pub type PanelTag = Tag<Panel>;
 #[derive(Bundle)]
 pub struct Panel {
+    tag: PanelTag,
     pub panel_type: PanelType,
     pub layer: Layer,
     pub content_area: PanelContentArea,
@@ -45,6 +47,7 @@ impl Panel {
         border_color: C,
     ) -> Self {
         Self {
+            tag: PanelTag::new(),
             panel_type,
             layer: layer.into(),
             border_color: BorderColor(border_color.into()),

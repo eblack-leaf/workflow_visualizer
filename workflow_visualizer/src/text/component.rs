@@ -5,12 +5,13 @@ use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::{
     Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, NumericalContext,
-    Position, Section, VisibleSection,
+    Position, Section, Tag, VisibleSection,
 };
-
+pub type TextTag = Tag<Text>;
 /// Entry point to spawn a Text element
 #[derive(Bundle)]
 pub struct Text {
+    tag: TextTag,
     pub layer: Layer,
     pub text: TextValue,
     pub scale_alignment: TextScaleAlignment,
@@ -38,6 +39,7 @@ impl Text {
         wrap_style: TextWrapStyle,
     ) -> Self {
         Self {
+            tag: TextTag::new(),
             layer: layer.into(),
             text: TextValue(text.into()),
             scale_alignment,

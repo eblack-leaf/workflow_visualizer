@@ -4,12 +4,44 @@
 //! trait Workflow to setup application messaging.
 //! Visualizer which handles rendering
 //! Runner which invokes the visualizer's tools for multiple platforms
+pub use crate::color::Color;
+pub use crate::coord::{
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+};
+pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
+pub use crate::focus::{Focus, FocusInputListener};
+pub use crate::gfx::{GfxOptions, GfxSurface};
+pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+pub use crate::grid::{BundlePlacement, Grid, HorizontalSpan, PlacementReference};
+pub use crate::icon::{
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale, IconTag,
+};
+pub use crate::job::Job;
+pub use crate::line::{Line, LineRender, LineTag};
+pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelType};
+pub use crate::path::{Path, PathView, ResponsivePathView};
+pub use crate::scale_factor::ScaleFactor;
+pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
+pub use crate::text::{
+    Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
+    TextScaleAlignment, TextTag, TextValue, TextWrapStyle,
+};
+pub use crate::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+};
+pub use crate::theme::{Theme, ThemeDescriptor};
+pub use crate::time::{TimeDelta, TimeMarker, Timer};
+pub use crate::uniform::Uniform;
+pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
+pub use crate::window::WindowResize;
+#[cfg(target_os = "android")]
+pub use crate::workflow::AndroidInterface;
+pub use animate::{Animation, Interpolator};
 pub use bevy_ecs;
-pub use wgpu;
-pub use winit;
-
 pub use bundling::{BundleBuilder, BundleExtension};
-pub use button::{Button, ButtonDespawn, ButtonType};
+pub use button::{Button, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::GridLocation;
 pub use grid::GridLocationDescriptor;
 pub use grid::GridMarker;
@@ -27,7 +59,7 @@ pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
 };
-pub use job::JobSyncPoint;
+pub use job::{JobSyncPoint, Tag};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use touch::CurrentlyPressed;
 pub use touch::PrimaryTouch;
@@ -38,43 +70,9 @@ pub use touch::TouchTrigger;
 pub use touch::Touchable;
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
+pub use wgpu;
+pub use winit;
 pub use workflow::{start_web_worker, Runner, Sender, Workflow};
-
-pub use crate::animate::Interpolator;
-pub use crate::color::Color;
-pub use crate::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
-};
-pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
-pub use crate::focus::{Focus, FocusInputListener};
-pub use crate::gfx::{GfxOptions, GfxSurface};
-pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-pub use crate::grid::{BundlePlacement, Grid, HorizontalSpan, PlacementReference};
-pub use crate::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
-};
-pub use crate::job::Job;
-pub use crate::line::{Line, LineRender};
-pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelType};
-pub use crate::path::{Path, PathView, ResponsivePathView};
-pub use crate::scale_factor::ScaleFactor;
-pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
-pub use crate::text::{
-    Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
-    TextScaleAlignment, TextValue, TextWrapStyle,
-};
-pub use crate::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
-    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
-};
-pub use crate::theme::{Theme, ThemeDescriptor};
-pub use crate::time::{TimeDelta, TimeMarker, Timer};
-pub use crate::uniform::Uniform;
-pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
-pub use crate::window::WindowResize;
-#[cfg(target_os = "android")]
-pub use crate::workflow::AndroidInterface;
 
 mod animate;
 mod bundling;

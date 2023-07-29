@@ -1,9 +1,22 @@
 use std::collections::HashMap;
+use std::marker::PhantomData;
 
-use bevy_ecs::prelude::{Entity, IntoSystemConfig, ResMut, Resource, Schedule, SystemSet, World};
+use bevy_ecs::prelude::{
+    Component, Entity, IntoSystemConfig, ResMut, Resource, Schedule, SystemSet, World,
+};
 use bevy_ecs::schedule::ExecutorKind;
 use compact_str::CompactString;
-
+#[derive(Component, Copy, Clone)]
+pub struct Tag<T> {
+    _phantom: PhantomData<T>,
+}
+impl<T> Tag<T> {
+    pub fn new() -> Self {
+        Self {
+            _phantom: PhantomData,
+        }
+    }
+}
 /// Wrapper around a bevy_ecs::World
 pub type Container = World;
 /// Wrapper around a bevy_ecs::Schedule
@@ -85,7 +98,7 @@ impl Job {
     }
     pub fn exec(&mut self, task_label: TaskLabel) {
         if let Some(task) = self.tasks.get_mut(&task_label) {
-            task.set_executor_kind(ExecutorKind::MultiThreaded)
+            task.set_executor_kind(ExecutorKind::Simple)
                 .run(&mut self.container);
         }
     }

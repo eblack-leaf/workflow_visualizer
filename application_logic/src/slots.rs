@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest};
+use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
+use workflow_visualizer::{
+    bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest, Interpolator,
+};
 use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
 use crate::workflow::{TokenName, TokenOtp};
@@ -31,6 +33,16 @@ impl SlotPaging {
         (start, end)
     }
 }
+pub(crate) struct SlotFadeIn {
+    pub(crate) alpha_interpolator: Interpolator,
+}
+impl SlotFadeIn {
+    pub(crate) fn new() -> Self {
+        Self {
+            alpha_interpolator: Interpolator::new(1f32),
+        }
+    }
+}
 pub struct OtpRead {
     pub name: TokenName,
     pub otp: TokenOtp,
@@ -43,6 +55,7 @@ impl Attach for Slots {
             .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization),));
         visualizer.add_event::<SlotFillEvent>();
         visualizer.add_event::<OtpRead>();
+        visualizer.register_animation::<SlotFadeIn>();
         visualizer.spawn(IconBitmapRequest::from((
             "edit",
             IconBitmap::bundled(BundledIcon::Edit),
@@ -55,6 +68,7 @@ impl Attach for Slots {
                 .in_set(UserSpaceSyncPoint::Process)
                 .after(system::fill_slots),
             system::read_otp.in_set(SyncPoint::Reconfigure),
+            system::animations.in_set(SyncPoint::Reconfigure),
         ));
     }
 }

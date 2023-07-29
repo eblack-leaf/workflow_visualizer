@@ -8,12 +8,13 @@ use crate::text::AlignedFonts;
 use crate::touch::{CurrentlyPressed, ToggleState, Touchable};
 use crate::{
     Area, Attach, Color, DeviceContext, Icon, IconId, IconScale, InterfaceContext, Layer, Panel,
-    PanelType, Position, ScaleFactor, Section, SyncPoint, Text, TextScale, TextScaleAlignment,
+    PanelType, Position, ScaleFactor, Section, SyncPoint, Tag, Text, TextScale, TextScaleAlignment,
     TextValue, TextWrapStyle, Visualizer,
 };
-
+pub type ButtonTag = Tag<Button>;
 #[derive(Bundle, Clone)]
 pub struct Button {
+    tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
     icon_id: IconId,
@@ -84,6 +85,7 @@ impl Button {
         icon_scale: IS,
     ) -> Self {
         Self {
+            tag: ButtonTag::new(),
             layer: layer.into(),
             button_type,
             icon_id: icon_id.into(),
@@ -301,16 +303,50 @@ pub(crate) fn placement(
         }
     }
 }
-
+pub(crate) fn color_forward(
+    mut color_listeners: Query<(&mut Color), Without<ButtonTag>>,
+    color_deciders: Query<
+        (
+            &Color,
+            &BackgroundColor,
+            &PanelEntity,
+            &IconEntity,
+            &TextEntity,
+        ),
+        (
+            With<ButtonTag>,
+            Or<(Changed<Color>, Changed<BackgroundColor>)>,
+        ),
+    >,
+) {
+    for (color, back_color, panel_ent, icon_ent, text_ent) in color_deciders.iter() {
+        if let Some(ent) = panel_ent.0 {
+            if let Ok(mut listened_color) = color_listeners.get_mut(ent) {
+                *listened_color = back_color.0;
+            }
+        }
+        if let Some(ent) = icon_ent.0 {
+            if let Ok(mut listened_color) = color_listeners.get_mut(ent) {
+                *listened_color = *color;
+            }
+        }
+        if let Some(ent) = text_ent.0 {
+            if let Ok(mut listened_color) = color_listeners.get_mut(ent) {
+                *listened_color = *color;
+            }
+        }
+    }
+}
 pub(crate) struct ButtonAttachment;
 
 impl Attach for ButtonAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             spawn.in_set(SyncPoint::Spawn),
-            placement.in_set(SyncPoint::SecondaryPlacement),
+            placement.in_set(SyncPoint::SecondaryEffects),
             color_invert.in_set(SyncPoint::Reconfigure),
             despawn.in_set(SyncPoint::Reconfigure),
+            color_forward.in_set(SyncPoint::SecondaryEffects),
         ));
     }
 }

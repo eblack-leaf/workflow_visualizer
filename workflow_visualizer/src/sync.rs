@@ -13,8 +13,8 @@ pub enum SyncPoint {
     PreProcessVisibility,
     Preparation,
     Spawn,
-    Grid,
-    SecondaryPlacement,
+    PostProcessPreparation,
+    SecondaryEffects,
     Reconfigure,
     PostProcessVisibility,
     Resolve,
@@ -63,24 +63,27 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
-            SyncPoint::Grid,
-            SyncPoint::SecondaryPlacement,
+            SyncPoint::PostProcessPreparation,
+            SyncPoint::SecondaryEffects,
             SyncPoint::Reconfigure,
             SyncPoint::PostProcessVisibility,
             SyncPoint::Resolve,
-            UserSpaceSyncPoint::Resolve,
         )
             .chain(),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
-        (SyncPoint::PushDiff, SyncPoint::Finish)
+        (
+            UserSpaceSyncPoint::Resolve,
+            SyncPoint::PushDiff,
+            SyncPoint::Finish,
+        )
             .chain()
-            .after(UserSpaceSyncPoint::Resolve),
+            .after(SyncPoint::Resolve),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)
-            .before(SyncPoint::Grid),
+            .before(SyncPoint::PostProcessPreparation),
         apply_system_buffers
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::PostProcessVisibility),

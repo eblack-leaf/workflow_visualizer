@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{
-    BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel, PanelType,
-    ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
-    TextWrapStyle,
-};
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
+use workflow_visualizer::{
+    Animation, BundleExtension, BundlePlacement, Button, ButtonDespawn, ButtonTag, ButtonType,
+    Color, Grid, Line, LineTag, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
+    Text, TextScaleAlignment, TextTag, TextValue, TextWrapStyle, Timer,
+};
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
-    SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
+    SlotFadeIn, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
 };
 use crate::workflow::{Action, Engen};
 
@@ -51,7 +51,7 @@ pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>)
                 0,
                 blueprint.button_icon_scale,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(blueprint.page_left_view)),
+            .responsively_viewed(ResponsiveGridView::all_same(blueprint.page_left_view)),
         )
         .id();
     let page_right_button_id = cmd
@@ -66,7 +66,7 @@ pub fn setup(mut cmd: Commands, grid: Res<Grid>, sender: NonSend<Sender<Engen>>)
                 0,
                 blueprint.button_icon_scale,
             )
-                .responsively_viewed(ResponsiveGridView::all_same(blueprint.page_right_view)),
+            .responsively_viewed(ResponsiveGridView::all_same(blueprint.page_right_view)),
         )
         .id();
     cmd.insert_resource(AddButton(add_button_id));
@@ -95,8 +95,8 @@ fn create_slot(
             Panel::new(
                 PanelType::Panel,
                 5,
-                Color::MEDIUM_GREEN,
-                Color::MEDIUM_GREEN,
+                Color::from(Color::MEDIUM_GREEN).with_alpha(1f32),
+                Color::from(Color::MEDIUM_GREEN).with_alpha(1f32),
             )
             .responsively_viewed(ResponsiveGridView::all_same(placements.view("info-panel"))),
         )
@@ -106,18 +106,23 @@ fn create_slot(
             Panel::new(
                 PanelType::Panel,
                 6,
-                Color::MEDIUM_RED_ORANGE,
-                Color::MEDIUM_RED_ORANGE,
+                Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(1f32),
+                Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(1f32),
             )
             .responsively_viewed(ResponsiveGridView::all_same(placements.view("edit-panel"))),
         )
         .id();
     let delete_panel = cmd
         .spawn(
-            Panel::new(PanelType::Panel, 7, Color::MEDIUM_RED, Color::MEDIUM_RED)
-                .responsively_viewed(ResponsiveGridView::all_same(
-                    placements.view("delete-panel"),
-                )),
+            Panel::new(
+                PanelType::Panel,
+                7,
+                Color::from(Color::MEDIUM_RED).with_alpha(1f32),
+                Color::from(Color::MEDIUM_RED).with_alpha(1f32),
+            )
+            .responsively_viewed(ResponsiveGridView::all_same(
+                placements.view("delete-panel"),
+            )),
         )
         .id();
     let name_text = cmd
@@ -126,7 +131,7 @@ fn create_slot(
                 4,
                 name,
                 TextScaleAlignment::Custom(blueprint.info_text_scale.0),
-                Color::OFF_WHITE,
+                Color::from(Color::OFF_WHITE).with_alpha(1f32),
                 TextWrapStyle::letter(),
             )
             .responsively_viewed(ResponsiveGridView::all_same(placements.view("name-text"))),
@@ -138,26 +143,28 @@ fn create_slot(
                 4,
                 otp_val,
                 TextScaleAlignment::Custom(blueprint.info_text_scale.0),
-                Color::OFF_WHITE,
+                Color::from(Color::OFF_WHITE).with_alpha(1f32),
                 TextWrapStyle::letter(),
             )
             .responsively_viewed(ResponsiveGridView::all_same(placements.view("otp-text"))),
         )
         .id();
     let info_line = cmd
-        .spawn(Line::new(
-            ResponsivePathView::all_same(placements.path_view("info-line")),
-            4,
-            Color::OFF_WHITE,
-        ))
+        .spawn(
+            Line::new(
+                ResponsivePathView::all_same(placements.path_view("info-line")),
+                4,
+                Color::from(Color::OFF_WHITE).with_alpha(0f32),
+            ),
+        )
         .id();
     let generate_button = cmd
         .spawn(
             Button::new(
                 ButtonType::Press,
                 4,
-                Color::LIGHT_GREEN,
-                Color::DARK_GREEN,
+                Color::from(Color::LIGHT_GREEN).with_alpha(1f32),
+                Color::from(Color::DARK_GREEN).with_alpha(1f32),
                 "edit",
                 "",
                 15,
@@ -173,8 +180,8 @@ fn create_slot(
             Button::new(
                 ButtonType::Press,
                 4,
-                Color::LIGHT_RED_ORANGE,
-                Color::DARK_RED_ORANGE,
+                Color::from(Color::LIGHT_RED_ORANGE).with_alpha(1f32),
+                Color::from(Color::DARK_RED_ORANGE).with_alpha(1f32),
                 "edit",
                 "",
                 15,
@@ -188,8 +195,8 @@ fn create_slot(
             Button::new(
                 ButtonType::Press,
                 4,
-                Color::LIGHT_RED,
-                Color::DARK_RED,
+                Color::from(Color::LIGHT_RED).with_alpha(1f32),
+                Color::from(Color::DARK_RED).with_alpha(1f32),
                 "edit",
                 "",
                 15,
@@ -213,7 +220,36 @@ fn create_slot(
         delete_panel,
     }
 }
-
+fn fade_in_slot(cmd: &mut Commands, slot: &Slot) {
+    let fade_time = 1;
+    cmd.entity(slot.name_text).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::OFF_WHITE).with_alpha(0f32)));
+    cmd.entity(slot.otp_text).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::OFF_WHITE).with_alpha(0f32)));
+    cmd.entity(slot.info_panel).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::MEDIUM_GREEN).with_alpha(0f32)));
+    cmd.entity(slot.edit_panel).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0f32)));
+    cmd.entity(slot.delete_panel).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::MEDIUM_RED).with_alpha(0f32)));
+    cmd.entity(slot.generate_button).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::LIGHT_GREEN).with_alpha(0f32)));
+    cmd.entity(slot.edit_button).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0f32)));
+    cmd.entity(slot.delete_button).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::LIGHT_RED).with_alpha(0f32)));
+    cmd.entity(slot.info_line).insert(
+        (Animation::new(SlotFadeIn::new(), fade_time),
+         Color::from(Color::OFF_WHITE).with_alpha(0f32)));
+}
 fn delete_slot(cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.name_text).despawn();
     cmd.entity(slot.otp_text).despawn();
@@ -270,6 +306,7 @@ pub fn fill_slots(
                                 if let Ok(mut text_val) = text_vals.get_mut(slot.otp_text) {
                                     text_val.0 = otp_val.clone();
                                 }
+                                fade_in_slot(&mut cmd, slot);
                             } else {
                                 slot_needed = true;
                             }
@@ -291,6 +328,7 @@ pub fn fill_slots(
                             token_name.0.clone(),
                             otp_val,
                         );
+                        fade_in_slot(&mut cmd, &slot);
                         slots.0.insert(zero_based_index, slot);
                     }
                 }
@@ -399,5 +437,15 @@ pub(crate) fn process(
             }
         }
         index += 1;
+    }
+}
+pub(crate) fn animations(
+    mut fades: Query<(&mut Color, &mut Animation<SlotFadeIn>)>,
+    timer: Res<Timer>,
+) {
+    for (mut color, mut anim) in fades.iter_mut() {
+        let (diff, _done) = anim.calc_delta_factor(&timer);
+        let (val, _over) = anim.animator.alpha_interpolator.extract(diff);
+        color.alpha += val;
     }
 }

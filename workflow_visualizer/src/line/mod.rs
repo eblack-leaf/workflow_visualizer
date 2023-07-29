@@ -8,16 +8,17 @@ use crate::line::line_render::LineRenderPoints;
 use crate::path::ResponsivePathView;
 use crate::{
     Color, DeviceContext, EnableVisibility, GfxSurface, InterfaceContext, Layer, Path, Position,
-    Section,
+    Section, Tag,
 };
 
 mod attachment;
 mod line_render;
 mod renderer;
 mod system;
-
+pub type LineTag = Tag<Line>;
 #[derive(Bundle)]
 pub struct Line {
+    tag: LineTag,
     responsive_path: ResponsivePathView,
     path: Path,
     visibility: EnableVisibility,
@@ -35,6 +36,7 @@ impl Line {
         color: C,
     ) -> Self {
         Self {
+            tag: LineTag::new(),
             responsive_path,
             path: Path::new(vec![]),
             visibility: EnableVisibility::default(),

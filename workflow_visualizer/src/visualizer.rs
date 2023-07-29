@@ -7,6 +7,7 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
 
+use crate::animate::{end_animations, start_animations};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
@@ -419,6 +420,12 @@ impl Visualizer {
                 .transparent
                 .push(Box::new(invoke_render::<Renderer>)),
         }
+    }
+    pub fn register_animation<A: Send + Sync + 'static>(&mut self) {
+        self.job.task(Self::TASK_MAIN).add_systems((
+            start_animations::<A>.in_set(SyncPoint::PostProcessPreparation),
+            end_animations::<A>.in_set(SyncPoint::Finish),
+        ));
     }
     /// queue attachment to the Visualizer
     pub fn add_attachment<Attached: Attach>(&mut self) {
