@@ -112,15 +112,18 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 
-<span class="kw">pub use </span>attachment::PanelAttachment;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::PanelAttachment;
 <span class="kw">pub use </span>system::calc_content_area;
 
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveGridView;
-<span class="kw">use crate</span>::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section};
+<span class="kw">use crate</span>::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag};
 
 <span class="kw">mod </span>attachment;
 <span class="kw">mod </span>renderer;
@@ -137,8 +140,10 @@
 }
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>BorderColor(<span class="kw">pub </span>Color);
+<span class="kw">pub type </span>PanelTag = Tag&lt;Panel&gt;;
 <span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>Panel {
+    tag: PanelTag,
     <span class="kw">pub </span>panel_type: PanelType,
     <span class="kw">pub </span>layer: Layer,
     <span class="kw">pub </span>content_area: PanelContentArea,
@@ -159,6 +164,7 @@
         border_color: C,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
+            tag: PanelTag::new(),
             panel_type,
             layer: layer.into(),
             border_color: BorderColor(border_color.into()),

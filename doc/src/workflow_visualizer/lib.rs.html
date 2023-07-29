@@ -105,20 +105,50 @@
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
 //! trait Workflow to setup application messaging.
 //! Visualizer which handles rendering
 //! Runner which invokes the visualizer&#39;s tools for multiple platforms
-</span><span class="kw">pub use </span>bevy_ecs;
-<span class="kw">pub use </span>wgpu;
-<span class="kw">pub use </span>winit;
-
+</span><span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
+<span class="kw">pub use </span><span class="kw">crate</span>::coord::{
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+};
+<span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
+<span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
+<span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
+<span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+<span class="kw">pub use </span><span class="kw">crate</span>::grid::{BundlePlacement, Grid, HorizontalSpan, PlacementReference};
+<span class="kw">pub use </span><span class="kw">crate</span>::icon::{
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale, IconTag,
+};
+<span class="kw">pub use </span><span class="kw">crate</span>::job::Job;
+<span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender, LineTag};
+<span class="kw">pub use </span><span class="kw">crate</span>::panel::{BorderColor, Panel, PanelContentArea, PanelType};
+<span class="kw">pub use </span><span class="kw">crate</span>::path::{Path, PathView, ResponsivePathView};
+<span class="kw">pub use </span><span class="kw">crate</span>::scale_factor::ScaleFactor;
+<span class="kw">pub use </span><span class="kw">crate</span>::sync::{SyncPoint, UserSpaceSyncPoint};
+<span class="kw">pub use </span><span class="kw">crate</span>::text::{
+    Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
+    TextScaleAlignment, TextTag, TextValue, TextWrapStyle,
+};
+<span class="kw">pub use </span><span class="kw">crate</span>::texture_atlas::{
+    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+};
+<span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
+<span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
+<span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
+<span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
+<span class="kw">pub use </span><span class="kw">crate</span>::window::WindowResize;
+<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
+<span class="kw">pub use </span>animate::{Animation, Interpolator};
+<span class="kw">pub use </span>bevy_ecs;
 <span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension};
-<span class="kw">pub use </span>button::{Button, ButtonDespawn, ButtonType};
+<span class="kw">pub use </span>button::{Button, ButtonDespawn, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::GridLocation;
 <span class="kw">pub use </span>grid::GridLocationDescriptor;
 <span class="kw">pub use </span>grid::GridMarker;
@@ -136,7 +166,7 @@
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
 };
-<span class="kw">pub use </span>job::JobSyncPoint;
+<span class="kw">pub use </span>job::{JobSyncPoint, Tag};
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>touch::CurrentlyPressed;
 <span class="kw">pub use </span>touch::PrimaryTouch;
@@ -147,43 +177,9 @@
 <span class="kw">pub use </span>touch::Touchable;
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
+<span class="kw">pub use </span>wgpu;
+<span class="kw">pub use </span>winit;
 <span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
-
-<span class="kw">pub use </span><span class="kw">crate</span>::animate::Interpolator;
-<span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
-<span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
-};
-<span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
-<span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
-<span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
-<span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-<span class="kw">pub use </span><span class="kw">crate</span>::grid::{BundlePlacement, Grid, HorizontalSpan, PlacementReference};
-<span class="kw">pub use </span><span class="kw">crate</span>::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale,
-};
-<span class="kw">pub use </span><span class="kw">crate</span>::job::Job;
-<span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender};
-<span class="kw">pub use </span><span class="kw">crate</span>::panel::{BorderColor, Panel, PanelContentArea, PanelType};
-<span class="kw">pub use </span><span class="kw">crate</span>::path::{Path, PathView, ResponsivePathView};
-<span class="kw">pub use </span><span class="kw">crate</span>::scale_factor::ScaleFactor;
-<span class="kw">pub use </span><span class="kw">crate</span>::sync::{SyncPoint, UserSpaceSyncPoint};
-<span class="kw">pub use </span><span class="kw">crate</span>::text::{
-    Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
-    TextScaleAlignment, TextValue, TextWrapStyle,
-};
-<span class="kw">pub use </span><span class="kw">crate</span>::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
-    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
-};
-<span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
-<span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
-<span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
-<span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
-<span class="kw">pub use </span><span class="kw">crate</span>::window::WindowResize;
-<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
-</span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
 
 <span class="kw">mod </span>animate;
 <span class="kw">mod </span>bundling;

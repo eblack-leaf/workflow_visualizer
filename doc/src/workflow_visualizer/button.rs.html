@@ -314,6 +314,42 @@
 <a href="#314" id="314">314</a>
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{
     Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Res, With,
     Without,
@@ -324,12 +360,13 @@
 <span class="kw">use </span><span class="kw">crate</span>::touch::{CurrentlyPressed, ToggleState, Touchable};
 <span class="kw">use crate</span>::{
     Area, Attach, Color, DeviceContext, Icon, IconId, IconScale, InterfaceContext, Layer, Panel,
-    PanelType, Position, ScaleFactor, Section, SyncPoint, Text, TextScale, TextScaleAlignment,
+    PanelType, Position, ScaleFactor, Section, SyncPoint, Tag, Text, TextScale, TextScaleAlignment,
     TextValue, TextWrapStyle, Visualizer,
 };
-
+<span class="kw">pub type </span>ButtonTag = Tag&lt;Button&gt;;
 <span class="attr">#[derive(Bundle, Clone)]
 </span><span class="kw">pub struct </span>Button {
+    tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
     icon_id: IconId,
@@ -400,6 +437,7 @@
         icon_scale: IS,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
+            tag: ButtonTag::new(),
             layer: layer.into(),
             button_type,
             icon_id: icon_id.into(),
@@ -617,16 +655,50 @@
         }
     }
 }
-
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>color_forward(
+    <span class="kw-2">mut </span>color_listeners: Query&lt;(<span class="kw-2">&amp;mut </span>Color), Without&lt;ButtonTag&gt;&gt;,
+    color_deciders: Query&lt;
+        (
+            <span class="kw-2">&amp;</span>Color,
+            <span class="kw-2">&amp;</span>BackgroundColor,
+            <span class="kw-2">&amp;</span>PanelEntity,
+            <span class="kw-2">&amp;</span>IconEntity,
+            <span class="kw-2">&amp;</span>TextEntity,
+        ),
+        (
+            With&lt;ButtonTag&gt;,
+            Or&lt;(Changed&lt;Color&gt;, Changed&lt;BackgroundColor&gt;)&gt;,
+        ),
+    &gt;,
+) {
+    <span class="kw">for </span>(color, back_color, panel_ent, icon_ent, text_ent) <span class="kw">in </span>color_deciders.iter() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = panel_ent.<span class="number">0 </span>{
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>listened_color) = color_listeners.get_mut(ent) {
+                <span class="kw-2">*</span>listened_color = back_color.<span class="number">0</span>;
+            }
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = icon_ent.<span class="number">0 </span>{
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>listened_color) = color_listeners.get_mut(ent) {
+                <span class="kw-2">*</span>listened_color = <span class="kw-2">*</span>color;
+            }
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = text_ent.<span class="number">0 </span>{
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>listened_color) = color_listeners.get_mut(ent) {
+                <span class="kw-2">*</span>listened_color = <span class="kw-2">*</span>color;
+            }
+        }
+    }
+}
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ButtonAttachment;
 
 <span class="kw">impl </span>Attach <span class="kw">for </span>ButtonAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             spawn.in_set(SyncPoint::Spawn),
-            placement.in_set(SyncPoint::SecondaryPlacement),
+            placement.in_set(SyncPoint::SecondaryEffects),
             color_invert.in_set(SyncPoint::Reconfigure),
             despawn.in_set(SyncPoint::Reconfigure),
+            color_forward.in_set(SyncPoint::SecondaryEffects),
         ));
     }
 }

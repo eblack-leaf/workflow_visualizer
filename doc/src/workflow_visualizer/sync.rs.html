@@ -124,6 +124,9 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 <span class="kw">use </span>bevy_ecs::schedule::apply_system_buffers;
 
@@ -139,8 +142,8 @@
     PreProcessVisibility,
     Preparation,
     Spawn,
-    Grid,
-    SecondaryPlacement,
+    PostProcessPreparation,
+    SecondaryEffects,
     Reconfigure,
     PostProcessVisibility,
     Resolve,
@@ -189,24 +192,27 @@
             SyncPoint::Preparation,
             UserSpaceSyncPoint::Process,
             SyncPoint::Spawn,
-            SyncPoint::Grid,
-            SyncPoint::SecondaryPlacement,
+            SyncPoint::PostProcessPreparation,
+            SyncPoint::SecondaryEffects,
             SyncPoint::Reconfigure,
             SyncPoint::PostProcessVisibility,
             SyncPoint::Resolve,
-            UserSpaceSyncPoint::Resolve,
         )
             .chain(),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
-        (SyncPoint::PushDiff, SyncPoint::Finish)
+        (
+            UserSpaceSyncPoint::Resolve,
+            SyncPoint::PushDiff,
+            SyncPoint::Finish,
+        )
             .chain()
-            .after(UserSpaceSyncPoint::Resolve),
+            .after(SyncPoint::Resolve),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_system_buffers
             .after(SyncPoint::Spawn)
-            .before(SyncPoint::Grid),
+            .before(SyncPoint::PostProcessPreparation),
         apply_system_buffers
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::PostProcessVisibility),
