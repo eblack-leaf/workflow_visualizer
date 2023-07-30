@@ -135,6 +135,8 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use </span>tracing::{info, trace};
@@ -240,6 +242,8 @@
             }
             <span class="kw">if </span>visualizer.can_idle() {
                 control_flow.set_wait();
+            } <span class="kw">else </span>{
+                control_flow.set_poll();
             }
         }
         Event::Suspended =&gt; {
