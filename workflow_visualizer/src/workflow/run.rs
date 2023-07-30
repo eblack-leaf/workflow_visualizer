@@ -103,6 +103,8 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             }
             if visualizer.can_idle() {
                 control_flow.set_wait();
+            } else {
+                control_flow.set_poll();
             }
         }
         Event::Suspended => {

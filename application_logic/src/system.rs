@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::TouchTrigger;
+use workflow_visualizer::{Idle, TouchTrigger};
 use workflow_visualizer::{
     Animation, BundlePlacement, Button, ButtonDespawn, ButtonType,
     Color, Grid, Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
@@ -434,9 +434,11 @@ pub(crate) fn process(
 pub(crate) fn animations(
     mut fades: Query<(Entity, &mut Color, &mut Animation<SlotFadeIn>), ()>,
     timer: Res<Timer>,
+    mut idle: ResMut<Idle>,
     mut cmd: Commands,
 ) {
     for (entity, mut color, mut anim) in fades.iter_mut() {
+        idle.can_idle = false;
         let (diff, done) = anim.calc_delta_factor(&timer);
         let (val, over) = anim.animator.alpha_interpolator.extract(diff);
         *color = color.with_alpha(color.alpha + val);
