@@ -60,7 +60,7 @@ impl Color {
         }
     }
     pub fn with_alpha(mut self, alpha: f32) -> Self {
-        self.alpha = alpha;
+        self.alpha = alpha.min(1.0);
         self
     }
 }

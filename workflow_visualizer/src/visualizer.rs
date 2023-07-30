@@ -7,6 +7,10 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 use winit::window::Window;
 
+use crate::{
+    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
+    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
+};
 use crate::animate::{end_animations, start_animations};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
@@ -22,17 +26,13 @@ use crate::render::{internal_render, invoke_render, Render, RenderPhase, RenderT
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;
-use crate::touch::TouchAttachment;
 use crate::touch::{Interactor, MouseAdapter, TouchAdapter, TrackedTouch};
 use crate::touch::{Touch, TouchEvent, TouchType};
+use crate::touch::TouchAttachment;
 use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
-    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
-};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
@@ -421,7 +421,7 @@ impl Visualizer {
                 .push(Box::new(invoke_render::<Renderer>)),
         }
     }
-    pub fn register_animation<A: Send + Sync + 'static>(&mut self) {
+    pub fn register_animation<A: Send + Sync + 'static + Clone>(&mut self) {
         self.job.task(Self::TASK_MAIN).add_systems((
             start_animations::<A>.in_set(SyncPoint::PostProcessPreparation),
             end_animations::<A>.in_set(SyncPoint::Finish),

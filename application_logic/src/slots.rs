@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 use workflow_visualizer::{
     bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest, Interpolator,
 };
@@ -8,6 +7,7 @@ use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
 use crate::workflow::{TokenName, TokenOtp};
@@ -28,18 +28,20 @@ pub struct Slots(pub Vec<Slot>);
 pub struct SlotPaging(pub u32);
 impl SlotPaging {
     pub fn range(&self, slots_per_page: usize) -> (usize, usize) {
-        let start = self.0 as usize * slots_per_page;
+        let start = self.0 as usize * (slots_per_page - 1);
         let end = start + slots_per_page - 1;
         (start, end)
     }
 }
+
+#[derive(Clone)]
 pub(crate) struct SlotFadeIn {
     pub(crate) alpha_interpolator: Interpolator,
 }
 impl SlotFadeIn {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(val: f32) -> Self {
         Self {
-            alpha_interpolator: Interpolator::new(1f32),
+            alpha_interpolator: Interpolator::new(val),
         }
     }
 }
@@ -244,7 +246,7 @@ impl SlotBlueprint {
             "edit-panel",
             (
                 (
-                    slot_left_top.0,
+                    slot_left_top.0.raw_offset(self.info_panel_offset - 1),
                     slot_left_top.0.raw_offset(self.edit_panel_offset),
                 ),
                 (
@@ -257,7 +259,7 @@ impl SlotBlueprint {
             "delete-panel",
             (
                 (
-                    slot_left_top.0,
+                    slot_left_top.0.raw_offset(self.edit_panel_offset - 1),
                     slot_left_top.0.raw_offset(self.total_width_markers.0),
                 ),
                 (

@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
-use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
 use workflow_visualizer::{
-    Animation, BundleExtension, BundlePlacement, Button, ButtonDespawn, ButtonTag, ButtonType,
-    Color, Grid, Line, LineTag, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
-    Text, TextScaleAlignment, TextTag, TextValue, TextWrapStyle, Timer,
+    Animation, BundlePlacement, Button, ButtonDespawn, ButtonType,
+    Color, Grid, Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
+    Text, TextScaleAlignment, TextValue, TextWrapStyle, Timer,
 };
+use workflow_visualizer::bevy_ecs::event::EventReader;
+use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, Entity, NonSend, Query, Res};
+use workflow_visualizer::bevy_ecs::system::ResMut;
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
@@ -222,33 +222,25 @@ fn create_slot(
 }
 fn fade_in_slot(cmd: &mut Commands, slot: &Slot) {
     let fade_time = 1;
+    let animation = Animation::new(SlotFadeIn::new(1f32), fade_time);
     cmd.entity(slot.name_text).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::OFF_WHITE).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
     cmd.entity(slot.otp_text).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::OFF_WHITE).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
     cmd.entity(slot.info_panel).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::MEDIUM_GREEN).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::MEDIUM_GREEN).with_alpha(0.0f32)));
     cmd.entity(slot.edit_panel).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0.0f32)));
     cmd.entity(slot.delete_panel).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::MEDIUM_RED).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::MEDIUM_RED).with_alpha(0.0f32)));
     cmd.entity(slot.generate_button).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::LIGHT_GREEN).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::LIGHT_GREEN).with_alpha(0.0f32)));
     cmd.entity(slot.edit_button).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0.0f32)));
     cmd.entity(slot.delete_button).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::LIGHT_RED).with_alpha(0f32)));
+        (animation.clone(), Color::from(Color::LIGHT_RED).with_alpha(0.0f32)));
     cmd.entity(slot.info_line).insert(
-        (Animation::new(SlotFadeIn::new(), fade_time),
-         Color::from(Color::OFF_WHITE).with_alpha(0f32)));
+        (animation, Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
 }
 fn delete_slot(cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.name_text).despawn();
@@ -390,7 +382,7 @@ pub(crate) fn process(
     _text: Query<&mut TextValue>,
 ) {
     // check buttons and send actions of each slot
-    if let Ok(trigger) = buttons.get(add_button.0) {
+    if let Ok(_trigger) = buttons.get(add_button.0) {
         // spawn input prompt for name / token + confirm_button
         // confirm button trigger despawns all these elements
     }
@@ -440,12 +432,16 @@ pub(crate) fn process(
     }
 }
 pub(crate) fn animations(
-    mut fades: Query<(&mut Color, &mut Animation<SlotFadeIn>)>,
+    mut fades: Query<(Entity, &mut Color, &mut Animation<SlotFadeIn>), ()>,
     timer: Res<Timer>,
+    mut cmd: Commands,
 ) {
-    for (mut color, mut anim) in fades.iter_mut() {
-        let (diff, _done) = anim.calc_delta_factor(&timer);
-        let (val, _over) = anim.animator.alpha_interpolator.extract(diff);
-        color.alpha += val;
+    for (entity, mut color, mut anim) in fades.iter_mut() {
+        let (diff, done) = anim.calc_delta_factor(&timer);
+        let (val, over) = anim.animator.alpha_interpolator.extract(diff);
+        *color = color.with_alpha(color.alpha + val);
+        if done || over {
+            cmd.entity(entity).remove::<Animation<SlotFadeIn>>();
+        }
     }
 }

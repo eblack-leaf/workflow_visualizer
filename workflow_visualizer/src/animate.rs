@@ -1,16 +1,17 @@
-use bevy_ecs::prelude::{Added, Commands, Component, Entity, Query, Res};
+use bevy_ecs::prelude::{Changed, Commands, Component, Entity, Query, Res};
 
 use crate::{TimeDelta, TimeMarker, Timer};
+
 /// Animation class for running interpolations over time
-#[derive(Component)]
-pub struct Animation<T> {
+#[derive(Component, Clone)]
+pub struct Animation<T: Clone> {
     pub total_time: TimeDelta,
     pub start: Option<TimeMarker>,
     pub animator: T,
     done: bool,
 }
 
-impl<T> Animation<T> {
+impl<T: Clone> Animation<T> {
     pub fn new<TD: Into<TimeDelta>>(animator: T, total_time: TD) -> Self {
         Self {
             total_time: total_time.into(),
@@ -41,16 +42,19 @@ impl<T> Animation<T> {
 }
 /// starter for the animations. Must be added for animation to run
 #[allow(unused)]
-pub fn start_animations<T: Send + Sync + 'static>(
-    mut uninitialized_animations: Query<&mut Animation<T>, Added<Animation<T>>>,
+pub fn start_animations<T: Send + Sync + 'static + Clone>(
+    mut uninitialized_animations: Query<&mut Animation<T>, Changed<Animation<T>>>,
     timer: Res<Timer>,
 ) {
     for mut anim in uninitialized_animations.iter_mut() {
         let mark = timer.mark();
-        anim.start.replace(mark);
+        if anim.start.is_none() {
+            anim.start.replace(mark);
+        }
     }
 }
-pub fn end_animations<T: Send + Sync + 'static>(
+
+pub fn end_animations<T: Send + Sync + 'static + Clone>(
     mut ended: Query<(Entity, &Animation<T>)>,
     timer: Res<Timer>,
     mut cmd: Commands,
@@ -63,6 +67,7 @@ pub fn end_animations<T: Send + Sync + 'static>(
     }
 }
 /// Interpolates a value over an interval
+#[derive(Copy, Clone)]
 pub struct Interpolator {
     pub value: f32,
     total: f32,

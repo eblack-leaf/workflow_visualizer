@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
+use wgpu::BlendState;
 
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
-use crate::panel::{Difference, Extraction};
 use crate::{
-    Color, Indexer, InstanceAttributeManager, Job, Layer, NullBit, RawArea, RawPosition, Render,
+    Color, Indexer, InstanceAttributeManager, Layer, NullBit, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, PanelVertex, vertex_buffer};
 
 #[derive(Resource)]
 pub(crate) struct PanelRenderer {
@@ -45,7 +45,7 @@ pub(crate) fn setup(
         .create_shader_module(wgpu::include_wgsl!("panel.wgsl"));
     let color_target_state = [Some(wgpu::ColorTargetState {
         format: gfx_surface_config.configuration.format,
-        blend: None,
+        blend: Some(BlendState::ALPHA_BLENDING),
         write_mask: Default::default(),
     })];
     let descriptor = wgpu::RenderPipelineDescriptor {
@@ -141,7 +141,7 @@ pub(crate) fn setup(
 }
 impl Render for PanelRenderer {
     fn phase() -> RenderPhase {
-        RenderPhase::Opaque
+        RenderPhase::Alpha(5)
     }
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
         if self.indexer.has_instances() {
