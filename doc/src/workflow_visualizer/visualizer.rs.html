@@ -475,6 +475,10 @@
 <span class="kw">use </span>winit::event::{ElementState, MouseButton, TouchPhase};
 <span class="kw">use </span>winit::window::Window;
 
+<span class="kw">use crate</span>::{
+    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
+    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
+};
 <span class="kw">use </span><span class="kw">crate</span>::animate::{end_animations, start_animations};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
@@ -490,17 +494,13 @@
 <span class="kw">use </span><span class="kw">crate</span>::sync::set_sync_points;
 <span class="kw">use </span><span class="kw">crate</span>::text::TextAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::time::TimerAttachment;
-<span class="kw">use </span><span class="kw">crate</span>::touch::TouchAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::touch::{Interactor, MouseAdapter, TouchAdapter, TrackedTouch};
 <span class="kw">use </span><span class="kw">crate</span>::touch::{Touch, TouchEvent, TouchType};
+<span class="kw">use </span><span class="kw">crate</span>::touch::TouchAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::virtual_keyboard::VirtualKeyboardAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::visibility::VisibilityAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowAttachment;
-<span class="kw">use crate</span>::{
-    Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section,
-    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
-};
 
 <span class="doccomment">/// Used to hold queued attachments until ready to invoke attach to the Visualizer
 </span><span class="kw">pub struct </span>Attachment(<span class="kw">pub </span>Box&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>Visualizer)&gt;);
@@ -889,7 +889,7 @@
                 .push(Box::new(invoke_render::&lt;Renderer&gt;)),
         }
     }
-    <span class="kw">pub fn </span>register_animation&lt;A: Send + Sync + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">pub fn </span>register_animation&lt;A: Send + Sync + <span class="lifetime">&#39;static </span>+ Clone&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.job.task(<span class="self">Self</span>::TASK_MAIN).add_systems((
             start_animations::&lt;A&gt;.in_set(SyncPoint::PostProcessPreparation),
             end_animations::&lt;A&gt;.in_set(SyncPoint::Finish),
