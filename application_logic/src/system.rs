@@ -1,16 +1,14 @@
 use std::collections::HashMap;
 
+use workflow_visualizer::{Idle, TouchTrigger};
 use workflow_visualizer::{
-    Animation, BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel,
-    PanelType, ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
-    TextWrapStyle, Timer,
+    Animation, BundlePlacement, Button, ButtonDespawn, ButtonType,
+    Color, Grid, Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
+    Text, TextScaleAlignment, TextValue, TextWrapStyle, Timer,
 };
 use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{
-    Commands, DetectChanges, Entity, NonSend, Query, Res,
-};
+use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, Entity, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
-use workflow_visualizer::TouchTrigger;
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
@@ -152,11 +150,13 @@ fn create_slot(
         )
         .id();
     let info_line = cmd
-        .spawn(Line::new(
-            ResponsivePathView::all_same(placements.path_view("info-line")),
-            4,
-            Color::from(Color::OFF_WHITE).with_alpha(0f32),
-        ))
+        .spawn(
+            Line::new(
+                ResponsivePathView::all_same(placements.path_view("info-line")),
+                4,
+                Color::from(Color::OFF_WHITE).with_alpha(0f32),
+            ),
+        )
         .id();
     let generate_button = cmd
         .spawn(
@@ -221,42 +221,26 @@ fn create_slot(
     }
 }
 fn fade_in_slot(cmd: &mut Commands, slot: &Slot) {
-    let fade_time = 0.35;
+    let fade_time = 1;
     let animation = Animation::new(SlotFadeIn::new(1f32), fade_time);
-    cmd.entity(slot.name_text).insert((
-        animation.clone(),
-        Color::from(Color::OFF_WHITE).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.otp_text).insert((
-        animation.clone(),
-        Color::from(Color::OFF_WHITE).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.info_panel).insert((
-        animation.clone(),
-        Color::from(Color::MEDIUM_GREEN).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.edit_panel).insert((
-        animation.clone(),
-        Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.delete_panel).insert((
-        animation.clone(),
-        Color::from(Color::MEDIUM_RED).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.generate_button).insert((
-        animation.clone(),
-        Color::from(Color::LIGHT_GREEN).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.edit_button).insert((
-        animation.clone(),
-        Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.delete_button).insert((
-        animation.clone(),
-        Color::from(Color::LIGHT_RED).with_alpha(0.0f32),
-    ));
-    cmd.entity(slot.info_line)
-        .insert((animation, Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
+    cmd.entity(slot.name_text).insert(
+        (animation.clone(), Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
+    cmd.entity(slot.otp_text).insert(
+        (animation.clone(), Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
+    cmd.entity(slot.info_panel).insert(
+        (animation.clone(), Color::from(Color::MEDIUM_GREEN).with_alpha(0.0f32)));
+    cmd.entity(slot.edit_panel).insert(
+        (animation.clone(), Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0.0f32)));
+    cmd.entity(slot.delete_panel).insert(
+        (animation.clone(), Color::from(Color::MEDIUM_RED).with_alpha(0.0f32)));
+    cmd.entity(slot.generate_button).insert(
+        (animation.clone(), Color::from(Color::LIGHT_GREEN).with_alpha(0.0f32)));
+    cmd.entity(slot.edit_button).insert(
+        (animation.clone(), Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0.0f32)));
+    cmd.entity(slot.delete_button).insert(
+        (animation.clone(), Color::from(Color::LIGHT_RED).with_alpha(0.0f32)));
+    cmd.entity(slot.info_line).insert(
+        (animation, Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
 }
 fn delete_slot(cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.name_text).despawn();

@@ -28,7 +28,7 @@ pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
 };
-pub use job::{JobSyncPoint, Tag};
+pub use job::{JobSyncPoint, Tag, Exit, Idle};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use touch::CurrentlyPressed;
 pub use touch::PrimaryTouch;

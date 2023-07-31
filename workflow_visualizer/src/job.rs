@@ -98,7 +98,7 @@ impl Job {
     }
     pub fn exec(&mut self, task_label: TaskLabel) {
         if let Some(task) = self.tasks.get_mut(&task_label) {
-            task.set_executor_kind(ExecutorKind::Simple)
+            task.set_executor_kind(ExecutorKind::MultiThreaded)
                 .run(&mut self.container);
         }
     }
