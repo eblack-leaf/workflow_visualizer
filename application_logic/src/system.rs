@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{Idle, TouchTrigger};
 use workflow_visualizer::{
     Animation, BundlePlacement, Button, ButtonDespawn, ButtonType,
     Color, Grid, Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
@@ -9,6 +8,7 @@ use workflow_visualizer::{
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, Entity, NonSend, Query, Res};
 use workflow_visualizer::bevy_ecs::system::ResMut;
+use workflow_visualizer::TouchTrigger;
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
