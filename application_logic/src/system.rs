@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{
-    Animation, BundlePlacement, Button, ButtonDespawn, ButtonType,
-    Color, Grid, Line, Panel, PanelType, ResponsiveGridView, ResponsivePathView, Sender,
-    Text, TextScaleAlignment, TextValue, TextWrapStyle, Timer,
-};
 use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, Entity, NonSend, Query, Res};
+use workflow_visualizer::bevy_ecs::prelude::{
+    Commands, DetectChanges, Entity, NonSend, Query, Res,
+};
 use workflow_visualizer::bevy_ecs::system::ResMut;
 use workflow_visualizer::TouchTrigger;
+use workflow_visualizer::{
+    Animation, BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel,
+    PanelType, ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
+    TextWrapStyle, Timer,
+};
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
@@ -150,13 +152,11 @@ fn create_slot(
         )
         .id();
     let info_line = cmd
-        .spawn(
-            Line::new(
-                ResponsivePathView::all_same(placements.path_view("info-line")),
-                4,
-                Color::from(Color::OFF_WHITE).with_alpha(0f32),
-            ),
-        )
+        .spawn(Line::new(
+            ResponsivePathView::all_same(placements.path_view("info-line")),
+            4,
+            Color::from(Color::OFF_WHITE).with_alpha(0f32),
+        ))
         .id();
     let generate_button = cmd
         .spawn(
@@ -220,27 +220,51 @@ fn create_slot(
         delete_panel,
     }
 }
-fn fade_in_slot(cmd: &mut Commands, slot: &Slot) {
-    let fade_time = 1;
-    let animation = Animation::new(SlotFadeIn::new(1f32), fade_time);
-    cmd.entity(slot.name_text).insert(
-        (animation.clone(), Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
-    cmd.entity(slot.otp_text).insert(
-        (animation.clone(), Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
-    cmd.entity(slot.info_panel).insert(
-        (animation.clone(), Color::from(Color::MEDIUM_GREEN).with_alpha(0.0f32)));
-    cmd.entity(slot.edit_panel).insert(
-        (animation.clone(), Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0.0f32)));
-    cmd.entity(slot.delete_panel).insert(
-        (animation.clone(), Color::from(Color::MEDIUM_RED).with_alpha(0.0f32)));
-    cmd.entity(slot.generate_button).insert(
-        (animation.clone(), Color::from(Color::LIGHT_GREEN).with_alpha(0.0f32)));
-    cmd.entity(slot.edit_button).insert(
-        (animation.clone(), Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0.0f32)));
-    cmd.entity(slot.delete_button).insert(
-        (animation.clone(), Color::from(Color::LIGHT_RED).with_alpha(0.0f32)));
-    cmd.entity(slot.info_line).insert(
-        (animation, Color::from(Color::OFF_WHITE).with_alpha(0.0f32)));
+fn animate_slot_fade(
+    cmd: &mut Commands,
+    slot: &Slot,
+    fade_time: f32,
+    delay_time: Option<f32>,
+    starting_opacity: f32,
+    interpolated_value: f32,
+) {
+    let animation = Animation::new(SlotFadeIn::new(interpolated_value), fade_time, delay_time);
+    cmd.entity(slot.name_text).insert((
+        animation.clone(),
+        Color::from(Color::OFF_WHITE).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.otp_text).insert((
+        animation.clone(),
+        Color::from(Color::OFF_WHITE).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.info_panel).insert((
+        animation.clone(),
+        Color::from(Color::MEDIUM_GREEN).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.edit_panel).insert((
+        animation.clone(),
+        Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.delete_panel).insert((
+        animation.clone(),
+        Color::from(Color::MEDIUM_RED).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.generate_button).insert((
+        animation.clone(),
+        Color::from(Color::LIGHT_GREEN).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.edit_button).insert((
+        animation.clone(),
+        Color::from(Color::LIGHT_RED_ORANGE).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.delete_button).insert((
+        animation.clone(),
+        Color::from(Color::LIGHT_RED).with_alpha(starting_opacity),
+    ));
+    cmd.entity(slot.info_line).insert((
+        animation,
+        Color::from(Color::OFF_WHITE).with_alpha(starting_opacity),
+    ));
 }
 fn delete_slot(cmd: &mut Commands, slot: &Slot) {
     cmd.entity(slot.name_text).despawn();
@@ -278,6 +302,7 @@ pub fn fill_slots(
         let (start, end) = paging.range(slot_blueprint.slots_per_page);
         let mut zero_based_index = 0;
         let mut slot_despawns = vec![];
+        let mut animation_delay = 0f32;
         for paged_index in start..end {
             let name = slot_pool.0.get(paged_index);
             if let Some(token_name) = name {
@@ -289,6 +314,7 @@ pub fn fill_slots(
                     };
                     slot_fills.0.push(token_name.clone());
                     let mut slot_needed = false;
+                    let mut slot_animation_needed = false;
                     if let Some(cached) = cache.0.get_mut(zero_based_index) {
                         if *cached != *token_name {
                             if let Some(slot) = slots.0.get(zero_based_index) {
@@ -298,7 +324,23 @@ pub fn fill_slots(
                                 if let Ok(mut text_val) = text_vals.get_mut(slot.otp_text) {
                                     text_val.0 = otp_val.clone();
                                 }
-                                fade_in_slot(&mut cmd, slot);
+                                animate_slot_fade(
+                                    &mut cmd,
+                                    slot,
+                                    0.35,
+                                    Some(animation_delay),
+                                    1f32,
+                                    -1f32,
+                                );
+                                animate_slot_fade(
+                                    &mut cmd,
+                                    slot,
+                                    0.35,
+                                    Some(0.5 + animation_delay),
+                                    0f32,
+                                    1f32,
+                                );
+                                animation_delay += 0.2;
                             } else {
                                 slot_needed = true;
                             }
@@ -320,7 +362,23 @@ pub fn fill_slots(
                             token_name.0.clone(),
                             otp_val,
                         );
-                        fade_in_slot(&mut cmd, &slot);
+                        animate_slot_fade(
+                            &mut cmd,
+                            &slot,
+                            0.35,
+                            Some(animation_delay),
+                            1f32,
+                            -1f32,
+                        );
+                        animate_slot_fade(
+                            &mut cmd,
+                            &slot,
+                            0.35,
+                            Some(0.5 + animation_delay),
+                            0f32,
+                            1f32,
+                        );
+                        animation_delay += 0.2;
                         slots.0.insert(zero_based_index, slot);
                     }
                 }

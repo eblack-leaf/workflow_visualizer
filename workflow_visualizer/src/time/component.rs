@@ -72,7 +72,7 @@ impl Timer {
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 pub struct TimeMarker(pub f64);
 /// signifies a change in time
-#[derive(PartialOrd, PartialEq, Copy, Clone)]
+#[derive(PartialOrd, PartialEq, Copy, Clone, Default)]
 pub struct TimeDelta(pub f64);
 
 impl TimeDelta {

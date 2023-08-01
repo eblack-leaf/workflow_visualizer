@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use wgpu::BlendState;
 
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
 use crate::{
     Color, Indexer, InstanceAttributeManager, Layer, NullBit, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
 };
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, PanelVertex, vertex_buffer};
 
 #[derive(Resource)]
 pub(crate) struct PanelRenderer {

@@ -6,38 +6,69 @@ use crate::{TimeDelta, TimeMarker, Timer};
 #[derive(Component, Clone)]
 pub struct Animation<T: Clone> {
     pub total_time: TimeDelta,
+    pub animation_time: TimeDelta,
     pub start: Option<TimeMarker>,
     pub animator: T,
     done: bool,
+    delay: Option<TimeDelta>,
 }
 
 impl<T: Clone> Animation<T> {
-    pub fn new<TD: Into<TimeDelta>>(animator: T, total_time: TD) -> Self {
+    pub fn new<TD: Into<TimeDelta> + Copy + Clone>(
+        animator: T,
+        total_time: TD,
+        delay_time: Option<TD>,
+    ) -> Self {
+        let delay = if let Some(time) = delay_time {
+            Some(time.into())
+        } else {
+            None
+        };
         Self {
-            total_time: total_time.into(),
+            total_time: total_time.into() + delay.unwrap_or_default(),
+            animation_time: total_time.into(),
             start: None,
             animator,
             done: false,
+            delay,
         }
     }
     pub fn calc_delta_factor(&mut self, timer: &Timer) -> (f32, bool) {
         if let Some(start) = self.start {
-            let total = timer.time_since(start);
-            let done = total >= self.total_time;
-            let past_total = total - self.total_time;
-            let mut delta = timer.frame_diff();
-            if done {
-                delta -= past_total;
-                self.done = true;
+            return if !self.delayed(timer) {
+                let mut time_since_start = timer.time_since(start);
+                let done = time_since_start >= self.total_time;
+                let mut delta = timer.frame_diff();
+                if done {
+                    let past_total = time_since_start - self.total_time;
+                    delta -= past_total;
+                    self.done = true;
+                }
+                let delta = delta / self.animation_time;
+                (delta.as_f32(), done)
+            } else {
+                (0f32, false)
             }
-            let delta = delta / self.total_time;
-            (delta.as_f32(), done)
         } else {
             (0f32, false)
         }
     }
     pub fn done(&self) -> bool {
         self.done
+    }
+    pub fn delayed(&self, timer: &Timer) -> bool {
+        if let Some(delay) = self.delay {
+            return if let Some(start) = self.start {
+                if timer.time_since(start) < delay {
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+        }
+        false
     }
 }
 /// starter for the animations. Must be added for animation to run

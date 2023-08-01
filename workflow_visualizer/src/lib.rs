@@ -28,23 +28,23 @@ pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
 };
-pub use job::{JobSyncPoint, Tag, Exit, Idle};
+pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use touch::CurrentlyPressed;
 pub use touch::PrimaryTouch;
 pub use touch::ToggleState;
-pub use touch::Touchable;
 pub use touch::TouchListener;
 pub use touch::TouchLocation;
 pub use touch::TouchTrigger;
+pub use touch::Touchable;
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
-pub use workflow::{Runner, Sender, start_web_worker, Workflow};
+pub use workflow::{start_web_worker, Runner, Sender, Workflow};
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
-    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
@@ -107,3 +107,4 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
+mod animation;
