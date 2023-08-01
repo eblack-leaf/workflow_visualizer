@@ -41,7 +41,10 @@ impl<T> AnimationManager<T> {
     }
 }
 
-pub(crate) fn manage<T: Send + Sync + 'static>(mut animation_manager: ResMut<AnimationManager<T>>, timer: Res<Timer>) {
+pub(crate) fn manage<T: Send + Sync + 'static>(
+    mut animation_manager: ResMut<AnimationManager<T>>,
+    timer: Res<Timer>,
+) {
     for (entity, managed_animation) in animation_manager.managed_animations.iter_mut() {
         let mut done_delaying = vec![];
         let mut index = 0;
@@ -84,7 +87,9 @@ pub(crate) fn manage<T: Send + Sync + 'static>(mut animation_manager: ResMut<Ani
     }
 }
 
-pub(crate) fn end_animations<T: Send + Sync + 'static>(mut animation_manager: ResMut<AnimationManager<T>>) {
+pub(crate) fn end_animations<T: Send + Sync + 'static>(
+    mut animation_manager: ResMut<AnimationManager<T>>,
+) {
     let mut removals = vec![];
     for (entity, managed_anim) in animation_manager.managed_animations.iter() {
         if let Some(current) = managed_anim.current.as_ref() {
@@ -132,10 +137,7 @@ pub struct Animation<T> {
 }
 
 impl<T> Animation<T> {
-    pub(crate) fn new<TD: Into<TimeDelta>>(
-        anim_time: TD,
-        animator: T,
-    ) -> Self {
+    pub(crate) fn new<TD: Into<TimeDelta>>(anim_time: TD, animator: T) -> Self {
         Self {
             start: None,
             animation_time: anim_time.into(),
@@ -152,11 +154,7 @@ impl<T> Animation<T> {
     }
     pub fn delta(&mut self) -> Option<f32> {
         if let Some(delta) = self.delta.take() {
-            return if self.done() {
-                Some(1f32)
-            } else {
-                Some(delta)
-            }
+            return if self.done() { Some(1f32) } else { Some(delta) };
         }
         None
     }
@@ -219,5 +217,5 @@ impl Interpolator {
 pub(crate) fn interpolator_test() {
     let mut interpolator = Interpolator::new(1f32);
     let extraction = interpolator.extract(0.25);
-    assert_eq!(extraction.0, 0.26f32);
+    assert_eq!(extraction.0, 0.25f32);
 }

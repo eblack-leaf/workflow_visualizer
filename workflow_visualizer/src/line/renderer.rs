@@ -155,7 +155,7 @@ pub(crate) fn setup(
         entry_point: "fragment_entry",
         targets: &[Some(wgpu::ColorTargetState {
             format: gfx_config.configuration.format,
-            blend: None,
+            blend: Option::from(wgpu::BlendState::ALPHA_BLENDING),
             write_mask: Default::default(),
         })],
     };
@@ -180,7 +180,7 @@ pub(crate) fn setup(
 
 impl Render for LineRenderer {
     fn phase() -> RenderPhase {
-        RenderPhase::Opaque
+        RenderPhase::Alpha(6)
     }
 
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
