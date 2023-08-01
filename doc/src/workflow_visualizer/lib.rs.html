@@ -119,7 +119,7 @@
 
 <span class="kw">pub use </span>animation::{Animation, AnimationManager, Interpolator, ManagedAnimation};
 <span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension};
-<span class="kw">pub use </span>button::{Button, ButtonDespawn, ButtonTag, ButtonType};
+<span class="kw">pub use </span>button::{Button, ButtonDespawn, ButtonTag, ButtonType, BackgroundColor};
 <span class="kw">pub use </span>grid::GridLocation;
 <span class="kw">pub use </span>grid::GridLocationDescriptor;
 <span class="kw">pub use </span>grid::GridMarker;
@@ -142,18 +142,18 @@
 <span class="kw">pub use </span>touch::CurrentlyPressed;
 <span class="kw">pub use </span>touch::PrimaryTouch;
 <span class="kw">pub use </span>touch::ToggleState;
-<span class="kw">pub use </span>touch::Touchable;
 <span class="kw">pub use </span>touch::TouchListener;
 <span class="kw">pub use </span>touch::TouchLocation;
 <span class="kw">pub use </span>touch::TouchTrigger;
+<span class="kw">pub use </span>touch::Touchable;
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
-<span class="kw">pub use </span>workflow::{Runner, Sender, start_web_worker, Workflow};
+<span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
-    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
+    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
+    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};

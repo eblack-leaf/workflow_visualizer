@@ -384,7 +384,7 @@
         entry_point: <span class="string">&quot;fragment_entry&quot;</span>,
         targets: <span class="kw-2">&amp;</span>[<span class="prelude-val">Some</span>(wgpu::ColorTargetState {
             format: gfx_config.configuration.format,
-            blend: <span class="prelude-val">None</span>,
+            blend: Option::from(wgpu::BlendState::ALPHA_BLENDING),
             write_mask: Default::default(),
         })],
     };
@@ -409,7 +409,7 @@
 
 <span class="kw">impl </span>Render <span class="kw">for </span>LineRenderer {
     <span class="kw">fn </span>phase() -&gt; RenderPhase {
-        RenderPhase::Opaque
+        RenderPhase::Alpha(<span class="number">6</span>)
     }
 
     <span class="kw">fn </span>render&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, render_pass_handle: <span class="kw-2">&amp;mut </span>RenderPassHandle&lt;<span class="lifetime">&#39;a</span>&gt;, viewport: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Viewport) {

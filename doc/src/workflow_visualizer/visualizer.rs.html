@@ -464,6 +464,11 @@
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
 <a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -473,7 +478,6 @@
 <span class="kw">use </span>winit::event::{ElementState, MouseButton, TouchPhase};
 <span class="kw">use </span>winit::window::Window;
 
-<span class="kw">use crate</span>::{AnimationManager, Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position, ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle, WindowResize};
 <span class="kw">use </span><span class="kw">crate</span>::animation::{end_animations, manage};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
@@ -489,13 +493,17 @@
 <span class="kw">use </span><span class="kw">crate</span>::sync::set_sync_points;
 <span class="kw">use </span><span class="kw">crate</span>::text::TextAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::time::TimerAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::touch::TouchAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::touch::{Interactor, MouseAdapter, TouchAdapter, TrackedTouch};
 <span class="kw">use </span><span class="kw">crate</span>::touch::{Touch, TouchEvent, TouchType};
-<span class="kw">use </span><span class="kw">crate</span>::touch::TouchAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::virtual_keyboard::VirtualKeyboardAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::visibility::VisibilityAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowAttachment;
+<span class="kw">use crate</span>::{
+    AnimationManager, Area, DeviceContext, GfxOptions, GfxSurface, Job, JobSyncPoint, Position,
+    ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
+};
 
 <span class="doccomment">/// Used to hold queued attachments until ready to invoke attach to the Visualizer
 </span><span class="kw">pub struct </span>Attachment(<span class="kw">pub </span>Box&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>Visualizer)&gt;);
@@ -885,7 +893,9 @@
         }
     }
     <span class="kw">pub fn </span>register_animation&lt;A: Send + Sync + <span class="lifetime">&#39;static </span>+ Clone&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.job.container.insert_resource(AnimationManager::&lt;A&gt;::new());
+        <span class="self">self</span>.job
+            .container
+            .insert_resource(AnimationManager::&lt;A&gt;::new());
         <span class="self">self</span>.job.task(<span class="self">Self</span>::TASK_MAIN).add_systems((
             manage::&lt;A&gt;.in_set(SyncPoint::PostProcessPreparation),
             end_animations::&lt;A&gt;.in_set(SyncPoint::Finish),
