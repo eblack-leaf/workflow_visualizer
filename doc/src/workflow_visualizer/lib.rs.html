@@ -117,7 +117,7 @@
 <span class="kw">pub use </span>wgpu;
 <span class="kw">pub use </span>winit;
 
-<span class="kw">pub use </span>animate::{Animation, Interpolator};
+<span class="kw">pub use </span>animation::{Animation, AnimationManager, Interpolator, ManagedAnimation};
 <span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension};
 <span class="kw">pub use </span>button::{Button, ButtonDespawn, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::GridLocation;
@@ -137,7 +137,7 @@
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
 };
-<span class="kw">pub use </span>job::{JobSyncPoint, Tag, Exit, Idle};
+<span class="kw">pub use </span>job::{Exit, Idle, JobSyncPoint, Tag};
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>touch::CurrentlyPressed;
 <span class="kw">pub use </span>touch::PrimaryTouch;
@@ -185,7 +185,7 @@
 <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
 
-<span class="kw">mod </span>animate;
+<span class="kw">mod </span>animation;
 <span class="kw">mod </span>bundling;
 <span class="kw">mod </span>button;
 <span class="kw">mod </span>color;

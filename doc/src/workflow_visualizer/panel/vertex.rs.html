@@ -317,8 +317,8 @@
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use crate</span>::{DeviceContext, InterfaceContext, Interpolator, Panel, Position, RawPosition};
+<span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 
 <span class="attr">#[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
@@ -370,17 +370,17 @@
     <span class="kw">let </span><span class="kw-2">mut </span>last =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
     <span class="kw">let </span><span class="kw-2">mut </span>interpolator = Interpolator::new(FRAC_PI_2);
-    <span class="kw">let </span>(<span class="kw-2">mut </span>extract, <span class="kw-2">mut </span>done) = interpolator.extract(delta);
-    current_angle += extract;
+    <span class="kw">let </span><span class="kw-2">mut </span>extraction = interpolator.extract(delta);
+    current_angle += extraction.<span class="number">0</span>;
     <span class="kw">let </span>point =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
     tris.push(current_corner);
     tris.push(last);
     tris.push(point);
     last = point;
-    <span class="kw">while </span>!done {
-        (extract, done) = interpolator.extract(delta);
-        current_angle += extract;
+    <span class="kw">while </span>!extraction.<span class="number">1 </span>{
+        extraction = interpolator.extract(delta);
+        current_angle += extraction.<span class="number">0</span>;
         <span class="kw">let </span>point =
             current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
         tris.push(current_corner);
@@ -534,8 +534,8 @@
     <span class="kw">let </span><span class="kw-2">mut </span>inner_bottom =
         current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
     <span class="kw">let </span><span class="kw-2">mut </span>interpolator = Interpolator::new(FRAC_PI_2);
-    <span class="kw">let </span>(<span class="kw-2">mut </span>extract, <span class="kw-2">mut </span>done) = interpolator.extract(delta);
-    current_angle += extract;
+    <span class="kw">let </span><span class="kw-2">mut </span>extraction = interpolator.extract(delta);
+    current_angle += extraction.<span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>outer_top =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
     <span class="kw">let </span><span class="kw-2">mut </span>inner_top =
@@ -544,9 +544,9 @@
     tris.extend([inner_bottom, outer_bottom, outer_top]);
     inner_bottom = inner_top;
     outer_bottom = outer_top;
-    <span class="kw">while </span>!done {
-        (extract, done) = interpolator.extract(delta);
-        current_angle += extract;
+    <span class="kw">while </span>!extraction.<span class="number">1 </span>{
+        extraction = interpolator.extract(delta);
+        current_angle += extraction.<span class="number">0</span>;
         outer_top =
             current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
         inner_top =
