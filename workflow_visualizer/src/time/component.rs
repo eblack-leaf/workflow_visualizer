@@ -2,6 +2,7 @@ use std::ops::{Add, AddAssign, Div, Sub, SubAssign};
 use std::time::Instant;
 
 use bevy_ecs::prelude::Resource;
+
 /// Access to time on the platform
 #[derive(Resource)]
 pub struct Timer {
@@ -71,6 +72,12 @@ impl Timer {
 /// signifies a point in time
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 pub struct TimeMarker(pub f64);
+
+impl TimeMarker {
+    pub fn offset<TD: Into<TimeDelta>>(mut self, delta: TD) -> Self {
+        Self(self.0 + delta.into().0)
+    }
+}
 /// signifies a change in time
 #[derive(PartialOrd, PartialEq, Copy, Clone, Default)]
 pub struct TimeDelta(pub f64);
@@ -81,6 +88,11 @@ impl TimeDelta {
     }
 }
 
+impl From<f64> for TimeDelta {
+    fn from(value: f64) -> Self {
+        TimeDelta(value)
+    }
+}
 impl SubAssign for TimeDelta {
     fn sub_assign(&mut self, rhs: Self) {
         self.0 -= rhs.0

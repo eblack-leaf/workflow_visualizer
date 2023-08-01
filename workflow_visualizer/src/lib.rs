@@ -8,7 +8,7 @@ pub use bevy_ecs;
 pub use wgpu;
 pub use winit;
 
-pub use animate::{Animation, Interpolator};
+pub use animation::{Animation, AnimationManager, Interpolator, ManagedAnimation};
 pub use bundling::{BundleBuilder, BundleExtension};
 pub use button::{Button, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::GridLocation;
@@ -33,18 +33,18 @@ pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use touch::CurrentlyPressed;
 pub use touch::PrimaryTouch;
 pub use touch::ToggleState;
+pub use touch::Touchable;
 pub use touch::TouchListener;
 pub use touch::TouchLocation;
 pub use touch::TouchTrigger;
-pub use touch::Touchable;
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
-pub use workflow::{start_web_worker, Runner, Sender, Workflow};
+pub use workflow::{Runner, Sender, start_web_worker, Workflow};
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
+    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
@@ -76,7 +76,7 @@ pub use crate::window::WindowResize;
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
 
-mod animate;
+mod animation;
 mod bundling;
 mod button;
 mod color;
@@ -107,4 +107,3 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
-mod animation;

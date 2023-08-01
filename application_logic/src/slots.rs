@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 use workflow_visualizer::{
     bevy_ecs, BundledIcon, GridView, IconBitmap, IconBitmapRequest, Interpolator,
 };
@@ -8,6 +7,7 @@ use workflow_visualizer::{
     Attach, Grid, GridPoint, PlacementReference, RawMarker, ResponsiveUnit, SyncPoint, TextScale,
     UserSpaceSyncPoint, Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::{Entity, IntoSystemConfig, Resource};
 
 use crate::system;
 use crate::workflow::{TokenName, TokenOtp};
@@ -35,7 +35,7 @@ impl SlotPaging {
 }
 
 #[derive(Clone)]
-pub(crate) struct SlotFadeIn {
+pub struct SlotFadeIn {
     pub(crate) alpha_interpolator: Interpolator,
 }
 impl SlotFadeIn {

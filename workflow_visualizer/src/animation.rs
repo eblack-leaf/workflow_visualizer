@@ -1,38 +1,53 @@
 use std::collections::HashMap;
-use bevy_ecs::prelude::{DetectChanges, Entity, Res, ResMut, Resource};
+
+use bevy_ecs::prelude::{Entity, Res, ResMut, Resource};
+
 use crate::{TimeDelta, TimeMarker, Timer};
+
 #[derive(Resource)]
 pub struct AnimationManager<T> {
-    pub(crate) managed_animations: HashMap<Entity, ManagedAnimation<T>>,
+    pub managed_animations: HashMap<Entity, ManagedAnimation<T>>,
 }
 impl<T> AnimationManager<T> {
-    pub(crate) fn new() -> Self { Self { managed_animations: HashMap::new() }}
-    pub fn animate<TD: Into<TimeDelta>>(&mut self, entity: Entity, animator: T, anim_time: TD) {
-        if let Some(managed_animation) = self.managed_animations.get_mut(&entity) {
-            managed_animation.animate(animator, anim_time);
-        } else {
-            let mut anim = ManagedAnimation::new();
-            anim.animate(animator, anim_time);
-            self.managed_animations.insert(entity, anim);
+    pub(crate) fn new() -> Self {
+        Self {
+            managed_animations: HashMap::new(),
         }
     }
-    pub fn delay<TD: Into<TimeDelta>>(&mut self, entity: Entity, animator: T, anim_time: TD, delay: TD) {
+    pub fn animate<TD: Into<TimeDelta>>(
+        &mut self,
+        entity: Entity,
+        animator: T,
+        anim_time: TD,
+        delay: Option<TD>,
+    ) {
         if let Some(managed_animation) = self.managed_animations.get_mut(&entity) {
-            managed_animation.delay(animator, anim_time, delay);
+            if let Some(delay) = delay {
+                managed_animation.delay(animator, anim_time, delay);
+            } else {
+                managed_animation.animate(animator, anim_time);
+            }
         } else {
-            let mut anim = ManagedAnimation::new();
-            anim.delay(animator, anim_time, delay);
-            self.managed_animations.insert(entity, anim);
+            if let Some(delay) = delay {
+                let mut anim = ManagedAnimation::new();
+                anim.delay(animator, anim_time, delay);
+                self.managed_animations.insert(entity, anim);
+            } else {
+                let mut anim = ManagedAnimation::new();
+                anim.animate(animator, anim_time);
+                self.managed_animations.insert(entity, anim);
+            }
         }
     }
 }
-pub(crate) fn manage<T>(mut animation_manager: ResMut<AnimationManager<T>>, timer: Res<Timer>) {
+
+pub(crate) fn manage<T: Send + Sync + 'static>(mut animation_manager: ResMut<AnimationManager<T>>, timer: Res<Timer>) {
     for (entity, managed_animation) in animation_manager.managed_animations.iter_mut() {
         let mut done_delaying = vec![];
         let mut index = 0;
-        for (mut delay, anim) in managed_animation.queue.iter_mut() {
-            delay -= timer.frame_diff();
-            if delay < 0 {
+        for (delay, anim) in managed_animation.queue.iter_mut() {
+            *delay -= timer.frame_diff();
+            if *delay <= 0.into() {
                 done_delaying.push(index);
             }
             index += 1;
@@ -46,9 +61,9 @@ pub(crate) fn manage<T>(mut animation_manager: ResMut<AnimationManager<T>>, time
         } else {
             done_delaying.sort();
             done_delaying.reverse();
-            for index in done_delaying {
-                let (delay, mut anim) = managed_animation.queue.remove(index);
-                anim.start.replace(timer.mark() + delay);
+            for index in done_delaying.drain(..) {
+                let (overage, mut anim) = managed_animation.queue.remove(index);
+                anim.start.replace(timer.mark().offset(overage));
                 managed_animation.current.replace(anim);
             }
         }
@@ -56,19 +71,20 @@ pub(crate) fn manage<T>(mut animation_manager: ResMut<AnimationManager<T>>, time
             if let Some(start) = current.start {
                 let mut time_since_start = timer.time_since(start);
                 let done = time_since_start >= current.animation_time;
-                let mut anim_delta = timer.frame_diff();
+                let mut anim_delta: TimeDelta = timer.frame_diff().0.min(time_since_start.0).into();
                 if done {
                     let past_total = time_since_start - current.animation_time;
                     anim_delta -= past_total;
                     current.done = true;
                 }
                 let anim_delta = anim_delta / current.animation_time;
-                current.delta.replace(anim_delta);
+                current.delta.replace(anim_delta.0.min(1f64) as f32);
             }
         }
     }
 }
-pub(crate) fn end_animations<T>(mut animation_manager: ResMut<AnimationManager<T>>) {
+
+pub(crate) fn end_animations<T: Send + Sync + 'static>(mut animation_manager: ResMut<AnimationManager<T>>) {
     let mut removals = vec![];
     for (entity, managed_anim) in animation_manager.managed_animations.iter() {
         if let Some(current) = managed_anim.current.as_ref() {
@@ -78,11 +94,16 @@ pub(crate) fn end_animations<T>(mut animation_manager: ResMut<AnimationManager<T
         }
     }
     for entity in removals {
-        animation_manager.managed_animations.get_mut(&entity).expect("anim").current.take();
+        let _ = animation_manager
+            .managed_animations
+            .get_mut(&entity)
+            .expect("anim")
+            .current
+            .take();
     }
 }
 pub struct ManagedAnimation<T> {
-    pub(crate) current: Option<Animation<T>>,
+    pub current: Option<Animation<T>>,
     pub(crate) queue: Vec<(TimeDelta, Animation<T>)>,
 }
 impl<T> ManagedAnimation<T> {
@@ -93,22 +114,28 @@ impl<T> ManagedAnimation<T> {
         }
     }
     pub(crate) fn animate<TD: Into<TimeDelta>>(&mut self, animator: T, anim_time: TD) {
-        self.current.replace(Animation::new(anim_time.into(), animator));
+        self.current
+            .replace(Animation::new(anim_time.into(), animator));
     }
     pub(crate) fn delay<TD: Into<TimeDelta>>(&mut self, animator: T, anim_time: TD, delay: TD) {
-        self.queue.push((delay.into(), Animation::new(anim_time.into(), animator)));
+        self.queue
+            .push((delay.into(), Animation::new(anim_time.into(), animator)));
     }
 }
 #[derive(Clone)]
 pub struct Animation<T> {
     pub(crate) start: Option<TimeMarker>,
     pub(crate) animation_time: TimeDelta,
-    pub(crate) animator: T,
-    pub(crate) delta: Option<TimeDelta>,
+    pub animator: T,
+    pub(crate) delta: Option<f32>,
     pub(crate) done: bool,
 }
+
 impl<T> Animation<T> {
-    pub(crate) fn new<TM: Into<TimeMarker>, TD: Into<TimeDelta>>(anim_time: TD, animator: T) -> Self {
+    pub(crate) fn new<TD: Into<TimeDelta>>(
+        anim_time: TD,
+        animator: T,
+    ) -> Self {
         Self {
             start: None,
             animation_time: anim_time.into(),
@@ -117,14 +144,27 @@ impl<T> Animation<T> {
             done: false,
         }
     }
-    pub fn done(&self) -> bool { self.done }
-    pub fn delta(&self) -> Option<TimeDelta> { self.delta }
+    pub fn done(&self) -> bool {
+        self.done
+    }
+    pub fn set_done(&mut self) {
+        self.done = true;
+    }
+    pub fn delta(&mut self) -> Option<f32> {
+        if let Some(delta) = self.delta.take() {
+            return if self.done() {
+                Some(1f32)
+            } else {
+                Some(delta)
+            }
+        }
+        None
+    }
 }
 #[derive(Clone, Copy)]
 pub struct InterpolationExtraction(pub f32, pub bool);
-impl InterpolationExtraction {
 
-}
+impl InterpolationExtraction {}
 /// Interpolates a value over an interval
 #[derive(Copy, Clone)]
 pub struct Interpolator {
@@ -172,4 +212,12 @@ impl Interpolator {
         let extract = InterpolationExtraction(extract, done);
         extract
     }
+}
+
+#[cfg(test)]
+#[test]
+pub(crate) fn interpolator_test() {
+    let mut interpolator = Interpolator::new(1f32);
+    let extraction = interpolator.extract(0.25);
+    assert_eq!(extraction.0, 0.26f32);
 }
