@@ -149,7 +149,7 @@
         }
     }
     <span class="kw">pub fn </span>with_alpha(<span class="kw-2">mut </span><span class="self">self</span>, alpha: f32) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.alpha = alpha.min(<span class="number">1.0</span>);
+        <span class="self">self</span>.alpha = alpha.min(<span class="number">1.0</span>).max(<span class="number">0.0</span>);
         <span class="self">self
     </span>}
 }
