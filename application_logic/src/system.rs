@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
-use workflow_visualizer::bevy_ecs::system::ResMut;
-use workflow_visualizer::{AnimationManager, BackgroundColor, ButtonTag, TouchTrigger};
+use workflow_visualizer::{AnimationManager, BackgroundColor, TouchTrigger};
 use workflow_visualizer::{
     BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel, PanelType,
     ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
     TextWrapStyle,
 };
+use workflow_visualizer::bevy_ecs::event::EventReader;
+use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
+use workflow_visualizer::bevy_ecs::system::ResMut;
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
@@ -494,7 +494,7 @@ pub(crate) fn process(
     }
 }
 pub(crate) fn animations(
-    mut fades: Query<(&mut Color,), ()>,
+    mut fades: Query<&mut Color>,
     mut background_fades: Query<&mut BackgroundColor>,
     mut animation_manager: ResMut<AnimationManager<SlotFadeIn>>,
 ) {
@@ -503,9 +503,9 @@ pub(crate) fn animations(
             if let Some(delta) = current.delta() {
                 if let Ok(mut color) = fades.get_mut(*entity) {
                     let extraction = current.animator.alpha_interpolator.extract(delta);
-                    *color.0 = color.0.with_alpha(color.0.alpha + extraction.0 as f32);
+                    *color = color.with_alpha(color.alpha + extraction.0);
                     if let Ok(mut back_color) = background_fades.get_mut(*entity) {
-                        back_color.0 = back_color.0.with_alpha(back_color.0.alpha + extraction.0 as f32);
+                        back_color.0 = back_color.0.with_alpha(back_color.0.alpha + extraction.0);
                     }
                     if extraction.1 {
                         current.set_done();
