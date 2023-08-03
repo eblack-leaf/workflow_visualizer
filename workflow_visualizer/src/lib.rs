@@ -10,7 +10,7 @@ pub use winit;
 
 pub use animation::{Animation, AnimationManager, Interpolator, ManagedAnimation};
 pub use bundling::{BundleBuilder, BundleExtension};
-pub use button::{Button, ButtonDespawn, ButtonTag, ButtonType, BackgroundColor};
+pub use button::{BackgroundColor, Button, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::GridLocation;
 pub use grid::GridLocationDescriptor;
 pub use grid::GridMarker;
@@ -75,7 +75,7 @@ pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::WindowResize;
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
-
+pub use crate::disable::Disabled;
 mod animation;
 mod bundling;
 mod button;
@@ -107,3 +107,4 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
+mod disable;

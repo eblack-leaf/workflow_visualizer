@@ -35,10 +35,10 @@ impl SlotPaging {
 }
 
 #[derive(Clone)]
-pub struct SlotFadeIn {
+pub struct SlotFade {
     pub(crate) alpha_interpolator: Interpolator,
 }
-impl SlotFadeIn {
+impl SlotFade {
     pub(crate) fn new(val: f32) -> Self {
         Self {
             alpha_interpolator: Interpolator::new(val),
@@ -57,7 +57,7 @@ impl Attach for Slots {
             .add_systems((system::setup.in_set(UserSpaceSyncPoint::Initialization),));
         visualizer.add_event::<SlotFillEvent>();
         visualizer.add_event::<OtpRead>();
-        visualizer.register_animation::<SlotFadeIn>();
+        visualizer.register_animation::<SlotFade>();
         visualizer.spawn(IconBitmapRequest::from((
             "edit",
             IconBitmap::bundled(BundledIcon::Edit),

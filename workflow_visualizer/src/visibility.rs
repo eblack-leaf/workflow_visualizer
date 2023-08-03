@@ -5,7 +5,7 @@ use crate::grid::config_grid;
 use crate::path::grid_updated_path;
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
-use crate::{Area, InterfaceContext, Position, Section, SyncPoint};
+use crate::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
 
 /// Entry point for enabling visibility module on an entity
 #[derive(Bundle)]
@@ -60,10 +60,17 @@ pub(crate) fn calc_visibility(
         &Area<InterfaceContext>,
         &mut Visibility,
         &mut VisibleSection,
+        Option<&Disabled>,
     )>,
     viewport_handle: Res<ViewportHandle>,
 ) {
-    for (pos, area, mut vis, mut vis_sec) in potentially_visible.iter_mut() {
+    for (pos, area, mut vis, mut vis_sec, disabled) in potentially_visible.iter_mut() {
+        if disabled.is_some() {
+            if vis.visible() {
+                vis.visible = false;
+            }
+            continue;
+        }
         let section = Section::from((*pos, *area));
         let intersection = viewport_handle.section.intersection(section);
         let visible = intersection.is_some();

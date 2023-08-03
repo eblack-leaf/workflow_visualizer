@@ -1,10 +1,10 @@
-use bevy_ecs::prelude::{Changed, Commands, Entity, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{Changed, Commands, Entity, Or, Query, RemovedComponents, Res, ResMut};
 
 use crate::line::line_render::LineRenderPoints;
 use crate::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
 use crate::line::LineRender;
 use crate::path::Path;
-use crate::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor};
+use crate::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, Visibility};
 
 // before ResolveVisibility after Reconfigure.set_path
 pub(crate) fn calc_section(
@@ -41,23 +41,27 @@ pub(crate) fn scale_path(
 
 pub(crate) fn create_render_group(
     paths: Query<
-        (Entity, &LineRender, &Layer, &Color, &LineRenderPoints),
-        Changed<LineRenderPoints>,
+        (Entity, &LineRender, &Layer, &Color, &LineRenderPoints, &Visibility),
+        Or<(Changed<LineRenderPoints>, Changed<Visibility>)>,
     >,
     gfx: Res<GfxSurface>,
     mut removed: RemovedComponents<LineRender>,
     mut line_renderer: ResMut<LineRenderer>,
 ) {
-    for (entity, line_render, layer, color, line_render_points) in paths.iter() {
-        let render_group = LineRenderGroup::new(
-            LineRenderGpu::new(&gfx, &line_render_points.points),
-            line_render.capacity,
-            LayerAndHooks::new(layer.z, 0f32, 0f32, 0f32),
-            *color,
-            &gfx,
-            &line_renderer.bind_group_layout,
-        );
-        line_renderer.render_groups.insert(entity, render_group);
+    for (entity, line_render, layer, color, line_render_points, visibility) in paths.iter() {
+        if visibility.visible() {
+            let render_group = LineRenderGroup::new(
+                LineRenderGpu::new(&gfx, &line_render_points.points),
+                line_render.capacity,
+                LayerAndHooks::new(layer.z, 0f32, 0f32, 0f32),
+                *color,
+                &gfx,
+                &line_renderer.bind_group_layout,
+            );
+            line_renderer.render_groups.insert(entity, render_group);
+        } else {
+            line_renderer.render_groups.remove(&entity);
+        }
     }
     for entity in removed.iter() {
         line_renderer.render_groups.remove(&entity);

@@ -1,18 +1,20 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{AnimationManager, BackgroundColor, TouchTrigger};
+use workflow_visualizer::bevy_ecs::event::EventReader;
+use workflow_visualizer::bevy_ecs::prelude::{
+    Commands, DetectChanges, Entity, NonSend, Query, Res,
+};
+use workflow_visualizer::bevy_ecs::system::ResMut;
+use workflow_visualizer::{Animation, BackgroundColor, TouchTrigger};
 use workflow_visualizer::{
     BundlePlacement, Button, ButtonDespawn, ButtonType, Color, Grid, Line, Panel, PanelType,
     ResponsiveGridView, ResponsivePathView, Sender, Text, TextScaleAlignment, TextValue,
     TextWrapStyle,
 };
-use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{Commands, DetectChanges, NonSend, Query, Res};
-use workflow_visualizer::bevy_ecs::system::ResMut;
 
 use crate::slots::{
     AddButton, CurrentOtpValue, OtpRead, PageLeftButton, PageRightButton, Slot, SlotBlueprint,
-    SlotFadeIn, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
+    SlotFade, SlotFillEvent, SlotFills, SlotFillsCache, SlotPaging, SlotPool, Slots,
 };
 use crate::workflow::{Action, Engen};
 
@@ -219,7 +221,7 @@ fn create_slot(
     }
 }
 fn animate_slot_fade(
-    animation_manager: &mut AnimationManager<SlotFadeIn>,
+    cmd: &mut Commands,
     slot: &Slot,
     fade_time: f32,
     delay_time: Option<f32>,
@@ -227,55 +229,55 @@ fn animate_slot_fade(
 ) {
     animation_manager.animate(
         slot.name_text,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.otp_text,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.info_line,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.info_panel,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.edit_panel,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.delete_panel,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.generate_button,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.edit_button,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
     animation_manager.animate(
         slot.delete_button,
-        SlotFadeIn::new(interpolated_value),
+        SlotFade::new(interpolated_value),
         fade_time,
         delay_time,
     );
@@ -310,7 +312,6 @@ pub fn fill_slots(
     mut cmd: Commands,
     mut text_vals: Query<&mut TextValue>,
     current_otps: Res<CurrentOtpValue>,
-    mut animation_manager: ResMut<AnimationManager<SlotFadeIn>>,
 ) {
     if slot_pool.is_changed() || slot_blueprint.is_changed() || paging.is_changed() {
         slot_fills.0.clear();
@@ -340,14 +341,14 @@ pub fn fill_slots(
                                     text_val.0 = otp_val.clone();
                                 }
                                 animate_slot_fade(
-                                    animation_manager.as_mut(),
+                                    &mut cmd,
                                     slot,
                                     anim_time,
                                     Some(animation_delay),
                                     -1f32,
                                 );
                                 animate_slot_fade(
-                                    animation_manager.as_mut(),
+                                    &mut cmd,
                                     slot,
                                     anim_time,
                                     Some(anim_time + animation_delay),
@@ -375,13 +376,7 @@ pub fn fill_slots(
                             token_name.0.clone(),
                             otp_val,
                         );
-                        animate_slot_fade(
-                            animation_manager.as_mut(),
-                            &slot,
-                            anim_time,
-                            Some(animation_delay),
-                            1f32,
-                        );
+                        animate_slot_fade(&mut cmd, &slot, anim_time, Some(animation_delay), 1f32);
                         animation_delay += anim_time;
                         slots.0.insert(zero_based_index, slot);
                     }
@@ -494,23 +489,18 @@ pub(crate) fn process(
     }
 }
 pub(crate) fn animations(
-    mut fades: Query<&mut Color>,
-    mut background_fades: Query<&mut BackgroundColor>,
-    mut animation_manager: ResMut<AnimationManager<SlotFadeIn>>,
+    mut fades: Query<(
+        Entity,
+        &mut Animation<SlotFade>,
+        &mut Color,
+        Option<&mut BackgroundColor>,
+    )>,
 ) {
-    for (entity, managed_animation) in animation_manager.managed_animations.iter_mut() {
-        if let Some(current) = managed_animation.current.as_mut() {
-            if let Some(delta) = current.delta() {
-                if let Ok(mut color) = fades.get_mut(*entity) {
-                    let extraction = current.animator.alpha_interpolator.extract(delta);
-                    *color = color.with_alpha(color.alpha + extraction.0);
-                    if let Ok(mut back_color) = background_fades.get_mut(*entity) {
-                        back_color.0 = back_color.0.with_alpha(back_color.0.alpha + extraction.0);
-                    }
-                    if extraction.1 {
-                        current.set_done();
-                    }
-                }
+    for (_entity, mut anim, mut color, mut back_color) in fades.iter_mut() {
+        if let Some(extraction) = anim.animator.0.get_mut(0).unwrap().extraction() {
+            *color = color.with_alpha(color.alpha + extraction.0);
+            if let Some(b_color) = back_color {
+                b_color.0 = b_color.0.with_alpha(b_color.0.alpha + extraction.0);
             }
         }
     }
