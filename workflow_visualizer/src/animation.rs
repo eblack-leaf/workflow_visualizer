@@ -1,7 +1,6 @@
-use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use bevy_ecs::prelude::{Changed, Commands, Entity, EventWriter, Query, Res, ResMut};
+use bevy_ecs::prelude::{Changed, Commands, Entity, EventWriter, Query, Res};
 
 use crate::{TimeDelta, TimeMarker, Timer};
 
@@ -29,7 +28,11 @@ pub(crate) fn manage<T: Send + Sync + 'static>(
             let anim_delta = anim_delta / anim.animation_time;
             let delta = anim_delta.0.min(1f64) as f32;
             anim.delta.replace(delta);
-            if animation_time_over { anim.animator.finish() } else { anim.animator.extract(delta) }
+            if animation_time_over {
+                anim.animator.finish()
+            } else {
+                anim.animator.extract(delta)
+            }
         }
     }
 }

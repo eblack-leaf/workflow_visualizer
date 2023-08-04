@@ -33,20 +33,21 @@ pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use touch::CurrentlyPressed;
 pub use touch::PrimaryTouch;
 pub use touch::ToggleState;
+pub use touch::Touchable;
 pub use touch::TouchListener;
 pub use touch::TouchLocation;
 pub use touch::TouchTrigger;
-pub use touch::Touchable;
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
-pub use workflow::{start_web_worker, Runner, Sender, Workflow};
+pub use workflow::{Runner, Sender, start_web_worker, Workflow};
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
+    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
+pub use crate::disable::Disabled;
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
@@ -75,13 +76,14 @@ pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::WindowResize;
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
-pub use crate::disable::Disabled;
+
 mod animation;
 mod bundling;
 mod button;
 mod color;
 mod coord;
 mod diagnostics;
+mod disable;
 mod focus;
 mod gfx;
 mod grid;
@@ -107,4 +109,3 @@ mod visibility;
 mod visualizer;
 mod window;
 mod workflow;
-mod disable;

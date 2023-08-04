@@ -1,14 +1,10 @@
-use std::collections::HashMap;
 use std::ops::Add;
 
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::{
-    Bundle, Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res,
-    Resource, Without,
+    Bundle, DetectChanges, IntoSystemConfig,
+    Resource,
 };
-use bevy_ecs::query::Changed;
-use bevy_ecs::system::ResMut;
-use tracing::trace;
 
 pub(crate) use attachment::GridAttachment;
 use marker::ColumnConfig;
@@ -23,13 +19,11 @@ pub use view::{
     GridPoint, GridRange, GridView, PlacementReference,
 };
 
-use crate::bundling::{BundleBuilder, BundleExtension};
-use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::viewport::{frontend_area_adjust, ViewportHandle};
 use crate::{
-    Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
-    WindowResize,
+    Area, Attach, InterfaceContext, ResponsivePathView, Section,
 };
+use crate::bundling::{BundleBuilder, BundleExtension};
+use crate::diagnostics::Record;
 
 mod attachment;
 mod marker;
@@ -216,6 +210,12 @@ where
         section: S,
     ) -> BundleBuilder<Self, Section<InterfaceContext>> {
         self.extend(section.into())
+    }
+    fn responsively_path_viewed<P: Into<ResponsivePathView>>(
+        self,
+        view: P,
+    ) -> BundleBuilder<Self, ResponsivePathView> {
+        self.extend(view.into())
     }
 }
 impl<T: Bundle + Sized> BundlePlacement for T {}

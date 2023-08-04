@@ -4,25 +4,31 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Query, Without};
 use tracing::trace;
 
+use crate::{
+    Area, CurrentlyPressed, Disabled, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor,
+    Section, ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle,
+};
 use crate::focus::FocusedEntity;
 use crate::touch::adapter::{TouchGrabState, TrackedTouch};
 use crate::touch::component::{ListenableTouchType, TouchEvent, TouchType};
-use crate::{Area, CurrentlyPressed, Disabled, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor, Section, ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle};
 
 pub(crate) fn read_touch_events(
     mut event_reader: EventReader<TouchEvent>,
     mut primary_touch: ResMut<PrimaryTouch>,
-    mut touch_listeners: Query<(
-        Entity,
-        &Position<InterfaceContext>,
-        &Area<InterfaceContext>,
-        &Layer,
-        &TouchListener,
-        &mut TouchTrigger,
-        &mut CurrentlyPressed,
-        &mut ToggleState,
-        &mut TouchLocation,
-    ), Without<Disabled>>,
+    mut touch_listeners: Query<
+        (
+            Entity,
+            &Position<InterfaceContext>,
+            &Area<InterfaceContext>,
+            &Layer,
+            &TouchListener,
+            &mut TouchTrigger,
+            &mut CurrentlyPressed,
+            &mut ToggleState,
+            &mut TouchLocation,
+        ),
+        Without<Disabled>,
+    >,
     scale_factor: Res<ScaleFactor>,
     viewport_handle: Res<ViewportHandle>,
     mut touch_grab_state: ResMut<TouchGrabState>,
