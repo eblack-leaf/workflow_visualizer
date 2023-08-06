@@ -1,7 +1,5 @@
-pub use slots::Slots;
+pub use entry::EntryAttachment;
 pub use workflow::Engen;
 
 mod entry;
-mod slots;
-mod system;
 mod workflow;

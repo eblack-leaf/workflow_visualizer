@@ -10,11 +10,12 @@ pub struct GridLocation {
 }
 
 impl GridLocation {
-    pub fn raw_offset(mut self, offset: i32) -> Self {
+    pub fn raw_offset<RM: Into<RawMarker>>(mut self, offset: RM) -> Self {
+        let offset = offset.into();
         if let Some(current_offset) = self.offset.as_mut() {
-            current_offset.0 .0 += offset;
+            current_offset.0.0 += offset.0;
         } else {
-            self.offset.replace(GridLocationOffset(offset.into()));
+            self.offset.replace(GridLocationOffset(offset));
         }
         self
     }

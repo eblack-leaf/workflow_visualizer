@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use workflow_visualizer::{Visualizer, Workflow};
 
-use crate::slots::{OtpRead, SlotFillEvent};
+use crate::entry::{ReadOtp, ReceivedTokens};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -107,13 +107,13 @@ impl Workflow for Engen {
             Response::TokenAdded(_name) => {}
             Response::TokenRemoved(_name) => {}
             Response::TokenOtp((name, otp)) => {
-                visualizer.job.container.send_event(OtpRead { name, otp });
+                visualizer.job.container.send_event(ReadOtp(name, otp));
             }
             Response::RequestedTokenNames(tokens) => {
                 visualizer
                     .job
                     .container
-                    .send_event(SlotFillEvent::new(tokens));
+                    .send_event(ReceivedTokens(tokens));
             }
             Response::ExitConfirmed => {}
         }

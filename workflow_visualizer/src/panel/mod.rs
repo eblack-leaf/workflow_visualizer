@@ -5,7 +5,6 @@ use bevy_ecs::prelude::{Bundle, Component, Entity, Resource};
 pub(crate) use attachment::PanelAttachment;
 pub use system::calc_content_area;
 
-use crate::grid::ResponsiveGridView;
 use crate::{Area, Color, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag};
 
 mod attachment;
@@ -17,7 +16,7 @@ mod vertex;
 pub struct PanelContentArea(pub Area<InterfaceContext>);
 #[derive(Component, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum PanelType {
-    Panel,
+    Flat,
     Border,
     BorderedPanel,
 }

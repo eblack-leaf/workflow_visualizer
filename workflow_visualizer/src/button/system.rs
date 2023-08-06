@@ -1,114 +1,16 @@
-use bevy_ecs::prelude::{
-    Added, Bundle, Changed, Commands, Component, Entity, IntoSystemConfig, Or, Query, Res, With,
-    Without,
-};
+use bevy_ecs::change_detection::Res;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-use crate::grid::RawMarker;
-use crate::text::AlignedFonts;
-use crate::touch::{CurrentlyPressed, ToggleState, Touchable};
 use crate::{
-    Area, Attach, Color, DeviceContext, Icon, IconId, IconScale, InterfaceContext, Layer, Panel,
-    PanelType, Position, ScaleFactor, Section, SyncPoint, Tag, Text, TextScale, TextScaleAlignment,
-    TextValue, TextWrapStyle, Visualizer,
+    Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color, CurrentlyPressed,
+    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelType, Position,
+    RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
+    ToggleState,
 };
-pub type ButtonTag = Tag<Button>;
-#[derive(Bundle, Clone)]
-pub struct Button {
-    tag: ButtonTag,
-    layer: Layer,
-    button_type: ButtonType,
-    icon_id: IconId,
-    button_text: TextValue,
-    section: Section<InterfaceContext>,
-    color: Color,
-    background_color: BackgroundColor,
-    panel_entity: PanelEntity,
-    icon_entity: IconEntity,
-    text_entity: TextEntity,
-    touchable: Touchable,
-    scaling: Scaling,
-}
-#[derive(Component, Copy, Clone)]
-pub struct ButtonDespawn {}
-impl Default for ButtonDespawn {
-    fn default() -> Self {
-        ButtonDespawn {}
-    }
-}
-pub(crate) fn despawn(
-    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<ButtonDespawn>>,
-    mut cmd: Commands,
-) {
-    for (entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {
-        cmd.entity(entity).despawn();
-        if let Some(ent) = panel_entity.0 {
-            cmd.entity(ent).despawn();
-        }
-        if let Some(ent) = text_entity.0 {
-            cmd.entity(ent).despawn();
-        }
-        if let Some(ent) = icon_entity.0 {
-            cmd.entity(ent).despawn();
-        }
-    }
-}
-#[derive(Component, Copy, Clone)]
-pub struct Scaling {
-    pub text: TextScale,
-    pub icon: IconScale,
-}
+use crate::button::{IconEntity, PanelEntity, Scaling, TextEntity};
+use crate::text::AlignedFonts;
 
-#[derive(Component, Copy, Clone)]
-pub struct BackgroundColor(pub Color);
-#[derive(Component, Copy, Clone)]
-pub(crate) struct PanelEntity(pub(crate) Option<Entity>);
-#[derive(Component, Copy, Clone)]
-pub(crate) struct IconEntity(pub(crate) Option<Entity>);
-#[derive(Component, Copy, Clone)]
-pub(crate) struct TextEntity(pub(crate) Option<Entity>);
-impl Button {
-    pub fn new<
-        L: Into<Layer>,
-        C: Into<Color>,
-        S: Into<String>,
-        ID: Into<IconId>,
-        TS: Into<TextScale>,
-        IS: Into<IconScale>,
-    >(
-        button_type: ButtonType,
-        layer: L,
-        foreground_color: C,
-        background_color: C,
-        icon_id: ID,
-        button_text: S,
-        text_scale: TS,
-        icon_scale: IS,
-    ) -> Self {
-        Self {
-            tag: ButtonTag::new(),
-            layer: layer.into(),
-            button_type,
-            icon_id: icon_id.into(),
-            button_text: TextValue(button_text.into()),
-            section: Section::default(),
-            color: foreground_color.into(),
-            background_color: BackgroundColor(background_color.into()),
-            panel_entity: PanelEntity(None),
-            icon_entity: IconEntity(None),
-            text_entity: TextEntity(None),
-            touchable: Touchable::on_press(),
-            scaling: Scaling {
-                text: text_scale.into(),
-                icon: icon_scale.into(),
-            },
-        }
-    }
-}
-#[derive(Component, Copy, Clone)]
-pub enum ButtonType {
-    Press,
-    Toggle,
-}
 pub(crate) fn spawn(
     mut buttons: Query<
         (
@@ -170,6 +72,7 @@ pub(crate) fn spawn(
         text_entity.0.replace(text);
     }
 }
+
 pub(crate) fn color_invert(
     buttons: Query<
         (
@@ -303,6 +206,7 @@ pub(crate) fn placement(
         }
     }
 }
+
 pub(crate) fn color_forward(
     mut color_listeners: Query<(&mut Color), Without<ButtonTag>>,
     color_deciders: Query<
@@ -337,16 +241,58 @@ pub(crate) fn color_forward(
         }
     }
 }
-pub(crate) struct ButtonAttachment;
 
-impl Attach for ButtonAttachment {
-    fn attach(visualizer: &mut Visualizer) {
-        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            spawn.in_set(SyncPoint::Spawn),
-            placement.in_set(SyncPoint::SecondaryEffects),
-            color_invert.in_set(SyncPoint::Reconfigure),
-            despawn.in_set(SyncPoint::Reconfigure),
-            color_forward.in_set(SyncPoint::SecondaryEffects),
-        ));
+pub(crate) fn despawn(
+    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<ButtonDespawn>>,
+    mut cmd: Commands,
+) {
+    for (entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {
+        cmd.entity(entity).despawn();
+        if let Some(ent) = panel_entity.0 {
+            cmd.entity(ent).despawn();
+        }
+        if let Some(ent) = text_entity.0 {
+            cmd.entity(ent).despawn();
+        }
+        if let Some(ent) = icon_entity.0 {
+            cmd.entity(ent).despawn();
+        }
+    }
+}
+
+pub(crate) fn forward_disable(
+    disabled: Query<(&PanelEntity, &TextEntity, &IconEntity), Added<Disabled>>,
+    mut cmd: Commands,
+) {
+    for (panel, text, icon) in disabled.iter() {
+        if let Some(ent) = panel.0 {
+            cmd.entity(ent).insert(Disabled::default());
+        }
+        if let Some(ent) = text.0 {
+            cmd.entity(ent).insert(Disabled::default());
+        }
+        if let Some(ent) = icon.0 {
+            cmd.entity(ent).insert(Disabled::default());
+        }
+    }
+}
+
+pub(crate) fn remove_disabled(
+    enabled: Query<(&PanelEntity, &TextEntity, &IconEntity)>,
+    mut removed: RemovedComponents<Disabled>,
+    mut cmd: Commands,
+) {
+    for remove in removed.iter() {
+        if let Ok((panel, text, icon)) = enabled.get(remove) {
+            if let Some(ent) = panel.0 {
+                cmd.entity(ent).remove::<Disabled>();
+            }
+            if let Some(ent) = text.0 {
+                cmd.entity(ent).remove::<Disabled>();
+            }
+            if let Some(ent) = icon.0 {
+                cmd.entity(ent).remove::<Disabled>();
+            }
+        }
     }
 }

@@ -2,12 +2,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
-use crate::gfx::GfxSurface;
-use crate::panel::renderer::PanelRenderer;
-use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
 use crate::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
+use crate::gfx::GfxSurface;
+use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
+use crate::panel::renderer::PanelRenderer;
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -196,7 +196,7 @@ pub(crate) fn process_extraction(
         }
         if let Some(panel_type) = difference.panel_type {
             match panel_type {
-                PanelType::Panel => {
+                PanelType::Flat => {
                     renderer
                         .panel_null_bits
                         .queue_write(index, NullBit::not_null());
