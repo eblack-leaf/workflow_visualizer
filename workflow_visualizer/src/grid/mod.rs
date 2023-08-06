@@ -1,10 +1,7 @@
 use std::ops::Add;
 
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{
-    Bundle, DetectChanges, IntoSystemConfig,
-    Resource,
-};
+use bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfig, Resource};
 
 pub(crate) use attachment::GridAttachment;
 use marker::ColumnConfig;
@@ -19,11 +16,9 @@ pub use view::{
     GridPoint, GridRange, GridView, PlacementReference,
 };
 
-use crate::{
-    Area, Attach, InterfaceContext, ResponsivePathView, Section,
-};
 use crate::bundling::{BundleBuilder, BundleExtension};
 use crate::diagnostics::Record;
+use crate::{Area, Attach, InterfaceContext, ResponsivePathView, Section};
 
 mod attachment;
 mod marker;

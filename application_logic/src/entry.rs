@@ -1,9 +1,12 @@
-use workflow_visualizer::{Attach, bevy_ecs, BundledIcon, Button, ButtonDespawn, ButtonType, Color, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, Text, TextScaleAlignment, TextWrapStyle, Visualizer};
-use workflow_visualizer::{Disabled, TextValue};
 use workflow_visualizer::bevy_ecs::prelude::{
-    Changed, Commands, Component, DetectChanges, Entity, EventReader, Query, Res, ResMut,
-    Resource,
+    Changed, Commands, Component, DetectChanges, Entity, EventReader, Query, Res, ResMut, Resource,
 };
+use workflow_visualizer::{
+    bevy_ecs, Attach, BundledIcon, Button, ButtonDespawn, ButtonType, Color, Grid, IconBitmap,
+    IconBitmapRequest, Line, Panel, PanelType, RawMarker, ResponsiveUnit, Text, TextScaleAlignment,
+    TextWrapStyle, Visualizer,
+};
+use workflow_visualizer::{Disabled, TextValue};
 
 use crate::workflow::{TokenName, TokenOtp};
 
@@ -12,7 +15,10 @@ pub struct EntryAttachment;
 impl Attach for EntryAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.add_event::<ReceivedTokens>();
-        visualizer.spawn(IconBitmapRequest::from(("edit", IconBitmap::bundled(BundledIcon::Edit))));
+        visualizer.spawn(IconBitmapRequest::from((
+            "edit",
+            IconBitmap::bundled(BundledIcon::Edit),
+        )));
     }
 }
 #[derive(Component)]
@@ -245,10 +251,34 @@ pub(crate) fn page_change(
         page_right.0 = false;
     }
 }
-
+pub(crate) const ENTRY_LIST_HEIGHT: i32 = 10;
+pub(crate) const ENTRY_LIST_PADDING: i32 = 2;
+pub(crate) const ENTRY_LIST_BUTTON_HEIGHT: i32 = ENTRY_LIST_HEIGHT - 2 * ENTRY_LIST_PADDING;
+#[derive(Resource)]
+pub(crate) struct EntryListLayout {
+    pub(crate) horizontal_markers: RawMarker,
+    pub(crate) vertical_markers: RawMarker,
+}
 #[derive(Resource)]
 pub(crate) struct EntriesPerPage(pub(crate) u32);
-
+pub(crate) fn entry_list_layout(
+    grid: Res<Grid>,
+    mut entries_per: ResMut<EntriesPerPage>,
+    mut entry_list_layout: ResMut<EntryListLayout>,
+) {
+    if grid.is_changed() {
+        let begin = grid.calc_horizontal_location(1.near());
+        let end = grid.calc_horizontal_location(4.far());
+        let horizontal_markers = end.0 - begin.0;
+        let vertical_markers = grid.vertical_markers()
+            - 2 * grid.markers_per_gutter()
+            - ENTRY_LIST_HEIGHT
+            - 2 * ENTRY_LIST_PADDING;
+        entry_list_layout.horizontal_markers = horizontal_markers.into();
+        entry_list_layout.vertical_markers = vertical_markers.into();
+        entries_per.0 = (vertical_markers / (ENTRY_LIST_HEIGHT + ENTRY_LIST_PADDING)) as u32;
+    }
+}
 #[derive(Resource)]
 pub(crate) struct PageRange(pub(crate) u32, pub(crate) u32);
 
@@ -274,9 +304,9 @@ pub(crate) fn page_range(
     page: Res<Page>,
 ) {
     if entries_per.is_changed() || page.is_changed() {
-        // un-position old range entries
+        // un-position old range entries and disable
         // set range
-        // reposition entries
+        // reposition entries and enable
     }
 }
 // where this entry is in the list
@@ -332,7 +362,7 @@ pub(crate) fn display_name(
 ) {
     for (entry, entry_name) in entries.iter() {
         if let Ok(text) = text.get_mut(entry.name) {
-            text.0 = entry_name.0.0.clone();
+            text.0 = entry_name.0 .0.clone();
         }
     }
 }

@@ -4,11 +4,8 @@ use wgpu::util::DeviceExt;
 pub(crate) use attachment::LineAttachment;
 pub use line_render::LineRender;
 
-use crate::{
-    Color, EnableVisibility, InterfaceContext, Layer, Path,
-    Section, Tag,
-};
 use crate::line::line_render::LineRenderPoints;
+use crate::{Color, EnableVisibility, InterfaceContext, Layer, Path, Section, Tag};
 
 mod attachment;
 mod line_render;
