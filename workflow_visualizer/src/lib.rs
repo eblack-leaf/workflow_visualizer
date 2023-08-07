@@ -60,7 +60,7 @@ pub use crate::line::{Line, LineRender, LineTag};
 pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelTag, PanelType};
 pub use crate::path::{Path, PathView, ResponsivePathView};
 pub use crate::scale_factor::ScaleFactor;
-pub use crate::sync::{SyncPoint, UserSpaceSyncPoint};
+pub use crate::sync::SyncPoint;
 pub use crate::text::{
     Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
     TextScaleAlignment, TextTag, TextValue, TextWrapStyle,

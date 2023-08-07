@@ -1,10 +1,10 @@
 use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
 
-use crate::line::line_render::LineRenderPoints;
-use crate::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
-use crate::line::LineRender;
-use crate::path::Path;
 use crate::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, Visibility};
+use crate::line::line_render::LineRenderPoints;
+use crate::line::LineRender;
+use crate::line::renderer::{LayerAndHooks, LineRenderer, LineRenderGpu, LineRenderGroup};
+use crate::path::Path;
 
 // before ResolveVisibility after Reconfigure.set_path
 pub(crate) fn calc_section(
@@ -34,8 +34,10 @@ pub(crate) fn scale_path(
         for point in path.points.iter() {
             scaled.push(point.to_device(scale_factor.factor()));
         }
-        *line_render = LineRender::new(scaled.len() - 1);
-        *line_render_points = LineRenderPoints { points: scaled };
+        if !scaled.is_empty() {
+            *line_render = LineRender::new(scaled.len() - 1);
+            *line_render_points = LineRenderPoints { points: scaled };
+        }
     }
 }
 

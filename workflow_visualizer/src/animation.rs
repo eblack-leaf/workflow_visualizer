@@ -198,7 +198,7 @@ impl Interpolator {
             let extract = InterpolationExtraction(extract, done);
             self.extraction.replace(extract);
             self.done = done;
-            return extract
+            return extract;
         }
         InterpolationExtraction(0.0, false)
     }

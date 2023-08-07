@@ -1,33 +1,28 @@
 use bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
 use bevy_ecs::schedule::apply_system_buffers;
 
-use crate::visualizer::Visualizer;
 use crate::JobSyncPoint;
+use crate::visualizer::Visualizer;
 
 /// Synchronization Points for bucketing systems in a task
 #[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
 pub enum SyncPoint {
     Event,
     Initialization,
+    PostInitialization,
     Config,
     PreProcessVisibility,
     Preparation,
+    Process,
     Spawn,
     PostProcessPreparation,
     SecondaryEffects,
     Reconfigure,
     PostProcessVisibility,
     Resolve,
+    PostResolve,
     PushDiff,
     Finish,
-}
-
-/// User Space Sync Points for clear extension buckets
-#[derive(SystemSet, Hash, Eq, PartialEq, Debug, Copy, Clone)]
-pub enum UserSpaceSyncPoint {
-    Initialization,
-    Process,
-    Resolve,
 }
 pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
     visualizer
@@ -36,10 +31,10 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
         .configure_sets(
             (
                 SyncPoint::Initialization,
-                UserSpaceSyncPoint::Initialization,
+                SyncPoint::PostInitialization,
                 SyncPoint::Preparation,
                 SyncPoint::Resolve,
-                UserSpaceSyncPoint::Resolve,
+                SyncPoint::PostResolve,
                 SyncPoint::Finish,
             )
                 .chain(),
@@ -47,9 +42,9 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
     visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
         apply_system_buffers
             .after(SyncPoint::Initialization)
-            .before(UserSpaceSyncPoint::Initialization),
+            .before(SyncPoint::PostInitialization),
         apply_system_buffers
-            .after(UserSpaceSyncPoint::Initialization)
+            .after(SyncPoint::PostInitialization)
             .before(SyncPoint::Preparation),
     ));
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
@@ -57,11 +52,11 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             JobSyncPoint::Idle,
             SyncPoint::Event,
             SyncPoint::Initialization,
-            UserSpaceSyncPoint::Initialization,
+            SyncPoint::PostInitialization,
             SyncPoint::Config,
             SyncPoint::PreProcessVisibility,
             SyncPoint::Preparation,
-            UserSpaceSyncPoint::Process,
+            SyncPoint::Process,
             SyncPoint::Spawn,
             SyncPoint::PostProcessPreparation,
             SyncPoint::SecondaryEffects,
@@ -73,7 +68,7 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
     );
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
-            UserSpaceSyncPoint::Resolve,
+            SyncPoint::PostResolve,
             SyncPoint::PushDiff,
             SyncPoint::Finish,
         )
@@ -88,7 +83,7 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::PostProcessVisibility),
         apply_system_buffers
-            .after(UserSpaceSyncPoint::Process)
+            .after(SyncPoint::Process)
             .before(SyncPoint::Spawn),
     ));
     visualizer
@@ -97,10 +92,10 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
         .configure_sets(
             (
                 SyncPoint::Initialization,
-                UserSpaceSyncPoint::Initialization,
+                SyncPoint::PostInitialization,
                 SyncPoint::Preparation,
                 SyncPoint::Resolve,
-                UserSpaceSyncPoint::Resolve,
+                SyncPoint::PostResolve,
                 SyncPoint::Finish,
             )
                 .chain(),
@@ -118,10 +113,10 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             (
                 JobSyncPoint::Idle,
                 SyncPoint::Initialization,
-                UserSpaceSyncPoint::Initialization,
+                SyncPoint::PostInitialization,
                 SyncPoint::Preparation,
                 SyncPoint::Resolve,
-                UserSpaceSyncPoint::Resolve,
+                SyncPoint::PostResolve,
                 SyncPoint::Finish,
             )
                 .chain(),

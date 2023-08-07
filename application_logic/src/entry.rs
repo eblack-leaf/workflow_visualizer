@@ -2,15 +2,17 @@ use std::collections::HashMap;
 
 use workflow_visualizer::{
     Attach, bevy_ecs, BundledIcon, Button, ButtonDespawn, ButtonType, Color, Disabled, Grid,
-    GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType,
-    RawMarker, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Text, TextScaleAlignment,
-    TextValue, TextWrapStyle, Visualizer,
+    GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
+    TextScaleAlignment, TextValue, TextWrapStyle, Visualizer,
 };
 use workflow_visualizer::bevy_ecs::prelude::{
-    Changed, Commands, Component, DetectChanges, Entity, EventReader, Query, Res, ResMut, Resource,
+    Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, NonSend,
+    Query, Res, ResMut, Resource,
 };
 
-use crate::workflow::{TokenName, TokenOtp};
+use crate::Engen;
+use crate::workflow::{Action, TokenName, TokenOtp};
 
 pub struct EntryAttachment;
 
@@ -22,7 +24,41 @@ impl Attach for EntryAttachment {
             "edit",
             IconBitmap::bundled(BundledIcon::Edit),
         )));
+        visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
+            request_tokens.in_set(SyncPoint::PostInitialization),
+            setup_paging.in_set(SyncPoint::PostInitialization),
+            setup_entry_list_placements.in_set(SyncPoint::PostInitialization),
+            setup_entry_scale.in_set(SyncPoint::PostInitialization),
+            setup_removed_entry_indices.in_set(SyncPoint::PostInitialization),
+            setup_total_entries.in_set(SyncPoint::PostInitialization),
+            setup_entry_list.in_set(SyncPoint::PostInitialization),
+            setup_add_button.in_set(SyncPoint::PostResolve),
+        ));
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            entry_list_placements.in_set(SyncPoint::Preparation).after(entry_list_layout),
+            page_range.in_set(SyncPoint::Spawn).after(page_change),
+            set_max_page.in_set(SyncPoint::Spawn).before(page_change),
+            page_change.in_set(SyncPoint::Spawn),
+            display_name.in_set(SyncPoint::Reconfigure),
+            read_otp.in_set(SyncPoint::PostInitialization),
+            display_otp.in_set(SyncPoint::Reconfigure),
+            place_add_button.in_set(SyncPoint::Spawn),
+            position.in_set(SyncPoint::Spawn).after(enable),
+            enable.in_set(SyncPoint::Spawn).after(page_range),
+            enable_by_index_change
+                .in_set(SyncPoint::Spawn)
+                .before(enable),
+            removed_indices
+                .in_set(SyncPoint::Spawn)
+                .before(set_max_page),
+            receive_tokens.in_set(SyncPoint::PostInitialization),
+            entry_list_layout.in_set(SyncPoint::Preparation),
+        ));
     }
+}
+
+pub(crate) fn request_tokens(sender: NonSend<Sender<Engen>>) {
+    sender.send(Action::RequestTokenNames);
 }
 #[derive(Component)]
 pub(crate) struct Entry {
@@ -46,13 +82,7 @@ pub(crate) fn page_range(
     if entries_per.is_changed() || page.is_changed() {
         range.set(page.0, entries_per.0);
         for (mut enabled, mut pos, index) in entries.iter_mut() {
-            if range.contains(*index) {
-                enabled.0 = true;
-                pos.0.replace(range.normalized(*index));
-            } else {
-                enabled.0 = false;
-                let _ = pos.0.take();
-            }
+            enable_entry(&range, &mut enabled, index, &mut pos);
         }
     }
 }
@@ -154,7 +184,10 @@ pub(crate) struct EntryOtp(pub(crate) Option<TokenOtp>);
 
 pub(crate) struct ReadOtp(pub(crate) TokenName, pub(crate) TokenOtp);
 
-pub(crate) fn read_otp(mut entries: Query<(&EntryName, &mut EntryOtp)>, mut events: EventReader<ReadOtp>) {
+pub(crate) fn read_otp(
+    mut entries: Query<(&EntryName, &mut EntryOtp)>,
+    mut events: EventReader<ReadOtp>,
+) {
     for event in events.iter() {
         for (name, mut otp) in entries.iter_mut() {
             if event.0 == name.0 {
@@ -202,20 +235,22 @@ pub(crate) fn place_add_button(
     entry_list_layout: Res<EntryListLayout>,
     mut cmd: Commands,
 ) {
-    let horizontal_start =
-        entry_list_layout.horizontal_markers.0 / 2 - ENTRY_LIST_CONTENT_HEIGHT / 2;
-    let horizontal = (
-        1.near().raw_offset(horizontal_start),
-        1.near().raw_offset(horizontal_start + ENTRY_LIST_HEIGHT),
-    );
-    let vertical_start = entry_list_layout.vertical_markers.0 + ENTRY_LIST_PADDING;
-    let vertical = (
-        1.near().raw_offset(vertical_start),
-        1.near().raw_offset(vertical_start + ENTRY_LIST_HEIGHT),
-    );
-    let view = (horizontal, vertical);
-    cmd.entity(add_button.0)
-        .insert(ResponsiveGridView::all_same(view));
+    if entry_list_layout.is_changed() {
+        let horizontal_start =
+            entry_list_layout.horizontal_markers.0 / 2 - ENTRY_LIST_CONTENT_HEIGHT / 2;
+        let horizontal = (
+            1.near().raw_offset(horizontal_start),
+            1.near().raw_offset(horizontal_start + ENTRY_LIST_HEIGHT),
+        );
+        let vertical_start = entry_list_layout.vertical_markers.0 + ENTRY_LIST_PADDING;
+        let vertical = (
+            1.near().raw_offset(vertical_start),
+            1.near().raw_offset(vertical_start + ENTRY_LIST_HEIGHT),
+        );
+        let view = (horizontal, vertical);
+        cmd.entity(add_button.0)
+            .insert(ResponsiveGridView::all_same(view));
+    }
 }
 
 // where this entry is in the list
@@ -241,83 +276,59 @@ pub(crate) fn entry_list_placements(
     if entry_list_layout.is_changed() {
         placements.0.insert(
             "info-panel-offset",
-            (entry_list_layout.horizontal_markers.0 - 2 * ENTRY_LIST_PADDING).into(),
+            (entry_list_layout.horizontal_markers.0 - 2 * ENTRY_LIST_HEIGHT - 2).into(),
         );
         placements.0.insert(
             "edit-panel-offset",
-            (entry_list_layout.horizontal_markers.0 - ENTRY_LIST_HEIGHT).into(),
+            (entry_list_layout.horizontal_markers.0 - ENTRY_LIST_HEIGHT - 1).into(),
         );
-        let midpoint = (placements.0.get("info-panel-offset").unwrap().0 as f32 / 2f32).ceil() as i32;
-        placements.0.insert(
-            "info-panel-midpoint",
-            midpoint.into(),
-        );
+        let midpoint =
+            (placements.0.get("info-panel-offset").unwrap().0 as f32 / 2f32).ceil() as i32;
+        placements.0.insert("info-panel-midpoint", midpoint.into());
         placements
             .0
             .insert("name-near-horizontal", (ENTRY_LIST_PADDING).into());
-        let nfh = (placements.0.get("info-panel-midpoint").unwrap().0 - ENTRY_LIST_PADDING * 2);
-        placements.0.insert(
-            "name-far-horizontal",
-            nfh.into(),
-        );
-        let onh = (placements.0.get("info-panel-midpoint").unwrap().0 + ENTRY_LIST_PADDING * 2);
-        placements.0.insert(
-            "otp-near-horizontal",
-            onh.into(),
-        );
-        let ofh = (placements.0.get("info-panel-offset").unwrap().0
+        let nfh = placements.0.get("info-panel-midpoint").unwrap().0 - ENTRY_LIST_PADDING * 2;
+        placements.0.insert("name-far-horizontal", nfh.into());
+        let onh = placements.0.get("info-panel-midpoint").unwrap().0 + ENTRY_LIST_PADDING * 2;
+        placements.0.insert("otp-near-horizontal", onh.into());
+        let ofh = placements.0.get("info-panel-offset").unwrap().0
             - ENTRY_LIST_PADDING * 4
-            - ENTRY_LIST_CONTENT_HEIGHT);
-        placements.0.insert(
-            "otp-far-horizontal",
-            ofh
-                .into(),
-        );
-        let gbfh = (placements.0.get("info-panel-offset").unwrap().0 - ENTRY_LIST_PADDING);
-        placements.0.insert(
-            "generate-button-far-horizontal",
-            gbfh.into(),
-        );
-        let gbnh = (placements
+            - ENTRY_LIST_CONTENT_HEIGHT;
+        placements.0.insert("otp-far-horizontal", ofh.into());
+        let gbfh = placements.0.get("info-panel-offset").unwrap().0 - ENTRY_LIST_PADDING;
+        placements
+            .0
+            .insert("generate-button-far-horizontal", gbfh.into());
+        let gbnh = placements
             .0
             .get("generate-button-far-horizontal")
             .unwrap()
             .0
-            - ENTRY_LIST_CONTENT_HEIGHT);
-        placements.0.insert(
-            "generate-button-near-horizontal",
-            gbnh
-                .into(),
-        );
-        let ebnh = (placements.0.get("info-panel-offset").unwrap().0 + ENTRY_LIST_PADDING);
-        placements.0.insert(
-            "edit-button-near-horizontal",
-            ebnh.into(),
-        );
-        let ebfh = (placements.0.get("edit-button-near-horizontal").unwrap().0
-            + ENTRY_LIST_CONTENT_HEIGHT);
-        placements.0.insert(
-            "edit-button-far-horizontal",
-            ebfh
-                .into(),
-        );
-        let bdnh = (placements.0.get("edit-panel-offset").unwrap().0 + ENTRY_LIST_PADDING);
-        placements.0.insert(
-            "delete-button-near-horizontal",
-            bdnh.into(),
-        );
-        let dbfh = (placements.0.get("delete-button-near-horizontal").unwrap().0
-            + ENTRY_LIST_CONTENT_HEIGHT);
-        placements.0.insert(
-            "delete-button-far-horizontal",
-            dbfh
-                .into(),
-        );
-        let lx = (placements.0.get("info-panel-midpoint").unwrap().0);
-        placements.0.insert(
-            "line-x",
-            lx.into(),
-        );
+            - ENTRY_LIST_CONTENT_HEIGHT;
+        placements
+            .0
+            .insert("generate-button-near-horizontal", gbnh.into());
+        let ebnh = placements.0.get("info-panel-offset").unwrap().0 + ENTRY_LIST_PADDING;
+        placements
+            .0
+            .insert("edit-button-near-horizontal", ebnh.into());
+        let ebfh =
+            placements.0.get("edit-button-near-horizontal").unwrap().0 + ENTRY_LIST_CONTENT_HEIGHT;
+        placements
+            .0
+            .insert("edit-button-far-horizontal", ebfh.into());
+        let bdnh = placements.0.get("edit-panel-offset").unwrap().0 + ENTRY_LIST_PADDING;
+        placements
+            .0
+            .insert("delete-button-near-horizontal", bdnh.into());
+        let dbfh = placements.0.get("delete-button-near-horizontal").unwrap().0
+            + ENTRY_LIST_CONTENT_HEIGHT;
+        placements
+            .0
+            .insert("delete-button-far-horizontal", dbfh.into());
+        let lx = placements.0.get("info-panel-midpoint").unwrap().0;
+        placements.0.insert("line-x", lx.into());
         placements
             .0
             .insert("line-y-top", (ENTRY_LIST_PADDING).into());
@@ -491,7 +502,8 @@ pub(crate) fn enable(
             cmd.entity(entry.info_panel).insert(Disabled::default());
             cmd.entity(entry.edit_panel).insert(Disabled::default());
             cmd.entity(entry.delete_panel).insert(Disabled::default());
-            cmd.entity(entry.generate_button).insert(Disabled::default());
+            cmd.entity(entry.generate_button)
+                .insert(Disabled::default());
             cmd.entity(entry.edit_button).insert(Disabled::default());
             cmd.entity(entry.delete_button).insert(Disabled::default());
         } else {
@@ -529,24 +541,24 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Panel::new(
             PanelType::Flat,
             5,
-            Color::from(Color::MEDIUM_GREEN).with_alpha(0f32),
-            Color::from(Color::MEDIUM_GREEN).with_alpha(0f32),
+            Color::from(Color::MEDIUM_GREEN).with_alpha(1f32),
+            Color::from(Color::MEDIUM_GREEN).with_alpha(1f32),
         ))
         .id();
     let edit_panel = cmd
         .spawn(Panel::new(
             PanelType::Flat,
             6,
-            Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0f32),
-            Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(0f32),
+            Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(1f32),
+            Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(1f32),
         ))
         .id();
     let delete_panel = cmd
         .spawn(Panel::new(
             PanelType::Flat,
             7,
-            Color::from(Color::MEDIUM_RED).with_alpha(0f32),
-            Color::from(Color::MEDIUM_RED).with_alpha(0f32),
+            Color::from(Color::MEDIUM_RED).with_alpha(1f32),
+            Color::from(Color::MEDIUM_RED).with_alpha(1f32),
         ))
         .id();
     let name = cmd
@@ -554,7 +566,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             "",
             TextScaleAlignment::Custom(entry_scale.text_scale),
-            Color::from(Color::OFF_WHITE).with_alpha(0f32),
+            Color::from(Color::OFF_WHITE).with_alpha(1f32),
             TextWrapStyle::letter(),
         ))
         .id();
@@ -563,19 +575,19 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             "------",
             TextScaleAlignment::Custom(entry_scale.text_scale),
-            Color::from(Color::OFF_WHITE).with_alpha(0f32),
+            Color::from(Color::OFF_WHITE).with_alpha(1f32),
             TextWrapStyle::letter(),
         ))
         .id();
     let line = cmd
-        .spawn(Line::new(4, Color::from(Color::OFF_WHITE).with_alpha(0f32)))
+        .spawn(Line::new(4, Color::from(Color::OFF_WHITE).with_alpha(1f32)))
         .id();
     let generate_button = cmd
         .spawn(Button::new(
             ButtonType::Press,
             4,
-            Color::from(Color::LIGHT_GREEN).with_alpha(0f32),
-            Color::from(Color::DARK_GREEN).with_alpha(0f32),
+            Color::from(Color::LIGHT_GREEN).with_alpha(1f32),
+            Color::from(Color::DARK_GREEN).with_alpha(1f32),
             "edit",
             "",
             15,
@@ -586,8 +598,8 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Button::new(
             ButtonType::Press,
             4,
-            Color::from(Color::LIGHT_RED_ORANGE).with_alpha(0f32),
-            Color::from(Color::DARK_RED_ORANGE).with_alpha(0f32),
+            Color::from(Color::LIGHT_RED_ORANGE).with_alpha(1f32),
+            Color::from(Color::DARK_RED_ORANGE).with_alpha(1f32),
             "edit",
             "",
             15,
@@ -598,15 +610,16 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Button::new(
             ButtonType::Press,
             4,
-            Color::from(Color::LIGHT_RED).with_alpha(0f32),
-            Color::from(Color::DARK_RED).with_alpha(0f32),
+            Color::from(Color::LIGHT_RED).with_alpha(1f32),
+            Color::from(Color::DARK_RED).with_alpha(1f32),
             "edit",
             "",
             15,
             entry_scale.button_icon_scale,
         ))
         .id();
-    let entry = Entry {
+
+    Entry {
         name,
         otp,
         line,
@@ -616,8 +629,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         generate_button,
         edit_button,
         delete_button,
-    };
-    entry
+    }
 }
 #[derive(Resource)]
 pub(crate) struct EntryScale {
@@ -644,10 +656,22 @@ pub(crate) fn enable_by_index_change(
     page_range: Res<PageRange>,
 ) {
     for (mut enabled, index, mut list_position) in entries.iter_mut() {
-        if page_range.contains(*index) {
-            enabled.0 = true;
-            list_position.0.replace(page_range.normalized(*index));
-        }
+        enable_entry(&page_range, &mut enabled, index, &mut list_position);
+    }
+}
+
+fn enable_entry(
+    page_range: &PageRange,
+    enabled: &mut EntryEnabled,
+    index: &EntryIndex,
+    list_position: &mut EntryListPosition,
+) {
+    if page_range.contains(*index) {
+        enabled.0 = true;
+        list_position.0.replace(page_range.normalized(*index));
+    } else {
+        enabled.0 = false;
+        let _ = list_position.0.take();
     }
 }
 

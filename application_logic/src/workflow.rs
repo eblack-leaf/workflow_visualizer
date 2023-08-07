@@ -95,6 +95,18 @@ impl Default for Engen {
             .tokens
             .insert("phone7".into(), Token("245215".to_string()));
         engen
+            .tokens
+            .insert("phone8".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone9".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone10".into(), Token("245215".to_string()));
+        engen
+            .tokens
+            .insert("phone11".into(), Token("245215".to_string()));
+        engen
     }
 }
 #[async_trait]
@@ -110,10 +122,7 @@ impl Workflow for Engen {
                 visualizer.job.container.send_event(ReadOtp(name, otp));
             }
             Response::RequestedTokenNames(tokens) => {
-                visualizer
-                    .job
-                    .container
-                    .send_event(ReceivedTokens(tokens));
+                visualizer.job.container.send_event(ReceivedTokens(tokens));
             }
             Response::ExitConfirmed => {}
         }
@@ -128,7 +137,6 @@ impl Workflow for Engen {
             }
             Action::RemoveToken(name) => Response::TokenRemoved(name),
             Action::RequestTokenNames => {
-                // get tokens from engen
                 Response::RequestedTokenNames(
                     engen.lock().unwrap().tokens.keys().cloned().collect(),
                 )

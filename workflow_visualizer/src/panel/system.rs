@@ -11,11 +11,13 @@ use crate::panel::renderer::PanelRenderer;
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
-    mut differential: Query<(Entity, &mut Difference), Changed<Difference>>,
+    mut differential: Query<(Entity, &mut Difference, &Visibility), Changed<Difference>>,
 ) {
-    for (entity, mut difference) in differential.iter_mut() {
-        extraction.differences.insert(entity, difference.clone());
-        *difference = Difference::new();
+    for (entity, mut difference, visibility) in differential.iter_mut() {
+        if visibility.visible() {
+            extraction.differences.insert(entity, difference.clone());
+            *difference = Difference::new();
+        }
     }
 }
 
@@ -28,7 +30,7 @@ pub fn calc_content_area(
     for (mut content_area, area) in content_changed.iter_mut() {
         let calculated_area =
             *area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
-        content_area.0 = calculated_area;
+        content_area.0 = Area::new(calculated_area.width.max(0.0), calculated_area.height.max(0.0));
     }
 }
 pub(crate) fn management(

@@ -29,14 +29,8 @@ pub struct Button {
     scaling: Scaling,
 }
 
-#[derive(Component, Copy, Clone)]
+#[derive(Component, Copy, Clone, Default)]
 pub struct ButtonDespawn {}
-
-impl Default for ButtonDespawn {
-    fn default() -> Self {
-        ButtonDespawn {}
-    }
-}
 
 #[derive(Component, Copy, Clone)]
 pub struct Scaling {
