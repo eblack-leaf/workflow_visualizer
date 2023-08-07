@@ -98,6 +98,13 @@
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 <span class="kw">use </span>tracing::{trace, warn};
 
@@ -105,7 +112,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::path::grid_updated_path;
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
-<span class="kw">use crate</span>::{Area, InterfaceContext, Position, Section, SyncPoint};
+<span class="kw">use crate</span>::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
 
 <span class="doccomment">/// Entry point for enabling visibility module on an entity
 </span><span class="attr">#[derive(Bundle)]
@@ -160,10 +167,17 @@
         <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
         <span class="kw-2">&amp;mut </span>Visibility,
         <span class="kw-2">&amp;mut </span>VisibleSection,
+        <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Disabled&gt;,
     )&gt;,
     viewport_handle: Res&lt;ViewportHandle&gt;,
 ) {
-    <span class="kw">for </span>(pos, area, <span class="kw-2">mut </span>vis, <span class="kw-2">mut </span>vis_sec) <span class="kw">in </span>potentially_visible.iter_mut() {
+    <span class="kw">for </span>(pos, area, <span class="kw-2">mut </span>vis, <span class="kw-2">mut </span>vis_sec, disabled) <span class="kw">in </span>potentially_visible.iter_mut() {
+        <span class="kw">if </span>disabled.is_some() {
+            <span class="kw">if </span>vis.visible() {
+                vis.visible = <span class="bool-val">false</span>;
+            }
+            <span class="kw">continue</span>;
+        }
         <span class="kw">let </span>section = Section::from((<span class="kw-2">*</span>pos, <span class="kw-2">*</span>area));
         <span class="kw">let </span>intersection = viewport_handle.section.intersection(section);
         <span class="kw">let </span>visible = intersection.is_some();

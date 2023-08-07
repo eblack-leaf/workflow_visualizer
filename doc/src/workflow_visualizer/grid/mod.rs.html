@@ -214,22 +214,10 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::ops::Add;
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
-<span class="kw">use </span>bevy_ecs::prelude::{
-    Bundle, Commands, DetectChanges, EventReader, IntoSystemConfig, Local, ParamSet, Query, Res,
-    Resource, Without,
-};
-<span class="kw">use </span>bevy_ecs::query::Changed;
-<span class="kw">use </span>bevy_ecs::system::ResMut;
-<span class="kw">use </span>tracing::trace;
+<span class="kw">use </span>bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfig, Resource};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::GridAttachment;
 <span class="kw">use </span>marker::ColumnConfig;
@@ -245,12 +233,8 @@
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::bundling::{BundleBuilder, BundleExtension};
-<span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
-<span class="kw">use </span><span class="kw">crate</span>::viewport::{frontend_area_adjust, ViewportHandle};
-<span class="kw">use crate</span>::{
-    Area, Attach, InterfaceContext, Position, Section, SyncPoint, UserSpaceSyncPoint, Visualizer,
-    WindowResize,
-};
+<span class="kw">use </span><span class="kw">crate</span>::diagnostics::Record;
+<span class="kw">use crate</span>::{Area, Attach, InterfaceContext, ResponsivePathView, Section};
 
 <span class="kw">mod </span>attachment;
 <span class="kw">mod </span>marker;
@@ -437,6 +421,12 @@
         section: S,
     ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, Section&lt;InterfaceContext&gt;&gt; {
         <span class="self">self</span>.extend(section.into())
+    }
+    <span class="kw">fn </span>responsively_path_viewed&lt;P: Into&lt;ResponsivePathView&gt;&gt;(
+        <span class="self">self</span>,
+        view: P,
+    ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, ResponsivePathView&gt; {
+        <span class="self">self</span>.extend(view.into())
     }
 }
 <span class="kw">impl</span>&lt;T: Bundle + Sized&gt; BundlePlacement <span class="kw">for </span>T {}

@@ -229,24 +229,28 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::ResMut;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
 
-<span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
-<span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
-<span class="kw">use </span><span class="kw">crate</span>::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
 <span class="kw">use crate</span>::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
+<span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
+<span class="kw">use </span><span class="kw">crate</span>::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
+<span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>pull_differences(
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,
-    <span class="kw-2">mut </span>differential: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>Difference), Changed&lt;Difference&gt;&gt;,
+    <span class="kw-2">mut </span>differential: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>Difference, <span class="kw-2">&amp;</span>Visibility), Changed&lt;Difference&gt;&gt;,
 ) {
-    <span class="kw">for </span>(entity, <span class="kw-2">mut </span>difference) <span class="kw">in </span>differential.iter_mut() {
-        extraction.differences.insert(entity, difference.clone());
-        <span class="kw-2">*</span>difference = Difference::new();
+    <span class="kw">for </span>(entity, <span class="kw-2">mut </span>difference, visibility) <span class="kw">in </span>differential.iter_mut() {
+        <span class="kw">if </span>visibility.visible() {
+            extraction.differences.insert(entity, difference.clone());
+            <span class="kw-2">*</span>difference = Difference::new();
+        }
     }
 }
 
@@ -259,7 +263,7 @@
     <span class="kw">for </span>(<span class="kw-2">mut </span>content_area, area) <span class="kw">in </span>content_changed.iter_mut() {
         <span class="kw">let </span>calculated_area =
             <span class="kw-2">*</span>area - Area::from((Panel::CORNER_DEPTH * <span class="number">2.0</span>, Panel::CORNER_DEPTH * <span class="number">2.0</span>));
-        content_area.<span class="number">0 </span>= calculated_area;
+        content_area.<span class="number">0 </span>= Area::new(calculated_area.width.max(<span class="number">0.0</span>), calculated_area.height.max(<span class="number">0.0</span>));
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>management(
@@ -427,7 +431,7 @@
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(panel_type) = difference.panel_type {
             <span class="kw">match </span>panel_type {
-                PanelType::Panel =&gt; {
+                PanelType::Flat =&gt; {
                     renderer
                         .panel_null_bits
                         .queue_write(index, NullBit::not_null());

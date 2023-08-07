@@ -185,6 +185,7 @@
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use crate</span>::{PathView, RawMarker};
@@ -197,11 +198,12 @@
 }
 
 <span class="kw">impl </span>GridLocation {
-    <span class="kw">pub fn </span>raw_offset(<span class="kw-2">mut </span><span class="self">self</span>, offset: i32) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>raw_offset&lt;RM: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, offset: RM) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>offset = offset.into();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(current_offset) = <span class="self">self</span>.offset.as_mut() {
-            current_offset.<span class="number">0 </span>.<span class="number">0 </span>+= offset;
+            current_offset.<span class="number">0.0 </span>+= offset.<span class="number">0</span>;
         } <span class="kw">else </span>{
-            <span class="self">self</span>.offset.replace(GridLocationOffset(offset.into()));
+            <span class="self">self</span>.offset.replace(GridLocationOffset(offset));
         }
         <span class="self">self
     </span>}

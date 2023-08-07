@@ -219,177 +219,163 @@
 <a href="#219" id="219">219</a>
 <a href="#220" id="220">220</a>
 <a href="#221" id="221">221</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
-
-<span class="kw">use </span>bevy_ecs::prelude::{Entity, Res, ResMut, Resource};
-
-<span class="kw">use crate</span>::{TimeDelta, TimeMarker, Timer};
-
-<span class="attr">#[derive(Resource)]
-</span><span class="kw">pub struct </span>AnimationManager&lt;T&gt; {
-    <span class="kw">pub </span>managed_animations: HashMap&lt;Entity, ManagedAnimation&lt;T&gt;&gt;,
-}
-<span class="kw">impl</span>&lt;T&gt; AnimationManager&lt;T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            managed_animations: HashMap::new(),
-        }
-    }
-    <span class="kw">pub fn </span>animate&lt;TD: Into&lt;TimeDelta&gt;&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        entity: Entity,
-        animator: T,
-        anim_time: TD,
-        delay: <span class="prelude-ty">Option</span>&lt;TD&gt;,
-    ) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(managed_animation) = <span class="self">self</span>.managed_animations.get_mut(<span class="kw-2">&amp;</span>entity) {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(delay) = delay {
-                managed_animation.delay(animator, anim_time, delay);
-            } <span class="kw">else </span>{
-                managed_animation.animate(animator, anim_time);
-            }
-        } <span class="kw">else </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(delay) = delay {
-                <span class="kw">let </span><span class="kw-2">mut </span>anim = ManagedAnimation::new();
-                anim.delay(animator, anim_time, delay);
-                <span class="self">self</span>.managed_animations.insert(entity, anim);
-            } <span class="kw">else </span>{
-                <span class="kw">let </span><span class="kw-2">mut </span>anim = ManagedAnimation::new();
-                anim.animate(animator, anim_time);
-                <span class="self">self</span>.managed_animations.insert(entity, anim);
-            }
-        }
-    }
-}
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>manage&lt;T: Send + Sync + <span class="lifetime">&#39;static</span>&gt;(
-    <span class="kw-2">mut </span>animation_manager: ResMut&lt;AnimationManager&lt;T&gt;&gt;,
-    timer: Res&lt;Timer&gt;,
-) {
-    <span class="kw">for </span>(entity, managed_animation) <span class="kw">in </span>animation_manager.managed_animations.iter_mut() {
-        <span class="kw">let </span><span class="kw-2">mut </span>done_delaying = <span class="macro">vec!</span>[];
-        <span class="kw">let </span><span class="kw-2">mut </span>index = <span class="number">0</span>;
-        <span class="kw">for </span>(delay, anim) <span class="kw">in </span>managed_animation.queue.iter_mut() {
-            <span class="kw-2">*</span>delay -= timer.frame_diff();
-            <span class="kw">if </span><span class="kw-2">*</span>delay &lt;= <span class="number">0</span>.into() {
-                done_delaying.push(index);
-            }
-            index += <span class="number">1</span>;
-        }
-        <span class="kw">if </span>done_delaying.is_empty() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(current) = managed_animation.current.as_mut() {
-                <span class="kw">if </span>current.start.is_none() {
-                    current.start.replace(timer.mark());
-                }
-            }
-        } <span class="kw">else </span>{
-            done_delaying.sort();
-            done_delaying.reverse();
-            <span class="kw">for </span>index <span class="kw">in </span>done_delaying.drain(..) {
-                <span class="kw">let </span>(overage, <span class="kw-2">mut </span>anim) = managed_animation.queue.remove(index);
-                anim.start.replace(timer.mark().offset(overage));
-                managed_animation.current.replace(anim);
-            }
-        }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(current) = managed_animation.current.as_mut() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(start) = current.start {
-                <span class="kw">let </span><span class="kw-2">mut </span>time_since_start = timer.time_since(start);
-                <span class="kw">let </span>done = time_since_start &gt;= current.animation_time;
-                <span class="kw">let </span><span class="kw-2">mut </span>anim_delta: TimeDelta = timer.frame_diff().<span class="number">0</span>.min(time_since_start.<span class="number">0</span>).into();
-                <span class="kw">if </span>done {
-                    <span class="kw">let </span>past_total = time_since_start - current.animation_time;
-                    anim_delta -= past_total;
-                    current.done = <span class="bool-val">true</span>;
-                }
-                <span class="kw">let </span>anim_delta = anim_delta / current.animation_time;
-                current.delta.replace(anim_delta.<span class="number">0</span>.min(<span class="number">1f64</span>) <span class="kw">as </span>f32);
-            }
-        }
-    }
-}
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>end_animations&lt;T: Send + Sync + <span class="lifetime">&#39;static</span>&gt;(
-    <span class="kw-2">mut </span>animation_manager: ResMut&lt;AnimationManager&lt;T&gt;&gt;,
-) {
-    <span class="kw">let </span><span class="kw-2">mut </span>removals = <span class="macro">vec!</span>[];
-    <span class="kw">for </span>(entity, managed_anim) <span class="kw">in </span>animation_manager.managed_animations.iter() {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(current) = managed_anim.current.as_ref() {
-            <span class="kw">if </span>current.done {
-                removals.push(<span class="kw-2">*</span>entity);
-            }
-        }
-    }
-    <span class="kw">for </span>entity <span class="kw">in </span>removals {
-        <span class="kw">let _ </span>= animation_manager
-            .managed_animations
-            .get_mut(<span class="kw-2">&amp;</span>entity)
-            .expect(<span class="string">&quot;anim&quot;</span>)
-            .current
-            .take();
-    }
-}
-<span class="kw">pub struct </span>ManagedAnimation&lt;T&gt; {
-    <span class="kw">pub </span>current: <span class="prelude-ty">Option</span>&lt;Animation&lt;T&gt;&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) queue: Vec&lt;(TimeDelta, Animation&lt;T&gt;)&gt;,
-}
-<span class="kw">impl</span>&lt;T&gt; ManagedAnimation&lt;T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            current: <span class="prelude-val">None</span>,
-            queue: <span class="macro">vec!</span>[],
-        }
-    }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>animate&lt;TD: Into&lt;TimeDelta&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, animator: T, anim_time: TD) {
-        <span class="self">self</span>.current
-            .replace(Animation::new(anim_time.into(), animator));
-    }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>delay&lt;TD: Into&lt;TimeDelta&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, animator: T, anim_time: TD, delay: TD) {
-        <span class="self">self</span>.queue
-            .push((delay.into(), Animation::new(anim_time.into(), animator)));
-    }
-}
-<span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Animation&lt;T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) start: <span class="prelude-ty">Option</span>&lt;TimeMarker&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) animation_time: TimeDelta,
-    <span class="kw">pub </span>animator: T,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) delta: <span class="prelude-ty">Option</span>&lt;f32&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) done: bool,
-}
-
-<span class="kw">impl</span>&lt;T&gt; Animation&lt;T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new&lt;TD: Into&lt;TimeDelta&gt;&gt;(anim_time: TD, animator: T) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            start: <span class="prelude-val">None</span>,
-            animation_time: anim_time.into(),
-            animator,
-            delta: <span class="prelude-val">None</span>,
-            done: <span class="bool-val">false</span>,
-        }
-    }
-    <span class="kw">pub fn </span>done(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.done
-    }
-    <span class="kw">pub fn </span>set_done(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.done = <span class="bool-val">true</span>;
-    }
-    <span class="kw">pub fn </span>delta(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;f32&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(delta) = <span class="self">self</span>.delta.take() {
-            <span class="kw">return if </span><span class="self">self</span>.done() { <span class="prelude-val">Some</span>(<span class="number">1f32</span>) } <span class="kw">else </span>{ <span class="prelude-val">Some</span>(delta) };
-        }
-        <span class="prelude-val">None
-    </span>}
-}
-<span class="attr">#[derive(Clone, Copy)]
+<a href="#222" id="222">222</a>
+</pre></div><pre class="rust"><code><span class="comment">// pub(crate) fn manage&lt;T: Send + Sync + &#39;static&gt;(
+//     mut animations: Query&lt;(Entity, &amp;mut Animation&lt;T&gt;), Changed&lt;Animation&lt;T&gt;&gt;&gt;,
+//     timer: Res&lt;Timer&gt;,
+// ) {
+//     for (entity, anim) in animations.iter_mut() {
+//         if anim.start.is_none() {
+//             anim.start.replace(timer.mark());
+//             anim.start
+//                 .unwrap()
+//                 .offset(anim.start_offset.unwrap_or_default());
+//         }
+//         let mut time_since_start = timer.time_since(anim.start.unwrap());
+//         if time_since_start.0.is_sign_positive() {
+//             let animation_time_over = time_since_start &gt;= anim.animation_time;
+//             let mut anim_delta: TimeDelta = timer.frame_diff().0.min(time_since_start.0).into();
+//             if animation_time_over {
+//                 let past_total = time_since_start - anim.animation_time;
+//                 anim_delta -= past_total;
+//                 anim.overage.replace(past_total.as_f32());
+//                 anim.animation_time_over = true;
+//             }
+//             let anim_delta = anim_delta / anim.animation_time;
+//             let delta = anim_delta.0.min(1f64) as f32;
+//             anim.delta.replace(delta);
+//             if animation_time_over {
+//                 anim.animator.finish()
+//             } else {
+//                 anim.animator.extract(delta)
+//             }
+//         }
+//     }
+// }
+// pub type AnimationTagValue = u32;
+// #[derive(Copy, Clone)]
+// pub struct AnimationTag(pub AnimationTagValue);
+// impl From&lt;u32&gt; for AnimationTag {
+//     fn from(value: u32) -&gt; Self {
+//         AnimationTag(value)
+//     }
+// }
+// pub struct AnimationDone&lt;T&gt; {
+//     pub entity: Entity,
+//     pub overage: Option&lt;TimeDelta&gt;,
+//     pub tag: AnimationTag,
+//     _phantom: PhantomData&lt;T&gt;,
+// }
+// impl&lt;T&gt; AnimationDone&lt;T&gt; {
+//     pub fn new&lt;TD: Into&lt;TimeDelta&gt;&gt;(
+//         entity: Entity,
+//         overage: Option&lt;TD&gt;,
+//         tag: AnimationTag,
+//     ) -&gt; Self {
+//         Self {
+//             entity,
+//             overage: overage.and_then(|o| Option::from(o.into())),
+//             tag,
+//             _phantom: PhantomData,
+//         }
+//     }
+// }
+// pub(crate) fn end_animations&lt;T: Send + Sync + &#39;static&gt;(
+//     mut animations: Query&lt;(Entity, &amp;mut Animation&lt;T&gt;)&gt;,
+//     mut event_sender: EventWriter&lt;AnimationDone&lt;T&gt;&gt;,
+//     mut cmd: Commands,
+// ) {
+//     for (entity, mut anim) in animations.iter_mut() {
+//         if anim.done() {
+//             event_sender.send(AnimationDone::&lt;T&gt;::new(entity, anim.overage(), anim.tag));
+//             cmd.entity(entity).remove::&lt;Animation&lt;T&gt;&gt;();
+//         }
+//     }
+// }
+// #[derive(Clone)]
+// pub struct Animator(pub Vec&lt;Interpolator&gt;);
+// impl Animator {
+//     pub fn all_finished(&amp;self) -&gt; bool {
+//         let mut finished = true;
+//         for inter in self.0.iter() {
+//             if !inter.done() {
+//                 finished = false;
+//             }
+//         }
+//         finished
+//     }
+//     pub fn extract(&amp;mut self, delta: f32) {
+//         for inter in self.0.iter_mut() {
+//             inter.extract(delta);
+//         }
+//     }
+//     pub fn finish(&amp;mut self) {
+//         for inter in self.0.iter_mut() {
+//             inter.finish();
+//         }
+//     }
+// }
+// #[derive(Clone)]
+// pub struct Animation&lt;T&gt; {
+//     pub(crate) start: Option&lt;TimeMarker&gt;,
+//     pub(crate) animation_time: TimeDelta,
+//     pub animator: Animator,
+//     pub(crate) delta: Option&lt;f32&gt;,
+//     pub(crate) overage: Option&lt;f32&gt;,
+//     pub tag: AnimationTag,
+//     pub(crate) animation_time_over: bool,
+//     pub(crate) start_offset: Option&lt;f32&gt;,
+//     _phantom: PhantomData&lt;T&gt;,
+// }
+//
+// impl&lt;T&gt; Animation&lt;T&gt; {
+//     pub(crate) fn new&lt;TD: Into&lt;TimeDelta&gt;, AT: Into&lt;AnimationTag&gt;, A: Into&lt;Animator&gt;&gt;(
+//         anim_time: TD,
+//         animator: A,
+//         anim_tag: AT,
+//         start_offset: Option&lt;f32&gt;,
+//     ) -&gt; Self {
+//         Self {
+//             start: None,
+//             animation_time: anim_time.into(),
+//             animator,
+//             delta: None,
+//             overage: None,
+//             tag: anim_tag.into(),
+//             animation_time_over: false,
+//             start_offset,
+//             _phantom: PhantomData,
+//         }
+//     }
+//     pub fn done(&amp;self) -&gt; bool {
+//         self.animation_time_over &amp;&amp; self.animator.all_finished()
+//     }
+//     pub fn delta(&amp;self) -&gt; Option&lt;f32&gt; {
+//         self.delta
+//     }
+//     pub fn overage(&amp;self) -&gt; Option&lt;f32&gt; {
+//         self.overage
+//     }
+// }
+</span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>InterpolationExtraction(<span class="kw">pub </span>f32, <span class="kw">pub </span>bool);
 
-<span class="kw">impl </span>InterpolationExtraction {}
+<span class="kw">impl </span>InterpolationExtraction {
+    <span class="kw">pub fn </span>done(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">1
+    </span>}
+    <span class="kw">pub fn </span>amount(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+        <span class="self">self</span>.<span class="number">0
+    </span>}
+}
 <span class="doccomment">/// Interpolates a value over an interval
 </span><span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>Interpolator {
     <span class="kw">pub </span>value: f32,
     total: f32,
     sign_positive: bool,
+    extraction: <span class="prelude-ty">Option</span>&lt;InterpolationExtraction&gt;,
+    done: bool,
 }
 
 <span class="kw">impl </span>Interpolator {
@@ -398,38 +384,54 @@
             value,
             total: value,
             sign_positive: value.is_sign_positive(),
+            extraction: <span class="prelude-val">None</span>,
+            done: <span class="bool-val">false</span>,
         }
     }
     <span class="kw">pub fn </span>extract(<span class="kw-2">&amp;mut </span><span class="self">self</span>, delta: f32) -&gt; InterpolationExtraction {
-        <span class="kw">let </span>segment = <span class="self">self</span>.total * delta;
-        <span class="self">self</span>.value -= segment;
-        <span class="kw">let </span>overage = <span class="kw">match </span><span class="self">self</span>.sign_positive {
-            <span class="bool-val">true </span>=&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>val = <span class="prelude-val">None</span>;
-                <span class="kw">if </span><span class="self">self</span>.value.is_sign_negative() {
-                    val = <span class="prelude-val">Some</span>(<span class="self">self</span>.value)
+        <span class="kw">if </span>!<span class="self">self</span>.done {
+            <span class="kw">let </span>segment = <span class="self">self</span>.total * delta;
+            <span class="self">self</span>.value -= segment;
+            <span class="kw">let </span>overage = <span class="kw">match </span><span class="self">self</span>.sign_positive {
+                <span class="bool-val">true </span>=&gt; {
+                    <span class="kw">let </span><span class="kw-2">mut </span>val = <span class="prelude-val">None</span>;
+                    <span class="kw">if </span><span class="self">self</span>.value.is_sign_negative() {
+                        val = <span class="prelude-val">Some</span>(<span class="self">self</span>.value)
+                    }
+                    val
                 }
-                val
-            }
-            <span class="bool-val">false </span>=&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>val = <span class="prelude-val">None</span>;
-                <span class="kw">if </span><span class="self">self</span>.value.is_sign_positive() {
-                    val = <span class="prelude-val">Some</span>(<span class="self">self</span>.value)
+                <span class="bool-val">false </span>=&gt; {
+                    <span class="kw">let </span><span class="kw-2">mut </span>val = <span class="prelude-val">None</span>;
+                    <span class="kw">if </span><span class="self">self</span>.value.is_sign_positive() {
+                        val = <span class="prelude-val">Some</span>(<span class="self">self</span>.value)
+                    }
+                    val
                 }
-                val
+            };
+            <span class="kw">let </span><span class="kw-2">mut </span>extract = segment;
+            <span class="kw">let </span><span class="kw-2">mut </span>done = <span class="bool-val">false</span>;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(over) = overage {
+                extract += over;
+                done = <span class="bool-val">true</span>;
             }
-        };
-        <span class="kw">let </span><span class="kw-2">mut </span>extract = segment;
-        <span class="kw">let </span><span class="kw-2">mut </span>done = <span class="bool-val">false</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(over) = overage {
-            extract += over;
-            done = <span class="bool-val">true</span>;
+            <span class="kw">if </span>extract == <span class="number">0.0 </span>{
+                done = <span class="bool-val">true</span>;
+            }
+            <span class="kw">let </span>extract = InterpolationExtraction(extract, done);
+            <span class="self">self</span>.extraction.replace(extract);
+            <span class="self">self</span>.done = done;
+            <span class="kw">return </span>extract;
         }
-        <span class="kw">if </span>extract == <span class="number">0.0 </span>{
-            done = <span class="bool-val">true</span>;
-        }
-        <span class="kw">let </span>extract = InterpolationExtraction(extract, done);
-        extract
+        InterpolationExtraction(<span class="number">0.0</span>, <span class="bool-val">false</span>)
+    }
+    <span class="kw">pub fn </span>done(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.done
+    }
+    <span class="kw">pub fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>extract = InterpolationExtraction(<span class="self">self</span>.value, <span class="bool-val">true</span>);
+        <span class="self">self</span>.value = <span class="number">0f32</span>;
+        <span class="self">self</span>.extraction.replace(extract);
+        <span class="self">self</span>.done = <span class="bool-val">true</span>;
     }
 }
 

@@ -170,34 +170,40 @@
 <a href="#170" id="170">170</a>
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::{Res, ResMut};
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::event::EventReader;
-<span class="kw">use </span>bevy_ecs::prelude::Query;
+<span class="kw">use </span>bevy_ecs::prelude::{Query, Without};
 <span class="kw">use </span>tracing::trace;
 
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusedEntity;
 <span class="kw">use </span><span class="kw">crate</span>::touch::adapter::{TouchGrabState, TrackedTouch};
 <span class="kw">use </span><span class="kw">crate</span>::touch::component::{ListenableTouchType, TouchEvent, TouchType};
 <span class="kw">use crate</span>::{
-    Area, CurrentlyPressed, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor, Section,
-    ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle,
+    Area, CurrentlyPressed, Disabled, InterfaceContext, Layer, Position, PrimaryTouch, ScaleFactor,
+    Section, ToggleState, TouchListener, TouchLocation, TouchTrigger, ViewportHandle,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_touch_events(
     <span class="kw-2">mut </span>event_reader: EventReader&lt;TouchEvent&gt;,
     <span class="kw-2">mut </span>primary_touch: ResMut&lt;PrimaryTouch&gt;,
-    <span class="kw-2">mut </span>touch_listeners: Query&lt;(
-        Entity,
-        <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
-        <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
-        <span class="kw-2">&amp;</span>Layer,
-        <span class="kw-2">&amp;</span>TouchListener,
-        <span class="kw-2">&amp;mut </span>TouchTrigger,
-        <span class="kw-2">&amp;mut </span>CurrentlyPressed,
-        <span class="kw-2">&amp;mut </span>ToggleState,
-        <span class="kw-2">&amp;mut </span>TouchLocation,
-    )&gt;,
+    <span class="kw-2">mut </span>touch_listeners: Query&lt;
+        (
+            Entity,
+            <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
+            <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
+            <span class="kw-2">&amp;</span>Layer,
+            <span class="kw-2">&amp;</span>TouchListener,
+            <span class="kw-2">&amp;mut </span>TouchTrigger,
+            <span class="kw-2">&amp;mut </span>CurrentlyPressed,
+            <span class="kw-2">&amp;mut </span>ToggleState,
+            <span class="kw-2">&amp;mut </span>TouchLocation,
+        ),
+        Without&lt;Disabled&gt;,
+    &gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
     viewport_handle: Res&lt;ViewportHandle&gt;,
     <span class="kw-2">mut </span>touch_grab_state: ResMut&lt;TouchGrabState&gt;,
