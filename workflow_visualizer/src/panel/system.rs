@@ -1,6 +1,6 @@
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res, With};
+use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res};
 
 use crate::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
@@ -30,20 +30,32 @@ pub fn calc_content_area(
     for (mut content_area, area) in content_changed.iter_mut() {
         let calculated_area =
             *area - Area::from((Panel::CORNER_DEPTH * 2.0, Panel::CORNER_DEPTH * 2.0));
-        content_area.0 = Area::new(calculated_area.width.max(0.0), calculated_area.height.max(0.0));
+        content_area.0 = Area::new(
+            calculated_area.width.max(0.0),
+            calculated_area.height.max(0.0),
+        );
     }
 }
 pub(crate) fn management(
     mut removed: RemovedComponents<PanelContentArea>,
-    lost_visibility: Query<(Entity, &Visibility), (With<PanelContentArea>, Changed<Visibility>)>,
+    mut panels: Query<(Entity, &Visibility, &PanelType, &Position<InterfaceContext>, &Layer, &Color, &BorderColor, &PanelContentArea, &mut Difference), Changed<Visibility>>,
     mut extraction: ResMut<Extraction>,
 ) {
     for entity in removed.iter() {
         extraction.removed.insert(entity);
     }
-    for (entity, visibility) in lost_visibility.iter() {
+    for (entity, visibility, panel_type, pos, layer, color, border_color, content_area, mut difference) in panels.iter_mut() {
         if !visibility.visible() {
             extraction.removed.insert(entity);
+        } else {
+            let mut diff = Difference::new();
+            diff.panel_type.replace(*panel_type);
+            diff.position.replace(*pos);
+            diff.content_area.replace(content_area.0);
+            diff.layer.replace(*layer);
+            diff.panel_color.replace(*color);
+            diff.border_color.replace(border_color.0);
+            *difference = diff;
         }
     }
 }
@@ -212,7 +224,7 @@ pub(crate) fn process_extraction(
                         .border_null_bits
                         .queue_write(index, NullBit::not_null());
                 }
-                PanelType::BorderedPanel => {
+                PanelType::BorderedFlat => {
                     renderer
                         .panel_null_bits
                         .queue_write(index, NullBit::not_null());

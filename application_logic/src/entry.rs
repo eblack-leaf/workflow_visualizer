@@ -4,7 +4,7 @@ use workflow_visualizer::{
     Attach, bevy_ecs, BundledIcon, Button, ButtonDespawn, ButtonType, Color, Disabled, Grid,
     GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
     ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle, Visualizer,
+    TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger, Visualizer,
 };
 use workflow_visualizer::bevy_ecs::prelude::{
     Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, NonSend,
@@ -32,18 +32,21 @@ impl Attach for EntryAttachment {
             setup_removed_entry_indices.in_set(SyncPoint::PostInitialization),
             setup_total_entries.in_set(SyncPoint::PostInitialization),
             setup_entry_list.in_set(SyncPoint::PostInitialization),
-            setup_add_button.in_set(SyncPoint::PostResolve),
+            setup_bottom_panel_buttons.in_set(SyncPoint::PostResolve),
         ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            entry_list_placements.in_set(SyncPoint::Preparation).after(entry_list_layout),
+            entry_list_placements
+                .in_set(SyncPoint::Preparation)
+                .after(entry_list_layout),
             page_range.in_set(SyncPoint::Spawn).after(page_change),
             set_max_page.in_set(SyncPoint::Spawn).before(page_change),
             page_change.in_set(SyncPoint::Spawn),
             display_name.in_set(SyncPoint::Reconfigure),
             read_otp.in_set(SyncPoint::PostInitialization),
             display_otp.in_set(SyncPoint::Reconfigure),
-            place_add_button.in_set(SyncPoint::Spawn),
-            position.in_set(SyncPoint::Spawn).after(enable),
+            process_bottom_panel_buttons.in_set(SyncPoint::Process),
+            place_bottom_panel_buttons.in_set(SyncPoint::Spawn),
+            position.in_set(SyncPoint::Spawn).after(enable_by_index_change),
             enable.in_set(SyncPoint::Spawn).after(page_range),
             enable_by_index_change
                 .in_set(SyncPoint::Spawn)
@@ -128,7 +131,8 @@ impl PageRange {
     }
     pub(crate) fn normalized(&self, index: EntryIndex) -> u32 {
         let diff = self.1 - self.0;
-        index.0 % diff
+        let normal = index.0 % diff;
+        normal
     }
 }
 
@@ -213,7 +217,7 @@ pub(crate) fn display_otp(
 #[derive(Resource)]
 pub(crate) struct AddButton(pub(crate) Entity);
 
-pub(crate) fn setup_add_button(mut cmd: Commands, entry_scale: Res<EntryScale>) {
+pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<EntryScale>) {
     let entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
@@ -228,11 +232,39 @@ pub(crate) fn setup_add_button(mut cmd: Commands, entry_scale: Res<EntryScale>) 
         .id();
     let add_button = AddButton(entity);
     cmd.insert_resource(add_button);
+    let entity = cmd
+        .spawn(Button::new(
+            ButtonType::Press,
+            4,
+            Color::OFF_WHITE,
+            Color::OFF_BLACK,
+            "edit",
+            "",
+            0,
+            entry_scale.button_icon_scale,
+        ))
+        .id();
+    let other = cmd
+        .spawn(Button::new(
+            ButtonType::Press,
+            4,
+            Color::OFF_WHITE,
+            Color::OFF_BLACK,
+            "edit",
+            "",
+            0,
+            entry_scale.button_icon_scale,
+        ))
+        .id();
+    cmd.insert_resource(PageLeftButton(entity));
+    cmd.insert_resource(PageRightButton(other));
 }
 
-pub(crate) fn place_add_button(
+pub(crate) fn place_bottom_panel_buttons(
     add_button: Res<AddButton>,
     entry_list_layout: Res<EntryListLayout>,
+    page_left_button: Res<PageLeftButton>,
+    page_right_button: Res<PageRightButton>,
     mut cmd: Commands,
 ) {
     if entry_list_layout.is_changed() {
@@ -250,10 +282,32 @@ pub(crate) fn place_add_button(
         let view = (horizontal, vertical);
         cmd.entity(add_button.0)
             .insert(ResponsiveGridView::all_same(view));
+        let page_left_horizontal = (
+            horizontal
+                .0
+                .raw_offset(-ENTRY_LIST_PADDING - ENTRY_LIST_HEIGHT),
+            horizontal.0.raw_offset(-ENTRY_LIST_PADDING),
+        );
+        let page_right_horizontal = (
+            horizontal.1.raw_offset(ENTRY_LIST_PADDING),
+            horizontal
+                .1
+                .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_HEIGHT),
+        );
+        let page_left_view = (page_left_horizontal, vertical);
+        let page_right_view = (page_right_horizontal, vertical);
+        cmd.entity(page_left_button.0)
+            .insert(ResponsiveGridView::all_same(page_left_view));
+        cmd.entity(page_right_button.0)
+            .insert(ResponsiveGridView::all_same(page_right_view));
     }
 }
 
-// where this entry is in the list
+#[derive(Resource)]
+pub(crate) struct PageLeftButton(pub(crate) Entity);
+
+#[derive(Resource)]
+pub(crate) struct PageRightButton(pub(crate) Entity);
 #[derive(Component)]
 pub(crate) struct EntryListPosition(pub(crate) Option<u32>);
 #[derive(Resource)]
@@ -537,7 +591,7 @@ pub(crate) fn delete_entry(cmd: &mut Commands, entity: Entity, entry: &Entry) {
 }
 
 pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entry {
-    let main_panel = cmd
+    let info_panel = cmd
         .spawn(Panel::new(
             PanelType::Flat,
             5,
@@ -623,7 +677,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         name,
         otp,
         line,
-        info_panel: main_panel,
+        info_panel,
         edit_panel,
         delete_panel,
         generate_button,
@@ -779,5 +833,30 @@ pub(crate) fn entry_list_layout(
         entry_list_layout.vertical_markers = vertical_markers.max(1).into();
         entries_per.0 = (vertical_markers / (ENTRY_LIST_HEIGHT + ENTRY_LIST_PADDING)) as u32;
         entries_per.0 = entries_per.0.max(1);
+    }
+}
+
+pub(crate) fn process_bottom_panel_buttons(
+    mut page_right: ResMut<PageRight>,
+    mut page_left: ResMut<PageLeft>,
+    add: Res<AddButton>,
+    page_left_button: Res<PageLeftButton>,
+    page_right_button: Res<PageRightButton>,
+    buttons: Query<&TouchTrigger>,
+) {
+    if let Ok(trigger) = buttons.get(add.0) {
+        if trigger.triggered() {
+            // add logic
+        }
+    }
+    if let Ok(trigger) = buttons.get(page_left_button.0) {
+        if trigger.triggered() {
+            page_left.0 = true;
+        }
+    }
+    if let Ok(trigger) = buttons.get(page_right_button.0) {
+        if trigger.triggered() {
+            page_right.0 = true;
+        }
     }
 }

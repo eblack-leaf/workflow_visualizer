@@ -104,9 +104,6 @@ impl Default for Engen {
             .tokens
             .insert("phone10".into(), Token("245215".to_string()));
         engen
-            .tokens
-            .insert("phone11".into(), Token("245215".to_string()));
-        engen
     }
 }
 #[async_trait]
@@ -136,11 +133,9 @@ impl Workflow for Engen {
                 Response::TokenOtp((name, TokenOtp(otp)))
             }
             Action::RemoveToken(name) => Response::TokenRemoved(name),
-            Action::RequestTokenNames => {
-                Response::RequestedTokenNames(
-                    engen.lock().unwrap().tokens.keys().cloned().collect(),
-                )
-            }
+            Action::RequestTokenNames => Response::RequestedTokenNames(
+                engen.lock().unwrap().tokens.keys().cloned().collect(),
+            ),
             Action::ExitRequest => Response::ExitConfirmed,
         }
     }

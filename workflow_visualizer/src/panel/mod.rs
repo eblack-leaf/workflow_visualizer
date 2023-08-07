@@ -18,7 +18,7 @@ pub struct PanelContentArea(pub Area<InterfaceContext>);
 pub enum PanelType {
     Flat,
     Border,
-    BorderedPanel,
+    BorderedFlat,
 }
 #[derive(Component, Copy, Clone)]
 pub struct BorderColor(pub Color);

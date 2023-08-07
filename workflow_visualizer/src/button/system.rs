@@ -44,7 +44,7 @@ pub(crate) fn spawn(
     {
         let panel = cmd
             .spawn(Panel::new(
-                PanelType::BorderedPanel,
+                PanelType::BorderedFlat,
                 *layer,
                 background_color.0,
                 *color,
