@@ -105,6 +105,7 @@
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 <span class="kw">use </span>tracing::{trace, warn};
 
@@ -176,6 +177,7 @@
             <span class="kw">if </span>vis.visible() {
                 vis.visible = <span class="bool-val">false</span>;
             }
+            vis_sec.section.take();
             <span class="kw">continue</span>;
         }
         <span class="kw">let </span>section = Section::from((<span class="kw-2">*</span>pos, <span class="kw-2">*</span>area));
