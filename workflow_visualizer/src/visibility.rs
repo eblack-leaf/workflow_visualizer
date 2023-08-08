@@ -69,6 +69,7 @@ pub(crate) fn calc_visibility(
             if vis.visible() {
                 vis.visible = false;
             }
+            vis_sec.section.take();
             continue;
         }
         let section = Section::from((*pos, *area));
