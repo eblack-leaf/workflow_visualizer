@@ -18,6 +18,7 @@
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
@@ -30,6 +31,7 @@
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::spawn.in_set(SyncPoint::Spawn),
             system::placement.in_set(SyncPoint::SecondaryEffects),
+            system::border_change.in_set(SyncPoint::Reconfigure),
             system::color_invert.in_set(SyncPoint::Reconfigure),
             system::despawn.in_set(SyncPoint::Reconfigure),
             system::color_forward.in_set(SyncPoint::SecondaryEffects),

@@ -94,6 +94,14 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::ButtonAttachment;
@@ -123,8 +131,14 @@
     text_entity: TextEntity,
     touchable: Touchable,
     scaling: Scaling,
+    border: ButtonBorder,
 }
 
+<span class="attr">#[derive(Component, Copy, Clone)]
+</span><span class="kw">pub enum </span>ButtonBorder {
+    Border,
+    <span class="prelude-val">None</span>,
+}
 <span class="attr">#[derive(Component, Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>ButtonDespawn {}
 
@@ -163,6 +177,7 @@
         button_text: S,
         text_scale: TS,
         icon_scale: IS,
+        border: ButtonBorder,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             tag: ButtonTag::new(),
@@ -181,6 +196,7 @@
                 text: text_scale.into(),
                 icon: icon_scale.into(),
             },
+            border,
         }
     }
 }

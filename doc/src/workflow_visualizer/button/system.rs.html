@@ -296,19 +296,50 @@
 <a href="#296" id="296">296</a>
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-<span class="kw">use crate</span>::{
-    Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color, CurrentlyPressed,
-    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelType, Position,
-    RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
-    ToggleState,
-};
-<span class="kw">use </span><span class="kw">crate</span>::button::{IconEntity, PanelEntity, Scaling, TextEntity};
+<span class="kw">use crate</span>::{Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color, CurrentlyPressed, DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState};
+<span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 <span class="kw">use </span><span class="kw">crate</span>::text::AlignedFonts;
 
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(buttons: Query&lt;(<span class="kw-2">&amp;</span>PanelEntity, <span class="kw-2">&amp;</span>ButtonBorder), Changed&lt;ButtonBorder&gt;&gt;, <span class="kw-2">mut </span>panels: Query&lt;<span class="kw-2">&amp;mut </span>PanelType, With&lt;PanelTag&gt;&gt;) {
+    <span class="kw">for </span>(panel_ref, border) <span class="kw">in </span>buttons.iter() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(panel) = panel_ref.<span class="number">0 </span>{
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>panel_type) = panels.get_mut(panel) {
+                <span class="kw">match </span>border {
+                    ButtonBorder::Border =&gt; {
+                        <span class="kw-2">*</span>panel_type = PanelType::BorderedFlat
+                    }
+                    ButtonBorder::None =&gt; {
+                        <span class="kw-2">*</span>panel_type = PanelType::Flat
+                    }
+                }
+            }
+        }
+    }
+}
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>spawn(
     <span class="kw-2">mut </span>buttons: Query&lt;
         (
@@ -322,6 +353,7 @@
             <span class="kw-2">&amp;mut </span>IconEntity,
             <span class="kw-2">&amp;mut </span>TextEntity,
             <span class="kw-2">&amp;</span>Scaling,
+            <span class="kw-2">&amp;</span>ButtonBorder,
         ),
         Added&lt;PanelEntity&gt;,
     &gt;,
@@ -338,11 +370,19 @@
         <span class="kw-2">mut </span>icon_entity,
         <span class="kw-2">mut </span>text_entity,
         scaling,
+        border
     ) <span class="kw">in </span>buttons.iter_mut()
     {
         <span class="kw">let </span>panel = cmd
             .spawn(Panel::new(
-                PanelType::BorderedFlat,
+                <span class="kw">match </span>border {
+                    ButtonBorder::Border =&gt; {
+                        PanelType::BorderedFlat
+                    }
+                    ButtonBorder::None =&gt; {
+                        PanelType::Flat
+                    }
+                },
                 <span class="kw-2">*</span>layer,
                 background_color.<span class="number">0</span>,
                 <span class="kw-2">*</span>color,
