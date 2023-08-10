@@ -2,14 +2,14 @@ use bevy_ecs::change_detection::Res;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-use crate::text::AlignedFonts;
 use crate::{
-    Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color, CurrentlyPressed,
+    ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
     Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
-    ToggleState,
+    Toggled,
 };
+use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+use crate::text::AlignedFonts;
 
 pub(crate) fn border_change(
     buttons: Query<(&PanelEntity, &ButtonBorder), Changed<ButtonBorder>>,
@@ -96,8 +96,8 @@ pub(crate) fn spawn(
 pub(crate) fn color_invert(
     buttons: Query<
         (
-            &CurrentlyPressed,
-            &ToggleState,
+            &ActiveInteraction,
+            &Toggled,
             &ButtonType,
             &Color,
             &BackgroundColor,
@@ -105,21 +105,22 @@ pub(crate) fn color_invert(
             &IconEntity,
             &TextEntity,
         ),
-        Or<(Changed<CurrentlyPressed>, Changed<ToggleState>)>,
+        Or<(Changed<ActiveInteraction>, Changed<Toggled>)>,
     >,
     mut color_inverters: Query<(&mut Color), Without<PanelEntity>>,
 ) {
-    for (pressed, toggle, button_type, foreground, background, panel, icon, text) in buttons.iter()
+    for (active_interaction, toggle, button_type, foreground, background, panel, icon, text) in
+    buttons.iter()
     {
         let mut inverted = false;
         match button_type {
             ButtonType::Press => {
-                if pressed.currently_pressed() {
+                if active_interaction.active() {
                     inverted = true;
                 }
             }
             ButtonType::Toggle => {
-                if toggle.toggled() {
+                if toggle.active() || active_interaction.active() {
                     inverted = true;
                 }
             }

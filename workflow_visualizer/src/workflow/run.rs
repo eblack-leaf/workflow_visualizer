@@ -5,9 +5,8 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
 
-use crate::job::Exit;
-use crate::workflow::native::initialize_native_window;
 use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
+use crate::workflow::native::initialize_native_window;
 
 pub(crate) fn internal_loop<T: Workflow + 'static>(
     mut visualizer: &mut Visualizer,
@@ -54,7 +53,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 visualizer.trigger_resize(*new_inner_size, scale_factor);
             }
             WindowEvent::Touch(touch) => {
-                visualizer.job.container.send_event();
+                visualizer.register_touch(touch);
                 info!("touch {:?}", touch);
             }
             WindowEvent::MouseInput { state, button, .. } => {

@@ -3,8 +3,8 @@ use bevy_ecs::prelude::{Bundle, Component, Entity};
 pub(crate) use attachment::ButtonAttachment;
 
 use crate::{
-    Color, IconId, IconScale, InterfaceContext, Layer, Section, Tag, TextScale, TextValue,
-    Touchable,
+    Color, IconId, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
+    TextValue,
 };
 
 mod attachment;
@@ -25,7 +25,7 @@ pub struct Button {
     panel_entity: PanelEntity,
     icon_entity: IconEntity,
     text_entity: TextEntity,
-    touchable: Touchable,
+    interactable: Interactable,
     scaling: Scaling,
     border: ButtonBorder,
 }
@@ -87,7 +87,7 @@ impl Button {
             panel_entity: PanelEntity(None),
             icon_entity: IconEntity(None),
             text_entity: TextEntity(None),
-            touchable: Touchable::on_press(),
+            interactable: Interactable::default(),
             scaling: Scaling {
                 text: text_scale.into(),
                 icon: icon_scale.into(),

@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
+use workflow_visualizer::{
+    Attach, bevy_ecs, BundledIcon, Button, ButtonBorder, ButtonDespawn, ButtonType, Color,
+    Disabled, Grid, GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
+    TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer,
+};
 use workflow_visualizer::bevy_ecs::prelude::{
     Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, NonSend,
     Query, Res, ResMut, Resource,
 };
-use workflow_visualizer::{
-    bevy_ecs, Attach, BundledIcon, Button, ButtonBorder, ButtonDespawn, ButtonType, Color,
-    Disabled, Grid, GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
-    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger, Visualizer,
-};
 
-use crate::workflow::{Action, TokenName, TokenOtp};
 use crate::Engen;
+use crate::workflow::{Action, TokenName, TokenOtp};
 
 pub struct EntryAttachment;
 
@@ -850,20 +850,20 @@ pub(crate) fn process_bottom_panel_buttons(
     add: Res<AddButton>,
     page_left_button: Res<PageLeftButton>,
     page_right_button: Res<PageRightButton>,
-    buttons: Query<&TouchTrigger>,
+    buttons: Query<&Triggered>,
 ) {
     if let Ok(trigger) = buttons.get(add.0) {
-        if trigger.triggered() {
+        if trigger.active() {
             // add logic
         }
     }
     if let Ok(trigger) = buttons.get(page_left_button.0) {
-        if trigger.triggered() {
+        if trigger.active() {
             page_left.0 = true;
         }
     }
     if let Ok(trigger) = buttons.get(page_right_button.0) {
-        if trigger.triggered() {
+        if trigger.active() {
             page_right.0 = true;
         }
     }
