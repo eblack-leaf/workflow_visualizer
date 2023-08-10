@@ -2,21 +2,25 @@ use bevy_ecs::change_detection::Res;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-use crate::{Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color, CurrentlyPressed, DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle, ToggleState};
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::text::AlignedFonts;
+use crate::{
+    Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color, CurrentlyPressed,
+    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
+    Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
+    ToggleState,
+};
 
-pub(crate) fn border_change(buttons: Query<(&PanelEntity, &ButtonBorder), Changed<ButtonBorder>>, mut panels: Query<&mut PanelType, With<PanelTag>>) {
+pub(crate) fn border_change(
+    buttons: Query<(&PanelEntity, &ButtonBorder), Changed<ButtonBorder>>,
+    mut panels: Query<&mut PanelType, With<PanelTag>>,
+) {
     for (panel_ref, border) in buttons.iter() {
         if let Some(panel) = panel_ref.0 {
             if let Ok(mut panel_type) = panels.get_mut(panel) {
                 match border {
-                    ButtonBorder::Border => {
-                        *panel_type = PanelType::BorderedFlat
-                    }
-                    ButtonBorder::None => {
-                        *panel_type = PanelType::Flat
-                    }
+                    ButtonBorder::Border => *panel_type = PanelType::BorderedFlat,
+                    ButtonBorder::None => *panel_type = PanelType::Flat,
                 }
             }
         }
@@ -52,18 +56,14 @@ pub(crate) fn spawn(
         mut icon_entity,
         mut text_entity,
         scaling,
-        border
+        border,
     ) in buttons.iter_mut()
     {
         let panel = cmd
             .spawn(Panel::new(
                 match border {
-                    ButtonBorder::Border => {
-                        PanelType::BorderedFlat
-                    }
-                    ButtonBorder::None => {
-                        PanelType::Flat
-                    }
+                    ButtonBorder::Border => PanelType::BorderedFlat,
+                    ButtonBorder::None => PanelType::Flat,
                 },
                 *layer,
                 background_color.0,

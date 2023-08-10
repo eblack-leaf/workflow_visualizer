@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
 
-use crate::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
+use crate::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
 
 /// Entry point for enabling visibility module on an entity
 #[derive(Bundle)]
@@ -66,7 +66,9 @@ pub(crate) fn calc_visibility(
             if vis.visible() {
                 vis.visible = false;
             }
-            if vis_sec.section.is_some() { vis_sec.section.take(); }
+            if vis_sec.section.is_some() {
+                vis_sec.section.take();
+            }
             continue;
         }
         let section = Section::from((*pos, *area));

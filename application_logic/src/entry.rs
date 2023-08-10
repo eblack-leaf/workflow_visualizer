@@ -1,13 +1,18 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{Attach, bevy_ecs, BundledIcon, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Disabled, Grid, GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::{
     Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, NonSend,
     Query, Res, ResMut, Resource,
 };
+use workflow_visualizer::{
+    bevy_ecs, Attach, BundledIcon, Button, ButtonBorder, ButtonDespawn, ButtonType, Color,
+    Disabled, Grid, GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
+    TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger, Visualizer,
+};
 
-use crate::Engen;
 use crate::workflow::{Action, TokenName, TokenOtp};
+use crate::Engen;
 
 pub struct EntryAttachment;
 
@@ -41,7 +46,9 @@ impl Attach for EntryAttachment {
             display_otp.in_set(SyncPoint::Reconfigure),
             process_bottom_panel_buttons.in_set(SyncPoint::Process),
             place_bottom_panel_buttons.in_set(SyncPoint::Spawn),
-            position.in_set(SyncPoint::Spawn).after(enable_by_index_change),
+            position
+                .in_set(SyncPoint::Spawn)
+                .after(enable_by_index_change),
             enable.in_set(SyncPoint::Spawn).after(page_range),
             enable_by_index_change
                 .in_set(SyncPoint::Spawn)
@@ -173,7 +180,7 @@ pub(crate) fn display_name(
 ) {
     for (entry, entry_name) in entries.iter() {
         if let Ok(mut text) = text.get_mut(entry.name) {
-            text.0 = entry_name.0.0.clone();
+            text.0 = entry_name.0 .0.clone();
         }
     }
 }
@@ -238,7 +245,7 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             "",
             0,
             entry_scale.button_icon_scale,
-            ButtonBorder::None
+            ButtonBorder::None,
         ))
         .id();
     let other = cmd
@@ -251,7 +258,7 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             "",
             0,
             entry_scale.button_icon_scale,
-            ButtonBorder::None
+            ButtonBorder::None,
         ))
         .id();
     cmd.insert_resource(PageLeftButton(entity));
@@ -644,7 +651,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             "",
             15,
             entry_scale.button_icon_scale,
-            ButtonBorder::None
+            ButtonBorder::None,
         ))
         .id();
     let edit_button = cmd
@@ -657,7 +664,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             "",
             15,
             entry_scale.button_icon_scale,
-            ButtonBorder::None
+            ButtonBorder::None,
         ))
         .id();
     let delete_button = cmd
@@ -670,7 +677,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             "",
             15,
             entry_scale.button_icon_scale,
-            ButtonBorder::None
+            ButtonBorder::None,
         ))
         .id();
 

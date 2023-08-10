@@ -2,12 +2,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res};
 
+use crate::gfx::GfxSurface;
+use crate::panel::renderer::PanelRenderer;
+use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
 use crate::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
-use crate::gfx::GfxSurface;
-use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
-use crate::panel::renderer::PanelRenderer;
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -38,13 +38,37 @@ pub fn calc_content_area(
 }
 pub(crate) fn management(
     mut removed: RemovedComponents<PanelContentArea>,
-    mut panels: Query<(Entity, &Visibility, &PanelType, &Position<InterfaceContext>, &Layer, &Color, &BorderColor, &PanelContentArea, &mut Difference), Changed<Visibility>>,
+    mut panels: Query<
+        (
+            Entity,
+            &Visibility,
+            &PanelType,
+            &Position<InterfaceContext>,
+            &Layer,
+            &Color,
+            &BorderColor,
+            &PanelContentArea,
+            &mut Difference,
+        ),
+        Changed<Visibility>,
+    >,
     mut extraction: ResMut<Extraction>,
 ) {
     for entity in removed.iter() {
         extraction.removed.insert(entity);
     }
-    for (entity, visibility, panel_type, pos, layer, color, border_color, content_area, mut difference) in panels.iter_mut() {
+    for (
+        entity,
+        visibility,
+        panel_type,
+        pos,
+        layer,
+        color,
+        border_color,
+        content_area,
+        mut difference,
+    ) in panels.iter_mut()
+    {
         if !visibility.visible() {
             extraction.removed.insert(entity);
         } else {
