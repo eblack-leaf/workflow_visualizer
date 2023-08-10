@@ -24,6 +24,10 @@ impl Attach for EntryAttachment {
             "edit",
             IconBitmap::bundled(BundledIcon::Edit),
         )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "square",
+            IconBitmap::bundled(BundledIcon::Square),
+        )));
         visualizer
             .job
             .container
@@ -807,14 +811,18 @@ pub(crate) struct ListDimensions {
 
 pub(crate) fn dimension_change(
     mut dimensions: ResMut<ListDimensions>,
+    mut entry_scale: ResMut<EntryScale>,
     scale_factor: Res<ScaleFactor>,
 ) {
     if scale_factor.is_changed() {
-        let entry = (10f64 * scale_factor.factor()).ceil() as i32;
+        let entry = (10f64 * scale_factor.factor()).floor() as i32;
+        let entry = 10;
         dimensions.entry = entry.into();
-        let padding = (2f64 * scale_factor.factor()).ceil() as i32;
+        let padding = (2f64 * scale_factor.factor()).floor() as i32;
+        let padding = 2;
         dimensions.padding = padding.into();
-        let content = ((entry - 2 * padding) as f64 * scale_factor.factor()).ceil() as i32;
+        let content = ((entry - 2 * padding) as f64 * scale_factor.factor()).floor() as i32;
+        let content = entry - 2 * padding;
         dimensions.content = content.into();
     }
 }
@@ -834,7 +842,7 @@ pub(crate) fn entry_list_layout(
     mut entry_list_layout: ResMut<EntryListLayout>,
     list_dimensions: Res<ListDimensions>,
 ) {
-    if grid.is_changed() {
+    if grid.is_changed() || list_dimensions.is_changed() {
         let begin = grid.calc_horizontal_location(1.near());
         let end = grid.calc_horizontal_location(4.far());
         let horizontal_markers = end.0 - begin.0;
