@@ -1,5 +1,7 @@
+use std::ops::Add;
+
 /// Index of 8px alignment location
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Default)]
 pub struct RawMarker(pub i32);
 
 impl RawMarker {
@@ -9,6 +11,13 @@ impl RawMarker {
     }
 }
 
+impl Add for RawMarker {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        RawMarker(self.0 + rhs.0)
+    }
+}
 impl From<i32> for RawMarker {
     fn from(value: i32) -> Self {
         RawMarker(value)

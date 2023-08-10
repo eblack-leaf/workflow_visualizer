@@ -8,8 +8,8 @@ use bevy_ecs::prelude::{Entity, Query, Resource, Without};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 
 use crate::{
-    Area, DeviceContext, Disabled, InterfaceContext, Layer, Position, ScaleFactor,
-    Section, ViewportHandle,
+    Area, DeviceContext, Disabled, InterfaceContext, Layer, Position, ScaleFactor, Section,
+    ViewportHandle,
 };
 use crate::focus::FocusedEntity;
 

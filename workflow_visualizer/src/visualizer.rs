@@ -9,8 +9,7 @@ use winit::window::Window;
 
 use crate::{
     Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
-    JobSyncPoint, ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle,
-    WindowResize,
+    JobSyncPoint, ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
 };
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;

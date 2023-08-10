@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use workflow_visualizer::{
     Attach, bevy_ecs, BundledIcon, Button, ButtonBorder, ButtonDespawn, ButtonType, Color,
     Disabled, Grid, GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
-    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
+    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, ScaleFactor, Sender, SyncPoint, Text,
     TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer,
 };
 use workflow_visualizer::bevy_ecs::prelude::{
@@ -24,6 +24,10 @@ impl Attach for EntryAttachment {
             "edit",
             IconBitmap::bundled(BundledIcon::Edit),
         )));
+        visualizer
+            .job
+            .container
+            .insert_resource(ListDimensions::default());
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
             request_tokens.in_set(SyncPoint::PostInitialization),
             setup_paging.in_set(SyncPoint::PostInitialization),
@@ -35,6 +39,7 @@ impl Attach for EntryAttachment {
             setup_bottom_panel_buttons.in_set(SyncPoint::PostResolve),
         ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            dimension_change.in_set(SyncPoint::PostInitialization),
             entry_list_placements
                 .in_set(SyncPoint::Preparation)
                 .after(entry_list_layout),
@@ -56,9 +61,9 @@ impl Attach for EntryAttachment {
             removed_indices
                 .in_set(SyncPoint::Spawn)
                 .before(set_max_page),
-            receive_tokens.in_set(SyncPoint::PostInitialization),
             entry_list_layout.in_set(SyncPoint::Preparation),
         ));
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((receive_tokens.in_set(SyncPoint::PostInitialization), ));
     }
 }
 
@@ -270,34 +275,30 @@ pub(crate) fn place_bottom_panel_buttons(
     entry_list_layout: Res<EntryListLayout>,
     page_left_button: Res<PageLeftButton>,
     page_right_button: Res<PageRightButton>,
+    list_dimensions: Res<ListDimensions>,
     mut cmd: Commands,
 ) {
     if entry_list_layout.is_changed() {
-        let horizontal_start =
-            entry_list_layout.horizontal_markers.0 / 2 - ENTRY_LIST_CONTENT_HEIGHT / 2;
+        let horizontal_start = entry_list_layout.horizontal_markers.0 / 2 - list_dimensions.entry.0 / 2;
         let horizontal = (
             1.near().raw_offset(horizontal_start),
-            1.near().raw_offset(horizontal_start + ENTRY_LIST_HEIGHT),
+            1.near().raw_offset(horizontal_start + list_dimensions.entry.0),
         );
-        let vertical_start = entry_list_layout.vertical_markers.0 + ENTRY_LIST_PADDING;
+        let vertical_start = entry_list_layout.vertical_markers.0 + list_dimensions.padding.0;
         let vertical = (
             1.near().raw_offset(vertical_start),
-            1.near().raw_offset(vertical_start + ENTRY_LIST_HEIGHT),
+            1.near().raw_offset(vertical_start + list_dimensions.entry.0),
         );
         let view = (horizontal, vertical);
         cmd.entity(add_button.0)
             .insert(ResponsiveGridView::all_same(view));
         let page_left_horizontal = (
-            horizontal
-                .0
-                .raw_offset(-ENTRY_LIST_PADDING - ENTRY_LIST_HEIGHT),
-            horizontal.0.raw_offset(-ENTRY_LIST_PADDING),
+            horizontal.0.raw_offset(-list_dimensions.padding.0 - list_dimensions.entry.0),
+            horizontal.0.raw_offset(-list_dimensions.padding.0),
         );
         let page_right_horizontal = (
-            horizontal.1.raw_offset(ENTRY_LIST_PADDING),
-            horizontal
-                .1
-                .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_HEIGHT),
+            horizontal.1.raw_offset(list_dimensions.padding),
+            horizontal.1.raw_offset(list_dimensions.padding + list_dimensions.entry),
         );
         let page_left_view = (page_left_horizontal, vertical);
         let page_right_view = (page_right_horizontal, vertical);
@@ -331,31 +332,31 @@ pub(crate) fn setup_entry_list_placements(mut cmd: Commands) {
 pub(crate) fn entry_list_placements(
     mut placements: ResMut<EntryListPlacements>,
     entry_list_layout: Res<EntryListLayout>,
+    list_dimensions: Res<ListDimensions>,
 ) {
     if entry_list_layout.is_changed() {
         placements.0.insert(
             "info-panel-offset",
-            (entry_list_layout.horizontal_markers.0 - 2 * ENTRY_LIST_HEIGHT - 2).into(),
+            (entry_list_layout.horizontal_markers.0 - 2 * list_dimensions.entry.0 - 2).into(),
         );
         placements.0.insert(
             "edit-panel-offset",
-            (entry_list_layout.horizontal_markers.0 - ENTRY_LIST_HEIGHT - 1).into(),
+            (entry_list_layout.horizontal_markers.0 - list_dimensions.entry.0 - 1).into(),
         );
         let midpoint =
             (placements.0.get("info-panel-offset").unwrap().0 as f32 / 2f32).ceil() as i32;
         placements.0.insert("info-panel-midpoint", midpoint.into());
         placements
             .0
-            .insert("name-near-horizontal", (ENTRY_LIST_PADDING).into());
-        let nfh = placements.0.get("info-panel-midpoint").unwrap().0 - ENTRY_LIST_PADDING * 2;
+            .insert("name-near-horizontal", (list_dimensions.padding).into());
+        let nfh = placements.0.get("info-panel-midpoint").unwrap().0 - list_dimensions.padding.0 * 2;
         placements.0.insert("name-far-horizontal", nfh.into());
-        let onh = placements.0.get("info-panel-midpoint").unwrap().0 + ENTRY_LIST_PADDING * 2;
+        let onh = placements.0.get("info-panel-midpoint").unwrap().0 + list_dimensions.padding.0 * 2;
         placements.0.insert("otp-near-horizontal", onh.into());
-        let ofh = placements.0.get("info-panel-offset").unwrap().0
-            - ENTRY_LIST_PADDING * 4
-            - ENTRY_LIST_CONTENT_HEIGHT;
+        let ofh =
+            placements.0.get("info-panel-offset").unwrap().0 - list_dimensions.padding.0 * 4 - list_dimensions.content.0;
         placements.0.insert("otp-far-horizontal", ofh.into());
-        let gbfh = placements.0.get("info-panel-offset").unwrap().0 - ENTRY_LIST_PADDING;
+        let gbfh = placements.0.get("info-panel-offset").unwrap().0 - list_dimensions.padding.0;
         placements
             .0
             .insert("generate-button-far-horizontal", gbfh.into());
@@ -364,37 +365,32 @@ pub(crate) fn entry_list_placements(
             .get("generate-button-far-horizontal")
             .unwrap()
             .0
-            - ENTRY_LIST_CONTENT_HEIGHT;
+            - list_dimensions.content.0;
         placements
             .0
             .insert("generate-button-near-horizontal", gbnh.into());
-        let ebnh = placements.0.get("info-panel-offset").unwrap().0 + ENTRY_LIST_PADDING;
+        let ebnh = placements.0.get("info-panel-offset").unwrap().0 + list_dimensions.padding.0;
         placements
             .0
             .insert("edit-button-near-horizontal", ebnh.into());
-        let ebfh =
-            placements.0.get("edit-button-near-horizontal").unwrap().0 + ENTRY_LIST_CONTENT_HEIGHT;
+        let ebfh = placements.0.get("edit-button-near-horizontal").unwrap().0 + list_dimensions.content.0;
         placements
             .0
             .insert("edit-button-far-horizontal", ebfh.into());
-        let bdnh = placements.0.get("edit-panel-offset").unwrap().0 + ENTRY_LIST_PADDING;
+        let bdnh = placements.0.get("edit-panel-offset").unwrap().0 + list_dimensions.padding.0;
         placements
             .0
             .insert("delete-button-near-horizontal", bdnh.into());
-        let dbfh = placements.0.get("delete-button-near-horizontal").unwrap().0
-            + ENTRY_LIST_CONTENT_HEIGHT;
+        let dbfh = placements.0.get("delete-button-near-horizontal").unwrap().0 + list_dimensions.content.0;
         placements
             .0
             .insert("delete-button-far-horizontal", dbfh.into());
         let lx = placements.0.get("info-panel-midpoint").unwrap().0;
         placements.0.insert("line-x", lx.into());
+        placements.0.insert("line-y-top", (list_dimensions.padding).into());
         placements
             .0
-            .insert("line-y-top", (ENTRY_LIST_PADDING).into());
-        placements.0.insert(
-            "line-y-bottom",
-            (ENTRY_LIST_HEIGHT - ENTRY_LIST_PADDING).into(),
-        );
+            .insert("line-y-bottom", (list_dimensions.entry.0 - list_dimensions.padding.0).into());
     }
 }
 
@@ -402,6 +398,7 @@ pub(crate) fn position(
     entries: Query<(&Entry, &EntryListPosition), Changed<EntryListPosition>>,
     entry_list_placements: Res<EntryListPlacements>,
     entry_list_layout: Res<EntryListLayout>,
+    list_dimensions: Res<ListDimensions>,
     mut cmd: Commands,
 ) {
     for (entry, list_position) in entries.iter() {
@@ -411,7 +408,7 @@ pub(crate) fn position(
                 entry_list_layout
                     .anchor
                     .y
-                    .raw_offset((ENTRY_LIST_HEIGHT + ENTRY_LIST_PADDING) * pos as i32),
+                    .raw_offset((list_dimensions.entry + list_dimensions.padding).0 * pos as i32),
             ));
             cmd.entity(entry.name).insert(ResponsiveGridView::all_same((
                 (
@@ -423,10 +420,8 @@ pub(crate) fn position(
                         .raw_offset(entry_list_placements.get("name-far-horizontal")),
                 ),
                 (
-                    anchor.y.raw_offset(ENTRY_LIST_PADDING),
-                    anchor
-                        .y
-                        .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_CONTENT_HEIGHT),
+                    anchor.y.raw_offset(list_dimensions.padding),
+                    anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
                 ),
             )));
             cmd.entity(entry.otp).insert(ResponsiveGridView::all_same((
@@ -439,10 +434,8 @@ pub(crate) fn position(
                         .raw_offset(entry_list_placements.get("otp-far-horizontal")),
                 ),
                 (
-                    anchor.y.raw_offset(ENTRY_LIST_PADDING),
-                    anchor
-                        .y
-                        .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_CONTENT_HEIGHT),
+                    anchor.y.raw_offset(list_dimensions.padding),
+                    anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
                 ),
             )));
             cmd.entity(entry.info_panel)
@@ -453,7 +446,7 @@ pub(crate) fn position(
                             .x
                             .raw_offset(entry_list_placements.get("info-panel-offset")),
                     ),
-                    (anchor.y, anchor.y.raw_offset(ENTRY_LIST_HEIGHT)),
+                    (anchor.y, anchor.y.raw_offset(list_dimensions.entry)),
                 )));
             cmd.entity(entry.edit_panel)
                 .insert(ResponsiveGridView::all_same((
@@ -465,7 +458,7 @@ pub(crate) fn position(
                             .x
                             .raw_offset(entry_list_placements.get("edit-panel-offset")),
                     ),
-                    (anchor.y, anchor.y.raw_offset(ENTRY_LIST_HEIGHT)),
+                    (anchor.y, anchor.y.raw_offset(list_dimensions.entry)),
                 )));
             cmd.entity(entry.delete_panel)
                 .insert(ResponsiveGridView::all_same((
@@ -475,7 +468,7 @@ pub(crate) fn position(
                             .raw_offset(entry_list_placements.get("edit-panel-offset").0 - 1),
                         anchor.x.raw_offset(entry_list_layout.horizontal_markers),
                     ),
-                    (anchor.y, anchor.y.raw_offset(ENTRY_LIST_HEIGHT)),
+                    (anchor.y, anchor.y.raw_offset(list_dimensions.entry)),
                 )));
             cmd.entity(entry.generate_button)
                 .insert(ResponsiveGridView::all_same((
@@ -488,10 +481,8 @@ pub(crate) fn position(
                         ),
                     ),
                     (
-                        anchor.y.raw_offset(ENTRY_LIST_PADDING),
-                        anchor
-                            .y
-                            .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_CONTENT_HEIGHT),
+                        anchor.y.raw_offset(list_dimensions.padding),
+                        anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
                     ),
                 )));
             cmd.entity(entry.edit_button)
@@ -505,10 +496,8 @@ pub(crate) fn position(
                             .raw_offset(entry_list_placements.get("edit-button-far-horizontal")),
                     ),
                     (
-                        anchor.y.raw_offset(ENTRY_LIST_PADDING),
-                        anchor
-                            .y
-                            .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_CONTENT_HEIGHT),
+                        anchor.y.raw_offset(list_dimensions.padding),
+                        anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
                     ),
                 )));
             cmd.entity(entry.delete_button)
@@ -522,10 +511,8 @@ pub(crate) fn position(
                             .raw_offset(entry_list_placements.get("delete-button-far-horizontal")),
                     ),
                     (
-                        anchor.y.raw_offset(ENTRY_LIST_PADDING),
-                        anchor
-                            .y
-                            .raw_offset(ENTRY_LIST_PADDING + ENTRY_LIST_CONTENT_HEIGHT),
+                        anchor.y.raw_offset(list_dimensions.padding),
+                        anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
                     ),
                 )));
             cmd.entity(entry.line)
@@ -802,9 +789,6 @@ pub(crate) fn receive_tokens(
         }
     }
 }
-pub(crate) const ENTRY_LIST_HEIGHT: i32 = 10;
-pub(crate) const ENTRY_LIST_PADDING: i32 = 2;
-pub(crate) const ENTRY_LIST_CONTENT_HEIGHT: i32 = ENTRY_LIST_HEIGHT - 2 * ENTRY_LIST_PADDING;
 #[derive(Resource)]
 pub(crate) struct EntryListLayout {
     pub(crate) horizontal_markers: RawMarker,
@@ -814,6 +798,26 @@ pub(crate) struct EntryListLayout {
 #[derive(Resource)]
 pub(crate) struct EntriesPerPage(pub(crate) u32);
 
+#[derive(Resource, Copy, Clone, Default)]
+pub(crate) struct ListDimensions {
+    pub(crate) entry: RawMarker,
+    pub(crate) padding: RawMarker,
+    pub(crate) content: RawMarker,
+}
+
+pub(crate) fn dimension_change(
+    mut dimensions: ResMut<ListDimensions>,
+    scale_factor: Res<ScaleFactor>,
+) {
+    if scale_factor.is_changed() {
+        let entry = (10f64 * scale_factor.factor()).ceil() as i32;
+        dimensions.entry = entry.into();
+        let padding = (2f64 * scale_factor.factor()).ceil() as i32;
+        dimensions.padding = padding.into();
+        let content = ((entry - 2 * padding) as f64 * scale_factor.factor()).ceil() as i32;
+        dimensions.content = content.into();
+    }
+}
 pub(crate) fn setup_entry_list(mut cmd: Commands) {
     let entry_list_layout = EntryListLayout {
         horizontal_markers: 0.into(),
@@ -828,6 +832,7 @@ pub(crate) fn entry_list_layout(
     grid: Res<Grid>,
     mut entries_per: ResMut<EntriesPerPage>,
     mut entry_list_layout: ResMut<EntryListLayout>,
+    list_dimensions: Res<ListDimensions>,
 ) {
     if grid.is_changed() {
         let begin = grid.calc_horizontal_location(1.near());
@@ -835,11 +840,11 @@ pub(crate) fn entry_list_layout(
         let horizontal_markers = end.0 - begin.0;
         let vertical_markers = grid.vertical_markers()
             - 2 * grid.markers_per_gutter()
-            - ENTRY_LIST_HEIGHT
-            - 2 * ENTRY_LIST_PADDING;
+            - list_dimensions.entry.0
+            - 2 * list_dimensions.padding.0;
         entry_list_layout.horizontal_markers = horizontal_markers.max(1).into();
         entry_list_layout.vertical_markers = vertical_markers.max(1).into();
-        entries_per.0 = (vertical_markers / (ENTRY_LIST_HEIGHT + ENTRY_LIST_PADDING)) as u32;
+        entries_per.0 = (vertical_markers / (list_dimensions.entry.0 + list_dimensions.padding.0)) as u32;
         entries_per.0 = entries_per.0.max(1);
     }
 }
