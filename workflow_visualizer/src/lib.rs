@@ -10,7 +10,7 @@ pub use winit;
 
 pub use animation::{InterpolationExtraction, Interpolator};
 pub use bundling::{BundleBuilder, BundleExtension};
-pub use button::{BackgroundColor, Button, ButtonDespawn, ButtonTag, ButtonType};
+pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::GridLocation;
 pub use grid::GridLocationDescriptor;
 pub use grid::GridMarker;

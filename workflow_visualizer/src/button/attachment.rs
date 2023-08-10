@@ -10,6 +10,7 @@ impl Attach for ButtonAttachment {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::spawn.in_set(SyncPoint::Spawn),
             system::placement.in_set(SyncPoint::SecondaryEffects),
+            system::border_change.in_set(SyncPoint::Reconfigure),
             system::color_invert.in_set(SyncPoint::Reconfigure),
             system::despawn.in_set(SyncPoint::Reconfigure),
             system::color_forward.in_set(SyncPoint::SecondaryEffects),

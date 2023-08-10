@@ -27,8 +27,14 @@ pub struct Button {
     text_entity: TextEntity,
     touchable: Touchable,
     scaling: Scaling,
+    border: ButtonBorder,
 }
 
+#[derive(Component, Copy, Clone)]
+pub enum ButtonBorder {
+    Border,
+    None,
+}
 #[derive(Component, Copy, Clone, Default)]
 pub struct ButtonDespawn {}
 
@@ -67,6 +73,7 @@ impl Button {
         button_text: S,
         text_scale: TS,
         icon_scale: IS,
+        border: ButtonBorder,
     ) -> Self {
         Self {
             tag: ButtonTag::new(),
@@ -85,6 +92,7 @@ impl Button {
                 text: text_scale.into(),
                 icon: icon_scale.into(),
             },
+            border,
         }
     }
 }

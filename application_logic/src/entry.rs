@@ -1,11 +1,6 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{
-    Attach, bevy_ecs, BundledIcon, Button, ButtonDespawn, ButtonType, Color, Disabled, Grid,
-    GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker,
-    ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger, Visualizer,
-};
+use workflow_visualizer::{Attach, bevy_ecs, BundledIcon, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Disabled, Grid, GridPoint, IconBitmap, IconBitmapRequest, Line, Panel, PanelType, RawMarker, ResponsiveGridView, ResponsivePathView, ResponsiveUnit, Sender, SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, TouchTrigger, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::{
     Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, NonSend,
     Query, Res, ResMut, Resource,
@@ -223,11 +218,12 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             ButtonType::Press,
             4,
             Color::RED_ORANGE,
-            Color::OFF_BLACK,
+            Color::DARK_GREY,
             "edit",
             "",
             0,
             entry_scale.button_icon_scale,
+            ButtonBorder::None,
         ))
         .id();
     let add_button = AddButton(entity);
@@ -237,11 +233,12 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             ButtonType::Press,
             4,
             Color::OFF_WHITE,
-            Color::OFF_BLACK,
+            Color::DARK_GREY,
             "edit",
             "",
             0,
             entry_scale.button_icon_scale,
+            ButtonBorder::None
         ))
         .id();
     let other = cmd
@@ -249,11 +246,12 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             ButtonType::Press,
             4,
             Color::OFF_WHITE,
-            Color::OFF_BLACK,
+            Color::DARK_GREY,
             "edit",
             "",
             0,
             entry_scale.button_icon_scale,
+            ButtonBorder::None
         ))
         .id();
     cmd.insert_resource(PageLeftButton(entity));
@@ -646,6 +644,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             "",
             15,
             entry_scale.button_icon_scale,
+            ButtonBorder::None
         ))
         .id();
     let edit_button = cmd
@@ -658,6 +657,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             "",
             15,
             entry_scale.button_icon_scale,
+            ButtonBorder::None
         ))
         .id();
     let delete_button = cmd
@@ -670,6 +670,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             "",
             15,
             entry_scale.button_icon_scale,
+            ButtonBorder::None
         ))
         .id();
 
