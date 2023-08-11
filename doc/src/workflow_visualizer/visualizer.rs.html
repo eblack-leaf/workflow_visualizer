@@ -345,6 +345,16 @@
 <a href="#345" id="345">345</a>
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -354,10 +364,7 @@
 <span class="kw">use </span>winit::event::{ElementState, MouseButton};
 <span class="kw">use </span>winit::window::Window;
 
-<span class="kw">use crate</span>::{
-    Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
-    JobSyncPoint, ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
-};
+<span class="kw">use crate</span>::{Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job, JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle, WindowResize};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
@@ -560,12 +567,25 @@
             .get_resource_mut::&lt;MouseAdapter&gt;()
             .expect(<span class="string">&quot;mouse adapter&quot;</span>)
             .location = (position.x, position.y).into();
-        <span class="self">self</span>.job.container.send_event(InteractionEvent::new(
-            InteractionDevice::Mouse,
-            (position.x, position.y).into(),
-            InteractionPhase::Moved,
-            MouseButton::Left.into(), <span class="comment">// wrong id
-        </span>));
+        <span class="kw">let </span>primary_button = <span class="self">self</span>.job.container.get_resource::&lt;PrimaryMouseButton&gt;().expect(<span class="string">&quot;primary_mouse_button&quot;</span>).<span class="number">0</span>.to_mouse_button();
+        <span class="kw">let </span>prime = <span class="self">self</span>.job.container.get_resource::&lt;PrimaryInteraction&gt;().expect(<span class="string">&quot;primary_interaction&quot;</span>).<span class="number">0</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(pri) = prime {
+            <span class="kw">if </span>pri == primary_button.into() {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(cached) = <span class="self">self</span>.job
+                    .container
+                    .get_resource_mut::&lt;MouseAdapter&gt;()
+                    .expect(<span class="string">&quot;mouse adapter&quot;</span>).button_cache.get(<span class="kw-2">&amp;</span>primary_button) {
+                    <span class="kw">if </span><span class="kw-2">*</span>cached == ElementState::Pressed {
+                        <span class="self">self</span>.job.container.send_event(InteractionEvent::new(
+                            InteractionDevice::Mouse,
+                            (position.x, position.y).into(),
+                            InteractionPhase::Moved,
+                            primary_button.into(),
+                        ));
+                    }
+                }
+            }
+        }
     }
     <span class="kw">pub fn </span>cancel_touches(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// self.job.container.send_event(InteractionEvent::new());
