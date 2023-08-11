@@ -389,11 +389,11 @@
 <span class="kw">use </span>bevy_ecs::prelude::{Entity, Query, Resource, Without};
 <span class="kw">use </span>winit::event::{ElementState, MouseButton, TouchPhase};
 
+<span class="kw">use </span><span class="kw">crate</span>::focus::FocusedEntity;
 <span class="kw">use crate</span>::{
     Area, DeviceContext, Disabled, InterfaceContext, Layer, Position, ScaleFactor, Section,
     ViewportHandle,
 };
-<span class="kw">use </span><span class="kw">crate</span>::focus::FocusedEntity;
 
 <span class="attr">#[derive(Copy, Clone, Eq, PartialEq, Hash, Default)]
 </span><span class="kw">pub struct </span>Interaction(<span class="kw">pub </span>u32);

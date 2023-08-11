@@ -151,9 +151,9 @@
 <span class="kw">use </span>tracing::trace;
 
 <span class="kw">use </span><span class="kw">crate</span>::diagnostics::{DiagnosticsHandle, Record};
-<span class="kw">use </span><span class="kw">crate</span>::SyncPoint;
 <span class="kw">use </span><span class="kw">crate</span>::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
+<span class="kw">use </span><span class="kw">crate</span>::SyncPoint;
 
 <span class="doccomment">/// Used to set the Focus of an element
 </span><span class="attr">#[derive(Component)]
@@ -285,7 +285,7 @@
             .task(Visualizer::TASK_MAIN)
             .add_systems((set_focused
                 .in_set(SyncPoint::Preparation)
-                              .after(<span class="kw">crate</span>::interaction::resolve), ));
+                .after(<span class="kw">crate</span>::interaction::resolve),));
     }
 }
 </code></pre></div></section></main></body></html>

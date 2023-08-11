@@ -41,12 +41,12 @@
 <a href="#41" id="41">41</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
 
-<span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
-<span class="kw">use </span><span class="kw">crate</span>::interaction::interaction::{
-    cleanup, InteractionEvent, InteractionLocations, InteractionPhases, MouseAdapter,
-    PrimaryInteraction, PrimaryMouseButton, update_interactions,
-};
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="kw">crate</span>::interaction::interaction::resolve;
+<span class="kw">use </span><span class="kw">crate</span>::interaction::interaction::{
+    cleanup, update_interactions, InteractionEvent, InteractionLocations, InteractionPhases,
+    MouseAdapter, PrimaryInteraction, PrimaryMouseButton,
+};
+<span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>InteractionAttachment;
 
