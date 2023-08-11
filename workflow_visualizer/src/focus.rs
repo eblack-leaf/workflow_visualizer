@@ -6,9 +6,9 @@ use bevy_ecs::prelude::{
 use tracing::trace;
 
 use crate::diagnostics::{DiagnosticsHandle, Record};
-use crate::SyncPoint;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
+use crate::SyncPoint;
 
 /// Used to set the Focus of an element
 #[derive(Component)]
@@ -140,6 +140,6 @@ impl Attach for FocusAttachment {
             .task(Visualizer::TASK_MAIN)
             .add_systems((set_focused
                 .in_set(SyncPoint::Preparation)
-                              .after(crate::interaction::resolve), ));
+                .after(crate::interaction::resolve),));
     }
 }

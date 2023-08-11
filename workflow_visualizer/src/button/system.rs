@@ -2,14 +2,14 @@ use bevy_ecs::change_detection::Res;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
+use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+use crate::text::AlignedFonts;
 use crate::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
     Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
     Toggled,
 };
-use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-use crate::text::AlignedFonts;
 
 pub(crate) fn border_change(
     buttons: Query<(&PanelEntity, &ButtonBorder), Changed<ButtonBorder>>,
@@ -110,7 +110,7 @@ pub(crate) fn color_invert(
     mut color_inverters: Query<(&mut Color), Without<PanelEntity>>,
 ) {
     for (active_interaction, toggle, button_type, foreground, background, panel, icon, text) in
-    buttons.iter()
+        buttons.iter()
     {
         let mut inverted = false;
         match button_type {

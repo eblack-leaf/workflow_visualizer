@@ -2,7 +2,8 @@
 
 use tracing::Level;
 
-use application_logic::{Engen, EntryAttachment};
+use application_logic::Engen;
+use application_logic::EntryAttachment;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
 use workflow_visualizer::Runner;

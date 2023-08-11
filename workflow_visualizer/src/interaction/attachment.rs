@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::IntoSystemConfig;
 
-use crate::{Attach, SyncPoint, Visualizer};
-use crate::interaction::interaction::{
-    cleanup, InteractionEvent, InteractionLocations, InteractionPhases, MouseAdapter,
-    PrimaryInteraction, PrimaryMouseButton, update_interactions,
-};
 pub(crate) use crate::interaction::interaction::resolve;
+use crate::interaction::interaction::{
+    cleanup, update_interactions, InteractionEvent, InteractionLocations, InteractionPhases,
+    MouseAdapter, PrimaryInteraction, PrimaryMouseButton,
+};
+use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct InteractionAttachment;
 

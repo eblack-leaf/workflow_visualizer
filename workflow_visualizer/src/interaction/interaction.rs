@@ -7,11 +7,11 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Entity, Query, Resource, Without};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 
+use crate::focus::FocusedEntity;
 use crate::{
     Area, DeviceContext, Disabled, InterfaceContext, Layer, Position, ScaleFactor, Section,
     ViewportHandle,
 };
-use crate::focus::FocusedEntity;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub struct Interaction(pub u32);

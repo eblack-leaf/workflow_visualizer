@@ -6,7 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use workflow_visualizer::{Visualizer, Workflow};
 
-use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp, ReceivedTokens};
+use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
+use crate::entry_list::ReceivedTokens;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {

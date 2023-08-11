@@ -1,5 +1,5 @@
 pub(crate) use attachment::InteractionAttachment;
-pub(crate) use interaction::{MouseAdapter, resolve};
+pub(crate) use interaction::{resolve, MouseAdapter};
 pub use interaction::{
     ActiveInteraction, Interactable, Interaction, InteractionDevice, InteractionEvent,
     InteractionLocation, InteractionLocations, InteractionPhase, InteractionPhases,

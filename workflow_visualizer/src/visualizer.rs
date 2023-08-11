@@ -7,7 +7,6 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
 use winit::window::Window;
 
-use crate::{Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job, JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme, Viewport, ViewportHandle, WindowResize};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
@@ -27,6 +26,11 @@ use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
+use crate::{
+    Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
+    JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme,
+    Viewport, ViewportHandle, WindowResize,
+};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
@@ -210,14 +214,29 @@ impl Visualizer {
             .get_resource_mut::<MouseAdapter>()
             .expect("mouse adapter")
             .location = (position.x, position.y).into();
-        let primary_button = self.job.container.get_resource::<PrimaryMouseButton>().expect("primary_mouse_button").0.to_mouse_button();
-        let prime = self.job.container.get_resource::<PrimaryInteraction>().expect("primary_interaction").0;
+        let primary_button = self
+            .job
+            .container
+            .get_resource::<PrimaryMouseButton>()
+            .expect("primary_mouse_button")
+            .0
+            .to_mouse_button();
+        let prime = self
+            .job
+            .container
+            .get_resource::<PrimaryInteraction>()
+            .expect("primary_interaction")
+            .0;
         if let Some(pri) = prime {
             if pri == primary_button.into() {
-                if let Some(cached) = self.job
+                if let Some(cached) = self
+                    .job
                     .container
                     .get_resource_mut::<MouseAdapter>()
-                    .expect("mouse adapter").button_cache.get(&primary_button) {
+                    .expect("mouse adapter")
+                    .button_cache
+                    .get(&primary_button)
+                {
                     if *cached == ElementState::Pressed {
                         self.job.container.send_event(InteractionEvent::new(
                             InteractionDevice::Mouse,
