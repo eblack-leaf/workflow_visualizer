@@ -1,22 +1,17 @@
-use std::collections::HashMap;
-
-use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, Resource};
-use bytemuck::{Pod, Zeroable};
-use compact_str::CompactString;
+use bevy_ecs::prelude::{Commands, Entity, Query, Res, Resource};
 use wgpu::util::DeviceExt;
 
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::icon::bitmap::{
-    IconBitmapLayout, IconBitmapRequest, IconPixelData, ICON_BITMAP_DIMENSION,
-};
-use crate::icon::component::IconId;
-use crate::texture_atlas::AtlasLocation;
 use crate::{
-    Area, AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasPosition, Color, GfxSurface, Indexer,
-    InstanceAttributeManager, InterfaceContext, Key, KeyFactory, Layer, NullBit, NumericalContext,
-    Position, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, Section, TextureAtlas,
+    AtlasBindGroup, AtlasBlock, AtlasDimension, Color, GfxSurface, Indexer,
+    InstanceAttributeManager, Layer, NullBit,
+    RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
     TextureCoordinates, Viewport,
 };
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::icon::bitmap::{
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
+};
+use crate::texture_atlas::AtlasLocation;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {
@@ -103,7 +98,7 @@ pub(crate) fn setup(
         cmd.entity(entity).despawn();
     }
     let mut icon_bitmap_layout = IconBitmapLayout::new();
-    let dimension = AtlasDimension::new(((writes.len() as f32 / 2f32).ceil() as u32).max(1));
+    let dimension = AtlasDimension::new(((writes.len() as f32).sqrt().ceil() as u32).max(1));
     let block = AtlasBlock::new((ICON_BITMAP_DIMENSION, ICON_BITMAP_DIMENSION));
     let atlas = TextureAtlas::new(&gfx, block, dimension);
     let mut x_index = 0;

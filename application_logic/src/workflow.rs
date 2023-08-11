@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use workflow_visualizer::{Visualizer, Workflow};
 
-use crate::entry::{ReadOtp, ReceivedTokens};
+use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp, ReceivedTokens};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Response {
@@ -113,8 +113,12 @@ impl Workflow for Engen {
 
     fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
         match response {
-            Response::TokenAdded(_name) => {}
-            Response::TokenRemoved(_name) => {}
+            Response::TokenAdded(name) => {
+                visualizer.job.container.send_event(EntryAddToken(name));
+            }
+            Response::TokenRemoved(name) => {
+                visualizer.job.container.send_event(EntryRemoveToken(name));
+            }
             Response::TokenOtp((name, otp)) => {
                 visualizer.job.container.send_event(ReadOtp(name, otp));
             }
@@ -127,12 +131,18 @@ impl Workflow for Engen {
 
     async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
         match action {
-            Action::AddToken((name, _token)) => Response::TokenAdded(name),
+            Action::AddToken((name, _token)) => {
+                engen.lock().unwrap().tokens.insert(name.clone(), _token);
+                Response::TokenAdded(name)
+            }
             Action::GenerateOtp(name) => {
                 let otp = "143647".to_string();
                 Response::TokenOtp((name, TokenOtp(otp)))
             }
-            Action::RemoveToken(name) => Response::TokenRemoved(name),
+            Action::RemoveToken(name) => {
+                engen.lock().unwrap().tokens.remove(&name);
+                Response::TokenRemoved(name)
+            }
             Action::RequestTokenNames => Response::RequestedTokenNames(
                 engen.lock().unwrap().tokens.keys().cloned().collect(),
             ),

@@ -6,13 +6,10 @@ use workflow_visualizer::{
     ResponsiveGridView, ResponsivePathView, ResponsiveUnit, ScaleFactor, Sender, SyncPoint, Text,
     TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer,
 };
-use workflow_visualizer::bevy_ecs::prelude::{
-    Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, NonSend,
-    Query, Res, ResMut, Resource,
-};
+use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Component, DetectChanges, Entity, EventReader, IntoSystemConfig, Local, NonSend, Query, Res, ResMut, Resource};
 
 use crate::Engen;
-use crate::workflow::{Action, TokenName, TokenOtp};
+use crate::workflow::{Action, Token, TokenName, TokenOtp};
 
 pub struct EntryAttachment;
 
@@ -20,6 +17,8 @@ impl Attach for EntryAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.add_event::<ReceivedTokens>();
         visualizer.add_event::<ReadOtp>();
+        visualizer.add_event::<EntryAddToken>();
+        visualizer.add_event::<EntryRemoveToken>();
         visualizer.spawn(IconBitmapRequest::from((
             "edit",
             IconBitmap::bundled(BundledIcon::Edit),
@@ -67,7 +66,12 @@ impl Attach for EntryAttachment {
                 .before(set_max_page),
             entry_list_layout.in_set(SyncPoint::Preparation),
         ));
-        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((receive_tokens.in_set(SyncPoint::PostInitialization), ));
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            receive_tokens.in_set(SyncPoint::PostInitialization),
+            receive_add_token.in_set(SyncPoint::PostInitialization),
+            receive_remove_token.in_set(SyncPoint::PostInitialization),
+            process_entry_buttons.in_set(SyncPoint::Process),
+        ));
     }
 }
 
@@ -198,7 +202,6 @@ pub(crate) fn display_name(
 pub(crate) struct EntryOtp(pub(crate) Option<TokenOtp>);
 
 pub(crate) struct ReadOtp(pub(crate) TokenName, pub(crate) TokenOtp);
-
 pub(crate) fn read_otp(
     mut entries: Query<(&EntryName, &mut EntryOtp)>,
     mut events: EventReader<ReadOtp>,
@@ -212,6 +215,45 @@ pub(crate) fn read_otp(
     }
 }
 
+pub(crate) struct EntryAddToken(pub(crate) TokenName);
+
+pub(crate) fn receive_add_token(
+    mut events: EventReader<EntryAddToken>,
+    mut cmd: Commands,
+    entry_scale: Res<EntryScale>,
+    mut total_entries: ResMut<TotalEntries>,
+) {
+    for event in events.iter() {
+        let entry = create_entry(&mut cmd, &entry_scale);
+        cmd.spawn((
+            entry,
+            EntryName(event.0.clone()),
+            EntryOtp(None),
+            EntryEnabled(false),
+            EntryIndex(total_entries.0),
+            EntryListPosition(None),
+        ));
+        total_entries.0 += 1;
+    }
+}
+
+pub(crate) struct EntryRemoveToken(pub(crate) TokenName);
+
+pub(crate) fn receive_remove_token(
+    mut events: EventReader<EntryRemoveToken>,
+    mut removed_indices: ResMut<RemovedEntryIndices>,
+    entries: Query<(Entity, &Entry, &EntryName, &EntryIndex)>,
+    mut cmd: Commands,
+) {
+    for event in events.iter() {
+        for (entity, entry, entry_name, entry_index) in entries.iter() {
+            if entry_name.0 == event.0 {
+                delete_entry(&mut cmd, entity, &entry);
+                removed_indices.0.push(entry_index.0);
+            }
+        }
+    }
+}
 pub(crate) fn display_otp(
     entries: Query<(&Entry, &EntryOtp), Changed<EntryOtp>>,
     mut text: Query<&mut TextValue>,
@@ -283,26 +325,33 @@ pub(crate) fn place_bottom_panel_buttons(
     mut cmd: Commands,
 ) {
     if entry_list_layout.is_changed() {
-        let horizontal_start = entry_list_layout.horizontal_markers.0 / 2 - list_dimensions.entry.0 / 2;
+        let horizontal_start =
+            entry_list_layout.horizontal_markers.0 / 2 - list_dimensions.entry.0 / 2;
         let horizontal = (
             1.near().raw_offset(horizontal_start),
-            1.near().raw_offset(horizontal_start + list_dimensions.entry.0),
+            1.near()
+                .raw_offset(horizontal_start + list_dimensions.entry.0),
         );
         let vertical_start = entry_list_layout.vertical_markers.0 + list_dimensions.padding.0;
         let vertical = (
             1.near().raw_offset(vertical_start),
-            1.near().raw_offset(vertical_start + list_dimensions.entry.0),
+            1.near()
+                .raw_offset(vertical_start + list_dimensions.entry.0),
         );
         let view = (horizontal, vertical);
         cmd.entity(add_button.0)
             .insert(ResponsiveGridView::all_same(view));
         let page_left_horizontal = (
-            horizontal.0.raw_offset(-list_dimensions.padding.0 - list_dimensions.entry.0),
+            horizontal
+                .0
+                .raw_offset(-list_dimensions.padding.0 - list_dimensions.entry.0),
             horizontal.0.raw_offset(-list_dimensions.padding.0),
         );
         let page_right_horizontal = (
             horizontal.1.raw_offset(list_dimensions.padding),
-            horizontal.1.raw_offset(list_dimensions.padding + list_dimensions.entry),
+            horizontal
+                .1
+                .raw_offset(list_dimensions.padding + list_dimensions.entry),
         );
         let page_left_view = (page_left_horizontal, vertical);
         let page_right_view = (page_right_horizontal, vertical);
@@ -341,11 +390,11 @@ pub(crate) fn entry_list_placements(
     if entry_list_layout.is_changed() {
         placements.0.insert(
             "info-panel-offset",
-            (entry_list_layout.horizontal_markers.0 - 2 * list_dimensions.entry.0 - 2).into(),
+            (entry_list_layout.horizontal_markers.0 - 2 * list_dimensions.entry.0).into(),
         );
         placements.0.insert(
             "edit-panel-offset",
-            (entry_list_layout.horizontal_markers.0 - list_dimensions.entry.0 - 1).into(),
+            (entry_list_layout.horizontal_markers.0 - list_dimensions.entry.0).into(),
         );
         let midpoint =
             (placements.0.get("info-panel-offset").unwrap().0 as f32 / 2f32).ceil() as i32;
@@ -353,12 +402,15 @@ pub(crate) fn entry_list_placements(
         placements
             .0
             .insert("name-near-horizontal", (list_dimensions.padding).into());
-        let nfh = placements.0.get("info-panel-midpoint").unwrap().0 - list_dimensions.padding.0 * 2;
+        let nfh =
+            placements.0.get("info-panel-midpoint").unwrap().0 - list_dimensions.padding.0 * 2;
         placements.0.insert("name-far-horizontal", nfh.into());
-        let onh = placements.0.get("info-panel-midpoint").unwrap().0 + list_dimensions.padding.0 * 2;
+        let onh =
+            placements.0.get("info-panel-midpoint").unwrap().0 + list_dimensions.padding.0 * 2;
         placements.0.insert("otp-near-horizontal", onh.into());
-        let ofh =
-            placements.0.get("info-panel-offset").unwrap().0 - list_dimensions.padding.0 * 4 - list_dimensions.content.0;
+        let ofh = placements.0.get("info-panel-offset").unwrap().0
+            - list_dimensions.padding.0 * 2
+            - list_dimensions.content.0;
         placements.0.insert("otp-far-horizontal", ofh.into());
         let gbfh = placements.0.get("info-panel-offset").unwrap().0 - list_dimensions.padding.0;
         placements
@@ -377,7 +429,8 @@ pub(crate) fn entry_list_placements(
         placements
             .0
             .insert("edit-button-near-horizontal", ebnh.into());
-        let ebfh = placements.0.get("edit-button-near-horizontal").unwrap().0 + list_dimensions.content.0;
+        let ebfh =
+            placements.0.get("edit-button-near-horizontal").unwrap().0 + list_dimensions.content.0;
         placements
             .0
             .insert("edit-button-far-horizontal", ebfh.into());
@@ -385,16 +438,20 @@ pub(crate) fn entry_list_placements(
         placements
             .0
             .insert("delete-button-near-horizontal", bdnh.into());
-        let dbfh = placements.0.get("delete-button-near-horizontal").unwrap().0 + list_dimensions.content.0;
+        let dbfh = placements.0.get("delete-button-near-horizontal").unwrap().0
+            + list_dimensions.content.0;
         placements
             .0
             .insert("delete-button-far-horizontal", dbfh.into());
         let lx = placements.0.get("info-panel-midpoint").unwrap().0;
         placements.0.insert("line-x", lx.into());
-        placements.0.insert("line-y-top", (list_dimensions.padding).into());
         placements
             .0
-            .insert("line-y-bottom", (list_dimensions.entry.0 - list_dimensions.padding.0).into());
+            .insert("line-y-top", (list_dimensions.padding).into());
+        placements.0.insert(
+            "line-y-bottom",
+            (list_dimensions.entry.0 - list_dimensions.padding.0).into(),
+        );
     }
 }
 
@@ -425,7 +482,9 @@ pub(crate) fn position(
                 ),
                 (
                     anchor.y.raw_offset(list_dimensions.padding),
-                    anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
+                    anchor
+                        .y
+                        .raw_offset(list_dimensions.padding + list_dimensions.content),
                 ),
             )));
             cmd.entity(entry.otp).insert(ResponsiveGridView::all_same((
@@ -439,7 +498,9 @@ pub(crate) fn position(
                 ),
                 (
                     anchor.y.raw_offset(list_dimensions.padding),
-                    anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
+                    anchor
+                        .y
+                        .raw_offset(list_dimensions.padding + list_dimensions.content),
                 ),
             )));
             cmd.entity(entry.info_panel)
@@ -486,7 +547,9 @@ pub(crate) fn position(
                     ),
                     (
                         anchor.y.raw_offset(list_dimensions.padding),
-                        anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
+                        anchor
+                            .y
+                            .raw_offset(list_dimensions.padding + list_dimensions.content),
                     ),
                 )));
             cmd.entity(entry.edit_button)
@@ -501,7 +564,9 @@ pub(crate) fn position(
                     ),
                     (
                         anchor.y.raw_offset(list_dimensions.padding),
-                        anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
+                        anchor
+                            .y
+                            .raw_offset(list_dimensions.padding + list_dimensions.content),
                     ),
                 )));
             cmd.entity(entry.delete_button)
@@ -516,7 +581,9 @@ pub(crate) fn position(
                     ),
                     (
                         anchor.y.raw_offset(list_dimensions.padding),
-                        anchor.y.raw_offset(list_dimensions.padding + list_dimensions.content),
+                        anchor
+                            .y
+                            .raw_offset(list_dimensions.padding + list_dimensions.content),
                     ),
                 )));
             cmd.entity(entry.line)
@@ -811,17 +878,17 @@ pub(crate) struct ListDimensions {
 
 pub(crate) fn dimension_change(
     mut dimensions: ResMut<ListDimensions>,
-    mut entry_scale: ResMut<EntryScale>,
+    // mut entry_scale: ResMut<EntryScale>,
     scale_factor: Res<ScaleFactor>,
 ) {
     if scale_factor.is_changed() {
-        let entry = (10f64 * scale_factor.factor()).floor() as i32;
+        // let entry = (10f64 * scale_factor.factor()).floor() as i32;
         let entry = 10;
         dimensions.entry = entry.into();
-        let padding = (2f64 * scale_factor.factor()).floor() as i32;
+        // let padding = (2f64 * scale_factor.factor()).floor() as i32;
         let padding = 2;
         dimensions.padding = padding.into();
-        let content = ((entry - 2 * padding) as f64 * scale_factor.factor()).floor() as i32;
+        // let content = ((entry - 2 * padding) as f64 * scale_factor.factor()).floor() as i32;
         let content = entry - 2 * padding;
         dimensions.content = content.into();
     }
@@ -852,7 +919,8 @@ pub(crate) fn entry_list_layout(
             - 2 * list_dimensions.padding.0;
         entry_list_layout.horizontal_markers = horizontal_markers.max(1).into();
         entry_list_layout.vertical_markers = vertical_markers.max(1).into();
-        entries_per.0 = (vertical_markers / (list_dimensions.entry.0 + list_dimensions.padding.0)) as u32;
+        entries_per.0 =
+            (vertical_markers / (list_dimensions.entry.0 + list_dimensions.padding.0)) as u32;
         entries_per.0 = entries_per.0.max(1);
     }
 }
@@ -864,10 +932,18 @@ pub(crate) fn process_bottom_panel_buttons(
     page_left_button: Res<PageLeftButton>,
     page_right_button: Res<PageRightButton>,
     buttons: Query<&Triggered>,
+    sender: NonSend<Sender<Engen>>,
+    mut counter: Local<u32>,
 ) {
     if let Ok(trigger) = buttons.get(add.0) {
         if trigger.active() {
             // add logic
+            let name = "hi".to_string() + counter.to_string().as_str();
+            *counter += 1;
+            sender.send(Action::AddToken(
+                (TokenName(name),
+                 Token("362452".into()))
+            ));
         }
     }
     if let Ok(trigger) = buttons.get(page_left_button.0) {
@@ -878,6 +954,30 @@ pub(crate) fn process_bottom_panel_buttons(
     if let Ok(trigger) = buttons.get(page_right_button.0) {
         if trigger.active() {
             page_right.0 = true;
+        }
+    }
+}
+
+pub(crate) fn process_entry_buttons(
+    triggers: Query<&Triggered>,
+    entries: Query<(&Entry, &EntryName)>,
+    sender: NonSend<Sender<Engen>>,
+) {
+    for (entry, entry_name) in entries.iter() {
+        if let Ok(trigger) = triggers.get(entry.generate_button) {
+            if trigger.active() {
+                sender.send(Action::GenerateOtp(entry_name.0.clone()));
+            }
+        }
+        if let Ok(trigger) = triggers.get(entry.edit_button) {
+            if trigger.active() {
+                // trigger edit animation
+            }
+        }
+        if let Ok(trigger) = triggers.get(entry.delete_button) {
+            if trigger.active() {
+                sender.send(Action::RemoveToken(entry_name.0.clone()));
+            }
         }
     }
 }

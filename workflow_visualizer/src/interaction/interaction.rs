@@ -39,6 +39,19 @@ impl From<MouseButton> for Interaction {
     }
 }
 
+impl Interaction {
+    pub fn to_mouse_button(&self) -> MouseButton {
+        if self.0 == 0 {
+            MouseButton::Left
+        } else if self.0 == 1 {
+            MouseButton::Right
+        } else if self.0 == 2 {
+            MouseButton::Middle
+        } else {
+            MouseButton::Other(self.0 as u16)
+        }
+    }
+}
 #[derive(Resource)]
 pub struct PrimaryMouseButton(pub(crate) Interaction);
 
