@@ -117,7 +117,7 @@
 <span class="kw">pub use </span>wgpu;
 <span class="kw">pub use </span>winit;
 
-<span class="kw">pub use </span>animation::{InterpolationExtraction, Interpolator};
+<span class="kw">pub use </span>animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 <span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension};
 <span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::GridLocation;
@@ -146,12 +146,12 @@
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
-<span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
+<span class="kw">pub use </span>workflow::{Runner, Sender, start_web_worker, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
+    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 <span class="kw">pub use </span><span class="kw">crate</span>::disable::Disabled;
@@ -184,7 +184,7 @@
 <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
 
-<span class="kw">mod </span>animation;
+<span class="kw">mod </span>animate;
 <span class="kw">mod </span>bundling;
 <span class="kw">mod </span>button;
 <span class="kw">mod </span>color;
