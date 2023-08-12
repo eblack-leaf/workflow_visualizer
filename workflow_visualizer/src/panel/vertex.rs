@@ -3,8 +3,8 @@ use std::f32::consts::{FRAC_PI_2, PI};
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
 
+use crate::{DeviceContext, InterfaceContext, Interpolation, Panel, Position, RawPosition};
 use crate::gfx::GfxSurface;
-use crate::{DeviceContext, InterfaceContext, Interpolator, Panel, Position, RawPosition};
 
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Debug)]
@@ -55,8 +55,8 @@ pub(crate) fn generate_panel_corner(
     let mut current_angle = current;
     let mut last =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
-    let mut interpolator = Interpolator::new(FRAC_PI_2);
-    let mut extraction = interpolator.extract(delta);
+    let mut interpolator = Interpolation::new(FRAC_PI_2);
+    let mut extraction = interpolator.extract(delta).expect("extract");
     current_angle += extraction.0;
     let point =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
@@ -64,8 +64,8 @@ pub(crate) fn generate_panel_corner(
     tris.push(last);
     tris.push(point);
     last = point;
-    while !extraction.1 {
-        extraction = interpolator.extract(delta);
+    while !interpolator.done() {
+        extraction = interpolator.extract(delta).expect("extract");
         current_angle += extraction.0;
         let point =
             current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
@@ -219,8 +219,8 @@ pub(crate) fn generate_border_corner(
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
     let mut inner_bottom =
         current_corner + position_from_angle(current_angle, line_width_offset, scale_factor);
-    let mut interpolator = Interpolator::new(FRAC_PI_2);
-    let mut extraction = interpolator.extract(delta);
+    let mut interpolator = Interpolation::new(FRAC_PI_2);
+    let mut extraction = interpolator.extract(delta).expect("extract");
     current_angle += extraction.0;
     let mut outer_top =
         current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
@@ -230,8 +230,8 @@ pub(crate) fn generate_border_corner(
     tris.extend([inner_bottom, outer_bottom, outer_top]);
     inner_bottom = inner_top;
     outer_bottom = outer_top;
-    while !extraction.1 {
-        extraction = interpolator.extract(delta);
+    while !interpolator.done() {
+        extraction = interpolator.extract(delta).expect("extract");
         current_angle += extraction.0;
         outer_top =
             current_corner + position_from_angle(current_angle, Panel::CORNER_DEPTH, scale_factor);
