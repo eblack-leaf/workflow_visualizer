@@ -7,11 +7,6 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
 use winit::window::Window;
 
-use crate::{
-    Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
-    JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme,
-    Viewport, ViewportHandle, WindowResize,
-};
 use crate::animate::{end_animations, start_animations, update_animations};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
@@ -32,6 +27,11 @@ use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
+use crate::{
+    Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
+    JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme,
+    Viewport, ViewportHandle, WindowResize,
+};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);

@@ -339,6 +339,15 @@ impl InteractionLocation {
             end: None,
         }
     }
+    pub fn current(&self) -> Position<InterfaceContext> {
+        self.current
+    }
+    pub fn start(&self) -> Position<InterfaceContext> {
+        self.start
+    }
+    pub fn end(&self) -> Option<Position<InterfaceContext>> {
+        self.end
+    }
 }
 
 #[derive(Resource, Default)]
