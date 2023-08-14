@@ -1,10 +1,11 @@
-use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
-use crate::entry_list::{ListDimensions, ReceivedTokens};
-use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
-use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
 use workflow_visualizer::{
     Attach, BundledIcon, IconBitmap, IconBitmapRequest, SyncPoint, Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
+
+use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
+use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
+use crate::entry_list::{ListDimensions, ReceivedTokens};
 
 pub struct EntryAttachment;
 
@@ -31,8 +32,8 @@ impl Attach for EntryAttachment {
             IconBitmap::bundled(BundledIcon::ArrowRight),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "generate",
-            IconBitmap::bundled(BundledIcon::Generate),
+            "run",
+            IconBitmap::bundled(BundledIcon::Run),
         )));
         visualizer.spawn(IconBitmapRequest::from((
             "delete",

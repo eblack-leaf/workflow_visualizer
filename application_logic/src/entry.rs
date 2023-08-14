@@ -1,16 +1,16 @@
-use crate::enable::EntryEnabled;
-use workflow_visualizer::bevy_ecs::prelude::{
-    Changed, Commands, Component, Entity, EventReader, NonSend, Query, Res, ResMut,
-};
 use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Line, Panel, PanelType,
     Sender, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered,
 };
+use workflow_visualizer::bevy_ecs::prelude::{
+    Changed, Commands, Component, Entity, EventReader, NonSend, Query, Res, ResMut,
+};
 
+use crate::enable::EntryEnabled;
+use crate::Engen;
 use crate::entry_list::{EntryIndex, EntryScale, RemovedEntryIndices, TotalEntries};
 use crate::positioning::EntryListPosition;
 use crate::workflow::{Action, TokenName, TokenOtp};
-use crate::Engen;
 
 pub(crate) fn request_tokens(sender: NonSend<Sender<Engen>>) {
     sender.send(Action::RequestTokenNames);
@@ -179,7 +179,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             Color::from(Color::LIGHT_GREEN).with_alpha(1f32),
             Color::from(Color::DARK_GREEN).with_alpha(1f32),
-            "edit",
+            "run",
             "",
             15,
             entry_scale.button_icon_scale,

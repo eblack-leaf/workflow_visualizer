@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Resource;
-use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
 use crate::icon::component::IconId;
@@ -49,7 +48,7 @@ pub enum BundledIcon {
     Add,
     ArrowRight,
     ArrowLeft,
-    Generate,
+    Run,
     Delete
 }
 
@@ -83,8 +82,8 @@ impl IconBitmap {
             BundledIcon::ArrowLeft => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/page_left.icon"
             ))),
-            BundledIcon::Generate => Self::new(Self::read_icon_file(include_str!(
-                "bundled_icons/generate.icon"
+            BundledIcon::Run => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/run.icon"
             ))),
             BundledIcon::Delete => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/delete.icon"
