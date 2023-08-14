@@ -136,12 +136,10 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
-<span class="kw">use </span>bytemuck::{Pod, Zeroable};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::IconId;
@@ -188,7 +186,7 @@
     Add,
     ArrowRight,
     ArrowLeft,
-    Generate,
+    Run,
     Delete
 }
 
@@ -222,8 +220,8 @@
             BundledIcon::ArrowLeft =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/page_left.icon&quot;
             </span>))),
-            BundledIcon::Generate =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
-                <span class="string">&quot;bundled_icons/generate.icon&quot;
+            BundledIcon::Run =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
+                <span class="string">&quot;bundled_icons/run.icon&quot;
             </span>))),
             BundledIcon::Delete =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/delete.icon&quot;
