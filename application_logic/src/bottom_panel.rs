@@ -15,49 +15,49 @@ use workflow_visualizer::{
 pub(crate) struct AddButton(pub(crate) Entity);
 
 pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<EntryScale>) {
-    let entity = cmd
+    let add_button_entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
             4,
             Color::RED_ORANGE,
             Color::DARK_GREY,
-            "edit",
+            "add",
             "",
             0,
             entry_scale.button_icon_scale,
             ButtonBorder::None,
         ))
         .id();
-    let add_button = AddButton(entity);
+    let add_button = AddButton(add_button_entity);
     cmd.insert_resource(add_button);
-    let entity = cmd
+    let page_left_entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
             4,
             Color::OFF_WHITE,
             Color::DARK_GREY,
-            "edit",
+            "page_left",
             "",
             0,
             entry_scale.button_icon_scale,
             ButtonBorder::None,
         ))
         .id();
-    let other = cmd
+    let page_right_entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
             4,
             Color::OFF_WHITE,
             Color::DARK_GREY,
-            "edit",
+            "page_right",
             "",
             0,
             entry_scale.button_icon_scale,
             ButtonBorder::None,
         ))
         .id();
-    cmd.insert_resource(PageLeftButton(entity));
-    cmd.insert_resource(PageRightButton(other));
+    cmd.insert_resource(PageLeftButton(page_left_entity));
+    cmd.insert_resource(PageRightButton(page_right_entity));
 }
 
 pub(crate) fn place_bottom_panel_buttons(

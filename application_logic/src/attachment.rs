@@ -19,8 +19,24 @@ impl Attach for EntryAttachment {
             IconBitmap::bundled(BundledIcon::Edit),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "square",
-            IconBitmap::bundled(BundledIcon::Square),
+            "add",
+            IconBitmap::bundled(BundledIcon::Add),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "page_left",
+            IconBitmap::bundled(BundledIcon::ArrowLeft),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "page_right",
+            IconBitmap::bundled(BundledIcon::ArrowRight),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "generate",
+            IconBitmap::bundled(BundledIcon::Generate),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "delete",
+            IconBitmap::bundled(BundledIcon::Delete),
         )));
         visualizer
             .job

@@ -46,6 +46,11 @@ pub struct IconBitmap {
 pub enum BundledIcon {
     Square,
     Edit,
+    Add,
+    ArrowRight,
+    ArrowLeft,
+    Generate,
+    Delete
 }
 
 impl IconBitmap {
@@ -68,6 +73,21 @@ impl IconBitmap {
             ))),
             BundledIcon::Edit => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/edit.icon"
+            ))),
+            BundledIcon::Add => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/add.icon"
+            ))),
+            BundledIcon::ArrowRight => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/page_right.icon"
+            ))),
+            BundledIcon::ArrowLeft => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/page_left.icon"
+            ))),
+            BundledIcon::Generate => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/generate.icon"
+            ))),
+            BundledIcon::Delete => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/delete.icon"
             ))),
         }
     }

@@ -116,7 +116,8 @@ pub(crate) fn side_panel_button_triggers(
                         .coverage_values
                         .get(&PadLocation::new(x, y))
                         .expect("coverage-value");
-                    println!("{:?}", value);
+                    let comma = if x == 19 && y == 19 { "" } else { "," };
+                    println!("{:?}{}", value, comma);
                 }
             }
             println!("]");
@@ -188,15 +189,15 @@ pub(crate) fn setup(mut cmd: Commands) {
         coverage_vertical.0.raw_offset(1),
         coverage_vertical.0.raw_offset(Pad::PAD_BUTTON_SCALE),
     );
-    let icon_scale = (Pad::PAD_BUTTON_SCALE - 2) as f32 * RawMarker::PX;
+    let icon_scale = (Pad::PAD_BUTTON_SCALE - 4) as f32 * RawMarker::PX;
     let icon_scale = icon_scale as u32;
     let coverage_left = cmd
         .spawn(
             Button::new(
                 ButtonType::Press,
                 Pad::PAD_LAYER,
-                Color::OFF_WHITE,
                 Color::DARK_GREY,
+                Color::OFF_WHITE,
                 "edit",
                 "",
                 0,
@@ -219,9 +220,9 @@ pub(crate) fn setup(mut cmd: Commands) {
         .spawn(
             Button::new(
                 ButtonType::Press,
-                Pad::PAD_PADDING,
-                Color::OFF_WHITE,
+                Pad::PAD_LAYER,
                 Color::DARK_GREY,
+                Color::OFF_WHITE,
                 "edit",
                 "",
                 0,
@@ -244,12 +245,12 @@ pub(crate) fn setup(mut cmd: Commands) {
             Button::new(
                 ButtonType::Press,
                 Pad::PAD_PADDING,
+                Color::DARK_GREY,
                 Color::OFF_WHITE,
-                Color::OFF_BLACK,
                 "edit",
                 "write-out",
                 17,
-                icon_scale - 2,
+                17,
                 ButtonBorder::Border,
             )
             .responsively_viewed(ResponsiveGridView::all_same((
@@ -295,7 +296,7 @@ impl Pad {
     pub(crate) const ICON_DIMENSION: i32 = 20;
     pub(crate) const PAD_LAYER: u32 = 5;
     pub(crate) const PAD_PADDING: i32 = 4;
-    pub(crate) const PAD_BUTTON_SCALE: i32 = 6;
+    pub(crate) const PAD_BUTTON_SCALE: i32 = 10;
     pub(crate) fn new(panel: Entity, anchor: GridPoint) -> Self {
         Self {
             panel,
