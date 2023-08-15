@@ -101,7 +101,6 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 window.as_ref().unwrap().request_redraw();
             }
             if visualizer.can_idle() {
-                #[cfg(not(target_family = "wasm"))]
                 control_flow.set_wait();
             } else {
                 control_flow.set_poll();
