@@ -321,14 +321,14 @@
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-<span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-<span class="kw">use </span><span class="kw">crate</span>::text::AlignedFonts;
 <span class="kw">use crate</span>::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
     Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
     Toggled,
 };
+<span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+<span class="kw">use </span><span class="kw">crate</span>::text::AlignedFonts;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(
     buttons: Query&lt;(<span class="kw-2">&amp;</span>PanelEntity, <span class="kw-2">&amp;</span>ButtonBorder), Changed&lt;ButtonBorder&gt;&gt;,
@@ -520,14 +520,14 @@
                 Area::&lt;DeviceContext&gt;::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());
             <span class="kw">let </span>len = button_text.<span class="number">0</span>.len() <span class="kw">as </span>f32;
-            <span class="kw">let </span>x = center.x
-                - logical_dimensions.width * (len / <span class="number">2f32</span>).ceil()
-                - scaling.icon.px() / <span class="number">2f32</span>;
+            <span class="kw">let </span>x = center.x - logical_dimensions.width * (len / <span class="number">2f32</span>).ceil()
+                + scaling.icon.px() / <span class="number">2f32
+                </span>+ RawMarker(<span class="number">2</span>).to_pixel();
             <span class="kw">let </span>y = center.y - logical_dimensions.height / <span class="number">2f32</span>;
             <span class="kw">let </span>width = logical_dimensions.width * len;
             <span class="kw">let </span>height = logical_dimensions.height;
             <span class="kw">let </span>text_section = Section::new((x, y), (width, height));
-            <span class="kw">let </span>icon_x = text_section.right() + RawMarker::PX;
+            <span class="kw">let </span>icon_x = text_section.left() - RawMarker(<span class="number">2</span>).to_pixel() - scaling.icon.px();
             <span class="kw">let </span>icon_y = text_section.top() + RawMarker::PX;
             (<span class="prelude-val">Some</span>(text_section), Position::new(icon_x, icon_y))
         };

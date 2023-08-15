@@ -136,6 +136,10 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -187,7 +191,8 @@
     ArrowRight,
     ArrowLeft,
     Run,
-    Delete
+    Delete,
+    Generate,
 }
 
 <span class="kw">impl </span>IconBitmap {
@@ -209,22 +214,25 @@
                 <span class="string">&quot;bundled_icons/square.icon&quot;
             </span>))),
             BundledIcon::Edit =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
-                <span class="string">&quot;bundled_icons/edit.icon&quot;
+                <span class="string">&quot;bundled_icons/edit_alt.icon&quot;
             </span>))),
-            BundledIcon::Add =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
-                <span class="string">&quot;bundled_icons/add.icon&quot;
-            </span>))),
+            BundledIcon::Add =&gt; {
+                <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(<span class="string">&quot;bundled_icons/add.icon&quot;</span>)))
+            }
             BundledIcon::ArrowRight =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/page_right.icon&quot;
             </span>))),
             BundledIcon::ArrowLeft =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/page_left.icon&quot;
             </span>))),
-            BundledIcon::Run =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
-                <span class="string">&quot;bundled_icons/run.icon&quot;
-            </span>))),
+            BundledIcon::Run =&gt; {
+                <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(<span class="string">&quot;bundled_icons/run.icon&quot;</span>)))
+            }
             BundledIcon::Delete =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/delete.icon&quot;
+            </span>))),
+            BundledIcon::Generate =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
+                <span class="string">&quot;bundled_icons/generate.icon&quot;
             </span>))),
         }
     }
@@ -265,7 +273,7 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>ICON_BITMAP_DIMENSION: u32 = <span class="number">20</span>;
+<span class="kw">pub const </span>ICON_BITMAP_DIMENSION: u32 = <span class="number">20</span>;
 
 <span class="attr">#[cfg(test)]
 #[test]
