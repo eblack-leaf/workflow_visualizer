@@ -179,7 +179,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             Color::from(Color::LIGHT_GREEN).with_alpha(1f32),
             Color::from(Color::DARK_GREEN).with_alpha(1f32),
-            "run",
+            "generate",
             "",
             15,
             entry_scale.button_icon_scale,

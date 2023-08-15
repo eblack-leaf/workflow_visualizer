@@ -1,15 +1,16 @@
-use crate::entry_list::EntryScale;
-use crate::entry_list::{EntryListLayout, ListDimensions};
-use crate::paging::{PageLeft, PageRight};
-use crate::workflow::{Action, Token, TokenName};
-use crate::Engen;
-use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
-use workflow_visualizer::bevy_ecs::entity::Entity;
-use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Resource};
 use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonType, Color, ResponsiveGridView, ResponsiveUnit, Sender,
     Triggered,
 };
+use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
+use workflow_visualizer::bevy_ecs::entity::Entity;
+use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Resource};
+
+use crate::Engen;
+use crate::entry_list::{EntryListLayout, ListDimensions};
+use crate::entry_list::EntryScale;
+use crate::paging::{PageLeft, PageRight};
+use crate::workflow::{Action, Token, TokenName};
 
 #[derive(Resource)]
 pub(crate) struct AddButton(pub(crate) Entity);
@@ -18,12 +19,12 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
     let add_button_entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
-            4,
+            5,
             Color::RED_ORANGE,
             Color::DARK_GREY,
             "add",
             "",
-            0,
+            15,
             entry_scale.button_icon_scale,
             ButtonBorder::None,
         ))
@@ -33,12 +34,12 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
     let page_left_entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
-            4,
+            5,
             Color::OFF_WHITE,
             Color::DARK_GREY,
             "page_left",
             "",
-            0,
+            15,
             entry_scale.button_icon_scale,
             ButtonBorder::None,
         ))
@@ -46,12 +47,12 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
     let page_right_entity = cmd
         .spawn(Button::new(
             ButtonType::Press,
-            4,
+            5,
             Color::OFF_WHITE,
             Color::DARK_GREY,
             "page_right",
             "",
-            0,
+            15,
             entry_scale.button_icon_scale,
             ButtonBorder::None,
         ))

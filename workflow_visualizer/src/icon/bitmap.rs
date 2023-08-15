@@ -49,7 +49,8 @@ pub enum BundledIcon {
     ArrowRight,
     ArrowLeft,
     Run,
-    Delete
+    Delete,
+    Generate,
 }
 
 impl IconBitmap {
@@ -71,22 +72,25 @@ impl IconBitmap {
                 "bundled_icons/square.icon"
             ))),
             BundledIcon::Edit => Self::new(Self::read_icon_file(include_str!(
-                "bundled_icons/edit.icon"
+                "bundled_icons/edit_alt.icon"
             ))),
-            BundledIcon::Add => Self::new(Self::read_icon_file(include_str!(
-                "bundled_icons/add.icon"
-            ))),
+            BundledIcon::Add => {
+                Self::new(Self::read_icon_file(include_str!("bundled_icons/add.icon")))
+            }
             BundledIcon::ArrowRight => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/page_right.icon"
             ))),
             BundledIcon::ArrowLeft => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/page_left.icon"
             ))),
-            BundledIcon::Run => Self::new(Self::read_icon_file(include_str!(
-                "bundled_icons/run.icon"
-            ))),
+            BundledIcon::Run => {
+                Self::new(Self::read_icon_file(include_str!("bundled_icons/run.icon")))
+            }
             BundledIcon::Delete => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/delete.icon"
+            ))),
+            BundledIcon::Generate => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/generate.icon"
             ))),
         }
     }
@@ -127,7 +131,7 @@ impl IconBitmapLayout {
     }
 }
 
-pub(crate) const ICON_BITMAP_DIMENSION: u32 = 20;
+pub const ICON_BITMAP_DIMENSION: u32 = 20;
 
 #[cfg(test)]
 #[test]

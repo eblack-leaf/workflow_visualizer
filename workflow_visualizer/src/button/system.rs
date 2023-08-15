@@ -2,14 +2,14 @@ use bevy_ecs::change_detection::Res;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-use crate::text::AlignedFonts;
 use crate::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
     Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
     Toggled,
 };
+use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+use crate::text::AlignedFonts;
 
 pub(crate) fn border_change(
     buttons: Query<(&PanelEntity, &ButtonBorder), Changed<ButtonBorder>>,
@@ -201,14 +201,14 @@ pub(crate) fn placement(
                 Area::<DeviceContext>::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());
             let len = button_text.0.len() as f32;
-            let x = center.x
-                - logical_dimensions.width * (len / 2f32).ceil()
-                - scaling.icon.px() / 2f32;
+            let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
+                + scaling.icon.px() / 2f32
+                + RawMarker(2).to_pixel();
             let y = center.y - logical_dimensions.height / 2f32;
             let width = logical_dimensions.width * len;
             let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
-            let icon_x = text_section.right() + RawMarker::PX;
+            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.px();
             let icon_y = text_section.top() + RawMarker::PX;
             (Some(text_section), Position::new(icon_x, icon_y))
         };

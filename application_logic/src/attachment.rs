@@ -39,6 +39,10 @@ impl Attach for EntryAttachment {
             "delete",
             IconBitmap::bundled(BundledIcon::Delete),
         )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "generate",
+            IconBitmap::bundled(BundledIcon::Generate),
+        )));
         visualizer
             .job
             .container

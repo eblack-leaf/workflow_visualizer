@@ -1,15 +1,16 @@
-use crate::enable::EntryEnabled;
-use crate::entry::{Entry, EntryName, EntryOtp};
-use crate::paging::PageRange;
-use crate::positioning::EntryListPosition;
-use crate::workflow::TokenName;
-use crate::{enable, entry};
+use workflow_visualizer::{bevy_ecs, Grid, GridPoint, RawMarker, ResponsiveUnit, ScaleFactor};
 use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
 use workflow_visualizer::bevy_ecs::component::Component;
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Query, Resource};
-use workflow_visualizer::{bevy_ecs, Grid, GridPoint, RawMarker, ResponsiveUnit, ScaleFactor};
+
+use crate::{enable, entry};
+use crate::enable::EntryEnabled;
+use crate::entry::{Entry, EntryName, EntryOtp};
+use crate::paging::PageRange;
+use crate::positioning::EntryListPosition;
+use crate::workflow::TokenName;
 
 #[derive(Resource)]
 pub(crate) struct RemovedEntryIndices(pub(crate) Vec<u32>);
@@ -101,7 +102,7 @@ pub(crate) fn dimension_change(
 ) {
     if scale_factor.is_changed() {
         // let entry = (10f64 * scale_factor.factor()).floor() as i32;
-        let entry = 10;
+        let entry = 12;
         dimensions.entry = entry.into();
         // let padding = (2f64 * scale_factor.factor()).floor() as i32;
         let padding = 2;

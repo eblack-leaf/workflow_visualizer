@@ -5,8 +5,8 @@ use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
 
-use crate::workflow::native::initialize_native_window;
 use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
+use crate::workflow::native::initialize_native_window;
 
 pub(crate) fn internal_loop<T: Workflow + 'static>(
     mut visualizer: &mut Visualizer,
@@ -101,6 +101,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 window.as_ref().unwrap().request_redraw();
             }
             if visualizer.can_idle() {
+                #[cfg(not(target_family = "wasm"))]
                 control_flow.set_wait();
             } else {
                 control_flow.set_poll();

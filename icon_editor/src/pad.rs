@@ -1,13 +1,14 @@
 use std::collections::HashMap;
-use workflow_visualizer::bevy_ecs::prelude::{
-    Commands, Entity, IntoSystemConfig, Query, Res, ResMut, Resource, With,
-};
+
 use workflow_visualizer::{
-    bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, BundledIcon, Button,
+    ActiveInteraction, Attach, bevy_ecs, BundledIcon, BundleExtension, BundlePlacement, Button,
     ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale,
     Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position,
     RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text,
     TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer,
+};
+use workflow_visualizer::bevy_ecs::prelude::{
+    Commands, Entity, IntoSystemConfig, Query, Res, ResMut, Resource, With,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -235,7 +236,7 @@ pub(crate) fn setup(mut cmd: Commands) {
             ))),
         )
         .id();
-    let write_out_horizontal = (coverage_horizontal.0, coverage_horizontal.0.raw_offset(45));
+    let write_out_horizontal = (coverage_horizontal.0, coverage_horizontal.0.raw_offset(40));
     let write_out_vertical = (
         coverage_vertical.1.raw_offset(Pad::PAD_PADDING * 3),
         coverage_vertical.1.raw_offset(Pad::PAD_PADDING * 3 + 7),
@@ -249,8 +250,8 @@ pub(crate) fn setup(mut cmd: Commands) {
                 Color::OFF_WHITE,
                 "edit",
                 "write-out",
-                17,
-                17,
+                18,
+                18,
                 ButtonBorder::Border,
             )
             .responsively_viewed(ResponsiveGridView::all_same((
