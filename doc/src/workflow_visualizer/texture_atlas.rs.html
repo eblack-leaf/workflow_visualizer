@@ -302,7 +302,7 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashSet;
 
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
-<span class="kw">use </span>wgpu::{BindGroupLayoutDescriptor, BindGroupLayoutEntry, Texture, TextureView};
+<span class="kw">use </span>wgpu::{BindGroupLayoutEntry, Texture, TextureView};
 
 <span class="kw">use crate</span>::{Area, GfxOptions, GfxSurface, NumericalContext, Position, Section};
 
@@ -315,6 +315,7 @@
 }
 
 <span class="kw">impl </span>TextureAtlas {
+    <span class="kw">pub const </span>ATLAS_PADDING: f32 = <span class="number">1f32</span>;
     <span class="kw">pub fn </span>new(gfx: <span class="kw-2">&amp;</span>GfxSurface, block: AtlasBlock, dimension: AtlasDimension) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>texture_dimensions = AtlasTextureDimensions::new(block, dimension);
         <span class="kw">let </span>atlas = AtlasTexture::new(gfx, texture_dimensions);
@@ -512,8 +513,8 @@
     <span class="kw">pub fn </span>new(block: AtlasBlock, dimension: AtlasDimension) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             dimensions: (
-                block.block.width * dimension.dimension <span class="kw">as </span>f32,
-                block.block.height * dimension.dimension <span class="kw">as </span>f32,
+                (block.block.width + TextureAtlas::ATLAS_PADDING) * dimension.dimension <span class="kw">as </span>f32,
+                (block.block.height + TextureAtlas::ATLAS_PADDING) * dimension.dimension <span class="kw">as </span>f32,
             )
                 .into(),
         }
@@ -584,7 +585,6 @@
         location
     }
 }
-
 <span class="kw">pub struct </span>AtlasPosition {
     <span class="kw">pub </span>position: Position&lt;NumericalContext&gt;,
 }
@@ -593,8 +593,8 @@
     <span class="kw">pub fn </span>new(atlas_location: AtlasLocation, atlas_block: AtlasBlock) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             position: (
-                atlas_location.x <span class="kw">as </span>f32 * atlas_block.block.width,
-                atlas_location.y <span class="kw">as </span>f32 * atlas_block.block.height,
+                atlas_location.x <span class="kw">as </span>f32 * (atlas_block.block.width + TextureAtlas::ATLAS_PADDING),
+                atlas_location.y <span class="kw">as </span>f32 * (atlas_block.block.height + TextureAtlas::ATLAS_PADDING),
             )
                 .into(),
         }
