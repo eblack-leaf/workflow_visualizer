@@ -121,7 +121,7 @@ pub(crate) fn position(
                         .raw_offset(entry_list_placements.get("name-far-horizontal")),
                 ),
                 (
-                    anchor.y.raw_offset(list_dimensions.padding),
+                    anchor.y.raw_offset(list_dimensions.padding + 1.into()),
                     anchor
                         .y
                         .raw_offset(list_dimensions.padding + list_dimensions.content),
@@ -137,7 +137,7 @@ pub(crate) fn position(
                         .raw_offset(entry_list_placements.get("otp-far-horizontal")),
                 ),
                 (
-                    anchor.y.raw_offset(list_dimensions.padding),
+                    anchor.y.raw_offset(list_dimensions.padding + 1.into()),
                     anchor
                         .y
                         .raw_offset(list_dimensions.padding + list_dimensions.content),

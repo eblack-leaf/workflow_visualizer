@@ -119,10 +119,11 @@ pub(crate) fn process_bottom_panel_buttons(
     buttons: Query<&Triggered>,
     sender: NonSend<Sender<Engen>>,
     mut counter: Local<u32>,
-    mut idle: ResMut<Idle>,
+    mut _idle: ResMut<Idle>,
 ) {
-    #[cfg(target_family = "wasm")]
-    idle.can_idle = false;
+    #[cfg(target_family = "wasm")] {
+        _idle.can_idle = false;
+    }
     if let Ok(trigger) = buttons.get(add.0) {
         if trigger.active() {
             // add logic
