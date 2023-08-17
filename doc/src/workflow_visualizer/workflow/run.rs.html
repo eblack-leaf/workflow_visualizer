@@ -136,7 +136,6 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use </span>tracing::{info, trace};
@@ -240,8 +239,7 @@
                 window.as_ref().unwrap().request_redraw();
             }
             <span class="kw">if </span>visualizer.can_idle() {
-                <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
-                </span>control_flow.set_wait();
+                control_flow.set_wait();
             } <span class="kw">else </span>{
                 control_flow.set_poll();
             }
