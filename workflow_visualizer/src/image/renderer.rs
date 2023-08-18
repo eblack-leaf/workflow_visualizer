@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Component, Entity, Res, Resource};
+use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resource};
+use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
-use crate::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas, TextureBindGroup, Uniform, Viewport};
+use crate::{AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas, TextureBindGroup, Uniform, Viewport};
 use crate::image::render_group::ImageRenderGroup;
+use crate::texture_atlas::AtlasLocation;
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
@@ -47,10 +49,10 @@ pub struct ImageFade(pub f32);
 
 #[derive(Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub struct ImageName(pub &'static str);
-
+#[derive(Component, Clone)]
 pub struct ImageRequest {
     pub name: ImageName,
-    pub data:,
+    pub data: Vec<u8>,
 }
 
 #[derive(Resource)]
@@ -59,9 +61,24 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
-    pub(crate) images: HashMap<ImageName, TextureAtlas>,
+    pub(crate) images: HashMap<ImageName, (TextureAtlas, TextureBindGroup)>,
+    render_group_layout: wgpu::BindGroupLayout,
 }
-
+pub(crate) fn load_images(mut image_renderer: ResMut<ImageRenderer>, requests: Query<(Entity, &ImageRequest)>, mut cmd: Commands, gfx: Res<GfxSurface>) {
+    for (entity, request) in requests.iter() {
+        let image = image::load_from_memory(request.data.as_slice()).expect("image-load");
+        let texture_data = image.as_rgba8().expect("rgba8");
+        let dimensions = image.dimensions();
+        let block = AtlasBlock::new((dimensions.0, dimensions.1));
+        let atlas_dimension = AtlasDimension::new(1);
+        let dimensions = AtlasTextureDimensions::new(block, atlas_dimension);
+        let atlas = TextureAtlas::new(&gfx, block, atlas_dimension, wgpu::TextureFormat::Rgba8Unorm);
+        atlas.write(AtlasLocation::new(0, 0), texture_data.as_bytes(), block.block, &gfx);
+        let bind_group = TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
+        image_renderer.images.insert(request.name.clone(), (atlas, bind_group));
+        cmd.entity(entity).despawn();
+    }
+}
 pub(crate) fn setup_renderer(
     mut cmd: Commands,
     gfx: Res<GfxSurface>,
@@ -145,7 +162,7 @@ pub(crate) fn setup_renderer(
                 attributes: &wgpu::vertex_attr_array![0 => Float32x3],
             }],
         },
-        primitive: gfx.filled_triangle_list(),
+        primitive: gfx.triangle_primitive(),
         depth_stencil: Some(viewport.depth_stencil_state()),
         multisample: msaa.multisample_state(),
         fragment: Some(wgpu::FragmentState {
@@ -161,6 +178,8 @@ pub(crate) fn setup_renderer(
         render_groups: HashMap::new(),
         vertex_buffer: aabb_vertex_buffer(&gfx),
         sampler_bind_group,
+        images: HashMap::new(),
+        render_group_layout,
     };
     cmd.insert_resource(renderer);
 }
@@ -183,7 +202,7 @@ impl Render for ImageRenderer {
         for (_, group) in self.render_groups.iter() {
             render_pass_handle
                 .0
-                .set_bind_group(2, &group.image_bind_group.bind_group, &[]);
+                .set_bind_group(2, &self.images.get(&group.image_name).expect("no image").1.bind_group, &[]);
             render_pass_handle
                 .0
                 .set_bind_group(3, &group.fade_bind_group, &[]);

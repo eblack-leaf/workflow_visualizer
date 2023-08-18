@@ -166,7 +166,7 @@ impl GfxSurface {
             options.msaa,
         )
     }
-    pub fn filled_triangle_list(&self) -> PrimitiveState {
+    pub fn triangle_primitive(&self) -> PrimitiveState {
         wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleList,
             strip_index_format: None,
