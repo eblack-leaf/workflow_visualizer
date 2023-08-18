@@ -9,12 +9,12 @@ diagnostics = []
 
 [dependencies]
 winit = { version = "0.28.6", features = ["android-game-activity"]}
-wgpu = { version = "0.16.0", features = ["webgl"] }
-bevy_ecs = { version = "0.10.1" }
+wgpu = { version = "0.17.0", features = ["webgl"] }
+bevy_ecs = { version = "0.11.0" }
 image = "0.24.6"
 bytemuck = { version = "1.13.1", features = ["derive"] }
 fontdue = "0.7.3"
-gloo-worker = { version = "0.2.1", features = ["futures"] }
+gloo-worker = { version = "0.3.0", features = ["futures"] }
 gloo-console = "0.2.3"
 nalgebra = { version = "0.32.2" }
 serde = { version = "1.0.160", features = ["derive"] }

@@ -4,7 +4,7 @@ use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resourc
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
-use crate::{AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas, TextureBindGroup, Uniform, Viewport};
+use crate::{AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas, TextureBindGroup, TextureCoordinates, Uniform, Viewport};
 use crate::image::render_group::ImageRenderGroup;
 use crate::texture_atlas::AtlasLocation;
 
@@ -61,8 +61,9 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
-    pub(crate) images: HashMap<ImageName, (TextureAtlas, TextureBindGroup)>,
+    pub(crate) images: HashMap<ImageName, (TextureAtlas, TextureBindGroup, TextureCoordinates)>,
     render_group_layout: wgpu::BindGroupLayout,
+    render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
 pub(crate) fn load_images(mut image_renderer: ResMut<ImageRenderer>, requests: Query<(Entity, &ImageRequest)>, mut cmd: Commands, gfx: Res<GfxSurface>) {
     for (entity, request) in requests.iter() {
@@ -73,9 +74,9 @@ pub(crate) fn load_images(mut image_renderer: ResMut<ImageRenderer>, requests: Q
         let atlas_dimension = AtlasDimension::new(1);
         let dimensions = AtlasTextureDimensions::new(block, atlas_dimension);
         let atlas = TextureAtlas::new(&gfx, block, atlas_dimension, wgpu::TextureFormat::Rgba8Unorm);
-        atlas.write(AtlasLocation::new(0, 0), texture_data.as_bytes(), block.block, &gfx);
+        let coordinates = atlas.write(AtlasLocation::new(0, 0), texture_data.as_bytes(), block.block, &gfx);
         let bind_group = TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
-        image_renderer.images.insert(request.name.clone(), (atlas, bind_group));
+        image_renderer.images.insert(request.name.clone(), (atlas, bind_group, coordinates));
         cmd.entity(entity).despawn();
     }
 }
@@ -128,11 +129,11 @@ pub(crate) fn setup_renderer(
                 label: Some("image-render-group-layout"),
                 entries: &[TextureBindGroup::entry(0)],
             });
-    let fade_layout = gfx
+    let render_group_uniforms_layout = gfx
         .device
         .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("fade"),
-            entries: &[Uniform::vertex_bind_group_entry(0)],
+            label: Some("render-group"),
+            entries: &[Uniform::vertex_bind_group_entry(0), Uniform::vertex_bind_group_entry(1)],
         });
     let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("image-render-pipeline-layout"),
@@ -140,7 +141,7 @@ pub(crate) fn setup_renderer(
             viewport.bind_group_layout(),
             &sampler_bind_group_layout,
             &render_group_layout,
-            &fade_layout,
+            &render_group_uniforms_layout,
         ],
         push_constant_ranges: &[],
     };
@@ -180,6 +181,7 @@ pub(crate) fn setup_renderer(
         sampler_bind_group,
         images: HashMap::new(),
         render_group_layout,
+        render_group_uniforms_layout
     };
     cmd.insert_resource(renderer);
 }
@@ -205,7 +207,7 @@ impl Render for ImageRenderer {
                 .set_bind_group(2, &self.images.get(&group.image_name).expect("no image").1.bind_group, &[]);
             render_pass_handle
                 .0
-                .set_bind_group(3, &group.fade_bind_group, &[]);
+                .set_bind_group(3, &group.render_group_bind_group, &[]);
             render_pass_handle.0.draw(0..AABB.len() as u32, 0..1);
         }
     }
