@@ -1,19 +1,19 @@
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
+use bevy_ecs::prelude::{IntoSystemConfig, Resource};
 use nalgebra::matrix;
-use wgpu::{BindGroup, BindGroupLayout, Texture, TextureFormat};
+use wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
 
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 use crate::coord::area::Area;
+use crate::coord::DeviceContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
-use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
 /// Viewport Matrix for converting to NDC
 #[derive(Resource)]
@@ -46,6 +46,15 @@ impl ViewportOffset {
 impl Viewport {
     pub fn depth_format(&self) -> TextureFormat {
         self.depth_format
+    }
+    pub fn depth_stencil_state(&self) -> DepthStencilState {
+        wgpu::DepthStencilState {
+            format: self.depth_format(),
+            depth_write_enabled: true,
+            depth_compare: wgpu::CompareFunction::Less,
+            stencil: Default::default(),
+            bias: Default::default(),
+        }
     }
     pub fn far_layer(&self) -> f32 {
         self.cpu.far_layer()

@@ -1,12 +1,16 @@
 use std::collections::{HashMap, HashSet};
-use std::num::NonZeroU32;
 
 use bevy_ecs::prelude::{
     Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
 };
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
-use tracing::{trace, warn};
+use tracing::trace;
 
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -24,15 +28,10 @@ use crate::text::render_group::{
 };
 use crate::text::renderer::{Extraction, TextRenderer};
 use crate::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasLocation, AtlasPosition,
-    AtlasTexture, AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+    AtlasBlock, AtlasDimension, AtlasLocation, AtlasPosition,
+    TextureAtlas, TextureBindGroup, TextureCoordinates,
 };
 use crate::window::WindowResize;
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -378,8 +377,13 @@ pub(crate) fn create_render_groups(
             &text_placement_uniform,
         );
         let atlas_dimension = AtlasDimension::from_unique_glyphs(unique_glyphs.unique_glyphs);
-        let atlas = TextureAtlas::new(&gfx_surface, *atlas_block, atlas_dimension);
-        let atlas_bind_group = AtlasBindGroup::new(
+        let atlas = TextureAtlas::new(
+            &gfx_surface,
+            *atlas_block,
+            atlas_dimension,
+            wgpu::TextureFormat::R8Unorm,
+        );
+        let atlas_bind_group = TextureBindGroup::new(
             &gfx_surface,
             &renderer.atlas_bind_group_layout,
             atlas.view(),
@@ -526,9 +530,13 @@ pub(crate) fn render_group_differences(
                 }
                 let new_dimension =
                     AtlasDimension::new(current_dimension + incremental_dimension_add);
-                render_group.atlas =
-                    TextureAtlas::new(&gfx_surface, render_group.atlas.block, new_dimension);
-                render_group.atlas_bind_group = AtlasBindGroup::new(
+                render_group.atlas = TextureAtlas::new(
+                    &gfx_surface,
+                    render_group.atlas.block,
+                    new_dimension,
+                    wgpu::TextureFormat::R8Unorm,
+                );
+                render_group.atlas_bind_group = TextureBindGroup::new(
                     &gfx_surface,
                     &renderer.atlas_bind_group_layout,
                     render_group.atlas.view(),

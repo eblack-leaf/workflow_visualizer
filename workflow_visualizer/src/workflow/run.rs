@@ -92,6 +92,11 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                     .expect("sender")
                     .send(T::exit_action());
             }
+            if visualizer.can_idle() {
+                control_flow.set_wait();
+            } else {
+                control_flow.set_poll();
+            }
         }
         Event::RedrawRequested(_) => {
             visualizer.render();
@@ -99,11 +104,6 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
         Event::RedrawEventsCleared => {
             if visualizer.job.resumed() && *initialized {
                 window.as_ref().unwrap().request_redraw();
-            }
-            if visualizer.can_idle() {
-                control_flow.set_wait();
-            } else {
-                control_flow.set_poll();
             }
         }
         Event::Suspended => {

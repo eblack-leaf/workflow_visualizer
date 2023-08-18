@@ -1,16 +1,16 @@
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, Resource};
 use wgpu::util::DeviceExt;
 
+use crate::{
+    AtlasBlock, AtlasDimension, Color, GfxSurface, Indexer, InstanceAttributeManager, Layer,
+    NullBit, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
+    TextureBindGroup, TextureCoordinates, Viewport,
+};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::icon::bitmap::{
-    IconBitmapLayout, IconBitmapRequest, IconPixelData, ICON_BITMAP_DIMENSION,
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
 };
 use crate::texture_atlas::AtlasLocation;
-use crate::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, Color, GfxSurface, Indexer,
-    InstanceAttributeManager, Layer, NullBit, RawArea, RawPosition, Render, RenderPassHandle,
-    RenderPhase, TextureAtlas, TextureCoordinates, Viewport,
-};
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {
@@ -79,7 +79,7 @@ pub(crate) fn setup(
     let bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("icon renderer bind group layout"),
         entries: &[
-            AtlasBindGroup::entry(0),
+            TextureBindGroup::entry(0),
             wgpu::BindGroupLayoutEntry {
                 binding: 1,
                 visibility: wgpu::ShaderStages::FRAGMENT,
@@ -99,7 +99,7 @@ pub(crate) fn setup(
     let mut icon_bitmap_layout = IconBitmapLayout::new();
     let dimension = AtlasDimension::new(((writes.len() as f32).sqrt().ceil() as u32).max(1));
     let block = AtlasBlock::new((ICON_BITMAP_DIMENSION, ICON_BITMAP_DIMENSION));
-    let atlas = TextureAtlas::new(&gfx, block, dimension);
+    let atlas = TextureAtlas::new(&gfx, block, dimension, wgpu::TextureFormat::R8Unorm);
     let mut x_index = 0;
     let mut y_index = 0;
     for mut write in writes {
@@ -212,13 +212,7 @@ pub(crate) fn setup(
         polygon_mode: wgpu::PolygonMode::Fill,
         conservative: false,
     };
-    let depth_stencil_state = wgpu::DepthStencilState {
-        format: viewport.depth_format(),
-        depth_write_enabled: true,
-        depth_compare: wgpu::CompareFunction::Less,
-        stencil: Default::default(),
-        bias: Default::default(),
-    };
+    let depth_stencil_state = viewport.depth_stencil_state();
     let fragment_state = wgpu::FragmentState {
         module: &shader,
         entry_point: "fragment_entry",
@@ -281,7 +275,7 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
     gfx_surface
         .device
         .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("text vertex buffer"),
+            label: Some("icon vertex buffer"),
             contents: bytemuck::cast_slice(&AABB),
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         })

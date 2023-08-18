@@ -15,9 +15,14 @@ pub struct TextureAtlas {
 
 impl TextureAtlas {
     pub const ATLAS_PADDING: f32 = 1f32;
-    pub fn new(gfx: &GfxSurface, block: AtlasBlock, dimension: AtlasDimension) -> Self {
+    pub fn new(
+        gfx: &GfxSurface,
+        block: AtlasBlock,
+        dimension: AtlasDimension,
+        texture_format: wgpu::TextureFormat,
+    ) -> Self {
         let texture_dimensions = AtlasTextureDimensions::new(block, dimension);
-        let atlas = AtlasTexture::new(gfx, texture_dimensions);
+        let atlas = AtlasTexture::new(gfx, texture_dimensions, texture_format);
         Self {
             texture: atlas,
             block,
@@ -106,15 +111,15 @@ impl TextureCoordinates {
     }
 }
 
-pub struct AtlasBindGroup {
+pub struct TextureBindGroup {
     pub bind_group: wgpu::BindGroup,
 }
 
-impl AtlasBindGroup {
+impl TextureBindGroup {
     pub fn new(
         gfx_surface: &GfxSurface,
         layout: &wgpu::BindGroupLayout,
-        atlas: &wgpu::TextureView,
+        texture: &wgpu::TextureView,
     ) -> Self {
         Self {
             bind_group: gfx_surface
@@ -124,7 +129,7 @@ impl AtlasBindGroup {
                     layout,
                     entries: &[wgpu::BindGroupEntry {
                         binding: 0,
-                        resource: wgpu::BindingResource::TextureView(atlas),
+                        resource: wgpu::BindingResource::TextureView(texture),
                     }],
                 }),
         }
@@ -149,8 +154,12 @@ pub struct AtlasTexture {
 }
 
 impl AtlasTexture {
-    pub fn new(gfx_surface: &GfxSurface, texture_dimensions: AtlasTextureDimensions) -> Self {
-        let descriptor = Self::texture_descriptor(texture_dimensions);
+    pub fn new(
+        gfx_surface: &GfxSurface,
+        texture_dimensions: AtlasTextureDimensions,
+        texture_format: wgpu::TextureFormat,
+    ) -> Self {
+        let descriptor = Self::texture_descriptor(texture_dimensions, texture_format);
         let texture = gfx_surface.device.create_texture(&descriptor);
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
         Self {
@@ -169,8 +178,9 @@ impl AtlasTexture {
             panic!("requested larger than possible texture")
         }
     }
-    fn texture_descriptor(
+    pub fn texture_descriptor(
         texture_dimensions: AtlasTextureDimensions,
+        texture_format: wgpu::TextureFormat,
     ) -> wgpu::TextureDescriptor<'static> {
         Self::hardware_max_check(texture_dimensions);
         wgpu::TextureDescriptor {
@@ -183,9 +193,9 @@ impl AtlasTexture {
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::R8Unorm,
+            format: texture_format,
             usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[wgpu::TextureFormat::R8Unorm],
+            view_formats: &[texture_format],
         }
     }
 }

@@ -1,8 +1,8 @@
 use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::prelude::Resource;
-use tracing::{info, instrument, trace, warn};
-use wgpu::TextureView;
+use tracing::{info, instrument, trace};
+use wgpu::{ColorTargetState, PrimitiveState, TextureView};
 use winit::window::Window;
 
 /// Options for instantiating the Gfx module
@@ -166,6 +166,17 @@ impl GfxSurface {
             options.msaa,
         )
     }
+    pub fn filled_triangle_list(&self) -> PrimitiveState {
+        wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: None,
+            front_face: wgpu::FrontFace::Ccw,
+            cull_mode: Some(wgpu::Face::Back),
+            unclipped_depth: false,
+            polygon_mode: wgpu::PolygonMode::Fill,
+            conservative: false,
+        }
+    }
     pub(crate) fn surface_texture(
         &self,
         surface_configuration: &GfxSurfaceConfiguration,
@@ -208,6 +219,13 @@ pub struct GfxSurfaceConfiguration {
 impl GfxSurfaceConfiguration {
     pub(crate) fn new(configuration: wgpu::SurfaceConfiguration) -> Self {
         Self { configuration }
+    }
+    pub fn alpha_color_target_state(&self) -> ColorTargetState {
+        wgpu::ColorTargetState {
+            format: self.configuration.format,
+            blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+            write_mask: Default::default(),
+        }
     }
 }
 /// Used for setting the multi-sampling/anti-aliasing

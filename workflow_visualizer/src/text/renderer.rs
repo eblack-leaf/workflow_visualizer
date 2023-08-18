@@ -1,19 +1,19 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
-use tracing::{instrument, trace, warn};
+use tracing::trace;
 use wgpu::util::DeviceExt;
 
+use crate::{
+    Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
+};
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::text::component::{Difference, TextScaleAlignment};
 use crate::text::font::AlignedFonts;
 use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
+use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
 use crate::texture_atlas::TextureCoordinates;
-use crate::texture_atlas::{AtlasBindGroup, AtlasBlock, TextureAtlas};
-use crate::{
-    Color, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
-};
 
 pub(crate) const AABB: [Vertex; 6] = [
     Vertex::new(RawPosition { x: 0.0, y: 0.0 }),
@@ -118,7 +118,7 @@ pub(crate) fn setup(
         .create_bind_group_layout(&render_group_bind_group_layout_descriptor);
     let atlas_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("atlas bind group layout descriptor"),
-        entries: &[AtlasBindGroup::entry(0)],
+        entries: &[TextureBindGroup::entry(0)],
     };
     let atlas_bind_group_layout = gfx_surface
         .device
@@ -194,11 +194,7 @@ pub(crate) fn setup(
     let fragment_state = wgpu::FragmentState {
         module: &shader,
         entry_point: "fragment_entry",
-        targets: &[Some(wgpu::ColorTargetState {
-            format: gfx_surface_config.configuration.format,
-            blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-            write_mask: Default::default(),
-        })],
+        targets: &[Some(gfx_surface_config.alpha_color_target_state())],
     };
     let descriptor = wgpu::RenderPipelineDescriptor {
         label: Some("text pipeline"),

@@ -37,12 +37,12 @@ pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
-pub use workflow::{start_web_worker, Runner, Sender, Workflow};
+pub use workflow::{Runner, Sender, start_web_worker, Workflow};
 
 pub use crate::color::Color;
 pub use crate::coord::{
-    area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    area::Area, area::RawArea, Coordinate, DeviceContext, InterfaceContext,
+    layer::Layer, NumericalContext, position::Position, position::RawPosition, section::Section,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::disable::Disabled;
@@ -64,8 +64,8 @@ pub use crate::text::{
     TextScaleAlignment, TextTag, TextValue, TextWrapStyle,
 };
 pub use crate::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
-    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+    AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureBindGroup, TextureCoordinates,
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, Timer};
@@ -86,6 +86,7 @@ mod focus;
 mod gfx;
 mod grid;
 mod icon;
+mod image;
 mod instance;
 mod interaction;
 mod job;
