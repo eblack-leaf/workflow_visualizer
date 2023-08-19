@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Component, Resource};
-use wgpu::{BindGroupLayoutEntry, Buffer};
 use wgpu::util::DeviceExt;
+use wgpu::{BindGroupEntry, BindGroupLayoutEntry, Buffer};
 
 /// Wrapper around wgpu::Buffer for use as a Uniform Buffer
 #[derive(Component, Resource)]
@@ -25,7 +25,13 @@ impl<Data: bytemuck::Pod + bytemuck::Zeroable> Uniform<Data> {
     pub fn update(&mut self, queue: &wgpu::Queue, data: Data) {
         queue.write_buffer(&self.buffer, 0, bytemuck::cast_slice(&[data]));
     }
-    pub fn vertex_bind_group_entry(binding: u32) -> BindGroupLayoutEntry {
+    pub fn bind_group_entry<'a>(&self, binding: u32) -> BindGroupEntry<'a> {
+        wgpu::BindGroupEntry {
+            binding,
+            resource: self.buffer.as_entire_binding(),
+        }
+    }
+    pub fn vertex_bind_group_layout_entry(binding: u32) -> BindGroupLayoutEntry {
         wgpu::BindGroupLayoutEntry {
             binding,
             visibility: wgpu::ShaderStages::VERTEX,

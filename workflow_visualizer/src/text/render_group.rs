@@ -2,15 +2,13 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::Component;
 
-use crate::{
-    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
-};
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
 use crate::text::component::{GlyphId, TextScaleAlignment, TextValue};
-use crate::texture_atlas::{
-    TextureAtlas, TextureBindGroup, TextureCoordinates,
+use crate::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
+use crate::{
+    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
+    RawArea, RawPosition, Section, Uniform, VisibleSection,
 };
 
 #[repr(C)]

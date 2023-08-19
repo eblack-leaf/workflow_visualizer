@@ -1,16 +1,16 @@
 use bevy_ecs::prelude::{Commands, Entity, Query, Res, Resource};
 use wgpu::util::DeviceExt;
 
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::icon::bitmap::{
+    IconBitmapLayout, IconBitmapRequest, IconPixelData, ICON_BITMAP_DIMENSION,
+};
+use crate::texture_atlas::AtlasLocation;
 use crate::{
     AtlasBlock, AtlasDimension, Color, GfxSurface, Indexer, InstanceAttributeManager, Layer,
     NullBit, RawArea, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
     TextureBindGroup, TextureCoordinates, Viewport,
 };
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::icon::bitmap::{
-    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequest, IconPixelData,
-};
-use crate::texture_atlas::AtlasLocation;
 
 #[derive(Resource)]
 pub(crate) struct IconRenderer {

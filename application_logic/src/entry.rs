@@ -1,16 +1,16 @@
+use workflow_visualizer::bevy_ecs::prelude::{
+    Changed, Commands, Component, Entity, EventReader, NonSend, Query, Res, ResMut,
+};
 use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Line, Panel, PanelType,
     Sender, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered,
 };
-use workflow_visualizer::bevy_ecs::prelude::{
-    Changed, Commands, Component, Entity, EventReader, NonSend, Query, Res, ResMut,
-};
 
 use crate::enable::EntryEnabled;
-use crate::Engen;
 use crate::entry_list::{EntryIndex, EntryScale, RemovedEntryIndices, TotalEntries};
 use crate::positioning::EntryListPosition;
 use crate::workflow::{Action, TokenName, TokenOtp};
+use crate::Engen;
 
 pub(crate) fn request_tokens(sender: NonSend<Sender<Engen>>) {
     sender.send(Action::RequestTokenNames);

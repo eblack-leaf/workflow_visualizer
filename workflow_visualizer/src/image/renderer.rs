@@ -4,9 +4,13 @@ use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resourc
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
-use crate::{AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas, TextureBindGroup, TextureCoordinates, Uniform, Viewport};
 use crate::image::render_group::ImageRenderGroup;
-use crate::texture_atlas::AtlasLocation;
+use crate::texture_atlas::{AtlasLocation, TextureSampler};
+use crate::{
+    AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
+    MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
+    TextureBindGroup, TextureCoordinates, Uniform, Viewport,
+};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
@@ -41,9 +45,8 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
         })
 }
 
-#[repr(C)]
 #[derive(
-bytemuck::Pod, bytemuck::Zeroable, Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug,
+    Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug,
 )]
 pub struct ImageFade(pub f32);
 
@@ -54,18 +57,40 @@ pub struct ImageRequest {
     pub name: ImageName,
     pub data: Vec<u8>,
 }
-
+pub(crate) struct ImageData {
+    pub(crate) atlas: TextureAtlas,
+    pub(crate) bind_group: TextureBindGroup,
+    pub(crate) coordinates: TextureCoordinates,
+}
+impl ImageData {
+    pub(crate) fn new(
+        atlas: TextureAtlas,
+        bind_group: TextureBindGroup,
+        coordinates: TextureCoordinates,
+    ) -> Self {
+        Self {
+            atlas,
+            bind_group,
+            coordinates,
+        }
+    }
+}
 #[derive(Resource)]
 pub(crate) struct ImageRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
-    pub(crate) images: HashMap<ImageName, (TextureAtlas, TextureBindGroup, TextureCoordinates)>,
-    render_group_layout: wgpu::BindGroupLayout,
-    render_group_uniforms_layout: wgpu::BindGroupLayout,
+    pub(crate) images: HashMap<ImageName, ImageData>,
+    pub(crate) render_group_layout: wgpu::BindGroupLayout,
+    pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
-pub(crate) fn load_images(mut image_renderer: ResMut<ImageRenderer>, requests: Query<(Entity, &ImageRequest)>, mut cmd: Commands, gfx: Res<GfxSurface>) {
+pub(crate) fn load_images(
+    mut image_renderer: ResMut<ImageRenderer>,
+    requests: Query<(Entity, &ImageRequest)>,
+    mut cmd: Commands,
+    gfx: Res<GfxSurface>,
+) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("image-load");
         let texture_data = image.as_rgba8().expect("rgba8");
@@ -73,10 +98,24 @@ pub(crate) fn load_images(mut image_renderer: ResMut<ImageRenderer>, requests: Q
         let block = AtlasBlock::new((dimensions.0, dimensions.1));
         let atlas_dimension = AtlasDimension::new(1);
         let dimensions = AtlasTextureDimensions::new(block, atlas_dimension);
-        let atlas = TextureAtlas::new(&gfx, block, atlas_dimension, wgpu::TextureFormat::Rgba8Unorm);
-        let coordinates = atlas.write(AtlasLocation::new(0, 0), texture_data.as_bytes(), block.block, &gfx);
-        let bind_group = TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
-        image_renderer.images.insert(request.name.clone(), (atlas, bind_group, coordinates));
+        let atlas = TextureAtlas::new(
+            &gfx,
+            block,
+            atlas_dimension,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
+        let coordinates = atlas.write(
+            AtlasLocation::new(0, 0),
+            texture_data.as_bytes(),
+            block.block,
+            &gfx,
+        );
+        let bind_group =
+            TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
+        image_renderer.images.insert(
+            request.name.clone(),
+            ImageData::new(atlas, bind_group, coordinates),
+        );
         cmd.entity(entity).despawn();
     }
 }
@@ -87,40 +126,18 @@ pub(crate) fn setup_renderer(
     viewport: Res<Viewport>,
     gfx_config: Res<GfxSurfaceConfiguration>,
 ) {
+    let sampler = TextureSampler::new(&gfx);
     let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
         label: Some("sampler bind group layout"),
-        entries: &[wgpu::BindGroupLayoutEntry {
-            binding: 0,
-            visibility: wgpu::ShaderStages::FRAGMENT,
-            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-            count: None,
-        }],
+        entries: &[TextureSampler::layout_entry(0)],
     };
     let sampler_bind_group_layout = gfx
         .device
         .create_bind_group_layout(&sampler_bind_group_layout_descriptor);
-    let sampler_descriptor = wgpu::SamplerDescriptor {
-        label: Some("image sampler"),
-        address_mode_u: wgpu::AddressMode::ClampToEdge,
-        address_mode_v: wgpu::AddressMode::ClampToEdge,
-        address_mode_w: wgpu::AddressMode::ClampToEdge,
-        mag_filter: wgpu::FilterMode::Linear,
-        min_filter: wgpu::FilterMode::Linear,
-        mipmap_filter: wgpu::FilterMode::Linear,
-        lod_min_clamp: Default::default(),
-        lod_max_clamp: Default::default(),
-        compare: None,
-        anisotropy_clamp: 1,
-        border_color: None,
-    };
-    let sampler = gfx.device.create_sampler(&sampler_descriptor);
     let sampler_bind_group_descriptor = wgpu::BindGroupDescriptor {
         label: Some("sampler bind group"),
         layout: &sampler_bind_group_layout,
-        entries: &[wgpu::BindGroupEntry {
-            binding: 0,
-            resource: wgpu::BindingResource::Sampler(&sampler),
-        }],
+        entries: &[TextureSampler::bind_group_entry(&sampler.sampler, 0)],
     };
     let sampler_bind_group = gfx.device.create_bind_group(&sampler_bind_group_descriptor);
     let render_group_layout =
@@ -129,12 +146,15 @@ pub(crate) fn setup_renderer(
                 label: Some("image-render-group-layout"),
                 entries: &[TextureBindGroup::entry(0)],
             });
-    let render_group_uniforms_layout = gfx
-        .device
-        .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("render-group"),
-            entries: &[Uniform::vertex_bind_group_entry(0), Uniform::vertex_bind_group_entry(1)],
-        });
+    let render_group_uniforms_layout =
+        gfx.device
+            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("render-group"),
+                entries: &[
+                    Uniform::vertex_bind_group_layout_entry(0),
+                    Uniform::vertex_bind_group_layout_entry(1),
+                ],
+            });
     let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("image-render-pipeline-layout"),
         bind_group_layouts: &[
@@ -181,7 +201,7 @@ pub(crate) fn setup_renderer(
         sampler_bind_group,
         images: HashMap::new(),
         render_group_layout,
-        render_group_uniforms_layout
+        render_group_uniforms_layout,
     };
     cmd.insert_resource(renderer);
 }
@@ -202,9 +222,16 @@ impl Render for ImageRenderer {
             .0
             .set_bind_group(1, &self.sampler_bind_group, &[]);
         for (_, group) in self.render_groups.iter() {
-            render_pass_handle
-                .0
-                .set_bind_group(2, &self.images.get(&group.image_name).expect("no image").1.bind_group, &[]);
+            render_pass_handle.0.set_bind_group(
+                2,
+                &self
+                    .images
+                    .get(&group.image_name)
+                    .expect("no image")
+                    .1
+                    .bind_group,
+                &[],
+            );
             render_pass_handle
                 .0
                 .set_bind_group(3, &group.render_group_bind_group, &[]);

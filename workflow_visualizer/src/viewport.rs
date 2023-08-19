@@ -4,16 +4,16 @@ use bevy_ecs::prelude::{IntoSystemConfig, Resource};
 use nalgebra::matrix;
 use wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
 
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 use crate::coord::area::Area;
-use crate::coord::DeviceContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
+use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
 /// Viewport Matrix for converting to NDC
 #[derive(Resource)]

@@ -1,10 +1,46 @@
 use std::collections::HashSet;
 
 use bytemuck::{Pod, Zeroable};
-use wgpu::{BindGroupLayoutEntry, Texture, TextureView};
+use wgpu::{BindGroupEntry, BindGroupLayoutEntry, Texture, TextureView};
 
 use crate::{Area, GfxOptions, GfxSurface, NumericalContext, Position, Section};
-
+pub struct TextureSampler {
+    pub sampler: wgpu::Sampler,
+}
+impl TextureSampler {
+    pub fn layout_entry(binding: u32) -> BindGroupLayoutEntry {
+        wgpu::BindGroupLayoutEntry {
+            binding,
+            visibility: wgpu::ShaderStages::FRAGMENT,
+            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+            count: None,
+        }
+    }
+    pub fn bind_group_entry(sampler: &wgpu::Sampler, binding: u32) -> BindGroupEntry<'a> {
+        wgpu::BindGroupEntry {
+            binding,
+            resource: wgpu::BindingResource::Sampler(sampler),
+        }
+    }
+    pub fn new(gfx: &GfxSurface) -> Self {
+        let sampler_descriptor = wgpu::SamplerDescriptor {
+            label: Some("image sampler"),
+            address_mode_u: wgpu::AddressMode::ClampToEdge,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            address_mode_w: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::FilterMode::Linear,
+            lod_min_clamp: Default::default(),
+            lod_max_clamp: Default::default(),
+            compare: None,
+            anisotropy_clamp: 1,
+            border_color: None,
+        };
+        let sampler = gfx.device.create_sampler(&sampler_descriptor);
+        Self { sampler }
+    }
+}
 pub struct TextureAtlas {
     pub texture: AtlasTexture,
     pub block: AtlasBlock,

@@ -1,16 +1,16 @@
-use workflow_visualizer::{bevy_ecs, Grid, GridPoint, RawMarker, ResponsiveUnit, ScaleFactor};
 use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
 use workflow_visualizer::bevy_ecs::component::Component;
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Query, Resource};
+use workflow_visualizer::{bevy_ecs, Grid, GridPoint, RawMarker, ResponsiveUnit, ScaleFactor};
 
-use crate::{enable, entry};
 use crate::enable::EntryEnabled;
 use crate::entry::{Entry, EntryName, EntryOtp};
 use crate::paging::PageRange;
 use crate::positioning::EntryListPosition;
 use crate::workflow::TokenName;
+use crate::{enable, entry};
 
 #[derive(Resource)]
 pub(crate) struct RemovedEntryIndices(pub(crate) Vec<u32>);
