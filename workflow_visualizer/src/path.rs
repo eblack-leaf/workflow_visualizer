@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
+use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfigs, Query, Res};
 
 use crate::grid::config_grid;
 use crate::grid::GridPoint;

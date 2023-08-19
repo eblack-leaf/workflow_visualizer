@@ -2,9 +2,7 @@ use bevy_ecs::prelude::Bundle;
 
 #[derive(Bundle)]
 pub struct BundleBuilder<T: Bundle, S: Bundle> {
-    #[bundle]
     pub original: T,
-    #[bundle]
     pub extension: S,
 }
 

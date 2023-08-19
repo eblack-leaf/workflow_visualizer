@@ -1,4 +1,4 @@
-use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfig;
+use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfigs;
 use workflow_visualizer::{
     Attach, BundledIcon, IconBitmap, IconBitmapRequest, SyncPoint, Visualizer,
 };

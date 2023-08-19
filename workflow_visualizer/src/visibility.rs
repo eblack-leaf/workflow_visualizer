@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfig, Query, Res};
+use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfigs, Query, Res};
 
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};

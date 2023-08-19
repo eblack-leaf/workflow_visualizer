@@ -4,7 +4,7 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::component::Component;
 use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{Entity, Query, Resource, Without};
+use bevy_ecs::prelude::{Entity, Event, Query, Resource, Without};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 
 use crate::focus::FocusedEntity;
@@ -300,7 +300,7 @@ pub(crate) fn cleanup(
 
 #[derive(Resource, Default)]
 pub struct InteractionPhases(pub HashMap<Interaction, InteractionPhase>);
-
+#[derive(Event)]
 pub struct InteractionEvent {
     pub(crate) device: InteractionDevice,
     pub(crate) location: Position<DeviceContext>,

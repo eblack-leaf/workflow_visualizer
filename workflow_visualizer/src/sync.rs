@@ -1,5 +1,4 @@
-use bevy_ecs::prelude::{IntoSystemConfig, IntoSystemSetConfigs, SystemSet};
-use bevy_ecs::schedule::apply_system_buffers;
+use bevy_ecs::prelude::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
 
 use crate::visualizer::Visualizer;
 use crate::JobSyncPoint;
@@ -40,10 +39,10 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
                 .chain(),
         );
     visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
-        apply_system_buffers
+        apply_deferred
             .after(SyncPoint::Initialization)
             .before(SyncPoint::PostInitialization),
-        apply_system_buffers
+        apply_deferred
             .after(SyncPoint::PostInitialization)
             .before(SyncPoint::Preparation),
     ));
@@ -76,13 +75,13 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             .after(SyncPoint::Resolve),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-        apply_system_buffers
+        apply_deferred
             .after(SyncPoint::Spawn)
             .before(SyncPoint::PostProcessPreparation),
-        apply_system_buffers
+        apply_deferred
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::PostProcessVisibility),
-        apply_system_buffers
+        apply_deferred
             .after(SyncPoint::Process)
             .before(SyncPoint::Spawn),
     ));
@@ -103,9 +102,14 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
     visualizer
         .job
         .task(Visualizer::TASK_RENDER_STARTUP)
-        .add_systems((apply_system_buffers
-            .after(SyncPoint::Initialization)
-            .before(SyncPoint::Preparation),));
+        .add_systems((
+            apply_deferred
+                .after(SyncPoint::Initialization)
+                .before(SyncPoint::PostInitialization),
+            apply_deferred
+                .after(SyncPoint::PostInitialization)
+                .before(SyncPoint::Preparation),
+        ));
     visualizer
         .job
         .task(Visualizer::TASK_RENDER_MAIN)

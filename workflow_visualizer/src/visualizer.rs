@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Bundle, Events, IntoSystemConfig, Resource};
+use bevy_ecs::prelude::{Bundle, Event, Events, IntoSystemConfigs, Resource};
 use tracing::{info, trace};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
@@ -13,6 +13,7 @@ use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
 use crate::icon::IconAttachment;
+use crate::images::ImageAttachment;
 use crate::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::line::LineAttachment;
@@ -145,6 +146,7 @@ impl Visualizer {
         self.invoke_attach::<TextAttachment>();
         self.invoke_attach::<IconAttachment>();
         self.invoke_attach::<ButtonAttachment>();
+        self.invoke_attach::<ImageAttachment>();
         self.attach_from_queue();
         self.setup();
         self.job.resume();
@@ -159,13 +161,11 @@ impl Visualizer {
             .spawn_batch(queue.datum)
             .collect::<Vec<Entity>>()
     }
-    pub fn add_event<Event: Sync + Send + 'static>(&mut self) {
+    pub fn add_event<E: Event + Sync + Send + 'static>(&mut self) {
         self.job
             .task(Self::TASK_MAIN)
-            .add_systems((Events::<Event>::update_system.in_set(SyncPoint::Event),));
-        self.job
-            .container
-            .insert_resource(Events::<Event>::default());
+            .add_systems((Events::<E>::update_system.in_set(SyncPoint::Event),));
+        self.job.container.insert_resource(Events::<E>::default());
     }
     pub fn register_touch(&mut self, touch: winit::event::Touch) {
         self.job.container.send_event(InteractionEvent::new(

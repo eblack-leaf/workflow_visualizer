@@ -1,7 +1,7 @@
 use std::ops::Add;
 
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfig, Resource};
+use bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfigs, Resource};
 
 pub(crate) use attachment::GridAttachment;
 use marker::ColumnConfig;

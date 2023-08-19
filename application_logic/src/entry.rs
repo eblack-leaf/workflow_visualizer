@@ -1,5 +1,5 @@
 use workflow_visualizer::bevy_ecs::prelude::{
-    Changed, Commands, Component, Entity, EventReader, NonSend, Query, Res, ResMut,
+    Changed, Commands, Component, Entity, Event, EventReader, NonSend, Query, Res, ResMut,
 };
 use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Line, Panel, PanelType,
@@ -44,7 +44,7 @@ pub(crate) fn display_name(
 
 #[derive(Component)]
 pub(crate) struct EntryOtp(pub(crate) Option<TokenOtp>);
-
+#[derive(Event)]
 pub(crate) struct ReadOtp(pub(crate) TokenName, pub(crate) TokenOtp);
 pub(crate) fn read_otp(
     mut entries: Query<(&EntryName, &mut EntryOtp)>,
@@ -58,7 +58,7 @@ pub(crate) fn read_otp(
         }
     }
 }
-
+#[derive(Event)]
 pub(crate) struct EntryAddToken(pub(crate) TokenName);
 
 pub(crate) fn receive_add_token(
@@ -80,7 +80,7 @@ pub(crate) fn receive_add_token(
         total_entries.0 += 1;
     }
 }
-
+#[derive(Event)]
 pub(crate) struct EntryRemoveToken(pub(crate) TokenName);
 
 pub(crate) fn receive_remove_token(

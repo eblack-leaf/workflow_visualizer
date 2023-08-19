@@ -1,5 +1,5 @@
 use bevy_ecs::change_detection::Res;
-use bevy_ecs::prelude::{Commands, IntoSystemConfig};
+use bevy_ecs::prelude::{Commands, IntoSystemConfigs};
 
 use crate::grid::system;
 use crate::{grid, Attach, Grid, SyncPoint, ViewportHandle, Visualizer};

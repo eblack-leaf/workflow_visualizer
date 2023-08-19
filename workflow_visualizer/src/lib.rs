@@ -4,11 +4,8 @@
 //! trait Workflow to setup application messaging.
 //! Visualizer which handles rendering
 //! Runner which invokes the visualizer's tools for multiple platforms
-pub use bevy_ecs;
-pub use wgpu;
-pub use winit;
-
 pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction};
+pub use bevy_ecs;
 pub use bundling::{BundleBuilder, BundleExtension};
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::GridLocation;
@@ -24,6 +21,7 @@ pub use grid::ResponsiveGridPoint;
 pub use grid::ResponsiveGridView;
 pub use grid::ResponsiveUnit;
 pub use grid::ResponsiveView;
+pub use images::{Image, ImageFade, ImageName, ImageRequest, ImageTag};
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
@@ -37,6 +35,8 @@ pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
+pub use wgpu;
+pub use winit;
 pub use workflow::{start_web_worker, Runner, Sender, Workflow};
 
 pub use crate::color::Color;
@@ -86,7 +86,7 @@ mod focus;
 mod gfx;
 mod grid;
 mod icon;
-mod image;
+mod images;
 mod instance;
 mod interaction;
 mod job;

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{
-    Component, DetectChanges, Entity, IntoSystemConfig, Local, Query, Res, Resource,
+    Component, DetectChanges, Entity, IntoSystemConfigs, Local, Query, Res, Resource,
 };
 use tracing::trace;
 

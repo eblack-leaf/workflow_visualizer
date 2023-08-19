@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::IntoSystemConfig;
+use bevy_ecs::prelude::IntoSystemConfigs;
 
 use crate::icon::renderer::{setup, IconRenderer};
 use crate::icon::system::{

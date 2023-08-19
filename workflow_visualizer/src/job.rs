@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{
-    Component, Entity, IntoSystemConfig, ResMut, Resource, Schedule, SystemSet, World,
+    Component, Entity, IntoSystemConfigs, ResMut, Resource, Schedule, SystemSet, World,
 };
 use bevy_ecs::schedule::ExecutorKind;
 use compact_str::CompactString;

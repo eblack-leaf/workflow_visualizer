@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::IntoSystemConfig;
+use bevy_ecs::prelude::IntoSystemConfigs;
 
 pub(crate) use crate::interaction::interaction::resolve;
 use crate::interaction::interaction::{

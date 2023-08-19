@@ -1,7 +1,6 @@
-use bevy_ecs::prelude::IntoSystemConfig;
-
 use crate::button::system;
 use crate::{Attach, SyncPoint, Visualizer};
+use bevy_ecs::prelude::IntoSystemConfigs;
 
 pub(crate) struct ButtonAttachment;
 

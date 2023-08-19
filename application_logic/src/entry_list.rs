@@ -2,7 +2,7 @@ use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut
 use workflow_visualizer::bevy_ecs::component::Component;
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::event::EventReader;
-use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Query, Resource};
+use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Event, Query, Resource};
 use workflow_visualizer::{bevy_ecs, Grid, GridPoint, RawMarker, ResponsiveUnit, ScaleFactor};
 
 use crate::enable::EntryEnabled;
@@ -35,7 +35,7 @@ pub(crate) fn removed_indices(
         }
     }
 }
-
+#[derive(Event)]
 pub(crate) struct ReceivedTokens(pub(crate) Vec<TokenName>);
 
 #[derive(Resource, Copy, Clone)]

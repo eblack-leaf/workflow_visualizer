@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::IntoSystemConfig;
+use bevy_ecs::prelude::IntoSystemConfigs;
 
 use crate::panel::renderer::PanelRenderer;
 use crate::panel::system::{

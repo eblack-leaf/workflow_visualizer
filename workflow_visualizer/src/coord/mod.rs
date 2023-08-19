@@ -31,7 +31,6 @@ impl CoordinateContext for NumericalContext {}
 /// Coordinate is a bundle of Section + Layer to denote coordinates in the world
 #[derive(Bundle, Copy, Clone, Default)]
 pub struct Coordinate<Context: CoordinateContext> {
-    #[bundle]
     pub section: Section<Context>,
     pub layer: Layer,
 }

@@ -25,22 +25,23 @@ impl<Data: bytemuck::Pod + bytemuck::Zeroable> Uniform<Data> {
     pub fn update(&mut self, queue: &wgpu::Queue, data: Data) {
         queue.write_buffer(&self.buffer, 0, bytemuck::cast_slice(&[data]));
     }
-    pub fn bind_group_entry<'a>(&self, binding: u32) -> BindGroupEntry<'a> {
+    pub fn bind_group_entry(&self, binding: u32) -> BindGroupEntry {
         wgpu::BindGroupEntry {
             binding,
             resource: self.buffer.as_entire_binding(),
         }
     }
-    pub fn vertex_bind_group_layout_entry(binding: u32) -> BindGroupLayoutEntry {
-        wgpu::BindGroupLayoutEntry {
-            binding,
-            visibility: wgpu::ShaderStages::VERTEX,
-            ty: wgpu::BindingType::Buffer {
-                ty: wgpu::BufferBindingType::Uniform,
-                has_dynamic_offset: false,
-                min_binding_size: None,
-            },
-            count: None,
-        }
+}
+
+pub fn vertex_bind_group_layout_entry(binding: u32) -> BindGroupLayoutEntry {
+    wgpu::BindGroupLayoutEntry {
+        binding,
+        visibility: wgpu::ShaderStages::VERTEX,
+        ty: wgpu::BindingType::Buffer {
+            ty: wgpu::BufferBindingType::Uniform,
+            has_dynamic_offset: false,
+            min_binding_size: None,
+        },
+        count: None,
     }
 }

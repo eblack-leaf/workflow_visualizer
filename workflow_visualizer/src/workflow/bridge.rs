@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, NonSend, Resource};
+use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfigs, NonSend, Resource};
 use gloo_worker::{HandlerId, Worker, WorkerBridge};
 use winit::event_loop::EventLoopProxy;
 

@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::IntoSystemConfig;
+use bevy_ecs::prelude::IntoSystemConfigs;
 
 use crate::text_input::system::{
     area_ties, cursor_letter_color_filter, open_virtual_keyboard, position_ties,

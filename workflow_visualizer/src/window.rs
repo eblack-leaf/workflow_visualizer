@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfig, Res, ResMut};
+use bevy_ecs::prelude::{Event, EventReader, Events, IntoSystemConfigs, Res, ResMut};
 use tracing::{info, trace, warn};
 
 use crate::coord::area::Area;
@@ -8,7 +8,7 @@ use crate::sync::SyncPoint;
 use crate::visualizer::{Attach, Visualizer};
 
 /// Event for triggering Window Resizing behaviour
-#[derive(Clone, Copy)]
+#[derive(Event, Clone, Copy)]
 pub struct WindowResize {
     pub size: Area<DeviceContext>,
     pub scale_factor: f64,
@@ -57,6 +57,6 @@ impl Attach for WindowAttachment {
         engen
             .job
             .task(Visualizer::TASK_MAIN)
-            .add_system(Events::<WindowResize>::update_system.in_set(SyncPoint::Event));
+            .add_systems((Events::<WindowResize>::update_system.in_set(SyncPoint::Event),));
     }
 }

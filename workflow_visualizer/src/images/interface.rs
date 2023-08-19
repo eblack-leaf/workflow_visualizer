@@ -1,4 +1,4 @@
-use crate::image::renderer::{ImageFade, ImageName};
+use crate::images::renderer::{ImageFade, ImageName};
 use crate::{
     Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility,
 };
@@ -11,7 +11,7 @@ use std::collections::{HashMap, HashSet};
 pub type ImageTag = Tag<Image>;
 #[derive(Bundle)]
 pub struct Image {
-    coordinate: Section<InterfaceContext>,
+    // section: Section<InterfaceContext>,
     layer: Layer,
     visibility: EnableVisibility,
     name: ImageName,
@@ -20,6 +20,20 @@ pub struct Image {
     difference: Difference,
     tag: ImageTag,
 }
+impl Image {
+    pub fn new<L: Into<Layer>>(name: ImageName, layer: L) -> Self {
+        Self {
+            // section: Section::default(),
+            layer: layer.into(),
+            visibility: EnableVisibility::default(),
+            name,
+            fade: ImageFade(1f32),
+            cache: Cache::default(),
+            difference: Difference::default(),
+            tag: ImageTag::new(),
+        }
+    }
+}
 #[derive(Component)]
 pub(crate) struct Cache {
     name: ImageName,
@@ -27,6 +41,17 @@ pub(crate) struct Cache {
     pos: Position<InterfaceContext>,
     area: Area<InterfaceContext>,
     layer: Layer,
+}
+impl Default for Cache {
+    fn default() -> Self {
+        Self {
+            name: ImageName(""),
+            fade: ImageFade(0.0),
+            pos: Position::default(),
+            area: Area::default(),
+            layer: Layer::default(),
+        }
+    }
 }
 #[derive(Component, Clone, Default)]
 pub(crate) struct Difference {
@@ -41,7 +66,7 @@ pub(crate) fn name_diff(
 ) {
     for (name, mut cache, mut difference) in images.iter_mut() {
         if name.0 != cache.name.0 {
-            cache.0 = name.0;
+            cache.name.0 = name.0;
             difference.name.replace(name.clone());
         }
     }

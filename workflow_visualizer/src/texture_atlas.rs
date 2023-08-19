@@ -16,7 +16,7 @@ impl TextureSampler {
             count: None,
         }
     }
-    pub fn bind_group_entry(sampler: &wgpu::Sampler, binding: u32) -> BindGroupEntry<'a> {
+    pub fn bind_group_entry(sampler: &wgpu::Sampler, binding: u32) -> BindGroupEntry {
         wgpu::BindGroupEntry {
             binding,
             resource: wgpu::BindingResource::Sampler(sampler),
@@ -24,7 +24,7 @@ impl TextureSampler {
     }
     pub fn new(gfx: &GfxSurface) -> Self {
         let sampler_descriptor = wgpu::SamplerDescriptor {
-            label: Some("image sampler"),
+            label: Some("images sampler"),
             address_mode_u: wgpu::AddressMode::ClampToEdge,
             address_mode_v: wgpu::AddressMode::ClampToEdge,
             address_mode_w: wgpu::AddressMode::ClampToEdge,
@@ -195,7 +195,8 @@ impl AtlasTexture {
         texture_dimensions: AtlasTextureDimensions,
         texture_format: wgpu::TextureFormat,
     ) -> Self {
-        let descriptor = Self::texture_descriptor(texture_dimensions, texture_format);
+        let formats = [texture_format];
+        let descriptor = Self::texture_descriptor(texture_dimensions, &formats);
         let texture = gfx_surface.device.create_texture(&descriptor);
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
         Self {
@@ -216,8 +217,8 @@ impl AtlasTexture {
     }
     pub fn texture_descriptor(
         texture_dimensions: AtlasTextureDimensions,
-        texture_format: wgpu::TextureFormat,
-    ) -> wgpu::TextureDescriptor<'static> {
+        texture_formats: &[wgpu::TextureFormat],
+    ) -> wgpu::TextureDescriptor {
         Self::hardware_max_check(texture_dimensions);
         wgpu::TextureDescriptor {
             label: Some("texture atlas"),
@@ -229,9 +230,9 @@ impl AtlasTexture {
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: texture_format,
+            format: texture_formats[0],
             usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[texture_format],
+            view_formats: texture_formats,
         }
     }
 }

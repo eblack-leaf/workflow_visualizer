@@ -4,8 +4,9 @@ use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resourc
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
-use crate::image::render_group::ImageRenderGroup;
+use crate::images::render_group::ImageRenderGroup;
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
+use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
     AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
     MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
@@ -39,23 +40,26 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
     gfx_surface
         .device
         .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("image vertex buffer"),
+            label: Some("images vertex buffer"),
             contents: bytemuck::cast_slice(&AABB),
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         })
 }
 
-#[derive(
-    Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug,
-)]
+#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
 
-#[derive(Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub struct ImageName(pub &'static str);
 #[derive(Component, Clone)]
 pub struct ImageRequest {
     pub name: ImageName,
     pub data: Vec<u8>,
+}
+impl ImageRequest {
+    pub fn new(name: ImageName, data: Vec<u8>) -> Self {
+        Self { name, data }
+    }
 }
 pub(crate) struct ImageData {
     pub(crate) atlas: TextureAtlas,
@@ -92,7 +96,7 @@ pub(crate) fn load_images(
     gfx: Res<GfxSurface>,
 ) {
     for (entity, request) in requests.iter() {
-        let image = image::load_from_memory(request.data.as_slice()).expect("image-load");
+        let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
         let texture_data = image.as_rgba8().expect("rgba8");
         let dimensions = image.dimensions();
         let block = AtlasBlock::new((dimensions.0, dimensions.1));
@@ -104,7 +108,7 @@ pub(crate) fn load_images(
             atlas_dimension,
             wgpu::TextureFormat::Rgba8Unorm,
         );
-        let coordinates = atlas.write(
+        let coordinates = atlas.write::<[f32; 4]>(
             AtlasLocation::new(0, 0),
             texture_data.as_bytes(),
             block.block,
@@ -140,10 +144,10 @@ pub(crate) fn setup_renderer(
         entries: &[TextureSampler::bind_group_entry(&sampler.sampler, 0)],
     };
     let sampler_bind_group = gfx.device.create_bind_group(&sampler_bind_group_descriptor);
-    let render_group_layout =
+    let texture_bind_group_layout =
         gfx.device
             .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                label: Some("image-render-group-layout"),
+                label: Some("images-render-group-layout"),
                 entries: &[TextureBindGroup::entry(0)],
             });
     let render_group_uniforms_layout =
@@ -151,16 +155,17 @@ pub(crate) fn setup_renderer(
             .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 label: Some("render-group"),
                 entries: &[
-                    Uniform::vertex_bind_group_layout_entry(0),
-                    Uniform::vertex_bind_group_layout_entry(1),
+                    vertex_bind_group_layout_entry(0),
+                    vertex_bind_group_layout_entry(1),
+                    vertex_bind_group_layout_entry(2),
                 ],
             });
     let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
-        label: Some("image-render-pipeline-layout"),
+        label: Some("images-render-pipeline-layout"),
         bind_group_layouts: &[
             viewport.bind_group_layout(),
             &sampler_bind_group_layout,
-            &render_group_layout,
+            &texture_bind_group_layout,
             &render_group_uniforms_layout,
         ],
         push_constant_ranges: &[],
@@ -170,9 +175,10 @@ pub(crate) fn setup_renderer(
         .create_pipeline_layout(&pipeline_layout_descriptor);
     let shader = gfx
         .device
-        .create_shader_module(wgpu::include_wgsl!("image.wgsl"));
+        .create_shader_module(wgpu::include_wgsl!("images.wgsl"));
+    let fragment_targets = [Some(gfx_config.alpha_color_target_state())];
     let pipeline_descriptor = wgpu::RenderPipelineDescriptor {
-        label: Some("image renderer"),
+        label: Some("images renderer"),
         layout: Some(&pipeline_layout),
         vertex: wgpu::VertexState {
             module: &shader,
@@ -189,7 +195,7 @@ pub(crate) fn setup_renderer(
         fragment: Some(wgpu::FragmentState {
             module: &shader,
             entry_point: "fragment_entry",
-            targets: &[Some(gfx_config.alpha_color_target_state())],
+            targets: &fragment_targets,
         }),
         multiview: None,
     };
@@ -200,7 +206,7 @@ pub(crate) fn setup_renderer(
         vertex_buffer: aabb_vertex_buffer(&gfx),
         sampler_bind_group,
         images: HashMap::new(),
-        render_group_layout,
+        render_group_layout: texture_bind_group_layout,
         render_group_uniforms_layout,
     };
     cmd.insert_resource(renderer);
@@ -227,8 +233,8 @@ impl Render for ImageRenderer {
                 &self
                     .images
                     .get(&group.image_name)
-                    .expect("no image")
-                    .1
+                    .expect("no images")
+                    .bind_group
                     .bind_group,
                 &[],
             );
