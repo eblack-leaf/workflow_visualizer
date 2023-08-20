@@ -4,14 +4,14 @@ use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resourc
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
-use crate::images::render_group::ImageRenderGroup;
-use crate::texture_atlas::{AtlasLocation, TextureSampler};
-use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
     AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
     MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
-    TextureBindGroup, TextureCoordinates, Uniform, Viewport,
+    TextureBindGroup, TextureCoordinates, Viewport,
 };
+use crate::images::render_group::ImageRenderGroup;
+use crate::texture_atlas::{AtlasLocation, TextureSampler};
+use crate::uniform::vertex_bind_group_layout_entry;
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
@@ -97,7 +97,7 @@ pub(crate) fn load_images(
 ) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
-        let texture_data = image.as_rgba8().expect("rgba8");
+        let texture_data = image.to_rgba8();
         let dimensions = image.dimensions();
         let block = AtlasBlock::new((dimensions.0, dimensions.1));
         let atlas_dimension = AtlasDimension::new(1);
@@ -108,7 +108,7 @@ pub(crate) fn load_images(
             atlas_dimension,
             wgpu::TextureFormat::Rgba8Unorm,
         );
-        let coordinates = atlas.write::<[f32; 4]>(
+        let coordinates = atlas.write::<[u8; 4]>(
             AtlasLocation::new(0, 0),
             texture_data.as_bytes(),
             block.block,

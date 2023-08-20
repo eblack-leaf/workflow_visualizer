@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use workflow_visualizer::{ActiveInteraction, Attach, bevy_ecs, BundledIcon, BundleExtension, BundlePlacement, Button, ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale, Image, ImageName, ImageRequest, Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Section, SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::{
     Commands, Entity, IntoSystemConfigs, Query, Res, ResMut, Resource, With,
 };
-use workflow_visualizer::{bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, BundledIcon, Button, ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale, Image, ImageName, ImageRequest, Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer, Section};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub(crate) struct PadLocation {
@@ -316,11 +316,11 @@ impl Attach for PadAttachment {
         // TEST
         visualizer.spawn(ImageRequest::new(
             ImageName("backdrop"),
-            include_bytes!("painting.jpg").to_vec(),
+            include_bytes!("test.png").to_vec(),
         ));
         visualizer.spawn(Image::new(ImageName("backdrop"), 1).absolute(Section::new(
-            (0.0, 0.0),
-            (600.0, 400.0)
+            (10.0, 10.0),
+            (10.0, 10.0)
         )));
         // END TEST
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((

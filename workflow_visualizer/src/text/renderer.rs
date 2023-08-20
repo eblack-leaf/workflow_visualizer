@@ -4,16 +4,16 @@ use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
 use tracing::trace;
 use wgpu::util::DeviceExt;
 
-use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::text::component::{Difference, TextScaleAlignment};
-use crate::text::font::AlignedFonts;
-use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
-use crate::texture_atlas::TextureCoordinates;
-use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
 use crate::{
     Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
 };
+use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
+use crate::text::component::{Difference, TextScaleAlignment};
+use crate::text::font::AlignedFonts;
+use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
+use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
+use crate::texture_atlas::TextureCoordinates;
 
 pub(crate) const AABB: [Vertex; 6] = [
     Vertex::new(RawPosition { x: 0.0, y: 0.0 }),
@@ -126,7 +126,7 @@ pub(crate) fn setup(
     let layout_descriptor = wgpu::PipelineLayoutDescriptor {
         label: Some("text pipeline layout descriptor"),
         bind_group_layouts: &[
-            (viewport.bind_group_layout()),
+            viewport.bind_group_layout(),
             &sampler_bind_group_layout,
             &render_group_bind_group_layout,
             &atlas_bind_group_layout,
@@ -202,10 +202,7 @@ pub(crate) fn setup(
         vertex: vertex_state,
         primitive: primitive_state,
         depth_stencil: depth_stencil_state,
-        multisample: wgpu::MultisampleState {
-            count: msaa_attachment.requested(),
-            ..wgpu::MultisampleState::default()
-        },
+        multisample: msaa_attachment.multisample_state(),
         fragment: Some(fragment_state),
         multiview: None,
     };

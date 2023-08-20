@@ -1,10 +1,11 @@
+use bevy_ecs::prelude::IntoSystemConfigs;
+
+use crate::{Attach, SyncPoint, Visualizer};
 use crate::images::interface::{
-    area_diff, extract, fade_diff, layer_diff, management, name_diff, pos_diff, Extraction,
+    area_diff, extract, Extraction, fade_diff, layer_diff, management, name_diff, pos_diff,
 };
 use crate::images::render_group::read_extraction;
-use crate::images::renderer::{load_images, setup_renderer, ImageRenderer};
-use crate::{Attach, SyncPoint, Visualizer};
-use bevy_ecs::prelude::IntoSystemConfigs;
+use crate::images::renderer::{ImageRenderer, load_images, setup_renderer};
 
 pub(crate) struct ImageAttachment;
 
@@ -23,7 +24,7 @@ impl Attach for ImageAttachment {
                 load_images.in_set(SyncPoint::Resolve),
             ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            management,
+            management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),
             layer_diff.in_set(SyncPoint::PushDiff),

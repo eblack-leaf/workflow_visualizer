@@ -1,13 +1,16 @@
-use crate::images::renderer::{ImageFade, ImageName};
-use crate::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility,
-};
+use std::collections::{HashMap, HashSet};
+
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
-    Added, Bundle, Changed, Component, Query, RemovedComponents, Resource, With, Without,
+    Bundle, Changed, Component, Query, RemovedComponents, Resource, Without,
 };
 use bevy_ecs::system::ResMut;
-use std::collections::{HashMap, HashSet};
+
+use crate::{
+    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Tag, Visibility,
+};
+use crate::images::renderer::{ImageFade, ImageName};
+
 pub type ImageTag = Tag<Image>;
 #[derive(Bundle)]
 pub struct Image {
@@ -36,20 +39,20 @@ impl Image {
 }
 #[derive(Component)]
 pub(crate) struct Cache {
-    name: ImageName,
-    fade: ImageFade,
-    pos: Position<InterfaceContext>,
-    area: Area<InterfaceContext>,
-    layer: Layer,
+    pub(crate) name: Option<ImageName>,
+    pub(crate) fade: Option<ImageFade>,
+    pub(crate) pos: Option<Position<InterfaceContext>>,
+    pub(crate) area: Option<Area<InterfaceContext>>,
+    pub(crate) layer: Option<Layer>,
 }
 impl Default for Cache {
     fn default() -> Self {
         Self {
-            name: ImageName(""),
-            fade: ImageFade(0.0),
-            pos: Position::default(),
-            area: Area::default(),
-            layer: Layer::default(),
+            name: None,
+            fade: None,
+            pos: None,
+            area: None,
+            layer: None,
         }
     }
 }
@@ -65,20 +68,24 @@ pub(crate) fn name_diff(
     mut images: Query<(&ImageName, &mut Cache, &mut Difference), Changed<ImageName>>,
 ) {
     for (name, mut cache, mut difference) in images.iter_mut() {
-        if name.0 != cache.name.0 {
-            cache.name.0 = name.0;
-            difference.name.replace(name.clone());
+        if let Some(cached) = cache.name.as_ref() {
+            if cached.0 != name.0 {
+                difference.name.replace(name.clone());
+            }
         }
+        cache.name.replace(name.clone());
     }
 }
 pub(crate) fn fade_diff(
     mut images: Query<(&ImageFade, &mut Cache, &mut Difference), Changed<ImageFade>>,
 ) {
     for (fade, mut cache, mut difference) in images.iter_mut() {
-        if *fade != cache.fade {
-            difference.fade.replace(*fade);
-            cache.fade = *fade;
+        if let Some(cached) = cache.fade.as_ref() {
+            if *cached != *fade {
+                difference.fade.replace(*fade);
+            }
         }
+        cache.fade.replace(*fade);
     }
 }
 pub(crate) fn pos_diff(
@@ -88,10 +95,12 @@ pub(crate) fn pos_diff(
     >,
 ) {
     for (pos, mut cache, mut difference) in images.iter_mut() {
-        if *pos != cache.pos {
-            cache.pos = *pos;
-            difference.pos.replace(*pos);
+        if let Some(cached) = cache.pos.as_ref() {
+            if *cached != *pos {
+                difference.pos.replace(*pos);
+            }
         }
+        cache.pos.replace(*pos);
     }
 }
 pub(crate) fn area_diff(
@@ -101,18 +110,22 @@ pub(crate) fn area_diff(
     >,
 ) {
     for (area, mut cache, mut difference) in images.iter_mut() {
-        if *area != cache.area {
-            cache.area = *area;
-            difference.area.replace(*area);
+        if let Some(cached) = cache.area.as_ref() {
+            if *cached != *area {
+                difference.area.replace(*area);
+            }
         }
+        cache.area.replace(*area);
     }
 }
 pub(crate) fn layer_diff(mut images: Query<(&Layer, &mut Cache, &mut Difference), Changed<Layer>>) {
     for (layer, mut cache, mut difference) in images.iter_mut() {
-        if *layer != cache.layer {
-            cache.layer = *layer;
-            difference.layer.replace(*layer);
+        if let Some(cached) = cache.layer.as_ref() {
+            if *cached != *layer {
+                difference.layer.replace(*layer);
+            }
         }
+        cache.layer.replace(*layer);
     }
 }
 #[derive(Resource, Default)]
@@ -148,16 +161,16 @@ pub(crate) fn management(
         images.iter_mut()
     {
         if visibility.visible() {
-            cache.pos = *pos;
-            cache.area = *area;
-            cache.layer = *layer;
-            cache.fade = *fade;
-            cache.name.0 = name.0;
-            difference.pos.replace(cache.pos);
-            difference.area.replace(cache.area);
-            difference.layer.replace(cache.layer);
-            difference.fade.replace(cache.fade);
-            difference.name.replace(cache.name.clone());
+            cache.pos.replace(*pos);
+            cache.area.replace(*area);
+            cache.layer.replace(*layer);
+            cache.name.replace(name.clone());
+            cache.fade.replace(*fade);
+            difference.pos.replace(cache.pos.unwrap());
+            difference.area.replace(cache.area.unwrap());
+            difference.layer.replace(cache.layer.unwrap());
+            difference.fade.replace(cache.fade.unwrap());
+            difference.name.replace(cache.name.clone().unwrap());
         } else {
             extraction.remove(entity);
         }
