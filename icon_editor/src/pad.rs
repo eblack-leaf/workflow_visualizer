@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use workflow_visualizer::{ActiveInteraction, Attach, bevy_ecs, BundledIcon, BundleExtension, BundlePlacement, Button, ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale, Image, ImageName, ImageRequest, Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Section, SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer};
+use workflow_visualizer::{ActiveInteraction, Attach, bevy_ecs, BundledIcon, BundleExtension, BundlePlacement, Button, ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale, Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::{
     Commands, Entity, IntoSystemConfigs, Query, Res, ResMut, Resource, With,
 };
@@ -313,16 +313,6 @@ impl Attach for PadAttachment {
             "square",
             IconBitmap::bundled(BundledIcon::Square),
         )));
-        // TEST
-        visualizer.spawn(ImageRequest::new(
-            ImageName("backdrop"),
-            include_bytes!("test.png").to_vec(),
-        ));
-        visualizer.spawn(Image::new(ImageName("backdrop"), 1).absolute(Section::new(
-            (10.0, 10.0),
-            (10.0, 10.0)
-        )));
-        // END TEST
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
             setup.in_set(SyncPoint::PostInitialization),
             pad_icons.in_set(SyncPoint::Resolve),

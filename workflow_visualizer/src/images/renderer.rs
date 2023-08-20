@@ -106,7 +106,7 @@ pub(crate) fn load_images(
             &gfx,
             block,
             atlas_dimension,
-            wgpu::TextureFormat::Rgba8Unorm,
+            wgpu::TextureFormat::Rgba8UnormSrgb,
         );
         let coordinates = atlas.write::<[u8; 4]>(
             AtlasLocation::new(0, 0),
@@ -218,6 +218,7 @@ impl Render for ImageRenderer {
     }
 
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
+        render_pass_handle.0.set_pipeline(&self.pipeline);
         render_pass_handle
             .0
             .set_vertex_buffer(0, self.vertex_buffer.slice(..));
