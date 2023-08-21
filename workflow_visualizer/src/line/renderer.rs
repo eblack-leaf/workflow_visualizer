@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{Entity, Resource};
 use wgpu::util::DeviceExt;
 
+use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::{
     Color, DeviceContext, GfxSurface, Position, RawPosition, Render, RenderPassHandle, RenderPhase,
     ScaleFactor, Uniform, Viewport, Visualizer,
 };
-use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 
 pub(crate) struct LineRenderGroup {
     pub(crate) line_render_gpu: LineRenderGpu,

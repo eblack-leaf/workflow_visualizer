@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::{Res, ResMut};
 
-use crate::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
 use crate::images::interface::Extraction;
 use crate::images::renderer::{ImageFade, ImageName, ImageRenderer};
+use crate::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
 
 pub(crate) struct ImageRenderGroup {
     pub(crate) image_name: ImageName,

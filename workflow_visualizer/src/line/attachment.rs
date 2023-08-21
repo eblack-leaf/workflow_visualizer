@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::{Attach, SyncPoint, Visualizer};
 use crate::line::renderer::LineRenderer;
 use crate::line::system::{
     calc_section, create_render_group, push_color, push_layer, push_uniforms, scale_path,
 };
 use crate::path::view_changed;
+use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct LineAttachment;
 

@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
 
-use crate::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
-};
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::component::{IconId, IconScale};
 use crate::icon::renderer::IconRenderer;
+use crate::{
+    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+};
 
 pub(crate) fn calc_area(
     mut icons: Query<

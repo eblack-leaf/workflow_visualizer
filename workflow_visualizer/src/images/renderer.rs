@@ -4,14 +4,14 @@ use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resourc
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
+use crate::images::render_group::ImageRenderGroup;
+use crate::texture_atlas::{AtlasLocation, TextureSampler};
+use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
     AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
     MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor,
     TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer,
 };
-use crate::images::render_group::ImageRenderGroup;
-use crate::texture_atlas::{AtlasLocation, TextureSampler};
-use crate::uniform::vertex_bind_group_layout_entry;
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]

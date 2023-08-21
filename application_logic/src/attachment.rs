@@ -1,9 +1,9 @@
-use workflow_visualizer::{Attach, SyncPoint, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfigs;
+use workflow_visualizer::{Attach, SyncPoint, Visualizer};
 
-use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
 use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
 use crate::entry_list::{ListDimensions, ReceivedTokens};
+use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
 
 pub struct EntryAttachment;
 

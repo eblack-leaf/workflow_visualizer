@@ -1,8 +1,8 @@
 use bevy_ecs::change_detection::Res;
 use bevy_ecs::prelude::{Commands, IntoSystemConfigs};
 
-use crate::{Attach, Grid, SyncPoint, ViewportHandle, Visualizer};
 use crate::grid::system;
+use crate::{Attach, Grid, SyncPoint, ViewportHandle, Visualizer};
 
 pub(crate) struct GridAttachment;
 

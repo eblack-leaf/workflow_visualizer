@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use wgpu::{BindGroupEntry, BindGroupLayoutEntry, Buffer};
 use wgpu::util::DeviceExt;
+use wgpu::{BindGroupEntry, BindGroupLayoutEntry, Buffer};
 
 /// Wrapper around wgpu::Buffer for use as a Uniform Buffer
 pub struct Uniform<Data: bytemuck::Pod + bytemuck::Zeroable> {

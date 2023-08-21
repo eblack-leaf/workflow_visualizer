@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::{Attach, SyncPoint, Visualizer};
 use crate::images::interface::{
-    area_diff, extract, Extraction, fade_diff, layer_diff, management, name_diff, pos_diff,
+    area_diff, extract, fade_diff, layer_diff, management, name_diff, pos_diff, Extraction,
 };
 use crate::images::render_group::read_extraction;
-use crate::images::renderer::{ImageRenderer, load_images};
+use crate::images::renderer::{load_images, ImageRenderer};
+use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct ImageAttachment;
 

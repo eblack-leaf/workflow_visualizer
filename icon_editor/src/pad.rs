@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
+use workflow_visualizer::bevy_ecs::prelude::{
+    Commands, Entity, IntoSystemConfigs, Query, Res, ResMut, Resource, With,
+};
 use workflow_visualizer::{
-    ActiveInteraction, Attach, bevy_ecs, BundleExtension, BundlePlacement, Button, ButtonBorder,
+    bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, Button, ButtonBorder,
     ButtonType, Color, GridPoint, Icon, IconScale, Interactable, InteractionTracker,
     InterfaceContext, Panel, PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint,
     ResponsiveGridView, ResponsiveUnit, SyncPoint, Text, TextScaleAlignment, TextValue,
     TextWrapStyle, Triggered, Visualizer,
-};
-use workflow_visualizer::bevy_ecs::prelude::{
-    Commands, Entity, IntoSystemConfigs, Query, Res, ResMut, Resource, With,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]

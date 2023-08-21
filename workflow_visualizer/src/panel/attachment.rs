@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::{Attach, SyncPoint, Visualizer};
-use crate::panel::Extraction;
 use crate::panel::renderer::PanelRenderer;
 use crate::panel::system::{
     calc_content_area, color_diff, content_area_diff, layer_diff, management, panel_type_diff,
     position_diff, process_extraction, pull_differences,
 };
+use crate::panel::Extraction;
+use crate::{Attach, SyncPoint, Visualizer};
 
 pub struct PanelAttachment;
 

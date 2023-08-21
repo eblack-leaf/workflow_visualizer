@@ -1,9 +1,9 @@
 use bevy_ecs::prelude::Resource;
 use tracing::trace;
 
-use crate::{GfxSurface, Job, ScaleFactor, Theme, Viewport};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::visualizer::Visualizer;
+use crate::{GfxSurface, Job, ScaleFactor, Theme, Viewport};
 
 /// Phase for Rendering
 pub enum RenderPhase {

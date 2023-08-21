@@ -1,12 +1,12 @@
 use bevy_ecs::prelude::{Entity, IntoSystemConfigs};
 
-use crate::{Attach, IconBitmapRequest, SyncPoint, Visualizer};
 use crate::icon::bitmap::{cleanup_requests, IconBitmapRequestManager};
 use crate::icon::renderer::IconRenderer;
 use crate::icon::system::{
     area_diff, calc_area, icon_id_diff, layer_diff, management, position_diff,
     positive_space_color_diff, read_differences,
 };
+use crate::{Attach, IconBitmapRequest, SyncPoint, Visualizer};
 
 pub(crate) struct IconAttachment;
 
