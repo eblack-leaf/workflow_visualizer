@@ -8,19 +8,11 @@ pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 pub use bevy_ecs;
 pub use bundling::{BundleBuilder, BundleExtension};
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
-pub use grid::GridLocation;
-pub use grid::GridLocationDescriptor;
-pub use grid::GridMarker;
-pub use grid::GridMarkerBias;
-pub use grid::GridPoint;
-pub use grid::GridRange;
-pub use grid::GridView;
-pub use grid::RawMarker;
-pub use grid::RawMarkerGrouping;
-pub use grid::ResponsiveGridPoint;
-pub use grid::ResponsiveGridView;
-pub use grid::ResponsiveUnit;
-pub use grid::ResponsiveView;
+pub use grid::{
+    BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
+    GridPoint, GridRange, GridView, HorizontalSpan, RawMarker, RawMarkerGrouping,
+    RelativePlacement, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, ResponsiveView,
+};
 pub use images::{Image, ImageFade, ImageName, ImageRequest, ImageTag};
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
@@ -49,7 +41,6 @@ pub use crate::disable::Disabled;
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-pub use crate::grid::{BundlePlacement, Grid, HorizontalSpan, PlacementReference};
 pub use crate::icon::{
     BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale, IconTag,
 };

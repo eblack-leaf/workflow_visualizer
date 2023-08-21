@@ -414,8 +414,8 @@ impl Visualizer {
     }
     pub fn register_animation<A: Animate + Send + Sync + 'static + Clone>(&mut self) {
         self.job.task(Self::TASK_MAIN).add_systems((
+            update_animations::<A>.in_set(SyncPoint::PostInitialization),
             start_animations::<A>.in_set(SyncPoint::PostProcessPreparation),
-            update_animations::<A>.in_set(SyncPoint::Preparation),
             end_animations::<A>.in_set(SyncPoint::Finish),
         ));
     }

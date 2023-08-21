@@ -111,78 +111,28 @@ pub enum GridMarkerBias {
 #[derive(Copy, Clone, PartialEq)]
 pub struct GridLocationOffset(pub RawMarker);
 
-pub struct PlacementReference {
-    pub locations: HashMap<&'static str, GridLocation>,
-    pub horizontal_ranges: HashMap<&'static str, GridRange>,
-    pub vertical_ranges: HashMap<&'static str, GridRange>,
-    pub points: HashMap<&'static str, GridPoint>,
-    pub path_views: HashMap<&'static str, PathView>,
+pub struct RelativePlacement {
+    pub anchor: GridPoint,
+    pub relative_offsets: HashMap<i32, RawMarker>,
 }
-
-impl PlacementReference {
-    pub fn new() -> Self {
+impl RelativePlacement {
+    pub fn new<GP: Into<GridPoint>>(anchor: GP) -> Self {
         Self {
-            locations: HashMap::new(),
-            horizontal_ranges: HashMap::new(),
-            vertical_ranges: HashMap::new(),
-            points: HashMap::new(),
-            path_views: HashMap::new(),
+            anchor: anchor.into(),
+            relative_offsets: HashMap::new(),
         }
     }
-    pub fn add_point<P: Into<GridPoint>>(&mut self, id: &'static str, point: P) {
-        self.points.insert(id, point.into());
+    pub fn add<R: Into<RawMarker>>(&mut self, key: i32, marker: R) {
+        self.relative_offsets.insert(key, marker.into());
     }
-    pub fn add_location<L: Into<GridLocation>>(&mut self, id: &'static str, location: L) {
-        self.locations.insert(id, location.into());
+    pub fn view<R: Into<RawMarker>>(&self, hb: R, he: R, vb: R, ve: R) -> GridView {
+        (
+            (self.anchor.x.raw_offset(hb), self.anchor.x.raw_offset(he)),
+            (self.anchor.y.raw_offset(vb), self.anchor.y.raw_offset(ve)),
+        )
+            .into()
     }
-    pub fn add_path_view<P: Into<PathView>>(&mut self, id: &'static str, path_view: P) {
-        self.path_views.insert(id, path_view.into());
-    }
-    pub fn add_horizontal_range<T: Into<&'static str>, R: Into<GridRange>>(
-        &mut self,
-        name: T,
-        range: R,
-    ) {
-        self.horizontal_ranges.insert(name.into(), range.into());
-    }
-    pub fn add_vertical_range<T: Into<&'static str>, R: Into<GridRange>>(
-        &mut self,
-        name: T,
-        range: R,
-    ) {
-        self.vertical_ranges.insert(name.into(), range.into());
-    }
-    pub fn add_view<V: Into<GridView>, N: Into<&'static str>>(&mut self, name: N, view: V) {
-        let view = view.into();
-        let name = name.into();
-        self.horizontal_ranges.insert(name, view.horizontal);
-        self.vertical_ranges.insert(name, view.vertical);
-    }
-    pub fn view<T: Into<&'static str>>(&self, name: T) -> GridView {
-        let name = name.into();
-        let horiz = self.horizontal_ranges.get(&name).copied().expect("horiz");
-        let vert = self.vertical_ranges.get(&name).copied().expect("vert");
-        (horiz, vert).into()
-    }
-    pub fn point<T: Into<&'static str>>(&self, name: T) -> GridPoint {
-        self.points.get(&name.into()).copied().expect("point")
-    }
-    pub fn location(&self, id: &'static str) -> GridLocation {
-        self.locations.get(id).copied().expect("location")
-    }
-    pub fn horizontal<N: Into<&'static str>>(&self, name: N) -> GridRange {
-        self.horizontal_ranges
-            .get(&name.into())
-            .copied()
-            .expect("no horizontal")
-    }
-    pub fn vertical<N: Into<&'static str>>(&self, name: N) -> GridRange {
-        self.vertical_ranges
-            .get(&name.into())
-            .copied()
-            .expect("no horizontal")
-    }
-    pub fn path_view(&self, name: &str) -> PathView {
-        self.path_views.get(name).cloned().expect("no path view")
+    pub fn point<R: Into<RawMarker>>(&self, hb: R, vb: R) -> GridPoint {
+        (self.anchor.x.raw_offset(hb), self.anchor.y.raw_offset(vb)).into()
     }
 }

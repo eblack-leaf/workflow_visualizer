@@ -67,12 +67,16 @@ pub struct Animation<T: Animate> {
 }
 
 impl<T: Animate> Animation<T> {
-    pub fn new(animation_time: TimeDelta, start_offset: Option<TimeDelta>) -> Self {
+    pub fn new(
+        animation_time: TimeDelta,
+        start_offset: Option<TimeDelta>,
+        interpolations: Vec<Interpolation>,
+    ) -> Self {
         Self {
             start: None,
             start_offset,
             animation_time,
-            interpolations: T::interpolations(),
+            interpolations,
             done: false,
             _phantom: PhantomData,
         }
@@ -89,8 +93,23 @@ impl<T: Animate> Animation<T> {
     }
 }
 
-pub trait Animate {
-    fn interpolations() -> Vec<Interpolation>;
+pub trait Animate
+where
+    Self: Sized,
+{
+    fn interpolations(&self, end: Self) -> Vec<Interpolation>;
+    fn animate(
+        &self,
+        end: Self,
+        animation_time: TimeDelta,
+        start_offset: Option<TimeDelta>,
+    ) -> Animation<Self> {
+        Animation::new(
+            animation_time,
+            start_offset,
+            Self::interpolations(&self, end),
+        )
+    }
 }
 
 pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(

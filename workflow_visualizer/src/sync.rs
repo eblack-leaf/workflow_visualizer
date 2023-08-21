@@ -9,6 +9,7 @@ pub enum SyncPoint {
     Event,
     Initialization,
     PostInitialization,
+    Animation,
     Config,
     PreProcessVisibility,
     Preparation,
@@ -53,6 +54,7 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             SyncPoint::Event,
             SyncPoint::Initialization,
             SyncPoint::PostInitialization,
+            SyncPoint::Animation,
             SyncPoint::Config,
             SyncPoint::PreProcessVisibility,
             SyncPoint::Preparation,
@@ -62,18 +64,18 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             SyncPoint::SecondaryEffects,
             SyncPoint::Reconfigure,
             SyncPoint::PostProcessVisibility,
-            SyncPoint::Resolve,
         )
             .chain(),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
+            SyncPoint::Resolve,
             SyncPoint::PostResolve,
             SyncPoint::PushDiff,
             SyncPoint::Finish,
         )
             .chain()
-            .after(SyncPoint::Resolve),
+            .after(SyncPoint::PostProcessVisibility),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_deferred

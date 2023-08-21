@@ -3,11 +3,12 @@ use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Div, Sub};
 
 use bevy_ecs::component::Component;
+use bevy_ecs::prelude::Query;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
 use crate::coord::{CoordinateContext, NumericalContext};
-use crate::{DeviceContext, InterfaceContext};
+use crate::{Animate, Animation, DeviceContext, InterfaceContext, Interpolation};
 
 /// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
@@ -124,5 +125,26 @@ impl<Context: CoordinateContext> AddAssign for Position<Context> {
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
+    }
+}
+impl<Context: CoordinateContext> Animate for Position<Context> {
+    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+        vec![
+            Interpolation::new(end.x - self.x),
+            Interpolation::new(end.y - self.y),
+        ]
+    }
+}
+pub(crate) fn apply_animation<Context: CoordinateContext>(
+    mut positions: Query<(&mut Position<Context>, &mut Animation<Position<Context>>)>,
+) {
+    for (mut pos, mut anim) in positions.iter_mut() {
+        let extracts = anim.extractions();
+        if let Some(extract) = extracts.get(0).unwrap() {
+            pos.x += extract.0;
+        }
+        if let Some(extract) = extracts.get(1).unwrap() {
+            pos.y += extract.0;
+        }
     }
 }

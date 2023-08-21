@@ -14,9 +14,6 @@ impl Attach for IconAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_area.in_set(SyncPoint::Reconfigure),
-            calc_area
-                .in_set(SyncPoint::Config)
-                .after(crate::grid::config_grid),
             management.in_set(SyncPoint::Resolve),
             position_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),
