@@ -214,7 +214,6 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -230,7 +229,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>system::config_grid;
 <span class="kw">pub use </span>view::{
     GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, PlacementReference,
+    GridPoint, GridRange, GridView, RelativePlacement,
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::bundling::{BundleBuilder, BundleExtension};
@@ -242,7 +241,6 @@
 <span class="kw">mod </span>responsive;
 <span class="kw">mod </span>system;
 <span class="kw">mod </span>view;
-
 <span class="doccomment">/// Span used for setting the number of columns available in the Grid
 </span><span class="attr">#[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
 </span><span class="kw">pub enum </span>HorizontalSpan {

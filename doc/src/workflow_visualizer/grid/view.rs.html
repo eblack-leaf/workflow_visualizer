@@ -136,56 +136,6 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use crate</span>::{PathView, RawMarker};
@@ -299,79 +249,29 @@
 <span class="attr">#[derive(Copy, Clone, PartialEq)]
 </span><span class="kw">pub struct </span>GridLocationOffset(<span class="kw">pub </span>RawMarker);
 
-<span class="kw">pub struct </span>PlacementReference {
-    <span class="kw">pub </span>locations: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, GridLocation&gt;,
-    <span class="kw">pub </span>horizontal_ranges: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, GridRange&gt;,
-    <span class="kw">pub </span>vertical_ranges: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, GridRange&gt;,
-    <span class="kw">pub </span>points: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, GridPoint&gt;,
-    <span class="kw">pub </span>path_views: HashMap&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, PathView&gt;,
+<span class="kw">pub struct </span>RelativePlacement {
+    <span class="kw">pub </span>anchor: GridPoint,
+    <span class="kw">pub </span>relative_offsets: HashMap&lt;i32, RawMarker&gt;,
 }
-
-<span class="kw">impl </span>PlacementReference {
-    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>RelativePlacement {
+    <span class="kw">pub fn </span>new&lt;GP: Into&lt;GridPoint&gt;&gt;(anchor: GP) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            locations: HashMap::new(),
-            horizontal_ranges: HashMap::new(),
-            vertical_ranges: HashMap::new(),
-            points: HashMap::new(),
-            path_views: HashMap::new(),
+            anchor: anchor.into(),
+            relative_offsets: HashMap::new(),
         }
     }
-    <span class="kw">pub fn </span>add_point&lt;P: Into&lt;GridPoint&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, point: P) {
-        <span class="self">self</span>.points.insert(id, point.into());
+    <span class="kw">pub fn </span>add&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: i32, marker: R) {
+        <span class="self">self</span>.relative_offsets.insert(key, marker.into());
     }
-    <span class="kw">pub fn </span>add_location&lt;L: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, location: L) {
-        <span class="self">self</span>.locations.insert(id, location.into());
+    <span class="kw">pub fn </span>view&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, hb: R, he: R, vb: R, ve: R) -&gt; GridView {
+        (
+            (<span class="self">self</span>.anchor.x.raw_offset(hb), <span class="self">self</span>.anchor.x.raw_offset(he)),
+            (<span class="self">self</span>.anchor.y.raw_offset(vb), <span class="self">self</span>.anchor.y.raw_offset(ve)),
+        )
+            .into()
     }
-    <span class="kw">pub fn </span>add_path_view&lt;P: Into&lt;PathView&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, path_view: P) {
-        <span class="self">self</span>.path_views.insert(id, path_view.into());
-    }
-    <span class="kw">pub fn </span>add_horizontal_range&lt;T: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;, R: Into&lt;GridRange&gt;&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        name: T,
-        range: R,
-    ) {
-        <span class="self">self</span>.horizontal_ranges.insert(name.into(), range.into());
-    }
-    <span class="kw">pub fn </span>add_vertical_range&lt;T: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;, R: Into&lt;GridRange&gt;&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        name: T,
-        range: R,
-    ) {
-        <span class="self">self</span>.vertical_ranges.insert(name.into(), range.into());
-    }
-    <span class="kw">pub fn </span>add_view&lt;V: Into&lt;GridView&gt;, N: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: N, view: V) {
-        <span class="kw">let </span>view = view.into();
-        <span class="kw">let </span>name = name.into();
-        <span class="self">self</span>.horizontal_ranges.insert(name, view.horizontal);
-        <span class="self">self</span>.vertical_ranges.insert(name, view.vertical);
-    }
-    <span class="kw">pub fn </span>view&lt;T: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: T) -&gt; GridView {
-        <span class="kw">let </span>name = name.into();
-        <span class="kw">let </span>horiz = <span class="self">self</span>.horizontal_ranges.get(<span class="kw-2">&amp;</span>name).copied().expect(<span class="string">&quot;horiz&quot;</span>);
-        <span class="kw">let </span>vert = <span class="self">self</span>.vertical_ranges.get(<span class="kw-2">&amp;</span>name).copied().expect(<span class="string">&quot;vert&quot;</span>);
-        (horiz, vert).into()
-    }
-    <span class="kw">pub fn </span>point&lt;T: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: T) -&gt; GridPoint {
-        <span class="self">self</span>.points.get(<span class="kw-2">&amp;</span>name.into()).copied().expect(<span class="string">&quot;point&quot;</span>)
-    }
-    <span class="kw">pub fn </span>location(<span class="kw-2">&amp;</span><span class="self">self</span>, id: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; GridLocation {
-        <span class="self">self</span>.locations.get(id).copied().expect(<span class="string">&quot;location&quot;</span>)
-    }
-    <span class="kw">pub fn </span>horizontal&lt;N: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; GridRange {
-        <span class="self">self</span>.horizontal_ranges
-            .get(<span class="kw-2">&amp;</span>name.into())
-            .copied()
-            .expect(<span class="string">&quot;no horizontal&quot;</span>)
-    }
-    <span class="kw">pub fn </span>vertical&lt;N: Into&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; GridRange {
-        <span class="self">self</span>.vertical_ranges
-            .get(<span class="kw-2">&amp;</span>name.into())
-            .copied()
-            .expect(<span class="string">&quot;no horizontal&quot;</span>)
-    }
-    <span class="kw">pub fn </span>path_view(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; PathView {
-        <span class="self">self</span>.path_views.get(name).cloned().expect(<span class="string">&quot;no path view&quot;</span>)
+    <span class="kw">pub fn </span>point&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, hb: R, vb: R) -&gt; GridPoint {
+        (<span class="self">self</span>.anchor.x.raw_offset(hb), <span class="self">self</span>.anchor.y.raw_offset(vb)).into()
     }
 }
 </code></pre></div></section></main></body></html>

@@ -874,8 +874,8 @@
     }
     <span class="kw">pub fn </span>register_animation&lt;A: Animate + Send + Sync + <span class="lifetime">&#39;static </span>+ Clone&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.job.task(<span class="self">Self</span>::TASK_MAIN).add_systems((
+            update_animations::&lt;A&gt;.in_set(SyncPoint::PostInitialization),
             start_animations::&lt;A&gt;.in_set(SyncPoint::PostProcessPreparation),
-            update_animations::&lt;A&gt;.in_set(SyncPoint::Preparation),
             end_animations::&lt;A&gt;.in_set(SyncPoint::Finish),
         ));
     }

@@ -128,6 +128,8 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
@@ -139,6 +141,7 @@
     Event,
     Initialization,
     PostInitialization,
+    Animation,
     Config,
     PreProcessVisibility,
     Preparation,
@@ -183,6 +186,7 @@
             SyncPoint::Event,
             SyncPoint::Initialization,
             SyncPoint::PostInitialization,
+            SyncPoint::Animation,
             SyncPoint::Config,
             SyncPoint::PreProcessVisibility,
             SyncPoint::Preparation,
@@ -192,18 +196,18 @@
             SyncPoint::SecondaryEffects,
             SyncPoint::Reconfigure,
             SyncPoint::PostProcessVisibility,
-            SyncPoint::Resolve,
         )
             .chain(),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).configure_sets(
         (
+            SyncPoint::Resolve,
             SyncPoint::PostResolve,
             SyncPoint::PushDiff,
             SyncPoint::Finish,
         )
             .chain()
-            .after(SyncPoint::Resolve),
+            .after(SyncPoint::PostProcessVisibility),
     );
     visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
         apply_deferred
