@@ -457,6 +457,7 @@
 <a href="#457" id="457">457</a>
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -471,7 +472,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
 <span class="kw">use </span><span class="kw">crate</span>::grid::GridAttachment;
-<span class="kw">use </span><span class="kw">crate</span>::icon::IconAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::icon::{IconAttachment, IconRendererAttachment};
 <span class="kw">use </span><span class="kw">crate</span>::images::ImageAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
@@ -608,6 +609,7 @@
         <span class="self">self</span>.invoke_attach::&lt;PathAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;PanelAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;LineAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;IconAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;VisibilityAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;InteractionAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;FocusAttachment&gt;();
@@ -615,10 +617,10 @@
         <span class="self">self</span>.invoke_attach::&lt;TimerAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;VirtualKeyboardAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;TextAttachment&gt;();
-        <span class="self">self</span>.invoke_attach::&lt;IconAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ButtonAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ImageAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
+        <span class="self">self</span>.invoke_attach::&lt;IconRendererAttachment&gt;();
         <span class="self">self</span>.setup();
         <span class="self">self</span>.job.resume();
     }

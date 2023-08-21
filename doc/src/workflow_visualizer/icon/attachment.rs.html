@@ -49,6 +49,11 @@
 <a href="#49" id="49">49</a>
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
+<a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Entity, IntoSystemConfigs};
 
 <span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::{cleanup_requests, IconBitmapRequestManager};
@@ -62,6 +67,27 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconAttachment;
 
 <span class="kw">impl </span>Attach <span class="kw">for </span>IconAttachment {
+    <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            calc_area.in_set(SyncPoint::Reconfigure),
+            calc_area
+                .in_set(SyncPoint::Config)
+                .after(<span class="kw">crate</span>::grid::config_grid),
+            management.in_set(SyncPoint::Resolve),
+            position_diff.in_set(SyncPoint::PushDiff),
+            area_diff.in_set(SyncPoint::PushDiff),
+            layer_diff.in_set(SyncPoint::PushDiff),
+            positive_space_color_diff.in_set(SyncPoint::PushDiff),
+            icon_id_diff.in_set(SyncPoint::PushDiff),
+        ));
+        visualizer
+            .job
+            .task(Visualizer::TASK_RENDER_MAIN)
+            .add_systems((read_differences.in_set(SyncPoint::Preparation),));
+    }
+}
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconRendererAttachment;
+<span class="kw">impl </span>Attach <span class="kw">for </span>IconRendererAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         <span class="kw">let </span><span class="kw-2">mut </span>manager = IconBitmapRequestManager::default();
         <span class="kw">for </span>(entity, request) <span class="kw">in </span>visualizer
@@ -82,22 +108,6 @@
             .job
             .task(Visualizer::TASK_STARTUP)
             .add_systems((cleanup_requests.in_set(SyncPoint::PostInitialization),));
-        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            calc_area.in_set(SyncPoint::Reconfigure),
-            calc_area
-                .in_set(SyncPoint::Config)
-                .after(<span class="kw">crate</span>::grid::config_grid),
-            management.in_set(SyncPoint::Resolve),
-            position_diff.in_set(SyncPoint::PushDiff),
-            area_diff.in_set(SyncPoint::PushDiff),
-            layer_diff.in_set(SyncPoint::PushDiff),
-            positive_space_color_diff.in_set(SyncPoint::PushDiff),
-            icon_id_diff.in_set(SyncPoint::PushDiff),
-        ));
-        visualizer
-            .job
-            .task(Visualizer::TASK_RENDER_MAIN)
-            .add_systems((read_differences.in_set(SyncPoint::Preparation),));
     }
 }
 </code></pre></div></section></main></body></html>
