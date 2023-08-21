@@ -9,7 +9,10 @@ use crate::{
 };
 
 pub(crate) fn calc_area(
-    mut icons: Query<(&mut Area<InterfaceContext>, &IconScale), (Changed<IconScale>, Added<Area<InterfaceContext>>)>,
+    mut icons: Query<
+        (&mut Area<InterfaceContext>, &IconScale),
+        (Changed<IconScale>, Added<Area<InterfaceContext>>),
+    >,
 ) {
     for (mut area, scale) in icons.iter_mut() {
         let px = scale.px();

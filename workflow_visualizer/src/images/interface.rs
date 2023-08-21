@@ -5,7 +5,9 @@ use bevy_ecs::prelude::{Bundle, Changed, Component, Query, RemovedComponents, Re
 use bevy_ecs::system::ResMut;
 
 use crate::images::renderer::{ImageFade, ImageName};
-use crate::{Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility};
+use crate::{
+    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility,
+};
 
 pub type ImageTag = Tag<Image>;
 #[derive(Bundle)]
