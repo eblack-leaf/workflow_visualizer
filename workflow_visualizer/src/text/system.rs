@@ -1,7 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{
-    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+    Added, Changed, Commands, Entity, EventReader, NonSend, NonSendMut, Or, Query,
+    RemovedComponents, Res, ResMut,
 };
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::trace;

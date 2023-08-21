@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Res, ResMut};
+use bevy_ecs::prelude::{NonSend, NonSendMut, Res, ResMut};
 
 use crate::images::interface::Extraction;
 use crate::images::renderer::{ImageFade, ImageName, ImageRenderer};

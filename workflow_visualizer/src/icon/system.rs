@@ -1,4 +1,6 @@
-use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{
+    Added, Changed, Entity, NonSend, NonSendMut, Query, RemovedComponents, Res, ResMut,
+};
 
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::component::{IconId, IconScale};

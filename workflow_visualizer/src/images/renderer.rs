@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resource};
+use bevy_ecs::prelude::{
+    Commands, Component, Entity, NonSend, NonSendMut, Query, Res, ResMut, Resource,
+};
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 

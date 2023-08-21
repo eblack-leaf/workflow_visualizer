@@ -1,4 +1,6 @@
-use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{
+    Changed, Entity, NonSend, NonSendMut, Or, Query, RemovedComponents, Res, ResMut,
+};
 
 use crate::line::line_render::LineRenderPoints;
 use crate::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
