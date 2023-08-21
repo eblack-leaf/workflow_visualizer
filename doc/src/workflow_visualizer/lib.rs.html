@@ -99,6 +99,7 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -111,8 +112,9 @@
 <span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, HorizontalSpan, RawMarker, RawMarkerGrouping,
-    RelativePlacement, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, ResponsiveView,
+    GridPoint, GridRange, GridView, HorizontalSpan, Placement, PlacementKey, RawMarker,
+    RawMarkerGrouping, RelativePlacementKey, RelativePlacer, ResponsiveGridPoint,
+    ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
 <span class="kw">pub use </span>images::{Image, ImageFade, ImageName, ImageRequest, ImageTag};
 <span class="kw">pub use </span>instance::{
