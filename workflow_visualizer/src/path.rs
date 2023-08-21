@@ -1,9 +1,8 @@
 use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfigs, Query, Res};
 
-use crate::grid::config_grid;
+use crate::{Attach, Grid, InterfaceContext, Position, SyncPoint, Visualizer};
 use crate::grid::GridPoint;
 use crate::grid::ResponsiveView;
-use crate::{Attach, Grid, InterfaceContext, Position, SyncPoint, Visualizer};
 
 /// Collection of specific points rendered from a PathView
 #[derive(Component, Clone)]
@@ -67,9 +66,7 @@ pub(crate) struct PathAttachment;
 impl Attach for PathAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            grid_updated_path
-                .in_set(SyncPoint::Config)
-                .after(config_grid),
+            grid_updated_path.in_set(SyncPoint::PostInitialization),
             view_changed.in_set(SyncPoint::Reconfigure),
         ));
     }

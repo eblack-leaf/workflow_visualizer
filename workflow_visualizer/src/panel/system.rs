@@ -2,12 +2,12 @@ use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res};
 
-use crate::gfx::GfxSurface;
-use crate::panel::renderer::PanelRenderer;
-use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
 use crate::{
     Area, Color, InterfaceContext, Layer, NullBit, Panel, Position, ScaleFactor, Visibility,
 };
+use crate::gfx::GfxSurface;
+use crate::panel::{BorderColor, Cache, Difference, Extraction, PanelContentArea, PanelType};
+use crate::panel::renderer::PanelRenderer;
 
 pub(crate) fn pull_differences(
     mut extraction: ResMut<Extraction>,
@@ -183,10 +183,12 @@ pub(crate) fn color_diff(
 }
 
 pub(crate) fn process_extraction(
-    mut renderer: ResMut<PanelRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut renderer: ResMut<PanelRenderer>,
+    #[cfg(target_family = "wasm")] mut renderer: NonSendMut<PanelRenderer>,
     mut extraction: ResMut<Extraction>,
     scale_factor: Res<ScaleFactor>,
-    gfx_surface: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] gfx_surface: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx_surface: NonSend<GfxSurface>,
 ) {
     for entity in extraction.removed.drain() {
         let old = renderer.indexer.remove(entity);

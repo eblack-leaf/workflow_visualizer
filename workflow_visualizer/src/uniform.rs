@@ -1,11 +1,9 @@
 use std::marker::PhantomData;
 
-use bevy_ecs::prelude::{Component, Resource};
-use wgpu::util::DeviceExt;
 use wgpu::{BindGroupEntry, BindGroupLayoutEntry, Buffer};
+use wgpu::util::DeviceExt;
 
 /// Wrapper around wgpu::Buffer for use as a Uniform Buffer
-#[derive(Component, Resource)]
 pub struct Uniform<Data: bytemuck::Pod + bytemuck::Zeroable> {
     pub buffer: Buffer,
     _data: PhantomData<Data>,

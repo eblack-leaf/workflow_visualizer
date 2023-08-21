@@ -1,11 +1,11 @@
-use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfigs;
 use workflow_visualizer::{
-    Attach, BundledIcon, IconBitmap, IconBitmapRequest, SyncPoint, Visualizer,
+    Attach, SyncPoint, Visualizer,
 };
+use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfigs;
 
+use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
 use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
 use crate::entry_list::{ListDimensions, ReceivedTokens};
-use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
 
 pub struct EntryAttachment;
 
@@ -15,34 +15,6 @@ impl Attach for EntryAttachment {
         visualizer.add_event::<ReadOtp>();
         visualizer.add_event::<EntryAddToken>();
         visualizer.add_event::<EntryRemoveToken>();
-        visualizer.spawn(IconBitmapRequest::from((
-            "edit",
-            IconBitmap::bundled(BundledIcon::Edit),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
-            "add",
-            IconBitmap::bundled(BundledIcon::Add),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
-            "page_left",
-            IconBitmap::bundled(BundledIcon::ArrowLeft),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
-            "page_right",
-            IconBitmap::bundled(BundledIcon::ArrowRight),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
-            "run",
-            IconBitmap::bundled(BundledIcon::Run),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
-            "delete",
-            IconBitmap::bundled(BundledIcon::Delete),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
-            "generate",
-            IconBitmap::bundled(BundledIcon::Generate),
-        )));
         visualizer
             .job
             .container

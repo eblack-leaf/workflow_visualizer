@@ -4,19 +4,19 @@ use bevy_ecs::prelude::{IntoSystemConfigs, Resource};
 use nalgebra::matrix;
 use wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
 
+use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 use crate::coord::area::Area;
+use crate::coord::DeviceContext;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
 use crate::coord::section::Section;
-use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
 
 /// Viewport Matrix for converting to NDC
-#[derive(Resource)]
+#[cfg_attr(not(target_family = "wasm"), derive(Resource))]
 pub struct Viewport {
     cpu: CpuViewport,
     gpu: GpuViewport,
@@ -216,18 +216,22 @@ impl From<[[f32; 4]; 4]> for GpuViewport {
 }
 
 pub(crate) fn viewport_resize(
-    gfx_surface: Res<GfxSurface>,
-    gfx_surface_configuration: Res<GfxSurfaceConfiguration>,
-    mut viewport: ResMut<Viewport>,
+    #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] gfx_config: Res<GfxSurfaceConfiguration>,
+    #[cfg(target_family = "wasm")] gfx_config: NonSend<GfxSurfaceConfiguration>,
+    #[cfg(not(target_family = "wasm"))] msaa: Res<MsaaRenderAdapter>,
+    #[cfg(target_family = "wasm")] msaa: NonSend<MsaaRenderAdapter>,
+    #[cfg(not(target_family = "wasm"))] mut viewport: ResMut<Viewport>,
+    #[cfg(target_family = "wasm")] mut viewport: NonSendMut<Viewport>,
     mut resize_events: EventReader<WindowResize>,
-    msaa_attachment: Res<MsaaRenderAdapter>,
 ) {
     for _resize in resize_events.iter() {
         viewport.adjust_area(
-            &gfx_surface,
-            gfx_surface_configuration.configuration.width,
-            gfx_surface_configuration.configuration.height,
-            msaa_attachment.requested(),
+            &gfx,
+            gfx_config.configuration.width,
+            gfx_config.configuration.height,
+            msaa.requested(),
         );
     }
 }
@@ -266,8 +270,10 @@ impl ViewportHandle {
 
 pub(crate) fn viewport_read_offset(
     mut viewport_handle: ResMut<ViewportHandle>,
-    mut viewport: ResMut<Viewport>,
-    gfx_surface: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] mut viewport: ResMut<Viewport>,
+    #[cfg(target_family = "wasm")] mut viewport: NonSendMut<Viewport>,
+    #[cfg(not(target_family = "wasm"))] gfx_surface: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx_surface: NonSend<GfxSurface>,
     scale_factor: Res<ScaleFactor>,
 ) {
     if viewport_handle.position_dirty {

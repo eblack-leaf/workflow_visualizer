@@ -1,7 +1,8 @@
+use bevy_ecs::prelude::{Res, ResMut};
+
+use crate::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
 use crate::images::interface::Extraction;
 use crate::images::renderer::{ImageFade, ImageName, ImageRenderer};
-use crate::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
-use bevy_ecs::prelude::{Res, ResMut};
 
 pub(crate) struct ImageRenderGroup {
     pub(crate) image_name: ImageName,
@@ -59,8 +60,10 @@ impl ImageRenderGroup {
 }
 pub(crate) fn read_extraction(
     mut extraction: ResMut<Extraction>,
-    mut image_renderer: ResMut<ImageRenderer>,
-    gfx: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] mut image_renderer: ResMut<ImageRenderer>,
+    #[cfg(target_family = "wasm")] mut image_renderer: NonSendMut<ImageRenderer>,
+    #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
 ) {
     for entity in extraction.queued_remove.drain() {
         image_renderer.render_groups.remove(&entity);

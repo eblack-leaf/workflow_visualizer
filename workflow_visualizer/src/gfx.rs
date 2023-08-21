@@ -47,8 +47,8 @@ impl GfxOptions {
         self
     }
 }
-/// Core structs for interop with wgpu
-#[derive(Resource)]
+
+#[cfg_attr(not(target_family = "wasm"), derive(Resource))]
 pub struct GfxSurface {
     pub instance: wgpu::Instance,
     pub surface: wgpu::Surface,
@@ -211,7 +211,7 @@ impl GfxSurface {
     }
 }
 
-#[derive(Resource)]
+#[cfg_attr(not(target_family = "wasm"), derive(Resource))]
 pub struct GfxSurfaceConfiguration {
     pub(crate) configuration: wgpu::SurfaceConfiguration,
 }
@@ -229,7 +229,7 @@ impl GfxSurfaceConfiguration {
     }
 }
 /// Used for setting the multi-sampling/anti-aliasing
-#[derive(Resource)]
+#[cfg_attr(not(target_family = "wasm"), derive(Resource))]
 pub struct MsaaRenderAdapter {
     max: u32,
     requested: u32,

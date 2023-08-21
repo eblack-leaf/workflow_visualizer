@@ -5,12 +5,12 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Changed, Local, Query, Without};
 use tracing::trace;
 
-use crate::grid::responsive::ResponsiveGridPoint;
-use crate::grid::AbsolutePlacement;
 use crate::{
     Area, DiagnosticsHandle, Grid, HorizontalSpan, InterfaceContext, Position, Record,
     ResponsiveGridView, ViewportHandle, WindowResize,
 };
+use crate::grid::AbsolutePlacement;
+use crate::grid::responsive::ResponsiveGridPoint;
 
 fn update_section(
     grid: &Grid,
@@ -131,4 +131,19 @@ pub(crate) fn set_from_view(
     }
 }
 
-// one for set_from_absolute
+pub(crate) fn set_from_absolute(
+    grid: Res<Grid>,
+    mut changed: Query<
+        (
+            &AbsolutePlacement,
+            &mut Position<InterfaceContext>,
+            &mut Area<InterfaceContext>,
+        ),
+        Changed<AbsolutePlacement>,
+    >,
+) {
+    for (placement, mut pos, mut area) in changed.iter_mut() {
+        *pos = placement.0.position;
+        *area = placement.0.area;
+    }
+}

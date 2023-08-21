@@ -1,5 +1,7 @@
-use bevy_ecs::prelude::{Event, EventReader, Events, IntoSystemConfigs, Res, ResMut};
-use tracing::{info, trace, warn};
+use bevy_ecs::prelude::{
+    Event, EventReader, Events, IntoSystemConfigs, Res, ResMut,
+};
+use tracing::trace;
 
 use crate::coord::area::Area;
 use crate::coord::DeviceContext;
@@ -20,10 +22,17 @@ impl WindowResize {
     }
 }
 pub(crate) fn gfx_resize(
-    gfx_surface: Res<GfxSurface>,
-    mut gfx_surface_configuration: ResMut<GfxSurfaceConfiguration>,
+    #[cfg(not(target_family = "wasm"))] gfx_surface: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx_surface: NonSend<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] mut gfx_surface_configuration: ResMut<
+        GfxSurfaceConfiguration,
+    >,
+    #[cfg(target_family = "wasm")] mut gfx_surface_configuration: NonSendMut<
+        GfxSurfaceConfiguration,
+    >,
     mut resize_events: EventReader<WindowResize>,
-    mut msaa_attachment: ResMut<MsaaRenderAdapter>,
+    #[cfg(not(target_family = "wasm"))] mut msaa_attachment: ResMut<MsaaRenderAdapter>,
+    #[cfg(target_family = "wasm")] mut msaa_attachment: NonSendMut<MsaaRenderAdapter>,
 ) {
     for resize in resize_events.iter() {
         trace!("resizing event: {:?}", resize.size);
@@ -56,7 +65,7 @@ impl Attach for WindowAttachment {
             .add_systems((gfx_resize.in_set(SyncPoint::Initialization),));
         engen
             .job
-            .task(Visualizer::TASK_MAIN)
+            .task(Visualizer::TASK_STARTUP)
             .add_systems((Events::<WindowResize>::update_system.in_set(SyncPoint::Event),));
     }
 }

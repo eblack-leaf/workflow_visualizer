@@ -1,12 +1,13 @@
-use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{
+    Added, Changed, Entity, Query, RemovedComponents, Res, ResMut,
+};
 
-use crate::icon::bitmap::IconBitmapLayout;
-use crate::icon::cache::{Cache, Difference};
-use crate::icon::component::{IconId, IconScale};
-use crate::icon::renderer::IconRenderer;
 use crate::{
     Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
 };
+use crate::icon::cache::{Cache, Difference};
+use crate::icon::component::{IconId, IconScale};
+use crate::icon::renderer::IconRenderer;
 
 pub(crate) fn calc_area(
     mut icons: Query<
@@ -36,7 +37,8 @@ pub(crate) fn management(
         Changed<Visibility>,
     >,
     mut removed: RemovedComponents<IconScale>,
-    mut icon_renderer: ResMut<IconRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut icon_renderer: ResMut<IconRenderer>,
+    #[cfg(target_family = "wasm")] mut icon_renderer: NonSendMut<IconRenderer>,
 ) {
     for (entity, pos, area, layer, color, id, visibility, mut difference) in icons.iter_mut() {
         if visibility.visible() {
@@ -131,10 +133,11 @@ pub(crate) fn icon_id_diff(
 
 pub(crate) fn read_differences(
     mut icons: Query<(Entity, &mut Difference), Changed<Difference>>,
-    mut icon_renderer: ResMut<IconRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut icon_renderer: ResMut<IconRenderer>,
+    #[cfg(target_family = "wasm")] mut icon_renderer: NonSendMut<IconRenderer>,
     scale_factor: Res<ScaleFactor>,
-    icon_bitmap_layout: Res<IconBitmapLayout>,
-    gfx: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
 ) {
     for (entity, mut difference) in icons.iter_mut() {
         if difference.remove {
@@ -179,14 +182,15 @@ pub(crate) fn read_differences(
         }
         if let Some(id) = difference.attributes.icon_id.take() {
             if let Some(index) = icon_renderer.indexer.get_index(entity) {
-                icon_renderer.tex_coords_attribute.queue_write(
-                    index,
-                    icon_bitmap_layout
-                        .bitmap_locations
-                        .get(&id)
-                        .copied()
-                        .expect("icon bitmap layout"),
-                );
+                let coordinates = icon_renderer
+                    .icon_bitmap_layout
+                    .bitmap_locations
+                    .get(&id)
+                    .copied()
+                    .expect("icon bitmap layout");
+                icon_renderer
+                    .tex_coords_attribute
+                    .queue_write(index, coordinates);
             }
         }
     }

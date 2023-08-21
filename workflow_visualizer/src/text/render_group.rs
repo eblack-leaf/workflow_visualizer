@@ -2,14 +2,14 @@ use std::collections::HashMap;
 
 use bevy_ecs::prelude::Component;
 
-use crate::gfx::GfxSurface;
-use crate::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
-use crate::text::component::{GlyphId, TextScaleAlignment, TextValue};
-use crate::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 use crate::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
     RawArea, RawPosition, Section, Uniform, VisibleSection,
 };
+use crate::gfx::GfxSurface;
+use crate::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
+use crate::text::component::{GlyphId, TextScaleAlignment, TextValue};
+use crate::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq, Component)]
@@ -25,7 +25,6 @@ impl TextPlacement {
     }
 }
 
-#[derive(Component)]
 pub(crate) struct RenderGroupBindGroup {
     pub(crate) bind_group: wgpu::BindGroup,
 }
@@ -50,7 +49,6 @@ impl RenderGroupBindGroup {
         }
     }
 }
-#[derive(Component)]
 pub(crate) struct DrawSection {
     pub(crate) section: Option<Section<DeviceContext>>,
 }
@@ -60,7 +58,6 @@ impl DrawSection {
         Self { section: None }
     }
 }
-#[derive(Component)]
 pub(crate) struct PositionWrite {
     pub(crate) write: Option<Position<DeviceContext>>,
 }
@@ -71,7 +68,6 @@ impl PositionWrite {
     }
 }
 
-#[derive(Component)]
 pub(crate) struct LayerWrite {
     pub(crate) write: Option<Layer>,
 }
@@ -82,7 +78,6 @@ impl LayerWrite {
     }
 }
 
-#[derive(Component)]
 pub(crate) struct KeyedGlyphIds {
     pub(crate) ids: HashMap<Key, GlyphId>,
 }
@@ -94,7 +89,8 @@ impl KeyedGlyphIds {
         }
     }
 }
-#[derive(Component, Copy, Clone)]
+
+#[derive(Copy, Clone)]
 pub(crate) struct RenderGroupUniqueGlyphs {
     pub(crate) unique_glyphs: u32,
 }

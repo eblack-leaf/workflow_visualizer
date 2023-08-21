@@ -1,6 +1,10 @@
+use workflow_visualizer::{
+    BundledIcon, Color, GfxOptions, IconBitmap, IconBitmapRequest, Runner, Theme, ThemeDescriptor,
+    Visualizer,
+};
+
 use crate::engen::Engen;
 use crate::pad::PadAttachment;
-use workflow_visualizer::{Color, GfxOptions, Runner, Theme, ThemeDescriptor, Visualizer};
 
 mod engen;
 mod pad;
@@ -12,6 +16,14 @@ fn main() {
         GfxOptions::native_defaults().with_msaa(2),
     );
     visualizer.add_attachment::<PadAttachment>();
+    visualizer.spawn(IconBitmapRequest::from((
+        "edit",
+        IconBitmap::bundled(BundledIcon::Edit),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "square",
+        IconBitmap::bundled(BundledIcon::Square),
+    )));
     Runner::new()
         .with_desktop_dimensions((600, 400))
         .native_run::<Engen>(visualizer);

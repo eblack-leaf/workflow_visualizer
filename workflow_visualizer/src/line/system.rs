@@ -1,10 +1,12 @@
-use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{
+    Changed, Entity, Or, Query, RemovedComponents, Res, ResMut,
+};
 
-use crate::line::line_render::LineRenderPoints;
-use crate::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
-use crate::line::LineRender;
-use crate::path::Path;
 use crate::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, Visibility};
+use crate::line::line_render::LineRenderPoints;
+use crate::line::LineRender;
+use crate::line::renderer::{LayerAndHooks, LineRenderer, LineRenderGpu, LineRenderGroup};
+use crate::path::Path;
 
 // before ResolveVisibility after Reconfigure.set_path
 pub(crate) fn calc_section(
@@ -53,9 +55,11 @@ pub(crate) fn create_render_group(
         ),
         Or<(Changed<LineRenderPoints>, Changed<Visibility>)>,
     >,
-    gfx: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
     mut removed: RemovedComponents<LineRender>,
-    mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(target_family = "wasm")] mut line_renderer: NonSendMut<LineRenderer>,
 ) {
     for (entity, line_render, layer, color, line_render_points, visibility) in paths.iter() {
         if visibility.visible() {
@@ -79,7 +83,8 @@ pub(crate) fn create_render_group(
 
 pub(crate) fn push_layer(
     lines: Query<(Entity, &Layer), Changed<Layer>>,
-    mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(target_family = "wasm")] mut line_renderer: NonSendMut<LineRenderer>,
 ) {
     for (entity, layer) in lines.iter() {
         if let Some(group) = line_renderer.render_groups.get_mut(&entity) {
@@ -91,7 +96,8 @@ pub(crate) fn push_layer(
 
 pub(crate) fn push_color(
     lines: Query<(Entity, &Color), Changed<Color>>,
-    mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(target_family = "wasm")] mut line_renderer: NonSendMut<LineRenderer>,
 ) {
     for (entity, color) in lines.iter() {
         if let Some(group) = line_renderer.render_groups.get_mut(&entity) {
@@ -101,7 +107,12 @@ pub(crate) fn push_color(
     }
 }
 
-pub(crate) fn push_uniforms(mut line_renderer: ResMut<LineRenderer>, gfx: Res<GfxSurface>) {
+pub(crate) fn push_uniforms(
+    #[cfg(not(target_family = "wasm"))] mut line_renderer: ResMut<LineRenderer>,
+    #[cfg(target_family = "wasm")] mut line_renderer: NonSendMut<LineRenderer>,
+    #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
+) {
     for group in line_renderer.render_groups.values_mut() {
         if group.color_dirty {
             group.color_uniform.update(&gfx.queue, group.color);

@@ -4,10 +4,10 @@ use tracing::Level;
 
 use application_logic::Engen;
 use application_logic::EntryAttachment;
+use workflow_visualizer::{BundledIcon, IconBitmap, IconBitmapRequest, Runner};
+use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
-use workflow_visualizer::Runner;
-use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
 
 mod web_worker;
 
@@ -29,6 +29,34 @@ fn visualizer() -> Visualizer {
         GfxOptions::native_defaults().with_msaa(1),
     );
     visualizer.add_attachment::<EntryAttachment>();
+    visualizer.spawn(IconBitmapRequest::from((
+        "edit",
+        IconBitmap::bundled(BundledIcon::Edit),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "add",
+        IconBitmap::bundled(BundledIcon::Add),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "page_left",
+        IconBitmap::bundled(BundledIcon::ArrowLeft),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "page_right",
+        IconBitmap::bundled(BundledIcon::ArrowRight),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "run",
+        IconBitmap::bundled(BundledIcon::Run),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "delete",
+        IconBitmap::bundled(BundledIcon::Delete),
+    )));
+    visualizer.spawn(IconBitmapRequest::from((
+        "generate",
+        IconBitmap::bundled(BundledIcon::Generate),
+    )));
     visualizer
 }
 

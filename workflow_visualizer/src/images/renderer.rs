@@ -1,17 +1,19 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resource};
+use bevy_ecs::prelude::{
+    Commands, Component, Entity, Query, Res, ResMut, Resource,
+};
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
+use crate::{
+    AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
+    MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor,
+    TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer,
+};
 use crate::images::render_group::ImageRenderGroup;
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
 use crate::uniform::vertex_bind_group_layout_entry;
-use crate::{
-    AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
-    MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, TextureAtlas,
-    TextureBindGroup, TextureCoordinates, Viewport,
-};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
@@ -79,7 +81,8 @@ impl ImageData {
         }
     }
 }
-#[derive(Resource)]
+
+#[cfg_attr(not(target_family = "wasm"), derive(Resource))]
 pub(crate) struct ImageRenderer {
     pub(crate) pipeline: wgpu::RenderPipeline,
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
@@ -90,10 +93,12 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
 pub(crate) fn load_images(
-    mut image_renderer: ResMut<ImageRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut image_renderer: ResMut<ImageRenderer>,
+    #[cfg(target_family = "wasm")] mut image_renderer: NonSendMut<ImageRenderer>,
     requests: Query<(Entity, &ImageRequest)>,
     mut cmd: Commands,
-    gfx: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
 ) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
@@ -123,96 +128,98 @@ pub(crate) fn load_images(
         cmd.entity(entity).despawn();
     }
 }
-pub(crate) fn setup_renderer(
-    mut cmd: Commands,
-    gfx: Res<GfxSurface>,
-    msaa: Res<MsaaRenderAdapter>,
-    viewport: Res<Viewport>,
-    gfx_config: Res<GfxSurfaceConfiguration>,
-) {
-    let sampler = TextureSampler::new(&gfx);
-    let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
-        label: Some("sampler bind group layout"),
-        entries: &[TextureSampler::layout_entry(0)],
-    };
-    let sampler_bind_group_layout = gfx
-        .device
-        .create_bind_group_layout(&sampler_bind_group_layout_descriptor);
-    let sampler_bind_group_descriptor = wgpu::BindGroupDescriptor {
-        label: Some("sampler bind group"),
-        layout: &sampler_bind_group_layout,
-        entries: &[TextureSampler::bind_group_entry(&sampler.sampler, 0)],
-    };
-    let sampler_bind_group = gfx.device.create_bind_group(&sampler_bind_group_descriptor);
-    let texture_bind_group_layout =
-        gfx.device
-            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                label: Some("images-render-group-layout"),
-                entries: &[TextureBindGroup::entry(0)],
-            });
-    let render_group_uniforms_layout =
-        gfx.device
-            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                label: Some("render-group"),
-                entries: &[
-                    vertex_bind_group_layout_entry(0),
-                    vertex_bind_group_layout_entry(1),
-                    vertex_bind_group_layout_entry(2),
-                ],
-            });
-    let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
-        label: Some("images-render-pipeline-layout"),
-        bind_group_layouts: &[
-            viewport.bind_group_layout(),
-            &sampler_bind_group_layout,
-            &texture_bind_group_layout,
-            &render_group_uniforms_layout,
-        ],
-        push_constant_ranges: &[],
-    };
-    let pipeline_layout = gfx
-        .device
-        .create_pipeline_layout(&pipeline_layout_descriptor);
-    let shader = gfx
-        .device
-        .create_shader_module(wgpu::include_wgsl!("images.wgsl"));
-    let fragment_targets = [Some(gfx_config.alpha_color_target_state())];
-    let pipeline_descriptor = wgpu::RenderPipelineDescriptor {
-        label: Some("images renderer"),
-        layout: Some(&pipeline_layout),
-        vertex: wgpu::VertexState {
-            module: &shader,
-            entry_point: "vertex_entry",
-            buffers: &[wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Vertex,
-                attributes: &wgpu::vertex_attr_array![0 => Float32x3],
-            }],
-        },
-        primitive: gfx.triangle_primitive(),
-        depth_stencil: Some(viewport.depth_stencil_state()),
-        multisample: msaa.multisample_state(),
-        fragment: Some(wgpu::FragmentState {
-            module: &shader,
-            entry_point: "fragment_entry",
-            targets: &fragment_targets,
-        }),
-        multiview: None,
-    };
-    let pipeline = gfx.device.create_render_pipeline(&pipeline_descriptor);
-    let renderer = ImageRenderer {
-        pipeline,
-        render_groups: HashMap::new(),
-        vertex_buffer: aabb_vertex_buffer(&gfx),
-        sampler_bind_group,
-        images: HashMap::new(),
-        render_group_layout: texture_bind_group_layout,
-        render_group_uniforms_layout,
-    };
-    cmd.insert_resource(renderer);
-}
 
 impl Render for ImageRenderer {
+    fn setup(
+        _visualizer: &Visualizer,
+        gfx: &GfxSurface,
+        viewport: &Viewport,
+        gfx_config: &GfxSurfaceConfiguration,
+        msaa: &MsaaRenderAdapter,
+        scale_factor: &ScaleFactor,
+    ) -> Self {
+        let sampler = TextureSampler::new(&gfx);
+        let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
+            label: Some("sampler bind group layout"),
+            entries: &[TextureSampler::layout_entry(0)],
+        };
+        let sampler_bind_group_layout = gfx
+            .device
+            .create_bind_group_layout(&sampler_bind_group_layout_descriptor);
+        let sampler_bind_group_descriptor = wgpu::BindGroupDescriptor {
+            label: Some("sampler bind group"),
+            layout: &sampler_bind_group_layout,
+            entries: &[TextureSampler::bind_group_entry(&sampler.sampler, 0)],
+        };
+        let sampler_bind_group = gfx.device.create_bind_group(&sampler_bind_group_descriptor);
+        let texture_bind_group_layout =
+            gfx.device
+                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("images-render-group-layout"),
+                    entries: &[TextureBindGroup::entry(0)],
+                });
+        let render_group_uniforms_layout =
+            gfx.device
+                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("render-group"),
+                    entries: &[
+                        vertex_bind_group_layout_entry(0),
+                        vertex_bind_group_layout_entry(1),
+                        vertex_bind_group_layout_entry(2),
+                    ],
+                });
+        let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
+            label: Some("images-render-pipeline-layout"),
+            bind_group_layouts: &[
+                viewport.bind_group_layout(),
+                &sampler_bind_group_layout,
+                &texture_bind_group_layout,
+                &render_group_uniforms_layout,
+            ],
+            push_constant_ranges: &[],
+        };
+        let pipeline_layout = gfx
+            .device
+            .create_pipeline_layout(&pipeline_layout_descriptor);
+        let shader = gfx
+            .device
+            .create_shader_module(wgpu::include_wgsl!("images.wgsl"));
+        let fragment_targets = [Some(gfx_config.alpha_color_target_state())];
+        let pipeline_descriptor = wgpu::RenderPipelineDescriptor {
+            label: Some("images renderer"),
+            layout: Some(&pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: "vertex_entry",
+                buffers: &[wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Vertex,
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x3],
+                }],
+            },
+            primitive: gfx.triangle_primitive(),
+            depth_stencil: Some(viewport.depth_stencil_state()),
+            multisample: msaa.multisample_state(),
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: "fragment_entry",
+                targets: &fragment_targets,
+            }),
+            multiview: None,
+        };
+        let pipeline = gfx.device.create_render_pipeline(&pipeline_descriptor);
+        let renderer = ImageRenderer {
+            pipeline,
+            render_groups: HashMap::new(),
+            vertex_buffer: aabb_vertex_buffer(&gfx),
+            sampler_bind_group,
+            images: HashMap::new(),
+            render_group_layout: texture_bind_group_layout,
+            render_group_uniforms_layout,
+        };
+        renderer
+    }
+
     fn phase() -> RenderPhase {
         RenderPhase::Alpha(7)
     }

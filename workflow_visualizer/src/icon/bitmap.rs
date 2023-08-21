@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::Resource;
+use bevy_ecs::prelude::{Commands, Entity, Query, Resource};
 use serde::{Deserialize, Serialize};
 
 use crate::icon::component::IconId;
@@ -103,6 +103,22 @@ impl IconBitmap {
     }
 }
 
+#[derive(Resource, Default)]
+pub(crate) struct IconBitmapRequestManager {
+    pub(crate) requests: Vec<IconBitmapRequest>,
+}
+
+impl IconBitmapRequestManager {
+    pub(crate) fn add<R: Into<IconBitmapRequest>>(&mut self, request: R) {
+        self.requests.push(request.into());
+    }
+}
+
+pub(crate) fn cleanup_requests(requests: Query<(Entity, &IconBitmapRequest)>, mut cmd: Commands) {
+    for (entity, _) in requests.iter() {
+        cmd.entity(entity).despawn();
+    }
+}
 #[derive(Component, Clone)]
 pub struct IconBitmapRequest {
     pub id: IconId,
@@ -118,7 +134,6 @@ impl<I: Into<IconId>, IB: Into<IconBitmap>> From<(I, IB)> for IconBitmapRequest 
     }
 }
 
-#[derive(Resource)]
 pub(crate) struct IconBitmapLayout {
     pub(crate) bitmap_locations: HashMap<IconId, TextureCoordinates>,
 }

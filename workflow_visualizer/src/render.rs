@@ -1,15 +1,17 @@
 use bevy_ecs::prelude::Resource;
-use tracing::{trace, warn};
+use tracing::trace;
 
+use crate::{GfxSurface, Job, ScaleFactor, Theme, Viewport};
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::visualizer::Visualizer;
-use crate::{GfxSurface, Job, Theme, Viewport};
 
 /// Phase for Rendering
 pub enum RenderPhase {
     Opaque,
     Alpha(u32),
 }
+
+#[cfg(not(target_family = "wasm"))]
 pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
     job: &'a Job,
     render_pass_handle: &mut RenderPassHandle<'a>,
@@ -20,6 +22,21 @@ pub(crate) fn invoke_render<'a, Renderer: Render + Resource>(
         .expect("no viewport attached");
     job.container
         .get_resource::<Renderer>()
+        .expect("no render attachment")
+        .render(render_pass_handle, viewport);
+}
+
+#[cfg(target_family = "wasm")]
+pub(crate) fn invoke_render<'a, Renderer: Render + 'static>(
+    job: &'a Job,
+    render_pass_handle: &mut RenderPassHandle<'a>,
+) {
+    let viewport = job
+        .container
+        .get_non_send_resource::<Viewport>()
+        .expect("no viewport attached");
+    job.container
+        .get_non_send_resource::<Renderer>()
         .expect("no render attachment")
         .render(render_pass_handle, viewport);
 }
@@ -43,41 +60,76 @@ impl RenderTaskManager {
 
 /// Trait to extend the render loop with a new pipeline
 pub trait Render {
+    fn setup(
+        visualizer: &Visualizer,
+        gfx: &GfxSurface,
+        viewport: &Viewport,
+        gfx_config: &GfxSurfaceConfiguration,
+        msaa: &MsaaRenderAdapter,
+        scale_factor: &ScaleFactor,
+    ) -> Self;
     fn phase() -> RenderPhase;
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport);
 }
 
 pub(crate) fn internal_render(visualizer: &mut Visualizer) {
-    let gfx_surface = visualizer
+    #[cfg(not(target_family = "wasm"))]
+        let gfx = visualizer
         .job
         .container
         .get_resource::<GfxSurface>()
         .expect("no gfx surface attached");
-    let gfx_surface_configuration = visualizer
+    #[cfg(not(target_family = "wasm"))]
+        let gfx_config = visualizer
         .job
         .container
         .get_resource::<GfxSurfaceConfiguration>()
         .expect("no gfx surface configuration");
-    let theme = visualizer
-        .job
-        .container
-        .get_resource::<Theme>()
-        .expect("no theme attached");
+    #[cfg(not(target_family = "wasm"))]
     let viewport = visualizer
         .job
         .container
         .get_resource::<Viewport>()
         .expect("no viewport attached");
-    let msaa_attachment = visualizer
+    #[cfg(not(target_family = "wasm"))]
+        let msaa = visualizer
         .job
         .container
         .get_resource::<MsaaRenderAdapter>()
         .expect("no msaa attachment");
-    if let Some(surface_texture) = gfx_surface.surface_texture(gfx_surface_configuration) {
+    #[cfg(target_family = "wasm")]
+        let gfx = visualizer
+        .job
+        .container
+        .get_non_send_resource::<GfxSurface>()
+        .unwrap();
+    #[cfg(target_family = "wasm")]
+        let gfx_config = visualizer
+        .job
+        .container
+        .get_non_send_resource::<GfxSurfaceConfiguration>()
+        .unwrap();
+    #[cfg(target_family = "wasm")]
+        let msaa = visualizer
+        .job
+        .container
+        .get_non_send_resource::<MsaaRenderAdapter>()
+        .unwrap();
+    #[cfg(target_family = "wasm")]
+        let viewport = visualizer
+        .job
+        .container
+        .get_non_send_resource::<Viewport>()
+        .unwrap();
+    let theme = visualizer
+        .job
+        .container
+        .get_resource::<Theme>()
+        .expect("no theme attached");
+    if let Some(surface_texture) = gfx.surface_texture(gfx_config) {
         trace!("obtained surface texture");
         let mut command_encoder =
-            gfx_surface
-                .device
+            gfx.device
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("command encoder"),
                 });
@@ -88,11 +140,11 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
             let depth_texture_view = viewport
                 .depth_texture()
                 .create_view(&wgpu::TextureViewDescriptor::default());
-            let (v, rt) = match msaa_attachment.view() {
+            let (v, rt) = match msaa.view() {
                 Some(view) => (view, Some(&surface_texture_view)),
                 None => (&surface_texture_view, None),
             };
-            let should_store = msaa_attachment.requested() == 1;
+            let should_store = msaa.requested() == 1;
             let color_attachment = wgpu::RenderPassColorAttachment {
                 view: v,
                 resolve_target: rt,
@@ -128,9 +180,7 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
                 invoke(&visualizer.job, &mut render_pass_handle);
             }
         }
-        gfx_surface
-            .queue
-            .submit(std::iter::once(command_encoder.finish()));
+        gfx.queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
     }
 }

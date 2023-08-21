@@ -1,21 +1,36 @@
-use bevy_ecs::prelude::IntoSystemConfigs;
+use bevy_ecs::prelude::{Entity, IntoSystemConfigs};
 
-use crate::icon::renderer::{setup, IconRenderer};
+use crate::{Attach, IconBitmapRequest, SyncPoint, Visualizer};
+use crate::icon::bitmap::{cleanup_requests, IconBitmapRequestManager};
+use crate::icon::renderer::IconRenderer;
 use crate::icon::system::{
     area_diff, calc_area, icon_id_diff, layer_diff, management, position_diff,
     positive_space_color_diff, read_differences,
 };
-use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct IconAttachment;
 
 impl Attach for IconAttachment {
     fn attach(visualizer: &mut Visualizer) {
+        let mut manager = IconBitmapRequestManager::default();
+        for (entity, request) in visualizer
+            .job
+            .container
+            .query::<(Entity, &IconBitmapRequest)>()
+            .iter(&visualizer.job.container)
+        {
+            manager.add(request.clone());
+        }
+        visualizer.job.container.insert_resource(manager);
         visualizer.register_renderer::<IconRenderer>();
         visualizer
             .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization),));
+            .container
+            .remove_resource::<IconBitmapRequestManager>();
+        visualizer
+            .job
+            .task(Visualizer::TASK_STARTUP)
+            .add_systems((cleanup_requests.in_set(SyncPoint::PostInitialization), ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_area.in_set(SyncPoint::Reconfigure),
             calc_area

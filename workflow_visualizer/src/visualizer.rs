@@ -7,6 +7,11 @@ use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
 use winit::window::Window;
 
+use crate::{
+    Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
+    JobSyncPoint, MsaaRenderAdapter, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section,
+    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
+};
 use crate::animate::{end_animations, start_animations, update_animations};
 use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
@@ -28,11 +33,6 @@ use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
 use crate::window::WindowAttachment;
-use crate::{
-    Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
-    JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme,
-    Viewport, ViewportHandle, WindowResize,
-};
 
 /// Used to hold queued attachments until ready to invoke attach to the Visualizer
 pub struct Attachment(pub Box<fn(&mut Visualizer)>);
@@ -111,11 +111,23 @@ impl Visualizer {
         let scale_factor = ScaleFactor::new(window.scale_factor());
         let viewport_handle =
             ViewportHandle::new(Section::new((0, 0), area.to_ui(scale_factor.factor())));
+        #[cfg(not(target_family = "wasm"))]
         self.job.container.insert_resource(viewport);
+        #[cfg(target_family = "wasm")]
+        self.job.container.insert_non_send_resource(viewport);
         self.job.container.insert_resource(viewport_handle);
+        #[cfg(not(target_family = "wasm"))]
         self.job.container.insert_resource(surface);
+        #[cfg(target_family = "wasm")]
+        self.job.container.insert_non_send_resource(surface);
+        #[cfg(not(target_family = "wasm"))]
         self.job.container.insert_resource(config);
+        #[cfg(target_family = "wasm")]
+        self.job.container.insert_non_send_resource(config);
+        #[cfg(not(target_family = "wasm"))]
         self.job.container.insert_resource(msaa);
+        #[cfg(target_family = "wasm")]
+        self.job.container.insert_non_send_resource(msaa);
         self.job.container.insert_resource(scale_factor);
     }
     /// Tells visualizer to send a signal of resizing to be read in systems
@@ -286,20 +298,37 @@ impl Visualizer {
         }
     }
     fn recreate_surface(&mut self, window: &Window) {
+        #[cfg(not(target_family = "wasm"))]
         let config = self
             .job
             .container
             .remove_resource::<GfxSurfaceConfiguration>()
             .expect("gfx config");
+        #[cfg(target_family = "wasm")]
+            let config = self
+            .job
+            .container
+            .remove_non_send_resource::<GfxSurfaceConfiguration>()
+            .expect("gfx config");
+        #[cfg(not(target_family = "wasm"))]
         let mut gfx = self
             .job
             .container
             .get_resource_mut::<GfxSurface>()
             .expect("gfx");
+        #[cfg(target_family = "wasm")]
+            let mut gfx = self
+            .job
+            .container
+            .get_non_send_resource_mut::<GfxSurface>()
+            .expect("gfx");
         gfx.surface = unsafe { gfx.instance.create_surface(window).expect("gfx surface") };
         // send resize event instead to get window sizing?
         gfx.surface.configure(&gfx.device, &config.configuration);
+        #[cfg(not(target_family = "wasm"))]
         self.job.container.insert_resource(config);
+        #[cfg(target_family = "wasm")]
+        self.job.container.insert_non_send_resource(config);
     }
     /// execute RENDER_MAIN then run the render pass
     pub fn render(&mut self) {
@@ -314,7 +343,62 @@ impl Visualizer {
         self.job.can_idle()
     }
     /// register render fn with the Visualizer
-    pub fn register_renderer<Renderer: Render + Resource>(&mut self) {
+    #[cfg(not(target_family = "wasm"))]
+    pub fn register_renderer<Renderer: Render + Resource + 'static>(&mut self) {
+        let gfx = self.job.container.get_resource::<GfxSurface>().unwrap();
+        let gfx_config = self
+            .job
+            .container
+            .get_resource::<GfxSurfaceConfiguration>()
+            .unwrap();
+        let msaa = self
+            .job
+            .container
+            .get_resource::<MsaaRenderAdapter>()
+            .unwrap();
+        let viewport = self.job.container.get_resource::<Viewport>().unwrap();
+        let scale_factor = self.job.container.get_resource::<ScaleFactor>().unwrap();
+        let renderer: Renderer =
+            Render::setup(&self, gfx, viewport, gfx_config, msaa, scale_factor);
+        self.job.container.insert_resource(renderer);
+        match Renderer::phase() {
+            RenderPhase::Opaque => self
+                .render_task_manager
+                .opaque
+                .push(Box::new(invoke_render::<Renderer>)),
+            // TODO insert in order + after if same priority
+            RenderPhase::Alpha(_order) => self
+                .render_task_manager
+                .transparent
+                .push(Box::new(invoke_render::<Renderer>)),
+        }
+    }
+    #[cfg(target_family = "wasm")]
+    pub fn register_renderer<Renderer: Render + 'static>(&mut self) {
+        let gfx = self
+            .job
+            .container
+            .get_non_send_resource::<GfxSurface>()
+            .unwrap();
+        let gfx_config = self
+            .job
+            .container
+            .get_non_send_resource::<GfxSurfaceConfiguration>()
+            .unwrap();
+        let msaa = self
+            .job
+            .container
+            .get_non_send_resource::<MsaaRenderAdapter>()
+            .unwrap();
+        let viewport = self
+            .job
+            .container
+            .get_non_send_resource::<Viewport>()
+            .unwrap();
+        let scale_factor = self.job.container.get_resource::<ScaleFactor>().unwrap();
+        let renderer: Renderer =
+            Render::setup(&self, gfx, viewport, gfx_config, msaa, scale_factor);
+        self.job.container.insert_non_send_resource(renderer);
         match Renderer::phase() {
             RenderPhase::Opaque => self
                 .render_task_manager

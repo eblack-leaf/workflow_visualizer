@@ -1,11 +1,17 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{
-    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+    Added, Changed, Commands, Entity, EventReader, Or, Query,
+    RemovedComponents, Res, ResMut,
 };
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::trace;
 
+use crate::{
+    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
+    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
+    VisibleSection,
+};
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -27,11 +33,6 @@ use crate::texture_atlas::{
     TextureCoordinates,
 };
 use crate::window::WindowResize;
-use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
-};
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
@@ -356,8 +357,10 @@ pub(crate) fn pull_differences(
 }
 pub(crate) fn create_render_groups(
     extraction: Res<Extraction>,
-    mut renderer: ResMut<TextRenderer>,
-    gfx_surface: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] mut renderer: ResMut<TextRenderer>,
+    #[cfg(target_family = "wasm")] mut renderer: NonSendMut<TextRenderer>,
+    #[cfg(not(target_family = "wasm"))] gfx_surface: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx_surface: NonSend<GfxSurface>,
     scale_factor: Res<ScaleFactor>,
 ) {
     for entity in extraction.removed.iter() {
@@ -421,10 +424,13 @@ pub(crate) fn create_render_groups(
 }
 pub(crate) fn render_group_differences(
     mut extraction: ResMut<Extraction>,
-    mut renderer: ResMut<TextRenderer>,
-    gfx_surface: Res<GfxSurface>,
+    #[cfg(not(target_family = "wasm"))] mut renderer: ResMut<TextRenderer>,
+    #[cfg(target_family = "wasm")] mut renderer: NonSendMut<TextRenderer>,
+    #[cfg(not(target_family = "wasm"))] gfx_surface: Res<GfxSurface>,
+    #[cfg(target_family = "wasm")] gfx_surface: NonSend<GfxSurface>,
     font: Res<AlignedFonts>,
-    viewport: Res<Viewport>,
+    #[cfg(not(target_family = "wasm"))] viewport: Res<Viewport>,
+    #[cfg(target_family = "wasm")] viewport: NonSend<Viewport>,
     scale_factor: Res<ScaleFactor>,
 ) {
     for (entity, difference) in extraction.differences.iter() {
@@ -696,9 +702,11 @@ pub(crate) fn render_group_differences(
     *extraction = Extraction::new();
 }
 pub(crate) fn resolve_draw_section_on_resize(
-    mut renderer: ResMut<TextRenderer>,
+    #[cfg(not(target_family = "wasm"))] mut renderer: ResMut<TextRenderer>,
+    #[cfg(target_family = "wasm")] mut renderer: NonSendMut<TextRenderer>,
     mut event_reader: EventReader<WindowResize>,
-    viewport: Res<Viewport>,
+    #[cfg(not(target_family = "wasm"))] viewport: Res<Viewport>,
+    #[cfg(target_family = "wasm")] viewport: NonSend<Viewport>,
     scale_factor: Res<ScaleFactor>,
 ) {
     for _event in event_reader.iter() {
