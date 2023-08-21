@@ -129,13 +129,6 @@
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::Component;
@@ -143,10 +136,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextScaleAlignment, TextValue};
-<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasTexture,
-    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
-};
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 <span class="kw">use crate</span>::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
     RawArea, RawPosition, Section, Uniform, VisibleSection,
@@ -166,8 +156,7 @@
     }
 }
 
-<span class="attr">#[derive(Component)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderGroupBindGroup {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderGroupBindGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) bind_group: wgpu::BindGroup,
 }
 
@@ -191,8 +180,7 @@
         }
     }
 }
-<span class="attr">#[derive(Component)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DrawSection {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DrawSection {
     <span class="kw">pub</span>(<span class="kw">crate</span>) section: <span class="prelude-ty">Option</span>&lt;Section&lt;DeviceContext&gt;&gt;,
 }
 
@@ -201,8 +189,7 @@
         <span class="self">Self </span>{ section: <span class="prelude-val">None </span>}
     }
 }
-<span class="attr">#[derive(Component)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PositionWrite {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PositionWrite {
     <span class="kw">pub</span>(<span class="kw">crate</span>) write: <span class="prelude-ty">Option</span>&lt;Position&lt;DeviceContext&gt;&gt;,
 }
 
@@ -212,8 +199,7 @@
     }
 }
 
-<span class="attr">#[derive(Component)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LayerWrite {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LayerWrite {
     <span class="kw">pub</span>(<span class="kw">crate</span>) write: <span class="prelude-ty">Option</span>&lt;Layer&gt;,
 }
 
@@ -223,8 +209,7 @@
     }
 }
 
-<span class="attr">#[derive(Component)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>KeyedGlyphIds {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>KeyedGlyphIds {
     <span class="kw">pub</span>(<span class="kw">crate</span>) ids: HashMap&lt;Key, GlyphId&gt;,
 }
 
@@ -235,7 +220,8 @@
         }
     }
 }
-<span class="attr">#[derive(Component, Copy, Clone)]
+
+<span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderGroupUniqueGlyphs {
     <span class="kw">pub</span>(<span class="kw">crate</span>) unique_glyphs: u32,
 }
@@ -268,7 +254,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) glyph_tex_coords: InstanceAttributeManager&lt;TextureCoordinates&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_bind_group: RenderGroupBindGroup,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas: TextureAtlas,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_bind_group: AtlasBindGroup,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_bind_group: TextureBindGroup,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_glyph_references: AtlasGlyphReferences,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_write_queue: AtlasWriteQueue,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_add_queue: AtlasAddQueue,

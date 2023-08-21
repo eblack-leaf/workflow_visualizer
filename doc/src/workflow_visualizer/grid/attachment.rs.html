@@ -26,21 +26,21 @@
 <a href="#26" id="26">26</a>
 <a href="#27" id="27">27</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
-<span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfig};
+<span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfigs};
 
 <span class="kw">use </span><span class="kw">crate</span>::grid::system;
-<span class="kw">use crate</span>::{grid, Attach, Grid, SyncPoint, ViewportHandle, Visualizer};
+<span class="kw">use crate</span>::{Attach, Grid, SyncPoint, ViewportHandle, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>GridAttachment;
 
 <span class="kw">impl </span>Attach <span class="kw">for </span>GridAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
-        visualizer
-            .job
-            .task(Visualizer::TASK_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization),));
+        visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
+            setup.in_set(SyncPoint::Initialization),
+            system::config_grid.in_set(SyncPoint::Finish),
+        ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            system::config_grid.in_set(SyncPoint::Config),
+            system::set_from_absolute.in_set(SyncPoint::PostProcessPreparation),
             system::set_from_view.in_set(SyncPoint::PostProcessPreparation),
             system::set_point_from_view.in_set(SyncPoint::PostProcessPreparation),
         ));

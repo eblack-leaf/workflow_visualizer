@@ -143,8 +143,8 @@
 <span class="kw">use </span>winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 <span class="kw">use </span>winit::window::Window;
 
-<span class="kw">use crate</span>::{Area, DeviceContext, Sender, Visualizer, Workflow};
 <span class="kw">use </span><span class="kw">crate</span>::workflow::native::initialize_native_window;
+<span class="kw">use crate</span>::{Area, DeviceContext, Sender, Visualizer, Workflow};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>internal_loop&lt;T: Workflow + <span class="lifetime">&#39;static</span>&gt;(
     <span class="kw-2">mut </span>visualizer: <span class="kw-2">&amp;mut </span>Visualizer,
@@ -230,6 +230,11 @@
                     .expect(<span class="string">&quot;sender&quot;</span>)
                     .send(T::exit_action());
             }
+            <span class="kw">if </span>visualizer.can_idle() {
+                control_flow.set_wait();
+            } <span class="kw">else </span>{
+                control_flow.set_poll();
+            }
         }
         Event::RedrawRequested(<span class="kw">_</span>) =&gt; {
             visualizer.render();
@@ -237,11 +242,6 @@
         Event::RedrawEventsCleared =&gt; {
             <span class="kw">if </span>visualizer.job.resumed() &amp;&amp; <span class="kw-2">*</span>initialized {
                 window.as_ref().unwrap().request_redraw();
-            }
-            <span class="kw">if </span>visualizer.can_idle() {
-                control_flow.set_wait();
-            } <span class="kw">else </span>{
-                control_flow.set_poll();
             }
         }
         Event::Suspended =&gt; {

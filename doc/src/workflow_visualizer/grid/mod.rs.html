@@ -214,10 +214,11 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
-<span class="kw">use </span>bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfig, Resource};
+<span class="kw">use </span>bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfigs, Resource};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::GridAttachment;
 <span class="kw">use </span>marker::ColumnConfig;
@@ -234,7 +235,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::bundling::{BundleBuilder, BundleExtension};
 <span class="kw">use </span><span class="kw">crate</span>::diagnostics::Record;
-<span class="kw">use crate</span>::{Area, Attach, InterfaceContext, ResponsivePathView, Section};
+<span class="kw">use crate</span>::{Area, Attach, InterfaceContext, Position, ResponsivePathView, Section};
 
 <span class="kw">mod </span>attachment;
 <span class="kw">mod </span>marker;
@@ -399,7 +400,8 @@
         location.into()
     }
 }
-
+<span class="attr">#[derive(Component, Copy, Clone)]
+</span><span class="kw">pub struct </span>AbsolutePlacement(<span class="kw">pub </span>Section&lt;InterfaceContext&gt;);
 <span class="kw">pub trait </span>BundlePlacement
 <span class="kw">where
     </span><span class="self">Self</span>: Sized + Bundle,
@@ -419,8 +421,8 @@
     <span class="kw">fn </span>absolute&lt;S: Into&lt;Section&lt;InterfaceContext&gt;&gt;&gt;(
         <span class="self">self</span>,
         section: S,
-    ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, Section&lt;InterfaceContext&gt;&gt; {
-        <span class="self">self</span>.extend(section.into())
+    ) -&gt; BundleBuilder&lt;<span class="self">Self</span>, AbsolutePlacement&gt; {
+        <span class="self">self</span>.extend(AbsolutePlacement(section.into()))
     }
     <span class="kw">fn </span>responsively_path_viewed&lt;P: Into&lt;ResponsivePathView&gt;&gt;(
         <span class="self">self</span>,

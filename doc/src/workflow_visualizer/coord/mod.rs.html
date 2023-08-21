@@ -43,7 +43,6 @@
 <a href="#43" id="43">43</a>
 <a href="#44" id="44">44</a>
 <a href="#45" id="45">45</a>
-<a href="#46" id="46">46</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 
 <span class="kw">use crate</span>::{Layer, Section};
@@ -77,8 +76,7 @@
 <span class="doccomment">/// Coordinate is a bundle of Section + Layer to denote coordinates in the world
 </span><span class="attr">#[derive(Bundle, Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>Coordinate&lt;Context: CoordinateContext&gt; {
-    <span class="attr">#[bundle]
-    </span><span class="kw">pub </span>section: Section&lt;Context&gt;,
+    <span class="kw">pub </span>section: Section&lt;Context&gt;,
     <span class="kw">pub </span>layer: Layer,
 }
 

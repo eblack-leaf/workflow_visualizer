@@ -107,17 +107,15 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
 //! trait Workflow to setup application messaging.
 //! Visualizer which handles rendering
 //! Runner which invokes the visualizer&#39;s tools for multiple platforms
-</span><span class="kw">pub use </span>bevy_ecs;
-<span class="kw">pub use </span>wgpu;
-<span class="kw">pub use </span>winit;
-
-<span class="kw">pub use </span>animate::{Animate, Animation, Interpolation, InterpolationExtraction};
+</span><span class="kw">pub use </span>animate::{Animate, Animation, Interpolation, InterpolationExtraction};
+<span class="kw">pub use </span>bevy_ecs;
 <span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension};
 <span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::GridLocation;
@@ -133,6 +131,7 @@
 <span class="kw">pub use </span>grid::ResponsiveGridView;
 <span class="kw">pub use </span>grid::ResponsiveUnit;
 <span class="kw">pub use </span>grid::ResponsiveView;
+<span class="kw">pub use </span>images::{Image, ImageFade, ImageName, ImageRequest, ImageTag};
 <span class="kw">pub use </span>instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,
@@ -146,6 +145,8 @@
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
+<span class="kw">pub use </span>wgpu;
+<span class="kw">pub use </span>winit;
 <span class="kw">pub use </span>workflow::{start_web_worker, Runner, Sender, Workflow};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::color::Color;
@@ -173,8 +174,8 @@
     TextScaleAlignment, TextTag, TextValue, TextWrapStyle,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
-    AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+    AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
+    AtlasTextureDimensions, TextureAtlas, TextureBindGroup, TextureCoordinates,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
@@ -195,6 +196,7 @@
 <span class="kw">mod </span>gfx;
 <span class="kw">mod </span>grid;
 <span class="kw">mod </span>icon;
+<span class="kw">mod </span>images;
 <span class="kw">mod </span>instance;
 <span class="kw">mod </span>interaction;
 <span class="kw">mod </span>job;

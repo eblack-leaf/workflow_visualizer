@@ -140,10 +140,25 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
-<span class="kw">use </span>bevy_ecs::prelude::Resource;
+<span class="kw">use </span>bevy_ecs::prelude::{Commands, Entity, Query, Resource};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::IconId;
@@ -245,6 +260,22 @@
     }
 }
 
+<span class="attr">#[derive(Resource, Default)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconBitmapRequestManager {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) requests: Vec&lt;IconBitmapRequest&gt;,
+}
+
+<span class="kw">impl </span>IconBitmapRequestManager {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>add&lt;R: Into&lt;IconBitmapRequest&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, request: R) {
+        <span class="self">self</span>.requests.push(request.into());
+    }
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>cleanup_requests(requests: Query&lt;(Entity, <span class="kw-2">&amp;</span>IconBitmapRequest)&gt;, <span class="kw-2">mut </span>cmd: Commands) {
+    <span class="kw">for </span>(entity, <span class="kw">_</span>) <span class="kw">in </span>requests.iter() {
+        cmd.entity(entity).despawn();
+    }
+}
 <span class="attr">#[derive(Component, Clone)]
 </span><span class="kw">pub struct </span>IconBitmapRequest {
     <span class="kw">pub </span>id: IconId,
@@ -260,8 +291,7 @@
     }
 }
 
-<span class="attr">#[derive(Resource)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconBitmapLayout {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IconBitmapLayout {
     <span class="kw">pub</span>(<span class="kw">crate</span>) bitmap_locations: HashMap&lt;IconId, TextureCoordinates&gt;,
 }
 

@@ -115,7 +115,20 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{
+    Changed, Entity, NonSend, NonSendMut, Or, Query, RemovedComponents, Res, ResMut,
+};
 
 <span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
 <span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
@@ -170,9 +183,11 @@
         ),
         Or&lt;(Changed&lt;LineRenderPoints&gt;, Changed&lt;Visibility&gt;)&gt;,
     &gt;,
-    gfx: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
     <span class="kw-2">mut </span>removed: RemovedComponents&lt;LineRender&gt;,
-    <span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>line_renderer: NonSendMut&lt;LineRenderer&gt;,
 ) {
     <span class="kw">for </span>(entity, line_render, layer, color, line_render_points, visibility) <span class="kw">in </span>paths.iter() {
         <span class="kw">if </span>visibility.visible() {
@@ -196,7 +211,8 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>push_layer(
     lines: Query&lt;(Entity, <span class="kw-2">&amp;</span>Layer), Changed&lt;Layer&gt;&gt;,
-    <span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>line_renderer: NonSendMut&lt;LineRenderer&gt;,
 ) {
     <span class="kw">for </span>(entity, layer) <span class="kw">in </span>lines.iter() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(group) = line_renderer.render_groups.get_mut(<span class="kw-2">&amp;</span>entity) {
@@ -208,7 +224,8 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>push_color(
     lines: Query&lt;(Entity, <span class="kw-2">&amp;</span>Color), Changed&lt;Color&gt;&gt;,
-    <span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>line_renderer: NonSendMut&lt;LineRenderer&gt;,
 ) {
     <span class="kw">for </span>(entity, color) <span class="kw">in </span>lines.iter() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(group) = line_renderer.render_groups.get_mut(<span class="kw-2">&amp;</span>entity) {
@@ -218,7 +235,12 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>push_uniforms(<span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;, gfx: Res&lt;GfxSurface&gt;) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>push_uniforms(
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>line_renderer: ResMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>line_renderer: NonSendMut&lt;LineRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
+) {
     <span class="kw">for </span>group <span class="kw">in </span>line_renderer.render_groups.values_mut() {
         <span class="kw">if </span>group.color_dirty {
             group.color_uniform.update(<span class="kw-2">&amp;</span>gfx.queue, group.color);

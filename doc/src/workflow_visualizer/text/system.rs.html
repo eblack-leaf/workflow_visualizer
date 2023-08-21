@@ -706,14 +706,30 @@
 <a href="#706" id="706">706</a>
 <a href="#707" id="707">707</a>
 <a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
-<span class="kw">use </span>std::num::NonZeroU32;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
-    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+    Added, Changed, Commands, Entity, EventReader, NonSend, NonSendMut, Or, Query,
+    RemovedComponents, Res, ResMut,
 };
 <span class="kw">use </span>fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
-<span class="kw">use </span>tracing::{trace, warn};
+<span class="kw">use </span>tracing::trace;
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::instance::key::KeyFactory;
@@ -732,8 +748,8 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::renderer::{Extraction, TextRenderer};
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{
-    AtlasBindGroup, AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasLocation, AtlasPosition,
-    AtlasTexture, AtlasTextureDimensions, TextureAtlas, TextureCoordinates,
+    AtlasBlock, AtlasDimension, AtlasLocation, AtlasPosition, TextureAtlas, TextureBindGroup,
+    TextureCoordinates,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowResize;
 <span class="kw">use crate</span>::{
@@ -1065,8 +1081,10 @@
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create_render_groups(
     extraction: Res&lt;Extraction&gt;,
-    <span class="kw-2">mut </span>renderer: ResMut&lt;TextRenderer&gt;,
-    gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>renderer: ResMut&lt;TextRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>renderer: NonSendMut&lt;TextRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx_surface: NonSend&lt;GfxSurface&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>entity <span class="kw">in </span>extraction.removed.iter() {
@@ -1086,8 +1104,13 @@
             <span class="kw-2">&amp;</span>text_placement_uniform,
         );
         <span class="kw">let </span>atlas_dimension = AtlasDimension::from_unique_glyphs(unique_glyphs.unique_glyphs);
-        <span class="kw">let </span>atlas = TextureAtlas::new(<span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">*</span>atlas_block, atlas_dimension);
-        <span class="kw">let </span>atlas_bind_group = AtlasBindGroup::new(
+        <span class="kw">let </span>atlas = TextureAtlas::new(
+            <span class="kw-2">&amp;</span>gfx_surface,
+            <span class="kw-2">*</span>atlas_block,
+            atlas_dimension,
+            wgpu::TextureFormat::R8Unorm,
+        );
+        <span class="kw">let </span>atlas_bind_group = TextureBindGroup::new(
             <span class="kw-2">&amp;</span>gfx_surface,
             <span class="kw-2">&amp;</span>renderer.atlas_bind_group_layout,
             atlas.view(),
@@ -1125,10 +1148,13 @@
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>render_group_differences(
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,
-    <span class="kw-2">mut </span>renderer: ResMut&lt;TextRenderer&gt;,
-    gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>renderer: ResMut&lt;TextRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>renderer: NonSendMut&lt;TextRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx_surface: NonSend&lt;GfxSurface&gt;,
     font: Res&lt;AlignedFonts&gt;,
-    viewport: Res&lt;Viewport&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>viewport: Res&lt;Viewport&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>viewport: NonSend&lt;Viewport&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>(entity, difference) <span class="kw">in </span>extraction.differences.iter() {
@@ -1234,9 +1260,13 @@
                 }
                 <span class="kw">let </span>new_dimension =
                     AtlasDimension::new(current_dimension + incremental_dimension_add);
-                render_group.atlas =
-                    TextureAtlas::new(<span class="kw-2">&amp;</span>gfx_surface, render_group.atlas.block, new_dimension);
-                render_group.atlas_bind_group = AtlasBindGroup::new(
+                render_group.atlas = TextureAtlas::new(
+                    <span class="kw-2">&amp;</span>gfx_surface,
+                    render_group.atlas.block,
+                    new_dimension,
+                    wgpu::TextureFormat::R8Unorm,
+                );
+                render_group.atlas_bind_group = TextureBindGroup::new(
                     <span class="kw-2">&amp;</span>gfx_surface,
                     <span class="kw-2">&amp;</span>renderer.atlas_bind_group_layout,
                     render_group.atlas.view(),
@@ -1396,9 +1426,11 @@
     <span class="kw-2">*</span>extraction = Extraction::new();
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>resolve_draw_section_on_resize(
-    <span class="kw-2">mut </span>renderer: ResMut&lt;TextRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>renderer: ResMut&lt;TextRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>renderer: NonSendMut&lt;TextRenderer&gt;,
     <span class="kw-2">mut </span>event_reader: EventReader&lt;WindowResize&gt;,
-    viewport: Res&lt;Viewport&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>viewport: Res&lt;Viewport&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>viewport: NonSend&lt;Viewport&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>_event <span class="kw">in </span>event_reader.iter() {

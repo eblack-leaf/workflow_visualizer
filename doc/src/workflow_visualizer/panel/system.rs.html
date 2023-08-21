@@ -267,9 +267,11 @@
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::ResMut;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
-<span class="kw">use </span>bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res};
+<span class="kw">use </span>bevy_ecs::prelude::{Changed, NonSend, NonSendMut, Or, Query, RemovedComponents, Res};
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
@@ -452,10 +454,12 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>process_extraction(
-    <span class="kw-2">mut </span>renderer: ResMut&lt;PanelRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>renderer: ResMut&lt;PanelRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>renderer: NonSendMut&lt;PanelRenderer&gt;,
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
-    gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx_surface: NonSend&lt;GfxSurface&gt;,
 ) {
     <span class="kw">for </span>entity <span class="kw">in </span>extraction.removed.drain() {
         <span class="kw">let </span>old = renderer.indexer.remove(entity);

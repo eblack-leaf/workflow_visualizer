@@ -71,12 +71,8 @@
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfig, Query, Res};
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfigs, Query, Res};
 
-<span class="kw">use </span><span class="kw">crate</span>::grid::config_grid;
 <span class="kw">use </span><span class="kw">crate</span>::grid::GridPoint;
 <span class="kw">use </span><span class="kw">crate</span>::grid::ResponsiveView;
 <span class="kw">use crate</span>::{Attach, Grid, InterfaceContext, Position, SyncPoint, Visualizer};
@@ -143,9 +139,7 @@
 <span class="kw">impl </span>Attach <span class="kw">for </span>PathAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            grid_updated_path
-                .in_set(SyncPoint::Config)
-                .after(config_grid),
+            grid_updated_path.in_set(SyncPoint::PostInitialization),
             view_changed.in_set(SyncPoint::Reconfigure),
         ));
     }

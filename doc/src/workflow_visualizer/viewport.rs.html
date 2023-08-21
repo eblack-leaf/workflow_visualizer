@@ -288,11 +288,26 @@
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
 <a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::{Res, ResMut};
 <span class="kw">use </span>bevy_ecs::event::EventReader;
-<span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfig, Resource};
+<span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfigs, NonSend, NonSendMut, Resource};
 <span class="kw">use </span>nalgebra::matrix;
-<span class="kw">use </span>wgpu::{BindGroup, BindGroupLayout, Texture, TextureFormat};
+<span class="kw">use </span>wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
 <span class="kw">use </span><span class="kw">crate</span>::coord::layer::Layer;
@@ -306,7 +321,7 @@
 <span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint};
 
 <span class="doccomment">/// Viewport Matrix for converting to NDC
-</span><span class="attr">#[derive(Resource)]
+</span><span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
 </span><span class="kw">pub struct </span>Viewport {
     cpu: CpuViewport,
     gpu: GpuViewport,
@@ -336,6 +351,15 @@
 <span class="kw">impl </span>Viewport {
     <span class="kw">pub fn </span>depth_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TextureFormat {
         <span class="self">self</span>.depth_format
+    }
+    <span class="kw">pub fn </span>depth_stencil_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DepthStencilState {
+        wgpu::DepthStencilState {
+            format: <span class="self">self</span>.depth_format(),
+            depth_write_enabled: <span class="bool-val">true</span>,
+            depth_compare: wgpu::CompareFunction::Less,
+            stencil: Default::default(),
+            bias: Default::default(),
+        }
     }
     <span class="kw">pub fn </span>far_layer(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
         <span class="self">self</span>.cpu.far_layer()
@@ -497,18 +521,22 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>viewport_resize(
-    gfx_surface: Res&lt;GfxSurface&gt;,
-    gfx_surface_configuration: Res&lt;GfxSurfaceConfiguration&gt;,
-    <span class="kw-2">mut </span>viewport: ResMut&lt;Viewport&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx_config: Res&lt;GfxSurfaceConfiguration&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx_config: NonSend&lt;GfxSurfaceConfiguration&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>msaa: Res&lt;MsaaRenderAdapter&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>msaa: NonSend&lt;MsaaRenderAdapter&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>viewport: ResMut&lt;Viewport&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>viewport: NonSendMut&lt;Viewport&gt;,
     <span class="kw-2">mut </span>resize_events: EventReader&lt;WindowResize&gt;,
-    msaa_attachment: Res&lt;MsaaRenderAdapter&gt;,
 ) {
     <span class="kw">for </span>_resize <span class="kw">in </span>resize_events.iter() {
         viewport.adjust_area(
-            <span class="kw-2">&amp;</span>gfx_surface,
-            gfx_surface_configuration.configuration.width,
-            gfx_surface_configuration.configuration.height,
-            msaa_attachment.requested(),
+            <span class="kw-2">&amp;</span>gfx,
+            gfx_config.configuration.width,
+            gfx_config.configuration.height,
+            msaa.requested(),
         );
     }
 }
@@ -547,8 +575,10 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>viewport_read_offset(
     <span class="kw-2">mut </span>viewport_handle: ResMut&lt;ViewportHandle&gt;,
-    <span class="kw-2">mut </span>viewport: ResMut&lt;Viewport&gt;,
-    gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>viewport: ResMut&lt;Viewport&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>viewport: NonSendMut&lt;Viewport&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx_surface: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx_surface: NonSend&lt;GfxSurface&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">if </span>viewport_handle.position_dirty {

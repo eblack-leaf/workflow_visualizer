@@ -29,13 +29,9 @@
 <a href="#29" id="29">29</a>
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
-<a href="#32" id="32">32</a>
-<a href="#33" id="33">33</a>
-<a href="#34" id="34">34</a>
-<a href="#35" id="35">35</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
-<span class="kw">use </span><span class="kw">crate</span>::line::renderer::{setup, LineRenderer};
+<span class="kw">use </span><span class="kw">crate</span>::line::renderer::LineRenderer;
 <span class="kw">use </span><span class="kw">crate</span>::line::system::{
     calc_section, create_render_group, push_color, push_layer, push_uniforms, scale_path,
 };
@@ -47,10 +43,6 @@
 <span class="kw">impl </span>Attach <span class="kw">for </span>LineAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         visualizer.register_renderer::&lt;LineRenderer&gt;();
-        visualizer
-            .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((setup.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_section
                 .in_set(SyncPoint::Reconfigure)

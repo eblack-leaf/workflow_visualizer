@@ -373,10 +373,94 @@
 <a href="#373" id="373">373</a>
 <a href="#374" id="374">374</a>
 <a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
-<span class="kw">use </span>bevy_ecs::prelude::{Bundle, Events, IntoSystemConfig, Resource};
+<span class="kw">use </span>bevy_ecs::prelude::{Bundle, Event, Events, IntoSystemConfigs, Resource};
 <span class="kw">use </span>tracing::{info, trace};
 <span class="kw">use </span>winit::dpi::{PhysicalPosition, PhysicalSize};
 <span class="kw">use </span>winit::event::{ElementState, MouseButton};
@@ -388,6 +472,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
 <span class="kw">use </span><span class="kw">crate</span>::grid::GridAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::icon::IconAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::images::ImageAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
 <span class="kw">use </span><span class="kw">crate</span>::line::LineAttachment;
@@ -404,8 +489,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowAttachment;
 <span class="kw">use crate</span>::{
     Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
-    JobSyncPoint, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section, SyncPoint, Theme,
-    Viewport, ViewportHandle, WindowResize,
+    JobSyncPoint, MsaaRenderAdapter, PrimaryInteraction, PrimaryMouseButton, ScaleFactor, Section,
+    SyncPoint, Theme, Viewport, ViewportHandle, WindowResize,
 };
 
 <span class="doccomment">/// Used to hold queued attachments until ready to invoke attach to the Visualizer
@@ -485,11 +570,23 @@
         <span class="kw">let </span>scale_factor = ScaleFactor::new(window.scale_factor());
         <span class="kw">let </span>viewport_handle =
             ViewportHandle::new(Section::new((<span class="number">0</span>, <span class="number">0</span>), area.to_ui(scale_factor.factor())));
-        <span class="self">self</span>.job.container.insert_resource(viewport);
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="self">self</span>.job.container.insert_resource(viewport);
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="self">self</span>.job.container.insert_non_send_resource(viewport);
         <span class="self">self</span>.job.container.insert_resource(viewport_handle);
-        <span class="self">self</span>.job.container.insert_resource(surface);
-        <span class="self">self</span>.job.container.insert_resource(config);
-        <span class="self">self</span>.job.container.insert_resource(msaa);
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="self">self</span>.job.container.insert_resource(surface);
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="self">self</span>.job.container.insert_non_send_resource(surface);
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="self">self</span>.job.container.insert_resource(config);
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="self">self</span>.job.container.insert_non_send_resource(config);
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="self">self</span>.job.container.insert_resource(msaa);
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="self">self</span>.job.container.insert_non_send_resource(msaa);
         <span class="self">self</span>.job.container.insert_resource(scale_factor);
     }
     <span class="doccomment">/// Tells visualizer to send a signal of resizing to be read in systems
@@ -520,6 +617,7 @@
         <span class="self">self</span>.invoke_attach::&lt;TextAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;IconAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ButtonAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;ImageAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
         <span class="self">self</span>.setup();
         <span class="self">self</span>.job.resume();
@@ -534,13 +632,11 @@
             .spawn_batch(queue.datum)
             .collect::&lt;Vec&lt;Entity&gt;&gt;()
     }
-    <span class="kw">pub fn </span>add_event&lt;Event: Sync + Send + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">pub fn </span>add_event&lt;E: Event + Sync + Send + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.job
             .task(<span class="self">Self</span>::TASK_MAIN)
-            .add_systems((Events::&lt;Event&gt;::update_system.in_set(SyncPoint::Event),));
-        <span class="self">self</span>.job
-            .container
-            .insert_resource(Events::&lt;Event&gt;::default());
+            .add_systems((Events::&lt;E&gt;::update_system.in_set(SyncPoint::Event),));
+        <span class="self">self</span>.job.container.insert_resource(Events::&lt;E&gt;::default());
     }
     <span class="kw">pub fn </span>register_touch(<span class="kw-2">&amp;mut </span><span class="self">self</span>, touch: winit::event::Touch) {
         <span class="self">self</span>.job.container.send_event(InteractionEvent::new(
@@ -661,20 +757,37 @@
         }
     }
     <span class="kw">fn </span>recreate_surface(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
-        <span class="kw">let </span>config = <span class="self">self
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="kw">let </span>config = <span class="self">self
             </span>.job
             .container
             .remove_resource::&lt;GfxSurfaceConfiguration&gt;()
             .expect(<span class="string">&quot;gfx config&quot;</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>gfx = <span class="self">self
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="kw">let </span>config = <span class="self">self
+            </span>.job
+            .container
+            .remove_non_send_resource::&lt;GfxSurfaceConfiguration&gt;()
+            .expect(<span class="string">&quot;gfx config&quot;</span>);
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="kw">let </span><span class="kw-2">mut </span>gfx = <span class="self">self
             </span>.job
             .container
             .get_resource_mut::&lt;GfxSurface&gt;()
             .expect(<span class="string">&quot;gfx&quot;</span>);
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="kw">let </span><span class="kw-2">mut </span>gfx = <span class="self">self
+            </span>.job
+            .container
+            .get_non_send_resource_mut::&lt;GfxSurface&gt;()
+            .expect(<span class="string">&quot;gfx&quot;</span>);
         gfx.surface = <span class="kw">unsafe </span>{ gfx.instance.create_surface(window).expect(<span class="string">&quot;gfx surface&quot;</span>) };
         <span class="comment">// send resize event instead to get window sizing?
         </span>gfx.surface.configure(<span class="kw-2">&amp;</span>gfx.device, <span class="kw-2">&amp;</span>config.configuration);
-        <span class="self">self</span>.job.container.insert_resource(config);
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span><span class="self">self</span>.job.container.insert_resource(config);
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span><span class="self">self</span>.job.container.insert_non_send_resource(config);
     }
     <span class="doccomment">/// execute RENDER_MAIN then run the render pass
     </span><span class="kw">pub fn </span>render(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -689,7 +802,62 @@
         <span class="self">self</span>.job.can_idle()
     }
     <span class="doccomment">/// register render fn with the Visualizer
-    </span><span class="kw">pub fn </span>register_renderer&lt;Renderer: Render + Resource&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    </span><span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+    </span><span class="kw">pub fn </span>register_renderer&lt;Renderer: Render + Resource + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>gfx = <span class="self">self</span>.job.container.get_resource::&lt;GfxSurface&gt;().unwrap();
+        <span class="kw">let </span>gfx_config = <span class="self">self
+            </span>.job
+            .container
+            .get_resource::&lt;GfxSurfaceConfiguration&gt;()
+            .unwrap();
+        <span class="kw">let </span>msaa = <span class="self">self
+            </span>.job
+            .container
+            .get_resource::&lt;MsaaRenderAdapter&gt;()
+            .unwrap();
+        <span class="kw">let </span>viewport = <span class="self">self</span>.job.container.get_resource::&lt;Viewport&gt;().unwrap();
+        <span class="kw">let </span>scale_factor = <span class="self">self</span>.job.container.get_resource::&lt;ScaleFactor&gt;().unwrap();
+        <span class="kw">let </span>renderer: Renderer =
+            Render::setup(<span class="kw-2">&amp;</span><span class="self">self</span>, gfx, viewport, gfx_config, msaa, scale_factor);
+        <span class="self">self</span>.job.container.insert_resource(renderer);
+        <span class="kw">match </span>Renderer::phase() {
+            RenderPhase::Opaque =&gt; <span class="self">self
+                </span>.render_task_manager
+                .opaque
+                .push(Box::new(invoke_render::&lt;Renderer&gt;)),
+            <span class="comment">// TODO insert in order + after if same priority
+            </span>RenderPhase::Alpha(_order) =&gt; <span class="self">self
+                </span>.render_task_manager
+                .transparent
+                .push(Box::new(invoke_render::&lt;Renderer&gt;)),
+        }
+    }
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+    </span><span class="kw">pub fn </span>register_renderer&lt;Renderer: Render + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>gfx = <span class="self">self
+            </span>.job
+            .container
+            .get_non_send_resource::&lt;GfxSurface&gt;()
+            .unwrap();
+        <span class="kw">let </span>gfx_config = <span class="self">self
+            </span>.job
+            .container
+            .get_non_send_resource::&lt;GfxSurfaceConfiguration&gt;()
+            .unwrap();
+        <span class="kw">let </span>msaa = <span class="self">self
+            </span>.job
+            .container
+            .get_non_send_resource::&lt;MsaaRenderAdapter&gt;()
+            .unwrap();
+        <span class="kw">let </span>viewport = <span class="self">self
+            </span>.job
+            .container
+            .get_non_send_resource::&lt;Viewport&gt;()
+            .unwrap();
+        <span class="kw">let </span>scale_factor = <span class="self">self</span>.job.container.get_resource::&lt;ScaleFactor&gt;().unwrap();
+        <span class="kw">let </span>renderer: Renderer =
+            Render::setup(<span class="kw-2">&amp;</span><span class="self">self</span>, gfx, viewport, gfx_config, msaa, scale_factor);
+        <span class="self">self</span>.job.container.insert_non_send_resource(renderer);
         <span class="kw">match </span>Renderer::phase() {
             RenderPhase::Opaque =&gt; <span class="self">self
                 </span>.render_task_manager

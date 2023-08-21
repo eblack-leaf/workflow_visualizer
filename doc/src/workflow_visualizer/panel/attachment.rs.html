@@ -30,35 +30,27 @@
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
 <a href="#32" id="32">32</a>
-<a href="#33" id="33">33</a>
-<a href="#34" id="34">34</a>
-<a href="#35" id="35">35</a>
-<a href="#36" id="36">36</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
 <span class="kw">use </span><span class="kw">crate</span>::panel::renderer::PanelRenderer;
 <span class="kw">use </span><span class="kw">crate</span>::panel::system::{
     calc_content_area, color_diff, content_area_diff, layer_diff, management, panel_type_diff,
     position_diff, process_extraction, pull_differences,
 };
-<span class="kw">use </span><span class="kw">crate</span>::panel::{renderer, Extraction, Panel};
+<span class="kw">use </span><span class="kw">crate</span>::panel::Extraction;
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 
 <span class="kw">pub struct </span>PanelAttachment;
 
 <span class="kw">impl </span>Attach <span class="kw">for </span>PanelAttachment {
-    <span class="kw">fn </span>attach(engen: <span class="kw-2">&amp;mut </span>Visualizer) {
-        engen.job.container.insert_resource(Extraction::new());
-        engen.register_renderer::&lt;PanelRenderer&gt;();
-        engen
-            .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((renderer::setup.in_set(SyncPoint::Preparation),));
-        engen
+    <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
+        visualizer.job.container.insert_resource(Extraction::new());
+        visualizer.register_renderer::&lt;PanelRenderer&gt;();
+        visualizer
             .job
             .task(Visualizer::TASK_RENDER_MAIN)
             .add_systems((process_extraction.in_set(SyncPoint::Preparation),));
-        engen.job.task(Visualizer::TASK_MAIN).add_systems((
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_content_area.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
             panel_type_diff.in_set(SyncPoint::PushDiff),

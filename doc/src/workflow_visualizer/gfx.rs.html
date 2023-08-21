@@ -274,11 +274,29 @@
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
-<span class="kw">use </span>tracing::{info, instrument, trace, warn};
-<span class="kw">use </span>wgpu::TextureView;
+<span class="kw">use </span>tracing::{info, instrument, trace};
+<span class="kw">use </span>wgpu::{ColorTargetState, PrimitiveState, TextureView};
 <span class="kw">use </span>winit::window::Window;
 
 <span class="doccomment">/// Options for instantiating the Gfx module
@@ -323,8 +341,8 @@
         <span class="self">self
     </span>}
 }
-<span class="doccomment">/// Core structs for interop with wgpu
-</span><span class="attr">#[derive(Resource)]
+
+<span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
 </span><span class="kw">pub struct </span>GfxSurface {
     <span class="kw">pub </span>instance: wgpu::Instance,
     <span class="kw">pub </span>surface: wgpu::Surface,
@@ -442,6 +460,17 @@
             options.msaa,
         )
     }
+    <span class="kw">pub fn </span>triangle_primitive(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PrimitiveState {
+        wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: <span class="prelude-val">None</span>,
+            front_face: wgpu::FrontFace::Ccw,
+            cull_mode: <span class="prelude-val">Some</span>(wgpu::Face::Back),
+            unclipped_depth: <span class="bool-val">false</span>,
+            polygon_mode: wgpu::PolygonMode::Fill,
+            conservative: <span class="bool-val">false</span>,
+        }
+    }
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>surface_texture(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         surface_configuration: <span class="kw-2">&amp;</span>GfxSurfaceConfiguration,
@@ -476,7 +505,7 @@
     }
 }
 
-<span class="attr">#[derive(Resource)]
+<span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
 </span><span class="kw">pub struct </span>GfxSurfaceConfiguration {
     <span class="kw">pub</span>(<span class="kw">crate</span>) configuration: wgpu::SurfaceConfiguration,
 }
@@ -485,9 +514,16 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(configuration: wgpu::SurfaceConfiguration) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ configuration }
     }
+    <span class="kw">pub fn </span>alpha_color_target_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ColorTargetState {
+        wgpu::ColorTargetState {
+            format: <span class="self">self</span>.configuration.format,
+            blend: <span class="prelude-val">Some</span>(wgpu::BlendState::ALPHA_BLENDING),
+            write_mask: Default::default(),
+        }
+    }
 }
 <span class="doccomment">/// Used for setting the multi-sampling/anti-aliasing
-</span><span class="attr">#[derive(Resource)]
+</span><span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
 </span><span class="kw">pub struct </span>MsaaRenderAdapter {
     max: u32,
     requested: u32,

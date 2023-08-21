@@ -203,9 +203,17 @@
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Changed, Entity, Query, RemovedComponents, Res, ResMut};
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{
+    Added, Changed, Entity, NonSend, NonSendMut, Query, RemovedComponents, Res, ResMut,
+};
 
-<span class="kw">use </span><span class="kw">crate</span>::icon::bitmap::IconBitmapLayout;
 <span class="kw">use </span><span class="kw">crate</span>::icon::cache::{Cache, Difference};
 <span class="kw">use </span><span class="kw">crate</span>::icon::component::{IconId, IconScale};
 <span class="kw">use </span><span class="kw">crate</span>::icon::renderer::IconRenderer;
@@ -214,7 +222,10 @@
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calc_area(
-    <span class="kw-2">mut </span>icons: Query&lt;(<span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;, <span class="kw-2">&amp;</span>IconScale), Changed&lt;IconScale&gt;&gt;,
+    <span class="kw-2">mut </span>icons: Query&lt;
+        (<span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;, <span class="kw-2">&amp;</span>IconScale),
+        (Changed&lt;IconScale&gt;, Added&lt;Area&lt;InterfaceContext&gt;&gt;),
+    &gt;,
 ) {
     <span class="kw">for </span>(<span class="kw-2">mut </span>area, scale) <span class="kw">in </span>icons.iter_mut() {
         <span class="kw">let </span>px = scale.px();
@@ -238,7 +249,8 @@
         Changed&lt;Visibility&gt;,
     &gt;,
     <span class="kw-2">mut </span>removed: RemovedComponents&lt;IconScale&gt;,
-    <span class="kw-2">mut </span>icon_renderer: ResMut&lt;IconRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>icon_renderer: ResMut&lt;IconRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>icon_renderer: NonSendMut&lt;IconRenderer&gt;,
 ) {
     <span class="kw">for </span>(entity, pos, area, layer, color, id, visibility, <span class="kw-2">mut </span>difference) <span class="kw">in </span>icons.iter_mut() {
         <span class="kw">if </span>visibility.visible() {
@@ -333,10 +345,11 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_differences(
     <span class="kw-2">mut </span>icons: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>Difference), Changed&lt;Difference&gt;&gt;,
-    <span class="kw-2">mut </span>icon_renderer: ResMut&lt;IconRenderer&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>icon_renderer: ResMut&lt;IconRenderer&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>icon_renderer: NonSendMut&lt;IconRenderer&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
-    icon_bitmap_layout: Res&lt;IconBitmapLayout&gt;,
-    gfx: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx: Res&lt;GfxSurface&gt;,
+    <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
 ) {
     <span class="kw">for </span>(entity, <span class="kw-2">mut </span>difference) <span class="kw">in </span>icons.iter_mut() {
         <span class="kw">if </span>difference.remove {
@@ -381,14 +394,15 @@
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(id) = difference.attributes.icon_id.take() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = icon_renderer.indexer.get_index(entity) {
-                icon_renderer.tex_coords_attribute.queue_write(
-                    index,
-                    icon_bitmap_layout
-                        .bitmap_locations
-                        .get(<span class="kw-2">&amp;</span>id)
-                        .copied()
-                        .expect(<span class="string">&quot;icon bitmap layout&quot;</span>),
-                );
+                <span class="kw">let </span>coordinates = icon_renderer
+                    .icon_bitmap_layout
+                    .bitmap_locations
+                    .get(<span class="kw-2">&amp;</span>id)
+                    .copied()
+                    .expect(<span class="string">&quot;icon bitmap layout&quot;</span>);
+                icon_renderer
+                    .tex_coords_attribute
+                    .queue_write(index, coordinates);
             }
         }
     }

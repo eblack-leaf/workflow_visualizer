@@ -27,16 +27,12 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
-<a href="#30" id="30">30</a>
-<a href="#31" id="31">31</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Bundle;
 
 <span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>BundleBuilder&lt;T: Bundle, S: Bundle&gt; {
-    <span class="attr">#[bundle]
-    </span><span class="kw">pub </span>original: T,
-    <span class="attr">#[bundle]
-    </span><span class="kw">pub </span>extension: S,
+    <span class="kw">pub </span>original: T,
+    <span class="kw">pub </span>extension: S,
 }
 
 <span class="kw">impl</span>&lt;T: Bundle, S: Bundle&gt; BundleBuilder&lt;T, S&gt; {

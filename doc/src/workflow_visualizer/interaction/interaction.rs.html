@@ -395,7 +395,7 @@
 <span class="kw">use </span>bevy_ecs::change_detection::{Res, ResMut};
 <span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::event::EventReader;
-<span class="kw">use </span>bevy_ecs::prelude::{Entity, Query, Resource, Without};
+<span class="kw">use </span>bevy_ecs::prelude::{Entity, Event, Query, Resource, Without};
 <span class="kw">use </span>winit::event::{ElementState, MouseButton, TouchPhase};
 
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusedEntity;
@@ -691,8 +691,8 @@
 
 <span class="attr">#[derive(Resource, Default)]
 </span><span class="kw">pub struct </span>InteractionPhases(<span class="kw">pub </span>HashMap&lt;Interaction, InteractionPhase&gt;);
-
-<span class="kw">pub struct </span>InteractionEvent {
+<span class="attr">#[derive(Event)]
+</span><span class="kw">pub struct </span>InteractionEvent {
     <span class="kw">pub</span>(<span class="kw">crate</span>) device: InteractionDevice,
     <span class="kw">pub</span>(<span class="kw">crate</span>) location: Position&lt;DeviceContext&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) phase: InteractionPhase,

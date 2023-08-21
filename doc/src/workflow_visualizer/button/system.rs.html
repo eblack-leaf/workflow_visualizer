@@ -321,14 +321,14 @@
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
+<span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+<span class="kw">use </span><span class="kw">crate</span>::text::AlignedFonts;
 <span class="kw">use crate</span>::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
     Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
     Toggled,
 };
-<span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-<span class="kw">use </span><span class="kw">crate</span>::text::AlignedFonts;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(
     buttons: Query&lt;(<span class="kw-2">&amp;</span>PanelEntity, <span class="kw-2">&amp;</span>ButtonBorder), Changed&lt;ButtonBorder&gt;&gt;,

@@ -18,11 +18,9 @@
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
-<a href="#21" id="21">21</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfig;
-
-<span class="kw">use </span><span class="kw">crate</span>::button::system;
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::button::system;
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
+<span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ButtonAttachment;
 

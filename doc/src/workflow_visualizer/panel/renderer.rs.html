@@ -185,17 +185,19 @@
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Commands, Entity, Res, Resource};
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Entity, Resource};
 <span class="kw">use </span>wgpu::BlendState;
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
 <span class="kw">use crate</span>::{
     Color, Indexer, InstanceAttributeManager, Layer, NullBit, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, Visualizer,
 };
 
-<span class="attr">#[derive(Resource)]
+<span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PanelRenderer {
     <span class="kw">pub</span>(<span class="kw">crate</span>) pipeline: wgpu::RenderPipeline,
     <span class="kw">pub</span>(<span class="kw">crate</span>) positions: InstanceAttributeManager&lt;RawPosition&gt;,
@@ -211,122 +213,124 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) border_mesh_len: u32,
     <span class="kw">pub</span>(<span class="kw">crate</span>) indexer: Indexer&lt;Entity&gt;,
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(
-    gfx_surface: Res&lt;GfxSurface&gt;,
-    viewport: Res&lt;Viewport&gt;,
-    msaa: Res&lt;MsaaRenderAdapter&gt;,
-    gfx_surface_config: Res&lt;GfxSurfaceConfiguration&gt;,
-    scale_factor: Res&lt;ScaleFactor&gt;,
-    <span class="kw-2">mut </span>cmd: Commands,
-) {
-    <span class="kw">let </span>pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;content panel pipeline layout descriptor&quot;</span>),
-        bind_group_layouts: <span class="kw-2">&amp;</span>[(viewport.bind_group_layout())],
-        push_constant_ranges: <span class="kw-2">&amp;</span>[],
-    };
-    <span class="kw">let </span>pipeline_layout = gfx_surface
-        .device
-        .create_pipeline_layout(<span class="kw-2">&amp;</span>pipeline_layout_descriptor);
-    <span class="kw">let </span>shader = gfx_surface
-        .device
-        .create_shader_module(<span class="macro">wgpu::include_wgsl!</span>(<span class="string">&quot;panel.wgsl&quot;</span>));
-    <span class="kw">let </span>color_target_state = [<span class="prelude-val">Some</span>(wgpu::ColorTargetState {
-        format: gfx_surface_config.configuration.format,
-        blend: <span class="prelude-val">Some</span>(BlendState::ALPHA_BLENDING),
-        write_mask: Default::default(),
-    })];
-    <span class="kw">let </span>descriptor = wgpu::RenderPipelineDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;content panel renderer&quot;</span>),
-        layout: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>pipeline_layout),
-        vertex: wgpu::VertexState {
-            module: <span class="kw-2">&amp;</span>shader,
-            entry_point: <span class="string">&quot;vertex_entry&quot;</span>,
-            buffers: <span class="kw-2">&amp;</span>[
-                wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::&lt;PanelVertex&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x4],
-                },
-                wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::&lt;RawPosition&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">1 </span>=&gt; Float32x2],
-                },
-                wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::&lt;RawArea&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">2 </span>=&gt; Float32x2],
-                },
-                wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::&lt;Layer&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">3 </span>=&gt; Float32],
-                },
-                wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::&lt;Color&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">4 </span>=&gt; Float32x4],
-                },
-                wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::&lt;NullBit&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">5 </span>=&gt; Uint32],
-                },
-            ],
-        },
-        primitive: wgpu::PrimitiveState {
-            topology: wgpu::PrimitiveTopology::TriangleList,
-            strip_index_format: <span class="prelude-val">None</span>,
-            front_face: wgpu::FrontFace::Ccw,
-            cull_mode: <span class="prelude-val">Some</span>(wgpu::Face::Back),
-            unclipped_depth: <span class="bool-val">false</span>,
-            polygon_mode: wgpu::PolygonMode::Fill,
-            conservative: <span class="bool-val">false</span>,
-        },
-        depth_stencil: <span class="prelude-val">Some</span>(wgpu::DepthStencilState {
-            format: viewport.depth_format(),
-            depth_write_enabled: <span class="bool-val">true</span>,
-            depth_compare: wgpu::CompareFunction::LessEqual,
-            stencil: wgpu::StencilState::default(),
-            bias: wgpu::DepthBiasState::default(),
-        }),
-        multisample: wgpu::MultisampleState {
-            count: msaa.requested(),
-            ..wgpu::MultisampleState::default()
-        },
-        fragment: <span class="prelude-val">Some</span>(wgpu::FragmentState {
-            module: <span class="kw-2">&amp;</span>shader,
-            entry_point: <span class="string">&quot;fragment_entry&quot;</span>,
-            targets: <span class="kw-2">&amp;</span>color_target_state,
-        }),
-        multiview: <span class="prelude-val">None</span>,
-    };
-    <span class="kw">let </span>pipeline = gfx_surface.device.create_render_pipeline(<span class="kw-2">&amp;</span>descriptor);
-    <span class="kw">let </span>mesh = generate_panel_mesh(<span class="number">16</span>, scale_factor.factor());
-    <span class="kw">let </span>mesh_len = mesh.len() <span class="kw">as </span>u32;
-    <span class="kw">let </span>buffer = vertex_buffer(gfx_surface.as_ref(), mesh);
-    <span class="kw">let </span>border_mesh = generate_border_mesh(<span class="number">16</span>, scale_factor.factor());
-    <span class="kw">let </span>border_mesh_len = border_mesh.len() <span class="kw">as </span>u32;
-    <span class="kw">let </span>border_vertex_buffer = vertex_buffer(<span class="kw-2">&amp;</span>gfx_surface, border_mesh);
-    <span class="kw">let </span>initial_max = <span class="number">5</span>;
-    <span class="kw">let </span>renderer = PanelRenderer {
-        pipeline,
-        positions: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        content_area: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        layers: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        panel_colors: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        panel_null_bits: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        panel_vertex_buffer: buffer,
-        panel_mesh_len: mesh_len,
-        border_null_bits: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        border_colors: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, initial_max),
-        border_vertex_buffer,
-        border_mesh_len,
-        indexer: Indexer::new(initial_max),
-    };
-    cmd.insert_resource(renderer);
-}
+
 <span class="kw">impl </span>Render <span class="kw">for </span>PanelRenderer {
+    <span class="kw">fn </span>setup(
+        _visualizer: <span class="kw-2">&amp;</span>Visualizer,
+        gfx: <span class="kw-2">&amp;</span>GfxSurface,
+        viewport: <span class="kw-2">&amp;</span>Viewport,
+        gfx_config: <span class="kw-2">&amp;</span>GfxSurfaceConfiguration,
+        msaa: <span class="kw-2">&amp;</span>MsaaRenderAdapter,
+        scale_factor: <span class="kw-2">&amp;</span>ScaleFactor,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;content panel pipeline layout descriptor&quot;</span>),
+            bind_group_layouts: <span class="kw-2">&amp;</span>[(viewport.bind_group_layout())],
+            push_constant_ranges: <span class="kw-2">&amp;</span>[],
+        };
+        <span class="kw">let </span>pipeline_layout = gfx
+            .device
+            .create_pipeline_layout(<span class="kw-2">&amp;</span>pipeline_layout_descriptor);
+        <span class="kw">let </span>shader = gfx
+            .device
+            .create_shader_module(<span class="macro">wgpu::include_wgsl!</span>(<span class="string">&quot;panel.wgsl&quot;</span>));
+        <span class="kw">let </span>color_target_state = [<span class="prelude-val">Some</span>(wgpu::ColorTargetState {
+            format: gfx_config.configuration.format,
+            blend: <span class="prelude-val">Some</span>(BlendState::ALPHA_BLENDING),
+            write_mask: Default::default(),
+        })];
+        <span class="kw">let </span>descriptor = wgpu::RenderPipelineDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;content panel renderer&quot;</span>),
+            layout: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: <span class="kw-2">&amp;</span>shader,
+                entry_point: <span class="string">&quot;vertex_entry&quot;</span>,
+                buffers: <span class="kw-2">&amp;</span>[
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::&lt;PanelVertex&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                        step_mode: wgpu::VertexStepMode::Vertex,
+                        attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x4],
+                    },
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::&lt;RawPosition&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">1 </span>=&gt; Float32x2],
+                    },
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::&lt;RawArea&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">2 </span>=&gt; Float32x2],
+                    },
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::&lt;Layer&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">3 </span>=&gt; Float32],
+                    },
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::&lt;Color&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">4 </span>=&gt; Float32x4],
+                    },
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::&lt;NullBit&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">5 </span>=&gt; Uint32],
+                    },
+                ],
+            },
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: <span class="prelude-val">None</span>,
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: <span class="prelude-val">Some</span>(wgpu::Face::Back),
+                unclipped_depth: <span class="bool-val">false</span>,
+                polygon_mode: wgpu::PolygonMode::Fill,
+                conservative: <span class="bool-val">false</span>,
+            },
+            depth_stencil: <span class="prelude-val">Some</span>(wgpu::DepthStencilState {
+                format: viewport.depth_format(),
+                depth_write_enabled: <span class="bool-val">true</span>,
+                depth_compare: wgpu::CompareFunction::LessEqual,
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
+            multisample: wgpu::MultisampleState {
+                count: msaa.requested(),
+                ..wgpu::MultisampleState::default()
+            },
+            fragment: <span class="prelude-val">Some</span>(wgpu::FragmentState {
+                module: <span class="kw-2">&amp;</span>shader,
+                entry_point: <span class="string">&quot;fragment_entry&quot;</span>,
+                targets: <span class="kw-2">&amp;</span>color_target_state,
+            }),
+            multiview: <span class="prelude-val">None</span>,
+        };
+        <span class="kw">let </span>pipeline = gfx.device.create_render_pipeline(<span class="kw-2">&amp;</span>descriptor);
+        <span class="kw">let </span>mesh = generate_panel_mesh(<span class="number">16</span>, scale_factor.factor());
+        <span class="kw">let </span>mesh_len = mesh.len() <span class="kw">as </span>u32;
+        <span class="kw">let </span>buffer = vertex_buffer(gfx, mesh);
+        <span class="kw">let </span>border_mesh = generate_border_mesh(<span class="number">16</span>, scale_factor.factor());
+        <span class="kw">let </span>border_mesh_len = border_mesh.len() <span class="kw">as </span>u32;
+        <span class="kw">let </span>border_vertex_buffer = vertex_buffer(gfx, border_mesh);
+        <span class="kw">let </span>initial_max = <span class="number">5</span>;
+        <span class="kw">let </span>renderer = PanelRenderer {
+            pipeline,
+            positions: InstanceAttributeManager::new(gfx, initial_max),
+            content_area: InstanceAttributeManager::new(gfx, initial_max),
+            layers: InstanceAttributeManager::new(gfx, initial_max),
+            panel_colors: InstanceAttributeManager::new(gfx, initial_max),
+            panel_null_bits: InstanceAttributeManager::new(gfx, initial_max),
+            panel_vertex_buffer: buffer,
+            panel_mesh_len: mesh_len,
+            border_null_bits: InstanceAttributeManager::new(gfx, initial_max),
+            border_colors: InstanceAttributeManager::new(gfx, initial_max),
+            border_vertex_buffer,
+            border_mesh_len,
+            indexer: Indexer::new(initial_max),
+        };
+        renderer
+    }
+
     <span class="kw">fn </span>phase() -&gt; RenderPhase {
         RenderPhase::Alpha(<span class="number">5</span>)
     }

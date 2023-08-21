@@ -315,13 +315,10 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, Entity, Res, Resource};
-<span class="kw">use </span>tracing::{instrument, trace, warn};
+<span class="kw">use </span>tracing::trace;
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
@@ -329,10 +326,10 @@
 <span class="kw">use </span><span class="kw">crate</span>::text::font::AlignedFonts;
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::TextureCoordinates;
-<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasBindGroup, AtlasBlock, TextureAtlas};
+<span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasBlock, TextureBindGroup};
 <span class="kw">use crate</span>::{
-    Color, InterfaceContext, Job, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection,
+    Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection, Visualizer,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>AABB: [Vertex; <span class="number">6</span>] = [
@@ -365,7 +362,8 @@
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         })
 }
-<span class="attr">#[derive(Resource)]
+
+<span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TextRenderer {
     <span class="kw">pub</span>(<span class="kw">crate</span>) pipeline: wgpu::RenderPipeline,
     <span class="kw">pub</span>(<span class="kw">crate</span>) vertex_buffer: wgpu::Buffer,
@@ -374,178 +372,12 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_bind_group_layout: wgpu::BindGroupLayout,
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas_bind_group_layout: wgpu::BindGroupLayout,
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(
-    gfx_surface: Res&lt;GfxSurface&gt;,
-    gfx_surface_config: Res&lt;GfxSurfaceConfiguration&gt;,
-    viewport: Res&lt;Viewport&gt;,
-    <span class="kw-2">mut </span>cmd: Commands,
-    scale_factor: Res&lt;ScaleFactor&gt;,
-    msaa_attachment: Res&lt;MsaaRenderAdapter&gt;,
-) {
-    <span class="kw">let </span>sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;sampler bind group layout&quot;</span>),
-        entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupLayoutEntry {
-            binding: <span class="number">0</span>,
-            visibility: wgpu::ShaderStages::FRAGMENT,
-            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-            count: <span class="prelude-val">None</span>,
-        }],
-    };
-    <span class="kw">let </span>sampler_bind_group_layout = gfx_surface
-        .device
-        .create_bind_group_layout(<span class="kw-2">&amp;</span>sampler_bind_group_layout_descriptor);
-    <span class="kw">let </span>sampler_descriptor = wgpu::SamplerDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;text sampler&quot;</span>),
-        address_mode_u: wgpu::AddressMode::ClampToEdge,
-        address_mode_v: wgpu::AddressMode::ClampToEdge,
-        address_mode_w: wgpu::AddressMode::ClampToEdge,
-        mag_filter: wgpu::FilterMode::Linear,
-        min_filter: wgpu::FilterMode::Linear,
-        mipmap_filter: wgpu::FilterMode::Linear,
-        lod_min_clamp: Default::default(),
-        lod_max_clamp: Default::default(),
-        compare: <span class="prelude-val">None</span>,
-        anisotropy_clamp: <span class="number">1</span>,
-        border_color: <span class="prelude-val">None</span>,
-    };
-    <span class="kw">let </span>sampler = gfx_surface.device.create_sampler(<span class="kw-2">&amp;</span>sampler_descriptor);
-    <span class="kw">let </span>sampler_bind_group_descriptor = wgpu::BindGroupDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;sampler bind group&quot;</span>),
-        layout: <span class="kw-2">&amp;</span>sampler_bind_group_layout,
-        entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupEntry {
-            binding: <span class="number">0</span>,
-            resource: wgpu::BindingResource::Sampler(<span class="kw-2">&amp;</span>sampler),
-        }],
-    };
-    <span class="kw">let </span>sampler_bind_group = gfx_surface
-        .device
-        .create_bind_group(<span class="kw-2">&amp;</span>sampler_bind_group_descriptor);
-    <span class="kw">let </span>render_group_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;rasterization bind group&quot;</span>),
-        entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupLayoutEntry {
-            binding: <span class="number">0</span>,
-            visibility: wgpu::ShaderStages::VERTEX,
-            ty: wgpu::BindingType::Buffer {
-                ty: wgpu::BufferBindingType::Uniform,
-                has_dynamic_offset: <span class="bool-val">false</span>,
-                min_binding_size: <span class="prelude-val">None</span>,
-            },
-            count: <span class="prelude-val">None</span>,
-        }],
-    };
-    <span class="kw">let </span>render_group_bind_group_layout = gfx_surface
-        .device
-        .create_bind_group_layout(<span class="kw-2">&amp;</span>render_group_bind_group_layout_descriptor);
-    <span class="kw">let </span>atlas_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;atlas bind group layout descriptor&quot;</span>),
-        entries: <span class="kw-2">&amp;</span>[AtlasBindGroup::entry(<span class="number">0</span>)],
-    };
-    <span class="kw">let </span>atlas_bind_group_layout = gfx_surface
-        .device
-        .create_bind_group_layout(<span class="kw-2">&amp;</span>atlas_bind_group_layout_descriptor);
-    <span class="kw">let </span>layout_descriptor = wgpu::PipelineLayoutDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;text pipeline layout descriptor&quot;</span>),
-        bind_group_layouts: <span class="kw-2">&amp;</span>[
-            (viewport.bind_group_layout()),
-            <span class="kw-2">&amp;</span>sampler_bind_group_layout,
-            <span class="kw-2">&amp;</span>render_group_bind_group_layout,
-            <span class="kw-2">&amp;</span>atlas_bind_group_layout,
-        ],
-        push_constant_ranges: <span class="kw-2">&amp;</span>[],
-    };
-    <span class="kw">let </span>layout = gfx_surface
-        .device
-        .create_pipeline_layout(<span class="kw-2">&amp;</span>layout_descriptor);
-    <span class="kw">let </span>shader = gfx_surface
-        .device
-        .create_shader_module(<span class="macro">wgpu::include_wgsl!</span>(<span class="string">&quot;padded_text.wgsl&quot;</span>));
-    <span class="kw">let </span>vertex_state = wgpu::VertexState {
-        module: <span class="kw-2">&amp;</span>shader,
-        entry_point: <span class="string">&quot;vertex_entry&quot;</span>,
-        buffers: <span class="kw-2">&amp;</span>[
-            wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::&lt;Vertex&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Vertex,
-                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x2],
-            },
-            wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::&lt;RawPosition&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Instance,
-                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">1 </span>=&gt; Float32x2],
-            },
-            wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::&lt;RawArea&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Instance,
-                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">2 </span>=&gt; Float32x2],
-            },
-            wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::&lt;NullBit&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Instance,
-                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">3 </span>=&gt; Uint32],
-            },
-            wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::&lt;Color&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Instance,
-                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">4 </span>=&gt; Float32x4],
-            },
-            wgpu::VertexBufferLayout {
-                array_stride: std::mem::size_of::&lt;TextureCoordinates&gt;() <span class="kw">as </span>wgpu::BufferAddress,
-                step_mode: wgpu::VertexStepMode::Instance,
-                attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">5 </span>=&gt; Float32x4],
-            },
-        ],
-    };
-    <span class="kw">let </span>primitive_state = wgpu::PrimitiveState {
-        topology: wgpu::PrimitiveTopology::TriangleList,
-        strip_index_format: <span class="prelude-val">None</span>,
-        front_face: wgpu::FrontFace::Ccw,
-        cull_mode: <span class="prelude-val">Some</span>(wgpu::Face::Back),
-        unclipped_depth: <span class="bool-val">false</span>,
-        polygon_mode: wgpu::PolygonMode::Fill,
-        conservative: <span class="bool-val">false</span>,
-    };
-    <span class="kw">let </span>depth_stencil_state = <span class="prelude-val">Some</span>(wgpu::DepthStencilState {
-        format: viewport.depth_format(),
-        depth_write_enabled: <span class="bool-val">true</span>,
-        depth_compare: wgpu::CompareFunction::Less,
-        stencil: wgpu::StencilState::default(),
-        bias: wgpu::DepthBiasState::default(),
-    });
-    <span class="kw">let </span>fragment_state = wgpu::FragmentState {
-        module: <span class="kw-2">&amp;</span>shader,
-        entry_point: <span class="string">&quot;fragment_entry&quot;</span>,
-        targets: <span class="kw-2">&amp;</span>[<span class="prelude-val">Some</span>(wgpu::ColorTargetState {
-            format: gfx_surface_config.configuration.format,
-            blend: <span class="prelude-val">Some</span>(wgpu::BlendState::ALPHA_BLENDING),
-            write_mask: Default::default(),
-        })],
-    };
-    <span class="kw">let </span>descriptor = wgpu::RenderPipelineDescriptor {
-        label: <span class="prelude-val">Some</span>(<span class="string">&quot;text pipeline&quot;</span>),
-        layout: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>layout),
-        vertex: vertex_state,
-        primitive: primitive_state,
-        depth_stencil: depth_stencil_state,
-        multisample: wgpu::MultisampleState {
-            count: msaa_attachment.requested(),
-            ..wgpu::MultisampleState::default()
-        },
-        fragment: <span class="prelude-val">Some</span>(fragment_state),
-        multiview: <span class="prelude-val">None</span>,
-    };
-    <span class="kw">let </span>pipeline = gfx_surface.device.create_render_pipeline(<span class="kw-2">&amp;</span>descriptor);
-    <span class="kw">let </span>renderer = TextRenderer {
-        pipeline,
-        vertex_buffer: aabb_vertex_buffer(<span class="kw-2">&amp;</span>gfx_surface),
-        sampler_bind_group,
-        render_groups: HashMap::new(),
-        render_group_bind_group_layout,
-        atlas_bind_group_layout,
-    };
-    cmd.insert_resource(renderer);
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(<span class="kw-2">mut </span>cmd: Commands, scale_factor: Res&lt;ScaleFactor&gt;) {
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
 }
+
 <span class="attr">#[derive(Resource, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Extraction {
     <span class="kw">pub</span>(<span class="kw">crate</span>) added: HashMap&lt;
@@ -563,6 +395,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) removed: HashSet&lt;Entity&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) differences: HashMap&lt;Entity, Difference&gt;,
 }
+
 <span class="kw">impl </span>Extraction {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -572,7 +405,168 @@
         }
     }
 }
+
 <span class="kw">impl </span>Render <span class="kw">for </span>TextRenderer {
+    <span class="kw">fn </span>setup(
+        _visualizer: <span class="kw-2">&amp;</span>Visualizer,
+        gfx: <span class="kw-2">&amp;</span>GfxSurface,
+        viewport: <span class="kw-2">&amp;</span>Viewport,
+        gfx_config: <span class="kw-2">&amp;</span>GfxSurfaceConfiguration,
+        msaa: <span class="kw-2">&amp;</span>MsaaRenderAdapter,
+        scale_factor: <span class="kw-2">&amp;</span>ScaleFactor,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;sampler bind group layout&quot;</span>),
+            entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupLayoutEntry {
+                binding: <span class="number">0</span>,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: <span class="prelude-val">None</span>,
+            }],
+        };
+        <span class="kw">let </span>sampler_bind_group_layout = gfx
+            .device
+            .create_bind_group_layout(<span class="kw-2">&amp;</span>sampler_bind_group_layout_descriptor);
+        <span class="kw">let </span>sampler_descriptor = wgpu::SamplerDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;text sampler&quot;</span>),
+            address_mode_u: wgpu::AddressMode::ClampToEdge,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            address_mode_w: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::FilterMode::Linear,
+            lod_min_clamp: Default::default(),
+            lod_max_clamp: Default::default(),
+            compare: <span class="prelude-val">None</span>,
+            anisotropy_clamp: <span class="number">1</span>,
+            border_color: <span class="prelude-val">None</span>,
+        };
+        <span class="kw">let </span>sampler = gfx.device.create_sampler(<span class="kw-2">&amp;</span>sampler_descriptor);
+        <span class="kw">let </span>sampler_bind_group_descriptor = wgpu::BindGroupDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;sampler bind group&quot;</span>),
+            layout: <span class="kw-2">&amp;</span>sampler_bind_group_layout,
+            entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupEntry {
+                binding: <span class="number">0</span>,
+                resource: wgpu::BindingResource::Sampler(<span class="kw-2">&amp;</span>sampler),
+            }],
+        };
+        <span class="kw">let </span>sampler_bind_group = gfx.device.create_bind_group(<span class="kw-2">&amp;</span>sampler_bind_group_descriptor);
+        <span class="kw">let </span>render_group_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;rasterization bind group&quot;</span>),
+            entries: <span class="kw-2">&amp;</span>[wgpu::BindGroupLayoutEntry {
+                binding: <span class="number">0</span>,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: <span class="bool-val">false</span>,
+                    min_binding_size: <span class="prelude-val">None</span>,
+                },
+                count: <span class="prelude-val">None</span>,
+            }],
+        };
+        <span class="kw">let </span>render_group_bind_group_layout = gfx
+            .device
+            .create_bind_group_layout(<span class="kw-2">&amp;</span>render_group_bind_group_layout_descriptor);
+        <span class="kw">let </span>atlas_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;atlas bind group layout descriptor&quot;</span>),
+            entries: <span class="kw-2">&amp;</span>[TextureBindGroup::entry(<span class="number">0</span>)],
+        };
+        <span class="kw">let </span>atlas_bind_group_layout = gfx
+            .device
+            .create_bind_group_layout(<span class="kw-2">&amp;</span>atlas_bind_group_layout_descriptor);
+        <span class="kw">let </span>layout_descriptor = wgpu::PipelineLayoutDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;text pipeline layout descriptor&quot;</span>),
+            bind_group_layouts: <span class="kw-2">&amp;</span>[
+                viewport.bind_group_layout(),
+                <span class="kw-2">&amp;</span>sampler_bind_group_layout,
+                <span class="kw-2">&amp;</span>render_group_bind_group_layout,
+                <span class="kw-2">&amp;</span>atlas_bind_group_layout,
+            ],
+            push_constant_ranges: <span class="kw-2">&amp;</span>[],
+        };
+        <span class="kw">let </span>layout = gfx.device.create_pipeline_layout(<span class="kw-2">&amp;</span>layout_descriptor);
+        <span class="kw">let </span>shader = gfx
+            .device
+            .create_shader_module(<span class="macro">wgpu::include_wgsl!</span>(<span class="string">&quot;padded_text.wgsl&quot;</span>));
+        <span class="kw">let </span>vertex_state = wgpu::VertexState {
+            module: <span class="kw-2">&amp;</span>shader,
+            entry_point: <span class="string">&quot;vertex_entry&quot;</span>,
+            buffers: <span class="kw-2">&amp;</span>[
+                wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::&lt;Vertex&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Vertex,
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x2],
+                },
+                wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::&lt;RawPosition&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">1 </span>=&gt; Float32x2],
+                },
+                wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::&lt;RawArea&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">2 </span>=&gt; Float32x2],
+                },
+                wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::&lt;NullBit&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">3 </span>=&gt; Uint32],
+                },
+                wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::&lt;Color&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">4 </span>=&gt; Float32x4],
+                },
+                wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::&lt;TextureCoordinates&gt;() <span class="kw">as </span>wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">5 </span>=&gt; Float32x4],
+                },
+            ],
+        };
+        <span class="kw">let </span>primitive_state = wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: <span class="prelude-val">None</span>,
+            front_face: wgpu::FrontFace::Ccw,
+            cull_mode: <span class="prelude-val">Some</span>(wgpu::Face::Back),
+            unclipped_depth: <span class="bool-val">false</span>,
+            polygon_mode: wgpu::PolygonMode::Fill,
+            conservative: <span class="bool-val">false</span>,
+        };
+        <span class="kw">let </span>depth_stencil_state = <span class="prelude-val">Some</span>(wgpu::DepthStencilState {
+            format: viewport.depth_format(),
+            depth_write_enabled: <span class="bool-val">true</span>,
+            depth_compare: wgpu::CompareFunction::Less,
+            stencil: wgpu::StencilState::default(),
+            bias: wgpu::DepthBiasState::default(),
+        });
+        <span class="kw">let </span>fragment_state = wgpu::FragmentState {
+            module: <span class="kw-2">&amp;</span>shader,
+            entry_point: <span class="string">&quot;fragment_entry&quot;</span>,
+            targets: <span class="kw-2">&amp;</span>[<span class="prelude-val">Some</span>(gfx_config.alpha_color_target_state())],
+        };
+        <span class="kw">let </span>descriptor = wgpu::RenderPipelineDescriptor {
+            label: <span class="prelude-val">Some</span>(<span class="string">&quot;text pipeline&quot;</span>),
+            layout: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>layout),
+            vertex: vertex_state,
+            primitive: primitive_state,
+            depth_stencil: depth_stencil_state,
+            multisample: msaa.multisample_state(),
+            fragment: <span class="prelude-val">Some</span>(fragment_state),
+            multiview: <span class="prelude-val">None</span>,
+        };
+        <span class="kw">let </span>pipeline = gfx.device.create_render_pipeline(<span class="kw-2">&amp;</span>descriptor);
+        <span class="kw">let </span>renderer = TextRenderer {
+            pipeline,
+            vertex_buffer: aabb_vertex_buffer(<span class="kw-2">&amp;</span>gfx),
+            sampler_bind_group,
+            render_groups: HashMap::new(),
+            render_group_bind_group_layout,
+            atlas_bind_group_layout,
+        };
+        renderer
+    }
+
     <span class="kw">fn </span>phase() -&gt; RenderPhase {
         RenderPhase::Alpha(<span class="number">0</span>)
     }
