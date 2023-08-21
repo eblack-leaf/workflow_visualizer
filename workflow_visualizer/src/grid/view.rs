@@ -110,20 +110,23 @@ pub enum GridMarkerBias {
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct GridLocationOffset(pub RawMarker);
-
-pub struct RelativePlacement {
+pub type RelativePlacementKey = u32;
+pub struct RelativePlacer {
     pub anchor: GridPoint,
-    pub relative_offsets: HashMap<i32, RawMarker>,
+    pub relative_offsets: HashMap<RelativePlacementKey, RawMarker>,
 }
-impl RelativePlacement {
+impl RelativePlacer {
     pub fn new<GP: Into<GridPoint>>(anchor: GP) -> Self {
         Self {
             anchor: anchor.into(),
             relative_offsets: HashMap::new(),
         }
     }
-    pub fn add<R: Into<RawMarker>>(&mut self, key: i32, marker: R) {
+    pub fn add<R: Into<RawMarker>>(&mut self, key: RelativePlacementKey, marker: R) {
         self.relative_offsets.insert(key, marker.into());
+    }
+    pub fn get(&self, key: RelativePlacementKey) -> RawMarker {
+        self.relative_offsets.get(&key).copied().unwrap_or_default()
     }
     pub fn view<R: Into<RawMarker>>(&self, hb: R, he: R, vb: R, ve: R) -> GridView {
         (
@@ -134,5 +137,28 @@ impl RelativePlacement {
     }
     pub fn point<R: Into<RawMarker>>(&self, hb: R, vb: R) -> GridPoint {
         (self.anchor.x.raw_offset(hb), self.anchor.y.raw_offset(vb)).into()
+    }
+}
+pub type PlacementKey = u32;
+#[derive(Default, Clone)]
+pub struct Placement {
+    pub(crate) views: HashMap<PlacementKey, GridView>,
+    pub(crate) points: HashMap<PlacementKey, GridPoint>,
+}
+impl Placement {
+    pub fn add_view<V: Into<GridView>>(&mut self, key: PlacementKey, view: V) {
+        self.views.insert(key, view.into());
+    }
+    pub fn add_point<P: Into<GridPoint>>(&mut self, key: PlacementKey, point: P) {
+        self.points.insert(key, point.into());
+    }
+    pub fn get_view(&self, key: PlacementKey) -> GridView {
+        self.views.get(&key).copied().expect("Placement::get_view")
+    }
+    pub fn get_point(&self, key: PlacementKey) -> GridPoint {
+        self.points
+            .get(&key)
+            .copied()
+            .expect("Placement::get_point")
     }
 }

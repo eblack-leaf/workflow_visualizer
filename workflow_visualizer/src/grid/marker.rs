@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Div, Mul, Sub};
 
 /// Index of 8px alignment location
 #[derive(Copy, Clone, PartialEq, Default)]
@@ -16,6 +16,27 @@ impl Add for RawMarker {
 
     fn add(self, rhs: Self) -> Self::Output {
         RawMarker(self.0 + rhs.0)
+    }
+}
+impl Sub for RawMarker {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        RawMarker(self.0 - rhs.0)
+    }
+}
+impl Mul for RawMarker {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        RawMarker(self.0 * rhs.0)
+    }
+}
+impl Div for RawMarker {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        RawMarker(self.0 / rhs.0)
     }
 }
 impl From<i32> for RawMarker {

@@ -10,8 +10,9 @@ pub use bundling::{BundleBuilder, BundleExtension};
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, HorizontalSpan, RawMarker, RawMarkerGrouping,
-    RelativePlacement, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, ResponsiveView,
+    GridPoint, GridRange, GridView, HorizontalSpan, Placement, PlacementKey, RawMarker,
+    RawMarkerGrouping, RelativePlacementKey, RelativePlacer, ResponsiveGridPoint,
+    ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
 pub use images::{Image, ImageFade, ImageName, ImageRequest, ImageTag};
 pub use instance::{
