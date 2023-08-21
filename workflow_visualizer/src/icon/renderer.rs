@@ -8,8 +8,7 @@ use crate::{
 };
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::icon::bitmap::{
-    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequestManager,
-    IconPixelData,
+    ICON_BITMAP_DIMENSION, IconBitmapLayout, IconBitmapRequestManager, IconPixelData,
 };
 use crate::texture_atlas::AtlasLocation;
 

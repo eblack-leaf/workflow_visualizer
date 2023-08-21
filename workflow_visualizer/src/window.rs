@@ -1,6 +1,4 @@
-use bevy_ecs::prelude::{
-    Event, EventReader, Events, IntoSystemConfigs, Res, ResMut,
-};
+use bevy_ecs::prelude::{Event, EventReader, Events, IntoSystemConfigs, Res, ResMut};
 use tracing::trace;
 
 use crate::coord::area::Area;

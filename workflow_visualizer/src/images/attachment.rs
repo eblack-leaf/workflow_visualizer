@@ -19,7 +19,7 @@ impl Attach for ImageAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((load_images.in_set(SyncPoint::Resolve), ));
+            .add_systems((load_images.in_set(SyncPoint::Resolve),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),

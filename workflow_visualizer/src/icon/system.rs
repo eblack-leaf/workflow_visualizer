@@ -1,6 +1,4 @@
-use bevy_ecs::prelude::{
-    Added, Changed, Entity, Query, RemovedComponents, Res, ResMut,
-};
+use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
 
 use crate::{
     Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,

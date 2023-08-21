@@ -305,7 +305,7 @@ impl Visualizer {
             .remove_resource::<GfxSurfaceConfiguration>()
             .expect("gfx config");
         #[cfg(target_family = "wasm")]
-            let config = self
+        let config = self
             .job
             .container
             .remove_non_send_resource::<GfxSurfaceConfiguration>()
@@ -317,7 +317,7 @@ impl Visualizer {
             .get_resource_mut::<GfxSurface>()
             .expect("gfx");
         #[cfg(target_family = "wasm")]
-            let mut gfx = self
+        let mut gfx = self
             .job
             .container
             .get_non_send_resource_mut::<GfxSurface>()

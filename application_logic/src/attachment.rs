@@ -1,6 +1,4 @@
-use workflow_visualizer::{
-    Attach, SyncPoint, Visualizer,
-};
+use workflow_visualizer::{Attach, SyncPoint, Visualizer};
 use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfigs;
 
 use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};

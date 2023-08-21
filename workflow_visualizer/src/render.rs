@@ -74,13 +74,13 @@ pub trait Render {
 
 pub(crate) fn internal_render(visualizer: &mut Visualizer) {
     #[cfg(not(target_family = "wasm"))]
-        let gfx = visualizer
+    let gfx = visualizer
         .job
         .container
         .get_resource::<GfxSurface>()
         .expect("no gfx surface attached");
     #[cfg(not(target_family = "wasm"))]
-        let gfx_config = visualizer
+    let gfx_config = visualizer
         .job
         .container
         .get_resource::<GfxSurfaceConfiguration>()
@@ -92,31 +92,31 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
         .get_resource::<Viewport>()
         .expect("no viewport attached");
     #[cfg(not(target_family = "wasm"))]
-        let msaa = visualizer
+    let msaa = visualizer
         .job
         .container
         .get_resource::<MsaaRenderAdapter>()
         .expect("no msaa attachment");
     #[cfg(target_family = "wasm")]
-        let gfx = visualizer
+    let gfx = visualizer
         .job
         .container
         .get_non_send_resource::<GfxSurface>()
         .unwrap();
     #[cfg(target_family = "wasm")]
-        let gfx_config = visualizer
+    let gfx_config = visualizer
         .job
         .container
         .get_non_send_resource::<GfxSurfaceConfiguration>()
         .unwrap();
     #[cfg(target_family = "wasm")]
-        let msaa = visualizer
+    let msaa = visualizer
         .job
         .container
         .get_non_send_resource::<MsaaRenderAdapter>()
         .unwrap();
     #[cfg(target_family = "wasm")]
-        let viewport = visualizer
+    let viewport = visualizer
         .job
         .container
         .get_non_send_resource::<Viewport>()

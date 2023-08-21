@@ -4,8 +4,8 @@ use bevy_ecs::prelude::{Entity, Resource};
 use wgpu::util::DeviceExt;
 
 use crate::{
-    Color, DeviceContext, GfxSurface, Position, RawPosition, Render, RenderPassHandle,
-    RenderPhase, ScaleFactor, Uniform, Viewport, Visualizer,
+    Color, DeviceContext, GfxSurface, Position, RawPosition, Render, RenderPassHandle, RenderPhase,
+    ScaleFactor, Uniform, Viewport, Visualizer,
 };
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 

@@ -30,7 +30,7 @@ impl Attach for IconAttachment {
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
-            .add_systems((cleanup_requests.in_set(SyncPoint::PostInitialization), ));
+            .add_systems((cleanup_requests.in_set(SyncPoint::PostInitialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             calc_area.in_set(SyncPoint::Reconfigure),
             calc_area

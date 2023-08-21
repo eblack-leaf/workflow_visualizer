@@ -1,6 +1,4 @@
-use bevy_ecs::prelude::{
-    Changed, Entity, Or, Query, RemovedComponents, Res, ResMut,
-};
+use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
 
 use crate::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, Visibility};
 use crate::line::line_render::LineRenderPoints;

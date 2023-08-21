@@ -1,9 +1,6 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::{
-    Attach, SyncPoint,
-    Visualizer,
-};
+use crate::{Attach, SyncPoint, Visualizer};
 use crate::panel::Extraction;
 use crate::panel::renderer::PanelRenderer;
 use crate::panel::system::{
