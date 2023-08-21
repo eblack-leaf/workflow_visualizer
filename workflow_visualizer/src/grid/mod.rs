@@ -18,7 +18,7 @@ pub use view::{
 
 use crate::bundling::{BundleBuilder, BundleExtension};
 use crate::diagnostics::Record;
-use crate::{Area, Attach, InterfaceContext, ResponsivePathView, Section};
+use crate::{Area, Attach, InterfaceContext, Position, ResponsivePathView, Section};
 
 mod attachment;
 mod marker;
@@ -183,7 +183,8 @@ impl Grid {
         location.into()
     }
 }
-
+#[derive(Component, Copy, Clone)]
+pub struct AbsolutePlacement(pub Section<InterfaceContext>);
 pub trait BundlePlacement
 where
     Self: Sized + Bundle,
@@ -203,8 +204,8 @@ where
     fn absolute<S: Into<Section<InterfaceContext>>>(
         self,
         section: S,
-    ) -> BundleBuilder<Self, Section<InterfaceContext>> {
-        self.extend(section.into())
+    ) -> BundleBuilder<Self, AbsolutePlacement> {
+        self.extend(AbsolutePlacement(section.into()))
     }
     fn responsively_path_viewed<P: Into<ResponsivePathView>>(
         self,

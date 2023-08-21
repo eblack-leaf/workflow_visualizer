@@ -1,20 +1,16 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{
-    Bundle, Changed, Component, Query, RemovedComponents, Resource, Without,
-};
+use bevy_ecs::prelude::{Bundle, Changed, Component, Query, RemovedComponents, Resource, Without};
 use bevy_ecs::system::ResMut;
 
-use crate::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Tag, Visibility,
-};
 use crate::images::renderer::{ImageFade, ImageName};
+use crate::{Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility};
 
 pub type ImageTag = Tag<Image>;
 #[derive(Bundle)]
 pub struct Image {
-    // section: Section<InterfaceContext>,
+    section: Section<InterfaceContext>,
     layer: Layer,
     visibility: EnableVisibility,
     name: ImageName,
@@ -26,7 +22,7 @@ pub struct Image {
 impl Image {
     pub fn new<L: Into<Layer>>(name: ImageName, layer: L) -> Self {
         Self {
-            // section: Section::default(),
+            section: Section::default(),
             layer: layer.into(),
             visibility: EnableVisibility::default(),
             name,

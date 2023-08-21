@@ -6,6 +6,7 @@ use bevy_ecs::prelude::{Changed, Local, Query, Without};
 use tracing::trace;
 
 use crate::grid::responsive::ResponsiveGridPoint;
+use crate::grid::AbsolutePlacement;
 use crate::{
     Area, DiagnosticsHandle, Grid, HorizontalSpan, InterfaceContext, Position, Record,
     ResponsiveGridView, ViewportHandle, WindowResize,
@@ -52,11 +53,19 @@ pub(crate) fn config_grid(
             &mut Position<InterfaceContext>,
             &mut Area<InterfaceContext>,
         ),
-        Without<ResponsiveGridPoint>,
+        (Without<ResponsiveGridPoint>, Without<AbsolutePlacement>),
     >,
     mut responsive_points: Query<
         (&ResponsiveGridPoint, &mut Position<InterfaceContext>),
-        Without<ResponsiveGridView>,
+        (Without<ResponsiveGridView>, Without<AbsolutePlacement>),
+    >,
+    mut absolutes: Query<
+        (
+            &AbsolutePlacement,
+            &mut Position<InterfaceContext>,
+            &mut Area<InterfaceContext>,
+        ),
+        (Without<ResponsiveGridView>, Without<ResponsiveGridPoint>),
     >,
     mut grid: ResMut<Grid>,
     #[cfg(feature = "diagnostics")] mut diagnostics: Local<DiagnosticsHandle<GridConfigRecorder>>,
@@ -78,6 +87,10 @@ pub(crate) fn config_grid(
                 .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").y)
                 .to_pixel();
             *pos = Position::new(x, y);
+        }
+        for (placement, mut pos, mut area) in absolutes.iter_mut() {
+            *pos = placement.0.position;
+            *area = placement.0.area;
         }
         #[cfg(feature = "diagnostics")]
         trace!("{:?}", diagnostics.record());
@@ -117,3 +130,5 @@ pub(crate) fn set_from_view(
         update_section(grid.as_ref(), view, pos.as_mut(), area.as_mut());
     }
 }
+
+// one for set_from_absolute

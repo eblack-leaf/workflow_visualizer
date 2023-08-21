@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::{Changed, Entity, Query, RemovedComponents, Res, ResMut};
+use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
 
 use crate::icon::bitmap::IconBitmapLayout;
 use crate::icon::cache::{Cache, Difference};
@@ -9,7 +9,7 @@ use crate::{
 };
 
 pub(crate) fn calc_area(
-    mut icons: Query<(&mut Area<InterfaceContext>, &IconScale), Changed<IconScale>>,
+    mut icons: Query<(&mut Area<InterfaceContext>, &IconScale), (Changed<IconScale>, Added<Area<InterfaceContext>>)>,
 ) {
     for (mut area, scale) in icons.iter_mut() {
         let px = scale.px();

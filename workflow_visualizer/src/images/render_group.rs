@@ -135,7 +135,11 @@ pub(crate) fn read_extraction(
             if let Some(name) = diff.name {
                 render_group.texture_coordinates.update(
                     &gfx.queue,
-                    image_renderer.images.get(&name).expect("images").coordinates,
+                    image_renderer
+                        .images
+                        .get(&name)
+                        .expect("images")
+                        .coordinates,
                 );
                 render_group.image_name = name;
             }
