@@ -1,4 +1,4 @@
-pub(crate) use attachment::IconAttachment;
+pub(crate) use attachment::{IconAttachment, IconRendererAttachment};
 pub use bitmap::IconBitmap;
 pub use bitmap::IconPixelData;
 pub use bitmap::{BundledIcon, IconBitmapRequest};

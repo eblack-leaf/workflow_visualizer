@@ -4,11 +4,11 @@ use workflow_visualizer::bevy_ecs::prelude::{
     Commands, Entity, IntoSystemConfigs, Query, Res, ResMut, Resource, With,
 };
 use workflow_visualizer::{
-    bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, Button, ButtonBorder,
-    ButtonType, Color, GridPoint, Icon, IconScale, Interactable, InteractionTracker,
-    InterfaceContext, Panel, PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint,
-    ResponsiveGridView, ResponsiveUnit, SyncPoint, Text, TextScaleAlignment, TextValue,
-    TextWrapStyle, Triggered, Visualizer,
+    bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, BundledIcon, Button,
+    ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale,
+    Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position,
+    RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text,
+    TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -311,6 +311,14 @@ impl Pad {
 pub(crate) struct PadAttachment;
 impl Attach for PadAttachment {
     fn attach(visualizer: &mut Visualizer) {
+        visualizer.spawn(IconBitmapRequest::from((
+            "edit",
+            IconBitmap::bundled(BundledIcon::Edit),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            "square",
+            IconBitmap::bundled(BundledIcon::Square),
+        )));
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
             setup.in_set(SyncPoint::PostInitialization),
             pad_icons.in_set(SyncPoint::Resolve),

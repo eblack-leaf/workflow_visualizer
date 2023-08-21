@@ -12,6 +12,27 @@ pub(crate) struct IconAttachment;
 
 impl Attach for IconAttachment {
     fn attach(visualizer: &mut Visualizer) {
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            calc_area.in_set(SyncPoint::Reconfigure),
+            calc_area
+                .in_set(SyncPoint::Config)
+                .after(crate::grid::config_grid),
+            management.in_set(SyncPoint::Resolve),
+            position_diff.in_set(SyncPoint::PushDiff),
+            area_diff.in_set(SyncPoint::PushDiff),
+            layer_diff.in_set(SyncPoint::PushDiff),
+            positive_space_color_diff.in_set(SyncPoint::PushDiff),
+            icon_id_diff.in_set(SyncPoint::PushDiff),
+        ));
+        visualizer
+            .job
+            .task(Visualizer::TASK_RENDER_MAIN)
+            .add_systems((read_differences.in_set(SyncPoint::Preparation),));
+    }
+}
+pub(crate) struct IconRendererAttachment;
+impl Attach for IconRendererAttachment {
+    fn attach(visualizer: &mut Visualizer) {
         let mut manager = IconBitmapRequestManager::default();
         for (entity, request) in visualizer
             .job
@@ -31,21 +52,5 @@ impl Attach for IconAttachment {
             .job
             .task(Visualizer::TASK_STARTUP)
             .add_systems((cleanup_requests.in_set(SyncPoint::PostInitialization),));
-        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            calc_area.in_set(SyncPoint::Reconfigure),
-            calc_area
-                .in_set(SyncPoint::Config)
-                .after(crate::grid::config_grid),
-            management.in_set(SyncPoint::Resolve),
-            position_diff.in_set(SyncPoint::PushDiff),
-            area_diff.in_set(SyncPoint::PushDiff),
-            layer_diff.in_set(SyncPoint::PushDiff),
-            positive_space_color_diff.in_set(SyncPoint::PushDiff),
-            icon_id_diff.in_set(SyncPoint::PushDiff),
-        ));
-        visualizer
-            .job
-            .task(Visualizer::TASK_RENDER_MAIN)
-            .add_systems((read_differences.in_set(SyncPoint::Preparation),));
     }
 }

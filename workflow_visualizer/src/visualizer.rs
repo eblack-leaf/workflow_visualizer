@@ -12,7 +12,7 @@ use crate::button::ButtonAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
-use crate::icon::IconAttachment;
+use crate::icon::{IconAttachment, IconRendererAttachment};
 use crate::images::ImageAttachment;
 use crate::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 use crate::job::{attempt_to_idle, Task, TaskLabel};
@@ -149,6 +149,7 @@ impl Visualizer {
         self.invoke_attach::<PathAttachment>();
         self.invoke_attach::<PanelAttachment>();
         self.invoke_attach::<LineAttachment>();
+        self.invoke_attach::<IconAttachment>();
         self.invoke_attach::<VisibilityAttachment>();
         self.invoke_attach::<InteractionAttachment>();
         self.invoke_attach::<FocusAttachment>();
@@ -156,10 +157,10 @@ impl Visualizer {
         self.invoke_attach::<TimerAttachment>();
         self.invoke_attach::<VirtualKeyboardAttachment>();
         self.invoke_attach::<TextAttachment>();
-        self.invoke_attach::<IconAttachment>();
         self.invoke_attach::<ButtonAttachment>();
         self.invoke_attach::<ImageAttachment>();
         self.attach_from_queue();
+        self.invoke_attach::<IconRendererAttachment>();
         self.setup();
         self.job.resume();
     }

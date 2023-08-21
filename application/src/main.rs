@@ -29,34 +29,6 @@ fn visualizer() -> Visualizer {
         GfxOptions::native_defaults().with_msaa(1),
     );
     visualizer.add_attachment::<EntryAttachment>();
-    visualizer.spawn(IconBitmapRequest::from((
-        "edit",
-        IconBitmap::bundled(BundledIcon::Edit),
-    )));
-    visualizer.spawn(IconBitmapRequest::from((
-        "add",
-        IconBitmap::bundled(BundledIcon::Add),
-    )));
-    visualizer.spawn(IconBitmapRequest::from((
-        "page_left",
-        IconBitmap::bundled(BundledIcon::ArrowLeft),
-    )));
-    visualizer.spawn(IconBitmapRequest::from((
-        "page_right",
-        IconBitmap::bundled(BundledIcon::ArrowRight),
-    )));
-    visualizer.spawn(IconBitmapRequest::from((
-        "run",
-        IconBitmap::bundled(BundledIcon::Run),
-    )));
-    visualizer.spawn(IconBitmapRequest::from((
-        "delete",
-        IconBitmap::bundled(BundledIcon::Delete),
-    )));
-    visualizer.spawn(IconBitmapRequest::from((
-        "generate",
-        IconBitmap::bundled(BundledIcon::Generate),
-    )));
     visualizer
 }
 
