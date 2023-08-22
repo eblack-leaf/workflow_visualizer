@@ -10,7 +10,7 @@ impl Attach for GridAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
             setup.in_set(SyncPoint::Initialization),
-            system::config_grid.in_set(SyncPoint::Finish),
+            system::config_grid.in_set(SyncPoint::PostInitialization),
         ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::set_from_absolute.in_set(SyncPoint::PostProcessPreparation),
