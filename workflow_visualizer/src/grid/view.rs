@@ -66,7 +66,6 @@ pub struct GridView {
     pub horizontal: GridRange,
     pub vertical: GridRange,
 }
-
 impl<T: Into<GridRange>> From<(T, T)> for GridView {
     fn from(value: (T, T)) -> Self {
         GridView {

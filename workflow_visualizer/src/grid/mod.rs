@@ -110,6 +110,16 @@ impl Grid {
             vertical_markers: (area.height / RawMarker::PX).floor() as u32,
         }
     }
+    pub fn view_horizontal_markers(&self, view: &GridView) -> RawMarker {
+        let end = self.calc_horizontal_location(view.horizontal.end);
+        let begin = self.calc_horizontal_location(view.horizontal.begin);
+        end - begin
+    }
+    pub fn view_vertical_markers(&self, view: &GridView) -> RawMarker {
+        let end = self.calc_vertical_location(view.vertical.end);
+        let begin = self.calc_vertical_location(view.vertical.begin);
+        end - begin
+    }
     pub fn horizontal_markers(&self) -> i32 {
         self.horizontal_markers as i32
     }
