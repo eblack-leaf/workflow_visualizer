@@ -214,6 +214,13 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -276,6 +283,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) row_config: RowConfig,
     <span class="kw">pub</span>(<span class="kw">crate</span>) gutter_config: GutterConfig,
     <span class="kw">pub</span>(<span class="kw">crate</span>) vertical_markers: u32,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) horizontal_markers: u32,
 }
 <span class="kw">impl </span>Grid {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SPAN_FOUR_EXT_BASE: f32 = <span class="number">400f32</span>;
@@ -321,8 +329,12 @@
             gutter_config: GutterConfig {
                 base: span.gutter_base(),
             },
+            horizontal_markers: (area.width / RawMarker::PX).floor() <span class="kw">as </span>u32,
             vertical_markers: (area.height / RawMarker::PX).floor() <span class="kw">as </span>u32,
         }
+    }
+    <span class="kw">pub fn </span>horizontal_markers(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
+        <span class="self">self</span>.horizontal_markers <span class="kw">as </span>i32
     }
     <span class="kw">pub fn </span>vertical_markers(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="self">self</span>.vertical_markers <span class="kw">as </span>i32
@@ -369,11 +381,12 @@
         <span class="kw">let </span>content_location = grid_location.location;
         <span class="kw">let </span>location = content_location.marker.<span class="number">0 </span>* markers_per_column
             + <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* content_location.marker.<span class="number">0</span>;
-        <span class="kw">let </span>location = <span class="kw">if </span>content_location.bias == GridMarkerBias::Near {
-            location - markers_per_column
-        } <span class="kw">else </span>{
-            location
-        };
+        <span class="kw">let </span>location =
+            <span class="kw">if </span>content_location.bias == GridMarkerBias::Near &amp;&amp; content_location.marker.<span class="number">0 </span>!= <span class="number">0 </span>{
+                location - markers_per_column
+            } <span class="kw">else </span>{
+                location
+            };
         <span class="kw">let </span>location = <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = grid_location.offset {
             location + offset.<span class="number">0 </span>.<span class="number">0
         </span>} <span class="kw">else </span>{
@@ -385,11 +398,12 @@
         <span class="kw">let </span>content_location = grid_location.location;
         <span class="kw">let </span>location = content_location.marker.<span class="number">0 </span>* <span class="self">self</span>.row_config.base.<span class="number">0
             </span>+ <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* content_location.marker.<span class="number">0</span>;
-        <span class="kw">let </span>location = <span class="kw">if </span>content_location.bias == GridMarkerBias::Near {
-            location - <span class="self">self</span>.row_config.base.<span class="number">0
-        </span>} <span class="kw">else </span>{
-            location
-        };
+        <span class="kw">let </span>location =
+            <span class="kw">if </span>content_location.bias == GridMarkerBias::Near &amp;&amp; content_location.marker.<span class="number">0 </span>!= <span class="number">0 </span>{
+                location - <span class="self">self</span>.row_config.base.<span class="number">0
+            </span>} <span class="kw">else </span>{
+                location
+            };
         <span class="kw">let </span>location = <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = grid_location.offset {
             location + offset.<span class="number">0 </span>.<span class="number">0
         </span>} <span class="kw">else </span>{
