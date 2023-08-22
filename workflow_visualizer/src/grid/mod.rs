@@ -60,6 +60,7 @@ pub struct Grid {
     pub(crate) row_config: RowConfig,
     pub(crate) gutter_config: GutterConfig,
     pub(crate) vertical_markers: u32,
+    pub(crate) horizontal_markers: u32,
 }
 impl Grid {
     pub(crate) const SPAN_FOUR_EXT_BASE: f32 = 400f32;
@@ -105,8 +106,12 @@ impl Grid {
             gutter_config: GutterConfig {
                 base: span.gutter_base(),
             },
+            horizontal_markers: (area.width / RawMarker::PX).floor() as u32,
             vertical_markers: (area.height / RawMarker::PX).floor() as u32,
         }
+    }
+    pub fn horizontal_markers(&self) -> i32 {
+        self.horizontal_markers as i32
     }
     pub fn vertical_markers(&self) -> i32 {
         self.vertical_markers as i32
@@ -153,11 +158,12 @@ impl Grid {
         let content_location = grid_location.location;
         let location = content_location.marker.0 * markers_per_column
             + self.gutter_config.base.0 * content_location.marker.0;
-        let location = if content_location.bias == GridMarkerBias::Near {
-            location - markers_per_column
-        } else {
-            location
-        };
+        let location =
+            if content_location.bias == GridMarkerBias::Near && content_location.marker.0 != 0 {
+                location - markers_per_column
+            } else {
+                location
+            };
         let location = if let Some(offset) = grid_location.offset {
             location + offset.0 .0
         } else {
@@ -169,11 +175,12 @@ impl Grid {
         let content_location = grid_location.location;
         let location = content_location.marker.0 * self.row_config.base.0
             + self.gutter_config.base.0 * content_location.marker.0;
-        let location = if content_location.bias == GridMarkerBias::Near {
-            location - self.row_config.base.0
-        } else {
-            location
-        };
+        let location =
+            if content_location.bias == GridMarkerBias::Near && content_location.marker.0 != 0 {
+                location - self.row_config.base.0
+            } else {
+                location
+            };
         let location = if let Some(offset) = grid_location.offset {
             location + offset.0 .0
         } else {

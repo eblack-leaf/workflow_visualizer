@@ -92,6 +92,9 @@ impl Visualizer {
             gfx_options,
         }
     }
+    pub fn task(&mut self, label: TaskLabel) -> &mut Task {
+        self.job.task(label)
+    }
     pub fn set_gfx_options(&mut self, gfx_options: GfxOptions) {
         self.gfx_options = gfx_options;
     }
