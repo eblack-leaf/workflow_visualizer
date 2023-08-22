@@ -18,6 +18,7 @@ fn android_main(android_app: AndroidApp) {
     let mut visualizer = visualizer();
     visualizer.set_gfx_options(GfxOptions::limited_environment());
     Runner::new()
+        .with_attachment::<EntryAttachment>()
         .with_android_app(android_app)
         .native_run::<Engen>(visualizer);
 }
@@ -28,7 +29,6 @@ fn visualizer() -> Visualizer {
         Theme::new(theme_desc),
         GfxOptions::native_defaults().with_msaa(1),
     );
-    visualizer.add_attachment::<EntryAttachment>();
     visualizer
 }
 
@@ -36,8 +36,10 @@ fn main() {
     #[cfg(not(target_family = "wasm"))]
     tracing_subscriber::fmt().with_max_level(Level::WARN).init();
     let mut visualizer = visualizer();
+    let runner = Runner::new()
+        .with_attachment::<EntryAttachment>();
     #[cfg(not(target_family = "wasm"))]
-    Runner::new()
+    runner
         .with_desktop_dimensions((400, 600))
         .native_run::<Engen>(visualizer);
     #[cfg(target_family = "wasm")]
@@ -45,6 +47,6 @@ fn main() {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
         visualizer.set_gfx_options(GfxOptions::limited_environment());
-        Runner::new().web_run::<Engen>(visualizer, "./worker.js".to_string());
+        runner.web_run::<Engen>(visualizer, "./worker.js".to_string());
     }
 }

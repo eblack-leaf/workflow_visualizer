@@ -1,5 +1,5 @@
 use workflow_visualizer::{
-    BundledIcon, Color, GfxOptions, IconBitmap, IconBitmapRequest, Runner, Theme, ThemeDescriptor,
+    Color, GfxOptions, Runner, Theme, ThemeDescriptor,
     Visualizer,
 };
 
@@ -15,8 +15,7 @@ fn main() {
         Theme::new(ThemeDescriptor::new().with_background(Color::OFF_BLACK)),
         GfxOptions::native_defaults().with_msaa(2),
     );
-    visualizer.add_attachment::<PadAttachment>();
-    Runner::new()
+    Runner::new().with_attachment::<PadAttachment>()
         .with_desktop_dimensions((600, 400))
         .native_run::<Engen>(visualizer);
 }

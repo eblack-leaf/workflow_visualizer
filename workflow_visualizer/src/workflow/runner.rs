@@ -5,7 +5,7 @@ use crate::workflow::bridge::{OutputWrapper, Receiver, Responder, Sender};
 use crate::workflow::native::internal_native_run;
 #[cfg(target_family = "wasm")]
 use crate::workflow::web::internal_web_run;
-use crate::{Area, DeviceContext, Visualizer, Workflow};
+use crate::{Area, Attach, Attachment, DeviceContext, Visualizer, Workflow};
 use std::sync::{Arc, Mutex};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
@@ -13,6 +13,7 @@ use winit::platform::android::activity::AndroidApp;
 pub(crate) struct EngenHandle<T: Workflow + Default>(pub(crate) Arc<Mutex<T>>);
 /// Main struct to run the visualizer's event loop
 pub struct Runner {
+    attachment_queue: Vec<Attachment>,
     pub(crate) desktop_dimensions: Option<Area<DeviceContext>>,
     #[cfg(not(target_os = "android"))]
     pub(crate) android_app: Option<()>,
@@ -29,6 +30,7 @@ impl Default for Runner {
 impl Runner {
     pub fn new() -> Self {
         Self {
+            attachment_queue: vec![],
             desktop_dimensions: None,
             android_app: None,
         }
@@ -44,12 +46,20 @@ impl Runner {
         self.desktop_dimensions.replace(dim.into());
         self
     }
+    pub fn add_attachment<Attached: Attach>(&mut self) {
+        self.attachment_queue.push(Attachment::using::<Attached>());
+    }
+    pub fn with_attachment<Attached: Attach>(mut self) -> Self {
+        self.add_attachment::<Attached>();
+        self
+    }
     /// invoke a native run of the visualizer
     #[cfg(not(target_family = "wasm"))]
     pub fn native_run<T: Workflow + Send + 'static + Default>(
         mut self,
         mut visualizer: Visualizer,
     ) {
+        visualizer.add_attachments(self.attachment_queue.drain(..).collect());
         internal_native_run::<T>(self, visualizer);
     }
     /// invoke a wasm run of the visualizer
@@ -59,6 +69,7 @@ impl Runner {
         visualizer: Visualizer,
         worker_path: String,
     ) {
+        visualizer.add_attachments(self.attachment_queue.drain(..).collect());
         #[cfg(target_family = "wasm")]
         wasm_bindgen_futures::spawn_local(internal_web_run::<T>(self, visualizer, worker_path));
     }

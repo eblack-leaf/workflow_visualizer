@@ -423,8 +423,8 @@ impl Visualizer {
         ));
     }
     /// queue attachment to the Visualizer
-    pub fn add_attachment<Attached: Attach>(&mut self) {
-        self.attachment_queue.push(Attachment::using::<Attached>());
+    pub(crate) fn add_attachments(&mut self, attachments: Vec<Attachment>) {
+        self.attachment_queue = attachments;
     }
     fn attach_from_queue(&mut self) {
         let attachment_queue = self.attachment_queue.drain(..).collect::<Vec<Attachment>>();
