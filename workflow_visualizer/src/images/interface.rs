@@ -35,6 +35,14 @@ impl Image {
         }
     }
 }
+#[derive(Component, Copy, Clone)]
+pub enum ImageMaxDimension {
+    Width(f32),
+    Height(f32),
+}
+pub(crate) fn max_dimension(bound: Query<(&ImageName, &ImageMaxDimension, &mut Area<InterfaceContext>)>) {
+
+}
 #[derive(Component)]
 pub(crate) struct Cache {
     pub(crate) name: Option<ImageName>,

@@ -47,10 +47,8 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         })
 }
-
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
-
 #[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub struct ImageName(pub &'static str);
 #[derive(Component, Clone)]
@@ -63,6 +61,8 @@ impl ImageRequest {
         Self { name, data }
     }
 }
+#[derive(Copy, Clone)]
+pub struct AspectRatio(pub f32);
 pub(crate) struct ImageData {
     pub(crate) atlas: TextureAtlas,
     pub(crate) bind_group: TextureBindGroup,
@@ -92,6 +92,13 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_group_layout: wgpu::BindGroupLayout,
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
+#[derive(Resource)]
+pub struct ImageAspectRatios(pub(crate) HashMap<ImageName, AspectRatio>);
+impl ImageAspectRatios {
+    pub fn get<I: Into<ImageName>>(&self, name: I) -> Option<AspectRatio> {
+        self.0.get(&name.into()).copied()
+    }
+}
 pub(crate) fn load_images(
     #[cfg(not(target_family = "wasm"))] mut image_renderer: ResMut<ImageRenderer>,
     #[cfg(target_family = "wasm")] mut image_renderer: NonSendMut<ImageRenderer>,
@@ -99,6 +106,7 @@ pub(crate) fn load_images(
     mut cmd: Commands,
     #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
     #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
+    mut aspect_ratios: ResMut<ImageAspectRatios>,
 ) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
@@ -121,6 +129,8 @@ pub(crate) fn load_images(
         );
         let bind_group =
             TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
+        let aspect_ratio = dimensions.dimensions.width / dimensions.dimensions.height;
+        aspect_ratios.0.insert(request.name.clone(), AspectRatio(aspect_ratio));
         image_renderer.images.insert(
             request.name.clone(),
             ImageData::new(atlas, bind_group, coordinates),

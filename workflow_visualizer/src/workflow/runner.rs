@@ -66,7 +66,7 @@ impl Runner {
     #[cfg(target_family = "wasm")]
     pub fn web_run<T: Workflow + 'static + Default>(
         mut self,
-        visualizer: Visualizer,
+        mut visualizer: Visualizer,
         worker_path: String,
     ) {
         visualizer.add_attachments(self.attachment_queue.drain(..).collect());
