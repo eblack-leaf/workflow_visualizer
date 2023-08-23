@@ -129,8 +129,14 @@ impl Grid {
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
         ((width - base) / RawMarker::PX).floor() as i32 / columns
     }
-    pub fn calc_section(&self, view: &ResponsiveGridView) -> Section<InterfaceContext> {
+    pub fn calc_section_from_responsive(
+        &self,
+        view: &ResponsiveGridView,
+    ) -> Section<InterfaceContext> {
         let current_view = view.mapping.get(&self.span).expect("view mapping");
+        self.calc_section(current_view)
+    }
+    pub fn calc_section(&self, current_view: &GridView) -> Section<InterfaceContext> {
         let left = {
             let grid_location = current_view.horizontal.begin;
             self.calc_horizontal_location(grid_location)

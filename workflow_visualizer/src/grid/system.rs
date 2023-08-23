@@ -18,7 +18,7 @@ fn update_section(
     pos: &mut Position<InterfaceContext>,
     area: &mut Area<InterfaceContext>,
 ) {
-    let section = grid.calc_section(view);
+    let section = grid.calc_section_from_responsive(view);
     *pos = section.position;
     *area = section.area;
 }

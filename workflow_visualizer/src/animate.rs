@@ -142,13 +142,20 @@ pub(crate) fn update_animations<T: Animate + Send + Sync + 'static>(
                     delta -= overage;
                     animation.done = true;
                 }
+                let mut all_finished = true;
                 for interpolation in animation.interpolations.iter_mut() {
                     if anim_done {
                         let _extract = interpolation.finish();
                     } else {
                         let percent = delta.0 / anim_time.0;
                         let _extract = interpolation.extract(percent as f32);
+                        if !interpolation.done() {
+                            all_finished = false;
+                        }
                     }
+                }
+                if all_finished {
+                    animation.done = true;
                 }
             }
         }
