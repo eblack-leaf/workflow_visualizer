@@ -35,13 +35,14 @@
 <a href="#35" id="35">35</a>
 <a href="#36" id="36">36</a>
 <a href="#37" id="37">37</a>
+<a href="#38" id="38">38</a>
+<a href="#39" id="39">39</a>
+<a href="#40" id="40">40</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
-<span class="kw">use </span><span class="kw">crate</span>::images::interface::{
-    area_diff, extract, fade_diff, layer_diff, management, name_diff, pos_diff, Extraction,
-};
+<span class="kw">use </span><span class="kw">crate</span>::images::interface::{area_diff, extract, fade_diff, layer_diff, management, name_diff, pos_diff, Extraction, aspect_ratio_aligned_dimension};
 <span class="kw">use </span><span class="kw">crate</span>::images::render_group::read_extraction;
-<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{load_images, ImageRenderer};
+<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{load_images, ImageAspectRatios, ImageRenderer};
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageAttachment;
@@ -55,9 +56,14 @@
             .insert_resource(Extraction::default());
         visualizer
             .job
+            .container
+            .insert_resource(ImageAspectRatios::default());
+        visualizer
+            .job
             .task(Visualizer::TASK_RENDER_STARTUP)
             .add_systems((load_images.in_set(SyncPoint::Resolve),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),

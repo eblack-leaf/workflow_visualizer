@@ -263,6 +263,8 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -357,11 +359,11 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_layout: wgpu::BindGroupLayout,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
-<span class="attr">#[derive(Resource)]
+<span class="attr">#[derive(Resource, Default)]
 </span><span class="kw">pub struct </span>ImageAspectRatios(<span class="kw">pub</span>(<span class="kw">crate</span>) HashMap&lt;ImageName, AspectRatio&gt;);
 <span class="kw">impl </span>ImageAspectRatios {
-    <span class="kw">pub fn </span>get&lt;I: Into&lt;ImageName&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: I) -&gt; <span class="prelude-ty">Option</span>&lt;AspectRatio&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.get(<span class="kw-2">&amp;</span>name.into()).copied()
+    <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>ImageName) -&gt; <span class="prelude-ty">Option</span>&lt;AspectRatio&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.get(name).copied()
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>load_images(
@@ -395,7 +397,9 @@
         <span class="kw">let </span>bind_group =
             TextureBindGroup::new(<span class="kw-2">&amp;</span>gfx, <span class="kw-2">&amp;</span>image_renderer.render_group_layout, atlas.view());
         <span class="kw">let </span>aspect_ratio = dimensions.dimensions.width / dimensions.dimensions.height;
-        aspect_ratios.<span class="number">0</span>.insert(request.name.clone(), AspectRatio(aspect_ratio));
+        aspect_ratios
+            .<span class="number">0
+            </span>.insert(request.name.clone(), AspectRatio(aspect_ratio));
         image_renderer.images.insert(
             request.name.clone(),
             ImageData::new(atlas, bind_group, coordinates),
