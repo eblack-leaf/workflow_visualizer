@@ -130,6 +130,9 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{apply_deferred, IntoSystemConfigs, IntoSystemSetConfigs, SystemSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
@@ -179,6 +182,9 @@
         apply_deferred
             .after(SyncPoint::Preparation)
             .before(SyncPoint::Resolve),
+        apply_deferred
+            .after(SyncPoint::Resolve)
+            .before(SyncPoint::PostResolve),
     ));
     visualizer.task(Visualizer::TASK_MAIN).configure_sets(
         (

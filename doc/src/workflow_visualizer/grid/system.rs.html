@@ -167,7 +167,7 @@
     pos: <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
     area: <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
 ) {
-    <span class="kw">let </span>section = grid.calc_section(view);
+    <span class="kw">let </span>section = grid.calc_section_from_responsive(view);
     <span class="kw-2">*</span>pos = section.position;
     <span class="kw-2">*</span>area = section.area;
 }

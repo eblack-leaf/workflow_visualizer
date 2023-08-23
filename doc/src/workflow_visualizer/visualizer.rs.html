@@ -461,6 +461,8 @@
 <a href="#461" id="461">461</a>
 <a href="#462" id="462">462</a>
 <a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -472,6 +474,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animate::{end_animations, start_animations, update_animations};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
 <span class="kw">use </span><span class="kw">crate</span>::grid::GridAttachment;
@@ -625,6 +628,7 @@
         <span class="self">self</span>.invoke_attach::&lt;TextAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ButtonAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ImageAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;CoordinateAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
         <span class="self">self</span>.invoke_attach::&lt;IconRendererAttachment&gt;();
         <span class="self">self</span>.setup();

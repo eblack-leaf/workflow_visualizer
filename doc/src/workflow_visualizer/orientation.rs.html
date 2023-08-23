@@ -58,28 +58,61 @@
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::ResMut;
 <span class="kw">use </span>bevy_ecs::event::EventReader;
-<span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfigs, Res, Resource};
+<span class="kw">use </span>bevy_ecs::prelude::{Commands, Component, IntoSystemConfigs, Res, Resource};
 
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowResize;
-<span class="kw">use crate</span>::{Area, DeviceContext, ScaleFactor, SyncPoint};
+<span class="kw">use crate</span>::{Area, DeviceContext, NumericalContext, ScaleFactor, SyncPoint};
 
-<span class="attr">#[derive(Resource, Copy, Clone)]
+<span class="attr">#[derive(Component, Resource, Copy, Clone)]
 </span><span class="kw">pub enum </span>Orientation {
-    Portrait(f32),
-    Landscape(f32),
+    Portrait(AspectRatio),
+    Landscape(AspectRatio),
 }
 
 <span class="kw">impl </span>Orientation {
-    <span class="kw">pub fn </span>new&lt;A: Into&lt;Area&lt;DeviceContext&gt;&gt;&gt;(window_size: A) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>window_size = window_size.into();
-        <span class="kw">let </span>aspect_ratio = window_size.width / window_size.height;
-        <span class="kw">match </span>aspect_ratio &gt;= <span class="number">1.0 </span>{
-            <span class="bool-val">true </span>=&gt; Orientation::Landscape(aspect_ratio),
-            <span class="bool-val">false </span>=&gt; Orientation::Portrait(aspect_ratio),
+    <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AspectRatio {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self </span>{
+            Orientation::Portrait(aspect) =&gt; <span class="kw-2">*</span>aspect,
+            Orientation::Landscape(aspect) =&gt; <span class="kw-2">*</span>aspect,
+        }
+    }
+    <span class="kw">pub fn </span>new&lt;A: Into&lt;Area&lt;NumericalContext&gt;&gt;&gt;(dimensions: A) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>aspect_ratio = AspectRatio::new(dimensions.into());
+        <span class="kw">if let </span><span class="bool-val">true </span>= aspect_ratio.is_width_major() {
+            Orientation::Landscape(aspect_ratio.into())
+        } <span class="kw">else </span>{
+            Orientation::Portrait(aspect_ratio.into())
         }
     }
 }
@@ -93,7 +126,8 @@
         viewport_handle
             .section
             .area
-            .to_device(scale_factor.factor()),
+            .to_device(scale_factor.factor())
+            .as_numerical(),
     ));
 }
 
@@ -102,7 +136,7 @@
     <span class="kw-2">mut </span>orientation: ResMut&lt;Orientation&gt;,
 ) {
     <span class="kw">for </span>event <span class="kw">in </span>events.iter() {
-        <span class="kw-2">*</span>orientation = Orientation::new(event.size);
+        <span class="kw-2">*</span>orientation = Orientation::new(event.size.as_numerical());
     }
 }
 <span class="kw">pub struct </span>OrientationAttachment;
@@ -116,6 +150,26 @@
             .job
             .task(Visualizer::TASK_MAIN)
             .add_systems((calc_orientation.in_set(SyncPoint::Config),));
+    }
+}
+
+<span class="attr">#[derive(Copy, Clone, Default, Debug)]
+</span><span class="kw">pub struct </span>AspectRatio(<span class="kw">pub </span>f32);
+
+<span class="kw">impl </span>AspectRatio {
+    <span class="kw">pub fn </span>new(area: Area&lt;NumericalContext&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(area.width / area.height)
+    }
+    <span class="kw">pub fn </span>is_width_major(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0 </span>&gt;= <span class="number">1f32
+    </span>}
+    <span class="kw">pub fn </span>reciprocal(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+        <span class="number">1f32 </span>/ <span class="self">self</span>.<span class="number">0
+    </span>}
+}
+<span class="kw">impl </span>From&lt;f32&gt; <span class="kw">for </span>AspectRatio {
+    <span class="kw">fn </span>from(value: f32) -&gt; <span class="self">Self </span>{
+        AspectRatio(value)
     }
 }
 </code></pre></div></section></main></body></html>

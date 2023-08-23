@@ -231,6 +231,12 @@
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -362,8 +368,14 @@
     <span class="kw">fn </span>calc_extension(width: f32, base: f32, columns: i32) -&gt; i32 {
         ((width - base) / RawMarker::PX).floor() <span class="kw">as </span>i32 / columns
     }
-    <span class="kw">pub fn </span>calc_section(<span class="kw-2">&amp;</span><span class="self">self</span>, view: <span class="kw-2">&amp;</span>ResponsiveGridView) -&gt; Section&lt;InterfaceContext&gt; {
+    <span class="kw">pub fn </span>calc_section_from_responsive(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        view: <span class="kw-2">&amp;</span>ResponsiveGridView,
+    ) -&gt; Section&lt;InterfaceContext&gt; {
         <span class="kw">let </span>current_view = view.mapping.get(<span class="kw-2">&amp;</span><span class="self">self</span>.span).expect(<span class="string">&quot;view mapping&quot;</span>);
+        <span class="self">self</span>.calc_section(current_view)
+    }
+    <span class="kw">pub fn </span>calc_section(<span class="kw-2">&amp;</span><span class="self">self</span>, current_view: <span class="kw-2">&amp;</span>GridView) -&gt; Section&lt;InterfaceContext&gt; {
         <span class="kw">let </span>left = {
             <span class="kw">let </span>grid_location = current_view.horizontal.begin;
             <span class="self">self</span>.calc_horizontal_location(grid_location)
