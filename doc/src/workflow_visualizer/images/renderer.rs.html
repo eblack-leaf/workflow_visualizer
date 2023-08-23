@@ -253,6 +253,16 @@
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -302,10 +312,8 @@
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         })
 }
-
 <span class="attr">#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 </span><span class="kw">pub struct </span>ImageFade(<span class="kw">pub </span>f32);
-
 <span class="attr">#[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
 </span><span class="kw">pub struct </span>ImageName(<span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str);
 <span class="attr">#[derive(Component, Clone)]
@@ -318,6 +326,8 @@
         <span class="self">Self </span>{ name, data }
     }
 }
+<span class="attr">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>AspectRatio(<span class="kw">pub </span>f32);
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageData {
     <span class="kw">pub</span>(<span class="kw">crate</span>) atlas: TextureAtlas,
     <span class="kw">pub</span>(<span class="kw">crate</span>) bind_group: TextureBindGroup,
@@ -347,6 +357,13 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_layout: wgpu::BindGroupLayout,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
+<span class="attr">#[derive(Resource)]
+</span><span class="kw">pub struct </span>ImageAspectRatios(<span class="kw">pub</span>(<span class="kw">crate</span>) HashMap&lt;ImageName, AspectRatio&gt;);
+<span class="kw">impl </span>ImageAspectRatios {
+    <span class="kw">pub fn </span>get&lt;I: Into&lt;ImageName&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: I) -&gt; <span class="prelude-ty">Option</span>&lt;AspectRatio&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.get(<span class="kw-2">&amp;</span>name.into()).copied()
+    }
+}
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>load_images(
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>image_renderer: ResMut&lt;ImageRenderer&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>image_renderer: NonSendMut&lt;ImageRenderer&gt;,
@@ -354,6 +371,7 @@
     <span class="kw-2">mut </span>cmd: Commands,
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx: Res&lt;GfxSurface&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
+    <span class="kw-2">mut </span>aspect_ratios: ResMut&lt;ImageAspectRatios&gt;,
 ) {
     <span class="kw">for </span>(entity, request) <span class="kw">in </span>requests.iter() {
         <span class="kw">let </span>image = image::load_from_memory(request.data.as_slice()).expect(<span class="string">&quot;images-load&quot;</span>);
@@ -376,6 +394,8 @@
         );
         <span class="kw">let </span>bind_group =
             TextureBindGroup::new(<span class="kw-2">&amp;</span>gfx, <span class="kw-2">&amp;</span>image_renderer.render_group_layout, atlas.view());
+        <span class="kw">let </span>aspect_ratio = dimensions.dimensions.width / dimensions.dimensions.height;
+        aspect_ratios.<span class="number">0</span>.insert(request.name.clone(), AspectRatio(aspect_ratio));
         image_renderer.images.insert(
             request.name.clone(),
             ImageData::new(atlas, bind_group, coordinates),

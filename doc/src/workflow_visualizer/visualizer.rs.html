@@ -886,8 +886,8 @@
         ));
     }
     <span class="doccomment">/// queue attachment to the Visualizer
-    </span><span class="kw">pub fn </span>add_attachment&lt;Attached: Attach&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.attachment_queue.push(Attachment::using::&lt;Attached&gt;());
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>add_attachments(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attachments: Vec&lt;Attachment&gt;) {
+        <span class="self">self</span>.attachment_queue = attachments;
     }
     <span class="kw">fn </span>attach_from_queue(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span>attachment_queue = <span class="self">self</span>.attachment_queue.drain(..).collect::&lt;Vec&lt;Attachment&gt;&gt;();
