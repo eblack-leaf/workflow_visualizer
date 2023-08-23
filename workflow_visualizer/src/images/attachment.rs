@@ -1,10 +1,8 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::images::interface::{
-    area_diff, extract, fade_diff, layer_diff, management, name_diff, pos_diff, Extraction,
-};
+use crate::images::interface::{area_diff, extract, fade_diff, layer_diff, management, name_diff, pos_diff, Extraction, aspect_ratio_aligned_dimension};
 use crate::images::render_group::read_extraction;
-use crate::images::renderer::{load_images, ImageRenderer};
+use crate::images::renderer::{load_images, ImageAspectRatios, ImageRenderer};
 use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct ImageAttachment;
@@ -18,9 +16,14 @@ impl Attach for ImageAttachment {
             .insert_resource(Extraction::default());
         visualizer
             .job
+            .container
+            .insert_resource(ImageAspectRatios::default());
+        visualizer
+            .job
             .task(Visualizer::TASK_RENDER_STARTUP)
             .add_systems((load_images.in_set(SyncPoint::Resolve),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),

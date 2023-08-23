@@ -92,11 +92,11 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_group_layout: wgpu::BindGroupLayout,
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct ImageAspectRatios(pub(crate) HashMap<ImageName, AspectRatio>);
 impl ImageAspectRatios {
-    pub fn get<I: Into<ImageName>>(&self, name: I) -> Option<AspectRatio> {
-        self.0.get(&name.into()).copied()
+    pub fn get(&self, name: &ImageName) -> Option<AspectRatio> {
+        self.0.get(name).copied()
     }
 }
 pub(crate) fn load_images(
@@ -130,7 +130,9 @@ pub(crate) fn load_images(
         let bind_group =
             TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
         let aspect_ratio = dimensions.dimensions.width / dimensions.dimensions.height;
-        aspect_ratios.0.insert(request.name.clone(), AspectRatio(aspect_ratio));
+        aspect_ratios
+            .0
+            .insert(request.name.clone(), AspectRatio(aspect_ratio));
         image_renderer.images.insert(
             request.name.clone(),
             ImageData::new(atlas, bind_group, coordinates),

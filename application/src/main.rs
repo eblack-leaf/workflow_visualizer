@@ -36,8 +36,7 @@ fn main() {
     #[cfg(not(target_family = "wasm"))]
     tracing_subscriber::fmt().with_max_level(Level::WARN).init();
     let mut visualizer = visualizer();
-    let runner = Runner::new()
-        .with_attachment::<EntryAttachment>();
+    let runner = Runner::new().with_attachment::<EntryAttachment>();
     #[cfg(not(target_family = "wasm"))]
     runner
         .with_desktop_dimensions((400, 600))

@@ -1,7 +1,4 @@
-use workflow_visualizer::{
-    Color, GfxOptions, Runner, Theme, ThemeDescriptor,
-    Visualizer,
-};
+use workflow_visualizer::{Color, GfxOptions, Runner, Theme, ThemeDescriptor, Visualizer};
 
 use crate::engen::Engen;
 use crate::pad::PadAttachment;
@@ -15,7 +12,8 @@ fn main() {
         Theme::new(ThemeDescriptor::new().with_background(Color::OFF_BLACK)),
         GfxOptions::native_defaults().with_msaa(2),
     );
-    Runner::new().with_attachment::<PadAttachment>()
+    Runner::new()
+        .with_attachment::<PadAttachment>()
         .with_desktop_dimensions((600, 400))
         .native_run::<Engen>(visualizer);
 }

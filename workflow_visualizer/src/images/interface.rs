@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Bundle, Changed, Component, Query, RemovedComponents, Resource, Without};
+use bevy_ecs::prelude::{
+    Added, Bundle, Changed, Component, Or, Query, RemovedComponents, Res, Resource, Without,
+};
 use bevy_ecs::system::ResMut;
 
-use crate::images::renderer::{ImageFade, ImageName};
+use crate::images::renderer::{ImageAspectRatios, ImageFade, ImageName};
 use crate::{
     Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility,
 };
@@ -35,13 +37,53 @@ impl Image {
         }
     }
 }
+// #[derive(Component, Copy, Clone, Default)]
+// pub struct ImageBounds {
+//     pub width_bounds: Option<f32>,
+//     pub height_bounds: Option<f32>,
+// }
+// impl ImageBounds {
+//     pub fn new(width: Option<f32>, height: Option<f32>) -> Self {
+//         Self {
+//             width_bounds: width,
+//             height_bounds: height
+//         }
+//     }
+// }
+// pub(crate) fn bounded_image(
+//     mut bounded: Query<(&ImageName, &mut Area<InterfaceContext>, &ImageBounds, Option<&AspectRatioAlignedDimension>), Or<(Changed<ImageBounds>, Changed<Area<InterfaceContext>>)>>
+// ) {
+//     for (name, mut area, bounds, aligned_dimension) in bounded.iter_mut() {
+//         if let Some(b) = bounds.width_bounds {
+//
+//         }
+//     }
+// }
 #[derive(Component, Copy, Clone)]
-pub enum ImageMaxDimension {
+pub enum AspectRatioAlignedDimension {
     Width(f32),
     Height(f32),
 }
-pub(crate) fn max_dimension(bound: Query<(&ImageName, &ImageMaxDimension, &mut Area<InterfaceContext>)>) {
-
+pub(crate) fn aspect_ratio_aligned_dimension(
+    mut bound: Query<
+        (&ImageName, &AspectRatioAlignedDimension, &mut Area<InterfaceContext>),
+        Or<(Changed<AspectRatioAlignedDimension>, Changed<Area<InterfaceContext>>)>,
+    >,
+    aspect_ratios: Res<ImageAspectRatios>,
+) {
+    for (name, max_dim, mut area) in bound.iter_mut() {
+        let aspect_ratio = aspect_ratios.get(name).expect("aspect-ratio");
+        match max_dim {
+            AspectRatioAlignedDimension::Width(width) => {
+                let height = width * 1f32 / aspect_ratio.0;
+                *area = Area::new(*width, height);
+            }
+            AspectRatioAlignedDimension::Height(height) => {
+                let width = height * aspect_ratio.0;
+                *area = Area::new(width, *height);
+            }
+        }
+    }
 }
 #[derive(Component)]
 pub(crate) struct Cache {
