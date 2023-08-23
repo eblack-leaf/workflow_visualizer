@@ -14,7 +14,9 @@ pub use grid::{
     RawMarkerGrouping, RelativePlacementKey, RelativePlacer, ResponsiveGridPoint,
     ResponsiveGridView, ResponsiveUnit, ResponsiveView,
 };
-pub use images::{Image, ImageFade, ImageName, ImageRequest, ImageTag};
+pub use images::{
+    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageRequest, ImageTag,
+};
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
     InstanceAttributeManager, Key, KeyFactory, NullBit,

@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{
-    Commands, Component, Entity, NonSend, NonSendMut, Query, Res, ResMut, Resource,
-};
+use bevy_ecs::prelude::{Commands, Component, Entity, Query, Res, ResMut, Resource};
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
 use crate::images::render_group::ImageRenderGroup;
+use crate::orientation::{AspectRatio, Orientation};
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
 use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
@@ -61,8 +60,7 @@ impl ImageRequest {
         Self { name, data }
     }
 }
-#[derive(Copy, Clone)]
-pub struct AspectRatio(pub f32);
+
 pub(crate) struct ImageData {
     pub(crate) atlas: TextureAtlas,
     pub(crate) bind_group: TextureBindGroup,
@@ -93,9 +91,9 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
 #[derive(Resource, Default)]
-pub struct ImageAspectRatios(pub(crate) HashMap<ImageName, AspectRatio>);
-impl ImageAspectRatios {
-    pub fn get(&self, name: &ImageName) -> Option<AspectRatio> {
+pub struct ImageOrientations(pub(crate) HashMap<ImageName, Orientation>);
+impl ImageOrientations {
+    pub fn get(&self, name: &ImageName) -> Option<Orientation> {
         self.0.get(name).copied()
     }
 }
@@ -106,7 +104,7 @@ pub(crate) fn load_images(
     mut cmd: Commands,
     #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
     #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
-    mut aspect_ratios: ResMut<ImageAspectRatios>,
+    mut orientations: ResMut<ImageOrientations>,
 ) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
@@ -129,10 +127,10 @@ pub(crate) fn load_images(
         );
         let bind_group =
             TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
-        let aspect_ratio = dimensions.dimensions.width / dimensions.dimensions.height;
-        aspect_ratios
-            .0
-            .insert(request.name.clone(), AspectRatio(aspect_ratio));
+        orientations.0.insert(
+            request.name.clone(),
+            Orientation::new(dimensions.dimensions),
+        );
         image_renderer.images.insert(
             request.name.clone(),
             ImageData::new(atlas, bind_group, coordinates),
