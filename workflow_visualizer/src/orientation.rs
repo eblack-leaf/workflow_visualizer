@@ -39,7 +39,8 @@ pub(crate) fn setup_orientation(
         viewport_handle
             .section
             .area
-            .to_device(scale_factor.factor()),
+            .to_device(scale_factor.factor())
+            .as_numerical(),
     ));
 }
 
@@ -48,7 +49,7 @@ pub(crate) fn calc_orientation(
     mut orientation: ResMut<Orientation>,
 ) {
     for event in events.iter() {
-        *orientation = Orientation::new(event.size);
+        *orientation = Orientation::new(event.size.as_numerical());
     }
 }
 pub struct OrientationAttachment;
