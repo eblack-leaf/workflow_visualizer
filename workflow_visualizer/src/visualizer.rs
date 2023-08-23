@@ -9,6 +9,7 @@ use winit::window::Window;
 
 use crate::animate::{end_animations, start_animations, update_animations};
 use crate::button::ButtonAttachment;
+use crate::coord::CoordinateAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
@@ -162,6 +163,7 @@ impl Visualizer {
         self.invoke_attach::<TextAttachment>();
         self.invoke_attach::<ButtonAttachment>();
         self.invoke_attach::<ImageAttachment>();
+        self.invoke_attach::<CoordinateAttachment>();
         self.attach_from_queue();
         self.invoke_attach::<IconRendererAttachment>();
         self.setup();
