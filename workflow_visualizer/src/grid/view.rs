@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{PathView, RawMarker};
+use crate::{PathView, RawMarker, ResponsiveGridView};
 
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]
@@ -65,6 +65,11 @@ impl<T: Into<GridLocation>> From<(T, T)> for GridRange {
 pub struct GridView {
     pub horizontal: GridRange,
     pub vertical: GridRange,
+}
+impl GridView {
+    pub fn all_same(self) -> ResponsiveGridView {
+        ResponsiveGridView::all_same(self)
+    }
 }
 impl<T: Into<GridRange>> From<(T, T)> for GridView {
     fn from(value: (T, T)) -> Self {
