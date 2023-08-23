@@ -17,7 +17,11 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
     control_flow: &mut ControlFlow,
     desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
-    control_flow.set_wait();
+    if visualizer.can_idle() {
+        control_flow.set_wait();
+    } else {
+        control_flow.set_poll();
+    }
     match event {
         Event::NewEvents(cause) => match cause {
             StartCause::Init => {
@@ -91,11 +95,6 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                     .get_non_send_resource_mut::<Sender<T>>()
                     .expect("sender")
                     .send(T::exit_action());
-            }
-            if visualizer.can_idle() {
-                control_flow.set_wait();
-            } else {
-                control_flow.set_poll();
             }
         }
         Event::RedrawRequested(_) => {

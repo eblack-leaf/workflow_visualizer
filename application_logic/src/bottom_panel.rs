@@ -2,8 +2,8 @@ use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Resource};
 use workflow_visualizer::{
-    bevy_ecs, Button, ButtonBorder, ButtonType, Color, Idle, ResponsiveGridView, ResponsiveUnit,
-    Sender, Triggered,
+    bevy_ecs, Button, ButtonBorder, ButtonType, Color, ResponsiveGridView, ResponsiveUnit, Sender,
+    Triggered,
 };
 
 use crate::entry_list::EntryScale;
@@ -122,12 +122,7 @@ pub(crate) fn process_bottom_panel_buttons(
     buttons: Query<&Triggered>,
     sender: NonSend<Sender<Engen>>,
     mut counter: Local<u32>,
-    mut _idle: ResMut<Idle>,
 ) {
-    #[cfg(target_family = "wasm")]
-    {
-        _idle.can_idle = false;
-    }
     if let Ok(trigger) = buttons.get(add.0) {
         if trigger.active() {
             // add logic

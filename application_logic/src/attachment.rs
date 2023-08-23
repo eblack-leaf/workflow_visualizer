@@ -1,6 +1,6 @@
-use workflow_visualizer::bevy_ecs::prelude::IntoSystemConfigs;
+use workflow_visualizer::bevy_ecs::prelude::{IntoSystemConfigs, ResMut};
 use workflow_visualizer::{
-    Attach, BundledIcon, IconBitmap, IconBitmapRequest, SyncPoint, Visualizer,
+    Attach, BundledIcon, IconBitmap, IconBitmapRequest, Idle, SyncPoint, Visualizer,
 };
 
 use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
@@ -93,6 +93,14 @@ impl Attach for EntryAttachment {
             entry::receive_add_token.in_set(SyncPoint::PostInitialization),
             entry::receive_remove_token.in_set(SyncPoint::PostInitialization),
             entry::process_entry_buttons.in_set(SyncPoint::Process),
+            stop_idle.in_set(SyncPoint::Process),
         ));
+    }
+}
+
+fn stop_idle(mut _idle: ResMut<Idle>) {
+    #[cfg(target_family = "wasm")]
+    {
+        _idle.can_idle = false;
     }
 }
