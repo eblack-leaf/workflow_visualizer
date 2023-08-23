@@ -47,6 +47,9 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
         apply_deferred
             .after(SyncPoint::Preparation)
             .before(SyncPoint::Resolve),
+        apply_deferred
+            .after(SyncPoint::Resolve)
+            .before(SyncPoint::PostResolve),
     ));
     visualizer.task(Visualizer::TASK_MAIN).configure_sets(
         (
