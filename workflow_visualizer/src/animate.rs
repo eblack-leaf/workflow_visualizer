@@ -98,14 +98,14 @@ where
     Self: Sized,
 {
     fn interpolations(&self, end: Self) -> Vec<Interpolation>;
-    fn animate(
+    fn animate<TD: Into<TimeDelta>>(
         &self,
         end: Self,
-        animation_time: TimeDelta,
+        animation_time: TD,
         start_offset: Option<TimeDelta>,
     ) -> Animation<Self> {
         Animation::new(
-            animation_time,
+            animation_time.into(),
             start_offset,
             Self::interpolations(&self, end),
         )
