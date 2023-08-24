@@ -25,6 +25,9 @@
 <a href="#25" id="25">25</a>
 <a href="#26" id="26">26</a>
 <a href="#27" id="27">27</a>
+<a href="#28" id="28">28</a>
+<a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::prelude::{Commands, IntoSystemConfigs};
 
@@ -38,6 +41,9 @@
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((
             setup.in_set(SyncPoint::Initialization),
             system::config_grid.in_set(SyncPoint::PostInitialization),
+            system::set_from_absolute.in_set(SyncPoint::Finish),
+            system::set_from_view.in_set(SyncPoint::Finish),
+            system::set_point_from_view.in_set(SyncPoint::Finish),
         ));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::set_from_absolute.in_set(SyncPoint::PostProcessPreparation),
