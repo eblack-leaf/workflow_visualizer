@@ -130,7 +130,7 @@ impl RelativePlacer {
         self.relative_offsets.insert(key, marker.into());
     }
     pub fn get(&self, key: RelativePlacementKey) -> RawMarker {
-        self.relative_offsets.get(&key).copied().unwrap_or_default()
+        self.relative_offsets.get(&key).copied().expect("RelativePlacer::get")
     }
     pub fn view<R: Into<RawMarker>>(&self, hb: R, he: R, vb: R, ve: R) -> GridView {
         (
