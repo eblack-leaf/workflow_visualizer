@@ -15,7 +15,8 @@ pub use grid::{
     ResponsiveUnit, ResponsiveView,
 };
 pub use images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageRequest, ImageTag,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageOrientations, ImageRequest,
+    ImageTag,
 };
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
