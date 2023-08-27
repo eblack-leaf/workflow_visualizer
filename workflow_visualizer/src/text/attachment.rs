@@ -31,10 +31,6 @@ impl Attach for TextAttachment {
             layer_diff.in_set(SyncPoint::PushDiff),
             pull_differences.in_set(SyncPoint::Finish),
         ));
-        engen
-            .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((renderer::setup.in_set(SyncPoint::Preparation),));
         engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
             create_render_groups.in_set(SyncPoint::Preparation),
             render_group_differences.in_set(SyncPoint::Resolve),

@@ -56,11 +56,6 @@ pub(crate) struct TextRenderer {
     pub(crate) atlas_bind_group_layout: wgpu::BindGroupLayout,
 }
 
-pub(crate) fn setup(mut cmd: Commands, scale_factor: Res<ScaleFactor>) {
-    cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
-}
-
 #[derive(Resource, Clone)]
 pub(crate) struct Extraction {
     pub(crate) added: HashMap<

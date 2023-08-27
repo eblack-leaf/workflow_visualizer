@@ -44,8 +44,8 @@ impl MonoSpacedFont {
     pub(crate) fn index() -> usize {
         0
     }
-    pub(crate) fn character_dimensions(&self, character: char, px: f32) -> Area<NumericalContext> {
-        let metrics = self.font().metrics(character, px);
+    pub(crate) fn character_dimensions(&self, px: f32) -> Area<NumericalContext> {
+        let metrics = self.font().metrics('a', px);
         let height = self
             .font()
             .horizontal_line_metrics(px)
@@ -107,7 +107,7 @@ fn tester() {
     for x in 0..96u32 {
         let font = MonoSpacedFont::jet_brains_mono(x);
         let x = x as f32;
-        let dims = font.character_dimensions('a', x);
+        let dims = font.character_dimensions(x);
         println!("Scale: {:?} dims: {:?}", x, dims);
     }
 }

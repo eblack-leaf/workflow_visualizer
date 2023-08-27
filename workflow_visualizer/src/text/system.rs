@@ -226,7 +226,7 @@ pub(crate) fn scale_change(
         *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor());
         let letter_dimensions = fonts
             .get(text_scale_alignment)
-            .character_dimensions('a', text_scale.px());
+            .character_dimensions(text_scale.px());
         let letter_dimensions =
             Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
         *text_letter_dimensions = TextLetterDimensions(letter_dimensions);
@@ -283,7 +283,7 @@ pub(crate) fn manage(
                     AtlasBlock::new(
                         fonts
                             .get(text_scale_alignment)
-                            .character_dimensions('a', text_scale.px()),
+                            .character_dimensions(text_scale.px()),
                     ),
                 ),
             );
