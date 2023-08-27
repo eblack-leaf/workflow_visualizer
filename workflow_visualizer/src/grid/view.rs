@@ -130,6 +130,18 @@ impl ReferenceView {
             bottom: None,
         }
     }
+    pub fn set_top<R: Into<RawMarker>>(&mut self, top: R) {
+        self.top.replace(top.into());
+    }
+    pub fn set_left<R: Into<RawMarker>>(&mut self, left: R) {
+        self.left.replace(left.into());
+    }
+    pub fn set_right<R: Into<RawMarker>>(&mut self, right: R) {
+        self.right.replace(right.into());
+    }
+    pub fn set_bottom<R: Into<RawMarker>>(&mut self, bottom: R) {
+        self.bottom.replace(bottom.into());
+    }
     pub fn top(&self) -> RawMarker {
         self.top.expect("top")
     }
@@ -167,6 +179,12 @@ pub struct ReferencePoint {
 impl ReferencePoint {
     pub fn new() -> Self {
         Self { x: None, y: None }
+    }
+    pub fn set_x<R: Into<RawMarker>>(&mut self, x: R) {
+        self.x.replace(x.into());
+    }
+    pub fn set_y<R: Into<RawMarker>>(&mut self, y: R) {
+        self.y.replace(y.into());
     }
     pub fn x(&self) -> RawMarker {
         self.x.expect("x")
@@ -236,7 +254,7 @@ impl<PlacementKey: Eq + PartialEq + Hash> Placer<PlacementKey> {
     pub fn point<R: Into<RawMarker>>(&self, hb: R, vb: R) -> GridPoint {
         (self.anchor.x.raw_offset(hb), self.anchor.y.raw_offset(vb)).into()
     }
-    pub fn add_point<R: Into<RawMarker>>(&mut self, key: PlacementKey, x: R, y: R) {
+    pub fn add_reference_point<R: Into<RawMarker>>(&mut self, key: PlacementKey, x: R, y: R) {
         self.reference_points
             .insert(key, ReferencePoint::new().with_x(x).with_y(y));
     }
