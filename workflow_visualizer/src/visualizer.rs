@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::entity::Entity;
@@ -164,6 +165,19 @@ impl Visualizer {
         self.attach_from_queue();
         self.invoke_attach::<IconRendererAttachment>();
         self.setup();
+        self.render_task_manager.transparent.sort_by(
+            |(order, _), (rhs_order, _)| -> std::cmp::Ordering {
+                let order = *order;
+                let rhs_order = *rhs_order;
+                if order < rhs_order {
+                    Ordering::Less
+                } else if order > rhs_order {
+                    Ordering::Greater
+                } else {
+                    Ordering::Equal
+                }
+            },
+        );
         self.job.resume();
     }
     pub fn set_theme(&mut self, theme: Theme) {
@@ -368,13 +382,13 @@ impl Visualizer {
                 .render_task_manager
                 .opaque
                 .push(Box::new(invoke_render::<Renderer>)),
-            // TODO insert in order + after if same priority
-            RenderPhase::Alpha(_order) => self
+            RenderPhase::Alpha(order) => self
                 .render_task_manager
                 .transparent
-                .push(Box::new(invoke_render::<Renderer>)),
+                .push((order, Box::new(invoke_render::<Renderer>))),
         }
     }
+
     #[cfg(target_family = "wasm")]
     pub fn register_renderer<Renderer: Render + 'static>(&mut self) {
         let gfx = self
@@ -406,11 +420,10 @@ impl Visualizer {
                 .render_task_manager
                 .opaque
                 .push(Box::new(invoke_render::<Renderer>)),
-            // TODO insert in order + after if same priority
-            RenderPhase::Alpha(_order) => self
+            RenderPhase::Alpha(order) => self
                 .render_task_manager
                 .transparent
-                .push(Box::new(invoke_render::<Renderer>)),
+                .push((order, Box::new(invoke_render::<Renderer>))),
         }
     }
     pub fn register_animation<A: Animate + Send + Sync + 'static + Clone>(&mut self) {

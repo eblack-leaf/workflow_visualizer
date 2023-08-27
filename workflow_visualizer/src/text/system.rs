@@ -36,7 +36,7 @@ use crate::{
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(100));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(40));
 }
 pub(crate) fn place(
     mut text_query: Query<
