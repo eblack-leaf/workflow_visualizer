@@ -52,13 +52,18 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 pub struct ImageFade(pub f32);
 #[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub struct ImageName(pub &'static str);
+impl From<&'static str> for ImageName {
+    fn from(value: &'static str) -> Self {
+        ImageName(value)
+    }
+}
 #[derive(Component, Clone)]
 pub struct ImageRequest {
     pub name: ImageName,
     pub data: Vec<u8>,
 }
 impl ImageRequest {
-    pub fn new(name: ImageName, data: Vec<u8>) -> Self {
+    pub fn new<IN: Into<ImageName>>(name: ImageName, data: Vec<u8>) -> Self {
         Self { name, data }
     }
 }

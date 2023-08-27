@@ -116,10 +116,10 @@ pub enum GridMarkerBias {
 pub struct GridLocationOffset(pub RawMarker);
 #[derive(Copy, Clone, Default)]
 pub struct ReferenceView {
-    pub top: Option<RawMarker>,
-    pub left: Option<RawMarker>,
-    pub right: Option<RawMarker>,
-    pub bottom: Option<RawMarker>,
+    top: Option<RawMarker>,
+    left: Option<RawMarker>,
+    right: Option<RawMarker>,
+    bottom: Option<RawMarker>,
 }
 impl ReferenceView {
     pub fn new() -> Self {
@@ -173,8 +173,8 @@ impl ReferenceView {
 }
 #[derive(Copy, Clone, Default)]
 pub struct ReferencePoint {
-    pub x: Option<RawMarker>,
-    pub y: Option<RawMarker>,
+    x: Option<RawMarker>,
+    y: Option<RawMarker>,
 }
 impl ReferencePoint {
     pub fn new() -> Self {
@@ -202,10 +202,10 @@ impl ReferencePoint {
     }
 }
 pub struct Placer<PlacementKey> {
-    pub anchor: GridPoint,
-    pub relative_offsets: HashMap<PlacementKey, RawMarker>,
-    pub reference_views: HashMap<PlacementKey, ReferenceView>,
-    pub reference_points: HashMap<PlacementKey, ReferencePoint>,
+    pub(crate) anchor: GridPoint,
+    pub(crate) relative_offsets: HashMap<PlacementKey, RawMarker>,
+    pub(crate) reference_views: HashMap<PlacementKey, ReferenceView>,
+    pub(crate) reference_points: HashMap<PlacementKey, ReferencePoint>,
 }
 impl<PlacementKey: Eq + PartialEq + Hash> Placer<PlacementKey> {
     pub fn new<GP: Into<GridPoint>>(anchor: GP) -> Self {
@@ -216,20 +216,23 @@ impl<PlacementKey: Eq + PartialEq + Hash> Placer<PlacementKey> {
             reference_points: HashMap::new(),
         }
     }
+    pub fn anchor(&self) -> GridPoint {
+        self.anchor
+    }
     pub fn add<R: Into<RawMarker>>(&mut self, key: PlacementKey, marker: R) {
         self.relative_offsets.insert(key, marker.into());
     }
     pub fn add_reference_view<R: Into<ReferenceView>>(&mut self, key: PlacementKey, view: R) {
         self.reference_views.insert(key, view.into());
     }
-    pub fn reference_view(&self, key: PlacementKey) -> ReferenceView {
+    pub fn get_reference_view(&self, key: PlacementKey) -> ReferenceView {
         self.reference_views
             .get(&key)
             .copied()
             .expect("reference-view")
     }
     pub fn view_from_reference(&self, key: PlacementKey) -> GridView {
-        let b = self.reference_view(key);
+        let b = self.get_reference_view(key);
         self.view(b.left(), b.right(), b.top(), b.bottom())
     }
     pub fn get(&self, key: PlacementKey) -> RawMarker {
