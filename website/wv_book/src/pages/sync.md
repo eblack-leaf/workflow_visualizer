@@ -116,15 +116,6 @@ This task is run every iteration of the event loop, while `!job.suspended()`.
 - `SyncPoint::PushDiff`
 - `SyncPoint::Finish`
 
-##### Visualizer::TASK_RENDER_STARTUP
-This task is run once after the initialization of the `Attachment`s queued in the visualizer.
-
-- `SyncPoint::Initialization,`
-- `UserSpaceSyncPoint::Initialization,`
-- `SyncPoint::Preparation,`
-- `SyncPoint::Resolve,`
-- `UserSpaceSyncPoint::Resolve,`
-- `SyncPoint::Finish,`
 
 ##### Visualizer::TASK_RENDER_MAIN
 This task is run every time a redraw is requested.

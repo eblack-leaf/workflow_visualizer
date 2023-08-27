@@ -68,8 +68,6 @@ impl Visualizer {
     pub const TASK_STARTUP: TaskLabel = TaskLabel("startup");
     /// Teardown for logic
     pub const TASK_TEARDOWN: TaskLabel = TaskLabel("teardown");
-    /// Preparation for rendering
-    pub const TASK_RENDER_STARTUP: TaskLabel = TaskLabel("render_startup");
     /// Render main
     pub const TASK_RENDER_MAIN: TaskLabel = TaskLabel("render_main");
     pub fn new(theme: Theme, gfx_options: GfxOptions) -> Self {
@@ -78,7 +76,6 @@ impl Visualizer {
                 let mut job = Job::new();
                 job.container.insert_resource(theme);
                 job.tasks.insert(Self::TASK_STARTUP, Task::new());
-                job.tasks.insert(Self::TASK_RENDER_STARTUP, Task::new());
                 job.tasks.insert(Self::TASK_TEARDOWN, Task::new());
                 job.tasks.insert(Self::TASK_RENDER_MAIN, Task::new());
                 job.tasks.insert(Self::TASK_MAIN, {
@@ -279,7 +276,6 @@ impl Visualizer {
     /// Exec setup tasks
     fn setup(&mut self) {
         self.job.exec(Self::TASK_STARTUP);
-        self.job.exec(Self::TASK_RENDER_STARTUP)
     }
     /// Run MAIN logic
     pub fn exec(&mut self) {

@@ -93,32 +93,6 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
     ));
     visualizer
         .job
-        .task(Visualizer::TASK_RENDER_STARTUP)
-        .configure_sets(
-            (
-                SyncPoint::Event,
-                SyncPoint::Initialization,
-                SyncPoint::PostInitialization,
-                SyncPoint::Preparation,
-                SyncPoint::Resolve,
-                SyncPoint::PostResolve,
-                SyncPoint::Finish,
-            )
-                .chain(),
-        );
-    visualizer
-        .job
-        .task(Visualizer::TASK_RENDER_STARTUP)
-        .add_systems((
-            apply_deferred
-                .after(SyncPoint::Initialization)
-                .before(SyncPoint::PostInitialization),
-            apply_deferred
-                .after(SyncPoint::PostInitialization)
-                .before(SyncPoint::Preparation),
-        ));
-    visualizer
-        .job
         .task(Visualizer::TASK_RENDER_MAIN)
         .configure_sets(
             (
