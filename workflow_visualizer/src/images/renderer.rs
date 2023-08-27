@@ -11,9 +11,9 @@ use crate::orientation::{AspectRatio, Orientation};
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
 use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
-    AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
-    MsaaRenderAdapter, RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor,
-    TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer,
+    Area, AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
+    MsaaRenderAdapter, NumericalContext, RawPosition, Render, RenderPassHandle, RenderPhase,
+    ScaleFactor, TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer,
 };
 
 #[repr(C)]
@@ -103,8 +103,15 @@ pub(crate) struct ImageRenderer {
 #[derive(Resource, Default)]
 pub struct ImageOrientations(pub(crate) HashMap<ImageName, Orientation>);
 impl ImageOrientations {
-    pub fn get(&self, name: &ImageName) -> Option<Orientation> {
-        self.0.get(name).copied()
+    pub fn get<IN: Into<ImageName>>(&self, name: IN) -> Orientation {
+        self.0.get(&name.into()).copied().expect("orientation")
+    }
+}
+#[derive(Resource, Default)]
+pub struct ImageSizes(pub(crate) HashMap<ImageName, Area<NumericalContext>>);
+impl ImageSizes {
+    pub fn get<IN: Into<ImageName>>(&self, name: IN) -> Area<NumericalContext> {
+        self.0.get(&name.into()).copied().expect("size")
     }
 }
 pub(crate) fn load_images(
@@ -115,11 +122,13 @@ pub(crate) fn load_images(
     #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
     #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
     mut orientations: ResMut<ImageOrientations>,
+    mut sizes: ResMut<ImageSizes>,
 ) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
         let texture_data = image.to_rgba8();
         let dimensions = image.dimensions();
+        sizes.0.insert(request.name.clone(), Area::from(dimensions));
         let block = AtlasBlock::new((dimensions.0, dimensions.1));
         let atlas_dimension = AtlasDimension::new(1);
         let dimensions = AtlasTextureDimensions::new(block, atlas_dimension);

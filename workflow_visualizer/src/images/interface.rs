@@ -57,7 +57,7 @@ pub(crate) fn aspect_ratio_aligned_dimension(
     orientations: Res<ImageOrientations>,
 ) {
     for (name, max_dim, mut area) in bound.iter_mut() {
-        let orientation = orientations.get(name).expect("aspect-ratio");
+        let orientation = orientations.get(name.clone());
         match max_dim {
             AspectRatioAlignedDimension::Width(width) => {
                 let height = width * orientation.value().reciprocal();

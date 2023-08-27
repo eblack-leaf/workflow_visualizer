@@ -16,7 +16,7 @@ pub use grid::{
 };
 pub use images::{
     AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageOrientations, ImageRequest,
-    ImageTag,
+    ImageSizes, ImageTag,
 };
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,

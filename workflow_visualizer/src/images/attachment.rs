@@ -6,7 +6,7 @@ use crate::images::interface::{
 };
 use crate::images::render_group::read_extraction;
 use crate::images::renderer::{load_images, ImageOrientations, ImageRenderer};
-use crate::{Attach, SyncPoint, Visualizer};
+use crate::{Attach, ImageSizes, SyncPoint, Visualizer};
 
 pub(crate) struct ImageAttachment;
 
@@ -21,6 +21,10 @@ impl Attach for ImageAttachment {
             .job
             .container
             .insert_resource(ImageOrientations::default());
+        visualizer
+            .job
+            .container
+            .insert_resource(ImageSizes::default());
         visualizer
             .job
             .task(Visualizer::TASK_STARTUP)
