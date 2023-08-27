@@ -183,7 +183,6 @@
 <a href="#183" id="183">183</a>
 <a href="#184" id="184">184</a>
 <a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>tracing::trace;
 
@@ -229,17 +228,16 @@
 
 <span class="doccomment">/// Wrapper around wgpu::RenderPass
 </span><span class="kw">pub struct </span>RenderPassHandle&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw">pub </span>wgpu::RenderPass&lt;<span class="lifetime">&#39;a</span>&gt;);
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>RenderTasks = Vec&lt;Box&lt;<span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Job, <span class="kw-2">&amp;mut </span>RenderPassHandle&lt;<span class="lifetime">&#39;a</span>&gt;)&gt;&gt;;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>RenderTask = Box&lt;<span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Job, <span class="kw-2">&amp;mut </span>RenderPassHandle&lt;<span class="lifetime">&#39;a</span>&gt;)&gt;;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RenderTaskManager {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) opaque: RenderTasks,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) transparent: RenderTasks,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) opaque: Vec&lt;RenderTask&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) transparent: Vec&lt;(u32, RenderTask)&gt;,
 }
 <span class="kw">impl </span>RenderTaskManager {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            opaque: RenderTasks::new(),
-            transparent: RenderTasks::new(),
+            opaque: Vec::new(),
+            transparent: Vec::new(),
         }
     }
 }
@@ -361,7 +359,7 @@
                 <span class="macro">trace!</span>(<span class="string">&quot;invoking opaque render fn&quot;</span>);
                 invoke(<span class="kw-2">&amp;</span>visualizer.job, <span class="kw-2">&amp;mut </span>render_pass_handle);
             }
-            <span class="kw">for </span>invoke <span class="kw">in </span>visualizer.render_task_manager.transparent.iter_mut() {
+            <span class="kw">for </span>(<span class="kw">_</span>, invoke) <span class="kw">in </span>visualizer.render_task_manager.transparent.iter_mut() {
                 <span class="macro">trace!</span>(<span class="string">&quot;invoking transparent render fn&quot;</span>);
                 invoke(<span class="kw-2">&amp;</span>visualizer.job, <span class="kw-2">&amp;mut </span>render_pass_handle);
             }
