@@ -28,6 +28,7 @@ pub use interaction::{
     PrimaryInteraction, PrimaryMouseButton, Toggled, Triggered,
 };
 pub use job::{Exit, Idle, JobSyncPoint, Tag};
+pub use orientation::{AspectRatio, Orientation};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
