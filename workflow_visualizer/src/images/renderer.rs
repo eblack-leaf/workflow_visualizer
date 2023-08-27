@@ -63,8 +63,11 @@ pub struct ImageRequest {
     pub data: Vec<u8>,
 }
 impl ImageRequest {
-    pub fn new<IN: Into<ImageName>>(name: ImageName, data: Vec<u8>) -> Self {
-        Self { name, data }
+    pub fn new<IN: Into<ImageName>>(name: IN, data: Vec<u8>) -> Self {
+        Self {
+            name: name.into(),
+            data,
+        }
     }
 }
 
