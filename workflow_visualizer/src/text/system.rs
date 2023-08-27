@@ -17,7 +17,7 @@ use crate::text::component::{
     TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextScaleAlignment,
     TextValue, TextWrapStyle,
 };
-use crate::text::font::{AlignedFonts, MonoSpacedFont};
+use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{
     DrawSection, KeyedGlyphIds, LayerWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
     RenderGroupUniqueGlyphs, TextPlacement,
@@ -36,7 +36,7 @@ use crate::{
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(20));
 }
 pub(crate) fn place(
     mut text_query: Query<
@@ -55,7 +55,7 @@ pub(crate) fn place(
             Changed<TextScale>,
         )>,
     >,
-    fonts: Res<AlignedFonts>,
+    fonts: Res<MonoSpacedFont>,
     scale_factor: Res<ScaleFactor>,
 ) {
     for (mut placer, mut placement, text, area, wrap_style, text_scale, text_scale_alignment) in
@@ -69,7 +69,7 @@ pub(crate) fn place(
             ..LayoutSettings::default()
         });
         placer.0.append(
-            fonts.get(text_scale_alignment).font_slice(),
+            fonts.font_slice(),
             &TextStyle::new(text.0.as_str(), text_scale.px(), MonoSpacedFont::index()),
         );
         let mut key_factory = KeyFactory::new();
@@ -219,14 +219,12 @@ pub(crate) fn scale_change(
         Changed<TextScaleAlignment>,
     >,
     scale_factor: Res<ScaleFactor>,
-    fonts: Res<AlignedFonts>,
+    fonts: Res<MonoSpacedFont>,
 ) {
     for (mut text_scale, mut text_letter_dimensions, text_scale_alignment) in text_query.iter_mut()
     {
         *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor());
-        let letter_dimensions = fonts
-            .get(text_scale_alignment)
-            .character_dimensions(text_scale.px());
+        let letter_dimensions = fonts.character_dimensions(text_scale.px());
         let letter_dimensions =
             Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
         *text_letter_dimensions = TextLetterDimensions(letter_dimensions);
@@ -250,7 +248,7 @@ pub(crate) fn manage(
     >,
     mut removed: RemovedComponents<TextValue>,
     mut extraction: ResMut<Extraction>,
-    fonts: Res<AlignedFonts>,
+    fonts: Res<MonoSpacedFont>,
 ) {
     for (
         entity,
@@ -280,11 +278,7 @@ pub(crate) fn manage(
                     *layer,
                     RenderGroupUniqueGlyphs::from_text(text),
                     *text_scale_alignment,
-                    AtlasBlock::new(
-                        fonts
-                            .get(text_scale_alignment)
-                            .character_dimensions(text_scale.px()),
-                    ),
+                    AtlasBlock::new(fonts.character_dimensions(text_scale.px())),
                 ),
             );
         } else {
@@ -428,7 +422,7 @@ pub(crate) fn render_group_differences(
     #[cfg(target_family = "wasm")] mut renderer: NonSendMut<TextRenderer>,
     #[cfg(not(target_family = "wasm"))] gfx_surface: Res<GfxSurface>,
     #[cfg(target_family = "wasm")] gfx_surface: NonSend<GfxSurface>,
-    font: Res<AlignedFonts>,
+    font: Res<MonoSpacedFont>,
     #[cfg(not(target_family = "wasm"))] viewport: Res<Viewport>,
     #[cfg(target_family = "wasm")] viewport: NonSend<Viewport>,
     scale_factor: Res<ScaleFactor>,
@@ -608,10 +602,7 @@ pub(crate) fn render_group_differences(
                 .get_mut(&add.id)
                 .unwrap()
                 .increment();
-            let rasterization = font
-                .get(&render_group.text_scale_alignment)
-                .font()
-                .rasterize(add.character, add.scale.px());
+            let rasterization = font.font().rasterize(add.character, add.scale.px());
             // TODO since subpixel , combine them here to save space
             let glyph_area: Area<NumericalContext> =
                 (rasterization.0.width, rasterization.0.height).into();

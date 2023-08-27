@@ -4,7 +4,7 @@ pub use component::{
     Text, TextGridLocation, TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale,
     TextScaleAlignment, TextTag, TextValue, TextWrapStyle,
 };
-pub(crate) use font::{AlignedFonts, MonoSpacedFont};
+pub use font::MonoSpacedFont;
 pub(crate) use system::{color_diff, scale_change};
 
 mod atlas;

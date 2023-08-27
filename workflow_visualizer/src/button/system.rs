@@ -3,12 +3,11 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-use crate::text::AlignedFonts;
 use crate::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
-    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
-    Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
-    Toggled,
+    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment,
+    TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -171,7 +170,7 @@ pub(crate) fn placement(
         (&mut Position<InterfaceContext>, &mut Area<InterfaceContext>),
         Without<PanelEntity>,
     >,
-    aligned_fonts: Res<AlignedFonts>,
+    aligned_fonts: Res<MonoSpacedFont>,
     scale_factor: Res<ScaleFactor>,
 ) {
     for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, scaling) in
@@ -194,9 +193,7 @@ pub(crate) fn placement(
                 ),
             )
         } else {
-            let dimensions = aligned_fonts
-                .get(&TextScaleAlignment::Custom(scaling.text.0))
-                .character_dimensions(scaling.text.px());
+            let dimensions = aligned_fonts.character_dimensions(scaling.text.px());
             let logical_dimensions =
                 Area::<DeviceContext>::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());

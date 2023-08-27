@@ -6,7 +6,6 @@ use wgpu::util::DeviceExt;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::text::component::{Difference, TextScaleAlignment};
-use crate::text::font::AlignedFonts;
 use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 use crate::texture_atlas::TextureCoordinates;
 use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
