@@ -170,9 +170,9 @@ impl Visualizer {
                 let order = *order;
                 let rhs_order = *rhs_order;
                 if order < rhs_order {
-                    Ordering::Less
-                } else if order > rhs_order {
                     Ordering::Greater
+                } else if order > rhs_order {
+                    Ordering::Less
                 } else {
                     Ordering::Equal
                 }

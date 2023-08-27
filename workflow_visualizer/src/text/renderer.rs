@@ -245,7 +245,7 @@ impl Render for TextRenderer {
     }
 
     fn phase() -> RenderPhase {
-        RenderPhase::Alpha(8)
+        RenderPhase::Alpha(0)
     }
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
         trace!("starting text render fn");

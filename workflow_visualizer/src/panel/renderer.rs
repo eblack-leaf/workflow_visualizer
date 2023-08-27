@@ -143,7 +143,7 @@ impl Render for PanelRenderer {
     }
 
     fn phase() -> RenderPhase {
-        RenderPhase::Alpha(5)
+        RenderPhase::Alpha(2)
     }
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
         if self.indexer.has_instances() {
