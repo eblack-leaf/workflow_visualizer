@@ -65,6 +65,9 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Add, Div, Mul, Sub};
 
 <span class="doccomment">/// Index of 8px alignment location
@@ -76,8 +79,11 @@
     <span class="kw">pub fn </span>to_pixel(<span class="self">self</span>) -&gt; f32 {
         <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>f32 * <span class="self">Self</span>::PX
     }
-    <span class="kw">pub fn </span>from_pixel(value: f32) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>from_pixel_exclusive(value: f32) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>((value / <span class="self">Self</span>::PX).floor() <span class="kw">as </span>i32)
+    }
+    <span class="kw">pub fn </span>from_pixel_inclusive(value: f32) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>((value / <span class="self">Self</span>::PX).ceil() <span class="kw">as </span>i32)
     }
 }
 
