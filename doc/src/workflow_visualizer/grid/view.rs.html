@@ -266,6 +266,7 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::hash::Hash;
 
 <span class="kw">use crate</span>::{PathView, RawMarker, ResponsiveGridView};
 
@@ -449,13 +450,13 @@
         <span class="self">self
     </span>}
 }
-<span class="kw">pub struct </span>Placer {
+<span class="kw">pub struct </span>Placer&lt;PlacementKey&gt; {
     <span class="kw">pub </span>anchor: GridPoint,
     <span class="kw">pub </span>relative_offsets: HashMap&lt;PlacementKey, RawMarker&gt;,
     <span class="kw">pub </span>reference_views: HashMap&lt;PlacementKey, ReferenceView&gt;,
     <span class="kw">pub </span>reference_points: HashMap&lt;PlacementKey, ReferencePoint&gt;,
 }
-<span class="kw">impl </span>Placer {
+<span class="kw">impl</span>&lt;PlacementKey: Eq + PartialEq + Hash&gt; Placer&lt;PlacementKey&gt; {
     <span class="kw">pub fn </span>new&lt;GP: Into&lt;GridPoint&gt;&gt;(anchor: GP) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             anchor: anchor.into(),
@@ -509,13 +510,12 @@
         <span class="self">self</span>.point(b.x(), b.y())
     }
 }
-<span class="kw">pub type </span>PlacementKey = u32;
 <span class="attr">#[derive(Default, Clone)]
-</span><span class="kw">pub struct </span>Placement {
+</span><span class="kw">pub struct </span>Placement&lt;PlacementKey&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) views: HashMap&lt;PlacementKey, GridView&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) points: HashMap&lt;PlacementKey, GridPoint&gt;,
 }
-<span class="kw">impl </span>Placement {
+<span class="kw">impl</span>&lt;PlacementKey: Eq + PartialEq + Hash&gt; Placement&lt;PlacementKey&gt; {
     <span class="kw">pub fn </span>add_view&lt;V: Into&lt;GridView&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, view: V) {
         <span class="self">self</span>.views.insert(key, view.into());
     }
