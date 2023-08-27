@@ -9,8 +9,11 @@ impl RawMarker {
     pub fn to_pixel(self) -> f32 {
         self.0 as f32 * Self::PX
     }
-    pub fn from_pixel(value: f32) -> Self {
+    pub fn from_pixel_exclusive(value: f32) -> Self {
         Self((value / Self::PX).floor() as i32)
+    }
+    pub fn from_pixel_inclusive(value: f32) -> Self {
+        Self((value / Self::PX).ceil() as i32)
     }
 }
 

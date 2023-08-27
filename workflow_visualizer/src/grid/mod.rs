@@ -106,8 +106,8 @@ impl Grid {
             gutter_config: GutterConfig {
                 base: span.gutter_base(),
             },
-            horizontal_markers: RawMarker::from_pixel(area.width).0 as u32,
-            vertical_markers: RawMarker::from_pixel(area.height).0 as u32,
+            horizontal_markers: RawMarker::from_pixel_exclusive(area.width).0 as u32,
+            vertical_markers: RawMarker::from_pixel_exclusive(area.height).0 as u32,
         }
     }
     pub fn view_horizontal_markers(&self, view: &GridView) -> RawMarker {
@@ -127,7 +127,7 @@ impl Grid {
         self.vertical_markers as i32
     }
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
-        RawMarker::from_pixel(width - base).0 / columns
+        RawMarker::from_pixel_exclusive(width - base).0 / columns
     }
     pub fn calc_section_from_responsive(
         &self,
