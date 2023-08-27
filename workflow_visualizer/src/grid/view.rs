@@ -220,6 +220,12 @@ impl<PlacementKey: Eq + PartialEq + Hash> Placer<PlacementKey> {
             .copied()
             .expect("RelativePlacer::get")
     }
+    pub fn get_reference_point(&self, key: PlacementKey) -> ReferencePoint {
+        self.reference_points
+            .get(&key)
+            .copied()
+            .expect("reference-point")
+    }
     pub fn view<R: Into<RawMarker>>(&self, hb: R, he: R, vb: R, ve: R) -> GridView {
         (
             (self.anchor.x.raw_offset(hb), self.anchor.x.raw_offset(he)),
