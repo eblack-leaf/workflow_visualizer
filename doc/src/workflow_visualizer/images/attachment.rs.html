@@ -66,8 +66,8 @@
             .insert_resource(ImageOrientations::default());
         visualizer
             .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((load_images.in_set(SyncPoint::Resolve),));
+            .task(Visualizer::TASK_STARTUP)
+            .add_systems((load_images.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),

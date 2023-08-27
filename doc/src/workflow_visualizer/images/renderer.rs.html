@@ -270,6 +270,9 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -335,8 +338,11 @@
     <span class="kw">pub </span>data: Vec&lt;u8&gt;,
 }
 <span class="kw">impl </span>ImageRequest {
-    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageName&gt;&gt;(name: ImageName, data: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ name, data }
+    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageName&gt;&gt;(name: IN, data: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            name: name.into(),
+            data,
+        }
     }
 }
 

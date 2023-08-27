@@ -459,10 +459,6 @@
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
 <a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -533,8 +529,6 @@
     </span><span class="kw">pub const </span>TASK_STARTUP: TaskLabel = TaskLabel(<span class="string">&quot;startup&quot;</span>);
     <span class="doccomment">/// Teardown for logic
     </span><span class="kw">pub const </span>TASK_TEARDOWN: TaskLabel = TaskLabel(<span class="string">&quot;teardown&quot;</span>);
-    <span class="doccomment">/// Preparation for rendering
-    </span><span class="kw">pub const </span>TASK_RENDER_STARTUP: TaskLabel = TaskLabel(<span class="string">&quot;render_startup&quot;</span>);
     <span class="doccomment">/// Render main
     </span><span class="kw">pub const </span>TASK_RENDER_MAIN: TaskLabel = TaskLabel(<span class="string">&quot;render_main&quot;</span>);
     <span class="kw">pub fn </span>new(theme: Theme, gfx_options: GfxOptions) -&gt; <span class="self">Self </span>{
@@ -543,7 +537,6 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>job = Job::new();
                 job.container.insert_resource(theme);
                 job.tasks.insert(<span class="self">Self</span>::TASK_STARTUP, Task::new());
-                job.tasks.insert(<span class="self">Self</span>::TASK_RENDER_STARTUP, Task::new());
                 job.tasks.insert(<span class="self">Self</span>::TASK_TEARDOWN, Task::new());
                 job.tasks.insert(<span class="self">Self</span>::TASK_RENDER_MAIN, Task::new());
                 job.tasks.insert(<span class="self">Self</span>::TASK_MAIN, {
@@ -744,7 +737,6 @@
     <span class="doccomment">/// Exec setup tasks
     </span><span class="kw">fn </span>setup(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_STARTUP);
-        <span class="self">self</span>.job.exec(<span class="self">Self</span>::TASK_RENDER_STARTUP)
     }
     <span class="doccomment">/// Run MAIN logic
     </span><span class="kw">pub fn </span>exec(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {

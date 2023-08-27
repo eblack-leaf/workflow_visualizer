@@ -252,12 +252,12 @@
     tag: ImageTag,
 }
 <span class="kw">impl </span>Image {
-    <span class="kw">pub fn </span>new&lt;L: Into&lt;Layer&gt;&gt;(name: ImageName, layer: L) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageName&gt;, L: Into&lt;Layer&gt;&gt;(name: IN, layer: L) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             section: Section::default(),
             layer: layer.into(),
             visibility: EnableVisibility::default(),
-            name,
+            name: name.into(),
             fade: ImageFade(<span class="number">1f32</span>),
             cache: Cache::default(),
             difference: Difference::default(),
