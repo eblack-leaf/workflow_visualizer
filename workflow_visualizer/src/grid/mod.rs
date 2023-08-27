@@ -13,7 +13,7 @@ pub use responsive::{ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, Re
 pub(crate) use system::config_grid;
 pub use view::{
     GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, Placement, PlacementKey, Placer, ReferencePoint, ReferenceView,
+    GridPoint, GridRange, GridView, Placement, Placer, ReferencePoint, ReferenceView,
 };
 
 use crate::bundling::{BundleBuilder, BundleExtension};

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash::Hash;
 
 use crate::{PathView, RawMarker, ResponsiveGridView};
 
@@ -182,13 +183,13 @@ impl ReferencePoint {
         self
     }
 }
-pub struct Placer {
+pub struct Placer<PlacementKey> {
     pub anchor: GridPoint,
     pub relative_offsets: HashMap<PlacementKey, RawMarker>,
     pub reference_views: HashMap<PlacementKey, ReferenceView>,
     pub reference_points: HashMap<PlacementKey, ReferencePoint>,
 }
-impl Placer {
+impl<PlacementKey: Eq + PartialEq + Hash> Placer<PlacementKey> {
     pub fn new<GP: Into<GridPoint>>(anchor: GP) -> Self {
         Self {
             anchor: anchor.into(),
@@ -242,13 +243,12 @@ impl Placer {
         self.point(b.x(), b.y())
     }
 }
-pub type PlacementKey = u32;
 #[derive(Default, Clone)]
-pub struct Placement {
+pub struct Placement<PlacementKey> {
     pub(crate) views: HashMap<PlacementKey, GridView>,
     pub(crate) points: HashMap<PlacementKey, GridPoint>,
 }
-impl Placement {
+impl<PlacementKey: Eq + PartialEq + Hash> Placement<PlacementKey> {
     pub fn add_view<V: Into<GridView>>(&mut self, key: PlacementKey, view: V) {
         self.views.insert(key, view.into());
     }

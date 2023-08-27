@@ -10,7 +10,7 @@ pub use bundling::{BundleBuilder, BundleExtension};
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
-    GridPoint, GridRange, GridView, HorizontalSpan, Placement, PlacementKey, Placer, RawMarker,
+    GridPoint, GridRange, GridView, HorizontalSpan, Placement, Placer, RawMarker,
     RawMarkerGrouping, ReferencePoint, ReferenceView, ResponsiveGridPoint, ResponsiveGridView,
     ResponsiveUnit, ResponsiveView,
 };
