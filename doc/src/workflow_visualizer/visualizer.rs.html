@@ -644,9 +644,9 @@
                 <span class="kw">let </span>order = <span class="kw-2">*</span>order;
                 <span class="kw">let </span>rhs_order = <span class="kw-2">*</span>rhs_order;
                 <span class="kw">if </span>order &lt; rhs_order {
-                    Ordering::Less
-                } <span class="kw">else if </span>order &gt; rhs_order {
                     Ordering::Greater
+                } <span class="kw">else if </span>order &gt; rhs_order {
+                    Ordering::Less
                 } <span class="kw">else </span>{
                     Ordering::Equal
                 }
