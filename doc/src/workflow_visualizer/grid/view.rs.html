@@ -289,6 +289,9 @@
 <a href="#289" id="289">289</a>
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::hash::Hash;
 
@@ -407,10 +410,10 @@
 </span><span class="kw">pub struct </span>GridLocationOffset(<span class="kw">pub </span>RawMarker);
 <span class="attr">#[derive(Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>ReferenceView {
-    <span class="kw">pub </span>top: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    <span class="kw">pub </span>left: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    <span class="kw">pub </span>right: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    <span class="kw">pub </span>bottom: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+    top: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+    left: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+    right: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+    bottom: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
 }
 <span class="kw">impl </span>ReferenceView {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
@@ -464,8 +467,8 @@
 }
 <span class="attr">#[derive(Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>ReferencePoint {
-    <span class="kw">pub </span>x: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    <span class="kw">pub </span>y: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+    x: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+    y: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
 }
 <span class="kw">impl </span>ReferencePoint {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
@@ -493,10 +496,10 @@
     </span>}
 }
 <span class="kw">pub struct </span>Placer&lt;PlacementKey&gt; {
-    <span class="kw">pub </span>anchor: GridPoint,
-    <span class="kw">pub </span>relative_offsets: HashMap&lt;PlacementKey, RawMarker&gt;,
-    <span class="kw">pub </span>reference_views: HashMap&lt;PlacementKey, ReferenceView&gt;,
-    <span class="kw">pub </span>reference_points: HashMap&lt;PlacementKey, ReferencePoint&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) anchor: GridPoint,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) relative_offsets: HashMap&lt;PlacementKey, RawMarker&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) reference_views: HashMap&lt;PlacementKey, ReferenceView&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) reference_points: HashMap&lt;PlacementKey, ReferencePoint&gt;,
 }
 <span class="kw">impl</span>&lt;PlacementKey: Eq + PartialEq + Hash&gt; Placer&lt;PlacementKey&gt; {
     <span class="kw">pub fn </span>new&lt;GP: Into&lt;GridPoint&gt;&gt;(anchor: GP) -&gt; <span class="self">Self </span>{
@@ -507,20 +510,23 @@
             reference_points: HashMap::new(),
         }
     }
+    <span class="kw">pub fn </span>anchor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridPoint {
+        <span class="self">self</span>.anchor
+    }
     <span class="kw">pub fn </span>add&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, marker: R) {
         <span class="self">self</span>.relative_offsets.insert(key, marker.into());
     }
     <span class="kw">pub fn </span>add_reference_view&lt;R: Into&lt;ReferenceView&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, view: R) {
         <span class="self">self</span>.reference_views.insert(key, view.into());
     }
-    <span class="kw">pub fn </span>reference_view(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; ReferenceView {
+    <span class="kw">pub fn </span>get_reference_view(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; ReferenceView {
         <span class="self">self</span>.reference_views
             .get(<span class="kw-2">&amp;</span>key)
             .copied()
             .expect(<span class="string">&quot;reference-view&quot;</span>)
     }
     <span class="kw">pub fn </span>view_from_reference(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; GridView {
-        <span class="kw">let </span>b = <span class="self">self</span>.reference_view(key);
+        <span class="kw">let </span>b = <span class="self">self</span>.get_reference_view(key);
         <span class="self">self</span>.view(b.left(), b.right(), b.top(), b.bottom())
     }
     <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; RawMarker {
