@@ -24,12 +24,12 @@ pub struct Image {
     tag: ImageTag,
 }
 impl Image {
-    pub fn new<L: Into<Layer>>(name: ImageName, layer: L) -> Self {
+    pub fn new<IN: Into<ImageName>, L: Into<Layer>>(name: IN, layer: L) -> Self {
         Self {
             section: Section::default(),
             layer: layer.into(),
             visibility: EnableVisibility::default(),
-            name,
+            name: name.into(),
             fade: ImageFade(1f32),
             cache: Cache::default(),
             difference: Difference::default(),
