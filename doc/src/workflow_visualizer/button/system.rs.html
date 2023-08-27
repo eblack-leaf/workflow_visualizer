@@ -515,7 +515,7 @@
         } <span class="kw">else </span>{
             <span class="kw">let </span>dimensions = aligned_fonts
                 .get(<span class="kw-2">&amp;</span>TextScaleAlignment::Custom(scaling.text.<span class="number">0</span>))
-                .character_dimensions(<span class="string">&#39;a&#39;</span>, scaling.text.px());
+                .character_dimensions(scaling.text.px());
             <span class="kw">let </span>logical_dimensions =
                 Area::&lt;DeviceContext&gt;::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());

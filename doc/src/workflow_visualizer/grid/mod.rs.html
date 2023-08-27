@@ -345,8 +345,8 @@
             gutter_config: GutterConfig {
                 base: span.gutter_base(),
             },
-            horizontal_markers: (area.width / RawMarker::PX).floor() <span class="kw">as </span>u32,
-            vertical_markers: (area.height / RawMarker::PX).floor() <span class="kw">as </span>u32,
+            horizontal_markers: RawMarker::from_pixel(area.width).<span class="number">0 </span><span class="kw">as </span>u32,
+            vertical_markers: RawMarker::from_pixel(area.height).<span class="number">0 </span><span class="kw">as </span>u32,
         }
     }
     <span class="kw">pub fn </span>view_horizontal_markers(<span class="kw-2">&amp;</span><span class="self">self</span>, view: <span class="kw-2">&amp;</span>GridView) -&gt; RawMarker {
@@ -366,7 +366,7 @@
         <span class="self">self</span>.vertical_markers <span class="kw">as </span>i32
     }
     <span class="kw">fn </span>calc_extension(width: f32, base: f32, columns: i32) -&gt; i32 {
-        ((width - base) / RawMarker::PX).floor() <span class="kw">as </span>i32 / columns
+        RawMarker::from_pixel(width - base).<span class="number">0 </span>/ columns
     }
     <span class="kw">pub fn </span>calc_section_from_responsive(
         <span class="kw-2">&amp;</span><span class="self">self</span>,

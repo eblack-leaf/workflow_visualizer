@@ -38,10 +38,6 @@
 <a href="#38" id="38">38</a>
 <a href="#39" id="39">39</a>
 <a href="#40" id="40">40</a>
-<a href="#41" id="41">41</a>
-<a href="#42" id="42">42</a>
-<a href="#43" id="43">43</a>
-<a href="#44" id="44">44</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
 <span class="kw">use </span><span class="kw">crate</span>::text::component::Text;
@@ -75,10 +71,6 @@
             layer_diff.in_set(SyncPoint::PushDiff),
             pull_differences.in_set(SyncPoint::Finish),
         ));
-        engen
-            .job
-            .task(Visualizer::TASK_RENDER_STARTUP)
-            .add_systems((renderer::setup.in_set(SyncPoint::Preparation),));
         engen.job.task(Visualizer::TASK_RENDER_MAIN).add_systems((
             create_render_groups.in_set(SyncPoint::Preparation),
             render_group_differences.in_set(SyncPoint::Resolve),

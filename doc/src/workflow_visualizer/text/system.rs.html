@@ -950,7 +950,7 @@
         <span class="kw-2">*</span>text_scale = TextScale::from_alignment(<span class="kw-2">*</span>text_scale_alignment, scale_factor.factor());
         <span class="kw">let </span>letter_dimensions = fonts
             .get(text_scale_alignment)
-            .character_dimensions(<span class="string">&#39;a&#39;</span>, text_scale.px());
+            .character_dimensions(text_scale.px());
         <span class="kw">let </span>letter_dimensions =
             Area::&lt;DeviceContext&gt;::from((letter_dimensions.width, letter_dimensions.height));
         <span class="kw-2">*</span>text_letter_dimensions = TextLetterDimensions(letter_dimensions);
@@ -1007,7 +1007,7 @@
                     AtlasBlock::new(
                         fonts
                             .get(text_scale_alignment)
-                            .character_dimensions(<span class="string">&#39;a&#39;</span>, text_scale.px()),
+                            .character_dimensions(text_scale.px()),
                     ),
                 ),
             );
