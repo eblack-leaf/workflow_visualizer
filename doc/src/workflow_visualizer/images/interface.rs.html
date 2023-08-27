@@ -285,7 +285,7 @@
     orientations: Res&lt;ImageOrientations&gt;,
 ) {
     <span class="kw">for </span>(name, max_dim, <span class="kw-2">mut </span>area) <span class="kw">in </span>bound.iter_mut() {
-        <span class="kw">let </span>orientation = orientations.get(name).expect(<span class="string">&quot;aspect-ratio&quot;</span>);
+        <span class="kw">let </span>orientation = orientations.get(name.clone());
         <span class="kw">match </span>max_dim {
             AspectRatioAlignedDimension::Width(width) =&gt; {
                 <span class="kw">let </span>height = width * orientation.value().reciprocal();

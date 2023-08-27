@@ -102,6 +102,8 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -119,7 +121,8 @@
     ResponsiveUnit, ResponsiveView,
 };
 <span class="kw">pub use </span>images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageRequest, ImageTag,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageOrientations, ImageRequest,
+    ImageSizes, ImageTag,
 };
 <span class="kw">pub use </span>instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
@@ -131,6 +134,7 @@
     PrimaryInteraction, PrimaryMouseButton, Toggled, Triggered,
 };
 <span class="kw">pub use </span>job::{Exit, Idle, JobSyncPoint, Tag};
+<span class="kw">pub use </span>orientation::{AspectRatio, Orientation};
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
