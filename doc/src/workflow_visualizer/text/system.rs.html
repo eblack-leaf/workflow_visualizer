@@ -713,15 +713,6 @@
 <a href="#713" id="713">713</a>
 <a href="#714" id="714">714</a>
 <a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -741,7 +732,7 @@
     TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextScaleAlignment,
     TextValue, TextWrapStyle,
 };
-<span class="kw">use </span><span class="kw">crate</span>::text::font::{AlignedFonts, MonoSpacedFont};
+<span class="kw">use </span><span class="kw">crate</span>::text::font::MonoSpacedFont;
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{
     DrawSection, KeyedGlyphIds, LayerWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
     RenderGroupUniqueGlyphs, TextPlacement,
@@ -760,7 +751,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(scale_factor: Res&lt;ScaleFactor&gt;, <span class="kw-2">mut </span>cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(AlignedFonts::new(scale_factor.factor()));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(<span class="number">20</span>));
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>place(
     <span class="kw-2">mut </span>text_query: Query&lt;
@@ -779,7 +770,7 @@
             Changed&lt;TextScale&gt;,
         )&gt;,
     &gt;,
-    fonts: Res&lt;AlignedFonts&gt;,
+    fonts: Res&lt;MonoSpacedFont&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, text, area, wrap_style, text_scale, text_scale_alignment) <span class="kw">in
@@ -793,7 +784,7 @@
             ..LayoutSettings::default()
         });
         placer.<span class="number">0</span>.append(
-            fonts.get(text_scale_alignment).font_slice(),
+            fonts.font_slice(),
             <span class="kw-2">&amp;</span>TextStyle::new(text.<span class="number">0</span>.as_str(), text_scale.px(), MonoSpacedFont::index()),
         );
         <span class="kw">let </span><span class="kw-2">mut </span>key_factory = KeyFactory::new();
@@ -943,14 +934,12 @@
         Changed&lt;TextScaleAlignment&gt;,
     &gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
-    fonts: Res&lt;AlignedFonts&gt;,
+    fonts: Res&lt;MonoSpacedFont&gt;,
 ) {
     <span class="kw">for </span>(<span class="kw-2">mut </span>text_scale, <span class="kw-2">mut </span>text_letter_dimensions, text_scale_alignment) <span class="kw">in </span>text_query.iter_mut()
     {
         <span class="kw-2">*</span>text_scale = TextScale::from_alignment(<span class="kw-2">*</span>text_scale_alignment, scale_factor.factor());
-        <span class="kw">let </span>letter_dimensions = fonts
-            .get(text_scale_alignment)
-            .character_dimensions(text_scale.px());
+        <span class="kw">let </span>letter_dimensions = fonts.character_dimensions(text_scale.px());
         <span class="kw">let </span>letter_dimensions =
             Area::&lt;DeviceContext&gt;::from((letter_dimensions.width, letter_dimensions.height));
         <span class="kw-2">*</span>text_letter_dimensions = TextLetterDimensions(letter_dimensions);
@@ -974,7 +963,7 @@
     &gt;,
     <span class="kw-2">mut </span>removed: RemovedComponents&lt;TextValue&gt;,
     <span class="kw-2">mut </span>extraction: ResMut&lt;Extraction&gt;,
-    fonts: Res&lt;AlignedFonts&gt;,
+    fonts: Res&lt;MonoSpacedFont&gt;,
 ) {
     <span class="kw">for </span>(
         entity,
@@ -1004,11 +993,7 @@
                     <span class="kw-2">*</span>layer,
                     RenderGroupUniqueGlyphs::from_text(text),
                     <span class="kw-2">*</span>text_scale_alignment,
-                    AtlasBlock::new(
-                        fonts
-                            .get(text_scale_alignment)
-                            .character_dimensions(text_scale.px()),
-                    ),
+                    AtlasBlock::new(fonts.character_dimensions(text_scale.px())),
                 ),
             );
         } <span class="kw">else </span>{
@@ -1152,7 +1137,7 @@
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>renderer: NonSendMut&lt;TextRenderer&gt;,
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx_surface: Res&lt;GfxSurface&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx_surface: NonSend&lt;GfxSurface&gt;,
-    font: Res&lt;AlignedFonts&gt;,
+    font: Res&lt;MonoSpacedFont&gt;,
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>viewport: Res&lt;Viewport&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>viewport: NonSend&lt;Viewport&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
@@ -1332,10 +1317,7 @@
                 .get_mut(<span class="kw-2">&amp;</span>add.id)
                 .unwrap()
                 .increment();
-            <span class="kw">let </span>rasterization = font
-                .get(<span class="kw-2">&amp;</span>render_group.text_scale_alignment)
-                .font()
-                .rasterize(add.character, add.scale.px());
+            <span class="kw">let </span>rasterization = font.font().rasterize(add.character, add.scale.px());
             <span class="comment">// TODO since subpixel , combine them here to save space
             </span><span class="kw">let </span>glyph_area: Area&lt;NumericalContext&gt; =
                 (rasterization.<span class="number">0</span>.width, rasterization.<span class="number">0</span>.height).into();

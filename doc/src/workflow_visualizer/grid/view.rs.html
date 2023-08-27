@@ -271,6 +271,24 @@
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::hash::Hash;
 
@@ -403,6 +421,18 @@
             bottom: <span class="prelude-val">None</span>,
         }
     }
+    <span class="kw">pub fn </span>set_top&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, top: R) {
+        <span class="self">self</span>.top.replace(top.into());
+    }
+    <span class="kw">pub fn </span>set_left&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, left: R) {
+        <span class="self">self</span>.left.replace(left.into());
+    }
+    <span class="kw">pub fn </span>set_right&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, right: R) {
+        <span class="self">self</span>.right.replace(right.into());
+    }
+    <span class="kw">pub fn </span>set_bottom&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bottom: R) {
+        <span class="self">self</span>.bottom.replace(bottom.into());
+    }
     <span class="kw">pub fn </span>top(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
         <span class="self">self</span>.top.expect(<span class="string">&quot;top&quot;</span>)
     }
@@ -440,6 +470,12 @@
 <span class="kw">impl </span>ReferencePoint {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ x: <span class="prelude-val">None</span>, y: <span class="prelude-val">None </span>}
+    }
+    <span class="kw">pub fn </span>set_x&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: R) {
+        <span class="self">self</span>.x.replace(x.into());
+    }
+    <span class="kw">pub fn </span>set_y&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, y: R) {
+        <span class="self">self</span>.y.replace(y.into());
     }
     <span class="kw">pub fn </span>x(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
         <span class="self">self</span>.x.expect(<span class="string">&quot;x&quot;</span>)
@@ -509,7 +545,7 @@
     <span class="kw">pub fn </span>point&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, hb: R, vb: R) -&gt; GridPoint {
         (<span class="self">self</span>.anchor.x.raw_offset(hb), <span class="self">self</span>.anchor.y.raw_offset(vb)).into()
     }
-    <span class="kw">pub fn </span>add_point&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, x: R, y: R) {
+    <span class="kw">pub fn </span>add_reference_point&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, x: R, y: R) {
         <span class="self">self</span>.reference_points
             .insert(key, ReferencePoint::new().with_x(x).with_y(y));
     }

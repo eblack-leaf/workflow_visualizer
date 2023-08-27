@@ -314,20 +314,16 @@
 <a href="#314" id="314">314</a>
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
 <span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
-<span class="kw">use </span><span class="kw">crate</span>::text::AlignedFonts;
 <span class="kw">use crate</span>::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
-    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, Panel, PanelTag, PanelType,
-    Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment, TextValue, TextWrapStyle,
-    Toggled,
+    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment,
+    TextValue, TextWrapStyle, Toggled,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(
@@ -490,7 +486,7 @@
         (<span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;, <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;),
         Without&lt;PanelEntity&gt;,
     &gt;,
-    aligned_fonts: Res&lt;AlignedFonts&gt;,
+    aligned_fonts: Res&lt;MonoSpacedFont&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>(button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, scaling) <span class="kw">in
@@ -513,9 +509,7 @@
                 ),
             )
         } <span class="kw">else </span>{
-            <span class="kw">let </span>dimensions = aligned_fonts
-                .get(<span class="kw-2">&amp;</span>TextScaleAlignment::Custom(scaling.text.<span class="number">0</span>))
-                .character_dimensions(scaling.text.px());
+            <span class="kw">let </span>dimensions = aligned_fonts.character_dimensions(scaling.text.px());
             <span class="kw">let </span>logical_dimensions =
                 Area::&lt;DeviceContext&gt;::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());
