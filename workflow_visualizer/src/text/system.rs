@@ -77,7 +77,7 @@ pub(crate) fn place(
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         for (key, glyph_position) in placement.0.iter_mut() {
-            glyph_position.y /= 0.3f32;
+            glyph_position.y /= 3f32;
         }
     }
 }
