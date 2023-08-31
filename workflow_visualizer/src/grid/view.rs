@@ -70,6 +70,18 @@ impl GridView {
     pub fn all_same(self) -> ResponsiveGridView {
         ResponsiveGridView::all_same(self)
     }
+    pub fn top(&self) -> GridLocation {
+        self.vertical.begin
+    }
+    pub fn left(&self) -> GridLocation {
+        self.horizontal.begin
+    }
+    pub fn right(&self) -> GridLocation {
+        self.horizontal.end
+    }
+    pub fn bottom(&self) -> GridLocation {
+        self.vertical.end
+    }
 }
 impl<T: Into<GridRange>> From<(T, T)> for GridView {
     fn from(value: (T, T)) -> Self {
