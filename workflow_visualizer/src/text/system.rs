@@ -78,7 +78,8 @@ pub(crate) fn place(
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         for (key, glyph_position) in placement.0.iter_mut() {
             if text_scale.0 > 40u32 {
-                glyph_position.y /= 4f32;
+                let factor = text_scale.0 as f32 / 40f32;
+                glyph_position.y -= 20f32 * factor;
             }
         }
     }
