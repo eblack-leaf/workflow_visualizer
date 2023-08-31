@@ -700,6 +700,11 @@
 <a href="#700" id="700">700</a>
 <a href="#701" id="701">701</a>
 <a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -738,7 +743,9 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(scale_factor: Res&lt;ScaleFactor&gt;, <span class="kw-2">mut </span>cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(<span class="number">40</span>));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
+        MonoSpacedFont::DEFAULT_OPT_SCALE,
+    ));
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>place(
     <span class="kw-2">mut </span>text_query: Query&lt;
@@ -779,7 +786,10 @@
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
         <span class="kw">for </span>(key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
-            glyph_position.y /= <span class="number">0.3f32</span>;
+            <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; <span class="number">40u32 </span>{
+                <span class="kw">let </span>factor = text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / MonoSpacedFont::DEFAULT_OPT_SCALE <span class="kw">as </span>f32;
+                glyph_position.y -= <span class="number">12f32 </span>* factor;
+            }
         }
     }
 }
