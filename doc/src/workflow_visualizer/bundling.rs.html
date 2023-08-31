@@ -74,8 +74,6 @@
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{TimeDelta, TimeMarker, Timer};
 <span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -110,34 +108,32 @@
     }
 }
 <span class="attr">#[derive(Component)]
-</span><span class="kw">pub struct </span>DelayedBundle&lt;T: Bundle + Sized + Clone&gt; {
-    <span class="kw">pub </span>bundle: T,
+</span><span class="kw">pub struct </span>DelayedBundle&lt;T: Bundle + Sized&gt; {
+    <span class="kw">pub </span>bundle: <span class="prelude-ty">Option</span>&lt;T&gt;,
     <span class="kw">pub </span>start: <span class="prelude-ty">Option</span>&lt;TimeMarker&gt;,
     <span class="kw">pub </span>delay: TimeDelta,
-    <span class="kw">pub </span>handle: Entity,
 }
-<span class="kw">impl</span>&lt;T: Bundle + Sized + Clone&gt; DelayedBundle&lt;T&gt; {
-    <span class="kw">pub fn </span>new&lt;TD: Into&lt;TimeDelta&gt;&gt;(bundle: T, delay: TD, handle: Entity) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;T: Bundle + Sized&gt; DelayedBundle&lt;T&gt; {
+    <span class="kw">pub fn </span>new&lt;TD: Into&lt;TimeDelta&gt;&gt;(bundle: T, delay: TD) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            bundle,
+            bundle: <span class="prelude-val">Some</span>(bundle),
             start: <span class="prelude-val">None</span>,
             delay: delay.into(),
-            handle,
         }
     }
 }
 <span class="kw">pub trait </span>DelayedSpawn
 <span class="kw">where
-    </span><span class="self">Self</span>: Bundle + Sized + Clone,
+    </span><span class="self">Self</span>: Bundle + Sized,
 {
-    <span class="kw">fn </span>delay&lt;TD: Into&lt;TimeDelta&gt;&gt;(<span class="self">self</span>, delay: TD, handle: Entity) -&gt; DelayedBundle&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>delay&lt;TD: Into&lt;TimeDelta&gt;&gt;(<span class="self">self</span>, delay: TD) -&gt; DelayedBundle&lt;<span class="self">Self</span>&gt;;
 }
-<span class="kw">impl</span>&lt;T: Bundle + Sized + Clone&gt; DelayedSpawn <span class="kw">for </span>T {
-    <span class="kw">fn </span>delay&lt;TD: Into&lt;TimeDelta&gt;&gt;(<span class="self">self</span>, delay: TD, handle: Entity) -&gt; DelayedBundle&lt;<span class="self">Self</span>&gt; {
-        DelayedBundle::&lt;T&gt;::new(<span class="self">self</span>, delay, handle)
+<span class="kw">impl</span>&lt;T: Bundle + Sized&gt; DelayedSpawn <span class="kw">for </span>T {
+    <span class="kw">fn </span>delay&lt;TD: Into&lt;TimeDelta&gt;&gt;(<span class="self">self</span>, delay: TD) -&gt; DelayedBundle&lt;<span class="self">Self</span>&gt; {
+        DelayedBundle::&lt;T&gt;::new(<span class="self">self</span>, delay)
     }
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>spawn_delayed_bundle&lt;T: Bundle + Sized + Send + <span class="lifetime">&#39;static </span>+ Clone&gt;(
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>spawn_delayed_bundle&lt;T: Bundle + Sized + Send + <span class="lifetime">&#39;static</span>&gt;(
     <span class="kw-2">mut </span>delayed: Query&lt;(Entity, <span class="kw-2">&amp;mut </span>DelayedBundle&lt;T&gt;)&gt;,
     timer: Res&lt;Timer&gt;,
     <span class="kw-2">mut </span>cmd: Commands,
@@ -148,9 +144,9 @@
         }
         <span class="kw">let </span>time_since_start = timer.time_since(delayed_bundle.start.unwrap());
         <span class="kw">if </span>time_since_start &gt;= delayed_bundle.delay {
-            cmd.entity(delayed_bundle.handle)
-                .insert(delayed_bundle.bundle.clone());
-            cmd.entity(entity).despawn();
+            cmd.entity(entity)
+                .insert(delayed_bundle.bundle.take().unwrap());
+            cmd.entity(entity).remove::&lt;DelayedBundle&lt;T&gt;&gt;();
         }
     }
 }

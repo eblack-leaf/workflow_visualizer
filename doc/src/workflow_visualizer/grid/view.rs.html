@@ -292,10 +292,14 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::hash::Hash;
 
-<span class="kw">use crate</span>::{PathView, RawMarker, ResponsiveGridView};
+<span class="kw">use crate</span>::{PathView, RawMarker, ResponsiveGridPoint, ResponsiveGridView};
 
 <span class="doccomment">/// Description of a Location on the Grid
 </span><span class="attr">#[derive(Copy, Clone)]
@@ -379,7 +383,11 @@
     <span class="kw">pub </span>x: GridLocation,
     <span class="kw">pub </span>y: GridLocation,
 }
-
+<span class="kw">impl </span>GridPoint {
+    <span class="kw">pub fn </span>all_same(<span class="self">self</span>) -&gt; ResponsiveGridPoint {
+        ResponsiveGridPoint::all_same(<span class="self">self</span>)
+    }
+}
 <span class="kw">impl</span>&lt;T: Into&lt;GridLocation&gt;&gt; From&lt;(T, T)&gt; <span class="kw">for </span>GridPoint {
     <span class="kw">fn </span>from(value: (T, T)) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{

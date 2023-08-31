@@ -331,7 +331,7 @@
     }
 }
 <span class="doccomment">/// Whether to wrap by Word or Letter
-</span><span class="attr">#[derive(Component)]
+</span><span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>TextWrapStyle(<span class="kw">pub </span>WrapStyle);
 <span class="kw">impl </span>TextWrapStyle {
     <span class="kw">pub fn </span>letter() -&gt; <span class="self">Self </span>{

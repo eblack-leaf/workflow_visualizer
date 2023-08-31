@@ -112,7 +112,7 @@
 <span class="kw">use crate</span>::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
 
 <span class="doccomment">/// Entry point for enabling visibility module on an entity
-</span><span class="attr">#[derive(Bundle)]
+</span><span class="attr">#[derive(Bundle, Copy, Clone)]
 </span><span class="kw">pub struct </span>EnableVisibility {
     <span class="kw">pub </span>visibility: Visibility,
     <span class="kw">pub </span>visible_section: VisibleSection,
