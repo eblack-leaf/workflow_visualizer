@@ -9,6 +9,7 @@ use winit::event::{ElementState, MouseButton};
 use winit::window::Window;
 
 use crate::animate::{end_animations, start_animations, update_animations};
+use crate::bundling::spawn_delayed_bundle;
 use crate::button::ButtonAttachment;
 use crate::color::ColorAttachment;
 use crate::coord::CoordinateAttachment;
@@ -434,6 +435,10 @@ impl Visualizer {
             start_animations::<A>.in_set(SyncPoint::PostProcessPreparation),
             end_animations::<A>.in_set(SyncPoint::Finish),
         ));
+    }
+    pub fn enable_delayed_spawn<T: Bundle + Clone + Sized + 'static>(&mut self) {
+        self.task(Visualizer::TASK_MAIN)
+            .add_systems((spawn_delayed_bundle::<T>.in_set(SyncPoint::Spawn),));
     }
     /// queue attachment to the Visualizer
     pub(crate) fn add_attachments(&mut self, attachments: Vec<Attachment>) {

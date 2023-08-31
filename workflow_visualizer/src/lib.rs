@@ -6,7 +6,7 @@
 //! Runner which invokes the visualizer's tools for multiple platforms
 pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 pub use bevy_ecs;
-pub use bundling::{BundleBuilder, BundleExtension};
+pub use bundling::{BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn};
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
 pub use grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
