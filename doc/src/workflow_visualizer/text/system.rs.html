@@ -786,11 +786,11 @@
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
         <span class="kw">for </span>(key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
-            <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; <span class="number">40u32 </span>{
-                <span class="kw">let </span>factor = text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / MonoSpacedFont::DEFAULT_OPT_SCALE <span class="kw">as </span>f32;
-                glyph_position.y -= <span class="number">12f32 </span>* factor;
-            }
-        }
+            <span class="comment">// if text_scale.0 &gt; MonoSpacedFont::DEFAULT_OPT_SCALE {
+            //     let factor = text_scale.0 as f32 / MonoSpacedFont::DEFAULT_OPT_SCALE as f32;
+            //     glyph_position.y -= 11.775f32 * factor;
+            // }
+        </span>}
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>letter_differential(
