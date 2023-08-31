@@ -11,15 +11,23 @@ pub enum IconScale {
     Medium,
     Large,
     Custom(u32),
+    Asymmetrical((u32, u32)),
 }
 
 impl IconScale {
-    pub fn px(&self) -> f32 {
+    pub fn width_px(&self) -> f32 {
         match &self {
             IconScale::Small => 13f32,
             IconScale::Medium => 17f32,
             IconScale::Large => 20f32,
             IconScale::Custom(dim) => *dim as f32,
+            IconScale::Asymmetrical((w, h)) => *w as f32,
+        }
+    }
+    pub fn height_px(&self) -> f32 {
+        match &self {
+            IconScale::Asymmetrical((w, h)) => *h as f32,
+            _ => self.width_px(),
         }
     }
 }

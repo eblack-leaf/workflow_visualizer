@@ -16,8 +16,7 @@ pub(crate) fn calc_area(
     >,
 ) {
     for (mut area, scale) in icons.iter_mut() {
-        let px = scale.px();
-        let new_area = Area::new(px, px);
+        let new_area = Area::new(scale.width_px(), scale.height_px());
         *area = new_area;
     }
 }

@@ -188,8 +188,8 @@ pub(crate) fn placement(
             (
                 None,
                 Position::new(
-                    center.x - scaling.icon.px() / 2f32,
-                    center.y - scaling.icon.px() / 2f32,
+                    center.x - scaling.icon.width_px() / 2f32,
+                    center.y - scaling.icon.height_px() / 2f32,
                 ),
             )
         } else {
@@ -199,13 +199,13 @@ pub(crate) fn placement(
                     .to_ui(scale_factor.factor());
             let len = button_text.0.len() as f32;
             let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
-                + scaling.icon.px() / 2f32
+                + scaling.icon.width_px() / 2f32
                 + RawMarker(2).to_pixel();
             let y = center.y - logical_dimensions.height / 2f32;
             let width = logical_dimensions.width * len;
             let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
-            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.px();
+            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.width_px();
             let icon_y = text_section.top() + RawMarker::PX;
             (Some(text_section), Position::new(icon_x, icon_y))
         };
