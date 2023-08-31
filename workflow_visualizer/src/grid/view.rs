@@ -134,6 +134,9 @@ impl GridViewBuilder {
             bottom: None,
         }
     }
+    pub fn build(&self) -> GridView {
+        ((self.left(), self.right()), (self.top(), self.bottom())).into()
+    }
     pub fn set_top<R: Into<GridLocation>>(&mut self, top: R) {
         self.top.replace(top.into());
     }
@@ -183,6 +186,9 @@ pub struct GridPointBuilder {
 impl GridPointBuilder {
     pub fn new() -> Self {
         Self { x: None, y: None }
+    }
+    pub fn build(&self) -> GridPoint {
+        (self.x(), self.y()).into()
     }
     pub fn set_x<R: Into<GridLocation>>(&mut self, x: R) {
         self.x.replace(x.into());
