@@ -436,7 +436,7 @@ impl Visualizer {
             end_animations::<A>.in_set(SyncPoint::Finish),
         ));
     }
-    pub fn enable_delayed_spawn<T: Bundle + Clone + Sized + 'static>(&mut self) {
+    pub fn enable_delayed_spawn<T: Bundle + Sized + 'static>(&mut self) {
         self.task(Visualizer::TASK_MAIN)
             .add_systems((spawn_delayed_bundle::<T>.in_set(SyncPoint::Spawn),));
     }
