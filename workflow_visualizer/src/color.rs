@@ -1,4 +1,6 @@
-use bevy_ecs::prelude::Component;
+use crate::{Animate, Animation, Attach, Interpolation, SyncPoint, Visualizer};
+use bevy_ecs::prelude::{Component, IntoSystemConfigs};
+use bevy_ecs::system::Query;
 
 /// RGBA colors
 #[repr(C)]
@@ -85,5 +87,42 @@ impl From<(f32, f32, f32)> for Color {
 impl From<(f32, f32, f32, f32)> for Color {
     fn from(rgba: (f32, f32, f32, f32)) -> Self {
         Self::rgba(rgba.0, rgba.1, rgba.2, rgba.3)
+    }
+}
+impl Animate for Color {
+    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+        vec![
+            Interpolation::new(end.red - self.red),
+            Interpolation::new(end.green - self.green),
+            Interpolation::new(end.blue - self.blue),
+            Interpolation::new(end.alpha - self.alpha),
+        ]
+    }
+}
+pub(crate) fn apply_animations(mut anims: Query<(&mut Color, &mut Animation<Color>)>) {
+    for (mut color, mut anim) in anims.iter_mut() {
+        let extracts = anim.extractions();
+        if let Some(extract) = extracts.get(0).expect("red") {
+            color.red += extract.value();
+        }
+        if let Some(extract) = extracts.get(1).expect("green") {
+            color.green += extract.value();
+        }
+        if let Some(extract) = extracts.get(2).expect("blue") {
+            color.blue += extract.value();
+        }
+        if let Some(extract) = extracts.get(3).expect("alpha") {
+            color.alpha += extract.value();
+        }
+    }
+}
+
+pub(crate) struct ColorAttachment;
+impl Attach for ColorAttachment {
+    fn attach(visualizer: &mut Visualizer) {
+        visualizer.register_animation::<Color>();
+        visualizer
+            .task(Visualizer::TASK_MAIN)
+            .add_systems((apply_animations.in_set(SyncPoint::Animation),));
     }
 }

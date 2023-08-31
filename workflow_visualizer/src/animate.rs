@@ -49,6 +49,11 @@ impl Interpolation {
 
 #[derive(Clone, Copy)]
 pub struct InterpolationExtraction(pub f32);
+impl InterpolationExtraction {
+    pub fn value(&self) -> f32 {
+        self.0
+    }
+}
 
 impl From<f32> for InterpolationExtraction {
     fn from(value: f32) -> Self {

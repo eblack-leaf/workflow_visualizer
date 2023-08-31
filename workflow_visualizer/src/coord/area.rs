@@ -3,10 +3,11 @@ use std::marker::PhantomData;
 use std::ops::{Add, Mul, Sub};
 
 use bevy_ecs::component::Component;
+use bevy_ecs::prelude::Query;
 use bytemuck::{Pod, Zeroable};
 
 use crate::coord::{CoordinateContext, NumericalContext};
-use crate::{DeviceContext, InterfaceContext};
+use crate::{Animate, Animation, DeviceContext, InterfaceContext, Interpolation};
 /// Area is for width/height of an entity
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Area<Context: CoordinateContext> {
@@ -111,5 +112,26 @@ impl<Context: CoordinateContext> Sub for Area<Context> {
     type Output = Area<Context>;
     fn sub(self, rhs: Self) -> Self::Output {
         Area::<Context>::new(self.width - rhs.width, self.height - rhs.height)
+    }
+}
+impl<Context: CoordinateContext> Animate for Area<Context> {
+    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+        vec![
+            Interpolation::new(end.width - self.width),
+            Interpolation::new(end.height - self.height),
+        ]
+    }
+}
+pub(crate) fn apply_animation<Context: CoordinateContext>(
+    mut positions: Query<(&mut Area<Context>, &mut Animation<Area<Context>>)>,
+) {
+    for (mut pos, mut anim) in positions.iter_mut() {
+        let extracts = anim.extractions();
+        if let Some(extract) = extracts.get(0).unwrap() {
+            pos.width += extract.0;
+        }
+        if let Some(extract) = extracts.get(1).unwrap() {
+            pos.height += extract.0;
+        }
     }
 }

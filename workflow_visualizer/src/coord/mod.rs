@@ -1,8 +1,7 @@
 use bevy_ecs::bundle::Bundle;
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::coord::position::apply_animation;
-use crate::{Attach, Layer, Position, Section, SyncPoint, Visualizer};
+use crate::{Area, Attach, Layer, Position, Section, SyncPoint, Visualizer};
 
 pub mod area;
 pub mod layer;
@@ -49,9 +48,10 @@ pub(crate) struct CoordinateAttachment;
 impl Attach for CoordinateAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.register_animation::<Position<InterfaceContext>>();
-        visualizer
-            .job
-            .task(Visualizer::TASK_MAIN)
-            .add_systems((apply_animation::<InterfaceContext>.in_set(SyncPoint::Animation),));
+        visualizer.register_animation::<Area<InterfaceContext>>();
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            position::apply_animation::<InterfaceContext>.in_set(SyncPoint::Animation),
+            area::apply_animation::<InterfaceContext>.in_set(SyncPoint::Animation),
+        ));
     }
 }
