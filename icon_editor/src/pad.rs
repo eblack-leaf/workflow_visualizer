@@ -7,8 +7,8 @@ use workflow_visualizer::{
     bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, BundledIcon, Button,
     ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale,
     Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position,
-    RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text,
-    TextScaleAlignment, TextValue, TextWrapStyle, Triggered, Visualizer,
+    RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text, TextValue,
+    TextWrapStyle, Triggered, Visualizer,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -170,7 +170,7 @@ pub(crate) fn setup(mut cmd: Commands) {
             Text::new(
                 Pad::PAD_LAYER,
                 "255",
-                TextScaleAlignment::Large,
+                17,
                 Color::OFF_WHITE,
                 TextWrapStyle::letter(),
             )

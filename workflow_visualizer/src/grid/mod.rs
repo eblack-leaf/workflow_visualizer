@@ -126,6 +126,9 @@ impl Grid {
     pub fn vertical_markers(&self) -> i32 {
         self.vertical_markers as i32
     }
+    pub fn last_full_row(&self) -> GridMarker {
+        (self.vertical_markers() / (self.markers_per_row() + self.markers_per_gutter())).into()
+    }
     fn calc_extension(width: f32, base: f32, columns: i32) -> i32 {
         RawMarker::from_pixel_exclusive(width - base).0 / columns
     }

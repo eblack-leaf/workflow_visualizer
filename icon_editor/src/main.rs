@@ -8,7 +8,7 @@ mod pad;
 
 fn main() {
     // tracing_subscriber::fmt().with_max_level(Level::TRACE).init();
-    let mut visualizer = Visualizer::new(
+    let visualizer = Visualizer::new(
         Theme::new(ThemeDescriptor::new().with_background(Color::OFF_BLACK)),
         GfxOptions::native_defaults().with_msaa(2),
     );

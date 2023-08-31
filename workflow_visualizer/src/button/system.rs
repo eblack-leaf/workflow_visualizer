@@ -6,8 +6,8 @@ use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
-    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment,
-    TextValue, TextWrapStyle, Toggled,
+    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
+    Toggled,
 };
 
 pub(crate) fn border_change(
@@ -81,7 +81,7 @@ pub(crate) fn spawn(
             .spawn(Text::new(
                 *layer - Layer::from(1),
                 button_text.0.clone(),
-                TextScaleAlignment::Custom(scaling.text.0),
+                scaling.text.0,
                 *color,
                 TextWrapStyle::letter(),
             ))

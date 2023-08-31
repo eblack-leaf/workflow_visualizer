@@ -3,7 +3,7 @@ use workflow_visualizer::bevy_ecs::prelude::{
 };
 use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Line, Panel, PanelType,
-    Sender, Text, TextScaleAlignment, TextValue, TextWrapStyle, Triggered,
+    Sender, Text, TextValue, TextWrapStyle, Triggered,
 };
 
 use crate::enable::EntryEnabled;
@@ -156,7 +156,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Text::new(
             4,
             "",
-            TextScaleAlignment::Custom(entry_scale.text_scale),
+            entry_scale.text_scale,
             Color::from(Color::OFF_WHITE).with_alpha(1f32),
             TextWrapStyle::letter(),
         ))
@@ -165,7 +165,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Text::new(
             4,
             "------",
-            TextScaleAlignment::Custom(entry_scale.text_scale),
+            entry_scale.text_scale,
             Color::from(Color::OFF_WHITE).with_alpha(1f32),
             TextWrapStyle::letter(),
         ))

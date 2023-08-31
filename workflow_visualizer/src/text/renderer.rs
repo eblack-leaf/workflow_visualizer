@@ -5,13 +5,13 @@ use tracing::trace;
 use wgpu::util::DeviceExt;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-use crate::text::component::{Difference, TextScaleAlignment};
+use crate::text::component::Difference;
 use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 use crate::texture_atlas::TextureCoordinates;
 use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
 use crate::{
     Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection, Visualizer,
+    RenderPassHandle, RenderPhase, ScaleFactor, TextScale, Viewport, VisibleSection, Visualizer,
 };
 
 pub(crate) const AABB: [Vertex; 6] = [
@@ -65,7 +65,7 @@ pub(crate) struct Extraction {
             VisibleSection,
             Layer,
             RenderGroupUniqueGlyphs,
-            TextScaleAlignment,
+            TextScale,
             AtlasBlock,
         ),
     >,

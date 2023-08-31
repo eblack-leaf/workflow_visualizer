@@ -14,8 +14,8 @@ use crate::text::atlas::{
 };
 use crate::text::component::{
     Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, TextGridLocation,
-    TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextScaleAlignment,
-    TextValue, TextWrapStyle,
+    TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextValue,
+    TextWrapStyle,
 };
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{
@@ -47,7 +47,6 @@ pub(crate) fn place(
             &Area<InterfaceContext>,
             &TextWrapStyle,
             &TextScale,
-            &TextScaleAlignment,
         ),
         Or<(
             Changed<Area<InterfaceContext>>,
@@ -58,9 +57,7 @@ pub(crate) fn place(
     fonts: Res<MonoSpacedFont>,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, mut placement, text, area, wrap_style, text_scale, text_scale_alignment) in
-        text_query.iter_mut()
-    {
+    for (mut placer, mut placement, text, area, wrap_style, text_scale) in text_query.iter_mut() {
         let area = area.to_device(scale_factor.factor());
         placer.0.reset(&LayoutSettings {
             max_width: Some(area.width),
@@ -210,20 +207,11 @@ pub(crate) fn filter(
     }
 }
 pub(crate) fn scale_change(
-    mut text_query: Query<
-        (
-            &mut TextScale,
-            &mut TextLetterDimensions,
-            &TextScaleAlignment,
-        ),
-        Changed<TextScaleAlignment>,
-    >,
+    mut text_query: Query<(&mut TextLetterDimensions, &TextScale), Changed<TextScale>>,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<MonoSpacedFont>,
 ) {
-    for (mut text_scale, mut text_letter_dimensions, text_scale_alignment) in text_query.iter_mut()
-    {
-        *text_scale = TextScale::from_alignment(*text_scale_alignment, scale_factor.factor());
+    for (mut text_letter_dimensions, text_scale) in text_query.iter_mut() {
         let letter_dimensions = fonts.character_dimensions(text_scale.px());
         let letter_dimensions =
             Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
@@ -239,7 +227,6 @@ pub(crate) fn manage(
             &Position<InterfaceContext>,
             &VisibleSection,
             &Layer,
-            &TextScaleAlignment,
             &TextScale,
             &mut Cache,
             &mut Difference,
@@ -257,7 +244,6 @@ pub(crate) fn manage(
         pos,
         visible_section,
         layer,
-        text_scale_alignment,
         text_scale,
         mut cache,
         mut difference,
@@ -277,7 +263,7 @@ pub(crate) fn manage(
                     *visible_section,
                     *layer,
                     RenderGroupUniqueGlyphs::from_text(text),
-                    *text_scale_alignment,
+                    *text_scale,
                     AtlasBlock::new(fonts.character_dimensions(text_scale.px())),
                 ),
             );
@@ -360,10 +346,8 @@ pub(crate) fn create_render_groups(
     for entity in extraction.removed.iter() {
         renderer.render_groups.remove(entity);
     }
-    for (
-        entity,
-        (max, pos, visible_section, layer, unique_glyphs, text_scale_alignment, atlas_block),
-    ) in extraction.added.iter()
+    for (entity, (max, pos, visible_section, layer, unique_glyphs, text_scale, atlas_block)) in
+        extraction.added.iter()
     {
         let position = pos.to_device(scale_factor.factor());
         let text_placement = TextPlacement::new(position, *layer);
@@ -398,7 +382,7 @@ pub(crate) fn create_render_groups(
                 text_placement,
                 text_placement_uniform,
                 unique_glyphs: *unique_glyphs,
-                text_scale_alignment: *text_scale_alignment,
+                text_scale: *text_scale,
                 indexer: Indexer::new(*max),
                 glyph_positions: InstanceAttributeManager::new(&gfx_surface, *max),
                 glyph_areas: InstanceAttributeManager::new(&gfx_surface, *max),

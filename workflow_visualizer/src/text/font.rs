@@ -1,11 +1,11 @@
 use std::collections::HashMap;
-use std::ops::Deref;
+use std::ops::{Deref, Sub};
 
 use bevy_ecs::prelude::Resource;
 use fontdue::{Font as fdFont, FontSettings};
 
 use crate::coord::NumericalContext;
-use crate::text::component::{TextScale, TextScaleAlignment};
+use crate::text::component::TextScale;
 use crate::Area;
 
 #[derive(Resource)]
@@ -35,6 +35,31 @@ impl MonoSpacedFont {
             .expect("text font creation")],
         }
     }
+    pub fn text_scale_from_dimension(&self, dimension: KnownTextDimension) -> TextScale {
+        let mut current_scale = 0;
+        let mut current_scale_dimension = 0;
+        match dimension {
+            KnownTextDimension::Width(width) => {
+                for scale in 0..width {
+                    let dimensions = self.character_dimensions(scale as f32);
+                    if dimensions.width as u32 > width {
+                        return TextScale(scale.sub(1).max(0));
+                    }
+                }
+            }
+            KnownTextDimension::Height(height) => {
+                for scale in 0..height {
+                    let dimensions = self.character_dimensions(scale as f32);
+                    if dimensions.height as u32 > height {
+                        return TextScale(scale.sub(1).max(0));
+                    } else if dimensions.height as u32 == height {
+                        return TextScale(scale);
+                    }
+                }
+            }
+        }
+        return TextScale(0);
+    }
     pub fn font_slice(&self) -> &[fdFont] {
         self.font_storage.as_slice()
     }
@@ -54,7 +79,10 @@ impl MonoSpacedFont {
         (metrics.advance_width.ceil(), height.ceil()).into()
     }
 }
-
+pub enum KnownTextDimension {
+    Width(u32),
+    Height(u32),
+}
 #[cfg(test)]
 #[test]
 fn tester() {

@@ -56,8 +56,8 @@ pub use crate::path::{Path, PathView, ResponsivePathView};
 pub use crate::scale_factor::ScaleFactor;
 pub use crate::sync::SyncPoint;
 pub use crate::text::{
-    MonoSpacedFont, Text, TextGridLocation, TextGridPlacement, TextLetterDimensions,
-    TextLineStructure, TextScale, TextScaleAlignment, TextTag, TextValue, TextWrapStyle,
+    KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement,
+    TextLetterDimensions, TextLineStructure, TextScale, TextTag, TextValue, TextWrapStyle,
 };
 pub use crate::texture_atlas::{
     AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,

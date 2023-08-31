@@ -14,9 +14,9 @@ pub struct Text {
     tag: TextTag,
     pub layer: Layer,
     pub text: TextValue,
-    pub scale_alignment: TextScaleAlignment,
     pub color: Color,
     pub wrap_style: TextWrapStyle,
+    pub scale: TextScale,
     pub(crate) visibility: EnableVisibility,
     pub(crate) placer: Placer,
     pub(crate) placement: Placement,
@@ -26,15 +26,14 @@ pub struct Text {
     pub(crate) text_letter_dimensions: TextLetterDimensions,
     pub(crate) text_grid_placement: TextGridPlacement,
     pub(crate) text_line_structure: TextLineStructure,
-    pub(crate) text_scale: TextScale,
     pub(crate) section: Section<InterfaceContext>,
 }
 
 impl Text {
-    pub fn new<S: Into<String>, C: Into<Color>, L: Into<Layer>>(
+    pub fn new<S: Into<String>, C: Into<Color>, L: Into<Layer>, TS: Into<TextScale>>(
         layer: L,
         text: S,
-        scale_alignment: TextScaleAlignment,
+        scale: TS,
         color: C,
         wrap_style: TextWrapStyle,
     ) -> Self {
@@ -42,7 +41,6 @@ impl Text {
             tag: TextTag::new(),
             layer: layer.into(),
             text: TextValue(text.into()),
-            scale_alignment,
             color: color.into(),
             wrap_style,
             visibility: EnableVisibility::new(),
@@ -54,7 +52,7 @@ impl Text {
             text_letter_dimensions: TextLetterDimensions(Area::default()),
             text_grid_placement: TextGridPlacement(HashMap::new()),
             text_line_structure: TextLineStructure(vec![], (0, 0)),
-            text_scale: TextScale(TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[0]),
+            scale: scale.into(),
             section: Section::default(),
         }
     }
@@ -102,20 +100,6 @@ impl From<u32> for TextScale {
 impl TextScale {
     pub(crate) fn px(&self) -> f32 {
         self.0 as f32
-    }
-    pub(crate) fn from_alignment(alignment: TextScaleAlignment, scale_factor: f64) -> Self {
-        match alignment {
-            TextScaleAlignment::Small => Self(
-                (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[0] as f64 * scale_factor) as u32,
-            ),
-            TextScaleAlignment::Medium => Self(
-                (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[1] as f64 * scale_factor) as u32,
-            ),
-            TextScaleAlignment::Large => Self(
-                (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[2] as f64 * scale_factor) as u32,
-            ),
-            TextScaleAlignment::Custom(val) => Self((val as f64 * scale_factor) as u32),
-        }
     }
 }
 /// What predetermined size category to assign to the Text

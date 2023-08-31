@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy_ecs::component::Component;
 
 use crate::grid::view::GridMarkerBias;
-use crate::{GridLocation, GridPoint, GridRange, GridView, HorizontalSpan};
+use crate::{GridLocation, GridMarker, GridPoint, GridRange, GridView, HorizontalSpan};
 
 /// A mapping of GridView for each HorizontalSpan Option
 #[derive(Component)]
@@ -65,5 +65,14 @@ impl ResponsiveUnit for i32 {
     }
     fn far(self) -> GridLocation {
         (self, GridMarkerBias::Far).into()
+    }
+}
+impl ResponsiveUnit for GridMarker {
+    fn near(self) -> GridLocation {
+        self.0.near()
+    }
+
+    fn far(self) -> GridLocation {
+        self.0.far()
     }
 }

@@ -4,11 +4,11 @@ use bevy_ecs::prelude::Component;
 
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
-use crate::text::component::{GlyphId, TextScaleAlignment, TextValue};
+use crate::text::component::{GlyphId, TextValue};
 use crate::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 use crate::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
+    RawArea, RawPosition, Section, TextScale, Uniform, VisibleSection,
 };
 
 #[repr(C)]
@@ -114,7 +114,7 @@ pub(crate) struct RenderGroup {
     pub(crate) text_placement: TextPlacement,
     pub(crate) text_placement_uniform: Uniform<TextPlacement>,
     pub(crate) unique_glyphs: RenderGroupUniqueGlyphs,
-    pub(crate) text_scale_alignment: TextScaleAlignment,
+    pub(crate) text_scale: TextScale,
     pub(crate) indexer: Indexer<Key>,
     pub(crate) glyph_positions: InstanceAttributeManager<RawPosition>,
     pub(crate) glyph_areas: InstanceAttributeManager<RawArea>,
