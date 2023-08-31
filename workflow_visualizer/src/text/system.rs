@@ -36,7 +36,9 @@ use crate::{
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(40));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
+        MonoSpacedFont::DEFAULT_OPT_SCALE,
+    ));
 }
 pub(crate) fn place(
     mut text_query: Query<
@@ -78,8 +80,8 @@ pub(crate) fn place(
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         for (key, glyph_position) in placement.0.iter_mut() {
             if text_scale.0 > 40u32 {
-                let factor = text_scale.0 as f32 / 40f32;
-                glyph_position.y -= 10f32 * factor;
+                let factor = text_scale.0 as f32 / MonoSpacedFont::DEFAULT_OPT_SCALE as f32;
+                glyph_position.y -= 12f32 * factor;
             }
         }
     }
