@@ -36,7 +36,7 @@ use crate::{
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(146));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(40));
 }
 pub(crate) fn place(
     mut text_query: Query<
@@ -76,6 +76,9 @@ pub(crate) fn place(
             .iter()
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
+        for (key, glyph_position) in placement.0.iter_mut() {
+            glyph_position.y /= 0.3f32;
+        }
     }
 }
 pub(crate) fn letter_differential(
