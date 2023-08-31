@@ -119,13 +119,13 @@ pub enum GridMarkerBias {
 #[derive(Copy, Clone, PartialEq)]
 pub struct GridLocationOffset(pub RawMarker);
 #[derive(Copy, Clone, Default)]
-pub struct ReferenceView {
-    top: Option<RawMarker>,
-    left: Option<RawMarker>,
-    right: Option<RawMarker>,
-    bottom: Option<RawMarker>,
+pub struct GridViewBuilder {
+    top: Option<GridLocation>,
+    left: Option<GridLocation>,
+    right: Option<GridLocation>,
+    bottom: Option<GridLocation>,
 }
-impl ReferenceView {
+impl GridViewBuilder {
     pub fn new() -> Self {
         Self {
             top: None,
@@ -134,144 +134,75 @@ impl ReferenceView {
             bottom: None,
         }
     }
-    pub fn set_top<R: Into<RawMarker>>(&mut self, top: R) {
+    pub fn set_top<R: Into<GridLocation>>(&mut self, top: R) {
         self.top.replace(top.into());
     }
-    pub fn set_left<R: Into<RawMarker>>(&mut self, left: R) {
+    pub fn set_left<R: Into<GridLocation>>(&mut self, left: R) {
         self.left.replace(left.into());
     }
-    pub fn set_right<R: Into<RawMarker>>(&mut self, right: R) {
+    pub fn set_right<R: Into<GridLocation>>(&mut self, right: R) {
         self.right.replace(right.into());
     }
-    pub fn set_bottom<R: Into<RawMarker>>(&mut self, bottom: R) {
+    pub fn set_bottom<R: Into<GridLocation>>(&mut self, bottom: R) {
         self.bottom.replace(bottom.into());
     }
-    pub fn top(&self) -> RawMarker {
+    pub fn top(&self) -> GridLocation {
         self.top.expect("top")
     }
-    pub fn left(&self) -> RawMarker {
+    pub fn left(&self) -> GridLocation {
         self.left.expect("left")
     }
-    pub fn right(&self) -> RawMarker {
+    pub fn right(&self) -> GridLocation {
         self.right.expect("right")
     }
-    pub fn bottom(&self) -> RawMarker {
+    pub fn bottom(&self) -> GridLocation {
         self.bottom.expect("bottom")
     }
-    pub fn with_top<R: Into<RawMarker>>(mut self, top: R) -> Self {
+    pub fn with_top<R: Into<GridLocation>>(mut self, top: R) -> Self {
         self.top.replace(top.into());
         self
     }
-    pub fn with_left<R: Into<RawMarker>>(mut self, left: R) -> Self {
+    pub fn with_left<R: Into<GridLocation>>(mut self, left: R) -> Self {
         self.left.replace(left.into());
         self
     }
-    pub fn with_right<R: Into<RawMarker>>(mut self, right: R) -> Self {
+    pub fn with_right<R: Into<GridLocation>>(mut self, right: R) -> Self {
         self.right.replace(right.into());
         self
     }
-    pub fn with_bottom<R: Into<RawMarker>>(mut self, bottom: R) -> Self {
+    pub fn with_bottom<R: Into<GridLocation>>(mut self, bottom: R) -> Self {
         self.bottom.replace(bottom.into());
         self
     }
 }
 #[derive(Copy, Clone, Default)]
-pub struct ReferencePoint {
-    x: Option<RawMarker>,
-    y: Option<RawMarker>,
+pub struct GridPointBuilder {
+    x: Option<GridLocation>,
+    y: Option<GridLocation>,
 }
-impl ReferencePoint {
+impl GridPointBuilder {
     pub fn new() -> Self {
         Self { x: None, y: None }
     }
-    pub fn set_x<R: Into<RawMarker>>(&mut self, x: R) {
+    pub fn set_x<R: Into<GridLocation>>(&mut self, x: R) {
         self.x.replace(x.into());
     }
-    pub fn set_y<R: Into<RawMarker>>(&mut self, y: R) {
+    pub fn set_y<R: Into<GridLocation>>(&mut self, y: R) {
         self.y.replace(y.into());
     }
-    pub fn x(&self) -> RawMarker {
+    pub fn x(&self) -> GridLocation {
         self.x.expect("x")
     }
-    pub fn y(&self) -> RawMarker {
+    pub fn y(&self) -> GridLocation {
         self.y.expect("y")
     }
-    pub fn with_x<R: Into<RawMarker>>(mut self, x: R) -> Self {
+    pub fn with_x<R: Into<GridLocation>>(mut self, x: R) -> Self {
         self.x.replace(x.into());
         self
     }
-    pub fn with_y<R: Into<RawMarker>>(mut self, y: R) -> Self {
+    pub fn with_y<R: Into<GridLocation>>(mut self, y: R) -> Self {
         self.y.replace(y.into());
         self
-    }
-}
-pub struct Placer<PlacementKey> {
-    pub(crate) anchor: GridPoint,
-    pub(crate) relative_offsets: HashMap<PlacementKey, RawMarker>,
-    pub(crate) reference_views: HashMap<PlacementKey, ReferenceView>,
-    pub(crate) reference_points: HashMap<PlacementKey, ReferencePoint>,
-}
-impl<PlacementKey: Eq + PartialEq + Hash> Placer<PlacementKey> {
-    pub fn new<GP: Into<GridPoint>>(anchor: GP) -> Self {
-        Self {
-            anchor: anchor.into(),
-            relative_offsets: HashMap::new(),
-            reference_views: HashMap::new(),
-            reference_points: HashMap::new(),
-        }
-    }
-    pub fn anchor(&self) -> GridPoint {
-        self.anchor
-    }
-    pub fn add<R: Into<RawMarker>>(&mut self, key: PlacementKey, marker: R) {
-        self.relative_offsets.insert(key, marker.into());
-    }
-    pub fn add_reference_view<R: Into<ReferenceView>>(&mut self, key: PlacementKey, view: R) {
-        self.reference_views.insert(key, view.into());
-    }
-    pub fn get_reference_view(&self, key: PlacementKey) -> ReferenceView {
-        self.reference_views
-            .get(&key)
-            .copied()
-            .expect("reference-view")
-    }
-    pub fn view_from_reference(&self, key: PlacementKey) -> GridView {
-        let b = self.get_reference_view(key);
-        self.view(b.left(), b.right(), b.top(), b.bottom())
-    }
-    pub fn get(&self, key: PlacementKey) -> RawMarker {
-        self.relative_offsets
-            .get(&key)
-            .copied()
-            .expect("RelativePlacer::get")
-    }
-    pub fn get_reference_point(&self, key: PlacementKey) -> ReferencePoint {
-        self.reference_points
-            .get(&key)
-            .copied()
-            .expect("reference-point")
-    }
-    pub fn view<R: Into<RawMarker>>(&self, hb: R, he: R, vb: R, ve: R) -> GridView {
-        (
-            (self.anchor.x.raw_offset(hb), self.anchor.x.raw_offset(he)),
-            (self.anchor.y.raw_offset(vb), self.anchor.y.raw_offset(ve)),
-        )
-            .into()
-    }
-    pub fn point<R: Into<RawMarker>>(&self, hb: R, vb: R) -> GridPoint {
-        (self.anchor.x.raw_offset(hb), self.anchor.y.raw_offset(vb)).into()
-    }
-    pub fn add_reference_point<R: Into<RawMarker>>(&mut self, key: PlacementKey, x: R, y: R) {
-        self.reference_points
-            .insert(key, ReferencePoint::new().with_x(x).with_y(y));
-    }
-    pub fn point_from_reference(&self, key: PlacementKey) -> GridPoint {
-        let b = self
-            .reference_points
-            .get(&key)
-            .copied()
-            .expect("reference-point");
-        self.point(b.x(), b.y())
     }
 }
 #[derive(Default, Clone)]
