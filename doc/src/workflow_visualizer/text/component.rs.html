@@ -271,22 +271,6 @@
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component};
@@ -303,9 +287,9 @@
     tag: TextTag,
     <span class="kw">pub </span>layer: Layer,
     <span class="kw">pub </span>text: TextValue,
-    <span class="kw">pub </span>scale_alignment: TextScaleAlignment,
     <span class="kw">pub </span>color: Color,
     <span class="kw">pub </span>wrap_style: TextWrapStyle,
+    <span class="kw">pub </span>scale: TextScale,
     <span class="kw">pub</span>(<span class="kw">crate</span>) visibility: EnableVisibility,
     <span class="kw">pub</span>(<span class="kw">crate</span>) placer: Placer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) placement: Placement,
@@ -315,15 +299,14 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) text_letter_dimensions: TextLetterDimensions,
     <span class="kw">pub</span>(<span class="kw">crate</span>) text_grid_placement: TextGridPlacement,
     <span class="kw">pub</span>(<span class="kw">crate</span>) text_line_structure: TextLineStructure,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) text_scale: TextScale,
     <span class="kw">pub</span>(<span class="kw">crate</span>) section: Section&lt;InterfaceContext&gt;,
 }
 
 <span class="kw">impl </span>Text {
-    <span class="kw">pub fn </span>new&lt;S: Into&lt;String&gt;, C: Into&lt;Color&gt;, L: Into&lt;Layer&gt;&gt;(
+    <span class="kw">pub fn </span>new&lt;S: Into&lt;String&gt;, C: Into&lt;Color&gt;, L: Into&lt;Layer&gt;, TS: Into&lt;TextScale&gt;&gt;(
         layer: L,
         text: S,
-        scale_alignment: TextScaleAlignment,
+        scale: TS,
         color: C,
         wrap_style: TextWrapStyle,
     ) -&gt; <span class="self">Self </span>{
@@ -331,7 +314,6 @@
             tag: TextTag::new(),
             layer: layer.into(),
             text: TextValue(text.into()),
-            scale_alignment,
             color: color.into(),
             wrap_style,
             visibility: EnableVisibility::new(),
@@ -343,7 +325,7 @@
             text_letter_dimensions: TextLetterDimensions(Area::default()),
             text_grid_placement: TextGridPlacement(HashMap::new()),
             text_line_structure: TextLineStructure(<span class="macro">vec!</span>[], (<span class="number">0</span>, <span class="number">0</span>)),
-            text_scale: TextScale(TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[<span class="number">0</span>]),
+            scale: scale.into(),
             section: Section::default(),
         }
     }
@@ -391,20 +373,6 @@
 <span class="kw">impl </span>TextScale {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>px(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
         <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>f32
-    }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_alignment(alignment: TextScaleAlignment, scale_factor: f64) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>alignment {
-            TextScaleAlignment::Small =&gt; <span class="self">Self</span>(
-                (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[<span class="number">0</span>] <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
-            ),
-            TextScaleAlignment::Medium =&gt; <span class="self">Self</span>(
-                (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[<span class="number">1</span>] <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
-            ),
-            TextScaleAlignment::Large =&gt; <span class="self">Self</span>(
-                (TextScaleAlignment::TEXT_SCALE_ALIGNMENT_GUIDE[<span class="number">2</span>] <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
-            ),
-            TextScaleAlignment::Custom(val) =&gt; <span class="self">Self</span>((val <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32),
-        }
     }
 }
 <span class="doccomment">/// What predetermined size category to assign to the Text

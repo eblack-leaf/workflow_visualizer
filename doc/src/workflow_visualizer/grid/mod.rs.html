@@ -237,6 +237,9 @@
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -364,6 +367,9 @@
     }
     <span class="kw">pub fn </span>vertical_markers(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="self">self</span>.vertical_markers <span class="kw">as </span>i32
+    }
+    <span class="kw">pub fn </span>last_full_row(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridMarker {
+        (<span class="self">self</span>.vertical_markers() / (<span class="self">self</span>.markers_per_row() + <span class="self">self</span>.markers_per_gutter())).into()
     }
     <span class="kw">fn </span>calc_extension(width: f32, base: f32, columns: i32) -&gt; i32 {
         RawMarker::from_pixel_exclusive(width - base).<span class="number">0 </span>/ columns

@@ -135,11 +135,11 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
 <span class="kw">use </span><span class="kw">crate</span>::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
-<span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextScaleAlignment, TextValue};
+<span class="kw">use </span><span class="kw">crate</span>::text::component::{GlyphId, TextValue};
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 <span class="kw">use crate</span>::{
     Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, Uniform, VisibleSection,
+    RawArea, RawPosition, Section, TextScale, Uniform, VisibleSection,
 };
 
 <span class="attr">#[repr(C)]
@@ -245,7 +245,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) text_placement: TextPlacement,
     <span class="kw">pub</span>(<span class="kw">crate</span>) text_placement_uniform: Uniform&lt;TextPlacement&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) unique_glyphs: RenderGroupUniqueGlyphs,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) text_scale_alignment: TextScaleAlignment,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) text_scale: TextScale,
     <span class="kw">pub</span>(<span class="kw">crate</span>) indexer: Indexer&lt;Key&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) glyph_positions: InstanceAttributeManager&lt;RawPosition&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) glyph_areas: InstanceAttributeManager&lt;RawArea&gt;,

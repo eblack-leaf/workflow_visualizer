@@ -322,8 +322,8 @@
 <span class="kw">use crate</span>::{
     ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
     DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
-    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextScaleAlignment,
-    TextValue, TextWrapStyle, Toggled,
+    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
+    Toggled,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(
@@ -397,7 +397,7 @@
             .spawn(Text::new(
                 <span class="kw-2">*</span>layer - Layer::from(<span class="number">1</span>),
                 button_text.<span class="number">0</span>.clone(),
-                TextScaleAlignment::Custom(scaling.text.<span class="number">0</span>),
+                scaling.text.<span class="number">0</span>,
                 <span class="kw-2">*</span>color,
                 TextWrapStyle::letter(),
             ))

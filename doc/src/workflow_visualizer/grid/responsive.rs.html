@@ -67,12 +67,21 @@
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
 <a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
 
 <span class="kw">use </span><span class="kw">crate</span>::grid::view::GridMarkerBias;
-<span class="kw">use crate</span>::{GridLocation, GridPoint, GridRange, GridView, HorizontalSpan};
+<span class="kw">use crate</span>::{GridLocation, GridMarker, GridPoint, GridRange, GridView, HorizontalSpan};
 
 <span class="doccomment">/// A mapping of GridView for each HorizontalSpan Option
 </span><span class="attr">#[derive(Component)]
@@ -134,6 +143,15 @@
     }
     <span class="kw">fn </span>far(<span class="self">self</span>) -&gt; GridLocation {
         (<span class="self">self</span>, GridMarkerBias::Far).into()
+    }
+}
+<span class="kw">impl </span>ResponsiveUnit <span class="kw">for </span>GridMarker {
+    <span class="kw">fn </span>near(<span class="self">self</span>) -&gt; GridLocation {
+        <span class="self">self</span>.<span class="number">0</span>.near()
+    }
+
+    <span class="kw">fn </span>far(<span class="self">self</span>) -&gt; GridLocation {
+        <span class="self">self</span>.<span class="number">0</span>.far()
     }
 }
 </code></pre></div></section></main></body></html>

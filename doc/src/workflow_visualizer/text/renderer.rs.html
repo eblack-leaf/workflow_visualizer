@@ -316,13 +316,13 @@
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
-<span class="kw">use </span><span class="kw">crate</span>::text::component::{Difference, TextScaleAlignment};
+<span class="kw">use </span><span class="kw">crate</span>::text::component::Difference;
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::TextureCoordinates;
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasBlock, TextureBindGroup};
 <span class="kw">use crate</span>::{
     Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection, Visualizer,
+    RenderPassHandle, RenderPhase, ScaleFactor, TextScale, Viewport, VisibleSection, Visualizer,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>AABB: [Vertex; <span class="number">6</span>] = [
@@ -376,7 +376,7 @@
             VisibleSection,
             Layer,
             RenderGroupUniqueGlyphs,
-            TextScaleAlignment,
+            TextScale,
             AtlasBlock,
         ),
     &gt;,

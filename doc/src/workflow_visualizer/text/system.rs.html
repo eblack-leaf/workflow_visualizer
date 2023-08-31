@@ -697,22 +697,6 @@
 <a href="#697" id="697">697</a>
 <a href="#698" id="698">698</a>
 <a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -729,8 +713,8 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::component::{
     Cache, Difference, FilteredPlacement, Glyph, GlyphId, Placement, Placer, TextGridLocation,
-    TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextScaleAlignment,
-    TextValue, TextWrapStyle,
+    TextGridPlacement, TextLetterDimensions, TextLineStructure, TextScale, TextValue,
+    TextWrapStyle,
 };
 <span class="kw">use </span><span class="kw">crate</span>::text::font::MonoSpacedFont;
 <span class="kw">use </span><span class="kw">crate</span>::text::render_group::{
@@ -762,7 +746,6 @@
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>TextWrapStyle,
             <span class="kw-2">&amp;</span>TextScale,
-            <span class="kw-2">&amp;</span>TextScaleAlignment,
         ),
         Or&lt;(
             Changed&lt;Area&lt;InterfaceContext&gt;&gt;,
@@ -773,9 +756,7 @@
     fonts: Res&lt;MonoSpacedFont&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
-    <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, text, area, wrap_style, text_scale, text_scale_alignment) <span class="kw">in
-        </span>text_query.iter_mut()
-    {
+    <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, text, area, wrap_style, text_scale) <span class="kw">in </span>text_query.iter_mut() {
         <span class="kw">let </span>area = area.to_device(scale_factor.factor());
         placer.<span class="number">0</span>.reset(<span class="kw-2">&amp;</span>LayoutSettings {
             max_width: <span class="prelude-val">Some</span>(area.width),
@@ -925,20 +906,11 @@
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>scale_change(
-    <span class="kw-2">mut </span>text_query: Query&lt;
-        (
-            <span class="kw-2">&amp;mut </span>TextScale,
-            <span class="kw-2">&amp;mut </span>TextLetterDimensions,
-            <span class="kw-2">&amp;</span>TextScaleAlignment,
-        ),
-        Changed&lt;TextScaleAlignment&gt;,
-    &gt;,
+    <span class="kw-2">mut </span>text_query: Query&lt;(<span class="kw-2">&amp;mut </span>TextLetterDimensions, <span class="kw-2">&amp;</span>TextScale), Changed&lt;TextScale&gt;&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
     fonts: Res&lt;MonoSpacedFont&gt;,
 ) {
-    <span class="kw">for </span>(<span class="kw-2">mut </span>text_scale, <span class="kw-2">mut </span>text_letter_dimensions, text_scale_alignment) <span class="kw">in </span>text_query.iter_mut()
-    {
-        <span class="kw-2">*</span>text_scale = TextScale::from_alignment(<span class="kw-2">*</span>text_scale_alignment, scale_factor.factor());
+    <span class="kw">for </span>(<span class="kw-2">mut </span>text_letter_dimensions, text_scale) <span class="kw">in </span>text_query.iter_mut() {
         <span class="kw">let </span>letter_dimensions = fonts.character_dimensions(text_scale.px());
         <span class="kw">let </span>letter_dimensions =
             Area::&lt;DeviceContext&gt;::from((letter_dimensions.width, letter_dimensions.height));
@@ -954,7 +926,6 @@
             <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>VisibleSection,
             <span class="kw-2">&amp;</span>Layer,
-            <span class="kw-2">&amp;</span>TextScaleAlignment,
             <span class="kw-2">&amp;</span>TextScale,
             <span class="kw-2">&amp;mut </span>Cache,
             <span class="kw-2">&amp;mut </span>Difference,
@@ -972,7 +943,6 @@
         pos,
         visible_section,
         layer,
-        text_scale_alignment,
         text_scale,
         <span class="kw-2">mut </span>cache,
         <span class="kw-2">mut </span>difference,
@@ -992,7 +962,7 @@
                     <span class="kw-2">*</span>visible_section,
                     <span class="kw-2">*</span>layer,
                     RenderGroupUniqueGlyphs::from_text(text),
-                    <span class="kw-2">*</span>text_scale_alignment,
+                    <span class="kw-2">*</span>text_scale,
                     AtlasBlock::new(fonts.character_dimensions(text_scale.px())),
                 ),
             );
@@ -1075,10 +1045,8 @@
     <span class="kw">for </span>entity <span class="kw">in </span>extraction.removed.iter() {
         renderer.render_groups.remove(entity);
     }
-    <span class="kw">for </span>(
-        entity,
-        (max, pos, visible_section, layer, unique_glyphs, text_scale_alignment, atlas_block),
-    ) <span class="kw">in </span>extraction.added.iter()
+    <span class="kw">for </span>(entity, (max, pos, visible_section, layer, unique_glyphs, text_scale, atlas_block)) <span class="kw">in
+        </span>extraction.added.iter()
     {
         <span class="kw">let </span>position = pos.to_device(scale_factor.factor());
         <span class="kw">let </span>text_placement = TextPlacement::new(position, <span class="kw-2">*</span>layer);
@@ -1113,7 +1081,7 @@
                 text_placement,
                 text_placement_uniform,
                 unique_glyphs: <span class="kw-2">*</span>unique_glyphs,
-                text_scale_alignment: <span class="kw-2">*</span>text_scale_alignment,
+                text_scale: <span class="kw-2">*</span>text_scale,
                 indexer: Indexer::new(<span class="kw-2">*</span>max),
                 glyph_positions: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">*</span>max),
                 glyph_areas: InstanceAttributeManager::new(<span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">*</span>max),
