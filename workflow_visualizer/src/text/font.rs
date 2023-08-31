@@ -36,14 +36,14 @@ impl MonoSpacedFont {
         }
     }
     pub fn text_scale_from_dimension(&self, dimension: KnownTextDimension) -> TextScale {
-        let mut current_scale = 0;
-        let mut current_scale_dimension = 0;
         match dimension {
             KnownTextDimension::Width(width) => {
                 for scale in 0..width {
                     let dimensions = self.character_dimensions(scale as f32);
                     if dimensions.width as u32 > width {
                         return TextScale(scale.sub(1).max(0));
+                    } else if dimensions.width as u32 == width {
+                        return TextScale(scale);
                     }
                 }
             }
