@@ -77,7 +77,9 @@ pub(crate) fn place(
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         for (key, glyph_position) in placement.0.iter_mut() {
-            glyph_position.y /= 3f32;
+            if glyph_position.parent.is_ascii_uppercase() {
+                glyph_position.y /= 3f32;
+            }
         }
     }
 }
