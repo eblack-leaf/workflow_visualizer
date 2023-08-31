@@ -79,10 +79,10 @@ pub(crate) fn place(
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         for (key, glyph_position) in placement.0.iter_mut() {
-            // if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE {
-            //     let factor = text_scale.0 as f32 / MonoSpacedFont::DEFAULT_OPT_SCALE as f32;
-            //     glyph_position.y -= 11.775f32 * factor;
-            // }
+            if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE {
+                let factor = text_scale.0 as f32 / MonoSpacedFont::DEFAULT_OPT_SCALE as f32;
+                glyph_position.y -= 11.775f32 * factor;
+            }
         }
     }
 }
