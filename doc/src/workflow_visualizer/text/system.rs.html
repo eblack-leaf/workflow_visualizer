@@ -697,6 +697,9 @@
 <a href="#697" id="697">697</a>
 <a href="#698" id="698">698</a>
 <a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -735,7 +738,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup(scale_factor: Res&lt;ScaleFactor&gt;, <span class="kw-2">mut </span>cmd: Commands) {
     cmd.insert_resource(Extraction::new());
-    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(<span class="number">146</span>));
+    cmd.insert_resource(MonoSpacedFont::jet_brains_mono(<span class="number">40</span>));
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>place(
     <span class="kw-2">mut </span>text_query: Query&lt;
@@ -775,6 +778,9 @@
             .iter()
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
+        <span class="kw">for </span>(key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
+            glyph_position.y /= <span class="number">0.3f32</span>;
+        }
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>letter_differential(
