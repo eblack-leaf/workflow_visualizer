@@ -226,6 +226,11 @@
 <a href="#226" id="226">226</a>
 <a href="#227" id="227">227</a>
 <a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -236,7 +241,8 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageName, ImageOrientations};
 <span class="kw">use crate</span>::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility,
+    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
+    Visibility,
 };
 
 <span class="kw">pub type </span>ImageTag = Tag&lt;Image&gt;;
@@ -266,9 +272,15 @@
     }
 }
 <span class="attr">#[derive(Component, Copy, Clone)]
-</span><span class="kw">pub enum </span>AspectRatioAlignedDimension {
-    Width(f32),
-    Height(f32),
+</span><span class="kw">pub struct </span>AspectRatioAlignedDimension {
+    <span class="kw">pub </span>dimension: Area&lt;InterfaceContext&gt;,
+}
+<span class="kw">impl </span>AspectRatioAlignedDimension {
+    <span class="kw">pub fn </span>new&lt;A: Into&lt;Area&lt;InterfaceContext&gt;&gt;&gt;(dimension: A) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            dimension: dimension.into(),
+        }
+    }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>aspect_ratio_aligned_dimension(
     <span class="kw-2">mut </span>bound: Query&lt;
@@ -286,16 +298,14 @@
 ) {
     <span class="kw">for </span>(name, max_dim, <span class="kw-2">mut </span>area) <span class="kw">in </span>bound.iter_mut() {
         <span class="kw">let </span>orientation = orientations.get(name.clone());
-        <span class="kw">match </span>max_dim {
-            AspectRatioAlignedDimension::Width(width) =&gt; {
-                <span class="kw">let </span>height = width * orientation.value().reciprocal();
-                <span class="kw-2">*</span>area = Area::new(<span class="kw-2">*</span>width, height);
-            }
-            AspectRatioAlignedDimension::Height(height) =&gt; {
-                <span class="kw">let </span>width = height * orientation.value().<span class="number">0</span>;
-                <span class="kw-2">*</span>area = Area::new(width, <span class="kw-2">*</span>height);
-            }
+        <span class="kw">let </span>dimensions_orientation = Orientation::new(max_dim.dimension.as_numerical());
+        <span class="kw">let </span><span class="kw-2">mut </span>attempted_width = max_dim.dimension.width;
+        <span class="kw">let </span><span class="kw-2">mut </span>attempted_height = attempted_width * orientation.value().reciprocal();
+        <span class="kw">while </span>attempted_height &gt; max_dim.dimension.height {
+            attempted_width -= <span class="number">1f32</span>;
+            attempted_height = attempted_width * orientation.value().reciprocal();
         }
+        <span class="kw-2">*</span>area = Area::new(attempted_width, attempted_height);
     }
 }
 <span class="attr">#[derive(Component)]
