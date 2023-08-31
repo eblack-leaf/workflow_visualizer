@@ -81,7 +81,7 @@ pub(crate) fn place(
         for (key, glyph_position) in placement.0.iter_mut() {
             if text_scale.0 > 40u32 {
                 let factor = text_scale.0 as f32 / MonoSpacedFont::DEFAULT_OPT_SCALE as f32;
-                glyph_position.y -= 12f32 * factor;
+                glyph_position.y -= 11f32 * factor;
             }
         }
     }
