@@ -14,6 +14,7 @@ pub struct MonoSpacedFont {
 }
 
 impl MonoSpacedFont {
+    pub const MAX_CHECKED_TEXT_SCALE: u32 = 200;
     pub fn jet_brains_mono<T: Into<TextScale>>(opt_scale: T) -> Self {
         Self::new(
             include_bytes!("JetBrainsMono-Regular.ttf").as_slice(),
@@ -38,7 +39,7 @@ impl MonoSpacedFont {
     pub fn text_scale_from_dimension(&self, dimension: KnownTextDimension) -> TextScale {
         match dimension {
             KnownTextDimension::Width(width) => {
-                for scale in 0..width {
+                for scale in 0..Self::MAX_CHECKED_TEXT_SCALE {
                     let dimensions = self.character_dimensions(scale as f32);
                     if dimensions.width as u32 > width {
                         return TextScale(scale.sub(1).max(0));
@@ -48,7 +49,7 @@ impl MonoSpacedFont {
                 }
             }
             KnownTextDimension::Height(height) => {
-                for scale in 0..height {
+                for scale in 0..Self::MAX_CHECKED_TEXT_SCALE {
                     let dimensions = self.character_dimensions(scale as f32);
                     if dimensions.height as u32 > height {
                         return TextScale(scale.sub(1).max(0));
