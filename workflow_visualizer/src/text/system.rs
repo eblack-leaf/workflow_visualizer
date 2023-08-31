@@ -79,9 +79,18 @@ pub(crate) fn place(
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         for (key, glyph_position) in placement.0.iter_mut() {
+            let base = if text_scale.0 <= MonoSpacedFont::DEFAULT_OPT_SCALE {
+                0f32
+            } else if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE
+                && text_scale.0 <= MonoSpacedFont::DEFAULT_OPT_SCALE * 2
+            {
+                8.775f32
+            } else if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE * 2 {
+                11.775f32
+            };
             if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE {
                 let factor = text_scale.0 as f32 / MonoSpacedFont::DEFAULT_OPT_SCALE as f32;
-                glyph_position.y -= 11.775f32 * factor;
+                glyph_position.y -= base * factor;
             }
         }
     }
