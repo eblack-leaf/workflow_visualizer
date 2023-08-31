@@ -227,75 +227,6 @@
 <a href="#227" id="227">227</a>
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::hash::Hash;
 
@@ -417,13 +348,13 @@
 <span class="attr">#[derive(Copy, Clone, PartialEq)]
 </span><span class="kw">pub struct </span>GridLocationOffset(<span class="kw">pub </span>RawMarker);
 <span class="attr">#[derive(Copy, Clone, Default)]
-</span><span class="kw">pub struct </span>ReferenceView {
-    top: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    left: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    right: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    bottom: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+</span><span class="kw">pub struct </span>GridViewBuilder {
+    top: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
+    left: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
+    right: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
+    bottom: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
 }
-<span class="kw">impl </span>ReferenceView {
+<span class="kw">impl </span>GridViewBuilder {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             top: <span class="prelude-val">None</span>,
@@ -432,145 +363,76 @@
             bottom: <span class="prelude-val">None</span>,
         }
     }
-    <span class="kw">pub fn </span>set_top&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, top: R) {
+    <span class="kw">pub fn </span>set_top&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, top: R) {
         <span class="self">self</span>.top.replace(top.into());
     }
-    <span class="kw">pub fn </span>set_left&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, left: R) {
+    <span class="kw">pub fn </span>set_left&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, left: R) {
         <span class="self">self</span>.left.replace(left.into());
     }
-    <span class="kw">pub fn </span>set_right&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, right: R) {
+    <span class="kw">pub fn </span>set_right&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, right: R) {
         <span class="self">self</span>.right.replace(right.into());
     }
-    <span class="kw">pub fn </span>set_bottom&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bottom: R) {
+    <span class="kw">pub fn </span>set_bottom&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bottom: R) {
         <span class="self">self</span>.bottom.replace(bottom.into());
     }
-    <span class="kw">pub fn </span>top(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
+    <span class="kw">pub fn </span>top(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridLocation {
         <span class="self">self</span>.top.expect(<span class="string">&quot;top&quot;</span>)
     }
-    <span class="kw">pub fn </span>left(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
+    <span class="kw">pub fn </span>left(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridLocation {
         <span class="self">self</span>.left.expect(<span class="string">&quot;left&quot;</span>)
     }
-    <span class="kw">pub fn </span>right(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
+    <span class="kw">pub fn </span>right(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridLocation {
         <span class="self">self</span>.right.expect(<span class="string">&quot;right&quot;</span>)
     }
-    <span class="kw">pub fn </span>bottom(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
+    <span class="kw">pub fn </span>bottom(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridLocation {
         <span class="self">self</span>.bottom.expect(<span class="string">&quot;bottom&quot;</span>)
     }
-    <span class="kw">pub fn </span>with_top&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, top: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_top&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, top: R) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.top.replace(top.into());
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>with_left&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, left: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_left&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, left: R) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.left.replace(left.into());
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>with_right&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, right: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_right&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, right: R) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.right.replace(right.into());
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>with_bottom&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, bottom: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_bottom&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, bottom: R) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.bottom.replace(bottom.into());
         <span class="self">self
     </span>}
 }
 <span class="attr">#[derive(Copy, Clone, Default)]
-</span><span class="kw">pub struct </span>ReferencePoint {
-    x: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
-    y: <span class="prelude-ty">Option</span>&lt;RawMarker&gt;,
+</span><span class="kw">pub struct </span>GridPointBuilder {
+    x: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
+    y: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
 }
-<span class="kw">impl </span>ReferencePoint {
+<span class="kw">impl </span>GridPointBuilder {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ x: <span class="prelude-val">None</span>, y: <span class="prelude-val">None </span>}
     }
-    <span class="kw">pub fn </span>set_x&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: R) {
+    <span class="kw">pub fn </span>set_x&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: R) {
         <span class="self">self</span>.x.replace(x.into());
     }
-    <span class="kw">pub fn </span>set_y&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, y: R) {
+    <span class="kw">pub fn </span>set_y&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, y: R) {
         <span class="self">self</span>.y.replace(y.into());
     }
-    <span class="kw">pub fn </span>x(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
+    <span class="kw">pub fn </span>x(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridLocation {
         <span class="self">self</span>.x.expect(<span class="string">&quot;x&quot;</span>)
     }
-    <span class="kw">pub fn </span>y(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawMarker {
+    <span class="kw">pub fn </span>y(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridLocation {
         <span class="self">self</span>.y.expect(<span class="string">&quot;y&quot;</span>)
     }
-    <span class="kw">pub fn </span>with_x&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, x: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_x&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, x: R) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.x.replace(x.into());
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>with_y&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, y: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_y&lt;R: Into&lt;GridLocation&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, y: R) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.y.replace(y.into());
         <span class="self">self
     </span>}
-}
-<span class="kw">pub struct </span>Placer&lt;PlacementKey&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) anchor: GridPoint,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) relative_offsets: HashMap&lt;PlacementKey, RawMarker&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) reference_views: HashMap&lt;PlacementKey, ReferenceView&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) reference_points: HashMap&lt;PlacementKey, ReferencePoint&gt;,
-}
-<span class="kw">impl</span>&lt;PlacementKey: Eq + PartialEq + Hash&gt; Placer&lt;PlacementKey&gt; {
-    <span class="kw">pub fn </span>new&lt;GP: Into&lt;GridPoint&gt;&gt;(anchor: GP) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            anchor: anchor.into(),
-            relative_offsets: HashMap::new(),
-            reference_views: HashMap::new(),
-            reference_points: HashMap::new(),
-        }
-    }
-    <span class="kw">pub fn </span>anchor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GridPoint {
-        <span class="self">self</span>.anchor
-    }
-    <span class="kw">pub fn </span>add&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, marker: R) {
-        <span class="self">self</span>.relative_offsets.insert(key, marker.into());
-    }
-    <span class="kw">pub fn </span>add_reference_view&lt;R: Into&lt;ReferenceView&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, view: R) {
-        <span class="self">self</span>.reference_views.insert(key, view.into());
-    }
-    <span class="kw">pub fn </span>get_reference_view(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; ReferenceView {
-        <span class="self">self</span>.reference_views
-            .get(<span class="kw-2">&amp;</span>key)
-            .copied()
-            .expect(<span class="string">&quot;reference-view&quot;</span>)
-    }
-    <span class="kw">pub fn </span>view_from_reference(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; GridView {
-        <span class="kw">let </span>b = <span class="self">self</span>.get_reference_view(key);
-        <span class="self">self</span>.view(b.left(), b.right(), b.top(), b.bottom())
-    }
-    <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; RawMarker {
-        <span class="self">self</span>.relative_offsets
-            .get(<span class="kw-2">&amp;</span>key)
-            .copied()
-            .expect(<span class="string">&quot;RelativePlacer::get&quot;</span>)
-    }
-    <span class="kw">pub fn </span>get_reference_point(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; ReferencePoint {
-        <span class="self">self</span>.reference_points
-            .get(<span class="kw-2">&amp;</span>key)
-            .copied()
-            .expect(<span class="string">&quot;reference-point&quot;</span>)
-    }
-    <span class="kw">pub fn </span>view&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, hb: R, he: R, vb: R, ve: R) -&gt; GridView {
-        (
-            (<span class="self">self</span>.anchor.x.raw_offset(hb), <span class="self">self</span>.anchor.x.raw_offset(he)),
-            (<span class="self">self</span>.anchor.y.raw_offset(vb), <span class="self">self</span>.anchor.y.raw_offset(ve)),
-        )
-            .into()
-    }
-    <span class="kw">pub fn </span>point&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, hb: R, vb: R) -&gt; GridPoint {
-        (<span class="self">self</span>.anchor.x.raw_offset(hb), <span class="self">self</span>.anchor.y.raw_offset(vb)).into()
-    }
-    <span class="kw">pub fn </span>add_reference_point&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: PlacementKey, x: R, y: R) {
-        <span class="self">self</span>.reference_points
-            .insert(key, ReferencePoint::new().with_x(x).with_y(y));
-    }
-    <span class="kw">pub fn </span>point_from_reference(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PlacementKey) -&gt; GridPoint {
-        <span class="kw">let </span>b = <span class="self">self
-            </span>.reference_points
-            .get(<span class="kw-2">&amp;</span>key)
-            .copied()
-            .expect(<span class="string">&quot;reference-point&quot;</span>);
-        <span class="self">self</span>.point(b.x(), b.y())
-    }
 }
 <span class="attr">#[derive(Default, Clone)]
 </span><span class="kw">pub struct </span>Placement&lt;PlacementKey&gt; {
