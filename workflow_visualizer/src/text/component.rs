@@ -58,7 +58,7 @@ impl Text {
     }
 }
 /// Whether to wrap by Word or Letter
-#[derive(Component)]
+#[derive(Component, Copy, Clone)]
 pub struct TextWrapStyle(pub WrapStyle);
 impl TextWrapStyle {
     pub fn letter() -> Self {

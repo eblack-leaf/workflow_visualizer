@@ -5,7 +5,7 @@ use crate::visualizer::{Attach, Visualizer};
 use crate::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
 
 /// Entry point for enabling visibility module on an entity
-#[derive(Bundle)]
+#[derive(Bundle, Copy, Clone)]
 pub struct EnableVisibility {
     pub visibility: Visibility,
     pub visible_section: VisibleSection,

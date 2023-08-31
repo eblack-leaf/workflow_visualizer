@@ -32,15 +32,15 @@ impl<I: Bundle> BundleExtension for I {
     }
 }
 #[derive(Component)]
-pub struct DelayedBundle<T: Bundle + Sized + Clone> {
-    pub bundle: T,
+pub struct DelayedBundle<T: Bundle + Sized> {
+    pub bundle: Option<T>,
     pub start: Option<TimeMarker>,
     pub delay: TimeDelta,
 }
-impl<T: Bundle + Sized + Clone> DelayedBundle<T> {
+impl<T: Bundle + Sized> DelayedBundle<T> {
     pub fn new<TD: Into<TimeDelta>>(bundle: T, delay: TD) -> Self {
         Self {
-            bundle,
+            bundle: Some(bundle),
             start: None,
             delay: delay.into(),
         }
@@ -48,16 +48,16 @@ impl<T: Bundle + Sized + Clone> DelayedBundle<T> {
 }
 pub trait DelayedSpawn
 where
-    Self: Bundle + Sized + Clone,
+    Self: Bundle + Sized,
 {
     fn delay<TD: Into<TimeDelta>>(self, delay: TD) -> DelayedBundle<Self>;
 }
-impl<T: Bundle + Sized + Clone> DelayedSpawn for T {
+impl<T: Bundle + Sized> DelayedSpawn for T {
     fn delay<TD: Into<TimeDelta>>(self, delay: TD) -> DelayedBundle<Self> {
         DelayedBundle::<T>::new(self, delay)
     }
 }
-pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static + Clone>(
+pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static>(
     mut delayed: Query<(Entity, &mut DelayedBundle<T>)>,
     timer: Res<Timer>,
     mut cmd: Commands,
@@ -68,7 +68,8 @@ pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static + Clone>(
         }
         let time_since_start = timer.time_since(delayed_bundle.start.unwrap());
         if time_since_start >= delayed_bundle.delay {
-            cmd.entity(entity).insert(delayed_bundle.bundle.clone());
+            cmd.entity(entity)
+                .insert(delayed_bundle.bundle.take().unwrap());
             cmd.entity(entity).remove::<DelayedBundle<T>>();
         }
     }
