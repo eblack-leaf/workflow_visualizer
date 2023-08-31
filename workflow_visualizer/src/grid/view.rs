@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::{PathView, RawMarker, ResponsiveGridView};
+use crate::{PathView, RawMarker, ResponsiveGridPoint, ResponsiveGridView};
 
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]
@@ -85,7 +85,11 @@ pub struct GridPoint {
     pub x: GridLocation,
     pub y: GridLocation,
 }
-
+impl GridPoint {
+    pub fn all_same(self) -> ResponsiveGridPoint {
+        ResponsiveGridPoint::all_same(self)
+    }
+}
 impl<T: Into<GridLocation>> From<(T, T)> for GridPoint {
     fn from(value: (T, T)) -> Self {
         Self {
