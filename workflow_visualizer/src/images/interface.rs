@@ -8,7 +8,8 @@ use bevy_ecs::system::ResMut;
 
 use crate::images::renderer::{ImageFade, ImageName, ImageOrientations};
 use crate::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Position, Section, Tag, Visibility,
+    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
+    Visibility,
 };
 
 pub type ImageTag = Tag<Image>;
@@ -38,9 +39,15 @@ impl Image {
     }
 }
 #[derive(Component, Copy, Clone)]
-pub enum AspectRatioAlignedDimension {
-    Width(f32),
-    Height(f32),
+pub struct AspectRatioAlignedDimension {
+    pub dimension: Area<InterfaceContext>,
+}
+impl AspectRatioAlignedDimension {
+    pub fn new<A: Into<Area<InterfaceContext>>>(dimension: A) -> Self {
+        Self {
+            dimension: dimension.into(),
+        }
+    }
 }
 pub(crate) fn aspect_ratio_aligned_dimension(
     mut bound: Query<
@@ -58,16 +65,14 @@ pub(crate) fn aspect_ratio_aligned_dimension(
 ) {
     for (name, max_dim, mut area) in bound.iter_mut() {
         let orientation = orientations.get(name.clone());
-        match max_dim {
-            AspectRatioAlignedDimension::Width(width) => {
-                let height = width * orientation.value().reciprocal();
-                *area = Area::new(*width, height);
-            }
-            AspectRatioAlignedDimension::Height(height) => {
-                let width = height * orientation.value().0;
-                *area = Area::new(width, *height);
-            }
+        let dimensions_orientation = Orientation::new(max_dim.dimension.as_numerical());
+        let mut attempted_width = max_dim.dimension.width;
+        let mut attempted_height = attempted_width * orientation.value().reciprocal();
+        while attempted_height > max_dim.dimension.height {
+            attempted_width -= 1f32;
+            attempted_height = attempted_width * orientation.value().reciprocal();
         }
+        *area = Area::new(attempted_width, attempted_height);
     }
 }
 #[derive(Component)]
