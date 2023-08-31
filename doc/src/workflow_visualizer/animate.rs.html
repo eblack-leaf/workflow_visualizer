@@ -172,6 +172,11 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::marker::PhantomData;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, Entity, Query, Res};
@@ -223,6 +228,11 @@
 
 <span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>InterpolationExtraction(<span class="kw">pub </span>f32);
+<span class="kw">impl </span>InterpolationExtraction {
+    <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+        <span class="self">self</span>.<span class="number">0
+    </span>}
+}
 
 <span class="kw">impl </span>From&lt;f32&gt; <span class="kw">for </span>InterpolationExtraction {
     <span class="kw">fn </span>from(value: f32) -&gt; <span class="self">Self </span>{

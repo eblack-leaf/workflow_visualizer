@@ -113,15 +113,38 @@
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::ops::{Add, Mul, Sub};
 
 <span class="kw">use </span>bevy_ecs::component::Component;
+<span class="kw">use </span>bevy_ecs::prelude::Query;
 <span class="kw">use </span>bytemuck::{Pod, Zeroable};
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::{CoordinateContext, NumericalContext};
-<span class="kw">use crate</span>::{DeviceContext, InterfaceContext};
+<span class="kw">use crate</span>::{Animate, Animation, DeviceContext, InterfaceContext, Interpolation};
 <span class="doccomment">/// Area is for width/height of an entity
 </span><span class="attr">#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 </span><span class="kw">pub struct </span>Area&lt;Context: CoordinateContext&gt; {
@@ -226,6 +249,27 @@
     <span class="kw">type </span>Output = Area&lt;Context&gt;;
     <span class="kw">fn </span>sub(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
         Area::&lt;Context&gt;::new(<span class="self">self</span>.width - rhs.width, <span class="self">self</span>.height - rhs.height)
+    }
+}
+<span class="kw">impl</span>&lt;Context: CoordinateContext&gt; Animate <span class="kw">for </span>Area&lt;Context&gt; {
+    <span class="kw">fn </span>interpolations(<span class="kw-2">&amp;</span><span class="self">self</span>, end: <span class="self">Self</span>) -&gt; Vec&lt;Interpolation&gt; {
+        <span class="macro">vec!</span>[
+            Interpolation::new(end.width - <span class="self">self</span>.width),
+            Interpolation::new(end.height - <span class="self">self</span>.height),
+        ]
+    }
+}
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>apply_animation&lt;Context: CoordinateContext&gt;(
+    <span class="kw-2">mut </span>positions: Query&lt;(<span class="kw-2">&amp;mut </span>Area&lt;Context&gt;, <span class="kw-2">&amp;mut </span>Animation&lt;Area&lt;Context&gt;&gt;)&gt;,
+) {
+    <span class="kw">for </span>(<span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>anim) <span class="kw">in </span>positions.iter_mut() {
+        <span class="kw">let </span>extracts = anim.extractions();
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(extract) = extracts.get(<span class="number">0</span>).unwrap() {
+            pos.width += extract.<span class="number">0</span>;
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(extract) = extracts.get(<span class="number">1</span>).unwrap() {
+            pos.height += extract.<span class="number">0</span>;
+        }
     }
 }
 </code></pre></div></section></main></body></html>

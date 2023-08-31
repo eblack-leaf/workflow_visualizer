@@ -58,8 +58,7 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 <span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
-<span class="kw">use </span><span class="kw">crate</span>::coord::position::apply_animation;
-<span class="kw">use crate</span>::{Attach, Layer, Position, Section, SyncPoint, Visualizer};
+<span class="kw">use crate</span>::{Area, Attach, Layer, Position, Section, SyncPoint, Visualizer};
 
 <span class="kw">pub mod </span>area;
 <span class="kw">pub mod </span>layer;
@@ -106,10 +105,11 @@
 <span class="kw">impl </span>Attach <span class="kw">for </span>CoordinateAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         visualizer.register_animation::&lt;Position&lt;InterfaceContext&gt;&gt;();
-        visualizer
-            .job
-            .task(Visualizer::TASK_MAIN)
-            .add_systems((apply_animation::&lt;InterfaceContext&gt;.in_set(SyncPoint::Animation),));
+        visualizer.register_animation::&lt;Area&lt;InterfaceContext&gt;&gt;();
+        visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            position::apply_animation::&lt;InterfaceContext&gt;.in_set(SyncPoint::Animation),
+            area::apply_animation::&lt;InterfaceContext&gt;.in_set(SyncPoint::Animation),
+        ));
     }
 }
 </code></pre></div></section></main></body></html>

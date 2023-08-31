@@ -472,6 +472,8 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -484,6 +486,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animate::{end_animations, start_animations, update_animations};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::color::ColorAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
@@ -636,6 +639,7 @@
         <span class="self">self</span>.invoke_attach::&lt;ButtonAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ImageAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;CoordinateAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;ColorAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
         <span class="self">self</span>.invoke_attach::&lt;IconRendererAttachment&gt;();
         <span class="self">self</span>.setup();
