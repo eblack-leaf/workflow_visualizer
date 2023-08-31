@@ -474,6 +474,11 @@
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -485,6 +490,7 @@
 <span class="kw">use </span>winit::window::Window;
 
 <span class="kw">use </span><span class="kw">crate</span>::animate::{end_animations, start_animations, update_animations};
+<span class="kw">use </span><span class="kw">crate</span>::bundling::spawn_delayed_bundle;
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::color::ColorAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateAttachment;
@@ -910,6 +916,10 @@
             start_animations::&lt;A&gt;.in_set(SyncPoint::PostProcessPreparation),
             end_animations::&lt;A&gt;.in_set(SyncPoint::Finish),
         ));
+    }
+    <span class="kw">pub fn </span>enable_delayed_spawn&lt;T: Bundle + Clone + Sized + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.task(Visualizer::TASK_MAIN)
+            .add_systems((spawn_delayed_bundle::&lt;T&gt;.in_set(SyncPoint::Spawn),));
     }
     <span class="doccomment">/// queue attachment to the Visualizer
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>add_attachments(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attachments: Vec&lt;Attachment&gt;) {
