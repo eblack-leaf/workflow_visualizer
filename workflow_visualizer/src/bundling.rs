@@ -36,15 +36,13 @@ pub struct DelayedBundle<T: Bundle + Sized + Clone> {
     pub bundle: T,
     pub start: Option<TimeMarker>,
     pub delay: TimeDelta,
-    pub handle: Entity,
 }
 impl<T: Bundle + Sized + Clone> DelayedBundle<T> {
-    pub fn new<TD: Into<TimeDelta>>(bundle: T, delay: TD, handle: Entity) -> Self {
+    pub fn new<TD: Into<TimeDelta>>(bundle: T, delay: TD) -> Self {
         Self {
             bundle,
             start: None,
             delay: delay.into(),
-            handle,
         }
     }
 }
@@ -52,11 +50,11 @@ pub trait DelayedSpawn
 where
     Self: Bundle + Sized + Clone,
 {
-    fn delay<TD: Into<TimeDelta>>(self, delay: TD, handle: Entity) -> DelayedBundle<Self>;
+    fn delay<TD: Into<TimeDelta>>(self, delay: TD) -> DelayedBundle<Self>;
 }
 impl<T: Bundle + Sized + Clone> DelayedSpawn for T {
-    fn delay<TD: Into<TimeDelta>>(self, delay: TD, handle: Entity) -> DelayedBundle<Self> {
-        DelayedBundle::<T>::new(self, delay, handle)
+    fn delay<TD: Into<TimeDelta>>(self, delay: TD) -> DelayedBundle<Self> {
+        DelayedBundle::<T>::new(self, delay)
     }
 }
 pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static + Clone>(
@@ -70,9 +68,8 @@ pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static + Clone>(
         }
         let time_since_start = timer.time_since(delayed_bundle.start.unwrap());
         if time_since_start >= delayed_bundle.delay {
-            cmd.entity(delayed_bundle.handle)
-                .insert(delayed_bundle.bundle.clone());
-            cmd.entity(entity).despawn();
+            cmd.entity(entity).insert(delayed_bundle.bundle.clone());
+            cmd.entity(entity).remove::<DelayedBundle<T>>();
         }
     }
 }
