@@ -5,6 +5,7 @@ use bevy_ecs::prelude::{
 };
 use compact_str::CompactString;
 use image::{EncodableLayout, GenericImageView};
+use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
 use crate::images::render_group::ImageRenderGroup;
@@ -51,7 +52,7 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 }
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
-#[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct ImageName(pub CompactString);
 impl From<&'static str> for ImageName {
     fn from(value: &'static str) -> Self {
@@ -63,7 +64,7 @@ impl From<String> for ImageName {
         ImageName(value.into())
     }
 }
-#[derive(Component, Clone)]
+#[derive(Component, Clone, Serialize, Deserialize)]
 pub struct ImageRequest {
     pub name: ImageName,
     pub data: Vec<u8>,
