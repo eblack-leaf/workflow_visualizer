@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use bevy_ecs::prelude::{
     Commands, Component, Entity, NonSend, NonSendMut, Query, Res, ResMut, Resource,
 };
+use compact_str::CompactString;
 use image::{EncodableLayout, GenericImageView};
 use wgpu::util::DeviceExt;
 
@@ -51,10 +52,15 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
 #[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
-pub struct ImageName(pub &'static str);
+pub struct ImageName(pub CompactString);
 impl From<&'static str> for ImageName {
     fn from(value: &'static str) -> Self {
-        ImageName(value)
+        ImageName(value.into())
+    }
+}
+impl From<String> for ImageName {
+    fn from(value: String) -> Self {
+        ImageName(value.into())
     }
 }
 #[derive(Component, Clone)]
