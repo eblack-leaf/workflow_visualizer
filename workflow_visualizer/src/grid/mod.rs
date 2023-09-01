@@ -167,7 +167,7 @@ impl Grid {
         self.column_config.base.0 + self.column_config.extension.0
     }
     pub fn markers_per_row(&self) -> i32 {
-        self.row_config.base.0
+        self.markers_per_column()
     }
     pub fn markers_per_gutter(&self) -> i32 {
         self.gutter_config.base.0
@@ -192,7 +192,7 @@ impl Grid {
     }
     pub fn calc_vertical_location(&self, grid_location: GridLocation) -> RawMarker {
         let content_location = grid_location.location;
-        let markers_per_row = self.markers_per_column();
+        let markers_per_row = self.markers_per_row();
         let location = content_location.marker.0 * markers_per_row
             + self.gutter_config.base.0 * content_location.marker.0;
         let location =
