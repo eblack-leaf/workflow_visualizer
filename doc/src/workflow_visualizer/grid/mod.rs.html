@@ -410,8 +410,8 @@
         <span class="self">self</span>.column_config.base.<span class="number">0 </span>+ <span class="self">self</span>.column_config.extension.<span class="number">0
     </span>}
     <span class="kw">pub fn </span>markers_per_row(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
-        <span class="self">self</span>.row_config.base.<span class="number">0
-    </span>}
+        <span class="self">self</span>.markers_per_column()
+    }
     <span class="kw">pub fn </span>markers_per_gutter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="self">self</span>.gutter_config.base.<span class="number">0
     </span>}
@@ -435,7 +435,7 @@
     }
     <span class="kw">pub fn </span>calc_vertical_location(<span class="kw-2">&amp;</span><span class="self">self</span>, grid_location: GridLocation) -&gt; RawMarker {
         <span class="kw">let </span>content_location = grid_location.location;
-        <span class="kw">let </span>markers_per_row = <span class="self">self</span>.markers_per_column();
+        <span class="kw">let </span>markers_per_row = <span class="self">self</span>.markers_per_row();
         <span class="kw">let </span>location = content_location.marker.<span class="number">0 </span>* markers_per_row
             + <span class="self">self</span>.gutter_config.base.<span class="number">0 </span>* content_location.marker.<span class="number">0</span>;
         <span class="kw">let </span>location =
