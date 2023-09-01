@@ -112,7 +112,7 @@
 
 <span class="kw">impl </span>MonoSpacedFont {
     <span class="kw">pub const </span>DEFAULT_OPT_SCALE: u32 = <span class="number">40u32</span>;
-    <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">200</span>;
+    <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400</span>;
     <span class="kw">pub fn </span>jet_brains_mono&lt;T: Into&lt;TextScale&gt;&gt;(opt_scale: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(
             <span class="macro">include_bytes!</span>(<span class="string">&quot;JetBrainsMono-Regular.ttf&quot;</span>).as_slice(),
