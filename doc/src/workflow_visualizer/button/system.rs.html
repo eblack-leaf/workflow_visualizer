@@ -504,8 +504,8 @@
             (
                 <span class="prelude-val">None</span>,
                 Position::new(
-                    center.x - scaling.icon.px() / <span class="number">2f32</span>,
-                    center.y - scaling.icon.px() / <span class="number">2f32</span>,
+                    center.x - scaling.icon.width_px() / <span class="number">2f32</span>,
+                    center.y - scaling.icon.height_px() / <span class="number">2f32</span>,
                 ),
             )
         } <span class="kw">else </span>{
@@ -515,13 +515,13 @@
                     .to_ui(scale_factor.factor());
             <span class="kw">let </span>len = button_text.<span class="number">0</span>.len() <span class="kw">as </span>f32;
             <span class="kw">let </span>x = center.x - logical_dimensions.width * (len / <span class="number">2f32</span>).ceil()
-                + scaling.icon.px() / <span class="number">2f32
+                + scaling.icon.width_px() / <span class="number">2f32
                 </span>+ RawMarker(<span class="number">2</span>).to_pixel();
             <span class="kw">let </span>y = center.y - logical_dimensions.height / <span class="number">2f32</span>;
             <span class="kw">let </span>width = logical_dimensions.width * len;
             <span class="kw">let </span>height = logical_dimensions.height;
             <span class="kw">let </span>text_section = Section::new((x, y), (width, height));
-            <span class="kw">let </span>icon_x = text_section.left() - RawMarker(<span class="number">2</span>).to_pixel() - scaling.icon.px();
+            <span class="kw">let </span>icon_x = text_section.left() - RawMarker(<span class="number">2</span>).to_pixel() - scaling.icon.width_px();
             <span class="kw">let </span>icon_y = text_section.top() + RawMarker::PX;
             (<span class="prelude-val">Some</span>(text_section), Position::new(icon_x, icon_y))
         };

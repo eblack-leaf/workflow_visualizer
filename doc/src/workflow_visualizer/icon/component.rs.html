@@ -77,6 +77,14 @@
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
 <a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::prelude::Bundle;
 <span class="kw">use </span>compact_str::CompactString;
@@ -90,15 +98,23 @@
     Medium,
     Large,
     Custom(u32),
+    Asymmetrical((u32, u32)),
 }
 
 <span class="kw">impl </span>IconScale {
-    <span class="kw">pub fn </span>px(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>width_px(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self </span>{
             IconScale::Small =&gt; <span class="number">13f32</span>,
             IconScale::Medium =&gt; <span class="number">17f32</span>,
             IconScale::Large =&gt; <span class="number">20f32</span>,
             IconScale::Custom(dim) =&gt; <span class="kw-2">*</span>dim <span class="kw">as </span>f32,
+            IconScale::Asymmetrical((w, h)) =&gt; <span class="kw-2">*</span>w <span class="kw">as </span>f32,
+        }
+    }
+    <span class="kw">pub fn </span>height_px(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self </span>{
+            IconScale::Asymmetrical((w, h)) =&gt; <span class="kw-2">*</span>h <span class="kw">as </span>f32,
+            <span class="kw">_ </span>=&gt; <span class="self">self</span>.width_px(),
         }
     }
 }
