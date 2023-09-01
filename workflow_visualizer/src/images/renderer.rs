@@ -53,7 +53,7 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
 #[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
-pub struct ImageName(pub CompactString);
+pub struct ImageName(pub String);
 impl From<&'static str> for ImageName {
     fn from(value: &'static str) -> Self {
         ImageName(value.into())
