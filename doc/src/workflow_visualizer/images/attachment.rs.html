@@ -45,6 +45,7 @@
 <a href="#45" id="45">45</a>
 <a href="#46" id="46">46</a>
 <a href="#47" id="47">47</a>
+<a href="#48" id="48">48</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
 <span class="kw">use </span><span class="kw">crate</span>::images::interface::{
@@ -77,6 +78,7 @@
             .task(Visualizer::TASK_STARTUP)
             .add_systems((load_images.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            load_images.in_set(SyncPoint::Initialization),
             aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),
