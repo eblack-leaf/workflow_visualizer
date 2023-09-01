@@ -135,6 +135,7 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="kw">use </span>tracing::{info, trace};
@@ -154,12 +155,13 @@
     control_flow: <span class="kw-2">&amp;mut </span>ControlFlow,
     desktop_dimensions: <span class="prelude-ty">Option</span>&lt;Area&lt;DeviceContext&gt;&gt;,
 ) {
-    <span class="kw">if </span>visualizer.can_idle() {
-        control_flow.set_wait();
-    } <span class="kw">else </span>{
-        control_flow.set_poll();
-    }
-    <span class="kw">match </span>event {
+    control_flow.set_poll();
+    <span class="comment">// if visualizer.can_idle() {
+    //     control_flow.set_wait();
+    // } else {
+    //     control_flow.set_poll();
+    // }
+    </span><span class="kw">match </span>event {
         Event::NewEvents(cause) =&gt; <span class="kw">match </span>cause {
             StartCause::Init =&gt; {
                 <span class="attr">#[cfg(not(target_os = <span class="string">&quot;android&quot;</span>))]
