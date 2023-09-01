@@ -4,8 +4,8 @@ use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, 
 
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::{
-    ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
-    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonDespawn, ButtonTag, ButtonType,
+    Color, DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
     PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
     Toggled,
 };
@@ -226,11 +226,11 @@ pub(crate) fn placement(
 }
 
 pub(crate) fn color_forward(
-    mut color_listeners: Query<(&mut Color), Without<ButtonTag>>,
-    color_deciders: Query<
+    mut color_listeners: Query<(&mut Color, Option<&mut BorderColor>), Without<ButtonTag>>,
+    mut color_deciders: Query<
         (
             &Color,
-            &BackgroundColor,
+            &mut BackgroundColor,
             &PanelEntity,
             &IconEntity,
             &TextEntity,
@@ -241,19 +241,21 @@ pub(crate) fn color_forward(
         ),
     >,
 ) {
-    for (color, back_color, panel_ent, icon_ent, text_ent) in color_deciders.iter() {
+    for (color, mut back_color, panel_ent, icon_ent, text_ent) in color_deciders.iter_mut() {
+        back_color.0.alpha = color.alpha;
         if let Some(ent) = panel_ent.0 {
-            if let Ok(mut listened_color) = color_listeners.get_mut(ent) {
+            if let Ok((mut listened_color, mut border)) = color_listeners.get_mut(ent) {
                 *listened_color = back_color.0;
+                border.unwrap().0 = *color;
             }
         }
         if let Some(ent) = icon_ent.0 {
-            if let Ok(mut listened_color) = color_listeners.get_mut(ent) {
+            if let Ok((mut listened_color, _)) = color_listeners.get_mut(ent) {
                 *listened_color = *color;
             }
         }
         if let Some(ent) = text_ent.0 {
-            if let Ok(mut listened_color) = color_listeners.get_mut(ent) {
+            if let Ok((mut listened_color, _)) = color_listeners.get_mut(ent) {
                 *listened_color = *color;
             }
         }
