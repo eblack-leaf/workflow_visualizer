@@ -98,20 +98,9 @@ impl From<u32> for TextScale {
     }
 }
 impl TextScale {
-    pub(crate) fn px(&self) -> f32 {
+    pub fn px(&self) -> f32 {
         self.0 as f32
     }
-}
-/// What predetermined size category to assign to the Text
-#[derive(Component, Copy, Clone, Eq, Hash, PartialEq)]
-pub enum TextScaleAlignment {
-    Small,
-    Medium,
-    Large,
-    Custom(u32),
-}
-impl TextScaleAlignment {
-    pub const TEXT_SCALE_ALIGNMENT_GUIDE: [u32; 3] = [13, 17, 20];
 }
 /// The size of a letter at an alignment
 /// This holds `Area<DeviceContext>` as character dimensions are
