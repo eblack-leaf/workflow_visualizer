@@ -59,6 +59,7 @@ pub(crate) fn aspect_ratio_aligned_dimension(
         Or<(
             Changed<AspectRatioAlignedDimension>,
             Changed<Area<InterfaceContext>>,
+            Changed<ImageName>,
         )>,
     >,
     orientations: Res<ImageOrientations>,

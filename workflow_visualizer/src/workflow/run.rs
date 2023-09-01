@@ -77,10 +77,6 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             _ => {}
         },
         Event::UserEvent(event) => {
-            let message = format!("visualizer loop received: {:?}", event);
-            info!(message);
-            #[cfg(target_family = "wasm")]
-            gloo_console::info!(wasm_bindgen::JsValue::from_str(message.as_str()));
             if T::is_exit_response(&event) {
                 control_flow.set_exit();
             }
