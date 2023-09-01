@@ -17,12 +17,11 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
     control_flow: &mut ControlFlow,
     desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
-    control_flow.set_poll();
-    // if visualizer.can_idle() {
-    //     control_flow.set_wait();
-    // } else {
-    //     control_flow.set_poll();
-    // }
+    if visualizer.can_idle() {
+        control_flow.set_wait();
+    } else {
+        control_flow.set_poll();
+    }
     match event {
         Event::NewEvents(cause) => match cause {
             StartCause::Init => {
