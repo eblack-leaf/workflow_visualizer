@@ -192,11 +192,12 @@ impl Grid {
     }
     pub fn calc_vertical_location(&self, grid_location: GridLocation) -> RawMarker {
         let content_location = grid_location.location;
-        let location = content_location.marker.0 * self.row_config.base.0
+        let markers_per_row = self.markers_per_column();
+        let location = content_location.marker.0 * markers_per_row
             + self.gutter_config.base.0 * content_location.marker.0;
         let location =
             if content_location.bias == GridMarkerBias::Near && content_location.marker.0 != 0 {
-                location - self.row_config.base.0
+                location - markers_per_row
             } else {
                 location
             };
