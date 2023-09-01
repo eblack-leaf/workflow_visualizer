@@ -314,14 +314,16 @@
 <a href="#314" id="314">314</a>
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
 <span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 <span class="kw">use crate</span>::{
-    ActiveInteraction, Area, BackgroundColor, ButtonDespawn, ButtonTag, ButtonType, Color,
-    DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonDespawn, ButtonTag, ButtonType,
+    Color, DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
     PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
     Toggled,
 };
@@ -542,11 +544,11 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>color_forward(
-    <span class="kw-2">mut </span>color_listeners: Query&lt;(<span class="kw-2">&amp;mut </span>Color), Without&lt;ButtonTag&gt;&gt;,
-    color_deciders: Query&lt;
+    <span class="kw-2">mut </span>color_listeners: Query&lt;(<span class="kw-2">&amp;mut </span>Color, <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>BorderColor&gt;), Without&lt;ButtonTag&gt;&gt;,
+    <span class="kw-2">mut </span>color_deciders: Query&lt;
         (
             <span class="kw-2">&amp;</span>Color,
-            <span class="kw-2">&amp;</span>BackgroundColor,
+            <span class="kw-2">&amp;mut </span>BackgroundColor,
             <span class="kw-2">&amp;</span>PanelEntity,
             <span class="kw-2">&amp;</span>IconEntity,
             <span class="kw-2">&amp;</span>TextEntity,
@@ -557,19 +559,21 @@
         ),
     &gt;,
 ) {
-    <span class="kw">for </span>(color, back_color, panel_ent, icon_ent, text_ent) <span class="kw">in </span>color_deciders.iter() {
+    <span class="kw">for </span>(color, <span class="kw-2">mut </span>back_color, panel_ent, icon_ent, text_ent) <span class="kw">in </span>color_deciders.iter_mut() {
+        back_color.<span class="number">0</span>.alpha = color.alpha;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = panel_ent.<span class="number">0 </span>{
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>listened_color) = color_listeners.get_mut(ent) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>listened_color, <span class="kw-2">mut </span>border)) = color_listeners.get_mut(ent) {
                 <span class="kw-2">*</span>listened_color = back_color.<span class="number">0</span>;
+                border.unwrap().<span class="number">0 </span>= <span class="kw-2">*</span>color;
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = icon_ent.<span class="number">0 </span>{
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>listened_color) = color_listeners.get_mut(ent) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>listened_color, <span class="kw">_</span>)) = color_listeners.get_mut(ent) {
                 <span class="kw-2">*</span>listened_color = <span class="kw-2">*</span>color;
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = text_ent.<span class="number">0 </span>{
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>listened_color) = color_listeners.get_mut(ent) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>listened_color, <span class="kw">_</span>)) = color_listeners.get_mut(ent) {
                 <span class="kw-2">*</span>listened_color = <span class="kw-2">*</span>color;
             }
         }
