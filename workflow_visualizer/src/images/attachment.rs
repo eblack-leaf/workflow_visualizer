@@ -30,6 +30,7 @@ impl Attach for ImageAttachment {
             .task(Visualizer::TASK_STARTUP)
             .add_systems((load_images.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
+            load_images.in_set(SyncPoint::Initialization),
             aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),
