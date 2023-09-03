@@ -133,7 +133,7 @@
 <span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>Icon {
     tag: IconTag,
-    id: IconId,
+    id: IconHandle,
     icon_scale: IconScale,
     layer: Layer,
     pos_color: Color,
@@ -144,7 +144,7 @@
 }
 
 <span class="kw">impl </span>Icon {
-    <span class="kw">pub fn </span>new&lt;Id: Into&lt;IconId&gt;, S: Into&lt;IconScale&gt;, L: Into&lt;Layer&gt;, C: Into&lt;Color&gt;&gt;(
+    <span class="kw">pub fn </span>new&lt;Id: Into&lt;IconHandle&gt;, S: Into&lt;IconScale&gt;, L: Into&lt;Layer&gt;, C: Into&lt;Color&gt;&gt;(
         id: Id,
         scale: S,
         layer: L,
@@ -164,12 +164,12 @@
     }
 }
 
-<span class="attr">#[derive(Component, Clone, Hash, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>IconId(<span class="kw">pub </span>CompactString);
+<span class="attr">#[derive(Component, Copy, Clone, Hash, Eq, PartialEq)]
+</span><span class="kw">pub struct </span>IconHandle(<span class="kw">pub </span>i32);
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; <span class="kw">for </span>IconId {
-    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="self">Self </span>{
-        IconId(CompactString::new(value))
+<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>IconHandle {
+    <span class="kw">fn </span>from(value: i32) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(value)
     }
 }
 </code></pre></div></section></main></body></html>

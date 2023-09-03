@@ -18,6 +18,8 @@
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::button::system;
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 <span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
@@ -31,7 +33,9 @@
             system::placement.in_set(SyncPoint::SecondaryEffects),
             system::border_change.in_set(SyncPoint::Reconfigure),
             system::color_invert.in_set(SyncPoint::Reconfigure),
-            system::despawn.in_set(SyncPoint::Reconfigure),
+            system::secondary_despawn
+                .in_set(SyncPoint::PostProcessPreparation)
+                .before(<span class="kw">crate</span>::despawn),
             system::color_forward.in_set(SyncPoint::SecondaryEffects),
             system::forward_disable.in_set(SyncPoint::SecondaryEffects),
             system::remove_disabled.in_set(SyncPoint::SecondaryEffects),

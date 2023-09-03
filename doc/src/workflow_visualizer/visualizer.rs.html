@@ -479,6 +479,9 @@
 <a href="#479" id="479">479</a>
 <a href="#480" id="480">480</a>
 <a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -490,7 +493,7 @@
 <span class="kw">use </span>winit::window::Window;
 
 <span class="kw">use </span><span class="kw">crate</span>::animate::{end_animations, start_animations, update_animations};
-<span class="kw">use </span><span class="kw">crate</span>::bundling::spawn_delayed_bundle;
+<span class="kw">use </span><span class="kw">crate</span>::bundling::{despawn, spawn_delayed_bundle};
 <span class="kw">use </span><span class="kw">crate</span>::button::ButtonAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::color::ColorAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateAttachment;
@@ -564,7 +567,10 @@
                 job.tasks.insert(<span class="self">Self</span>::TASK_RENDER_MAIN, Task::new());
                 job.tasks.insert(<span class="self">Self</span>::TASK_MAIN, {
                     <span class="kw">let </span><span class="kw-2">mut </span>task = Task::default();
-                    task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle),));
+                    task.add_systems((
+                        attempt_to_idle.in_set(JobSyncPoint::Idle),
+                        despawn.in_set(SyncPoint::PostProcessPreparation),
+                    ));
                     task
                 });
                 job

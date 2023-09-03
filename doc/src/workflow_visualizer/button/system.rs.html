@@ -320,10 +320,11 @@
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
+<span class="kw">use </span><span class="kw">crate</span>::bundling::Despawn;
 <span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 <span class="kw">use crate</span>::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonDespawn, ButtonTag, ButtonType,
-    Color, DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
+    DeviceContext, Disabled, Icon, IconHandle, InterfaceContext, Layer, MonoSpacedFont, Panel,
     PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
     Toggled,
 };
@@ -350,7 +351,7 @@
             <span class="kw-2">&amp;</span>Layer,
             <span class="kw-2">&amp;</span>BackgroundColor,
             <span class="kw-2">&amp;</span>Color,
-            <span class="kw-2">&amp;</span>IconId,
+            <span class="kw-2">&amp;</span>IconHandle,
             <span class="kw-2">&amp;</span>TextValue,
             <span class="kw-2">&amp;mut </span>PanelEntity,
             <span class="kw-2">&amp;mut </span>IconEntity,
@@ -580,12 +581,11 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>despawn(
-    despawned_buttons: Query&lt;(Entity, <span class="kw-2">&amp;</span>PanelEntity, <span class="kw-2">&amp;</span>TextEntity, <span class="kw-2">&amp;</span>IconEntity), With&lt;ButtonDespawn&gt;&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>secondary_despawn(
+    despawned_buttons: Query&lt;(Entity, <span class="kw-2">&amp;</span>PanelEntity, <span class="kw-2">&amp;</span>TextEntity, <span class="kw-2">&amp;</span>IconEntity), With&lt;Despawn&gt;&gt;,
     <span class="kw-2">mut </span>cmd: Commands,
 ) {
     <span class="kw">for </span>(entity, panel_entity, text_entity, icon_entity) <span class="kw">in </span>despawned_buttons.iter() {
-        cmd.entity(entity).despawn();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ent) = panel_entity.<span class="number">0 </span>{
             cmd.entity(ent).despawn();
         }

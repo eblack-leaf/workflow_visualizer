@@ -112,8 +112,8 @@
 //! Runner which invokes the visualizer&#39;s tools for multiple platforms
 </span><span class="kw">pub use </span>animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 <span class="kw">pub use </span>bevy_ecs;
-<span class="kw">pub use </span>bundling::{BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn};
-<span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
+<span class="kw">pub use </span>bundling::{despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn};
+<span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
     GridPoint, GridPointBuilder, GridRange, GridView, GridViewBuilder, HorizontalSpan, Placement,
@@ -121,7 +121,7 @@
     ResponsiveView,
 };
 <span class="kw">pub use </span>images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageOrientations, ImageRequest,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageHandle, ImageOrientations, ImageRequest,
     ImageSizes, ImageTag,
 };
 <span class="kw">pub use </span>instance::{
@@ -153,7 +153,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">pub use </span><span class="kw">crate</span>::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale, IconTag,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconScale, IconTag,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::job::Job;
 <span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender, LineTag};

@@ -100,14 +100,12 @@
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::ButtonAttachment;
 
 <span class="kw">use crate</span>::{
-    Color, IconId, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
+    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
     TextValue,
 };
 
@@ -121,7 +119,7 @@
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    icon_id: IconId,
+    icon_id: IconHandle,
     button_text: TextValue,
     section: Section&lt;InterfaceContext&gt;,
     color: Color,
@@ -139,8 +137,6 @@
     Border,
     <span class="prelude-val">None</span>,
 }
-<span class="attr">#[derive(Component, Copy, Clone, Default)]
-</span><span class="kw">pub struct </span>ButtonDespawn {}
 
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>Scaling {
@@ -165,7 +161,7 @@
         L: Into&lt;Layer&gt;,
         C: Into&lt;Color&gt;,
         S: Into&lt;String&gt;,
-        ID: Into&lt;IconId&gt;,
+        H: Into&lt;IconHandle&gt;,
         TS: Into&lt;TextScale&gt;,
         IS: Into&lt;IconScale&gt;,
     &gt;(
@@ -173,7 +169,7 @@
         layer: L,
         foreground_color: C,
         background_color: C,
-        icon_id: ID,
+        handle: H,
         button_text: S,
         text_scale: TS,
         icon_scale: IS,
@@ -183,7 +179,7 @@
             tag: ButtonTag::new(),
             layer: layer.into(),
             button_type,
-            icon_id: icon_id.into(),
+            icon_id: handle.into(),
             button_text: TextValue(button_text.into()),
             section: Section::default(),
             color: foreground_color.into(),

@@ -240,7 +240,7 @@
 };
 <span class="kw">use </span>bevy_ecs::system::ResMut;
 
-<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageName, ImageOrientations};
+<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
 <span class="kw">use crate</span>::{
     Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
     Visibility,
@@ -252,14 +252,14 @@
     section: Section&lt;InterfaceContext&gt;,
     layer: Layer,
     visibility: EnableVisibility,
-    name: ImageName,
+    name: ImageHandle,
     fade: ImageFade,
     cache: Cache,
     difference: Difference,
     tag: ImageTag,
 }
 <span class="kw">impl </span>Image {
-    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageName&gt;, L: Into&lt;Layer&gt;&gt;(name: IN, layer: L) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageHandle&gt;, L: Into&lt;Layer&gt;&gt;(name: IN, layer: L) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             section: Section::default(),
             layer: layer.into(),
@@ -286,14 +286,14 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>aspect_ratio_aligned_dimension(
     <span class="kw-2">mut </span>bound: Query&lt;
         (
-            <span class="kw-2">&amp;</span>ImageName,
+            <span class="kw-2">&amp;</span>ImageHandle,
             <span class="kw-2">&amp;</span>AspectRatioAlignedDimension,
             <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
         ),
         Or&lt;(
             Changed&lt;AspectRatioAlignedDimension&gt;,
             Changed&lt;Area&lt;InterfaceContext&gt;&gt;,
-            Changed&lt;ImageName&gt;,
+            Changed&lt;ImageHandle&gt;,
         )&gt;,
     &gt;,
     orientations: Res&lt;ImageOrientations&gt;,
@@ -312,7 +312,7 @@
 }
 <span class="attr">#[derive(Component)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Cache {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) name: <span class="prelude-ty">Option</span>&lt;ImageName&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) name: <span class="prelude-ty">Option</span>&lt;ImageHandle&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) fade: <span class="prelude-ty">Option</span>&lt;ImageFade&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) pos: <span class="prelude-ty">Option</span>&lt;Position&lt;InterfaceContext&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) area: <span class="prelude-ty">Option</span>&lt;Area&lt;InterfaceContext&gt;&gt;,
@@ -331,14 +331,14 @@
 }
 <span class="attr">#[derive(Component, Clone, Default)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Difference {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) name: <span class="prelude-ty">Option</span>&lt;ImageName&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) name: <span class="prelude-ty">Option</span>&lt;ImageHandle&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) fade: <span class="prelude-ty">Option</span>&lt;ImageFade&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) pos: <span class="prelude-ty">Option</span>&lt;Position&lt;InterfaceContext&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) area: <span class="prelude-ty">Option</span>&lt;Area&lt;InterfaceContext&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) layer: <span class="prelude-ty">Option</span>&lt;Layer&gt;,
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>name_diff(
-    <span class="kw-2">mut </span>images: Query&lt;(<span class="kw-2">&amp;</span>ImageName, <span class="kw-2">&amp;mut </span>Cache, <span class="kw-2">&amp;mut </span>Difference), Changed&lt;ImageName&gt;&gt;,
+    <span class="kw-2">mut </span>images: Query&lt;(<span class="kw-2">&amp;</span>ImageHandle, <span class="kw-2">&amp;mut </span>Cache, <span class="kw-2">&amp;mut </span>Difference), Changed&lt;ImageHandle&gt;&gt;,
 ) {
     <span class="kw">for </span>(name, <span class="kw-2">mut </span>cache, <span class="kw-2">mut </span>difference) <span class="kw">in </span>images.iter_mut() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cached) = cache.name.as_ref() {
@@ -419,7 +419,7 @@
             <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>Layer,
-            <span class="kw-2">&amp;</span>ImageName,
+            <span class="kw-2">&amp;</span>ImageHandle,
             <span class="kw-2">&amp;</span>ImageFade,
             <span class="kw-2">&amp;</span>Visibility,
             <span class="kw-2">&amp;mut </span>Cache,

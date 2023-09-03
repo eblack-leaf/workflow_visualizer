@@ -153,11 +153,11 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{NonSend, NonSendMut, Res, ResMut};
 
 <span class="kw">use </span><span class="kw">crate</span>::images::interface::Extraction;
-<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageName, ImageRenderer};
+<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageHandle, ImageRenderer};
 <span class="kw">use crate</span>::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageRenderGroup {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) image_name: ImageName,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) image_name: ImageHandle,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_bind_group: wgpu::BindGroup,
     <span class="kw">pub</span>(<span class="kw">crate</span>) fade_and_layer: Uniform&lt;ImageFadeAndLayer&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) cpu_fade_and_layer: ImageFadeAndLayer,
@@ -191,7 +191,7 @@
 }
 <span class="kw">impl </span>ImageRenderGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
-        name: ImageName,
+        name: ImageHandle,
         uniforms_bind_group: wgpu::BindGroup,
         fade_uniform: Uniform&lt;ImageFadeAndLayer&gt;,
         texture_coordinates: Uniform&lt;TextureCoordinates&gt;,
