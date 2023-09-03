@@ -1,11 +1,11 @@
 use bevy_ecs::prelude::{NonSend, NonSendMut, Res, ResMut};
 
 use crate::images::interface::Extraction;
-use crate::images::renderer::{ImageFade, ImageName, ImageRenderer};
+use crate::images::renderer::{ImageFade, ImageHandle, ImageRenderer};
 use crate::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
 
 pub(crate) struct ImageRenderGroup {
-    pub(crate) image_name: ImageName,
+    pub(crate) image_name: ImageHandle,
     pub(crate) render_group_bind_group: wgpu::BindGroup,
     pub(crate) fade_and_layer: Uniform<ImageFadeAndLayer>,
     pub(crate) cpu_fade_and_layer: ImageFadeAndLayer,
@@ -39,7 +39,7 @@ impl ImageFadeAndLayer {
 }
 impl ImageRenderGroup {
     pub(crate) fn new(
-        name: ImageName,
+        name: ImageHandle,
         uniforms_bind_group: wgpu::BindGroup,
         fade_uniform: Uniform<ImageFadeAndLayer>,
         texture_coordinates: Uniform<TextureCoordinates>,

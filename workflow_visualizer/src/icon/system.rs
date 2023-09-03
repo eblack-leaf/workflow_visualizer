@@ -3,7 +3,7 @@ use bevy_ecs::prelude::{
 };
 
 use crate::icon::cache::{Cache, Difference};
-use crate::icon::component::{IconId, IconScale};
+use crate::icon::component::{IconHandle, IconScale};
 use crate::icon::renderer::IconRenderer;
 use crate::{
     Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
@@ -29,7 +29,7 @@ pub(crate) fn management(
             &Area<InterfaceContext>,
             &Layer,
             &Color,
-            &IconId,
+            &IconHandle,
             &Visibility,
             &mut Difference,
         ),
@@ -118,7 +118,7 @@ pub(crate) fn positive_space_color_diff(
 }
 
 pub(crate) fn icon_id_diff(
-    mut icons: Query<(&IconId, &mut Cache, &mut Difference), Changed<IconId>>,
+    mut icons: Query<(&IconHandle, &mut Cache, &mut Difference), Changed<IconHandle>>,
 ) {
     for (id, mut cache, mut difference) in icons.iter_mut() {
         if let Some(cached_id) = cache.attributes.icon_id.as_ref() {

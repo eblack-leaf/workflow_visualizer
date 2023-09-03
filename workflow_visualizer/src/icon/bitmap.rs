@@ -4,7 +4,7 @@ use bevy_ecs::component::Component;
 use bevy_ecs::prelude::{Commands, Entity, Query, Resource};
 use serde::{Deserialize, Serialize};
 
-use crate::icon::component::IconId;
+use crate::icon::component::IconHandle;
 use crate::TextureCoordinates;
 
 #[repr(C)]
@@ -121,11 +121,11 @@ pub(crate) fn cleanup_requests(requests: Query<(Entity, &IconBitmapRequest)>, mu
 }
 #[derive(Component, Clone)]
 pub struct IconBitmapRequest {
-    pub id: IconId,
+    pub id: IconHandle,
     pub bitmap: IconBitmap,
 }
 
-impl<I: Into<IconId>, IB: Into<IconBitmap>> From<(I, IB)> for IconBitmapRequest {
+impl<I: Into<IconHandle>, IB: Into<IconBitmap>> From<(I, IB)> for IconBitmapRequest {
     fn from(value: (I, IB)) -> Self {
         Self {
             id: value.0.into(),
@@ -135,7 +135,7 @@ impl<I: Into<IconId>, IB: Into<IconBitmap>> From<(I, IB)> for IconBitmapRequest 
 }
 
 pub(crate) struct IconBitmapLayout {
-    pub(crate) bitmap_locations: HashMap<IconId, TextureCoordinates>,
+    pub(crate) bitmap_locations: HashMap<IconHandle, TextureCoordinates>,
 }
 
 impl IconBitmapLayout {

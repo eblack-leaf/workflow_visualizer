@@ -1,6 +1,6 @@
 use workflow_visualizer::bevy_ecs::prelude::{IntoSystemConfigs, ResMut};
 use workflow_visualizer::{
-    Attach, BundledIcon, IconBitmap, IconBitmapRequest, Idle, SyncPoint, Visualizer,
+    Attach, BundledIcon, IconBitmap, IconBitmapRequest, IconHandle, Idle, SyncPoint, Visualizer,
 };
 
 use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
@@ -8,6 +8,22 @@ use crate::entry_list::{ListDimensions, ReceivedTokens};
 use crate::{bottom_panel, enable, entry, entry_list, paging, positioning};
 
 pub struct EntryAttachment;
+#[repr(i32)]
+#[derive(Copy, Clone)]
+pub(crate) enum IconHandles {
+    Edit,
+    Add,
+    PageLeft,
+    PageRight,
+    Run,
+    Delete,
+    Generate,
+}
+impl IconHandles {
+    pub(crate) fn handle(&self) -> IconHandle {
+        (*self as i32).into()
+    }
+}
 
 impl Attach for EntryAttachment {
     fn attach(visualizer: &mut Visualizer) {
@@ -16,31 +32,31 @@ impl Attach for EntryAttachment {
         visualizer.add_event::<EntryAddToken>();
         visualizer.add_event::<EntryRemoveToken>();
         visualizer.spawn(IconBitmapRequest::from((
-            "edit",
+            IconHandles::Edit.handle(),
             IconBitmap::bundled(BundledIcon::Edit),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "add",
+            IconHandles::Add.handle(),
             IconBitmap::bundled(BundledIcon::Add),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "page_left",
+            IconHandles::PageLeft.handle(),
             IconBitmap::bundled(BundledIcon::ArrowLeft),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "page_right",
+            IconHandles::PageRight.handle(),
             IconBitmap::bundled(BundledIcon::ArrowRight),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "run",
+            IconHandles::Run.handle(),
             IconBitmap::bundled(BundledIcon::Run),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "delete",
+            IconHandles::Delete.handle(),
             IconBitmap::bundled(BundledIcon::Delete),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "generate",
+            IconHandles::Generate.handle(),
             IconBitmap::bundled(BundledIcon::Generate),
         )));
         visualizer

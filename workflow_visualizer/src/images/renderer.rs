@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{
-    Commands, Component, Entity, NonSend, NonSendMut, Query, Res, ResMut, Resource,
+    Commands, Component, Entity, Event, NonSend, NonSendMut, Query, Res, ResMut, Resource,
 };
 use compact_str::CompactString;
 use image::{EncodableLayout, GenericImageView};
@@ -52,28 +52,25 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 }
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
-#[derive(Component, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug)]
-pub struct ImageName(pub String);
-impl From<&'static str> for ImageName {
-    fn from(value: &'static str) -> Self {
-        ImageName(value.into())
-    }
-}
-impl From<String> for ImageName {
-    fn from(value: String) -> Self {
-        ImageName(value.into())
+#[derive(
+    Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
+)]
+pub struct ImageHandle(pub i32);
+impl From<i32> for ImageHandle {
+    fn from(value: i32) -> Self {
+        ImageHandle(value)
     }
 }
 #[derive(Component, Clone, Serialize, Deserialize, Debug)]
 pub struct ImageRequest {
-    pub name: ImageName,
+    pub handle: ImageHandle,
     pub data: Vec<u8>,
 }
 impl ImageRequest {
-    pub fn new<IN: Into<ImageName>>(name: IN, data: Vec<u8>) -> Self {
+    pub fn new<IN: Into<ImageHandle>, D: Into<Vec<u8>>>(handle: IN, data: D) -> Self {
         Self {
-            name: name.into(),
-            data,
+            handle: handle.into(),
+            data: data.into(),
         }
     }
 }
@@ -103,24 +100,26 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
-    pub(crate) images: HashMap<ImageName, ImageData>,
+    pub(crate) images: HashMap<ImageHandle, ImageData>,
     pub(crate) render_group_layout: wgpu::BindGroupLayout,
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
 #[derive(Resource, Default)]
-pub struct ImageOrientations(pub(crate) HashMap<ImageName, Orientation>);
+pub struct ImageOrientations(pub(crate) HashMap<ImageHandle, Orientation>);
 impl ImageOrientations {
-    pub fn get<IN: Into<ImageName>>(&self, name: IN) -> Orientation {
+    pub fn get<IN: Into<ImageHandle>>(&self, name: IN) -> Orientation {
         self.0.get(&name.into()).copied().expect("orientation")
     }
 }
 #[derive(Resource, Default)]
-pub struct ImageSizes(pub(crate) HashMap<ImageName, Area<NumericalContext>>);
+pub struct ImageSizes(pub(crate) HashMap<ImageHandle, Area<NumericalContext>>);
 impl ImageSizes {
-    pub fn get<IN: Into<ImageName>>(&self, name: IN) -> Area<NumericalContext> {
+    pub fn get<IN: Into<ImageHandle>>(&self, name: IN) -> Area<NumericalContext> {
         self.0.get(&name.into()).copied().expect("size")
     }
 }
+#[derive(Event, Copy, Clone)]
+pub struct ImageLoaded(pub ImageHandle);
 pub(crate) fn load_images(
     #[cfg(not(target_family = "wasm"))] mut image_renderer: ResMut<ImageRenderer>,
     #[cfg(target_family = "wasm")] mut image_renderer: NonSendMut<ImageRenderer>,
@@ -135,7 +134,9 @@ pub(crate) fn load_images(
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
         let texture_data = image.to_rgba8();
         let dimensions = image.dimensions();
-        sizes.0.insert(request.name.clone(), Area::from(dimensions));
+        sizes
+            .0
+            .insert(request.handle.clone(), Area::from(dimensions));
         let block = AtlasBlock::new((dimensions.0, dimensions.1));
         let atlas_dimension = AtlasDimension::new(1);
         let dimensions = AtlasTextureDimensions::new(block, atlas_dimension);
@@ -154,11 +155,11 @@ pub(crate) fn load_images(
         let bind_group =
             TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
         orientations.0.insert(
-            request.name.clone(),
+            request.handle.clone(),
             Orientation::new(dimensions.dimensions),
         );
         image_renderer.images.insert(
-            request.name.clone(),
+            request.handle.clone(),
             ImageData::new(atlas, bind_group, coordinates),
         );
         cmd.entity(entity).despawn();

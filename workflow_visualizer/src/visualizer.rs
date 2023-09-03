@@ -9,7 +9,7 @@ use winit::event::{ElementState, MouseButton};
 use winit::window::Window;
 
 use crate::animate::{end_animations, start_animations, update_animations};
-use crate::bundling::spawn_delayed_bundle;
+use crate::bundling::{despawn, spawn_delayed_bundle};
 use crate::button::ButtonAttachment;
 use crate::color::ColorAttachment;
 use crate::coord::CoordinateAttachment;
@@ -83,7 +83,10 @@ impl Visualizer {
                 job.tasks.insert(Self::TASK_RENDER_MAIN, Task::new());
                 job.tasks.insert(Self::TASK_MAIN, {
                     let mut task = Task::default();
-                    task.add_systems((attempt_to_idle.in_set(JobSyncPoint::Idle),));
+                    task.add_systems((
+                        attempt_to_idle.in_set(JobSyncPoint::Idle),
+                        despawn.in_set(SyncPoint::PostProcessPreparation),
+                    ));
                     task
                 });
                 job

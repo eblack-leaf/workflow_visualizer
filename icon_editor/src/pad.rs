@@ -5,10 +5,10 @@ use workflow_visualizer::bevy_ecs::prelude::{
 };
 use workflow_visualizer::{
     bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, BundledIcon, Button,
-    ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconScale,
-    Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType, Position,
-    RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text, TextValue,
-    TextWrapStyle, Triggered, Visualizer,
+    ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconHandle,
+    IconScale, Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType,
+    Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text,
+    TextValue, TextWrapStyle, Triggered, Visualizer,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -32,6 +32,24 @@ impl From<Position<InterfaceContext>> for PadLocation {
         }
     }
 }
+#[repr(i32)]
+#[derive(Copy, Clone)]
+pub(crate) enum IconHandles {
+    ArrowLeft,
+    ArrowRight,
+    Generate,
+    Square,
+}
+impl IconHandles {
+    pub(crate) fn handle(&self) -> IconHandle {
+        (*self as i32).into()
+    }
+}
+impl Into<IconHandle> for IconHandles {
+    fn into(self) -> IconHandle {
+        self.handle()
+    }
+}
 #[derive(Resource)]
 pub(crate) struct Pad {
     pub(crate) panel: Entity,
@@ -51,7 +69,7 @@ pub(crate) fn pad_icons(mut pad: ResMut<Pad>, mut cmd: Commands) {
             let entity = cmd
                 .spawn(
                     Icon::new(
-                        "square",
+                        IconHandles::Square,
                         IconScale::Custom(RawMarker::from(Pad::ICON_MARKERS).to_pixel() as u32),
                         Pad::PAD_LAYER - 1,
                         color_from_coverage(0),
@@ -199,7 +217,7 @@ pub(crate) fn setup(mut cmd: Commands) {
                 Pad::PAD_LAYER,
                 Color::DARK_GREY,
                 Color::OFF_WHITE,
-                "edit",
+                IconHandles::ArrowLeft,
                 "",
                 0,
                 icon_scale,
@@ -224,7 +242,7 @@ pub(crate) fn setup(mut cmd: Commands) {
                 Pad::PAD_LAYER,
                 Color::DARK_GREY,
                 Color::OFF_WHITE,
-                "edit",
+                IconHandles::ArrowRight,
                 "",
                 0,
                 icon_scale,
@@ -248,7 +266,7 @@ pub(crate) fn setup(mut cmd: Commands) {
                 Pad::PAD_PADDING,
                 Color::DARK_GREY,
                 Color::OFF_WHITE,
-                "edit",
+                IconHandles::Generate,
                 "write-out",
                 18,
                 18,
@@ -312,11 +330,19 @@ pub(crate) struct PadAttachment;
 impl Attach for PadAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.spawn(IconBitmapRequest::from((
-            "edit",
-            IconBitmap::bundled(BundledIcon::Edit),
+            IconHandles::ArrowRight,
+            IconBitmap::bundled(BundledIcon::ArrowRight),
         )));
         visualizer.spawn(IconBitmapRequest::from((
-            "square",
+            IconHandles::ArrowLeft,
+            IconBitmap::bundled(BundledIcon::ArrowLeft),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            IconHandles::Generate,
+            IconBitmap::bundled(BundledIcon::Generate),
+        )));
+        visualizer.spawn(IconBitmapRequest::from((
+            IconHandles::Square,
             IconBitmap::bundled(BundledIcon::Square),
         )));
         visualizer.job.task(Visualizer::TASK_STARTUP).add_systems((

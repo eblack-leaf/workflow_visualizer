@@ -11,7 +11,9 @@ impl Attach for ButtonAttachment {
             system::placement.in_set(SyncPoint::SecondaryEffects),
             system::border_change.in_set(SyncPoint::Reconfigure),
             system::color_invert.in_set(SyncPoint::Reconfigure),
-            system::despawn.in_set(SyncPoint::Reconfigure),
+            system::secondary_despawn
+                .in_set(SyncPoint::PostProcessPreparation)
+                .before(crate::despawn),
             system::color_forward.in_set(SyncPoint::SecondaryEffects),
             system::forward_disable.in_set(SyncPoint::SecondaryEffects),
             system::remove_disabled.in_set(SyncPoint::SecondaryEffects),

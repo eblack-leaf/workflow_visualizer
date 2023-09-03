@@ -1,3 +1,4 @@
+use crate::attachment::IconHandles;
 use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Resource};
@@ -22,7 +23,7 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             5,
             Color::RED_ORANGE,
             Color::DARK_GREY,
-            "add",
+            IconHandles::Add.handle(),
             "",
             15,
             entry_scale.button_icon_scale,
@@ -37,7 +38,7 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             5,
             Color::OFF_WHITE,
             Color::DARK_GREY,
-            "page_left",
+            IconHandles::PageLeft.handle(),
             "",
             15,
             entry_scale.button_icon_scale,
@@ -50,7 +51,7 @@ pub(crate) fn setup_bottom_panel_buttons(mut cmd: Commands, entry_scale: Res<Ent
             5,
             Color::OFF_WHITE,
             Color::DARK_GREY,
-            "page_right",
+            IconHandles::PageRight.handle(),
             "",
             15,
             entry_scale.button_icon_scale,

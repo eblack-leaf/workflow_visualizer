@@ -6,7 +6,7 @@ use bevy_ecs::prelude::{
 };
 use bevy_ecs::system::ResMut;
 
-use crate::images::renderer::{ImageFade, ImageName, ImageOrientations};
+use crate::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
 use crate::{
     Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
     Visibility,
@@ -18,14 +18,14 @@ pub struct Image {
     section: Section<InterfaceContext>,
     layer: Layer,
     visibility: EnableVisibility,
-    name: ImageName,
+    name: ImageHandle,
     fade: ImageFade,
     cache: Cache,
     difference: Difference,
     tag: ImageTag,
 }
 impl Image {
-    pub fn new<IN: Into<ImageName>, L: Into<Layer>>(name: IN, layer: L) -> Self {
+    pub fn new<IN: Into<ImageHandle>, L: Into<Layer>>(name: IN, layer: L) -> Self {
         Self {
             section: Section::default(),
             layer: layer.into(),
@@ -52,14 +52,14 @@ impl AspectRatioAlignedDimension {
 pub(crate) fn aspect_ratio_aligned_dimension(
     mut bound: Query<
         (
-            &ImageName,
+            &ImageHandle,
             &AspectRatioAlignedDimension,
             &mut Area<InterfaceContext>,
         ),
         Or<(
             Changed<AspectRatioAlignedDimension>,
             Changed<Area<InterfaceContext>>,
-            Changed<ImageName>,
+            Changed<ImageHandle>,
         )>,
     >,
     orientations: Res<ImageOrientations>,
@@ -78,7 +78,7 @@ pub(crate) fn aspect_ratio_aligned_dimension(
 }
 #[derive(Component)]
 pub(crate) struct Cache {
-    pub(crate) name: Option<ImageName>,
+    pub(crate) name: Option<ImageHandle>,
     pub(crate) fade: Option<ImageFade>,
     pub(crate) pos: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
@@ -97,14 +97,14 @@ impl Default for Cache {
 }
 #[derive(Component, Clone, Default)]
 pub(crate) struct Difference {
-    pub(crate) name: Option<ImageName>,
+    pub(crate) name: Option<ImageHandle>,
     pub(crate) fade: Option<ImageFade>,
     pub(crate) pos: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) layer: Option<Layer>,
 }
 pub(crate) fn name_diff(
-    mut images: Query<(&ImageName, &mut Cache, &mut Difference), Changed<ImageName>>,
+    mut images: Query<(&ImageHandle, &mut Cache, &mut Difference), Changed<ImageHandle>>,
 ) {
     for (name, mut cache, mut difference) in images.iter_mut() {
         if let Some(cached) = cache.name.as_ref() {
@@ -185,7 +185,7 @@ pub(crate) fn management(
             &Position<InterfaceContext>,
             &Area<InterfaceContext>,
             &Layer,
-            &ImageName,
+            &ImageHandle,
             &ImageFade,
             &Visibility,
             &mut Cache,

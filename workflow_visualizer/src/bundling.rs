@@ -2,6 +2,7 @@ use crate::{TimeDelta, TimeMarker, Timer};
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Bundle;
+use bevy_ecs::query::With;
 use bevy_ecs::system::{Commands, Query, Res};
 
 #[derive(Bundle)]
@@ -72,5 +73,14 @@ pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static>(
                 .insert(delayed_bundle.bundle.take().unwrap());
             cmd.entity(entity).remove::<DelayedBundle<T>>();
         }
+    }
+}
+
+#[derive(Component, Copy, Clone, Default)]
+pub struct Despawn {}
+
+pub fn despawn(despawned: Query<Entity, With<Despawn>>, mut cmd: Commands) {
+    for entity in despawned.iter() {
+        cmd.entity(entity).despawn();
     }
 }

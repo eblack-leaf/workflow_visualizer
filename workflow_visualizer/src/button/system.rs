@@ -2,10 +2,11 @@ use bevy_ecs::change_detection::Res;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
+use crate::bundling::Despawn;
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonDespawn, ButtonTag, ButtonType,
-    Color, DeviceContext, Disabled, Icon, IconId, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
+    DeviceContext, Disabled, Icon, IconHandle, InterfaceContext, Layer, MonoSpacedFont, Panel,
     PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
     Toggled,
 };
@@ -32,7 +33,7 @@ pub(crate) fn spawn(
             &Layer,
             &BackgroundColor,
             &Color,
-            &IconId,
+            &IconHandle,
             &TextValue,
             &mut PanelEntity,
             &mut IconEntity,
@@ -262,12 +263,11 @@ pub(crate) fn color_forward(
     }
 }
 
-pub(crate) fn despawn(
-    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<ButtonDespawn>>,
+pub(crate) fn secondary_despawn(
+    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<Despawn>>,
     mut cmd: Commands,
 ) {
     for (entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {
-        cmd.entity(entity).despawn();
         if let Some(ent) = panel_entity.0 {
             cmd.entity(ent).despawn();
         }

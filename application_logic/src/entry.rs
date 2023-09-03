@@ -1,9 +1,11 @@
+use crate::attachment::IconHandles;
 use workflow_visualizer::bevy_ecs::prelude::{
     Changed, Commands, Component, Entity, Event, EventReader, NonSend, Query, Res, ResMut,
 };
+use workflow_visualizer::Despawn;
 use workflow_visualizer::{
-    bevy_ecs, Button, ButtonBorder, ButtonDespawn, ButtonType, Color, Line, Panel, PanelType,
-    Sender, Text, TextValue, TextWrapStyle, Triggered,
+    bevy_ecs, Button, ButtonBorder, ButtonType, Color, Line, Panel, PanelType, Sender, Text,
+    TextValue, TextWrapStyle, Triggered,
 };
 
 use crate::enable::EntryEnabled;
@@ -112,19 +114,16 @@ pub(crate) fn display_otp(
 }
 
 pub(crate) fn delete_entry(cmd: &mut Commands, entity: Entity, entry: &Entry) {
-    cmd.entity(entry.name).despawn();
-    cmd.entity(entry.otp).despawn();
-    cmd.entity(entry.line).despawn();
-    cmd.entity(entry.info_panel).despawn();
-    cmd.entity(entry.edit_panel).despawn();
-    cmd.entity(entry.delete_panel).despawn();
-    cmd.entity(entry.generate_button)
-        .insert(ButtonDespawn::default());
-    cmd.entity(entry.edit_button)
-        .insert(ButtonDespawn::default());
-    cmd.entity(entry.delete_button)
-        .insert(ButtonDespawn::default());
-    cmd.entity(entity).despawn();
+    cmd.entity(entry.name).insert(Despawn::default());
+    cmd.entity(entry.otp).insert(Despawn::default());
+    cmd.entity(entry.line).insert(Despawn::default());
+    cmd.entity(entry.info_panel).insert(Despawn::default());
+    cmd.entity(entry.edit_panel).insert(Despawn::default());
+    cmd.entity(entry.delete_panel).insert(Despawn::default());
+    cmd.entity(entry.generate_button).insert(Despawn::default());
+    cmd.entity(entry.edit_button).insert(Despawn::default());
+    cmd.entity(entry.delete_button).insert(Despawn::default());
+    cmd.entity(entity).insert(Despawn::default());
 }
 
 pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entry {
@@ -179,7 +178,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             Color::from(Color::LIGHT_GREEN).with_alpha(1f32),
             Color::from(Color::DARK_GREEN).with_alpha(1f32),
-            "generate",
+            IconHandles::Generate.handle(),
             "",
             15,
             entry_scale.button_icon_scale,
@@ -192,7 +191,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             Color::from(Color::LIGHT_RED_ORANGE).with_alpha(1f32),
             Color::from(Color::DARK_RED_ORANGE).with_alpha(1f32),
-            "edit",
+            IconHandles::Edit.handle(),
             "",
             15,
             entry_scale.button_icon_scale,
@@ -205,7 +204,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             Color::from(Color::LIGHT_RED).with_alpha(1f32),
             Color::from(Color::DARK_RED).with_alpha(1f32),
-            "delete",
+            IconHandles::Delete.handle(),
             "",
             15,
             entry_scale.button_icon_scale,

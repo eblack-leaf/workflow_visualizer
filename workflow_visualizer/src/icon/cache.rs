@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{Component, Entity, Resource};
 
-use crate::icon::component::IconId;
+use crate::icon::component::IconHandle;
 use crate::{Area, Color, InterfaceContext, Layer, Position};
 
 pub(crate) struct Attributes {
-    pub(crate) icon_id: Option<IconId>,
+    pub(crate) icon_id: Option<IconHandle>,
     pub(crate) position: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) positive_space_color: Option<Color>,

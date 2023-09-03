@@ -3,7 +3,7 @@ use bevy_ecs::prelude::{Bundle, Component, Entity};
 pub(crate) use attachment::ButtonAttachment;
 
 use crate::{
-    Color, IconId, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
+    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
     TextValue,
 };
 
@@ -17,7 +17,7 @@ pub struct Button {
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    icon_id: IconId,
+    icon_id: IconHandle,
     button_text: TextValue,
     section: Section<InterfaceContext>,
     color: Color,
@@ -35,8 +35,6 @@ pub enum ButtonBorder {
     Border,
     None,
 }
-#[derive(Component, Copy, Clone, Default)]
-pub struct ButtonDespawn {}
 
 #[derive(Component, Copy, Clone)]
 pub struct Scaling {
@@ -61,7 +59,7 @@ impl Button {
         L: Into<Layer>,
         C: Into<Color>,
         S: Into<String>,
-        ID: Into<IconId>,
+        H: Into<IconHandle>,
         TS: Into<TextScale>,
         IS: Into<IconScale>,
     >(
@@ -69,7 +67,7 @@ impl Button {
         layer: L,
         foreground_color: C,
         background_color: C,
-        icon_id: ID,
+        handle: H,
         button_text: S,
         text_scale: TS,
         icon_scale: IS,
@@ -79,7 +77,7 @@ impl Button {
             tag: ButtonTag::new(),
             layer: layer.into(),
             button_type,
-            icon_id: icon_id.into(),
+            icon_id: handle.into(),
             button_text: TextValue(button_text.into()),
             section: Section::default(),
             color: foreground_color.into(),

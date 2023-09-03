@@ -46,7 +46,7 @@ pub type IconTag = Tag<Icon>;
 #[derive(Bundle)]
 pub struct Icon {
     tag: IconTag,
-    id: IconId,
+    id: IconHandle,
     icon_scale: IconScale,
     layer: Layer,
     pos_color: Color,
@@ -57,7 +57,7 @@ pub struct Icon {
 }
 
 impl Icon {
-    pub fn new<Id: Into<IconId>, S: Into<IconScale>, L: Into<Layer>, C: Into<Color>>(
+    pub fn new<Id: Into<IconHandle>, S: Into<IconScale>, L: Into<Layer>, C: Into<Color>>(
         id: Id,
         scale: S,
         layer: L,
@@ -77,11 +77,11 @@ impl Icon {
     }
 }
 
-#[derive(Component, Clone, Hash, Eq, PartialEq)]
-pub struct IconId(pub CompactString);
+#[derive(Component, Copy, Clone, Hash, Eq, PartialEq)]
+pub struct IconHandle(pub i32);
 
-impl From<&'static str> for IconId {
-    fn from(value: &'static str) -> Self {
-        IconId(CompactString::new(value))
+impl From<i32> for IconHandle {
+    fn from(value: i32) -> Self {
+        Self(value)
     }
 }

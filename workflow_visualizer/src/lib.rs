@@ -6,8 +6,8 @@
 //! Runner which invokes the visualizer's tools for multiple platforms
 pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 pub use bevy_ecs;
-pub use bundling::{BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn};
-pub use button::{BackgroundColor, Button, ButtonBorder, ButtonDespawn, ButtonTag, ButtonType};
+pub use bundling::{despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn};
+pub use button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
 pub use grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
     GridPoint, GridPointBuilder, GridRange, GridView, GridViewBuilder, HorizontalSpan, Placement,
@@ -15,7 +15,7 @@ pub use grid::{
     ResponsiveView,
 };
 pub use images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageName, ImageOrientations, ImageRequest,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageHandle, ImageOrientations, ImageRequest,
     ImageSizes, ImageTag,
 };
 pub use instance::{
@@ -47,7 +47,7 @@ pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconId, IconPixelData, IconScale, IconTag,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconScale, IconTag,
 };
 pub use crate::job::Job;
 pub use crate::line::{Line, LineRender, LineTag};
