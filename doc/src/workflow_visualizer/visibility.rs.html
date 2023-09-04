@@ -105,11 +105,13 @@
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, IntoSystemConfigs, Query, Res};
 
+<span class="kw">use </span><span class="kw">crate</span>::bundling::Disabled;
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportHandle;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
-<span class="kw">use crate</span>::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
+<span class="kw">use crate</span>::{Area, InterfaceContext, Position, Section, SyncPoint};
 
 <span class="doccomment">/// Entry point for enabling visibility module on an entity
 </span><span class="attr">#[derive(Bundle, Copy, Clone)]

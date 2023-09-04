@@ -21,7 +21,7 @@
 <a href="#21" id="21">21</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
-<span class="kw">use </span><span class="kw">crate</span>::time::{system, Timer};
+<span class="kw">use </span><span class="kw">crate</span>::time::{system, TimeTracker};
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::SyncPoint;
 
@@ -29,7 +29,7 @@
 
 <span class="kw">impl </span>Attach <span class="kw">for </span>TimerAttachment {
     <span class="kw">fn </span>attach(engen: <span class="kw-2">&amp;mut </span>Visualizer) {
-        engen.job.container.insert_resource(Timer::new());
+        engen.job.container.insert_resource(TimeTracker::new());
         engen
             .job
             .task(Visualizer::TASK_MAIN)

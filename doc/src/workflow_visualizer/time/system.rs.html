@@ -11,13 +11,13 @@
 <a href="#11" id="11">11</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::ResMut;
 
-<span class="kw">use </span><span class="kw">crate</span>::time::Timer;
+<span class="kw">use </span><span class="kw">crate</span>::time::TimeTracker;
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_time(<span class="kw-2">mut </span>timer: ResMut&lt;Timer&gt;) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_time(<span class="kw-2">mut </span>timer: ResMut&lt;TimeTracker&gt;) {
     <span class="kw">let </span>_delta = timer.read();
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>start_time(<span class="kw-2">mut </span>timer: ResMut&lt;Timer&gt;) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>start_time(<span class="kw-2">mut </span>timer: ResMut&lt;TimeTracker&gt;) {
     timer.set_to_now();
 }
 </code></pre></div></section></main></body></html>

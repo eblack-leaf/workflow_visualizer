@@ -182,9 +182,9 @@
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, Entity, Query, Res};
 <span class="kw">use </span>bevy_ecs::system::Commands;
 
-<span class="kw">use crate</span>::{TimeDelta, TimeMarker, Timer};
-
-<span class="kw">pub struct </span>Interpolation {
+<span class="kw">use crate</span>::{TimeDelta, TimeMarker, TimeTracker};
+<span class="attr">#[derive(Copy, Clone, Default, Debug, Component)]
+</span><span class="kw">pub struct </span>Interpolation {
     remaining: f32,
     total: f32,
     extraction: <span class="prelude-ty">Option</span>&lt;InterpolationExtraction&gt;,
@@ -226,7 +226,7 @@
     </span>}
 }
 
-<span class="attr">#[derive(Clone, Copy)]
+<span class="attr">#[derive(Clone, Copy, Default, Debug)]
 </span><span class="kw">pub struct </span>InterpolationExtraction(<span class="kw">pub </span>f32);
 <span class="kw">impl </span>InterpolationExtraction {
     <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
@@ -298,11 +298,11 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>start_animations&lt;T: Animate + Send + Sync + <span class="lifetime">&#39;static</span>&gt;(
     <span class="kw-2">mut </span>animations: Query&lt;<span class="kw-2">&amp;mut </span>Animation&lt;T&gt;, Changed&lt;Animation&lt;T&gt;&gt;&gt;,
-    timer: Res&lt;Timer&gt;,
+    time_tracker: Res&lt;TimeTracker&gt;,
 ) {
     <span class="kw">for </span><span class="kw-2">mut </span>animation <span class="kw">in </span>animations.iter_mut() {
         <span class="kw">if </span>animation.start.is_none() {
-            <span class="kw">let </span>start = timer
+            <span class="kw">let </span>start = time_tracker
                 .mark()
                 .offset(animation.start_offset.unwrap_or_default());
             animation.start.replace(start);
@@ -312,13 +312,13 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>update_animations&lt;T: Animate + Send + Sync + <span class="lifetime">&#39;static</span>&gt;(
     <span class="kw-2">mut </span>animations: Query&lt;<span class="kw-2">&amp;mut </span>Animation&lt;T&gt;&gt;,
-    timer: Res&lt;Timer&gt;,
+    time_tracker: Res&lt;TimeTracker&gt;,
 ) {
     <span class="kw">for </span><span class="kw-2">mut </span>animation <span class="kw">in </span>animations.iter_mut() {
         <span class="kw">if </span>animation.start.is_some() {
-            <span class="kw">let </span>time_since_start = timer.time_since(animation.start.unwrap());
+            <span class="kw">let </span>time_since_start = time_tracker.time_since(animation.start.unwrap());
             <span class="kw">if </span>time_since_start.<span class="number">0</span>.is_sign_positive() {
-                <span class="kw">let </span><span class="kw-2">mut </span>delta = timer.frame_diff();
+                <span class="kw">let </span><span class="kw-2">mut </span>delta = time_tracker.frame_diff();
                 <span class="kw">let </span>anim_time = animation.animation_time;
                 <span class="kw">let </span>overage = time_since_start - anim_time;
                 <span class="kw">let </span>anim_done = overage.<span class="number">0</span>.is_sign_positive() || overage.<span class="number">0 </span>== <span class="number">0.0</span>;

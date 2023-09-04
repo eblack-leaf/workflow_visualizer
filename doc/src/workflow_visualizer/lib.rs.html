@@ -104,6 +104,7 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -112,7 +113,10 @@
 //! Runner which invokes the visualizer&#39;s tools for multiple platforms
 </span><span class="kw">pub use </span>animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 <span class="kw">pub use </span>bevy_ecs;
-<span class="kw">pub use </span>bundling::{despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn};
+<span class="kw">pub use </span>bundling::{
+    despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
+    Disabled,
+};
 <span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
@@ -148,7 +152,6 @@
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
-<span class="kw">pub use </span><span class="kw">crate</span>::disable::Disabled;
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
@@ -170,7 +173,7 @@
     AtlasTextureDimensions, TextureAtlas, TextureBindGroup, TextureCoordinates,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::theme::{Theme, ThemeDescriptor};
-<span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, Timer};
+<span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, TimeTracker, Timer};
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
 <span class="kw">pub use </span><span class="kw">crate</span>::window::WindowResize;
@@ -183,7 +186,6 @@
 <span class="kw">mod </span>color;
 <span class="kw">mod </span>coord;
 <span class="kw">mod </span>diagnostics;
-<span class="kw">mod </span>disable;
 <span class="kw">mod </span>focus;
 <span class="kw">mod </span>gfx;
 <span class="kw">mod </span>grid;

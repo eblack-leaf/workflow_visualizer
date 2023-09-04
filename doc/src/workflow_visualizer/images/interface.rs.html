@@ -232,17 +232,19 @@
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{
-    Added, Bundle, Changed, Component, Or, Query, RemovedComponents, Res, Resource, Without,
+    Bundle, Changed, Component, Or, Query, RemovedComponents, Res, Resource, Without,
 };
 <span class="kw">use </span>bevy_ecs::system::ResMut;
 
+<span class="kw">use </span><span class="kw">crate</span>::bundling::Disabled;
 <span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
 <span class="kw">use crate</span>::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
+    Area, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
     Visibility,
 };
 

@@ -290,7 +290,8 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+</pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::event::EventWriter;
+<span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
     Commands, Component, Entity, Event, NonSend, NonSendMut, Query, Res, ResMut, Resource,
@@ -421,14 +422,13 @@
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
     <span class="kw-2">mut </span>orientations: ResMut&lt;ImageOrientations&gt;,
     <span class="kw-2">mut </span>sizes: ResMut&lt;ImageSizes&gt;,
+    <span class="kw-2">mut </span>event_writer: EventWriter&lt;ImageLoaded&gt;,
 ) {
     <span class="kw">for </span>(entity, request) <span class="kw">in </span>requests.iter() {
         <span class="kw">let </span>image = image::load_from_memory(request.data.as_slice()).expect(<span class="string">&quot;images-load&quot;</span>);
         <span class="kw">let </span>texture_data = image.to_rgba8();
         <span class="kw">let </span>dimensions = image.dimensions();
-        sizes
-            .<span class="number">0
-            </span>.insert(request.handle.clone(), Area::from(dimensions));
+        sizes.<span class="number">0</span>.insert(request.handle, Area::from(dimensions));
         <span class="kw">let </span>block = AtlasBlock::new((dimensions.<span class="number">0</span>, dimensions.<span class="number">1</span>));
         <span class="kw">let </span>atlas_dimension = AtlasDimension::new(<span class="number">1</span>);
         <span class="kw">let </span>dimensions = AtlasTextureDimensions::new(block, atlas_dimension);
@@ -446,14 +446,14 @@
         );
         <span class="kw">let </span>bind_group =
             TextureBindGroup::new(<span class="kw-2">&amp;</span>gfx, <span class="kw-2">&amp;</span>image_renderer.render_group_layout, atlas.view());
-        orientations.<span class="number">0</span>.insert(
-            request.handle.clone(),
-            Orientation::new(dimensions.dimensions),
-        );
+        orientations
+            .<span class="number">0
+            </span>.insert(request.handle, Orientation::new(dimensions.dimensions));
         image_renderer.images.insert(
-            request.handle.clone(),
+            request.handle,
             ImageData::new(atlas, bind_group, coordinates),
         );
+        event_writer.send(ImageLoaded(request.handle));
         cmd.entity(entity).despawn();
     }
 }
