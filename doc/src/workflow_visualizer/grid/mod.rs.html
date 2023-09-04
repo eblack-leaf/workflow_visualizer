@@ -241,6 +241,9 @@
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Add;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -352,6 +355,9 @@
             horizontal_markers: RawMarker::from_pixel_exclusive(area.width).<span class="number">0 </span><span class="kw">as </span>u32,
             vertical_markers: RawMarker::from_pixel_exclusive(area.height).<span class="number">0 </span><span class="kw">as </span>u32,
         }
+    }
+    <span class="kw">pub fn </span>percent_column(<span class="kw-2">&amp;</span><span class="self">self</span>, percent: f32) -&gt; RawMarker {
+        ((<span class="self">self</span>.markers_per_column() <span class="kw">as </span>f32 * percent).floor() <span class="kw">as </span>i32).into()
     }
     <span class="kw">pub fn </span>view_horizontal_markers(<span class="kw-2">&amp;</span><span class="self">self</span>, view: <span class="kw-2">&amp;</span>GridView) -&gt; RawMarker {
         <span class="kw">let </span>end = <span class="self">self</span>.calc_horizontal_location(view.horizontal.end);

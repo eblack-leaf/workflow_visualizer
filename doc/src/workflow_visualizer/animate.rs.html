@@ -163,26 +163,12 @@
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::marker::PhantomData;
 
 <span class="kw">use </span>bevy_ecs::prelude::{Changed, Component, Entity, Query, Res};
 <span class="kw">use </span>bevy_ecs::system::Commands;
 
-<span class="kw">use crate</span>::{TimeDelta, TimeMarker, TimeTracker};
+<span class="kw">use crate</span>::{TimeDelta, TimeMarker, TimeTracker, Timer};
 <span class="attr">#[derive(Copy, Clone, Default, Debug, Component)]
 </span><span class="kw">pub struct </span>Interpolation {
     remaining: f32,
@@ -242,24 +228,16 @@
 
 <span class="attr">#[derive(Component)]
 </span><span class="kw">pub struct </span>Animation&lt;T: Animate&gt; {
-    start: <span class="prelude-ty">Option</span>&lt;TimeMarker&gt;,
-    start_offset: <span class="prelude-ty">Option</span>&lt;TimeDelta&gt;,
-    animation_time: TimeDelta,
+    timer: Timer,
     interpolations: Vec&lt;Interpolation&gt;,
     done: bool,
     _phantom: PhantomData&lt;T&gt;,
 }
 
 <span class="kw">impl</span>&lt;T: Animate&gt; Animation&lt;T&gt; {
-    <span class="kw">pub fn </span>new(
-        animation_time: TimeDelta,
-        start_offset: <span class="prelude-ty">Option</span>&lt;TimeDelta&gt;,
-        interpolations: Vec&lt;Interpolation&gt;,
-    ) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(timer: Timer, interpolations: Vec&lt;Interpolation&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            start: <span class="prelude-val">None</span>,
-            start_offset,
-            animation_time,
+            timer,
             interpolations,
             done: <span class="bool-val">false</span>,
             _phantom: PhantomData,
@@ -286,13 +264,14 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         end: <span class="self">Self</span>,
         animation_time: TD,
-        start_offset: <span class="prelude-ty">Option</span>&lt;TimeDelta&gt;,
+        start_offset: <span class="prelude-ty">Option</span>&lt;TD&gt;,
     ) -&gt; Animation&lt;<span class="self">Self</span>&gt; {
-        Animation::new(
-            animation_time.into(),
-            start_offset,
-            <span class="self">Self</span>::interpolations(<span class="kw-2">&amp;</span><span class="self">self</span>, end),
-        )
+        <span class="kw">let </span>timer = Timer::new(animation_time);
+        <span class="kw">let </span>timer = <span class="kw">match </span>start_offset {
+            <span class="prelude-val">Some</span>(offset) =&gt; timer.with_start_offset(offset),
+            <span class="prelude-val">None </span>=&gt; timer,
+        };
+        Animation::new(timer, <span class="self">Self</span>::interpolations(<span class="kw-2">&amp;</span><span class="self">self</span>, end))
     }
 }
 
@@ -301,11 +280,8 @@
     time_tracker: Res&lt;TimeTracker&gt;,
 ) {
     <span class="kw">for </span><span class="kw-2">mut </span>animation <span class="kw">in </span>animations.iter_mut() {
-        <span class="kw">if </span>animation.start.is_none() {
-            <span class="kw">let </span>start = time_tracker
-                .mark()
-                .offset(animation.start_offset.unwrap_or_default());
-            animation.start.replace(start);
+        <span class="kw">if </span>animation.timer.not_started() {
+            animation.timer.start(time_tracker.mark());
         }
     }
 }
@@ -315,23 +291,19 @@
     time_tracker: Res&lt;TimeTracker&gt;,
 ) {
     <span class="kw">for </span><span class="kw-2">mut </span>animation <span class="kw">in </span>animations.iter_mut() {
-        <span class="kw">if </span>animation.start.is_some() {
-            <span class="kw">let </span>time_since_start = time_tracker.time_since(animation.start.unwrap());
-            <span class="kw">if </span>time_since_start.<span class="number">0</span>.is_sign_positive() {
-                <span class="kw">let </span><span class="kw-2">mut </span>delta = time_tracker.frame_diff();
-                <span class="kw">let </span>anim_time = animation.animation_time;
-                <span class="kw">let </span>overage = time_since_start - anim_time;
-                <span class="kw">let </span>anim_done = overage.<span class="number">0</span>.is_sign_positive() || overage.<span class="number">0 </span>== <span class="number">0.0</span>;
-                <span class="kw">if </span>anim_done {
-                    delta -= overage;
+        <span class="kw">if </span>animation.timer.started() {
+            animation.timer.mark(time_tracker.mark());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(elapsed) = animation.timer.time_elapsed() {
+                <span class="kw">let </span>percent = animation.timer.percent_elapsed(time_tracker.frame_diff());
+                <span class="kw">if </span>animation.timer.finished() {
                     animation.done = <span class="bool-val">true</span>;
                 }
+                <span class="kw">let </span>anim_done = animation.done;
                 <span class="kw">let </span><span class="kw-2">mut </span>all_finished = <span class="bool-val">true</span>;
                 <span class="kw">for </span>interpolation <span class="kw">in </span>animation.interpolations.iter_mut() {
                     <span class="kw">if </span>anim_done {
                         <span class="kw">let </span>_extract = interpolation.finish();
                     } <span class="kw">else </span>{
-                        <span class="kw">let </span>percent = delta.<span class="number">0 </span>/ anim_time.<span class="number">0</span>;
                         <span class="kw">let </span>_extract = interpolation.extract(percent <span class="kw">as </span>f32);
                         <span class="kw">if </span>!interpolation.done() {
                             all_finished = <span class="bool-val">false</span>;

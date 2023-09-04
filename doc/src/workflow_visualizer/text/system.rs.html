@@ -798,10 +798,10 @@
             <span class="kw">let </span>base = <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::DEFAULT_OPT_SCALE
                 &amp;&amp; text_scale.<span class="number">0 </span>&lt;= MonoSpacedFont::DEFAULT_OPT_SCALE * <span class="number">2
             </span>{
-                <span class="number">8.775f32
+                <span class="number">8.5f32
             </span>} <span class="kw">else if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::DEFAULT_OPT_SCALE * <span class="number">2 </span>{
-                <span class="number">11.775f32
-            </span>} <span class="kw">else </span>{
+                <span class="number">11.5f32 </span>* (text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / <span class="number">120f32</span>).min(<span class="number">1.0</span>)
+            } <span class="kw">else </span>{
                 <span class="number">0f32
             </span>};
             <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::DEFAULT_OPT_SCALE {
