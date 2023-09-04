@@ -82,9 +82,9 @@ pub(crate) fn place(
             let base = if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE
                 && text_scale.0 <= MonoSpacedFont::DEFAULT_OPT_SCALE * 2
             {
-                8.775f32
+                8.5f32
             } else if text_scale.0 > MonoSpacedFont::DEFAULT_OPT_SCALE * 2 {
-                11.775f32
+                11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
             } else {
                 0f32
             };

@@ -94,7 +94,6 @@ impl TimeDelta {
         self.0 as f32
     }
 }
-
 impl From<f64> for TimeDelta {
     fn from(value: f64) -> Self {
         TimeDelta(value)

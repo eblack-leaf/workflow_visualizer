@@ -110,6 +110,9 @@ impl Grid {
             vertical_markers: RawMarker::from_pixel_exclusive(area.height).0 as u32,
         }
     }
+    pub fn percent_column(&self, percent: f32) -> RawMarker {
+        ((self.markers_per_column() as f32 * percent).floor() as i32).into()
+    }
     pub fn view_horizontal_markers(&self, view: &GridView) -> RawMarker {
         let end = self.calc_horizontal_location(view.horizontal.end);
         let begin = self.calc_horizontal_location(view.horizontal.begin);

@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use bevy_ecs::prelude::{Changed, Component, Entity, Query, Res};
 use bevy_ecs::system::Commands;
 
-use crate::{TimeDelta, TimeMarker, TimeTracker};
+use crate::{TimeDelta, TimeMarker, TimeTracker, Timer};
 #[derive(Copy, Clone, Default, Debug, Component)]
 pub struct Interpolation {
     remaining: f32,
@@ -63,24 +63,16 @@ impl From<f32> for InterpolationExtraction {
 
 #[derive(Component)]
 pub struct Animation<T: Animate> {
-    start: Option<TimeMarker>,
-    start_offset: Option<TimeDelta>,
-    animation_time: TimeDelta,
+    timer: Timer,
     interpolations: Vec<Interpolation>,
     done: bool,
     _phantom: PhantomData<T>,
 }
 
 impl<T: Animate> Animation<T> {
-    pub fn new(
-        animation_time: TimeDelta,
-        start_offset: Option<TimeDelta>,
-        interpolations: Vec<Interpolation>,
-    ) -> Self {
+    pub fn new(timer: Timer, interpolations: Vec<Interpolation>) -> Self {
         Self {
-            start: None,
-            start_offset,
-            animation_time,
+            timer,
             interpolations,
             done: false,
             _phantom: PhantomData,
@@ -107,13 +99,14 @@ where
         &self,
         end: Self,
         animation_time: TD,
-        start_offset: Option<TimeDelta>,
+        start_offset: Option<TD>,
     ) -> Animation<Self> {
-        Animation::new(
-            animation_time.into(),
-            start_offset,
-            Self::interpolations(&self, end),
-        )
+        let timer = Timer::new(animation_time);
+        let timer = match start_offset {
+            Some(offset) => timer.with_start_offset(offset),
+            None => timer,
+        };
+        Animation::new(timer, Self::interpolations(&self, end))
     }
 }
 
@@ -122,11 +115,8 @@ pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(
     time_tracker: Res<TimeTracker>,
 ) {
     for mut animation in animations.iter_mut() {
-        if animation.start.is_none() {
-            let start = time_tracker
-                .mark()
-                .offset(animation.start_offset.unwrap_or_default());
-            animation.start.replace(start);
+        if animation.timer.not_started() {
+            animation.timer.start(time_tracker.mark());
         }
     }
 }
@@ -136,23 +126,19 @@ pub(crate) fn update_animations<T: Animate + Send + Sync + 'static>(
     time_tracker: Res<TimeTracker>,
 ) {
     for mut animation in animations.iter_mut() {
-        if animation.start.is_some() {
-            let time_since_start = time_tracker.time_since(animation.start.unwrap());
-            if time_since_start.0.is_sign_positive() {
-                let mut delta = time_tracker.frame_diff();
-                let anim_time = animation.animation_time;
-                let overage = time_since_start - anim_time;
-                let anim_done = overage.0.is_sign_positive() || overage.0 == 0.0;
-                if anim_done {
-                    delta -= overage;
+        if animation.timer.started() {
+            animation.timer.mark(time_tracker.mark());
+            if let Some(elapsed) = animation.timer.time_elapsed() {
+                let percent = animation.timer.percent_elapsed(time_tracker.frame_diff());
+                if animation.timer.finished() {
                     animation.done = true;
                 }
+                let anim_done = animation.done;
                 let mut all_finished = true;
                 for interpolation in animation.interpolations.iter_mut() {
                     if anim_done {
                         let _extract = interpolation.finish();
                     } else {
-                        let percent = delta.0 / anim_time.0;
                         let _extract = interpolation.extract(percent as f32);
                         if !interpolation.done() {
                             all_finished = false;
