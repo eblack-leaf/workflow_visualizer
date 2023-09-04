@@ -1,3 +1,4 @@
+use bevy_ecs::event::EventWriter;
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{
@@ -129,14 +130,13 @@ pub(crate) fn load_images(
     #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
     mut orientations: ResMut<ImageOrientations>,
     mut sizes: ResMut<ImageSizes>,
+    mut event_writer: EventWriter<ImageLoaded>,
 ) {
     for (entity, request) in requests.iter() {
         let image = image::load_from_memory(request.data.as_slice()).expect("images-load");
         let texture_data = image.to_rgba8();
         let dimensions = image.dimensions();
-        sizes
-            .0
-            .insert(request.handle.clone(), Area::from(dimensions));
+        sizes.0.insert(request.handle, Area::from(dimensions));
         let block = AtlasBlock::new((dimensions.0, dimensions.1));
         let atlas_dimension = AtlasDimension::new(1);
         let dimensions = AtlasTextureDimensions::new(block, atlas_dimension);
@@ -154,14 +154,14 @@ pub(crate) fn load_images(
         );
         let bind_group =
             TextureBindGroup::new(&gfx, &image_renderer.render_group_layout, atlas.view());
-        orientations.0.insert(
-            request.handle.clone(),
-            Orientation::new(dimensions.dimensions),
-        );
+        orientations
+            .0
+            .insert(request.handle, Orientation::new(dimensions.dimensions));
         image_renderer.images.insert(
-            request.handle.clone(),
+            request.handle,
             ImageData::new(atlas, bind_group, coordinates),
         );
+        event_writer.send(ImageLoaded(request.handle));
         cmd.entity(entity).despawn();
     }
 }

@@ -85,6 +85,9 @@ pub(crate) fn set_sync_points(visualizer: &mut Visualizer) {
             .after(SyncPoint::Spawn)
             .before(SyncPoint::PostProcessPreparation),
         apply_deferred
+            .after(SyncPoint::PostProcessPreparation)
+            .before(SyncPoint::SecondaryEffects),
+        apply_deferred
             .after(SyncPoint::Reconfigure)
             .before(SyncPoint::PostProcessVisibility),
         apply_deferred

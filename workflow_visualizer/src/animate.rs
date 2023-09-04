@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 use bevy_ecs::prelude::{Changed, Component, Entity, Query, Res};
 use bevy_ecs::system::Commands;
 
-use crate::{TimeDelta, TimeMarker, Timer};
-
+use crate::{TimeDelta, TimeMarker, TimeTracker};
+#[derive(Copy, Clone, Default, Debug, Component)]
 pub struct Interpolation {
     remaining: f32,
     total: f32,
@@ -47,7 +47,7 @@ impl Interpolation {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct InterpolationExtraction(pub f32);
 impl InterpolationExtraction {
     pub fn value(&self) -> f32 {
@@ -119,11 +119,11 @@ where
 
 pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(
     mut animations: Query<&mut Animation<T>, Changed<Animation<T>>>,
-    timer: Res<Timer>,
+    time_tracker: Res<TimeTracker>,
 ) {
     for mut animation in animations.iter_mut() {
         if animation.start.is_none() {
-            let start = timer
+            let start = time_tracker
                 .mark()
                 .offset(animation.start_offset.unwrap_or_default());
             animation.start.replace(start);
@@ -133,13 +133,13 @@ pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(
 
 pub(crate) fn update_animations<T: Animate + Send + Sync + 'static>(
     mut animations: Query<&mut Animation<T>>,
-    timer: Res<Timer>,
+    time_tracker: Res<TimeTracker>,
 ) {
     for mut animation in animations.iter_mut() {
         if animation.start.is_some() {
-            let time_since_start = timer.time_since(animation.start.unwrap());
+            let time_since_start = time_tracker.time_since(animation.start.unwrap());
             if time_since_start.0.is_sign_positive() {
-                let mut delta = timer.frame_diff();
+                let mut delta = time_tracker.frame_diff();
                 let anim_time = animation.animation_time;
                 let overage = time_since_start - anim_time;
                 let anim_done = overage.0.is_sign_positive() || overage.0 == 0.0;

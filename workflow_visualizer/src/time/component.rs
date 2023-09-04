@@ -5,7 +5,7 @@ use bevy_ecs::prelude::Resource;
 
 /// Access to time on the platform
 #[derive(Resource)]
-pub struct Timer {
+pub struct TimeTracker {
     #[cfg(not(target_arch = "wasm32"))]
     pub(crate) beginning: Instant,
     #[cfg(target_arch = "wasm32")]
@@ -19,7 +19,7 @@ fn millisecond_to_sec(ms: f64) -> f64 {
     ms / 1000.0
 }
 
-impl Timer {
+impl TimeTracker {
     pub(crate) fn new() -> Self {
         Self {
             #[cfg(not(target_arch = "wasm32"))]
@@ -70,7 +70,7 @@ impl Timer {
     }
 }
 /// signifies a point in time
-#[derive(PartialOrd, PartialEq, Copy, Clone)]
+#[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
 pub struct TimeMarker(pub f64);
 
 impl TimeMarker {
@@ -78,8 +78,15 @@ impl TimeMarker {
         Self(self.0 + delta.into().0)
     }
 }
+impl Sub for TimeMarker {
+    type Output = TimeDelta;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        TimeDelta::from(self.0 - rhs.0)
+    }
+}
 /// signifies a change in time
-#[derive(PartialOrd, PartialEq, Copy, Clone, Default)]
+#[derive(PartialOrd, PartialEq, Copy, Clone, Default, Debug)]
 pub struct TimeDelta(pub f64);
 
 impl TimeDelta {

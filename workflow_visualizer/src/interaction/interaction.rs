@@ -7,10 +7,10 @@ use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{Entity, Event, Query, Resource, Without};
 use winit::event::{ElementState, MouseButton, TouchPhase};
 
+use crate::bundling::Disabled;
 use crate::focus::FocusedEntity;
 use crate::{
-    Area, DeviceContext, Disabled, InterfaceContext, Layer, Position, ScaleFactor, Section,
-    ViewportHandle,
+    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, ViewportHandle,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Default)]

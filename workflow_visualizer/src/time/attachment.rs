@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::time::{system, Timer};
+use crate::time::{system, TimeTracker};
 use crate::visualizer::{Attach, Visualizer};
 use crate::SyncPoint;
 
@@ -8,7 +8,7 @@ pub struct TimerAttachment;
 
 impl Attach for TimerAttachment {
     fn attach(engen: &mut Visualizer) {
-        engen.job.container.insert_resource(Timer::new());
+        engen.job.container.insert_resource(TimeTracker::new());
         engen
             .job
             .task(Visualizer::TASK_MAIN)

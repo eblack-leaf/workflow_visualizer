@@ -6,7 +6,10 @@
 //! Runner which invokes the visualizer's tools for multiple platforms
 pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction};
 pub use bevy_ecs;
-pub use bundling::{despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn};
+pub use bundling::{
+    despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
+    Disabled,
+};
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
 pub use grid::{
     BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
@@ -42,7 +45,6 @@ pub use crate::coord::{
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
-pub use crate::disable::Disabled;
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
@@ -64,7 +66,7 @@ pub use crate::texture_atlas::{
     AtlasTextureDimensions, TextureAtlas, TextureBindGroup, TextureCoordinates,
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
-pub use crate::time::{TimeDelta, TimeMarker, Timer};
+pub use crate::time::{TimeDelta, TimeMarker, TimeTracker, Timer};
 pub use crate::uniform::Uniform;
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::WindowResize;
@@ -77,7 +79,6 @@ mod button;
 mod color;
 mod coord;
 mod diagnostics;
-mod disable;
 mod focus;
 mod gfx;
 mod grid;

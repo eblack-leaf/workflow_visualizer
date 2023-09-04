@@ -1,4 +1,4 @@
-use crate::{TimeDelta, TimeMarker, Timer};
+use crate::{TimeDelta, TimeMarker, TimeTracker};
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Bundle;
@@ -60,7 +60,7 @@ impl<T: Bundle + Sized> DelayedSpawn for T {
 }
 pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static>(
     mut delayed: Query<(Entity, &mut DelayedBundle<T>)>,
-    timer: Res<Timer>,
+    timer: Res<TimeTracker>,
     mut cmd: Commands,
 ) {
     for (entity, mut delayed_bundle) in delayed.iter_mut() {
@@ -75,12 +75,19 @@ pub(crate) fn spawn_delayed_bundle<T: Bundle + Sized + Send + 'static>(
         }
     }
 }
-
+#[derive(Bundle, Copy, Clone, Default)]
+pub struct Despawn {
+    despawn: Despawned,
+    disable: Disabled,
+}
 #[derive(Component, Copy, Clone, Default)]
-pub struct Despawn {}
+pub struct Despawned {}
 
-pub fn despawn(despawned: Query<Entity, With<Despawn>>, mut cmd: Commands) {
+pub fn despawn(despawned: Query<Entity, With<Despawned>>, mut cmd: Commands) {
     for entity in despawned.iter() {
         cmd.entity(entity).despawn();
     }
 }
+
+#[derive(Component, Copy, Clone, Default)]
+pub struct Disabled {}

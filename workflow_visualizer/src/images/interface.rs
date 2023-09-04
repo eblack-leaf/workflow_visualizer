@@ -2,13 +2,14 @@ use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
-    Added, Bundle, Changed, Component, Or, Query, RemovedComponents, Res, Resource, Without,
+    Bundle, Changed, Component, Or, Query, RemovedComponents, Res, Resource, Without,
 };
 use bevy_ecs::system::ResMut;
 
+use crate::bundling::Disabled;
 use crate::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
 use crate::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
+    Area, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
     Visibility,
 };
 

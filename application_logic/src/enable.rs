@@ -2,9 +2,10 @@ use crate::entry::Entry;
 use crate::entry_list::EntryIndex;
 use crate::paging::PageRange;
 use crate::positioning::EntryListPosition;
+use workflow_visualizer::bevy_ecs;
 use workflow_visualizer::bevy_ecs::component::Component;
 use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Query};
-use workflow_visualizer::{bevy_ecs, Disabled};
+use workflow_visualizer::Disabled;
 
 // Trigger to disable all entry elements
 #[derive(Component)]

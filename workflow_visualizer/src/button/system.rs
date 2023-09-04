@@ -2,13 +2,12 @@ use bevy_ecs::change_detection::Res;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
-use crate::bundling::Despawn;
+use crate::bundling::{Despawned, Disabled};
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
-    DeviceContext, Disabled, Icon, IconHandle, InterfaceContext, Layer, MonoSpacedFont, Panel,
-    PanelTag, PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle,
-    Toggled,
+    DeviceContext, Icon, IconHandle, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag,
+    PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -264,7 +263,7 @@ pub(crate) fn color_forward(
 }
 
 pub(crate) fn secondary_despawn(
-    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<Despawn>>,
+    despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<Despawned>>,
     mut cmd: Commands,
 ) {
     for (entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {

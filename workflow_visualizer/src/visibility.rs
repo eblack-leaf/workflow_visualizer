@@ -1,8 +1,9 @@
 use bevy_ecs::prelude::{Bundle, Component, IntoSystemConfigs, Query, Res};
 
+use crate::bundling::Disabled;
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
-use crate::{Area, Disabled, InterfaceContext, Position, Section, SyncPoint};
+use crate::{Area, InterfaceContext, Position, Section, SyncPoint};
 
 /// Entry point for enabling visibility module on an entity
 #[derive(Bundle, Copy, Clone)]
