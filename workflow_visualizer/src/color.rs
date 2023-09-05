@@ -25,7 +25,7 @@ impl Color {
     pub const CYAN: (f32, f32, f32) = (0.0, 0.75, 0.35);
     pub const CYAN_MEDIUM: (f32, f32, f32) = (0.0, 0.45, 0.145);
     pub const OFF_WHITE: (f32, f32, f32) = (0.8, 0.8, 0.8);
-    pub const DARK_GREY: (f32, f32, f32) = (0.01, 0.01, 0.01);
+    pub const DARK_GREY: (f32, f32, f32) = (0.025, 0.025, 0.025);
     pub const MEDIUM_GREY: (f32, f32, f32) = (0.05, 0.05, 0.05);
     pub const GREY: (f32, f32, f32) = (0.25, 0.25, 0.25);
     pub const BLACK: (f32, f32, f32) = (0.0, 0.0, 0.0);
