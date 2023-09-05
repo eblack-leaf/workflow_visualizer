@@ -254,9 +254,9 @@
             BundledIcon::Generate =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
                 <span class="string">&quot;bundled_icons/generate.icon&quot;
             </span>))),
-            BundledIcon::At =&gt; <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(
-                <span class="string">&quot;bundled_icons/at.icon&quot;
-            </span>))),
+            BundledIcon::At =&gt; {
+                <span class="self">Self</span>::new(<span class="self">Self</span>::read_icon_file(<span class="macro">include_str!</span>(<span class="string">&quot;bundled_icons/at.icon&quot;</span>)))
+            }
         }
     }
     <span class="kw">fn </span>read_icon_file(file: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;IconPixelData&gt; {

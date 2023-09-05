@@ -599,7 +599,7 @@
             config.configuration.height <span class="kw">as </span>f32,
         );
         <span class="kw">let </span>viewport = Viewport::new(<span class="kw-2">&amp;</span>surface.device, area, msaa.requested());
-        <span class="kw">let </span>scale_factor = ScaleFactor::new(window.scale_factor());
+        <span class="kw">let </span>scale_factor = ScaleFactor::new(window.scale_factor() <span class="kw">as </span>f32);
         <span class="kw">let </span>viewport_handle =
             ViewportHandle::new(Section::new((<span class="number">0</span>, <span class="number">0</span>), area.to_ui(scale_factor.factor())));
         <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
@@ -622,7 +622,7 @@
         <span class="self">self</span>.job.container.insert_resource(scale_factor);
     }
     <span class="doccomment">/// Tells visualizer to send a signal of resizing to be read in systems
-    </span><span class="kw">pub fn </span>trigger_resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: PhysicalSize&lt;u32&gt;, scale_factor: f64) {
+    </span><span class="kw">pub fn </span>trigger_resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: PhysicalSize&lt;u32&gt;, scale_factor: f32) {
         <span class="kw">let </span>resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
         <span class="self">self</span>.job.container.send_event(resize_event);
         <span class="self">self</span>.job
@@ -772,7 +772,7 @@
     <span class="kw">pub fn </span>cancel_touches(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// self.job.container.send_event(InteractionEvent::new());
     </span>}
-    <span class="kw">pub fn </span>set_scale_factor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, scale_factor: f64) {
+    <span class="kw">pub fn </span>set_scale_factor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, scale_factor: f32) {
         <span class="self">self</span>.job
             .container
             .insert_resource(ScaleFactor::new(scale_factor));

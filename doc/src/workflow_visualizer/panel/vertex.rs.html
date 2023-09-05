@@ -359,7 +359,7 @@
     delta: f32,
     x_offset: bool,
     y_offset: bool,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -&gt; Vec&lt;PanelVertex&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>tris = Vec::new();
     <span class="kw">let </span>listen_offset = ListenOffset::new(
@@ -422,12 +422,12 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>position_from_angle(
     angle: f32,
     radius: f32,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -&gt; Position&lt;DeviceContext&gt; {
     Position::&lt;InterfaceContext&gt;::from((angle.cos() * radius, -angle.sin() * radius))
         .to_device(scale_factor)
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>generate_panel_mesh(corner_precision: u32, scale_factor: f64) -&gt; Vec&lt;PanelVertex&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>generate_panel_mesh(corner_precision: u32, scale_factor: f32) -&gt; Vec&lt;PanelVertex&gt; {
     <span class="kw">let </span>delta = <span class="number">1f32 </span>/ corner_precision <span class="kw">as </span>f32;
     <span class="kw">let </span><span class="kw-2">mut </span>mesh = Vec::new();
     <span class="kw">let </span>center = Position::&lt;InterfaceContext&gt;::from((Panel::CORNER_DEPTH, Panel::CORNER_DEPTH))
@@ -520,7 +520,7 @@
     delta: f32,
     x_offset: bool,
     y_offset: bool,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -&gt; Vec&lt;PanelVertex&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>tris = Vec::new();
     <span class="kw">let </span>listen_offset = ListenOffset::new(
@@ -587,7 +587,7 @@
     corner_tris.extend(bar_tris);
     corner_tris
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>generate_border_mesh(corner_precision: u32, scale_factor: f64) -&gt; Vec&lt;PanelVertex&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>generate_border_mesh(corner_precision: u32, scale_factor: f32) -&gt; Vec&lt;PanelVertex&gt; {
     <span class="kw">let </span>delta = <span class="number">1f32 </span>/ corner_precision <span class="kw">as </span>f32;
     <span class="kw">let </span><span class="kw-2">mut </span>mesh = Vec::new();
     <span class="kw">let </span>center = Position::&lt;InterfaceContext&gt;::from((Panel::CORNER_DEPTH, Panel::CORNER_DEPTH))

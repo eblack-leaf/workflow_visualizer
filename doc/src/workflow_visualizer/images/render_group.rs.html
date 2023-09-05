@@ -150,11 +150,18 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{NonSend, NonSendMut, Res, ResMut};
 
 <span class="kw">use </span><span class="kw">crate</span>::images::interface::Extraction;
 <span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageHandle, ImageRenderer};
-<span class="kw">use crate</span>::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
+<span class="kw">use crate</span>::{
+    Area, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, TextureCoordinates, Uniform,
+};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageRenderGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) image_name: ImageHandle,
@@ -216,6 +223,7 @@
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>image_renderer: NonSendMut&lt;ImageRenderer&gt;,
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span>gfx: Res&lt;GfxSurface&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span>gfx: NonSend&lt;GfxSurface&gt;,
+    scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>entity <span class="kw">in </span>extraction.queued_remove.drain() {
         image_renderer.render_groups.remove(<span class="kw-2">&amp;</span>entity);
@@ -259,11 +267,13 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>render_group) = image_renderer.render_groups.remove(<span class="kw-2">&amp;</span>entity) {
             <span class="kw">let </span><span class="kw-2">mut </span>placement_changed = <span class="bool-val">false</span>;
             <span class="kw">if let </span><span class="prelude-val">Some</span>(pos) = diff.pos {
+                <span class="kw">let </span>pos = pos.to_device(scale_factor.factor());
                 render_group.cpu_placement.placement[<span class="number">0</span>] = pos.x;
                 render_group.cpu_placement.placement[<span class="number">1</span>] = pos.y;
                 placement_changed = <span class="bool-val">true</span>;
             }
             <span class="kw">if let </span><span class="prelude-val">Some</span>(area) = diff.area {
+                <span class="kw">let </span>area = area.to_device(scale_factor.factor());
                 render_group.cpu_placement.placement[<span class="number">2</span>] = area.width;
                 render_group.cpu_placement.placement[<span class="number">3</span>] = area.height;
                 placement_changed = <span class="bool-val">true</span>;

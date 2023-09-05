@@ -25,20 +25,20 @@
 <span class="doccomment">/// Scale Factor of the device&#39;s Window
 </span><span class="attr">#[derive(Resource, Clone, Copy)]
 </span><span class="kw">pub struct </span>ScaleFactor {
-    factor: f64,
+    factor: f32,
 }
 
 <span class="kw">impl </span>ScaleFactor {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(factor: f64) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(factor: f32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ factor }
     }
-    <span class="kw">pub fn </span>factor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f64 {
+    <span class="kw">pub fn </span>factor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
         <span class="self">self</span>.factor
     }
 }
 
-<span class="kw">impl </span>From&lt;f64&gt; <span class="kw">for </span>ScaleFactor {
-    <span class="kw">fn </span>from(value: f64) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;f32&gt; <span class="kw">for </span>ScaleFactor {
+    <span class="kw">fn </span>from(value: f32) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(value)
     }
 }

@@ -229,6 +229,13 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -238,7 +245,10 @@
 <span class="kw">use </span>bevy_ecs::system::ResMut;
 
 <span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
-<span class="kw">use crate</span>::{Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag, Visibility};
+<span class="kw">use crate</span>::{
+    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
+    Visibility,
+};
 
 <span class="kw">pub type </span>ImageTag = Tag&lt;Image&gt;;
 <span class="attr">#[derive(Bundle)]
@@ -253,7 +263,11 @@
     tag: ImageTag,
 }
 <span class="kw">impl </span>Image {
-    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageHandle&gt;, L: Into&lt;Layer&gt;, IF: Into&lt;ImageFade&gt;&gt;(name: IN, layer: L, fade: IF) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageHandle&gt;, L: Into&lt;Layer&gt;, IF: Into&lt;ImageFade&gt;&gt;(
+        name: IN,
+        layer: L,
+        fade: IF,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             section: Section::default(),
             layer: layer.into(),

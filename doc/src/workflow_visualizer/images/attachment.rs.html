@@ -49,6 +49,8 @@
 <a href="#49" id="49">49</a>
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
+<a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
 <span class="kw">use </span><span class="kw">crate</span>::images::interface::{
@@ -56,7 +58,9 @@
     name_diff, pos_diff, Extraction,
 };
 <span class="kw">use </span><span class="kw">crate</span>::images::render_group::read_extraction;
-<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{load_images, ImageLoaded, ImageOrientations, ImageRenderer, apply_animations};
+<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{
+    apply_animations, load_images, ImageLoaded, ImageOrientations, ImageRenderer,
+};
 <span class="kw">use crate</span>::{Attach, ImageFade, ImageSizes, SyncPoint, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageAttachment;

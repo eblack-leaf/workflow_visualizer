@@ -179,7 +179,7 @@
             }
             WindowEvent::Resized(size) =&gt; {
                 <span class="macro">info!</span>(<span class="string">&quot;resizing: {:?}&quot;</span>, size);
-                <span class="kw">let </span>scale_factor = window.as_ref().unwrap().scale_factor();
+                <span class="kw">let </span>scale_factor = window.as_ref().unwrap().scale_factor() <span class="kw">as </span>f32;
                 visualizer.trigger_resize(size, scale_factor);
             }
             WindowEvent::ScaleFactorChanged {
@@ -187,7 +187,7 @@
                 scale_factor,
             } =&gt; {
                 <span class="macro">info!</span>(<span class="string">&quot;resizing: {:?}&quot;</span>, <span class="kw-2">*</span>new_inner_size);
-                visualizer.trigger_resize(<span class="kw-2">*</span>new_inner_size, scale_factor);
+                visualizer.trigger_resize(<span class="kw-2">*</span>new_inner_size, scale_factor <span class="kw">as </span>f32);
             }
             WindowEvent::Touch(touch) =&gt; {
                 visualizer.register_touch(touch);

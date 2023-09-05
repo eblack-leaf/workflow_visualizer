@@ -84,11 +84,11 @@
 </span><span class="attr">#[derive(Event, Clone, Copy)]
 </span><span class="kw">pub struct </span>WindowResize {
     <span class="kw">pub </span>size: Area&lt;DeviceContext&gt;,
-    <span class="kw">pub </span>scale_factor: f64,
+    <span class="kw">pub </span>scale_factor: f32,
 }
 
 <span class="kw">impl </span>WindowResize {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(size: Area&lt;DeviceContext&gt;, scale_factor: f64) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(size: Area&lt;DeviceContext&gt;, scale_factor: f32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ size, scale_factor }
     }
 }

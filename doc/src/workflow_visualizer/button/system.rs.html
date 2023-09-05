@@ -315,6 +315,7 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
@@ -510,7 +511,8 @@
                 ),
             )
         } <span class="kw">else </span>{
-            <span class="kw">let </span>dimensions = aligned_fonts.character_dimensions(scaling.text.px());
+            <span class="kw">let </span>dimensions = aligned_fonts
+                .character_dimensions(scaling.text.px() * scale_factor.factor() <span class="kw">as </span>f32);
             <span class="kw">let </span>logical_dimensions =
                 Area::&lt;DeviceContext&gt;::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());
