@@ -482,6 +482,7 @@
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -599,7 +600,8 @@
             config.configuration.height <span class="kw">as </span>f32,
         );
         <span class="kw">let </span>viewport = Viewport::new(<span class="kw-2">&amp;</span>surface.device, area, msaa.requested());
-        <span class="kw">let </span>scale_factor = ScaleFactor::new(window.scale_factor() <span class="kw">as </span>f32);
+        <span class="kw">let </span>window_factor = window.scale_factor() <span class="kw">as </span>f32;
+        <span class="kw">let </span>scale_factor = ScaleFactor::new(window_factor);
         <span class="kw">let </span>viewport_handle =
             ViewportHandle::new(Section::new((<span class="number">0</span>, <span class="number">0</span>), area.to_ui(scale_factor.factor())));
         <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]

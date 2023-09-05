@@ -95,6 +95,8 @@
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::{Deref, Sub};
 
@@ -112,6 +114,8 @@
 
 <span class="kw">impl </span>MonoSpacedFont {
     <span class="kw">pub const </span>DEFAULT_OPT_SCALE: u32 = <span class="number">80u32</span>;
+
+    <span class="kw">pub const </span>FACTOR_BASE_SCALE: u32 = <span class="number">40u32</span>;
     <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400</span>;
     <span class="kw">pub fn </span>jet_brains_mono&lt;T: Into&lt;TextScale&gt;&gt;(opt_scale: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(

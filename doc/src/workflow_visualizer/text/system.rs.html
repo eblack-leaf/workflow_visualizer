@@ -796,17 +796,17 @@
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
         <span class="kw">for </span>(key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
-            <span class="kw">let </span>base = <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::DEFAULT_OPT_SCALE
-                &amp;&amp; text_scale.<span class="number">0 </span>&lt;= MonoSpacedFont::DEFAULT_OPT_SCALE * <span class="number">2
+            <span class="kw">let </span>base = <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE
+                &amp;&amp; text_scale.<span class="number">0 </span>&lt;= MonoSpacedFont::FACTOR_BASE_SCALE * <span class="number">2
             </span>{
                 <span class="number">8.5f32
-            </span>} <span class="kw">else if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::DEFAULT_OPT_SCALE * <span class="number">2 </span>{
+            </span>} <span class="kw">else if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE * <span class="number">2 </span>{
                 <span class="number">11.5f32 </span>* (text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / <span class="number">120f32</span>).min(<span class="number">1.0</span>)
             } <span class="kw">else </span>{
                 <span class="number">0f32
             </span>};
-            <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::DEFAULT_OPT_SCALE {
-                <span class="kw">let </span>factor = text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / MonoSpacedFont::DEFAULT_OPT_SCALE <span class="kw">as </span>f32;
+            <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE {
+                <span class="kw">let </span>factor = text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / MonoSpacedFont::FACTOR_BASE_SCALE <span class="kw">as </span>f32;
                 glyph_position.y -= base * factor;
             }
         }
