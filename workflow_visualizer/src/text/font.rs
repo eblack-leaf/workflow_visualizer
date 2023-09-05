@@ -15,6 +15,8 @@ pub struct MonoSpacedFont {
 
 impl MonoSpacedFont {
     pub const DEFAULT_OPT_SCALE: u32 = 80u32;
+
+    pub const FACTOR_BASE_SCALE: u32 = 40u32;
     pub const MAX_CHECKED_TEXT_SCALE: u32 = 400;
     pub fn jet_brains_mono<T: Into<TextScale>>(opt_scale: T) -> Self {
         Self::new(
