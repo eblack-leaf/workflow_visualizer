@@ -523,7 +523,7 @@
             <span class="kw">let </span>height = logical_dimensions.height;
             <span class="kw">let </span>text_section = Section::new((x, y), (width, height));
             <span class="kw">let </span>icon_x = text_section.left() - RawMarker(<span class="number">2</span>).to_pixel() - scaling.icon.width_px();
-            <span class="kw">let </span>icon_y = text_section.top() + RawMarker::PX;
+            <span class="kw">let </span>icon_y = text_section.top() + RawMarker(<span class="number">1</span>).to_pixel();
             (<span class="prelude-val">Some</span>(text_section), Position::new(icon_x, icon_y))
         };
         <span class="kw">if let </span><span class="prelude-val">Some</span>(icon_entity) = icon_ref.<span class="number">0 </span>{
