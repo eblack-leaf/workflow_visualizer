@@ -199,7 +199,7 @@
     }
 }
 <span class="kw">impl </span>Section&lt;InterfaceContext&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_device(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Section&lt;DeviceContext&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_device(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Section&lt;DeviceContext&gt; {
         Section::&lt;DeviceContext&gt;::new(
             <span class="self">self</span>.position.to_device(scale_factor),
             <span class="self">self</span>.area.to_device(scale_factor),
@@ -208,10 +208,10 @@
 }
 <span class="kw">impl </span>Section&lt;DeviceContext&gt; {
     <span class="attr">#[allow(unused)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Section&lt;InterfaceContext&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Section&lt;InterfaceContext&gt; {
         Section::&lt;InterfaceContext&gt;::new(
             <span class="self">self</span>.position.to_interface(scale_factor),
-            <span class="self">self</span>.area.to_ui(scale_factor),
+            <span class="self">self</span>.area.to_interface(scale_factor),
         )
     }
 }

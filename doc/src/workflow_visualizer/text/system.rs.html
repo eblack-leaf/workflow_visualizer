@@ -909,7 +909,7 @@
             grid_placement.<span class="number">0 </span>= HashMap::new();
             <span class="kw">let </span><span class="kw-2">mut </span>filter_queue = HashSet::new();
             <span class="kw">let </span>position = pos.to_device(scale_factor.factor());
-            <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor());
+            <span class="kw">let </span>v_sec = v_sec.to_device(scale_factor.factor());
             <span class="kw">for </span>(key, glyph_pos) <span class="kw">in </span>placement.<span class="number">0</span>.iter() {
                 <span class="kw">if </span>glyph_pos.parent.is_ascii_control() {
                     filter_queue.insert(<span class="kw-2">*</span>key);
@@ -1399,7 +1399,7 @@
         }
         <span class="kw">if </span>draw_section_resize_needed {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = render_group.visible_section.section {
-                <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor());
+                <span class="kw">let </span>v_sec = v_sec.to_device(scale_factor.factor());
                 <span class="kw">let </span>draw_bound = Section::&lt;DeviceContext&gt;::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,
@@ -1422,7 +1422,7 @@
     <span class="kw">for </span>_event <span class="kw">in </span>event_reader.iter() {
         <span class="kw">for </span>(<span class="kw">_</span>, render_group) <span class="kw">in </span>renderer.render_groups.iter_mut() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = render_group.visible_section.section {
-                <span class="kw">let </span>v_sec = v_sec.as_device(scale_factor.factor());
+                <span class="kw">let </span>v_sec = v_sec.to_device(scale_factor.factor());
                 <span class="kw">let </span>draw_bound = Section::&lt;DeviceContext&gt;::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,

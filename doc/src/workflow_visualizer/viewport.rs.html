@@ -546,7 +546,7 @@
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
     <span class="kw">for </span>event <span class="kw">in </span>resize_events.iter() {
-        viewport_handle.section.area = event.size.to_ui(scale_factor.factor());
+        viewport_handle.section.area = event.size.to_interface(scale_factor.factor());
     }
 }
 

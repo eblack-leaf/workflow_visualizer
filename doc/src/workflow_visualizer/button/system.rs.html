@@ -515,7 +515,7 @@
                 .character_dimensions(scaling.text.px() * scale_factor.factor() <span class="kw">as </span>f32);
             <span class="kw">let </span>logical_dimensions =
                 Area::&lt;DeviceContext&gt;::new(dimensions.width, dimensions.height)
-                    .to_ui(scale_factor.factor());
+                    .to_interface(scale_factor.factor());
             <span class="kw">let </span>len = button_text.<span class="number">0</span>.len() <span class="kw">as </span>f32;
             <span class="kw">let </span>x = center.x - logical_dimensions.width * (len / <span class="number">2f32</span>).ceil()
                 + scaling.icon.width_px() / <span class="number">2f32

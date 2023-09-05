@@ -180,7 +180,7 @@
 
 <span class="kw">impl </span>Area&lt;DeviceContext&gt; {
     <span class="doccomment">/// accounts for scale factor to convert this to interface area
-    </span><span class="kw">pub fn </span>to_ui(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Area&lt;InterfaceContext&gt; {
+    </span><span class="kw">pub fn </span>to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Area&lt;InterfaceContext&gt; {
         Area::&lt;InterfaceContext&gt;::new(<span class="self">self</span>.width / scale_factor, <span class="self">self</span>.height / scale_factor)
     }
 }
