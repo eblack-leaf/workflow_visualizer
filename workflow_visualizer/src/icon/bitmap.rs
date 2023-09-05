@@ -51,6 +51,7 @@ pub enum BundledIcon {
     Run,
     Delete,
     Generate,
+    At,
 }
 
 impl IconBitmap {
@@ -91,6 +92,9 @@ impl IconBitmap {
             ))),
             BundledIcon::Generate => Self::new(Self::read_icon_file(include_str!(
                 "bundled_icons/generate.icon"
+            ))),
+            BundledIcon::At => Self::new(Self::read_icon_file(include_str!(
+                "bundled_icons/at.icon"
             ))),
         }
     }

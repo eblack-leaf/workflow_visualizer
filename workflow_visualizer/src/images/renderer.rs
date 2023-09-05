@@ -13,11 +13,7 @@ use crate::images::render_group::ImageRenderGroup;
 use crate::orientation::{AspectRatio, Orientation};
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
 use crate::uniform::vertex_bind_group_layout_entry;
-use crate::{
-    Area, AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration,
-    MsaaRenderAdapter, NumericalContext, RawPosition, Render, RenderPassHandle, RenderPhase,
-    ScaleFactor, TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer,
-};
+use crate::{Animate, Animation, Area, AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration, Interpolation, MsaaRenderAdapter, NumericalContext, RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor, TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
@@ -34,12 +30,12 @@ impl Vertex {
 }
 
 pub(crate) const AABB: [Vertex; 6] = [
-    Vertex::new(RawPosition { x: 0.0, y: 0.0 }, 0.9),
-    Vertex::new(RawPosition { x: 0.0, y: 1.0 }, 0.5),
-    Vertex::new(RawPosition { x: 1.0, y: 0.0 }, 0.5),
-    Vertex::new(RawPosition { x: 1.0, y: 0.0 }, 0.5),
-    Vertex::new(RawPosition { x: 0.0, y: 1.0 }, 0.5),
-    Vertex::new(RawPosition { x: 1.0, y: 1.0 }, 0.2),
+    Vertex::new(RawPosition { x: 0.0, y: 0.0 }, 0.25),
+    Vertex::new(RawPosition { x: 0.0, y: 1.0 }, 0.15),
+    Vertex::new(RawPosition { x: 1.0, y: 0.0 }, 0.15),
+    Vertex::new(RawPosition { x: 1.0, y: 0.0 }, 0.15),
+    Vertex::new(RawPosition { x: 0.0, y: 1.0 }, 0.15),
+    Vertex::new(RawPosition { x: 1.0, y: 1.0 }, 0.05),
 ];
 
 pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
@@ -53,6 +49,38 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 }
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
+impl Animate for ImageFade {
+    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+        vec![Interpolation::new(end.0 - self.0)]
+    }
+}
+pub(crate) fn apply_animations(mut animations: Query<(&mut ImageFade, &mut Animation<ImageFade>)>) {
+    for (mut fade, mut anim) in animations.iter_mut() {
+        let extracts = anim.extractions();
+        if let Some(extract) = extracts.get(0).expect("extract") {
+            fade.0 += extract.0;
+        }
+    }
+}
+impl ImageFade {
+    pub const  TRANSPARENT: ImageFade = ImageFade(0f32);
+    pub const OPAQUE: ImageFade = ImageFade(20f32);
+}
+impl From<f32> for ImageFade {
+    fn from(value: f32) -> Self {
+        Self(value)
+    }
+}
+impl From<i32> for ImageFade {
+    fn from(value: i32) -> Self {
+        Self(value as f32)
+    }
+}
+impl From<u32> for ImageFade {
+    fn from(value: u32) -> Self {
+        Self(value as f32)
+    }
+}
 #[derive(
     Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
 )]

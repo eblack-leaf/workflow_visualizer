@@ -206,7 +206,7 @@ pub(crate) fn placement(
             let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
             let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.width_px();
-            let icon_y = text_section.top() + RawMarker::PX;
+            let icon_y = text_section.top() + RawMarker(1).to_pixel();
             (Some(text_section), Position::new(icon_x, icon_y))
         };
         if let Some(icon_entity) = icon_ref.0 {

@@ -88,6 +88,10 @@ impl<T: Animate> Animation<T> {
     pub fn done(&self) -> bool {
         self.done
     }
+    pub fn with_offset<TD: Into<TimeDelta>>(mut self, offset: Option<TD>) -> Self {
+        self.timer.set_offset(offset);
+        self
+    }
 }
 
 pub trait Animate
@@ -99,13 +103,8 @@ where
         &self,
         end: Self,
         animation_time: TD,
-        start_offset: Option<TD>,
     ) -> Animation<Self> {
         let timer = Timer::new(animation_time);
-        let timer = match start_offset {
-            Some(offset) => timer.with_start_offset(offset),
-            None => timer,
-        };
         Animation::new(timer, Self::interpolations(&self, end))
     }
 }

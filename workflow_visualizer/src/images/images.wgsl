@@ -43,6 +43,7 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) sample_coords: vec2<f32>,
+    @location(1) fade: f32,
 };
 @group(3)
 @binding(0)
@@ -60,6 +61,7 @@ fn vertex_entry(vertex_input: VertexInput) -> VertexOutput {
     let output = VertexOutput(
         viewport.view_matrix * coordinates,
         sample_coordinates,
+        fade_and_layer.r * vertex_input.vertex_position.b,
     );
     return output;
 }
@@ -72,5 +74,6 @@ var image_texture: texture_2d<f32>;
 @fragment
 fn fragment_entry(vertex_output: VertexOutput) -> @location(0) vec4<f32> {
     let image_data = textureSample(image_texture, image_sampler, vertex_output.sample_coords);
-    return image_data;
+    let color = vec4<f32>(image_data.rgb, image_data.a * vertex_output.fade);
+    return color;
 }

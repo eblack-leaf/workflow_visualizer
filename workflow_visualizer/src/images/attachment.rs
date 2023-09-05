@@ -5,14 +5,15 @@ use crate::images::interface::{
     name_diff, pos_diff, Extraction,
 };
 use crate::images::render_group::read_extraction;
-use crate::images::renderer::{load_images, ImageLoaded, ImageOrientations, ImageRenderer};
-use crate::{Attach, ImageSizes, SyncPoint, Visualizer};
+use crate::images::renderer::{load_images, ImageLoaded, ImageOrientations, ImageRenderer, apply_animations};
+use crate::{Attach, ImageFade, ImageSizes, SyncPoint, Visualizer};
 
 pub(crate) struct ImageAttachment;
 
 impl Attach for ImageAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.register_renderer::<ImageRenderer>();
+        visualizer.register_animation::<ImageFade>();
         visualizer
             .job
             .container
@@ -32,6 +33,7 @@ impl Attach for ImageAttachment {
             .add_systems((load_images.in_set(SyncPoint::Initialization),));
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             load_images.in_set(SyncPoint::Initialization),
+            apply_animations.in_set(SyncPoint::Animation),
             aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
             pos_diff.in_set(SyncPoint::PushDiff),

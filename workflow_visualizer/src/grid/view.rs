@@ -82,6 +82,22 @@ impl GridView {
     pub fn bottom(&self) -> GridLocation {
         self.vertical.end
     }
+    pub fn with_top<R: Into<GridLocation>>(mut self, top: R) -> Self {
+        self.vertical.begin = top.into();
+        self
+    }
+    pub fn with_left<R: Into<GridLocation>>(mut self, left: R) -> Self {
+        self.horizontal.begin = left.into();
+        self
+    }
+    pub fn with_right<R: Into<GridLocation>>(mut self, right: R) -> Self {
+        self.horizontal.end = right.into();
+        self
+    }
+    pub fn with_bottom<R: Into<GridLocation>>(mut self, bottom: R) -> Self {
+        self.vertical.end = bottom.into();
+        self
+    }
 }
 impl<T: Into<GridRange>> From<(T, T)> for GridView {
     fn from(value: (T, T)) -> Self {
@@ -136,6 +152,15 @@ pub struct GridViewBuilder {
     left: Option<GridLocation>,
     right: Option<GridLocation>,
     bottom: Option<GridLocation>,
+}
+impl From<GridView> for GridViewBuilder {
+    fn from(value: GridView) -> Self {
+        GridViewBuilder::new()
+            .with_top(value.top())
+            .with_left(value.left())
+            .with_right(value.right())
+            .with_bottom(value.bottom())
+    }
 }
 impl GridViewBuilder {
     pub fn new() -> Self {
