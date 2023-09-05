@@ -197,7 +197,7 @@ pub(crate) fn placement(
                 .character_dimensions(scaling.text.px() * scale_factor.factor() as f32);
             let logical_dimensions =
                 Area::<DeviceContext>::new(dimensions.width, dimensions.height)
-                    .to_ui(scale_factor.factor());
+                    .to_interface(scale_factor.factor());
             let len = button_text.0.len() as f32;
             let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
                 + scaling.icon.width_px() / 2f32

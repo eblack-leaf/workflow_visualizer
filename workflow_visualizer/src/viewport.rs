@@ -241,7 +241,7 @@ pub(crate) fn frontend_area_adjust(
     scale_factor: Res<ScaleFactor>,
 ) {
     for event in resize_events.iter() {
-        viewport_handle.section.area = event.size.to_ui(scale_factor.factor());
+        viewport_handle.section.area = event.size.to_interface(scale_factor.factor());
     }
 }
 

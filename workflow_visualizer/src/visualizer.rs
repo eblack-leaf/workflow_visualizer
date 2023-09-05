@@ -117,8 +117,10 @@ impl Visualizer {
         let viewport = Viewport::new(&surface.device, area, msaa.requested());
         let window_factor = window.scale_factor() as f32;
         let scale_factor = ScaleFactor::new(window_factor);
-        let viewport_handle =
-            ViewportHandle::new(Section::new((0, 0), area.to_ui(scale_factor.factor())));
+        let viewport_handle = ViewportHandle::new(Section::new(
+            (0, 0),
+            area.to_interface(scale_factor.factor()),
+        ));
         #[cfg(not(target_family = "wasm"))]
         self.job.container.insert_resource(viewport);
         #[cfg(target_family = "wasm")]

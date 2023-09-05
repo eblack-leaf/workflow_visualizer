@@ -192,7 +192,7 @@ pub(crate) fn filter(
             grid_placement.0 = HashMap::new();
             let mut filter_queue = HashSet::new();
             let position = pos.to_device(scale_factor.factor());
-            let v_sec = v_sec.as_device(scale_factor.factor());
+            let v_sec = v_sec.to_device(scale_factor.factor());
             for (key, glyph_pos) in placement.0.iter() {
                 if glyph_pos.parent.is_ascii_control() {
                     filter_queue.insert(*key);
@@ -682,7 +682,7 @@ pub(crate) fn render_group_differences(
         }
         if draw_section_resize_needed {
             if let Some(v_sec) = render_group.visible_section.section {
-                let v_sec = v_sec.as_device(scale_factor.factor());
+                let v_sec = v_sec.to_device(scale_factor.factor());
                 let draw_bound = Section::<DeviceContext>::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,
@@ -705,7 +705,7 @@ pub(crate) fn resolve_draw_section_on_resize(
     for _event in event_reader.iter() {
         for (_, render_group) in renderer.render_groups.iter_mut() {
             if let Some(v_sec) = render_group.visible_section.section {
-                let v_sec = v_sec.as_device(scale_factor.factor());
+                let v_sec = v_sec.to_device(scale_factor.factor());
                 let draw_bound = Section::<DeviceContext>::new(
                     v_sec.position - viewport.as_section().position,
                     v_sec.area,

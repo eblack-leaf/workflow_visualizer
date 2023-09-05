@@ -87,7 +87,7 @@ impl<Context: CoordinateContext> Section<Context> {
     }
 }
 impl Section<InterfaceContext> {
-    pub(crate) fn as_device(&self, scale_factor: f32) -> Section<DeviceContext> {
+    pub(crate) fn to_device(&self, scale_factor: f32) -> Section<DeviceContext> {
         Section::<DeviceContext>::new(
             self.position.to_device(scale_factor),
             self.area.to_device(scale_factor),
@@ -96,10 +96,10 @@ impl Section<InterfaceContext> {
 }
 impl Section<DeviceContext> {
     #[allow(unused)]
-    pub(crate) fn as_interface(&self, scale_factor: f32) -> Section<InterfaceContext> {
+    pub(crate) fn to_interface(&self, scale_factor: f32) -> Section<InterfaceContext> {
         Section::<InterfaceContext>::new(
             self.position.to_interface(scale_factor),
-            self.area.to_ui(scale_factor),
+            self.area.to_interface(scale_factor),
         )
     }
 }

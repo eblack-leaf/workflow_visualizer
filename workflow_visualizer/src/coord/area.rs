@@ -49,7 +49,7 @@ impl Area<InterfaceContext> {
 
 impl Area<DeviceContext> {
     /// accounts for scale factor to convert this to interface area
-    pub fn to_ui(&self, scale_factor: f32) -> Area<InterfaceContext> {
+    pub fn to_interface(&self, scale_factor: f32) -> Area<InterfaceContext> {
         Area::<InterfaceContext>::new(self.width / scale_factor, self.height / scale_factor)
     }
 }
