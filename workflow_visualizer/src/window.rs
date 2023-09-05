@@ -13,11 +13,11 @@ use crate::visualizer::{Attach, Visualizer};
 #[derive(Event, Clone, Copy)]
 pub struct WindowResize {
     pub size: Area<DeviceContext>,
-    pub scale_factor: f64,
+    pub scale_factor: f32,
 }
 
 impl WindowResize {
-    pub(crate) fn new(size: Area<DeviceContext>, scale_factor: f64) -> Self {
+    pub(crate) fn new(size: Area<DeviceContext>, scale_factor: f32) -> Self {
         Self { size, scale_factor }
     }
 }

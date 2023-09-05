@@ -193,7 +193,8 @@ pub(crate) fn placement(
                 ),
             )
         } else {
-            let dimensions = aligned_fonts.character_dimensions(scaling.text.px());
+            let dimensions = aligned_fonts
+                .character_dimensions(scaling.text.px() * scale_factor.factor() as f32);
             let logical_dimensions =
                 Area::<DeviceContext>::new(dimensions.width, dimensions.height)
                     .to_ui(scale_factor.factor());

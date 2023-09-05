@@ -2,7 +2,9 @@ use bevy_ecs::prelude::{NonSend, NonSendMut, Res, ResMut};
 
 use crate::images::interface::Extraction;
 use crate::images::renderer::{ImageFade, ImageHandle, ImageRenderer};
-use crate::{Area, GfxSurface, InterfaceContext, Layer, Position, TextureCoordinates, Uniform};
+use crate::{
+    Area, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, TextureCoordinates, Uniform,
+};
 
 pub(crate) struct ImageRenderGroup {
     pub(crate) image_name: ImageHandle,
@@ -64,6 +66,7 @@ pub(crate) fn read_extraction(
     #[cfg(target_family = "wasm")] mut image_renderer: NonSendMut<ImageRenderer>,
     #[cfg(not(target_family = "wasm"))] gfx: Res<GfxSurface>,
     #[cfg(target_family = "wasm")] gfx: NonSend<GfxSurface>,
+    scale_factor: Res<ScaleFactor>,
 ) {
     for entity in extraction.queued_remove.drain() {
         image_renderer.render_groups.remove(&entity);
@@ -107,11 +110,13 @@ pub(crate) fn read_extraction(
         if let Some(mut render_group) = image_renderer.render_groups.remove(&entity) {
             let mut placement_changed = false;
             if let Some(pos) = diff.pos {
+                let pos = pos.to_device(scale_factor.factor());
                 render_group.cpu_placement.placement[0] = pos.x;
                 render_group.cpu_placement.placement[1] = pos.y;
                 placement_changed = true;
             }
             if let Some(area) = diff.area {
+                let area = area.to_device(scale_factor.factor());
                 render_group.cpu_placement.placement[2] = area.width;
                 render_group.cpu_placement.placement[3] = area.height;
                 placement_changed = true;

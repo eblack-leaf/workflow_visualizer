@@ -224,11 +224,12 @@ pub(crate) fn filter(
     }
 }
 pub(crate) fn scale_change(
-    mut text_query: Query<(&mut TextLetterDimensions, &TextScale), Changed<TextScale>>,
+    mut text_query: Query<(&mut TextLetterDimensions, &mut TextScale), Changed<TextScale>>,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<MonoSpacedFont>,
 ) {
-    for (mut text_letter_dimensions, text_scale) in text_query.iter_mut() {
+    for (mut text_letter_dimensions, mut text_scale) in text_query.iter_mut() {
+        text_scale.0 = (text_scale.0 as f32 * scale_factor.factor()) as u32;
         let letter_dimensions = fonts.character_dimensions(text_scale.px());
         let letter_dimensions =
             Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));

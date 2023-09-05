@@ -7,7 +7,10 @@ use bevy_ecs::prelude::{
 use bevy_ecs::system::ResMut;
 
 use crate::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
-use crate::{Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag, Visibility};
+use crate::{
+    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
+    Visibility,
+};
 
 pub type ImageTag = Tag<Image>;
 #[derive(Bundle)]
@@ -22,7 +25,11 @@ pub struct Image {
     tag: ImageTag,
 }
 impl Image {
-    pub fn new<IN: Into<ImageHandle>, L: Into<Layer>, IF: Into<ImageFade>>(name: IN, layer: L, fade: IF) -> Self {
+    pub fn new<IN: Into<ImageHandle>, L: Into<Layer>, IF: Into<ImageFade>>(
+        name: IN,
+        layer: L,
+        fade: IF,
+    ) -> Self {
         Self {
             section: Section::default(),
             layer: layer.into(),

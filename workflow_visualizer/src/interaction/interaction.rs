@@ -76,6 +76,17 @@ pub(crate) fn update_interactions(
     for event in events.iter() {
         let offset_location =
             event.location.to_interface(scale_factor.factor()) + viewport_handle.section.position;
+        #[cfg(target_family = "wasm")]
+        web_sys::console::info_1(&wasm_bindgen::JsValue::from_str(
+            format!(
+                "event at: {:?}, touch at: {:?} with scale factor: {:?} viewport: {:?}",
+                event.location,
+                offset_location,
+                scale_factor.factor(),
+                viewport_handle.section,
+            )
+            .as_str(),
+        ));
         match event.device {
             InteractionDevice::Mouse => {
                 if event.interaction == primary_mouse.0 {
@@ -249,6 +260,14 @@ pub(crate) fn resolve(
                         let section = Section::new(*pos, *area);
                         if section.contains(end) {
                             if let Some(tracked) = tracker.location.as_mut() {
+                                #[cfg(target_family = "wasm")]
+                                web_sys::console::info_1(&wasm_bindgen::JsValue::from_str(
+                                    format!(
+                                        "touch end at: {:?} with section: {:?} tracked: {:?}",
+                                        end, section, tracked,
+                                    )
+                                    .as_str(),
+                                ));
                                 triggered.0 = true;
                                 toggled.0 = !toggled.0;
                                 tracked.end.replace(end);
@@ -324,7 +343,7 @@ impl InteractionEvent {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct InteractionLocation {
     pub(crate) start: Position<InterfaceContext>,
     pub(crate) current: Position<InterfaceContext>,

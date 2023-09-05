@@ -46,7 +46,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             }
             WindowEvent::Resized(size) => {
                 info!("resizing: {:?}", size);
-                let scale_factor = window.as_ref().unwrap().scale_factor();
+                let scale_factor = window.as_ref().unwrap().scale_factor() as f32;
                 visualizer.trigger_resize(size, scale_factor);
             }
             WindowEvent::ScaleFactorChanged {
@@ -54,7 +54,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 scale_factor,
             } => {
                 info!("resizing: {:?}", *new_inner_size);
-                visualizer.trigger_resize(*new_inner_size, scale_factor);
+                visualizer.trigger_resize(*new_inner_size, scale_factor as f32);
             }
             WindowEvent::Touch(touch) => {
                 visualizer.register_touch(touch);

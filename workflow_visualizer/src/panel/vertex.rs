@@ -45,7 +45,7 @@ pub(crate) fn generate_panel_corner(
     delta: f32,
     x_offset: bool,
     y_offset: bool,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -> Vec<PanelVertex> {
     let mut tris = Vec::new();
     let listen_offset = ListenOffset::new(
@@ -108,12 +108,12 @@ pub(crate) fn generate_panel_corner(
 pub(crate) fn position_from_angle(
     angle: f32,
     radius: f32,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -> Position<DeviceContext> {
     Position::<InterfaceContext>::from((angle.cos() * radius, -angle.sin() * radius))
         .to_device(scale_factor)
 }
-pub(crate) fn generate_panel_mesh(corner_precision: u32, scale_factor: f64) -> Vec<PanelVertex> {
+pub(crate) fn generate_panel_mesh(corner_precision: u32, scale_factor: f32) -> Vec<PanelVertex> {
     let delta = 1f32 / corner_precision as f32;
     let mut mesh = Vec::new();
     let center = Position::<InterfaceContext>::from((Panel::CORNER_DEPTH, Panel::CORNER_DEPTH))
@@ -206,7 +206,7 @@ pub(crate) fn generate_border_corner(
     delta: f32,
     x_offset: bool,
     y_offset: bool,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -> Vec<PanelVertex> {
     let mut tris = Vec::new();
     let listen_offset = ListenOffset::new(
@@ -273,7 +273,7 @@ pub(crate) fn generate_border_corner(
     corner_tris.extend(bar_tris);
     corner_tris
 }
-pub(crate) fn generate_border_mesh(corner_precision: u32, scale_factor: f64) -> Vec<PanelVertex> {
+pub(crate) fn generate_border_mesh(corner_precision: u32, scale_factor: f32) -> Vec<PanelVertex> {
     let delta = 1f32 / corner_precision as f32;
     let mut mesh = Vec::new();
     let center = Position::<InterfaceContext>::from((Panel::CORNER_DEPTH, Panel::CORNER_DEPTH))

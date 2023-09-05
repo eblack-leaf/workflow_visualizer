@@ -42,21 +42,15 @@ impl<Context: CoordinateContext> Area<Context> {
 }
 impl Area<InterfaceContext> {
     /// accounts for scale factor to convert this to device area
-    pub fn to_device(&self, scale_factor: f64) -> Area<DeviceContext> {
-        Area::<DeviceContext>::new(
-            self.width * scale_factor as f32,
-            self.height * scale_factor as f32,
-        )
+    pub fn to_device(&self, scale_factor: f32) -> Area<DeviceContext> {
+        Area::<DeviceContext>::new(self.width * scale_factor, self.height * scale_factor)
     }
 }
 
 impl Area<DeviceContext> {
     /// accounts for scale factor to convert this to interface area
-    pub fn to_ui(&self, scale_factor: f64) -> Area<InterfaceContext> {
-        Area::<InterfaceContext>::new(
-            self.width / scale_factor as f32,
-            self.height / scale_factor as f32,
-        )
+    pub fn to_ui(&self, scale_factor: f32) -> Area<InterfaceContext> {
+        Area::<InterfaceContext>::new(self.width / scale_factor, self.height / scale_factor)
     }
 }
 /// Raw area defined in C representation for interacting with C (vulkan mostly)

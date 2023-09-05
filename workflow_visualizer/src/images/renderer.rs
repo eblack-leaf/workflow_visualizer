@@ -13,7 +13,12 @@ use crate::images::render_group::ImageRenderGroup;
 use crate::orientation::{AspectRatio, Orientation};
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
 use crate::uniform::vertex_bind_group_layout_entry;
-use crate::{Animate, Animation, Area, AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface, GfxSurfaceConfiguration, Interpolation, MsaaRenderAdapter, NumericalContext, RawPosition, Render, RenderPassHandle, RenderPhase, ScaleFactor, TextureAtlas, TextureBindGroup, TextureCoordinates, Viewport, Visualizer};
+use crate::{
+    Animate, Animation, Area, AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface,
+    GfxSurfaceConfiguration, Interpolation, MsaaRenderAdapter, NumericalContext, RawPosition,
+    Render, RenderPassHandle, RenderPhase, ScaleFactor, TextureAtlas, TextureBindGroup,
+    TextureCoordinates, Viewport, Visualizer,
+};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
@@ -63,7 +68,7 @@ pub(crate) fn apply_animations(mut animations: Query<(&mut ImageFade, &mut Anima
     }
 }
 impl ImageFade {
-    pub const  TRANSPARENT: ImageFade = ImageFade(0f32);
+    pub const TRANSPARENT: ImageFade = ImageFade(0f32);
     pub const OPAQUE: ImageFade = ImageFade(20f32);
 }
 impl From<f32> for ImageFade {

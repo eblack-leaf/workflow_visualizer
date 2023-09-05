@@ -99,11 +99,7 @@ where
     Self: Sized,
 {
     fn interpolations(&self, end: Self) -> Vec<Interpolation>;
-    fn animate<TD: Into<TimeDelta>>(
-        &self,
-        end: Self,
-        animation_time: TD,
-    ) -> Animation<Self> {
+    fn animate<TD: Into<TimeDelta>>(&self, end: Self, animation_time: TD) -> Animation<Self> {
         let timer = Timer::new(animation_time);
         Animation::new(timer, Self::interpolations(&self, end))
     }

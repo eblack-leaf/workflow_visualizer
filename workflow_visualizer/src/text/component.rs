@@ -139,7 +139,7 @@ impl TextLineStructure {
         grid_placement: &TextGridPlacement,
         area: &Area<InterfaceContext>,
         letter_dimensions: &TextLetterDimensions,
-        scale_factor: f64,
+        scale_factor: f32,
     ) -> Self {
         let mut max_y = 0;
         for key in grid_placement.0.keys() {

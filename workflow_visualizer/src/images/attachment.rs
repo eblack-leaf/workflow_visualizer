@@ -5,7 +5,9 @@ use crate::images::interface::{
     name_diff, pos_diff, Extraction,
 };
 use crate::images::render_group::read_extraction;
-use crate::images::renderer::{load_images, ImageLoaded, ImageOrientations, ImageRenderer, apply_animations};
+use crate::images::renderer::{
+    apply_animations, load_images, ImageLoaded, ImageOrientations, ImageRenderer,
+};
 use crate::{Attach, ImageFade, ImageSizes, SyncPoint, Visualizer};
 
 pub(crate) struct ImageAttachment;

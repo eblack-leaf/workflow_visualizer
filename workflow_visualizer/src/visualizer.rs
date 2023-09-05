@@ -115,7 +115,7 @@ impl Visualizer {
             config.configuration.height as f32,
         );
         let viewport = Viewport::new(&surface.device, area, msaa.requested());
-        let scale_factor = ScaleFactor::new(window.scale_factor());
+        let scale_factor = ScaleFactor::new(window.scale_factor() as f32);
         let viewport_handle =
             ViewportHandle::new(Section::new((0, 0), area.to_ui(scale_factor.factor())));
         #[cfg(not(target_family = "wasm"))]
@@ -138,7 +138,7 @@ impl Visualizer {
         self.job.container.insert_resource(scale_factor);
     }
     /// Tells visualizer to send a signal of resizing to be read in systems
-    pub fn trigger_resize(&mut self, size: PhysicalSize<u32>, scale_factor: f64) {
+    pub fn trigger_resize(&mut self, size: PhysicalSize<u32>, scale_factor: f32) {
         let resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
         self.job.container.send_event(resize_event);
         self.job
@@ -288,7 +288,7 @@ impl Visualizer {
     pub fn cancel_touches(&mut self) {
         // self.job.container.send_event(InteractionEvent::new());
     }
-    pub fn set_scale_factor(&mut self, scale_factor: f64) {
+    pub fn set_scale_factor(&mut self, scale_factor: f32) {
         self.job
             .container
             .insert_resource(ScaleFactor::new(scale_factor));
