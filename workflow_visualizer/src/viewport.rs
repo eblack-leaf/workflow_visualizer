@@ -13,7 +13,7 @@ use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{InterfaceContext, ScaleFactor, SyncPoint};
+use crate::{InterfaceContext, ScaleFactor, SyncPoint, WindowAppearanceFactor};
 
 /// Viewport Matrix for converting to NDC
 #[cfg_attr(not(target_family = "wasm"), derive(Resource))]
@@ -239,9 +239,13 @@ pub(crate) fn frontend_area_adjust(
     mut resize_events: EventReader<WindowResize>,
     mut viewport_handle: ResMut<ViewportHandle>,
     scale_factor: Res<ScaleFactor>,
+    window_appearance_factor: Res<WindowAppearanceFactor>,
 ) {
     for event in resize_events.iter() {
-        viewport_handle.section.area = event.size.to_interface(scale_factor.factor());
+        viewport_handle.section.area = event
+            .size
+            .to_actual(&window_appearance_factor)
+            .to_interface(scale_factor.factor());
     }
 }
 

@@ -8,16 +8,17 @@ use crate::coord::DeviceContext;
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::sync::SyncPoint;
 use crate::visualizer::{Attach, Visualizer};
+use crate::{WindowAppearanceContext, WindowAppearanceFactor};
 
 /// Event for triggering Window Resizing behaviour
 #[derive(Event, Clone, Copy)]
 pub struct WindowResize {
-    pub size: Area<DeviceContext>,
+    pub size: Area<WindowAppearanceContext>,
     pub scale_factor: f32,
 }
 
 impl WindowResize {
-    pub(crate) fn new(size: Area<DeviceContext>, scale_factor: f32) -> Self {
+    pub(crate) fn new(size: Area<WindowAppearanceContext>, scale_factor: f32) -> Self {
         Self { size, scale_factor }
     }
 }
@@ -33,13 +34,22 @@ pub(crate) fn gfx_resize(
     mut resize_events: EventReader<WindowResize>,
     #[cfg(not(target_family = "wasm"))] mut msaa_attachment: ResMut<MsaaRenderAdapter>,
     #[cfg(target_family = "wasm")] mut msaa_attachment: NonSendMut<MsaaRenderAdapter>,
+    mut window_appearance_factor: ResMut<WindowAppearanceFactor>,
 ) {
     for resize in resize_events.iter() {
         trace!("resizing event: {:?}", resize.size);
-        gfx_surface_configuration.configuration.width =
-            (resize.size.width as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
-        gfx_surface_configuration.configuration.height =
-            (resize.size.height as u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
+        let requested = Area::new(resize.size.width, resize.size.height);
+        let actual = Area::new(
+            requested
+                .width
+                .min(gfx_surface.options.limits.max_texture_dimension_2d as f32),
+            requested
+                .height
+                .min(gfx_surface.options.limits.max_texture_dimension_2d as f32),
+        );
+        *window_appearance_factor = WindowAppearanceFactor::new(requested, actual);
+        gfx_surface_configuration.configuration.width = actual.width as u32;
+        gfx_surface_configuration.configuration.height = actual.height as u32;
         *msaa_attachment = MsaaRenderAdapter::new(
             &gfx_surface,
             &gfx_surface_configuration,
