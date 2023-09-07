@@ -69,6 +69,16 @@
 <a href="#69" id="69">69</a>
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{
     Event, EventReader, Events, IntoSystemConfigs, NonSend, NonSendMut, Res, ResMut,
 };
@@ -79,16 +89,17 @@
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::sync::SyncPoint;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
+<span class="kw">use crate</span>::{WindowAppearanceContext, WindowAppearanceFactor};
 
 <span class="doccomment">/// Event for triggering Window Resizing behaviour
 </span><span class="attr">#[derive(Event, Clone, Copy)]
 </span><span class="kw">pub struct </span>WindowResize {
-    <span class="kw">pub </span>size: Area&lt;DeviceContext&gt;,
+    <span class="kw">pub </span>size: Area&lt;WindowAppearanceContext&gt;,
     <span class="kw">pub </span>scale_factor: f32,
 }
 
 <span class="kw">impl </span>WindowResize {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(size: Area&lt;DeviceContext&gt;, scale_factor: f32) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(size: Area&lt;WindowAppearanceContext&gt;, scale_factor: f32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ size, scale_factor }
     }
 }
@@ -104,13 +115,22 @@
     <span class="kw-2">mut </span>resize_events: EventReader&lt;WindowResize&gt;,
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>msaa_attachment: ResMut&lt;MsaaRenderAdapter&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>msaa_attachment: NonSendMut&lt;MsaaRenderAdapter&gt;,
+    <span class="kw-2">mut </span>window_appearance_factor: ResMut&lt;WindowAppearanceFactor&gt;,
 ) {
     <span class="kw">for </span>resize <span class="kw">in </span>resize_events.iter() {
         <span class="macro">trace!</span>(<span class="string">&quot;resizing event: {:?}&quot;</span>, resize.size);
-        gfx_surface_configuration.configuration.width =
-            (resize.size.width <span class="kw">as </span>u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
-        gfx_surface_configuration.configuration.height =
-            (resize.size.height <span class="kw">as </span>u32).min(gfx_surface.options.limits.max_texture_dimension_2d);
+        <span class="kw">let </span>requested = Area::new(resize.size.width, resize.size.height);
+        <span class="kw">let </span>actual = Area::new(
+            requested
+                .width
+                .min(gfx_surface.options.limits.max_texture_dimension_2d <span class="kw">as </span>f32),
+            requested
+                .height
+                .min(gfx_surface.options.limits.max_texture_dimension_2d <span class="kw">as </span>f32),
+        );
+        <span class="kw-2">*</span>window_appearance_factor = WindowAppearanceFactor::new(requested, actual);
+        gfx_surface_configuration.configuration.width = actual.width <span class="kw">as </span>u32;
+        gfx_surface_configuration.configuration.height = actual.height <span class="kw">as </span>u32;
         <span class="kw-2">*</span>msaa_attachment = MsaaRenderAdapter::new(
             <span class="kw-2">&amp;</span>gfx_surface,
             <span class="kw-2">&amp;</span>gfx_surface_configuration,

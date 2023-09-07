@@ -303,6 +303,10 @@
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
 <a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::{Res, ResMut};
 <span class="kw">use </span>bevy_ecs::event::EventReader;
 <span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfigs, NonSend, NonSendMut, Resource};
@@ -318,7 +322,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::window::{gfx_resize, WindowResize};
-<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint};
+<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint, WindowAppearanceFactor};
 
 <span class="doccomment">/// Viewport Matrix for converting to NDC
 </span><span class="attr">#[cfg_attr(not(target_family = <span class="string">&quot;wasm&quot;</span>), derive(Resource))]
@@ -544,9 +548,13 @@
     <span class="kw-2">mut </span>resize_events: EventReader&lt;WindowResize&gt;,
     <span class="kw-2">mut </span>viewport_handle: ResMut&lt;ViewportHandle&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
+    window_appearance_factor: Res&lt;WindowAppearanceFactor&gt;,
 ) {
     <span class="kw">for </span>event <span class="kw">in </span>resize_events.iter() {
-        viewport_handle.section.area = event.size.to_interface(scale_factor.factor());
+        viewport_handle.section.area = event
+            .size
+            .to_actual(<span class="kw-2">&amp;</span>window_appearance_factor)
+            .to_interface(scale_factor.factor());
     }
 }
 
