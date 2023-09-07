@@ -43,6 +43,7 @@ pub use crate::color::Color;
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
+    WindowAppearanceContext,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
@@ -55,7 +56,7 @@ pub use crate::job::Job;
 pub use crate::line::{Line, LineRender, LineTag};
 pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelTag, PanelType};
 pub use crate::path::{Path, PathView, ResponsivePathView};
-pub use crate::scale_factor::ScaleFactor;
+pub use crate::scale_factor::{ScaleFactor, WindowAppearanceFactor};
 pub use crate::sync::SyncPoint;
 pub use crate::text::{
     KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement,

@@ -105,7 +105,8 @@ impl Visualizer {
     /// Initializes the `GfxSurface` and `Viewport` for a Visualizer
     pub async fn init_gfx(&mut self, window: &Window) {
         info!("initializing gfx.");
-        let (surface, config, msaa) = GfxSurface::new(window, self.gfx_options.clone()).await;
+        let (surface, config, msaa, window_appearance_factor) =
+            GfxSurface::new(window, self.gfx_options.clone()).await;
         info!(
             "gfx -> surface: {:?}/{:?}",
             config.configuration.width, config.configuration.height
@@ -139,6 +140,7 @@ impl Visualizer {
         #[cfg(target_family = "wasm")]
         self.job.container.insert_non_send_resource(msaa);
         self.job.container.insert_resource(scale_factor);
+        self.job.container.insert_resource(window_appearance_factor);
     }
     /// Tells visualizer to send a signal of resizing to be read in systems
     pub fn trigger_resize(&mut self, size: PhysicalSize<u32>, scale_factor: f32) {

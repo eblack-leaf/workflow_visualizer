@@ -26,9 +26,14 @@ pub struct InterfaceContext;
 /// device/logical sizes
 #[derive(Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct NumericalContext;
+/// If the screen look scales beyond the actual Viewport this context
+/// is needed to go from the scaled look to the actual device representation
+#[derive(Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
+pub struct WindowAppearanceContext;
 impl CoordinateContext for DeviceContext {}
 impl CoordinateContext for InterfaceContext {}
 impl CoordinateContext for NumericalContext {}
+impl CoordinateContext for WindowAppearanceContext {}
 /// Coordinate is a bundle of Section + Layer to denote coordinates in the world
 #[derive(Bundle, Copy, Clone, Default)]
 pub struct Coordinate<Context: CoordinateContext> {

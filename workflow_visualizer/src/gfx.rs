@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
+use crate::WindowAppearanceFactor;
 use bevy_ecs::prelude::Resource;
 use tracing::{info, instrument, trace};
 use wgpu::{ColorTargetState, PrimitiveState, TextureView};
@@ -57,7 +58,12 @@ pub struct GfxSurface {
     pub queue: wgpu::Queue,
     pub options: GfxOptions,
 }
-pub(crate) type GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter);
+pub(crate) type GfxStack = (
+    GfxSurface,
+    GfxSurfaceConfiguration,
+    MsaaRenderAdapter,
+    WindowAppearanceFactor,
+);
 impl GfxSurface {
     #[instrument]
     pub(crate) async fn new(window: &Window, options: GfxOptions) -> GfxStack {
@@ -110,21 +116,19 @@ impl GfxSurface {
             .first()
             .expect("surface format unsupported");
         trace!("surface format: {:?}", surface_format);
-        window.set_inner_size(PhysicalSize::new(
-            window
-                .inner_size()
-                .width
-                .min(options.limits.max_texture_dimension_2d),
-            window
-                .inner_size()
-                .height
-                .min(options.limits.max_texture_dimension_2d),
-        ));
+        let requested_width = window.inner_size().width;
+        let actual_width = requested_width.min(options.limits.max_texture_dimension_2d);
+        let requested_height = window.inner_size().height;
+        let actual_height = requested_height.min(options.limits.max_texture_dimension_2d);
+        let window_appearance_factor = WindowAppearanceFactor::new(
+            (requested_width, requested_height).into(),
+            (actual_width, actual_height).into(),
+        );
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: window.inner_size().width,
-            height: window.inner_size().height,
+            width: actual_width,
+            height: actual_height,
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![surface_format],
@@ -140,7 +144,12 @@ impl GfxSurface {
         let gfx_surface_config = GfxSurfaceConfiguration::new(surface_configuration);
         let msaa_render_attachment =
             Self::configure_msaa(options, adapter, &gfx_surface, &gfx_surface_config);
-        (gfx_surface, gfx_surface_config, msaa_render_attachment)
+        (
+            gfx_surface,
+            gfx_surface_config,
+            msaa_render_attachment,
+            window_appearance_factor,
+        )
     }
 
     fn configure_msaa(

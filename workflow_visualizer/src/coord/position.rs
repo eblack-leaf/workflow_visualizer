@@ -7,8 +7,10 @@ use bevy_ecs::prelude::Query;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use crate::coord::{CoordinateContext, NumericalContext};
-use crate::{Animate, Animation, DeviceContext, InterfaceContext, Interpolation};
+use crate::coord::{CoordinateContext, NumericalContext, WindowAppearanceContext};
+use crate::{
+    Animate, Animation, DeviceContext, InterfaceContext, Interpolation, WindowAppearanceFactor,
+};
 
 /// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
@@ -53,6 +55,26 @@ impl Position<DeviceContext> {
     /// converts to interface context accounting for scale factor
     pub fn to_interface(&self, scale_factor: f32) -> Position<InterfaceContext> {
         Position::<InterfaceContext>::new(self.x / scale_factor, self.y / scale_factor)
+    }
+    pub fn to_window_appearance(
+        &self,
+        window_appearance_factor: &WindowAppearanceFactor,
+    ) -> Position<WindowAppearanceContext> {
+        Position::new(
+            self.x * window_appearance_factor.x_factor(),
+            self.y * window_appearance_factor.y_factor(),
+        )
+    }
+}
+impl Position<WindowAppearanceContext> {
+    pub fn to_actual(
+        &self,
+        window_appearance_factor: &WindowAppearanceFactor,
+    ) -> Position<DeviceContext> {
+        Position::new(
+            self.x / window_appearance_factor.x_factor(),
+            self.y / window_appearance_factor.y_factor(),
+        )
     }
 }
 impl<Context: CoordinateContext> Add for Position<Context> {

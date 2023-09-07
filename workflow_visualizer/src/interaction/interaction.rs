@@ -11,6 +11,7 @@ use crate::bundling::Disabled;
 use crate::focus::FocusedEntity;
 use crate::{
     Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, ViewportHandle,
+    WindowAppearanceContext, WindowAppearanceFactor,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Default)]
@@ -72,10 +73,14 @@ pub(crate) fn update_interactions(
     mut phases: ResMut<InteractionPhases>,
     viewport_handle: Res<ViewportHandle>,
     scale_factor: Res<ScaleFactor>,
+    window_appearance_factor: Res<WindowAppearanceFactor>,
 ) {
     for event in events.iter() {
-        let offset_location =
-            event.location.to_interface(scale_factor.factor()) + viewport_handle.section.position;
+        let offset_location = event
+            .location
+            .to_actual(&window_appearance_factor)
+            .to_interface(scale_factor.factor())
+            + viewport_handle.section.position;
         #[cfg(target_family = "wasm")]
         web_sys::console::info_1(&wasm_bindgen::JsValue::from_str(
             format!(
@@ -322,7 +327,7 @@ pub struct InteractionPhases(pub HashMap<Interaction, InteractionPhase>);
 #[derive(Event)]
 pub struct InteractionEvent {
     pub(crate) device: InteractionDevice,
-    pub(crate) location: Position<DeviceContext>,
+    pub(crate) location: Position<WindowAppearanceContext>,
     pub(crate) phase: InteractionPhase,
     pub(crate) interaction: Interaction,
 }
@@ -330,7 +335,7 @@ pub struct InteractionEvent {
 impl InteractionEvent {
     pub fn new(
         device: InteractionDevice,
-        location: Position<DeviceContext>,
+        location: Position<WindowAppearanceContext>,
         phase: InteractionPhase,
         interaction: Interaction,
     ) -> Self {
@@ -393,12 +398,12 @@ impl From<winit::event::TouchPhase> for InteractionPhase {
 
 #[derive(Resource, Default)]
 pub(crate) struct MouseAdapter {
-    pub(crate) location: Position<DeviceContext>,
+    pub(crate) location: Position<WindowAppearanceContext>,
     pub(crate) button_cache: HashMap<MouseButton, ElementState>,
 }
 
 impl MouseAdapter {
-    pub(crate) fn set_location<P: Into<Position<DeviceContext>>>(&mut self, location: P) {
+    pub(crate) fn set_location<P: Into<Position<WindowAppearanceContext>>>(&mut self, location: P) {
         self.location = location.into();
     }
     pub(crate) fn cache_invalid(&mut self, button: MouseButton, value: ElementState) -> bool {

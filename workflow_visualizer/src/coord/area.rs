@@ -6,8 +6,10 @@ use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Query;
 use bytemuck::{Pod, Zeroable};
 
-use crate::coord::{CoordinateContext, NumericalContext};
-use crate::{Animate, Animation, DeviceContext, InterfaceContext, Interpolation};
+use crate::coord::{CoordinateContext, NumericalContext, WindowAppearanceContext};
+use crate::{
+    Animate, Animation, DeviceContext, InterfaceContext, Interpolation, WindowAppearanceFactor,
+};
 /// Area is for width/height of an entity
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Area<Context: CoordinateContext> {
@@ -51,6 +53,26 @@ impl Area<DeviceContext> {
     /// accounts for scale factor to convert this to interface area
     pub fn to_interface(&self, scale_factor: f32) -> Area<InterfaceContext> {
         Area::<InterfaceContext>::new(self.width / scale_factor, self.height / scale_factor)
+    }
+    pub fn to_window_appearance(
+        &self,
+        window_appearance_factor: &WindowAppearanceFactor,
+    ) -> Area<WindowAppearanceContext> {
+        Area::new(
+            self.width * window_appearance_factor.x_factor(),
+            self.height * window_appearance_factor.y_factor(),
+        )
+    }
+}
+impl Area<WindowAppearanceContext> {
+    pub fn to_actual(
+        &self,
+        window_appearance_factor: &WindowAppearanceFactor,
+    ) -> Area<DeviceContext> {
+        Area::new(
+            self.width / window_appearance_factor.x_factor(),
+            self.height / window_appearance_factor.y_factor(),
+        )
     }
 }
 /// Raw area defined in C representation for interacting with C (vulkan mostly)
