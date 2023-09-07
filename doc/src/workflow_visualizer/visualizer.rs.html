@@ -485,6 +485,8 @@
 <a href="#485" id="485">485</a>
 <a href="#486" id="486">486</a>
 <a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -592,7 +594,8 @@
     <span class="doccomment">/// Initializes the `GfxSurface` and `Viewport` for a Visualizer
     </span><span class="kw">pub async fn </span>init_gfx(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window: <span class="kw-2">&amp;</span>Window) {
         <span class="macro">info!</span>(<span class="string">&quot;initializing gfx.&quot;</span>);
-        <span class="kw">let </span>(surface, config, msaa) = GfxSurface::new(window, <span class="self">self</span>.gfx_options.clone()).<span class="kw">await</span>;
+        <span class="kw">let </span>(surface, config, msaa, window_appearance_factor) =
+            GfxSurface::new(window, <span class="self">self</span>.gfx_options.clone()).<span class="kw">await</span>;
         <span class="macro">info!</span>(
             <span class="string">&quot;gfx -&gt; surface: {:?}/{:?}&quot;</span>,
             config.configuration.width, config.configuration.height
@@ -626,6 +629,7 @@
         <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
         </span><span class="self">self</span>.job.container.insert_non_send_resource(msaa);
         <span class="self">self</span>.job.container.insert_resource(scale_factor);
+        <span class="self">self</span>.job.container.insert_resource(window_appearance_factor);
     }
     <span class="doccomment">/// Tells visualizer to send a signal of resizing to be read in systems
     </span><span class="kw">pub fn </span>trigger_resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: PhysicalSize&lt;u32&gt;, scale_factor: f32) {

@@ -55,6 +55,11 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 <span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
@@ -83,9 +88,14 @@
 /// device/logical sizes
 </span><span class="attr">#[derive(Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 </span><span class="kw">pub struct </span>NumericalContext;
+<span class="doccomment">/// If the screen look scales beyond the actual Viewport this context
+/// is needed to go from the scaled look to the actual device representation
+</span><span class="attr">#[derive(Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
+</span><span class="kw">pub struct </span>WindowAppearanceContext;
 <span class="kw">impl </span>CoordinateContext <span class="kw">for </span>DeviceContext {}
 <span class="kw">impl </span>CoordinateContext <span class="kw">for </span>InterfaceContext {}
 <span class="kw">impl </span>CoordinateContext <span class="kw">for </span>NumericalContext {}
+<span class="kw">impl </span>CoordinateContext <span class="kw">for </span>WindowAppearanceContext {}
 <span class="doccomment">/// Coordinate is a bundle of Section + Layer to denote coordinates in the world
 </span><span class="attr">#[derive(Bundle, Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>Coordinate&lt;Context: CoordinateContext&gt; {

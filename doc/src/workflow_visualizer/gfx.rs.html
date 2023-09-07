@@ -297,8 +297,18 @@
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a>
 <a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 
+<span class="kw">use </span><span class="kw">crate</span>::WindowAppearanceFactor;
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>tracing::{info, instrument, trace};
 <span class="kw">use </span>wgpu::{ColorTargetState, PrimitiveState, TextureView};
@@ -356,7 +366,12 @@
     <span class="kw">pub </span>queue: wgpu::Queue,
     <span class="kw">pub </span>options: GfxOptions,
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>GfxStack = (GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter);
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>GfxStack = (
+    GfxSurface,
+    GfxSurfaceConfiguration,
+    MsaaRenderAdapter,
+    WindowAppearanceFactor,
+);
 <span class="kw">impl </span>GfxSurface {
     <span class="attr">#[instrument]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>new(window: <span class="kw-2">&amp;</span>Window, options: GfxOptions) -&gt; GfxStack {
@@ -409,21 +424,19 @@
             .first()
             .expect(<span class="string">&quot;surface format unsupported&quot;</span>);
         <span class="macro">trace!</span>(<span class="string">&quot;surface format: {:?}&quot;</span>, surface_format);
-        window.set_inner_size(PhysicalSize::new(
-            window
-                .inner_size()
-                .width
-                .min(options.limits.max_texture_dimension_2d),
-            window
-                .inner_size()
-                .height
-                .min(options.limits.max_texture_dimension_2d),
-        ));
+        <span class="kw">let </span>requested_width = window.inner_size().width;
+        <span class="kw">let </span>actual_width = requested_width.min(options.limits.max_texture_dimension_2d);
+        <span class="kw">let </span>requested_height = window.inner_size().height;
+        <span class="kw">let </span>actual_height = requested_height.min(options.limits.max_texture_dimension_2d);
+        <span class="kw">let </span>window_appearance_factor = WindowAppearanceFactor::new(
+            (requested_width, requested_height).into(),
+            (actual_width, actual_height).into(),
+        );
         <span class="kw">let </span>surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: window.inner_size().width,
-            height: window.inner_size().height,
+            width: actual_width,
+            height: actual_height,
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: <span class="macro">vec!</span>[surface_format],
@@ -439,7 +452,12 @@
         <span class="kw">let </span>gfx_surface_config = GfxSurfaceConfiguration::new(surface_configuration);
         <span class="kw">let </span>msaa_render_attachment =
             <span class="self">Self</span>::configure_msaa(options, adapter, <span class="kw-2">&amp;</span>gfx_surface, <span class="kw-2">&amp;</span>gfx_surface_config);
-        (gfx_surface, gfx_surface_config, msaa_render_attachment)
+        (
+            gfx_surface,
+            gfx_surface_config,
+            msaa_render_attachment,
+            window_appearance_factor,
+        )
     }
 
     <span class="kw">fn </span>configure_msaa(
