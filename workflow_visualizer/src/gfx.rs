@@ -3,6 +3,7 @@ use std::fmt::{Debug, Formatter};
 use bevy_ecs::prelude::Resource;
 use tracing::{info, instrument, trace};
 use wgpu::{ColorTargetState, PrimitiveState, TextureView};
+use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
 /// Options for instantiating the Gfx module
@@ -109,17 +110,21 @@ impl GfxSurface {
             .first()
             .expect("surface format unsupported");
         trace!("surface format: {:?}", surface_format);
-        let surface_configuration = wgpu::SurfaceConfiguration {
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface_format,
-            width: window
+        window.set_inner_size(PhysicalSize::new(
+            window
                 .inner_size()
                 .width
                 .min(options.limits.max_texture_dimension_2d),
-            height: window
+            window
                 .inner_size()
                 .height
                 .min(options.limits.max_texture_dimension_2d),
+        ));
+        let surface_configuration = wgpu::SurfaceConfiguration {
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            format: surface_format,
+            width: window.inner_size().width,
+            height: window.inner_size().height,
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![surface_format],
