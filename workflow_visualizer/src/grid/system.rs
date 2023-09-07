@@ -84,7 +84,7 @@ pub(crate) fn config_grid(
                 .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").x)
                 .to_pixel();
             let y = grid
-                .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").y)
+                .calc_vertical_location(view.mapping.get(&grid.span).expect("mapping").y)
                 .to_pixel();
             *pos = Position::new(x, y);
         }
@@ -109,7 +109,7 @@ pub(crate) fn set_point_from_view(
             .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").x)
             .to_pixel();
         let y = grid
-            .calc_horizontal_location(view.mapping.get(&grid.span).expect("mapping").y)
+            .calc_vertical_location(view.mapping.get(&grid.span).expect("mapping").y)
             .to_pixel();
         *pos = Position::new(x, y);
     }
