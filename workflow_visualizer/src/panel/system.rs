@@ -1,6 +1,6 @@
 use bevy_ecs::change_detection::ResMut;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Changed, NonSend, NonSendMut, Or, Query, RemovedComponents, Res};
+use bevy_ecs::prelude::{Changed, Or, Query, RemovedComponents, Res};
 
 use crate::gfx::GfxSurface;
 use crate::panel::renderer::PanelRenderer;

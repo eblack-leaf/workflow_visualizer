@@ -65,6 +65,7 @@ pub(crate) struct GutterConfig {
 }
 
 /// MarkerGrouping fro deciding row size
+#[allow(unused)]
 pub(crate) struct RowConfig {
     pub base: RawMarkerGrouping,
 }

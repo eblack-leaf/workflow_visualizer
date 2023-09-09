@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::{Component, Resource};
-use tracing::info;
+
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
 
@@ -13,10 +13,12 @@ pub struct VirtualKeyboardAdapter {
     #[cfg(target_os = "android")]
     android_app: AndroidApp,
     #[cfg(not(target_os = "android"))]
+    #[allow(unused)]
     android_app: (),
 }
 
 /// VirtualKeyboard Type for opening different pads on web
+#[allow(unused)]
 #[derive(Component, Copy, Clone)]
 pub enum VirtualKeyboardType {
     Keyboard,

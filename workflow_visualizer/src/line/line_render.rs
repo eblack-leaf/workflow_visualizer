@@ -1,7 +1,6 @@
 use bevy_ecs::component::Component;
-use wgpu::util::DeviceExt;
 
-use crate::{DeviceContext, GfxSurface, Position};
+use crate::{DeviceContext, Position};
 
 #[derive(Component)]
 pub struct LineRenderPoints {

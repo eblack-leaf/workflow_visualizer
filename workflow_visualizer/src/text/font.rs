@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::ops::{Deref, Sub};
 
 use bevy_ecs::prelude::Resource;
@@ -62,7 +61,7 @@ impl MonoSpacedFont {
                 }
             }
         }
-        return TextScale(0);
+        TextScale(0)
     }
     pub fn font_slice(&self) -> &[fdFont] {
         self.font_storage.as_slice()

@@ -159,9 +159,11 @@ impl TextLineStructure {
         let max_y = (area.height / letter_dimensions.0.height).floor() as u32;
         Self(line_counts, (max_x, max_y))
     }
+    #[allow(unused)]
     pub(crate) fn horizontal_character_max(&self) -> u32 {
         self.1 .0 - (!self.1 .0 == 0) as u32
     }
+    #[allow(unused)]
     pub(crate) fn line_max(&self) -> u32 {
         self.1 .1 - (!self.1 .1 == 0) as u32
     }
@@ -234,7 +236,6 @@ impl Cache {
 #[derive(Component, Clone)]
 pub(crate) struct Difference {
     pub(crate) position: Option<Position<InterfaceContext>>,
-    pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) visible_section: Option<VisibleSection>,
     pub(crate) layer: Option<Layer>,
     pub(crate) glyph_add: HashMap<Key, Glyph>,
@@ -248,7 +249,6 @@ impl Difference {
     pub(crate) fn new() -> Self {
         Self {
             position: None,
-            area: None,
             visible_section: None,
             layer: None,
             glyph_add: HashMap::new(),

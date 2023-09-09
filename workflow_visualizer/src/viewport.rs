@@ -1,6 +1,6 @@
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{IntoSystemConfigs, NonSend, NonSendMut, Resource};
+use bevy_ecs::prelude::{IntoSystemConfigs, Resource};
 use nalgebra::matrix;
 use wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
 

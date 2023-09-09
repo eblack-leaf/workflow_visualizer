@@ -1,6 +1,5 @@
 use bevy_ecs::component::Component;
 use bevy_ecs::prelude::Bundle;
-use compact_str::CompactString;
 
 use crate::icon::cache::{Cache, Difference};
 use crate::{Color, EnableVisibility, InterfaceContext, Layer, Section, Tag};
@@ -21,12 +20,12 @@ impl IconScale {
             IconScale::Medium => 17f32,
             IconScale::Large => 20f32,
             IconScale::Custom(dim) => *dim as f32,
-            IconScale::Asymmetrical((w, h)) => *w as f32,
+            IconScale::Asymmetrical((w, _h)) => *w as f32,
         }
     }
     pub fn height_px(&self) -> f32 {
         match &self {
-            IconScale::Asymmetrical((w, h)) => *h as f32,
+            IconScale::Asymmetrical((_w, h)) => *h as f32,
             _ => self.width_px(),
         }
     }

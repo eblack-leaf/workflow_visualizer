@@ -2,14 +2,13 @@ use std::collections::HashMap;
 
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{Changed, Local, Query, Without};
-use tracing::trace;
+use bevy_ecs::prelude::{Changed, Query, Without};
 
 use crate::grid::responsive::ResponsiveGridPoint;
 use crate::grid::AbsolutePlacement;
 use crate::{
-    Area, DiagnosticsHandle, Grid, HorizontalSpan, InterfaceContext, Position, Record,
-    ResponsiveGridView, ViewportHandle, WindowResize,
+    Area, Grid, HorizontalSpan, InterfaceContext, Position, Record, ResponsiveGridView,
+    ViewportHandle, WindowResize,
 };
 
 fn update_section(
@@ -68,7 +67,9 @@ pub(crate) fn config_grid(
         (Without<ResponsiveGridView>, Without<ResponsiveGridPoint>),
     >,
     mut grid: ResMut<Grid>,
-    #[cfg(feature = "diagnostics")] mut diagnostics: Local<DiagnosticsHandle<GridConfigRecorder>>,
+    #[cfg(feature = "diagnostics")] mut diagnostics: bevy_ecs::prelude::Local<
+        crate::DiagnosticsHandle<GridConfigRecorder>,
+    >,
 ) {
     if !window_resize_events.is_empty() {
         // configure grid configs + span
@@ -93,7 +94,7 @@ pub(crate) fn config_grid(
             *area = placement.0.area;
         }
         #[cfg(feature = "diagnostics")]
-        trace!("{:?}", diagnostics.record());
+        tracing::trace!("{:?}", diagnostics.record());
     }
 }
 
@@ -132,7 +133,7 @@ pub(crate) fn set_from_view(
 }
 
 pub(crate) fn set_from_absolute(
-    grid: Res<Grid>,
+    _grid: Res<Grid>,
     mut changed: Query<
         (
             &AbsolutePlacement,

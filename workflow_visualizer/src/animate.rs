@@ -101,7 +101,7 @@ where
     fn interpolations(&self, end: Self) -> Vec<Interpolation>;
     fn animate<TD: Into<TimeDelta>>(&self, end: Self, animation_time: TD) -> Animation<Self> {
         let timer = Timer::new(animation_time);
-        Animation::new(timer, Self::interpolations(&self, end))
+        Animation::new(timer, Self::interpolations(self, end))
     }
 }
 
@@ -123,7 +123,7 @@ pub(crate) fn update_animations<T: Animate + Send + Sync + 'static>(
     for mut animation in animations.iter_mut() {
         if animation.timer.started() {
             animation.timer.mark(time_tracker.mark());
-            if let Some(elapsed) = animation.timer.time_elapsed() {
+            if let Some(_elapsed) = animation.timer.time_elapsed() {
                 let percent = animation.timer.percent_elapsed(time_tracker.frame_diff());
                 if animation.timer.finished() {
                     animation.done = true;
@@ -134,7 +134,7 @@ pub(crate) fn update_animations<T: Animate + Send + Sync + 'static>(
                     if anim_done {
                         let _extract = interpolation.finish();
                     } else {
-                        let _extract = interpolation.extract(percent as f32);
+                        let _extract = interpolation.extract(percent);
                         if !interpolation.done() {
                             all_finished = false;
                         }

@@ -254,7 +254,7 @@ impl Visualizer {
             .container
             .get_resource_mut::<MouseAdapter>()
             .expect("mouse adapter")
-            .location = (position.x, position.y).into();
+            .set_location((position.x, position.y));
         let primary_button = self
             .job
             .container
@@ -385,8 +385,7 @@ impl Visualizer {
             .unwrap();
         let viewport = self.job.container.get_resource::<Viewport>().unwrap();
         let scale_factor = self.job.container.get_resource::<ScaleFactor>().unwrap();
-        let renderer: Renderer =
-            Render::setup(&self, gfx, viewport, gfx_config, msaa, scale_factor);
+        let renderer: Renderer = Render::setup(self, gfx, viewport, gfx_config, msaa, scale_factor);
         self.job.container.insert_resource(renderer);
         match Renderer::phase() {
             RenderPhase::Opaque => self

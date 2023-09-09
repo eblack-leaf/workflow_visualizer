@@ -1,11 +1,9 @@
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use bevy_ecs::prelude::{
-    Component, Entity, IntoSystemConfigs, ResMut, Resource, Schedule, SystemSet, World,
-};
+use bevy_ecs::prelude::{Component, ResMut, Resource, Schedule, SystemSet, World};
 use bevy_ecs::schedule::ExecutorKind;
-use compact_str::CompactString;
+
 #[derive(Component, Copy, Clone)]
 pub struct Tag<T> {
     _phantom: PhantomData<T>,

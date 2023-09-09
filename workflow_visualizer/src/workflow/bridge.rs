@@ -1,11 +1,11 @@
 use std::fmt::Debug;
 
-use bevy_ecs::prelude::{EventReader, Events, IntoSystemConfigs, NonSend, Resource};
-use gloo_worker::{HandlerId, Worker, WorkerBridge};
+use bevy_ecs::prelude::Resource;
+use gloo_worker::{HandlerId, Worker};
 use winit::event_loop::EventLoopProxy;
 
 use crate::workflow::runner::EngenHandle;
-use crate::{SyncPoint, Visualizer, Workflow};
+use crate::Workflow;
 
 pub(crate) struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]

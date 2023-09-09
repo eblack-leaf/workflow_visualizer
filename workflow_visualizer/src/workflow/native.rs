@@ -1,7 +1,6 @@
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
-use bevy_ecs::prelude::Resource;
 use winit::dpi::PhysicalSize;
 use winit::event_loop::{EventLoopBuilder, EventLoopWindowTarget};
 #[cfg(target_os = "android")]
@@ -17,7 +16,7 @@ use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
 
 #[cfg(not(target_family = "wasm"))]
 pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
-    mut runner: Runner,
+    runner: Runner,
     mut visualizer: Visualizer,
 ) {
     let tokio_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");

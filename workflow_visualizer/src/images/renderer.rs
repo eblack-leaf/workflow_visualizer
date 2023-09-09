@@ -1,16 +1,14 @@
 use bevy_ecs::event::EventWriter;
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{
-    Commands, Component, Entity, Event, NonSend, NonSendMut, Query, Res, ResMut, Resource,
-};
-use compact_str::CompactString;
+use bevy_ecs::prelude::{Commands, Component, Entity, Event, Query, Res, ResMut, Resource};
+
 use image::{EncodableLayout, GenericImageView};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
 use crate::images::render_group::ImageRenderGroup;
-use crate::orientation::{AspectRatio, Orientation};
+use crate::orientation::Orientation;
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
 use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
@@ -110,6 +108,7 @@ impl ImageRequest {
 }
 
 pub(crate) struct ImageData {
+    #[allow(unused)]
     pub(crate) atlas: TextureAtlas,
     pub(crate) bind_group: TextureBindGroup,
     pub(crate) coordinates: TextureCoordinates,
@@ -206,9 +205,9 @@ impl Render for ImageRenderer {
         viewport: &Viewport,
         gfx_config: &GfxSurfaceConfiguration,
         msaa: &MsaaRenderAdapter,
-        scale_factor: &ScaleFactor,
+        _scale_factor: &ScaleFactor,
     ) -> Self {
-        let sampler = TextureSampler::new(&gfx);
+        let sampler = TextureSampler::new(gfx);
         let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
             label: Some("sampler bind group layout"),
             entries: &[TextureSampler::layout_entry(0)],
@@ -278,16 +277,16 @@ impl Render for ImageRenderer {
             multiview: None,
         };
         let pipeline = gfx.device.create_render_pipeline(&pipeline_descriptor);
-        let renderer = ImageRenderer {
+
+        ImageRenderer {
             pipeline,
             render_groups: HashMap::new(),
-            vertex_buffer: aabb_vertex_buffer(&gfx),
+            vertex_buffer: aabb_vertex_buffer(gfx),
             sampler_bind_group,
             images: HashMap::new(),
             render_group_layout: texture_bind_group_layout,
             render_group_uniforms_layout,
-        };
-        renderer
+        }
     }
 
     fn phase() -> RenderPhase {

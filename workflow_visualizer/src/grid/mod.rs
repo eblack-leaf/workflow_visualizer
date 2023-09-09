@@ -1,7 +1,5 @@
-use std::ops::Add;
-
 use bevy_ecs::component::Component;
-use bevy_ecs::prelude::{Bundle, DetectChanges, IntoSystemConfigs, Resource};
+use bevy_ecs::prelude::{Bundle, Resource};
 
 pub(crate) use attachment::GridAttachment;
 use marker::ColumnConfig;
@@ -10,15 +8,15 @@ pub use marker::RawMarker;
 pub use marker::RawMarkerGrouping;
 use marker::RowConfig;
 pub use responsive::{ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, ResponsiveView};
-pub(crate) use system::config_grid;
+
 pub use view::{
     GridLocation, GridLocationDescriptor, GridLocationOffset, GridMarker, GridMarkerBias,
     GridPoint, GridPointBuilder, GridRange, GridView, GridViewBuilder, Placement,
 };
 
 use crate::bundling::{BundleBuilder, BundleExtension};
-use crate::diagnostics::Record;
-use crate::{Area, Attach, InterfaceContext, Position, ResponsivePathView, Section};
+
+use crate::{Area, InterfaceContext, ResponsivePathView, Section};
 
 mod attachment;
 mod marker;
@@ -57,6 +55,7 @@ impl HorizontalSpan {
 pub struct Grid {
     pub(crate) span: HorizontalSpan,
     pub(crate) column_config: ColumnConfig,
+    #[allow(unused)]
     pub(crate) row_config: RowConfig,
     pub(crate) gutter_config: GutterConfig,
     pub(crate) vertical_markers: u32,

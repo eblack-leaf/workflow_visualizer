@@ -1,5 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use std::collections::HashMap;
+
 use std::marker::PhantomData;
 
 use wgpu::util::DeviceExt;
@@ -45,6 +45,7 @@ pub fn vertex_bind_group_layout_entry(binding: u32) -> BindGroupLayoutEntry {
         count: None,
     }
 }
+#[allow(unused)]
 pub type AlignedUniformData<Repr> = [Repr; 4];
 pub struct AlignedUniform<Repr: Default + Copy + Clone + Pod + Zeroable> {
     pub uniform: Uniform<[Repr; 4]>,

@@ -1,24 +1,20 @@
-use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use gloo_worker::{HandlerId, Worker, WorkerScope};
-use winit::dpi::PhysicalSize;
-use winit::event_loop::EventLoopBuilder;
-use winit::window::{Window, WindowBuilder};
 
 use crate::workflow::bridge::OutputWrapper;
 #[cfg(target_family = "wasm")]
 use crate::workflow::bridge::WebSender;
-use crate::workflow::run::internal_loop;
+
 use crate::workflow::runner::EngenHandle;
-use crate::{Runner, Sender, Visualizer, Workflow};
+use crate::Workflow;
 
 impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
     type Message = OutputWrapper<T>;
     type Input = T::Action;
     type Output = T::Response;
 
-    fn create(scope: &WorkerScope<Self>) -> Self {
+    fn create(_scope: &WorkerScope<Self>) -> Self {
         EngenHandle(Arc::new(Mutex::new(T::default())))
     }
 

@@ -1,6 +1,4 @@
-use bevy_ecs::prelude::{
-    Changed, Entity, NonSend, NonSendMut, Or, Query, RemovedComponents, Res, ResMut,
-};
+use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
 
 use crate::line::line_render::LineRenderPoints;
 use crate::line::renderer::{LineRenderGpu, LineRenderGroup, LineRenderer};
@@ -22,7 +20,7 @@ pub(crate) fn calc_section(
         Changed<Path>,
     >,
 ) {
-    for (path, mut pos, mut area) in lines.iter_mut() {
+    for (_path, mut pos, mut area) in lines.iter_mut() {
         // TODO remove this and calc section of line by farthest bounds
         *pos = (100, 100).into();
         *area = (100, 100).into();
@@ -34,7 +32,7 @@ pub(crate) fn scale_path(
     scale_factor: Res<ScaleFactor>,
     mut paths: Query<(Entity, &Path, &mut LineRender, &mut LineRenderPoints), Changed<Path>>,
 ) {
-    for (entity, path, mut line_render, mut line_render_points) in paths.iter_mut() {
+    for (_entity, path, mut line_render, mut line_render_points) in paths.iter_mut() {
         let mut scaled = Vec::new();
         for point in path.points.iter() {
             scaled.push(point.to_device(scale_factor.factor()));

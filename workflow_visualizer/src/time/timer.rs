@@ -1,4 +1,4 @@
-use crate::{Interpolation, TimeDelta, TimeMarker};
+use crate::{TimeDelta, TimeMarker};
 use bevy_ecs::prelude::Component;
 
 #[derive(Component, Copy, Clone, Default, Debug)]

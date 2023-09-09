@@ -10,7 +10,7 @@ use winit::event::{ElementState, MouseButton, TouchPhase};
 use crate::bundling::Disabled;
 use crate::focus::FocusedEntity;
 use crate::{
-    Area, DeviceContext, InterfaceContext, Layer, Position, ScaleFactor, Section, ViewportHandle,
+    Area, InterfaceContext, Layer, Position, ScaleFactor, Section, ViewportHandle,
     WindowAppearanceContext, WindowAppearanceFactor,
 };
 
@@ -94,19 +94,16 @@ pub(crate) fn update_interactions(
         ));
         match event.device {
             InteractionDevice::Mouse => {
-                if event.interaction == primary_mouse.0 {
-                    if primary.0.is_none() {
-                        if event.phase == InteractionPhase::Started {
-                            primary.0.replace(event.interaction);
-                        }
-                    }
+                if event.interaction == primary_mouse.0
+                    && primary.0.is_none()
+                    && event.phase == InteractionPhase::Started
+                {
+                    primary.0.replace(event.interaction);
                 }
             }
             InteractionDevice::Touchscreen => {
-                if primary.0.is_none() {
-                    if event.phase == InteractionPhase::Started {
-                        primary.0.replace(event.interaction);
-                    }
+                if primary.0.is_none() && event.phase == InteractionPhase::Started {
+                    primary.0.replace(event.interaction);
                 }
             }
         }
@@ -118,12 +115,12 @@ pub(crate) fn update_interactions(
                     .insert(event.interaction, InteractionLocation::new(offset_location));
             }
             InteractionPhase::Moved | InteractionPhase::Cancelled => {
-                if let Some(mut loc) = locations.0.get_mut(&event.interaction) {
+                if let Some(loc) = locations.0.get_mut(&event.interaction) {
                     loc.current = offset_location;
                 }
             }
             InteractionPhase::Ended => {
-                if let Some(mut loc) = locations.0.get_mut(&event.interaction) {
+                if let Some(loc) = locations.0.get_mut(&event.interaction) {
                     loc.end.replace(offset_location);
                 }
             }
@@ -231,15 +228,13 @@ pub(crate) fn resolve(
                 }
             }
             focused_entity.entity.replace(grabbed.0);
-        } else {
-            if phase == InteractionPhase::Started {
-                if let Some(ent) = focused_entity.entity.take() {
-                    if let Ok((_, _, _, _, mut tracker, _, _, mut active)) =
-                        interactable_entities.get_mut(ent)
-                    {
-                        active.0 = false;
-                        tracker.location.take();
-                    }
+        } else if phase == InteractionPhase::Started {
+            if let Some(ent) = focused_entity.entity.take() {
+                if let Ok((_, _, _, _, mut tracker, _, _, mut active)) =
+                    interactable_entities.get_mut(ent)
+                {
+                    active.0 = false;
+                    tracker.location.take();
                 }
             }
         }
@@ -314,10 +309,8 @@ pub(crate) fn cleanup(
                     }
                 }
             }
-        } else {
-            if active.active() {
-                active.0 = false;
-            }
+        } else if active.active() {
+            active.0 = false;
         }
     }
 }
@@ -408,7 +401,7 @@ impl MouseAdapter {
     }
     pub(crate) fn cache_invalid(&mut self, button: MouseButton, value: ElementState) -> bool {
         if let Some(old) = self.button_cache.insert(button, value) {
-            return if old != value { true } else { false };
+            return old != value;
         }
         true
     }

@@ -1,7 +1,4 @@
 #[cfg(not(target_family = "wasm"))]
-use crate::workflow::bridge::NativeSender;
-use crate::workflow::bridge::{OutputWrapper, Receiver, Responder, Sender};
-#[cfg(not(target_family = "wasm"))]
 use crate::workflow::native::internal_native_run;
 #[cfg(target_family = "wasm")]
 use crate::workflow::web::internal_web_run;
@@ -16,6 +13,7 @@ pub struct Runner {
     attachment_queue: Vec<Attachment>,
     pub(crate) desktop_dimensions: Option<Area<DeviceContext>>,
     #[cfg(not(target_os = "android"))]
+    #[allow(unused)]
     pub(crate) android_app: Option<()>,
     #[cfg(target_os = "android")]
     pub(crate) android_app: Option<AndroidApp>,

@@ -1,7 +1,5 @@
 use bevy_ecs::prelude::IntoSystemConfigs;
 
-use crate::text::component::Text;
-use crate::text::renderer;
 use crate::text::renderer::TextRenderer;
 use crate::text::system::{
     color_diff, create_render_groups, filter, layer_diff, letter_differential, manage, place,

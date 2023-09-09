@@ -24,6 +24,7 @@ pub(crate) struct IconRenderer {
     pub(crate) tex_coords_attribute: InstanceAttributeManager<TextureCoordinates>,
     pub(crate) null_bit_attribute: InstanceAttributeManager<NullBit>,
     pub(crate) indexer: Indexer<Entity>,
+    #[allow(unused)]
     pub(crate) atlas: TextureAtlas,
     pub(crate) icon_bitmap_layout: IconBitmapLayout,
 }
@@ -35,7 +36,7 @@ impl Render for IconRenderer {
         viewport: &Viewport,
         gfx_config: &GfxSurfaceConfiguration,
         msaa: &MsaaRenderAdapter,
-        scale_factor: &ScaleFactor,
+        _scale_factor: &ScaleFactor,
     ) -> Self {
         let bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
             label: Some("icon renderer bind group layout"),
@@ -64,16 +65,16 @@ impl Render for IconRenderer {
         let mut icon_bitmap_layout = IconBitmapLayout::new();
         let dimension = AtlasDimension::new(((writes.len() as f32).sqrt().ceil() as u32).max(1));
         let block = AtlasBlock::new((ICON_BITMAP_DIMENSION, ICON_BITMAP_DIMENSION));
-        let atlas = TextureAtlas::new(&gfx, block, dimension, wgpu::TextureFormat::R8Unorm);
+        let atlas = TextureAtlas::new(gfx, block, dimension, wgpu::TextureFormat::R8Unorm);
         let mut x_index = 0;
         let mut y_index = 0;
-        for mut write in writes {
+        for write in writes {
             let atlas_location = AtlasLocation::new(x_index, y_index);
             let coordinates = atlas.write::<IconPixelData>(
                 atlas_location,
                 bytemuck::cast_slice(&write.bitmap.data),
                 block.block,
-                &gfx,
+                gfx,
             );
             icon_bitmap_layout
                 .bitmap_locations
@@ -197,23 +198,23 @@ impl Render for IconRenderer {
             multiview: None,
         };
         let pipeline = gfx.device.create_render_pipeline(&pipeline_descriptor);
-        let vertex_quad = aabb_vertex_buffer(&gfx);
+        let vertex_quad = aabb_vertex_buffer(gfx);
         let max = 10;
-        let renderer = IconRenderer {
+
+        IconRenderer {
             pipeline,
             vertex_quad,
             bind_group,
-            pos_attribute: InstanceAttributeManager::new(&gfx, max),
-            area_attribute: InstanceAttributeManager::new(&gfx, max),
-            tex_coords_attribute: InstanceAttributeManager::new(&gfx, max),
-            color_attribute: InstanceAttributeManager::new(&gfx, max),
-            layer_attribute: InstanceAttributeManager::new(&gfx, max),
-            null_bit_attribute: InstanceAttributeManager::new(&gfx, max),
+            pos_attribute: InstanceAttributeManager::new(gfx, max),
+            area_attribute: InstanceAttributeManager::new(gfx, max),
+            tex_coords_attribute: InstanceAttributeManager::new(gfx, max),
+            color_attribute: InstanceAttributeManager::new(gfx, max),
+            layer_attribute: InstanceAttributeManager::new(gfx, max),
+            null_bit_attribute: InstanceAttributeManager::new(gfx, max),
             indexer: Indexer::new(max),
             atlas,
             icon_bitmap_layout,
-        };
-        renderer
+        }
     }
 
     fn phase() -> RenderPhase {

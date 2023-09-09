@@ -65,7 +65,7 @@ impl Render for LineRenderer {
         viewport: &Viewport,
         gfx_config: &GfxSurfaceConfiguration,
         msaa: &MsaaRenderAdapter,
-        scale_factor: &ScaleFactor,
+        _scale_factor: &ScaleFactor,
     ) -> Self {
         let line_renderer_bind_group_layout =
             gfx.device
@@ -147,12 +147,12 @@ impl Render for LineRenderer {
             multiview: None,
         };
         let pipeline = gfx.device.create_render_pipeline(&pipeline_descriptor);
-        let line_renderer = LineRenderer {
+
+        LineRenderer {
             pipeline,
             render_groups: HashMap::new(),
             bind_group_layout: line_renderer_bind_group_layout,
-        };
-        line_renderer
+        }
     }
 
     fn phase() -> RenderPhase {

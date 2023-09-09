@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy_ecs::component::Component;
 
 use crate::grid::view::GridMarkerBias;
-use crate::{GridLocation, GridMarker, GridPoint, GridRange, GridView, HorizontalSpan};
+use crate::{GridLocation, GridMarker, GridPoint, GridView, HorizontalSpan};
 
 /// A mapping of GridView for each HorizontalSpan Option
 #[derive(Component)]

@@ -1,12 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
-use bytemuck::{Pod, Zeroable};
+use crate::text::component::{Glyph, GlyphId};
 
-use crate::gfx::GfxSurface;
-use crate::text::component::{Glyph, GlyphId, TextScale};
-use crate::text::font::MonoSpacedFont;
-use crate::texture_atlas::{AtlasBlock, AtlasLocation, TextureCoordinates};
-use crate::{Area, GfxOptions, NumericalContext, Position, Section};
+use crate::texture_atlas::{AtlasLocation, TextureCoordinates};
+use crate::{Area, NumericalContext};
 
 pub(crate) struct AtlasGlyphReference {
     pub(crate) count: u32,

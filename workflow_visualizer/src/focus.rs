@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use bevy_ecs::prelude::{
-    Component, DetectChanges, Entity, IntoSystemConfigs, Local, Query, Res, Resource,
+    Component, DetectChanges, Entity, IntoSystemConfigs, Query, Res, Resource,
 };
-use tracing::trace;
 
-use crate::diagnostics::{DiagnosticsHandle, Record};
+use crate::diagnostics::Record;
 use crate::virtual_keyboard::{VirtualKeyboardAdapter, VirtualKeyboardType};
 use crate::visualizer::{Attach, Visualizer};
 use crate::SyncPoint;
@@ -78,7 +77,9 @@ pub(crate) fn set_focused(
     focus_input_listeners: Query<(Entity, &FocusInputListener)>,
     focused_entity_res: Res<FocusedEntity>,
     virtual_keyboard: Res<VirtualKeyboardAdapter>,
-    #[cfg(feature = "diagnostics")] mut diagnostics: Local<DiagnosticsHandle<FocusRecorder>>,
+    #[cfg(feature = "diagnostics")] mut diagnostics: bevy_ecs::prelude::Local<
+        crate::DiagnosticsHandle<FocusRecorder>,
+    >,
 ) {
     if focused_entity_res.is_changed() {
         if let Some(f_entity) = focused_entity_res.entity {
@@ -114,7 +115,7 @@ pub(crate) fn set_focused(
         }
     }
     #[cfg(feature = "diagnostics")]
-    trace!("{:?}", diagnostics.record());
+    tracing::trace!("{:?}", diagnostics.record());
 }
 /// which entity is currently focused
 #[derive(Resource)]

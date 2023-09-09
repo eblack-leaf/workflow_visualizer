@@ -124,7 +124,8 @@ impl Render for PanelRenderer {
         let border_mesh_len = border_mesh.len() as u32;
         let border_vertex_buffer = vertex_buffer(gfx, border_mesh);
         let initial_max = 5;
-        let renderer = PanelRenderer {
+
+        PanelRenderer {
             pipeline,
             positions: InstanceAttributeManager::new(gfx, initial_max),
             content_area: InstanceAttributeManager::new(gfx, initial_max),
@@ -138,8 +139,7 @@ impl Render for PanelRenderer {
             border_vertex_buffer,
             border_mesh_len,
             indexer: Indexer::new(initial_max),
-        };
-        renderer
+        }
     }
 
     fn phase() -> RenderPhase {

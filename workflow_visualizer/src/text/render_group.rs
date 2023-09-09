@@ -1,14 +1,12 @@
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::Component;
-
 use crate::gfx::GfxSurface;
 use crate::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, AtlasWriteQueue};
 use crate::text::component::{GlyphId, TextValue};
 use crate::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 use crate::{
     AlignedUniform, Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit,
-    Position, RawArea, RawPosition, Section, TextScale, Uniform, VisibleSection,
+    Position, RawArea, RawPosition, Section, VisibleSection,
 };
 
 pub(crate) struct RenderGroupBindGroup {
@@ -89,14 +87,11 @@ impl RenderGroupUniqueGlyphs {
 pub(crate) struct RenderGroup {
     pub(crate) position: Position<DeviceContext>,
     pub(crate) visible_section: VisibleSection,
-    pub(crate) layer: Layer,
     pub(crate) position_write: PositionWrite,
     pub(crate) layer_write: LayerWrite,
     pub(crate) keyed_glyph_ids: KeyedGlyphIds,
     pub(crate) draw_section: DrawSection,
     pub(crate) text_placement: AlignedUniform<f32>,
-    pub(crate) unique_glyphs: RenderGroupUniqueGlyphs,
-    pub(crate) text_scale: TextScale,
     pub(crate) indexer: Indexer<Key>,
     pub(crate) glyph_positions: InstanceAttributeManager<RawPosition>,
     pub(crate) glyph_areas: InstanceAttributeManager<RawArea>,

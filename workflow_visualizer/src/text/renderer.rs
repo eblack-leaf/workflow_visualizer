@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{Commands, Entity, Res, Resource};
+use bevy_ecs::prelude::{Entity, Resource};
 use tracing::trace;
 use wgpu::util::DeviceExt;
 
@@ -10,8 +10,8 @@ use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 use crate::texture_atlas::TextureCoordinates;
 use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
 use crate::{
-    Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
-    RenderPassHandle, RenderPhase, ScaleFactor, TextScale, Viewport, VisibleSection, Visualizer,
+    animate, Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection, Visualizer,
 };
 
 pub(crate) const AABB: [Vertex; 6] = [
@@ -65,7 +65,6 @@ pub(crate) struct Extraction {
             VisibleSection,
             Layer,
             RenderGroupUniqueGlyphs,
-            TextScale,
             AtlasBlock,
         ),
     >,
@@ -90,7 +89,7 @@ impl Render for TextRenderer {
         viewport: &Viewport,
         gfx_config: &GfxSurfaceConfiguration,
         msaa: &MsaaRenderAdapter,
-        scale_factor: &ScaleFactor,
+        _scale_factor: &ScaleFactor,
     ) -> Self {
         let sampler_bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
             label: Some("sampler bind group layout"),
@@ -233,15 +232,15 @@ impl Render for TextRenderer {
             multiview: None,
         };
         let pipeline = gfx.device.create_render_pipeline(&descriptor);
-        let renderer = TextRenderer {
+
+        TextRenderer {
             pipeline,
-            vertex_buffer: aabb_vertex_buffer(&gfx),
+            vertex_buffer: aabb_vertex_buffer(gfx),
             sampler_bind_group,
             render_groups: HashMap::new(),
             render_group_bind_group_layout,
             atlas_bind_group_layout,
-        };
-        renderer
+        }
     }
 
     fn phase() -> RenderPhase {

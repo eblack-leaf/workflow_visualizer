@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::{PathView, RawMarker, ResponsiveGridPoint, ResponsiveGridView};
+use crate::{RawMarker, ResponsiveGridPoint, ResponsiveGridView};
 
 /// Description of a Location on the Grid
 #[derive(Copy, Clone)]

@@ -1,6 +1,3 @@
-use bevy_ecs::prelude::Local;
-use tracing::trace;
-
 /// Interpreter for Diagnostic traces
 pub struct Diagnostics {
     // regex for interpreting output (at least core output)

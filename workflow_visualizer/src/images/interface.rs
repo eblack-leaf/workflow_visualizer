@@ -69,8 +69,8 @@ pub(crate) fn aspect_ratio_aligned_dimension(
     orientations: Res<ImageOrientations>,
 ) {
     for (name, max_dim, mut area) in bound.iter_mut() {
-        let orientation = orientations.get(name.clone());
-        let dimensions_orientation = Orientation::new(max_dim.dimension.as_numerical());
+        let orientation = orientations.get(*name);
+        let _dimensions_orientation = Orientation::new(max_dim.dimension.as_numerical());
         let mut attempted_width = max_dim.dimension.width;
         let mut attempted_height = attempted_width * orientation.value().reciprocal();
         while attempted_height > max_dim.dimension.height {
@@ -80,7 +80,7 @@ pub(crate) fn aspect_ratio_aligned_dimension(
         *area = Area::new(attempted_width, attempted_height);
     }
 }
-#[derive(Component)]
+#[derive(Component, Default)]
 pub(crate) struct Cache {
     pub(crate) name: Option<ImageHandle>,
     pub(crate) fade: Option<ImageFade>,
@@ -88,17 +88,7 @@ pub(crate) struct Cache {
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) layer: Option<Layer>,
 }
-impl Default for Cache {
-    fn default() -> Self {
-        Self {
-            name: None,
-            fade: None,
-            pos: None,
-            area: None,
-            layer: None,
-        }
-    }
-}
+
 #[derive(Component, Clone, Default)]
 pub(crate) struct Difference {
     pub(crate) name: Option<ImageHandle>,
@@ -113,10 +103,10 @@ pub(crate) fn name_diff(
     for (name, mut cache, mut difference) in images.iter_mut() {
         if let Some(cached) = cache.name.as_ref() {
             if cached.0 != name.0 {
-                difference.name.replace(name.clone());
+                difference.name.replace(*name);
             }
         }
-        cache.name.replace(name.clone());
+        cache.name.replace(*name);
     }
 }
 pub(crate) fn fade_diff(
@@ -207,13 +197,13 @@ pub(crate) fn management(
             cache.pos.replace(*pos);
             cache.area.replace(*area);
             cache.layer.replace(*layer);
-            cache.name.replace(name.clone());
+            cache.name.replace(*name);
             cache.fade.replace(*fade);
             difference.pos.replace(cache.pos.unwrap());
             difference.area.replace(cache.area.unwrap());
             difference.layer.replace(cache.layer.unwrap());
             difference.fade.replace(cache.fade.unwrap());
-            difference.name.replace(cache.name.clone().unwrap());
+            difference.name.replace(cache.name.unwrap());
         } else {
             extraction.remove(entity);
         }

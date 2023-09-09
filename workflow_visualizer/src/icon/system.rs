@@ -1,6 +1,4 @@
-use bevy_ecs::prelude::{
-    Added, Changed, Entity, NonSend, NonSendMut, Query, RemovedComponents, Res, ResMut,
-};
+use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
 
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::component::{IconHandle, IconScale};
@@ -39,13 +37,13 @@ pub(crate) fn management(
     #[cfg(not(target_family = "wasm"))] mut icon_renderer: ResMut<IconRenderer>,
     #[cfg(target_family = "wasm")] mut icon_renderer: NonSendMut<IconRenderer>,
 ) {
-    for (entity, pos, area, layer, color, id, visibility, mut difference) in icons.iter_mut() {
+    for (_entity, pos, area, layer, color, id, visibility, mut difference) in icons.iter_mut() {
         if visibility.visible() {
             difference.attributes.position.replace(*pos);
             difference.attributes.area.replace(*area);
             difference.attributes.layer.replace(*layer);
             difference.attributes.positive_space_color.replace(*color);
-            difference.attributes.icon_id.replace(id.clone());
+            difference.attributes.icon_id.replace(*id);
             difference.create = true;
         } else {
             difference.remove = true;
@@ -123,10 +121,10 @@ pub(crate) fn icon_id_diff(
     for (id, mut cache, mut difference) in icons.iter_mut() {
         if let Some(cached_id) = cache.attributes.icon_id.as_ref() {
             if *cached_id != *id {
-                difference.attributes.icon_id.replace(id.clone());
+                difference.attributes.icon_id.replace(*id);
             }
         }
-        cache.attributes.icon_id.replace(id.clone());
+        cache.attributes.icon_id.replace(*id);
     }
 }
 

@@ -5,7 +5,7 @@ use bevy_ecs::prelude::{Commands, Component, IntoSystemConfigs, Res, Resource};
 use crate::viewport::ViewportHandle;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::WindowResize;
-use crate::{Area, DeviceContext, NumericalContext, ScaleFactor, SyncPoint};
+use crate::{Area, NumericalContext, ScaleFactor, SyncPoint};
 
 #[derive(Component, Resource, Copy, Clone)]
 pub enum Orientation {
@@ -23,9 +23,9 @@ impl Orientation {
     pub fn new<A: Into<Area<NumericalContext>>>(dimensions: A) -> Self {
         let aspect_ratio = AspectRatio::new(dimensions.into());
         if let true = aspect_ratio.is_width_major() {
-            Orientation::Landscape(aspect_ratio.into())
+            Orientation::Landscape(aspect_ratio)
         } else {
-            Orientation::Portrait(aspect_ratio.into())
+            Orientation::Portrait(aspect_ratio)
         }
     }
 }

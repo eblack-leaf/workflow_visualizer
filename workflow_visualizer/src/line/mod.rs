@@ -1,5 +1,4 @@
-use bevy_ecs::prelude::{Bundle, Component};
-use wgpu::util::DeviceExt;
+use bevy_ecs::prelude::Bundle;
 
 pub(crate) use attachment::LineAttachment;
 pub use line_render::LineRender;

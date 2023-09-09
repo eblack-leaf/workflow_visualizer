@@ -1,11 +1,8 @@
-use bevy_ecs::prelude::{NonSend, NonSendMut, Res, ResMut};
+use bevy_ecs::prelude::{Res, ResMut};
 
 use crate::images::interface::Extraction;
-use crate::images::renderer::{ImageFade, ImageHandle, ImageRenderer};
-use crate::{
-    AlignedUniform, Area, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor,
-    TextureCoordinates, Uniform,
-};
+use crate::images::renderer::{ImageHandle, ImageRenderer};
+use crate::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
 
 pub(crate) struct ImageRenderGroup {
     pub(crate) image_name: ImageHandle,
@@ -57,7 +54,7 @@ pub(crate) fn read_extraction(
                 &gfx.device,
                 image_renderer
                     .images
-                    .get(&diff.name.clone().expect("name"))
+                    .get(&diff.name.expect("name"))
                     .expect("images")
                     .coordinates,
             );
@@ -77,7 +74,7 @@ pub(crate) fn read_extraction(
                 ],
             });
             let render_group = ImageRenderGroup::new(
-                diff.name.clone().expect("name"),
+                diff.name.expect("name"),
                 bind_group,
                 fade_and_layer,
                 coordinates_uniform,

@@ -1,8 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy_ecs::prelude::{
-    Added, Changed, Commands, Entity, EventReader, NonSend, NonSendMut, Or, Query,
-    RemovedComponents, Res, ResMut,
+    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
 };
 use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
 use tracing::trace;
@@ -31,10 +30,10 @@ use crate::window::WindowResize;
 use crate::{
     AlignedUniform, Area, Color, DeviceContext, Indexer, InstanceAttributeManager,
     InterfaceContext, Key, Layer, NullBit, NumericalContext, Position, ScaleFactor, Section,
-    Uniform, Viewport, Visibility, VisibleSection,
+    Viewport, Visibility, VisibleSection,
 };
 
-pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
+pub(crate) fn setup(_scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
     cmd.insert_resource(MonoSpacedFont::jet_brains_mono(
         MonoSpacedFont::DEFAULT_OPT_SCALE,
@@ -78,7 +77,7 @@ pub(crate) fn place(
             .iter()
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
-        for (key, glyph_position) in placement.0.iter_mut() {
+        for (_key, glyph_position) in placement.0.iter_mut() {
             let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
                 && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
             {
@@ -281,7 +280,6 @@ pub(crate) fn manage(
                     *visible_section,
                     *layer,
                     RenderGroupUniqueGlyphs::from_text(text),
-                    *text_scale,
                     AtlasBlock::new(fonts.character_dimensions(text_scale.px())),
                 ),
             );
@@ -364,7 +362,7 @@ pub(crate) fn create_render_groups(
     for entity in extraction.removed.iter() {
         renderer.render_groups.remove(entity);
     }
-    for (entity, (max, pos, visible_section, layer, unique_glyphs, text_scale, atlas_block)) in
+    for (entity, (max, pos, visible_section, layer, unique_glyphs, atlas_block)) in
         extraction.added.iter()
     {
         let position = pos.to_device(scale_factor.factor());
@@ -394,14 +392,11 @@ pub(crate) fn create_render_groups(
             RenderGroup {
                 position,
                 visible_section: *visible_section,
-                layer: *layer,
                 position_write: PositionWrite::new(),
                 layer_write: LayerWrite::new(),
                 keyed_glyph_ids: KeyedGlyphIds::new(),
                 draw_section: DrawSection::new(),
                 text_placement,
-                unique_glyphs: *unique_glyphs,
-                text_scale: *text_scale,
                 indexer: Indexer::new(*max),
                 glyph_positions: InstanceAttributeManager::new(&gfx_surface, *max),
                 glyph_areas: InstanceAttributeManager::new(&gfx_surface, *max),

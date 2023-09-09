@@ -9,8 +9,8 @@ use crate::workflow::native::initialize_native_window;
 use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
 
 pub(crate) fn internal_loop<T: Workflow + 'static>(
-    mut visualizer: &mut Visualizer,
-    mut window: &mut Option<Rc<Window>>,
+    visualizer: &mut Visualizer,
+    window: &mut Option<Rc<Window>>,
     initialized: &mut bool,
     event: Event<<T as Workflow>::Response>,
     event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>,

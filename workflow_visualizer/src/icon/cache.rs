@@ -1,6 +1,4 @@
-use std::collections::{HashMap, HashSet};
-
-use bevy_ecs::prelude::{Component, Entity, Resource};
+use bevy_ecs::prelude::Component;
 
 use crate::icon::component::IconHandle;
 use crate::{Area, Color, InterfaceContext, Layer, Position};

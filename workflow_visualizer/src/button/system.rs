@@ -45,7 +45,7 @@ pub(crate) fn spawn(
     mut cmd: Commands,
 ) {
     for (
-        entity,
+        _entity,
         layer,
         background_color,
         color,
@@ -71,7 +71,7 @@ pub(crate) fn spawn(
             .id();
         let icon = cmd
             .spawn(Icon::new(
-                icon_id.clone(),
+                *icon_id,
                 scaling.icon,
                 *layer - Layer::from(1),
                 *color,
@@ -106,7 +106,7 @@ pub(crate) fn color_invert(
         ),
         Or<(Changed<ActiveInteraction>, Changed<Toggled>)>,
     >,
-    mut color_inverters: Query<(&mut Color), Without<PanelEntity>>,
+    mut color_inverters: Query<&mut Color, Without<PanelEntity>>,
 ) {
     for (active_interaction, toggle, button_type, foreground, background, panel, icon, text) in
         buttons.iter()
@@ -193,8 +193,8 @@ pub(crate) fn placement(
                 ),
             )
         } else {
-            let dimensions = aligned_fonts
-                .character_dimensions(scaling.text.px() * scale_factor.factor() as f32);
+            let dimensions =
+                aligned_fonts.character_dimensions(scaling.text.px() * scale_factor.factor());
             let logical_dimensions =
                 Area::<DeviceContext>::new(dimensions.width, dimensions.height)
                     .to_interface(scale_factor.factor());
@@ -245,7 +245,7 @@ pub(crate) fn color_forward(
     for (color, mut back_color, panel_ent, icon_ent, text_ent) in color_deciders.iter_mut() {
         back_color.0.alpha = color.alpha;
         if let Some(ent) = panel_ent.0 {
-            if let Ok((mut listened_color, mut border)) = color_listeners.get_mut(ent) {
+            if let Ok((mut listened_color, border)) = color_listeners.get_mut(ent) {
                 *listened_color = back_color.0;
                 border.unwrap().0 = *color;
             }
@@ -267,7 +267,7 @@ pub(crate) fn secondary_despawn(
     despawned_buttons: Query<(Entity, &PanelEntity, &TextEntity, &IconEntity), With<Despawned>>,
     mut cmd: Commands,
 ) {
-    for (entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {
+    for (_entity, panel_entity, text_entity, icon_entity) in despawned_buttons.iter() {
         if let Some(ent) = panel_entity.0 {
             cmd.entity(ent).despawn();
         }

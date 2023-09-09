@@ -74,7 +74,7 @@ impl TimeTracker {
 pub struct TimeMarker(pub f64);
 
 impl TimeMarker {
-    pub fn offset<TD: Into<TimeDelta>>(mut self, delta: TD) -> Self {
+    pub fn offset<TD: Into<TimeDelta>>(self, delta: TD) -> Self {
         Self(self.0 + delta.into().0)
     }
 }

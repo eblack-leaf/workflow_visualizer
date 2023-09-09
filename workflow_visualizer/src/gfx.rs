@@ -4,7 +4,7 @@ use crate::WindowAppearanceFactor;
 use bevy_ecs::prelude::Resource;
 use tracing::{info, instrument, trace};
 use wgpu::{ColorTargetState, PrimitiveState, TextureView};
-use winit::dpi::PhysicalSize;
+
 use winit::window::Window;
 
 /// Options for instantiating the Gfx module
@@ -98,7 +98,7 @@ impl GfxSurface {
             .expect("adapter request failed");
         info!("requesting device/queue");
         let features = options.features | wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES;
-        let mut limits = options.limits.clone().using_resolution(adapter.limits());
+        let limits = options.limits.clone().using_resolution(adapter.limits());
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
