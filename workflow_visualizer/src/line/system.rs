@@ -3,10 +3,13 @@ use bevy_ecs::prelude::{
 };
 
 use crate::line::line_render::LineRenderPoints;
-use crate::line::renderer::{LayerAndHooks, LineRenderGpu, LineRenderGroup, LineRenderer};
+use crate::line::renderer::{LineRenderGpu, LineRenderGroup, LineRenderer};
 use crate::line::LineRender;
 use crate::path::Path;
-use crate::{Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor, Visibility};
+use crate::{
+    AlignedUniform, Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor,
+    Visibility,
+};
 
 // before ResolveVisibility after Reconfigure.set_path
 pub(crate) fn calc_section(
@@ -66,7 +69,7 @@ pub(crate) fn create_render_group(
             let render_group = LineRenderGroup::new(
                 LineRenderGpu::new(&gfx, &line_render_points.points),
                 line_render.capacity,
-                LayerAndHooks::new(layer.z, 0f32, 0f32, 0f32),
+                AlignedUniform::new(&gfx.device, Some([layer.z, 0.0, 0.0, 0.0])),
                 *color,
                 &gfx,
                 &line_renderer.bind_group_layout,
@@ -88,7 +91,7 @@ pub(crate) fn push_layer(
 ) {
     for (entity, layer) in lines.iter() {
         if let Some(group) = line_renderer.render_groups.get_mut(&entity) {
-            group.layer_and_hooks.aspects[0] = layer.z;
+            group.layer_and_hooks.set_aspect(0, layer.z);
             group.layer_and_hooks_dirty = true;
         }
     }
@@ -119,9 +122,7 @@ pub(crate) fn push_uniforms(
             group.color_dirty = false;
         }
         if group.layer_and_hooks_dirty {
-            group
-                .layer_and_hooks_uniform
-                .update(&gfx.queue, group.layer_and_hooks);
+            group.layer_and_hooks.update(&gfx.queue);
             group.layer_and_hooks_dirty = false;
         }
     }

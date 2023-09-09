@@ -1,4 +1,4 @@
-#![allow(unused, dead_code)]
+// #![allow(unused, dead_code)]
 //! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
 //! trait Workflow to setup application messaging.
@@ -68,7 +68,7 @@ pub use crate::texture_atlas::{
 };
 pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, TimeTracker, Timer};
-pub use crate::uniform::Uniform;
+pub use crate::uniform::{AlignedUniform, Uniform};
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
 pub use crate::window::WindowResize;
 #[cfg(target_os = "android")]

@@ -20,7 +20,7 @@ use crate::text::component::{
 use crate::text::font::MonoSpacedFont;
 use crate::text::render_group::{
     DrawSection, KeyedGlyphIds, LayerWrite, PositionWrite, RenderGroup, RenderGroupBindGroup,
-    RenderGroupUniqueGlyphs, TextPlacement,
+    RenderGroupUniqueGlyphs,
 };
 use crate::text::renderer::{Extraction, TextRenderer};
 use crate::texture_atlas::{
@@ -29,9 +29,9 @@ use crate::texture_atlas::{
 };
 use crate::window::WindowResize;
 use crate::{
-    Area, Color, DeviceContext, Indexer, InstanceAttributeManager, InterfaceContext, Key, Layer,
-    NullBit, NumericalContext, Position, ScaleFactor, Section, Uniform, Viewport, Visibility,
-    VisibleSection,
+    AlignedUniform, Area, Color, DeviceContext, Indexer, InstanceAttributeManager,
+    InterfaceContext, Key, Layer, NullBit, NumericalContext, Position, ScaleFactor, Section,
+    Uniform, Viewport, Visibility, VisibleSection,
 };
 
 pub(crate) fn setup(scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
@@ -368,12 +368,14 @@ pub(crate) fn create_render_groups(
         extraction.added.iter()
     {
         let position = pos.to_device(scale_factor.factor());
-        let text_placement = TextPlacement::new(position, *layer);
-        let text_placement_uniform = Uniform::new(&gfx_surface.device, text_placement);
+        let text_placement = AlignedUniform::new(
+            &gfx_surface.device,
+            Some([position.x, position.y, layer.z, 0.0]),
+        );
         let render_group_bind_group = RenderGroupBindGroup::new(
             &gfx_surface,
             &renderer.render_group_bind_group_layout,
-            &text_placement_uniform,
+            &text_placement,
         );
         let atlas_dimension = AtlasDimension::from_unique_glyphs(unique_glyphs.unique_glyphs);
         let atlas = TextureAtlas::new(
@@ -398,7 +400,6 @@ pub(crate) fn create_render_groups(
                 keyed_glyph_ids: KeyedGlyphIds::new(),
                 draw_section: DrawSection::new(),
                 text_placement,
-                text_placement_uniform,
                 unique_glyphs: *unique_glyphs,
                 text_scale: *text_scale,
                 indexer: Indexer::new(*max),
@@ -662,18 +663,16 @@ pub(crate) fn render_group_differences(
         let mut dirty = false;
         if let Some(position) = render_group.position_write.write.take() {
             render_group.position = position;
-            render_group.text_placement.placement[0] = position.x;
-            render_group.text_placement.placement[1] = position.y;
+            render_group.text_placement.set_aspect(0, position.x);
+            render_group.text_placement.set_aspect(1, position.y);
             dirty = true;
         }
         if let Some(layer) = render_group.layer_write.write.take() {
-            render_group.text_placement.placement[2] = layer.z;
+            render_group.text_placement.set_aspect(2, layer.z);
             dirty = true;
         }
         if dirty {
-            render_group
-                .text_placement_uniform
-                .update(&gfx_surface.queue, render_group.text_placement);
+            render_group.text_placement.update(&gfx_surface.queue);
         }
         for (location, (_, glyph_area, bitmap)) in render_group.atlas_write_queue.queue.iter() {
             render_group

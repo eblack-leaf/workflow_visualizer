@@ -7,23 +7,9 @@ use crate::text::atlas::{AtlasAddQueue, AtlasGlyphReferences, AtlasGlyphs, Atlas
 use crate::text::component::{GlyphId, TextValue};
 use crate::texture_atlas::{TextureAtlas, TextureBindGroup, TextureCoordinates};
 use crate::{
-    Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit, Position,
-    RawArea, RawPosition, Section, TextScale, Uniform, VisibleSection,
+    AlignedUniform, Color, DeviceContext, Indexer, InstanceAttributeManager, Key, Layer, NullBit,
+    Position, RawArea, RawPosition, Section, TextScale, Uniform, VisibleSection,
 };
-
-#[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone, Default, PartialEq, Component)]
-pub(crate) struct TextPlacement {
-    pub(crate) placement: [f32; 4],
-}
-
-impl TextPlacement {
-    pub(crate) fn new(position: Position<DeviceContext>, layer: Layer) -> Self {
-        Self {
-            placement: [position.x, position.y, layer.z, 0.0],
-        }
-    }
-}
 
 pub(crate) struct RenderGroupBindGroup {
     pub(crate) bind_group: wgpu::BindGroup,
@@ -33,7 +19,7 @@ impl RenderGroupBindGroup {
     pub(crate) fn new(
         gfx_surface: &GfxSurface,
         layout: &wgpu::BindGroupLayout,
-        text_placement_uniform: &Uniform<TextPlacement>,
+        text_placement: &AlignedUniform<f32>,
     ) -> Self {
         Self {
             bind_group: gfx_surface
@@ -41,10 +27,7 @@ impl RenderGroupBindGroup {
                 .create_bind_group(&wgpu::BindGroupDescriptor {
                     label: Some("render group bind group"),
                     layout,
-                    entries: &[wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: text_placement_uniform.buffer.as_entire_binding(),
-                    }],
+                    entries: &[text_placement.uniform.bind_group_entry(0)],
                 }),
         }
     }
@@ -111,8 +94,7 @@ pub(crate) struct RenderGroup {
     pub(crate) layer_write: LayerWrite,
     pub(crate) keyed_glyph_ids: KeyedGlyphIds,
     pub(crate) draw_section: DrawSection,
-    pub(crate) text_placement: TextPlacement,
-    pub(crate) text_placement_uniform: Uniform<TextPlacement>,
+    pub(crate) text_placement: AlignedUniform<f32>,
     pub(crate) unique_glyphs: RenderGroupUniqueGlyphs,
     pub(crate) text_scale: TextScale,
     pub(crate) indexer: Indexer<Key>,

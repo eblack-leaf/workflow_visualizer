@@ -5,8 +5,8 @@ use wgpu::util::DeviceExt;
 
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::{
-    Color, DeviceContext, GfxSurface, Position, RawPosition, Render, RenderPassHandle, RenderPhase,
-    ScaleFactor, Uniform, Viewport, Visualizer,
+    AlignedUniform, Color, DeviceContext, GfxSurface, Position, RawPosition, Render,
+    RenderPassHandle, RenderPhase, ScaleFactor, Uniform, Viewport, Visualizer,
 };
 
 pub(crate) struct LineRenderGroup {
@@ -14,10 +14,9 @@ pub(crate) struct LineRenderGroup {
     pub(crate) capacity: usize,
     pub(crate) color: Color,
     pub(crate) color_dirty: bool,
-    pub(crate) layer_and_hooks: LayerAndHooks,
+    pub(crate) layer_and_hooks: AlignedUniform<f32>,
     pub(crate) layer_and_hooks_dirty: bool,
     pub(crate) color_uniform: Uniform<Color>,
-    pub(crate) layer_and_hooks_uniform: Uniform<LayerAndHooks>,
     bind_group: wgpu::BindGroup,
 }
 
@@ -25,25 +24,18 @@ impl LineRenderGroup {
     pub(crate) fn new(
         line_render_gpu: LineRenderGpu,
         capacity: usize,
-        layer_and_hooks: LayerAndHooks,
+        layer_and_hooks: AlignedUniform<f32>,
         color: Color,
         gfx: &GfxSurface,
         bind_group_layout: &wgpu::BindGroupLayout,
     ) -> LineRenderGroup {
         let color_uniform = Uniform::new(&gfx.device, color);
-        let layer_and_hooks_uniform = Uniform::new(&gfx.device, layer_and_hooks);
         let bind_group = gfx.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("line render group"),
             layout: bind_group_layout,
             entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: color_uniform.buffer.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: layer_and_hooks_uniform.buffer.as_entire_binding(),
-                },
+                color_uniform.bind_group_entry(0),
+                layer_and_hooks.uniform.bind_group_entry(1),
             ],
         });
         Self {
@@ -54,22 +46,7 @@ impl LineRenderGroup {
             layer_and_hooks,
             layer_and_hooks_dirty: false,
             color_uniform,
-            layer_and_hooks_uniform,
             bind_group,
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
-pub(crate) struct LayerAndHooks {
-    pub(crate) aspects: [f32; 4],
-}
-
-impl LayerAndHooks {
-    pub(crate) fn new(layer: f32, aspect1: f32, aspect2: f32, aspect3: f32) -> Self {
-        Self {
-            aspects: [layer, aspect1, aspect2, aspect3],
         }
     }
 }

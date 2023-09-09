@@ -151,11 +151,3 @@ impl IconBitmapLayout {
 }
 
 pub const ICON_BITMAP_DIMENSION: u32 = 20;
-
-#[cfg(test)]
-#[test]
-fn sample() {
-    // let value = (0,0,0);
-    // let string =  serde_json::to_string(&value).unwrap();
-    println!("{:?}", 1 << 9);
-}
