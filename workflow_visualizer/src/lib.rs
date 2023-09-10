@@ -4,7 +4,7 @@
 //! trait Workflow to setup application messaging.
 //! Visualizer which handles rendering
 //! Runner which invokes the visualizer's tools for multiple platforms
-pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction};
+pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction, QueuedAnimation};
 pub use bevy_ecs;
 pub use bundling::{
     despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
