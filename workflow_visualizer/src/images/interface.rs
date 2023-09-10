@@ -8,8 +8,8 @@ use bevy_ecs::system::ResMut;
 
 use crate::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
 use crate::{
-    Area, Disabled, EnableVisibility, InterfaceContext, Layer, Orientation, Position, Section, Tag,
-    Visibility,
+    Animate, Animation, Area, Disabled, EnableVisibility, InterfaceContext, Interpolation, Layer,
+    Orientation, Position, Section, Tag, Visibility,
 };
 
 pub type ImageTag = Tag<Image>;
@@ -50,6 +50,30 @@ impl AspectRatioAlignedDimension {
     pub fn new<A: Into<Area<InterfaceContext>>>(dimension: A) -> Self {
         Self {
             dimension: dimension.into(),
+        }
+    }
+}
+impl Animate for AspectRatioAlignedDimension {
+    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+        vec![
+            Interpolation::new(end.dimension.width - self.dimension.width),
+            Interpolation::new(end.dimension.height - self.dimension.height),
+        ]
+    }
+}
+pub(crate) fn apply_aspect_animations(
+    mut anims: Query<(
+        &mut AspectRatioAlignedDimension,
+        &mut Animation<AspectRatioAlignedDimension>,
+    )>,
+) {
+    for (mut dim, mut anim) in anims.iter_mut() {
+        let extractions = anim.extractions();
+        if let Some(extract) = extractions.get(0).unwrap() {
+            dim.dimension.width += extract.0;
+        }
+        if let Some(extract) = extractions.get(1).unwrap() {
+            dim.dimension.height += extract.0;
         }
     }
 }
