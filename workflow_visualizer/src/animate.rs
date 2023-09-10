@@ -132,7 +132,8 @@ pub(crate) fn pull_from_queue<T: Animate + Send + Sync + 'static + Component>(
                 .insert(current.end.take().expect("no anim end"));
         }
         cmd.entity(entity)
-            .insert(queued.0.take().expect("no queued anim"));
+            .insert(queued.0.take().expect("no queued anim"))
+            .remove::<QueuedAnimation<T>>();
     }
 }
 pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(
