@@ -114,7 +114,11 @@ where
 pub struct QueuedAnimation<T: Animate>(pub Option<Animation<T>>);
 impl<T: Animate> QueuedAnimation<T> {
     pub fn with_offset<TD: Into<TimeDelta>>(mut self, offset: Option<TD>) -> Self {
-        self.0.expect("queued anim").timer.set_offset(offset);
+        self.0
+            .as_mut()
+            .expect("queued anim")
+            .timer
+            .set_offset(offset);
         self
     }
 }
