@@ -39,7 +39,7 @@ pub use wgpu;
 pub use winit;
 pub use workflow::{start_web_worker, Runner, Sender, Workflow};
 
-pub use crate::color::Color;
+pub use crate::color::{Color, ColorBuilder, Rgb, Rgba};
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
     section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,

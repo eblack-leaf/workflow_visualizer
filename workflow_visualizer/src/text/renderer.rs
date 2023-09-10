@@ -10,7 +10,7 @@ use crate::text::render_group::{RenderGroup, RenderGroupUniqueGlyphs};
 use crate::texture_atlas::TextureCoordinates;
 use crate::texture_atlas::{AtlasBlock, TextureBindGroup};
 use crate::{
-    animate, Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
+    Color, InterfaceContext, Layer, NullBit, Position, RawArea, RawPosition, Render,
     RenderPassHandle, RenderPhase, ScaleFactor, Viewport, VisibleSection, Visualizer,
 };
 
