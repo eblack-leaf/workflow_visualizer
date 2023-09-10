@@ -135,7 +135,7 @@ impl From<Rgba> for Color {
     }
 }
 impl Animate for Color {
-    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+    fn interpolations(&self, end: &Self) -> Vec<Interpolation> {
         vec![
             Interpolation::new(end.red - self.red),
             Interpolation::new(end.green - self.green),

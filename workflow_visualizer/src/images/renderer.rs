@@ -53,7 +53,7 @@ pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct ImageFade(pub f32);
 impl Animate for ImageFade {
-    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+    fn interpolations(&self, end: &Self) -> Vec<Interpolation> {
         vec![Interpolation::new(end.0 - self.0)]
     }
 }

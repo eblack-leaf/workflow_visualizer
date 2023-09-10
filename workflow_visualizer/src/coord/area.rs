@@ -131,7 +131,7 @@ impl<Context: CoordinateContext> Sub for Area<Context> {
     }
 }
 impl<Context: CoordinateContext> Animate for Area<Context> {
-    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+    fn interpolations(&self, end: &Self) -> Vec<Interpolation> {
         vec![
             Interpolation::new(end.width - self.width),
             Interpolation::new(end.height - self.height),

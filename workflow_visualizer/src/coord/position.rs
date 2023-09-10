@@ -147,7 +147,7 @@ impl<Context: CoordinateContext> AddAssign for Position<Context> {
     }
 }
 impl<Context: CoordinateContext> Animate for Position<Context> {
-    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+    fn interpolations(&self, end: &Self) -> Vec<Interpolation> {
         vec![
             Interpolation::new(end.x - self.x),
             Interpolation::new(end.y - self.y),

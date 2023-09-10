@@ -66,15 +66,17 @@ pub struct Animation<T: Animate> {
     timer: Timer,
     interpolations: Vec<Interpolation>,
     done: bool,
+    end: Option<T>,
     _phantom: PhantomData<T>,
 }
 
 impl<T: Animate> Animation<T> {
-    pub fn new(timer: Timer, interpolations: Vec<Interpolation>) -> Self {
+    pub fn new(timer: Timer, interpolations: Vec<Interpolation>, end: T) -> Self {
         Self {
             timer,
             interpolations,
             done: false,
+            end: Some(end),
             _phantom: PhantomData,
         }
     }
@@ -96,15 +98,33 @@ impl<T: Animate> Animation<T> {
 
 pub trait Animate
 where
-    Self: Sized,
+    Self: Sized + Clone,
 {
-    fn interpolations(&self, end: Self) -> Vec<Interpolation>;
-    fn animate<TD: Into<TimeDelta>>(&self, end: Self, animation_time: TD) -> Animation<Self> {
+    fn interpolations(&self, end: &Self) -> Vec<Interpolation>;
+    fn animate<TD: Into<TimeDelta>>(&self, end: Self, animation_time: TD) -> QueuedAnimation<Self> {
         let timer = Timer::new(animation_time);
-        Animation::new(timer, Self::interpolations(self, end))
+        QueuedAnimation(Some(Animation::new(
+            timer,
+            Self::interpolations(self, &end),
+            end.clone(),
+        )))
     }
 }
-
+#[derive(Component, Default)]
+pub struct QueuedAnimation<T: Animate>(pub Option<Animation<T>>);
+pub(crate) fn pull_from_queue<T: Animate + Send + Sync + 'static + Component>(
+    mut queued: Query<(Entity, &mut QueuedAnimation<T>, Option<&mut Animation<T>>)>,
+    mut cmd: Commands,
+) {
+    for (entity, mut queued, mut current) in queued.iter_mut() {
+        if let Some(current) = current.as_mut() {
+            cmd.entity(entity)
+                .insert(current.end.take().expect("no anim end"));
+        }
+        cmd.entity(entity)
+            .insert(queued.0.take().expect("no queued anim"));
+    }
+}
 pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(
     mut animations: Query<&mut Animation<T>, Changed<Animation<T>>>,
     time_tracker: Res<TimeTracker>,

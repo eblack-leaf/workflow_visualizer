@@ -54,7 +54,7 @@ impl AspectRatioAlignedDimension {
     }
 }
 impl Animate for AspectRatioAlignedDimension {
-    fn interpolations(&self, end: Self) -> Vec<Interpolation> {
+    fn interpolations(&self, end: &Self) -> Vec<Interpolation> {
         vec![
             Interpolation::new(end.dimension.width - self.dimension.width),
             Interpolation::new(end.dimension.height - self.dimension.height),

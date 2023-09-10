@@ -2,13 +2,13 @@ use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Bundle, Event, Events, IntoSystemConfigs, Resource};
+use bevy_ecs::prelude::{Bundle, Component, Event, Events, IntoSystemConfigs, Resource};
 use tracing::{info, trace};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
 use winit::window::Window;
 
-use crate::animate::{end_animations, start_animations, update_animations};
+use crate::animate::{end_animations, pull_from_queue, start_animations, update_animations};
 use crate::bundling::{despawn, spawn_delayed_bundle};
 use crate::button::ButtonAttachment;
 use crate::color::ColorAttachment;
@@ -436,9 +436,10 @@ impl Visualizer {
                 .push((order, Box::new(invoke_render::<Renderer>))),
         }
     }
-    pub fn register_animation<A: Animate + Send + Sync + 'static + Clone>(&mut self) {
+    pub fn register_animation<A: Animate + Send + Sync + 'static + Clone + Component>(&mut self) {
         self.job.task(Self::TASK_MAIN).add_systems((
             update_animations::<A>.in_set(SyncPoint::PostInitialization),
+            pull_from_queue::<A>.in_set(SyncPoint::PostSpawn),
             start_animations::<A>.in_set(SyncPoint::PostProcessPreparation),
             end_animations::<A>.in_set(SyncPoint::Finish),
         ));
