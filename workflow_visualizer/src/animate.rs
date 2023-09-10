@@ -112,6 +112,12 @@ where
 }
 #[derive(Component, Default)]
 pub struct QueuedAnimation<T: Animate>(pub Option<Animation<T>>);
+impl<T: Animate> QueuedAnimation<T> {
+    pub fn with_offset<TD: Into<TimeDelta>>(mut self, offset: Option<TD>) -> Self {
+        self.0.expect("queued anim").timer.set_offset(offset);
+        self
+    }
+}
 pub(crate) fn pull_from_queue<T: Animate + Send + Sync + 'static + Component>(
     mut queued: Query<(Entity, &mut QueuedAnimation<T>, Option<&mut Animation<T>>)>,
     mut cmd: Commands,
