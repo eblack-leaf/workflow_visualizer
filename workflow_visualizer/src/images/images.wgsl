@@ -74,6 +74,9 @@ var image_texture: texture_2d<f32>;
 @fragment
 fn fragment_entry(vertex_output: VertexOutput) -> @location(0) vec4<f32> {
     let image_data = textureSample(image_texture, image_sampler, vertex_output.sample_coords);
-    let color = vec4<f32>(image_data.rgb, image_data.a);
+    if (image_data.a == 0) {
+        discard;
+    }
+    let color = vec4<f32>(image_data.rgb, image_data.a * vertex_output.fade);
     return color;
 }
