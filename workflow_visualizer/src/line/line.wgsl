@@ -27,5 +27,6 @@ fn vertex_entry(vertex_input: VertexInput) -> VertexOutput {
 }
 @fragment
 fn fragment_entry(fragment_input: VertexOutput) -> @location(0) vec4<f32> {
+    if (fragment_input.color.a <= 0.0) { discard; }
     return fragment_input.color;
 }
