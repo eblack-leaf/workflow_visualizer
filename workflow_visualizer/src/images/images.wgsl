@@ -77,6 +77,6 @@ fn fragment_entry(vertex_output: VertexOutput) -> @location(0) vec4<f32> {
     if (image_data.a == 0.0) {
         discard;
     }
-    let color = vec4<f32>(image_data.rgb, image_data.a * vertex_output.fade);
+    let color = vec4<f32>(image_data.rgb, image_data.a);
     return color;
 }
