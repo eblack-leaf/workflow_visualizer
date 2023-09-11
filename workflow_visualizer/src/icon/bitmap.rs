@@ -126,14 +126,14 @@ pub(crate) fn cleanup_requests(requests: Query<(Entity, &IconBitmapRequest)>, mu
 #[derive(Component, Clone)]
 pub struct IconBitmapRequest {
     pub id: IconHandle,
-    pub bitmap: IconBitmap,
+    pub bitmap: Option<IconBitmap>,
 }
 
 impl<I: Into<IconHandle>, IB: Into<IconBitmap>> From<(I, IB)> for IconBitmapRequest {
     fn from(value: (I, IB)) -> Self {
         Self {
             id: value.0.into(),
-            bitmap: value.1.into(),
+            bitmap: Some(value.1.into()),
         }
     }
 }

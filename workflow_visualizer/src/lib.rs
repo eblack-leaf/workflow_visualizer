@@ -6,6 +6,7 @@
 //! Runner which invokes the visualizer's tools for multiple platforms
 pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction, QueuedAnimation};
 pub use bevy_ecs;
+pub use bundling::ImageHandle;
 pub use bundling::{
     despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
     Disabled,
@@ -18,8 +19,8 @@ pub use grid::{
     ResponsiveView,
 };
 pub use images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageHandle, ImageLoaded, ImageOrientations,
-    ImageRequest, ImageSizes, ImageTag,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageLoaded, ImageOrientations, ImageRequest,
+    ImageSizes, ImageTag,
 };
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,

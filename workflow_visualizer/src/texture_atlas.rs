@@ -50,6 +50,7 @@ pub struct TextureAtlas {
 }
 
 impl TextureAtlas {
+    pub(crate) const ATLAS_PADDING: f32 = 1f32;
     pub fn new(
         gfx: &GfxSurface,
         block: AtlasBlock,
@@ -258,8 +259,8 @@ impl AtlasTextureDimensions {
     pub fn new(block: AtlasBlock, dimension: AtlasDimension) -> Self {
         Self {
             dimensions: (
-                block.block.width * dimension.dimension as f32,
-                block.block.height * dimension.dimension as f32,
+                (block.block.width + TextureAtlas::ATLAS_PADDING) * dimension.dimension as f32,
+                (block.block.height + TextureAtlas::ATLAS_PADDING) * dimension.dimension as f32,
             )
                 .into(),
         }
@@ -338,8 +339,8 @@ impl AtlasPosition {
     pub fn new(atlas_location: AtlasLocation, atlas_block: AtlasBlock) -> Self {
         Self {
             position: (
-                atlas_location.x as f32 * atlas_block.block.width,
-                atlas_location.y as f32 * atlas_block.block.height,
+                atlas_location.x as f32 * (atlas_block.block.width + TextureAtlas::ATLAS_PADDING),
+                atlas_location.y as f32 * (atlas_block.block.height + TextureAtlas::ATLAS_PADDING),
             )
                 .into(),
         }

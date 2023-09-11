@@ -6,7 +6,8 @@ use bevy_ecs::prelude::{
 };
 use bevy_ecs::system::ResMut;
 
-use crate::images::renderer::{ImageFade, ImageHandle, ImageOrientations};
+use crate::bundling::ImageHandle;
+use crate::images::renderer::{ImageFade, ImageOrientations};
 use crate::{
     Animate, Animation, Area, Disabled, EnableVisibility, InterfaceContext, Interpolation, Layer,
     Orientation, Position, Section, Tag, Visibility,

@@ -74,7 +74,7 @@ impl Render for IconRenderer {
             let atlas_location = AtlasLocation::new(x_index, y_index);
             let coordinates = atlas.write::<IconPixelData>(
                 atlas_location,
-                bytemuck::cast_slice(&write.bitmap.data),
+                bytemuck::cast_slice(&write.bitmap.expect("bitmap").data),
                 block.block,
                 gfx,
             );

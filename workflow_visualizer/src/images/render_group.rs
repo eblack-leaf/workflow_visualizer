@@ -1,5 +1,6 @@
+use crate::bundling::ImageHandle;
 use crate::images::interface::Extraction;
-use crate::images::renderer::{ImageHandle, ImageRenderer};
+use crate::images::renderer::ImageRenderer;
 use crate::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
 #[cfg(target_family = "wasm")]
 use bevy_ecs::prelude::{NonSend, NonSendMut};

@@ -31,13 +31,13 @@ pub(crate) struct IconRendererAttachment;
 impl Attach for IconRendererAttachment {
     fn attach(visualizer: &mut Visualizer) {
         let mut manager = IconBitmapRequestManager::default();
-        for (_entity, request) in visualizer
+        for (_entity, mut request) in visualizer
             .job
             .container
-            .query::<(Entity, &IconBitmapRequest)>()
-            .iter(&visualizer.job.container)
+            .query::<(Entity, &mut IconBitmapRequest)>()
+            .iter_mut(&mut visualizer.job.container)
         {
-            manager.add(request.clone());
+            manager.add((request.id, request.bitmap.take().expect("bitmap")));
         }
         visualizer.job.container.insert_resource(manager);
         visualizer.register_renderer::<IconRenderer>();

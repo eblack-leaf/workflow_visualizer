@@ -4,6 +4,7 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Bundle;
 use bevy_ecs::query::With;
 use bevy_ecs::system::{Commands, Query, Res};
+use serde::{Deserialize, Serialize};
 
 #[derive(Bundle)]
 pub struct BundleBuilder<T: Bundle, S: Bundle> {
@@ -91,3 +92,14 @@ pub fn despawn(despawned: Query<Entity, With<Despawned>>, mut cmd: Commands) {
 
 #[derive(Component, Copy, Clone, Default)]
 pub struct Disabled {}
+
+#[derive(
+    Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
+)]
+pub struct ImageHandle(pub i32);
+
+impl From<i32> for ImageHandle {
+    fn from(value: i32) -> Self {
+        ImageHandle(value)
+    }
+}

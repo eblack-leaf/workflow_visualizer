@@ -10,6 +10,7 @@ use image::{EncodableLayout, GenericImageView};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
+use crate::bundling::ImageHandle;
 use crate::images::render_group::ImageRenderGroup;
 use crate::orientation::Orientation;
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
@@ -24,24 +25,24 @@ use crate::{
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 pub(crate) struct Vertex {
-    pub(crate) data: [f32; 3],
+    pub(crate) data: [f32; 2],
 }
 
 impl Vertex {
-    pub(crate) const fn new(position: RawPosition, fade: f32) -> Self {
+    pub(crate) const fn new(position: RawPosition) -> Self {
         Self {
-            data: [position.x, position.y, fade],
+            data: [position.x, position.y],
         }
     }
 }
 
 pub(crate) const AABB: [Vertex; 6] = [
-    Vertex::new(RawPosition { x: 0.0, y: 0.0 }, 0.25),
-    Vertex::new(RawPosition { x: 0.0, y: 1.0 }, 0.15),
-    Vertex::new(RawPosition { x: 1.0, y: 0.0 }, 0.15),
-    Vertex::new(RawPosition { x: 1.0, y: 0.0 }, 0.15),
-    Vertex::new(RawPosition { x: 0.0, y: 1.0 }, 0.15),
-    Vertex::new(RawPosition { x: 1.0, y: 1.0 }, 0.05),
+    Vertex::new(RawPosition { x: 0.0, y: 0.0 }),
+    Vertex::new(RawPosition { x: 0.0, y: 1.0 }),
+    Vertex::new(RawPosition { x: 1.0, y: 0.0 }),
+    Vertex::new(RawPosition { x: 1.0, y: 0.0 }),
+    Vertex::new(RawPosition { x: 0.0, y: 1.0 }),
+    Vertex::new(RawPosition { x: 1.0, y: 1.0 }),
 ];
 
 pub(crate) fn aabb_vertex_buffer(gfx_surface: &GfxSurface) -> wgpu::Buffer {
@@ -70,7 +71,7 @@ pub(crate) fn apply_animations(mut animations: Query<(&mut ImageFade, &mut Anima
 }
 impl ImageFade {
     pub const TRANSPARENT: ImageFade = ImageFade(0f32);
-    pub const OPAQUE: ImageFade = ImageFade(20f32);
+    pub const OPAQUE: ImageFade = ImageFade(1f32);
 }
 impl From<f32> for ImageFade {
     fn from(value: f32) -> Self {
@@ -87,15 +88,7 @@ impl From<u32> for ImageFade {
         Self(value as f32)
     }
 }
-#[derive(
-    Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
-)]
-pub struct ImageHandle(pub i32);
-impl From<i32> for ImageHandle {
-    fn from(value: i32) -> Self {
-        ImageHandle(value)
-    }
-}
+
 #[derive(Component, Clone, Serialize, Deserialize, Debug)]
 pub struct ImageRequest {
     pub handle: ImageHandle,
@@ -266,7 +259,7 @@ impl Render for ImageRenderer {
                 buffers: &[wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &wgpu::vertex_attr_array![0 => Float32x3],
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x2],
                 }],
             },
             primitive: gfx.triangle_primitive(),

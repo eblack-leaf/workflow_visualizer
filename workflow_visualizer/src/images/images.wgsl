@@ -38,7 +38,7 @@ fn adjust_coords_of(vertex_index: u32, tex_coords: vec4<f32>) -> vec2<f32> {
 }
 struct VertexInput {
     @builtin(vertex_index) vertex_index: u32,
-    @location(0) vertex_position: vec3<f32>,
+    @location(0) vertex_position: vec2<f32>,
 };
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -61,7 +61,7 @@ fn vertex_entry(vertex_input: VertexInput) -> VertexOutput {
     let output = VertexOutput(
         viewport.view_matrix * coordinates,
         sample_coordinates,
-        fade_and_layer.r * vertex_input.vertex_position.b,
+        fade_and_layer.r,
     );
     return output;
 }
