@@ -1,4 +1,5 @@
 use std::ops::{Add, AddAssign, Div, Sub, SubAssign};
+#[cfg(not(target_family = "wasm"))]
 use std::time::Instant;
 
 use bevy_ecs::prelude::Resource;

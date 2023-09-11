@@ -11,7 +11,7 @@ pub(crate) struct EngenHandle<T: Workflow + Default>(pub(crate) Arc<Mutex<T>>);
 /// Main struct to run the visualizer's event loop
 pub struct Runner {
     attachment_queue: Vec<Attachment>,
-    pub(crate) desktop_dimensions: Option<Area<DeviceContext>>,
+    pub(crate) _desktop_dimensions: Option<Area<DeviceContext>>,
     #[cfg(not(target_os = "android"))]
     #[allow(unused)]
     pub(crate) android_app: Option<()>,
@@ -29,7 +29,7 @@ impl Runner {
     pub fn new() -> Self {
         Self {
             attachment_queue: vec![],
-            desktop_dimensions: None,
+            _desktop_dimensions: None,
             android_app: None,
         }
     }
@@ -41,7 +41,7 @@ impl Runner {
     }
     /// set the fixed dimensions on the desktop platforms
     pub fn with_desktop_dimensions<A: Into<Area<DeviceContext>>>(mut self, dim: A) -> Self {
-        self.desktop_dimensions.replace(dim.into());
+        self._desktop_dimensions.replace(dim.into());
         self
     }
     pub fn add_attachment<Attached: Attach>(&mut self) {

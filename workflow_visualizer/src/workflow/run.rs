@@ -1,21 +1,21 @@
 use std::rc::Rc;
 
+#[cfg(not(target_family = "wasm"))]
+use crate::workflow::native::initialize_native_window;
+use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
 use tracing::{info, trace};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
-
-use crate::workflow::native::initialize_native_window;
-use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
 
 pub(crate) fn internal_loop<T: Workflow + 'static>(
     visualizer: &mut Visualizer,
     window: &mut Option<Rc<Window>>,
     initialized: &mut bool,
     event: Event<<T as Workflow>::Response>,
-    event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>,
+    #[allow(unused)] event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>,
     control_flow: &mut ControlFlow,
-    desktop_dimensions: Option<Area<DeviceContext>>,
+    #[allow(unused)] desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
     if visualizer.can_idle() {
         control_flow.set_wait();

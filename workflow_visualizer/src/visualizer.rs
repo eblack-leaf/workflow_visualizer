@@ -2,7 +2,9 @@ use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Bundle, Component, Event, Events, IntoSystemConfigs, Resource};
+#[cfg(not(target_family = "wasm"))]
+use bevy_ecs::prelude::Resource;
+use bevy_ecs::prelude::{Bundle, Component, Event, Events, IntoSystemConfigs};
 use tracing::{info, trace};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
@@ -151,9 +153,9 @@ impl Visualizer {
             .insert_resource(ScaleFactor::new(scale_factor));
     }
     /// invokes queued attachments after system attachments
-    pub fn initialize(&mut self, window: &Window) {
+    pub fn initialize(&mut self, _window: &Window) {
         #[cfg(not(target_family = "wasm"))]
-        pollster::block_on(self.init_gfx(window));
+        pollster::block_on(self.init_gfx(_window));
         set_sync_points(self);
         self.invoke_attach::<WindowAttachment>();
         self.invoke_attach::<ViewportAttachment>();

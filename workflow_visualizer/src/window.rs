@@ -1,7 +1,10 @@
-use bevy_ecs::prelude::{Event, EventReader, Events, IntoSystemConfigs, Res, ResMut};
-use tracing::trace;
-
 use crate::coord::area::Area;
+#[cfg(not(target_family = "wasm"))]
+use bevy_ecs::prelude::Res;
+use bevy_ecs::prelude::{Event, EventReader, Events, IntoSystemConfigs, ResMut};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
+use tracing::trace;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::sync::SyncPoint;

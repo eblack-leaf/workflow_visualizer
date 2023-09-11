@@ -1,8 +1,11 @@
 use bevy_ecs::event::EventWriter;
 use std::collections::HashMap;
 
-use bevy_ecs::prelude::{Commands, Component, Entity, Event, Query, Res, ResMut, Resource};
-
+#[cfg(not(target_family = "wasm"))]
+use bevy_ecs::prelude::Res;
+use bevy_ecs::prelude::{Commands, Component, Entity, Event, Query, ResMut, Resource};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
 use image::{EncodableLayout, GenericImageView};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;

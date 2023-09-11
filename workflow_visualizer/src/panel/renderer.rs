@@ -1,4 +1,6 @@
-use bevy_ecs::prelude::{Entity, Resource};
+use bevy_ecs::prelude::Entity;
+#[cfg(not(target_family = "wasm"))]
+use bevy_ecs::prelude::Resource;
 use wgpu::BlendState;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};

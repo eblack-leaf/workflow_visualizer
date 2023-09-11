@@ -1,3 +1,4 @@
+#[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::Resource;
 use tracing::trace;
 

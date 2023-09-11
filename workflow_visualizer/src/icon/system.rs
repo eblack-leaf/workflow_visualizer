@@ -1,11 +1,14 @@
-use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res, ResMut};
-
 use crate::icon::cache::{Cache, Difference};
 use crate::icon::component::{IconHandle, IconScale};
 use crate::icon::renderer::IconRenderer;
 use crate::{
     Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
 };
+#[cfg(not(target_family = "wasm"))]
+use bevy_ecs::prelude::ResMut;
+use bevy_ecs::prelude::{Added, Changed, Entity, Query, RemovedComponents, Res};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
 
 pub(crate) fn calc_area(
     mut icons: Query<

@@ -1,12 +1,14 @@
 use std::fmt::Debug;
 
 use bevy_ecs::prelude::Resource;
+#[cfg(target_family = "wasm")]
+use gloo_worker::WorkerBridge;
 use gloo_worker::{HandlerId, Worker};
 use winit::event_loop::EventLoopProxy;
 
 use crate::workflow::runner::EngenHandle;
 use crate::Workflow;
-
+#[allow(dead_code)]
 pub(crate) struct Receiver<T: Send + 'static> {
     #[cfg(not(target_family = "wasm"))]
     pub(crate) receiver: tokio::sync::mpsc::UnboundedReceiver<T>,
@@ -20,12 +22,14 @@ impl<T: Send + 'static> Receiver<T> {
         self.receiver.recv().await
     }
     #[cfg(target_family = "wasm")]
+    #[allow(unused)]
     pub(crate) fn receive(&mut self) {}
 }
-
+#[allow(unused)]
 pub(crate) struct Responder<T: Send + 'static + Debug>(pub(crate) EventLoopProxy<T>);
 
 impl<T: Send + 'static + Debug> Responder<T> {
+    #[allow(unused)]
     pub(crate) fn respond(&self, response: T) {
         self.0.send_event(response).expect("responder");
     }

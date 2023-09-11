@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Formatter};
 
 use crate::WindowAppearanceFactor;
+#[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::Resource;
 use tracing::{info, instrument, trace};
 use wgpu::{ColorTargetState, PrimitiveState, TextureView};

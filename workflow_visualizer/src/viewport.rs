@@ -1,9 +1,3 @@
-use bevy_ecs::change_detection::{Res, ResMut};
-use bevy_ecs::event::EventReader;
-use bevy_ecs::prelude::{IntoSystemConfigs, Resource};
-use nalgebra::matrix;
-use wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
-
 use crate::coord::area::Area;
 use crate::coord::layer::Layer;
 use crate::coord::position::Position;
@@ -14,6 +8,13 @@ use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
 use crate::{InterfaceContext, ScaleFactor, SyncPoint, WindowAppearanceFactor};
+use bevy_ecs::change_detection::{Res, ResMut};
+use bevy_ecs::event::EventReader;
+use bevy_ecs::prelude::{IntoSystemConfigs, Resource};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
+use nalgebra::matrix;
+use wgpu::{BindGroup, BindGroupLayout, DepthStencilState, Texture, TextureFormat};
 
 /// Viewport Matrix for converting to NDC
 #[cfg_attr(not(target_family = "wasm"), derive(Resource))]

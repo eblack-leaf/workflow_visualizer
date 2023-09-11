@@ -1,5 +1,3 @@
-use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res, ResMut};
-
 use crate::line::line_render::LineRenderPoints;
 use crate::line::renderer::{LineRenderGpu, LineRenderGroup, LineRenderer};
 use crate::line::LineRender;
@@ -8,6 +6,11 @@ use crate::{
     AlignedUniform, Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor,
     Visibility,
 };
+#[cfg(not(target_family = "wasm"))]
+use bevy_ecs::prelude::ResMut;
+use bevy_ecs::prelude::{Changed, Entity, Or, Query, RemovedComponents, Res};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
 
 // before ResolveVisibility after Reconfigure.set_path
 pub(crate) fn calc_section(

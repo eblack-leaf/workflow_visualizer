@@ -1,8 +1,9 @@
-use bevy_ecs::prelude::{Res, ResMut};
-
 use crate::images::interface::Extraction;
 use crate::images::renderer::{ImageHandle, ImageRenderer};
 use crate::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
+use bevy_ecs::prelude::{Res, ResMut};
 
 pub(crate) struct ImageRenderGroup {
     pub(crate) image_name: ImageHandle,

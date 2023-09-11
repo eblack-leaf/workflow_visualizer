@@ -5,9 +5,22 @@ use gloo_worker::{HandlerId, Worker, WorkerScope};
 use crate::workflow::bridge::OutputWrapper;
 #[cfg(target_family = "wasm")]
 use crate::workflow::bridge::WebSender;
-
 use crate::workflow::runner::EngenHandle;
+#[cfg(target_family = "wasm")]
+use crate::Runner;
+#[cfg(target_family = "wasm")]
+use crate::Sender;
+#[cfg(target_family = "wasm")]
+use crate::Visualizer;
 use crate::Workflow;
+#[cfg(target_family = "wasm")]
+use std::rc::Rc;
+#[cfg(target_family = "wasm")]
+use winit::dpi::PhysicalSize;
+#[cfg(target_family = "wasm")]
+use winit::event_loop::EventLoopBuilder;
+#[cfg(target_family = "wasm")]
+use winit::window::{Window, WindowBuilder};
 
 impl<T: Workflow + Default + 'static> Worker for EngenHandle<T> {
     type Message = OutputWrapper<T>;
@@ -69,7 +82,7 @@ fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
 
 #[cfg(target_arch = "wasm32")]
 fn web_resizing(window: &Rc<Window>) {
-    use wasm_bindgen::{prelude::*, JsCast};
+    use wasm_bindgen::prelude::*;
     let w_window = window.clone();
     let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
         let scale_factor = w_window.scale_factor();
@@ -91,7 +104,7 @@ fn web_resizing(window: &Rc<Window>) {
 }
 #[cfg(target_family = "wasm")]
 pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
-    mut runner: Runner,
+    _runner: Runner,
     mut visualizer: Visualizer,
     worker_path: String,
 ) {
@@ -113,7 +126,7 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
     use gloo_worker::Spawnable;
     let bridge = EngenHandle::<T>::spawner()
         .callback(move |response| {
-            proxy.send_event(response);
+            let _ = proxy.send_event(response);
         })
         .spawn(worker_path.as_str());
     let bridge = Box::leak(Box::new(bridge));
@@ -124,7 +137,7 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
     let mut initialized = true;
     use winit::platform::web::EventLoopExtWebSys;
     event_loop.spawn(move |event, event_loop_window_target, control_flow| {
-        internal_loop::<T>(
+        crate::workflow::run::internal_loop::<T>(
             &mut visualizer,
             &mut window,
             &mut initialized,

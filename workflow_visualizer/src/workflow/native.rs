@@ -1,17 +1,25 @@
+#[cfg(not(target_family = "wasm"))]
 use std::rc::Rc;
+#[cfg(not(target_family = "wasm"))]
 use std::sync::{Arc, Mutex};
-
+#[cfg(not(target_family = "wasm"))]
 use winit::dpi::PhysicalSize;
+#[cfg(not(target_family = "wasm"))]
 use winit::event_loop::{EventLoopBuilder, EventLoopWindowTarget};
 #[cfg(target_os = "android")]
 use winit::platform::android::activity::AndroidApp;
+#[cfg(not(target_family = "wasm"))]
 use winit::window::{Window, WindowBuilder};
 
 #[cfg(not(target_family = "wasm"))]
 use crate::workflow::bridge::NativeSender;
+#[cfg(not(target_family = "wasm"))]
 use crate::workflow::bridge::{Receiver, Responder};
+#[cfg(not(target_family = "wasm"))]
 use crate::workflow::run::internal_loop;
+#[cfg(not(target_family = "wasm"))]
 use crate::workflow::runner::EngenHandle;
+#[cfg(not(target_family = "wasm"))]
 use crate::{Area, DeviceContext, Runner, Sender, Visualizer, Workflow};
 
 #[cfg(not(target_family = "wasm"))]
@@ -55,7 +63,7 @@ pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
             .insert_non_send_resource(Sender::new(NativeSender::<T>::new(sender)));
         let mut window: Option<Rc<Window>> = None;
         let mut initialized = false;
-        let desktop_dimensions = runner.desktop_dimensions;
+        let desktop_dimensions = runner._desktop_dimensions;
         event_loop.run(move |event, event_loop_window_target, control_flow| {
             internal_loop::<T>(
                 &mut visualizer,
@@ -69,12 +77,13 @@ pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
         });
     });
 }
-
+#[cfg(not(target_family = "wasm"))]
 pub(crate) fn initialize_native_window<T>(
     w_target: &EventLoopWindowTarget<T>,
     window: &mut Option<Rc<Window>>,
     desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
+    #[allow(unused_mut)]
     let mut builder = WindowBuilder::new().with_resizable(false);
     #[cfg(all(not(target_os = "android"), not(target_family = "wasm")))]
     {

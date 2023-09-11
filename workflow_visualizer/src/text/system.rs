@@ -1,11 +1,5 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy_ecs::prelude::{
-    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
-};
-use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
-use tracing::trace;
-
 use crate::gfx::GfxSurface;
 use crate::instance::key::KeyFactory;
 use crate::text::atlas::{
@@ -32,6 +26,13 @@ use crate::{
     InterfaceContext, Key, Layer, NullBit, NumericalContext, Position, ScaleFactor, Section,
     Viewport, Visibility, VisibleSection,
 };
+use bevy_ecs::prelude::{
+    Added, Changed, Commands, Entity, EventReader, Or, Query, RemovedComponents, Res, ResMut,
+};
+#[cfg(target_family = "wasm")]
+use bevy_ecs::prelude::{NonSend, NonSendMut};
+use fontdue::layout::{GlyphPosition, LayoutSettings, TextStyle};
+use tracing::trace;
 
 pub(crate) fn setup(_scale_factor: Res<ScaleFactor>, mut cmd: Commands) {
     cmd.insert_resource(Extraction::new());
