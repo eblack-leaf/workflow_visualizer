@@ -293,7 +293,7 @@ impl Render for ImageRenderer {
     }
 
     fn phase() -> RenderPhase {
-        RenderPhase::Alpha(7)
+        RenderPhase::Alpha(1)
     }
 
     fn render<'a>(&'a self, render_pass_handle: &mut RenderPassHandle<'a>, viewport: &'a Viewport) {
