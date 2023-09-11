@@ -84,13 +84,13 @@
 <span class="kw">impl </span>Attach <span class="kw">for </span>IconRendererAttachment {
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         <span class="kw">let </span><span class="kw-2">mut </span>manager = IconBitmapRequestManager::default();
-        <span class="kw">for </span>(_entity, request) <span class="kw">in </span>visualizer
+        <span class="kw">for </span>(_entity, <span class="kw-2">mut </span>request) <span class="kw">in </span>visualizer
             .job
             .container
-            .query::&lt;(Entity, <span class="kw-2">&amp;</span>IconBitmapRequest)&gt;()
-            .iter(<span class="kw-2">&amp;</span>visualizer.job.container)
+            .query::&lt;(Entity, <span class="kw-2">&amp;mut </span>IconBitmapRequest)&gt;()
+            .iter_mut(<span class="kw-2">&amp;mut </span>visualizer.job.container)
         {
-            manager.add(request.clone());
+            manager.add((request.id, request.bitmap.take().expect(<span class="string">&quot;bitmap&quot;</span>)));
         }
         visualizer.job.container.insert_resource(manager);
         visualizer.register_renderer::&lt;IconRenderer&gt;();

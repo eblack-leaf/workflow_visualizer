@@ -279,14 +279,14 @@
 <span class="attr">#[derive(Component, Clone)]
 </span><span class="kw">pub struct </span>IconBitmapRequest {
     <span class="kw">pub </span>id: IconHandle,
-    <span class="kw">pub </span>bitmap: IconBitmap,
+    <span class="kw">pub </span>bitmap: <span class="prelude-ty">Option</span>&lt;IconBitmap&gt;,
 }
 
 <span class="kw">impl</span>&lt;I: Into&lt;IconHandle&gt;, IB: Into&lt;IconBitmap&gt;&gt; From&lt;(I, IB)&gt; <span class="kw">for </span>IconBitmapRequest {
     <span class="kw">fn </span>from(value: (I, IB)) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             id: value.<span class="number">0</span>.into(),
-            bitmap: value.<span class="number">1</span>.into(),
+            bitmap: <span class="prelude-val">Some</span>(value.<span class="number">1</span>.into()),
         }
     }
 }

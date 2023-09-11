@@ -127,8 +127,10 @@
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::images::interface::Extraction;
-<span class="kw">use </span><span class="kw">crate</span>::images::renderer::{ImageHandle, ImageRenderer};
+<a href="#130" id="130">130</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::bundling::ImageHandle;
+<span class="kw">use </span><span class="kw">crate</span>::images::interface::Extraction;
+<span class="kw">use </span><span class="kw">crate</span>::images::renderer::ImageRenderer;
 <span class="kw">use crate</span>::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
 <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
 </span><span class="kw">use </span>bevy_ecs::prelude::{NonSend, NonSendMut};

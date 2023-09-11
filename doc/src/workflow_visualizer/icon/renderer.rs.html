@@ -365,7 +365,7 @@
             <span class="kw">let </span>atlas_location = AtlasLocation::new(x_index, y_index);
             <span class="kw">let </span>coordinates = atlas.write::&lt;IconPixelData&gt;(
                 atlas_location,
-                bytemuck::cast_slice(<span class="kw-2">&amp;</span>write.bitmap.data),
+                bytemuck::cast_slice(<span class="kw-2">&amp;</span>write.bitmap.expect(<span class="string">&quot;bitmap&quot;</span>).data),
                 block.block,
                 gfx,
             );

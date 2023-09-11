@@ -318,13 +318,6 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::event::EventWriter;
 <span class="kw">use </span>std::collections::HashMap;
 
@@ -337,6 +330,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
+<span class="kw">use </span><span class="kw">crate</span>::bundling::ImageHandle;
 <span class="kw">use </span><span class="kw">crate</span>::images::render_group::ImageRenderGroup;
 <span class="kw">use </span><span class="kw">crate</span>::orientation::Orientation;
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasLocation, TextureSampler};
@@ -351,24 +345,24 @@
 <span class="attr">#[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Copy, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Vertex {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) data: [f32; <span class="number">3</span>],
+    <span class="kw">pub</span>(<span class="kw">crate</span>) data: [f32; <span class="number">2</span>],
 }
 
 <span class="kw">impl </span>Vertex {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>new(position: RawPosition, fade: f32) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>new(position: RawPosition) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            data: [position.x, position.y, fade],
+            data: [position.x, position.y],
         }
     }
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>AABB: [Vertex; <span class="number">6</span>] = [
-    Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">0.0 </span>}, <span class="number">0.25</span>),
-    Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">1.0 </span>}, <span class="number">0.15</span>),
-    Vertex::new(RawPosition { x: <span class="number">1.0</span>, y: <span class="number">0.0 </span>}, <span class="number">0.15</span>),
-    Vertex::new(RawPosition { x: <span class="number">1.0</span>, y: <span class="number">0.0 </span>}, <span class="number">0.15</span>),
-    Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">1.0 </span>}, <span class="number">0.15</span>),
-    Vertex::new(RawPosition { x: <span class="number">1.0</span>, y: <span class="number">1.0 </span>}, <span class="number">0.05</span>),
+    Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">0.0 </span>}),
+    Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">1.0 </span>}),
+    Vertex::new(RawPosition { x: <span class="number">1.0</span>, y: <span class="number">0.0 </span>}),
+    Vertex::new(RawPosition { x: <span class="number">1.0</span>, y: <span class="number">0.0 </span>}),
+    Vertex::new(RawPosition { x: <span class="number">0.0</span>, y: <span class="number">1.0 </span>}),
+    Vertex::new(RawPosition { x: <span class="number">1.0</span>, y: <span class="number">1.0 </span>}),
 ];
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>aabb_vertex_buffer(gfx_surface: <span class="kw-2">&amp;</span>GfxSurface) -&gt; wgpu::Buffer {
@@ -397,7 +391,7 @@
 }
 <span class="kw">impl </span>ImageFade {
     <span class="kw">pub const </span>TRANSPARENT: ImageFade = ImageFade(<span class="number">0f32</span>);
-    <span class="kw">pub const </span>OPAQUE: ImageFade = ImageFade(<span class="number">20f32</span>);
+    <span class="kw">pub const </span>OPAQUE: ImageFade = ImageFade(<span class="number">1f32</span>);
 }
 <span class="kw">impl </span>From&lt;f32&gt; <span class="kw">for </span>ImageFade {
     <span class="kw">fn </span>from(value: f32) -&gt; <span class="self">Self </span>{
@@ -414,15 +408,7 @@
         <span class="self">Self</span>(value <span class="kw">as </span>f32)
     }
 }
-<span class="attr">#[derive(
-    Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
-)]
-</span><span class="kw">pub struct </span>ImageHandle(<span class="kw">pub </span>i32);
-<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>ImageHandle {
-    <span class="kw">fn </span>from(value: i32) -&gt; <span class="self">Self </span>{
-        ImageHandle(value)
-    }
-}
+
 <span class="attr">#[derive(Component, Clone, Serialize, Deserialize, Debug)]
 </span><span class="kw">pub struct </span>ImageRequest {
     <span class="kw">pub </span>handle: ImageHandle,
@@ -593,7 +579,7 @@
                 buffers: <span class="kw-2">&amp;</span>[wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::&lt;Vertex&gt;() <span class="kw">as </span>wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x3],
+                    attributes: <span class="kw-2">&amp;</span><span class="macro">wgpu::vertex_attr_array!</span>[<span class="number">0 </span>=&gt; Float32x2],
                 }],
             },
             primitive: gfx.triangle_primitive(),
