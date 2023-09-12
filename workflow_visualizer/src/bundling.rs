@@ -96,10 +96,10 @@ pub struct Disabled {}
 #[derive(
     Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
 )]
-pub struct ImageHandle(pub i32);
+pub struct ResourceHandle(pub i32);
 
-impl From<i32> for ImageHandle {
+impl From<i32> for ResourceHandle {
     fn from(value: i32) -> Self {
-        ImageHandle(value)
+        ResourceHandle(value)
     }
 }

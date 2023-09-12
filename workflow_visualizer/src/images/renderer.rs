@@ -10,7 +10,7 @@ use image::{EncodableLayout, GenericImageView};
 use serde::{Deserialize, Serialize};
 use wgpu::util::DeviceExt;
 
-use crate::bundling::ImageHandle;
+use crate::bundling::ResourceHandle;
 use crate::images::render_group::ImageRenderGroup;
 use crate::orientation::Orientation;
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
@@ -91,11 +91,11 @@ impl From<u32> for ImageFade {
 
 #[derive(Component, Clone, Serialize, Deserialize, Debug)]
 pub struct ImageRequest {
-    pub handle: ImageHandle,
+    pub handle: ResourceHandle,
     pub data: Vec<u8>,
 }
 impl ImageRequest {
-    pub fn new<IN: Into<ImageHandle>, D: Into<Vec<u8>>>(handle: IN, data: D) -> Self {
+    pub fn new<IN: Into<ResourceHandle>, D: Into<Vec<u8>>>(handle: IN, data: D) -> Self {
         Self {
             handle: handle.into(),
             data: data.into(),
@@ -129,26 +129,26 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
-    pub(crate) images: HashMap<ImageHandle, ImageData>,
+    pub(crate) images: HashMap<ResourceHandle, ImageData>,
     pub(crate) render_group_layout: wgpu::BindGroupLayout,
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
 #[derive(Resource, Default)]
-pub struct ImageOrientations(pub(crate) HashMap<ImageHandle, Orientation>);
+pub struct ImageOrientations(pub(crate) HashMap<ResourceHandle, Orientation>);
 impl ImageOrientations {
-    pub fn get<IN: Into<ImageHandle>>(&self, name: IN) -> Orientation {
+    pub fn get<IN: Into<ResourceHandle>>(&self, name: IN) -> Orientation {
         self.0.get(&name.into()).copied().expect("orientation")
     }
 }
 #[derive(Resource, Default)]
-pub struct ImageSizes(pub(crate) HashMap<ImageHandle, Area<NumericalContext>>);
+pub struct ImageSizes(pub(crate) HashMap<ResourceHandle, Area<NumericalContext>>);
 impl ImageSizes {
-    pub fn get<IN: Into<ImageHandle>>(&self, name: IN) -> Area<NumericalContext> {
+    pub fn get<IN: Into<ResourceHandle>>(&self, name: IN) -> Area<NumericalContext> {
         self.0.get(&name.into()).copied().expect("size")
     }
 }
 #[derive(Event, Copy, Clone)]
-pub struct ImageLoaded(pub ImageHandle);
+pub struct ImageLoaded(pub ResourceHandle);
 pub(crate) fn load_images(
     #[cfg(not(target_family = "wasm"))] mut image_renderer: ResMut<ImageRenderer>,
     #[cfg(target_family = "wasm")] mut image_renderer: NonSendMut<ImageRenderer>,

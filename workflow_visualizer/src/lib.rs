@@ -6,10 +6,9 @@
 //! Runner which invokes the visualizer's tools for multiple platforms
 pub use animate::{Animate, Animation, Interpolation, InterpolationExtraction, QueuedAnimation};
 pub use bevy_ecs;
-pub use bundling::ImageHandle;
 pub use bundling::{
     despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
-    Disabled,
+    Disabled, ResourceHandle,
 };
 pub use button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
 pub use grid::{
@@ -95,6 +94,7 @@ mod panel;
 mod path;
 mod render;
 mod scale_factor;
+mod svg_icon;
 mod sync;
 mod text;
 mod texture_atlas;

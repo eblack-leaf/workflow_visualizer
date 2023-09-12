@@ -1,4 +1,4 @@
-use crate::bundling::ImageHandle;
+use crate::bundling::ResourceHandle;
 use crate::images::interface::Extraction;
 use crate::images::renderer::ImageRenderer;
 use crate::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
@@ -7,7 +7,7 @@ use bevy_ecs::prelude::{NonSend, NonSendMut};
 use bevy_ecs::prelude::{Res, ResMut};
 
 pub(crate) struct ImageRenderGroup {
-    pub(crate) image_name: ImageHandle,
+    pub(crate) image_name: ResourceHandle,
     pub(crate) render_group_bind_group: wgpu::BindGroup,
     pub(crate) fade_and_layer: AlignedUniform<f32>,
     pub(crate) texture_coordinates: Uniform<TextureCoordinates>,
@@ -15,7 +15,7 @@ pub(crate) struct ImageRenderGroup {
 }
 impl ImageRenderGroup {
     pub(crate) fn new(
-        name: ImageHandle,
+        name: ResourceHandle,
         uniforms_bind_group: wgpu::BindGroup,
         fade_uniform: AlignedUniform<f32>,
         texture_coordinates: Uniform<TextureCoordinates>,
