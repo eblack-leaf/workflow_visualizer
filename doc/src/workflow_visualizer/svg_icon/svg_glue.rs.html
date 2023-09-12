@@ -136,6 +136,8 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>lyon::math::Point;
 <span class="kw">use </span>lyon::path::PathEvent;
 <span class="kw">use </span>lyon::tessellation;
@@ -207,7 +209,7 @@
                             to: <span class="self">self</span>.prev,
                         })
                     }
-                    PathSegment::QuadTo(a, x) =&gt; {
+                    PathSegment::QuadTo(a, b) =&gt; {
                         <span class="comment">// PathEvent::Quad?
                         </span><span class="prelude-val">None
                     </span>}
@@ -236,8 +238,8 @@
         }
     }
 }
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>convert_path(p: <span class="kw-2">&amp;</span>usvg::Path) -&gt; PathConvIter {
+<span class="attr">#[allow(unused)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>convert_path(p: <span class="kw-2">&amp;</span>usvg::Path) -&gt; PathConvIter {
     PathConvIter {
         iter: p.data.segments(),
         first: Point::new(<span class="number">0.0</span>, <span class="number">0.0</span>),
@@ -246,12 +248,14 @@
         needs_end: <span class="bool-val">false</span>,
     }
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>FALLBACK_COLOR: usvg::Color = usvg::Color {
+<span class="attr">#[allow(unused)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>FALLBACK_COLOR: usvg::Color = usvg::Color {
     red: <span class="number">0</span>,
     green: <span class="number">0</span>,
     blue: <span class="number">0</span>,
 };
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>convert_stroke(s: <span class="kw-2">&amp;</span>usvg::Stroke) -&gt; (usvg::Color, StrokeOptions) {
+<span class="attr">#[allow(unused)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>convert_stroke(s: <span class="kw-2">&amp;</span>usvg::Stroke) -&gt; (usvg::Color, StrokeOptions) {
     <span class="kw">let </span>color = <span class="kw">match </span>s.paint {
         usvg::Paint::Color(c) =&gt; c,
         <span class="kw">_ </span>=&gt; FALLBACK_COLOR,

@@ -489,6 +489,8 @@
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -518,6 +520,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::panel::PanelAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::path::PathAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
+<span class="kw">use </span><span class="kw">crate</span>::svg_icon::SvgIconAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::sync::set_sync_points;
 <span class="kw">use </span><span class="kw">crate</span>::text::TextAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::time::TimerAttachment;
@@ -665,6 +668,7 @@
         <span class="self">self</span>.invoke_attach::&lt;ButtonAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ImageAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;CoordinateAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;SvgIconAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ColorAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
         <span class="self">self</span>.invoke_attach::&lt;IconRendererAttachment&gt;();

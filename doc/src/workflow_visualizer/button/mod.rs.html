@@ -105,8 +105,8 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::ButtonAttachment;
 
 <span class="kw">use crate</span>::{
-    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
-    TextValue,
+    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, ResourceHandle, Section,
+    SvgIconScale, Tag, TextScale, TextValue,
 };
 
 <span class="kw">mod </span>attachment;
@@ -119,7 +119,7 @@
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    icon_id: IconHandle,
+    icon_id: ResourceHandle,
     button_text: TextValue,
     section: Section&lt;InterfaceContext&gt;,
     color: Color,
@@ -141,7 +141,7 @@
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>Scaling {
     <span class="kw">pub </span>text: TextScale,
-    <span class="kw">pub </span>icon: IconScale,
+    <span class="kw">pub </span>icon: SvgIconScale,
 }
 
 <span class="attr">#[derive(Component, Copy, Clone)]
@@ -161,9 +161,9 @@
         L: Into&lt;Layer&gt;,
         C: Into&lt;Color&gt;,
         S: Into&lt;String&gt;,
-        H: Into&lt;IconHandle&gt;,
+        H: Into&lt;ResourceHandle&gt;,
         TS: Into&lt;TextScale&gt;,
-        IS: Into&lt;IconScale&gt;,
+        IS: Into&lt;SvgIconScale&gt;,
     &gt;(
         button_type: ButtonType,
         layer: L,

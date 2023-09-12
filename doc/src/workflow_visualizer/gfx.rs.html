@@ -544,12 +544,12 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(configuration: wgpu::SurfaceConfiguration) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ configuration }
     }
-    <span class="kw">pub fn </span>alpha_color_target_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ColorTargetState {
-        wgpu::ColorTargetState {
+    <span class="kw">pub fn </span>alpha_color_target_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [<span class="prelude-ty">Option</span>&lt;ColorTargetState&gt;; <span class="number">1</span>] {
+        [<span class="prelude-val">Some</span>(wgpu::ColorTargetState {
             format: <span class="self">self</span>.configuration.format,
             blend: <span class="prelude-val">Some</span>(wgpu::BlendState::ALPHA_BLENDING),
             write_mask: Default::default(),
-        }
+        })]
     }
 }
 <span class="doccomment">/// Used for setting the multi-sampling/anti-aliasing
