@@ -33,6 +33,9 @@ pub use interaction::{
 pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use orientation::{AspectRatio, Orientation};
 pub use render::{Render, RenderPassHandle, RenderPhase};
+pub use svg_icon::{
+    BundledSvg, SvgData, SvgIcon, SvgIconScale, SvgRequest, SvgTag, TessellatedSvg,
+};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
 pub use wgpu;

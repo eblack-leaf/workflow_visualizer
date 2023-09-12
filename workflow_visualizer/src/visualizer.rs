@@ -27,6 +27,7 @@ use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
 use crate::path::PathAttachment;
 use crate::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
+use crate::svg_icon::SvgIconAttachment;
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;
@@ -174,6 +175,7 @@ impl Visualizer {
         self.invoke_attach::<ButtonAttachment>();
         self.invoke_attach::<ImageAttachment>();
         self.invoke_attach::<CoordinateAttachment>();
+        self.invoke_attach::<SvgIconAttachment>();
         self.invoke_attach::<ColorAttachment>();
         self.attach_from_queue();
         self.invoke_attach::<IconRendererAttachment>();

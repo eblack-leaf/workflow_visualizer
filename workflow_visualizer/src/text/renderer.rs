@@ -219,7 +219,7 @@ impl Render for TextRenderer {
         let fragment_state = wgpu::FragmentState {
             module: &shader,
             entry_point: "fragment_entry",
-            targets: &[Some(gfx_config.alpha_color_target_state())],
+            targets: &gfx_config.alpha_color_target_state(),
         };
         let descriptor = wgpu::RenderPipelineDescriptor {
             label: Some("text pipeline"),

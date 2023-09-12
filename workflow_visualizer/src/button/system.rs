@@ -7,7 +7,8 @@ use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
     DeviceContext, Icon, IconHandle, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag,
-    PanelType, Position, RawMarker, ScaleFactor, Section, Text, TextValue, TextWrapStyle, Toggled,
+    PanelType, Position, RawMarker, ResourceHandle, ScaleFactor, Section, SvgIcon, Text, TextValue,
+    TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -32,7 +33,7 @@ pub(crate) fn spawn(
             &Layer,
             &BackgroundColor,
             &Color,
-            &IconHandle,
+            &ResourceHandle,
             &TextValue,
             &mut PanelEntity,
             &mut IconEntity,
@@ -70,7 +71,7 @@ pub(crate) fn spawn(
             ))
             .id();
         let icon = cmd
-            .spawn(Icon::new(
+            .spawn(SvgIcon::new(
                 *icon_id,
                 scaling.icon,
                 *layer - Layer::from(1),
@@ -188,8 +189,8 @@ pub(crate) fn placement(
             (
                 None,
                 Position::new(
-                    center.x - scaling.icon.width_px() / 2f32,
-                    center.y - scaling.icon.height_px() / 2f32,
+                    center.x - scaling.icon.width() / 2f32,
+                    center.y - scaling.icon.height() / 2f32,
                 ),
             )
         } else {
@@ -200,13 +201,13 @@ pub(crate) fn placement(
                     .to_interface(scale_factor.factor());
             let len = button_text.0.len() as f32;
             let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
-                + scaling.icon.width_px() / 2f32
+                + scaling.icon.width() / 2f32
                 + RawMarker(2).to_pixel();
             let y = center.y - logical_dimensions.height / 2f32;
             let width = logical_dimensions.width * len;
             let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
-            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.width_px();
+            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.width();
             let icon_y = text_section.top() + RawMarker(1).to_pixel();
             (Some(text_section), Position::new(icon_x, icon_y))
         };

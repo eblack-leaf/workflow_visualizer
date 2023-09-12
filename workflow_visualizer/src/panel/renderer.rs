@@ -1,7 +1,6 @@
 use bevy_ecs::prelude::Entity;
 #[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::Resource;
-use wgpu::BlendState;
 
 use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::panel::vertex::{generate_border_mesh, generate_panel_mesh, vertex_buffer, PanelVertex};
@@ -47,11 +46,7 @@ impl Render for PanelRenderer {
         let shader = gfx
             .device
             .create_shader_module(wgpu::include_wgsl!("panel.wgsl"));
-        let color_target_state = [Some(wgpu::ColorTargetState {
-            format: gfx_config.configuration.format,
-            blend: Some(BlendState::ALPHA_BLENDING),
-            write_mask: Default::default(),
-        })];
+        let color_target_state = gfx_config.alpha_color_target_state();
         let descriptor = wgpu::RenderPipelineDescriptor {
             label: Some("content panel renderer"),
             layout: Some(&pipeline_layout),

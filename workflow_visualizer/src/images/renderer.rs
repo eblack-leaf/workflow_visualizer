@@ -249,7 +249,7 @@ impl Render for ImageRenderer {
         let shader = gfx
             .device
             .create_shader_module(wgpu::include_wgsl!("images.wgsl"));
-        let fragment_targets = [Some(gfx_config.alpha_color_target_state())];
+        let color_target_state = gfx_config.alpha_color_target_state();
         let pipeline_descriptor = wgpu::RenderPipelineDescriptor {
             label: Some("images renderer"),
             layout: Some(&pipeline_layout),
@@ -268,7 +268,7 @@ impl Render for ImageRenderer {
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: "fragment_entry",
-                targets: &fragment_targets,
+                targets: &color_target_state,
             }),
             multiview: None,
         };

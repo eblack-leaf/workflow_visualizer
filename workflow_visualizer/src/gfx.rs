@@ -235,12 +235,12 @@ impl GfxSurfaceConfiguration {
     pub(crate) fn new(configuration: wgpu::SurfaceConfiguration) -> Self {
         Self { configuration }
     }
-    pub fn alpha_color_target_state(&self) -> ColorTargetState {
-        wgpu::ColorTargetState {
+    pub fn alpha_color_target_state(&self) -> [Option<ColorTargetState>; 1] {
+        [Some(wgpu::ColorTargetState {
             format: self.configuration.format,
             blend: Some(wgpu::BlendState::ALPHA_BLENDING),
             write_mask: Default::default(),
-        }
+        })]
     }
 }
 /// Used for setting the multi-sampling/anti-aliasing

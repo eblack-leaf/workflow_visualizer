@@ -1,6 +1,7 @@
 use workflow_visualizer::bevy_ecs::prelude::{IntoSystemConfigs, ResMut};
 use workflow_visualizer::{
-    Attach, BundledIcon, IconBitmap, IconBitmapRequest, IconHandle, Idle, SyncPoint, Visualizer,
+    Attach, BundledIcon, BundledSvg, IconBitmap, IconBitmapRequest, IconHandle, Idle,
+    ResourceHandle, SvgRequest, SyncPoint, TessellatedSvg, Visualizer,
 };
 
 use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
@@ -20,7 +21,7 @@ pub(crate) enum IconHandles {
     Generate,
 }
 impl IconHandles {
-    pub(crate) fn handle(&self) -> IconHandle {
+    pub(crate) fn handle(&self) -> ResourceHandle {
         (*self as i32).into()
     }
 }
@@ -31,34 +32,34 @@ impl Attach for EntryAttachment {
         visualizer.add_event::<ReadOtp>();
         visualizer.add_event::<EntryAddToken>();
         visualizer.add_event::<EntryRemoveToken>();
-        visualizer.spawn(IconBitmapRequest::from((
+        visualizer.spawn(SvgRequest::new(
             IconHandles::Edit.handle(),
-            IconBitmap::bundled(BundledIcon::Edit),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
+            BundledSvg::Activity.tessellation(),
+        ));
+        visualizer.spawn(SvgRequest::new(
             IconHandles::Add.handle(),
-            IconBitmap::bundled(BundledIcon::Add),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
+            BundledSvg::Activity.tessellation(),
+        ));
+        visualizer.spawn(SvgRequest::new(
             IconHandles::PageLeft.handle(),
-            IconBitmap::bundled(BundledIcon::ArrowLeft),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
+            BundledSvg::Activity.tessellation(),
+        ));
+        visualizer.spawn(SvgRequest::new(
             IconHandles::PageRight.handle(),
-            IconBitmap::bundled(BundledIcon::ArrowRight),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
+            BundledSvg::Activity.tessellation(),
+        ));
+        visualizer.spawn(SvgRequest::new(
             IconHandles::Run.handle(),
-            IconBitmap::bundled(BundledIcon::Run),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
+            BundledSvg::Activity.tessellation(),
+        ));
+        visualizer.spawn(SvgRequest::new(
             IconHandles::Delete.handle(),
-            IconBitmap::bundled(BundledIcon::Delete),
-        )));
-        visualizer.spawn(IconBitmapRequest::from((
+            BundledSvg::Activity.tessellation(),
+        ));
+        visualizer.spawn(SvgRequest::new(
             IconHandles::Generate.handle(),
-            IconBitmap::bundled(BundledIcon::Generate),
-        )));
+            BundledSvg::Activity.tessellation(),
+        ));
         visualizer
             .job
             .container

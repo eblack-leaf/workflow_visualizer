@@ -3,8 +3,8 @@ use bevy_ecs::prelude::{Bundle, Component, Entity};
 pub(crate) use attachment::ButtonAttachment;
 
 use crate::{
-    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, Section, Tag, TextScale,
-    TextValue,
+    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, ResourceHandle, Section,
+    SvgIconScale, Tag, TextScale, TextValue,
 };
 
 mod attachment;
@@ -17,7 +17,7 @@ pub struct Button {
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    icon_id: IconHandle,
+    icon_id: ResourceHandle,
     button_text: TextValue,
     section: Section<InterfaceContext>,
     color: Color,
@@ -39,7 +39,7 @@ pub enum ButtonBorder {
 #[derive(Component, Copy, Clone)]
 pub struct Scaling {
     pub text: TextScale,
-    pub icon: IconScale,
+    pub icon: SvgIconScale,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -59,9 +59,9 @@ impl Button {
         L: Into<Layer>,
         C: Into<Color>,
         S: Into<String>,
-        H: Into<IconHandle>,
+        H: Into<ResourceHandle>,
         TS: Into<TextScale>,
-        IS: Into<IconScale>,
+        IS: Into<SvgIconScale>,
     >(
         button_type: ButtonType,
         layer: L,

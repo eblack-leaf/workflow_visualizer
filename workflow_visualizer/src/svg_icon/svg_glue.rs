@@ -69,7 +69,7 @@ impl<'l> Iterator for PathConvIter<'l> {
                             to: self.prev,
                         })
                     }
-                    PathSegment::QuadTo(a, x) => {
+                    PathSegment::QuadTo(a, b) => {
                         // PathEvent::Quad?
                         None
                     }
@@ -98,7 +98,7 @@ impl<'l> Iterator for PathConvIter<'l> {
         }
     }
 }
-
+#[allow(unused)]
 pub(crate) fn convert_path(p: &usvg::Path) -> PathConvIter {
     PathConvIter {
         iter: p.data.segments(),
@@ -108,11 +108,13 @@ pub(crate) fn convert_path(p: &usvg::Path) -> PathConvIter {
         needs_end: false,
     }
 }
+#[allow(unused)]
 pub(crate) const FALLBACK_COLOR: usvg::Color = usvg::Color {
     red: 0,
     green: 0,
     blue: 0,
 };
+#[allow(unused)]
 pub(crate) fn convert_stroke(s: &usvg::Stroke) -> (usvg::Color, StrokeOptions) {
     let color = match s.paint {
         usvg::Paint::Color(c) => c,
