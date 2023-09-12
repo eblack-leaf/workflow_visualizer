@@ -115,10 +115,9 @@
 //! Runner which invokes the visualizer&#39;s tools for multiple platforms
 </span><span class="kw">pub use </span>animate::{Animate, Animation, Interpolation, InterpolationExtraction, QueuedAnimation};
 <span class="kw">pub use </span>bevy_ecs;
-<span class="kw">pub use </span>bundling::ImageHandle;
 <span class="kw">pub use </span>bundling::{
     despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
-    Disabled,
+    Disabled, ResourceHandle,
 };
 <span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
 <span class="kw">pub use </span>grid::{
@@ -204,6 +203,7 @@
 <span class="kw">mod </span>path;
 <span class="kw">mod </span>render;
 <span class="kw">mod </span>scale_factor;
+<span class="kw">mod </span>svg_icon;
 <span class="kw">mod </span>sync;
 <span class="kw">mod </span>text;
 <span class="kw">mod </span>texture_atlas;

@@ -128,7 +128,7 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::bundling::ImageHandle;
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::bundling::ResourceHandle;
 <span class="kw">use </span><span class="kw">crate</span>::images::interface::Extraction;
 <span class="kw">use </span><span class="kw">crate</span>::images::renderer::ImageRenderer;
 <span class="kw">use crate</span>::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
@@ -137,7 +137,7 @@
 <span class="kw">use </span>bevy_ecs::prelude::{Res, ResMut};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageRenderGroup {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) image_name: ImageHandle,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) image_name: ResourceHandle,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_bind_group: wgpu::BindGroup,
     <span class="kw">pub</span>(<span class="kw">crate</span>) fade_and_layer: AlignedUniform&lt;f32&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) texture_coordinates: Uniform&lt;TextureCoordinates&gt;,
@@ -145,7 +145,7 @@
 }
 <span class="kw">impl </span>ImageRenderGroup {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
-        name: ImageHandle,
+        name: ResourceHandle,
         uniforms_bind_group: wgpu::BindGroup,
         fade_uniform: AlignedUniform&lt;f32&gt;,
         texture_coordinates: Uniform&lt;TextureCoordinates&gt;,

@@ -330,7 +330,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>wgpu::util::DeviceExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::bundling::ImageHandle;
+<span class="kw">use </span><span class="kw">crate</span>::bundling::ResourceHandle;
 <span class="kw">use </span><span class="kw">crate</span>::images::render_group::ImageRenderGroup;
 <span class="kw">use </span><span class="kw">crate</span>::orientation::Orientation;
 <span class="kw">use </span><span class="kw">crate</span>::texture_atlas::{AtlasLocation, TextureSampler};
@@ -411,11 +411,11 @@
 
 <span class="attr">#[derive(Component, Clone, Serialize, Deserialize, Debug)]
 </span><span class="kw">pub struct </span>ImageRequest {
-    <span class="kw">pub </span>handle: ImageHandle,
+    <span class="kw">pub </span>handle: ResourceHandle,
     <span class="kw">pub </span>data: Vec&lt;u8&gt;,
 }
 <span class="kw">impl </span>ImageRequest {
-    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ImageHandle&gt;, D: Into&lt;Vec&lt;u8&gt;&gt;&gt;(handle: IN, data: D) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ResourceHandle&gt;, D: Into&lt;Vec&lt;u8&gt;&gt;&gt;(handle: IN, data: D) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             handle: handle.into(),
             data: data.into(),
@@ -449,26 +449,26 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_groups: HashMap&lt;Entity, ImageRenderGroup&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) vertex_buffer: wgpu::Buffer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) sampler_bind_group: wgpu::BindGroup,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) images: HashMap&lt;ImageHandle, ImageData&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) images: HashMap&lt;ResourceHandle, ImageData&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_layout: wgpu::BindGroupLayout,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
 <span class="attr">#[derive(Resource, Default)]
-</span><span class="kw">pub struct </span>ImageOrientations(<span class="kw">pub</span>(<span class="kw">crate</span>) HashMap&lt;ImageHandle, Orientation&gt;);
+</span><span class="kw">pub struct </span>ImageOrientations(<span class="kw">pub</span>(<span class="kw">crate</span>) HashMap&lt;ResourceHandle, Orientation&gt;);
 <span class="kw">impl </span>ImageOrientations {
-    <span class="kw">pub fn </span>get&lt;IN: Into&lt;ImageHandle&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: IN) -&gt; Orientation {
+    <span class="kw">pub fn </span>get&lt;IN: Into&lt;ResourceHandle&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: IN) -&gt; Orientation {
         <span class="self">self</span>.<span class="number">0</span>.get(<span class="kw-2">&amp;</span>name.into()).copied().expect(<span class="string">&quot;orientation&quot;</span>)
     }
 }
 <span class="attr">#[derive(Resource, Default)]
-</span><span class="kw">pub struct </span>ImageSizes(<span class="kw">pub</span>(<span class="kw">crate</span>) HashMap&lt;ImageHandle, Area&lt;NumericalContext&gt;&gt;);
+</span><span class="kw">pub struct </span>ImageSizes(<span class="kw">pub</span>(<span class="kw">crate</span>) HashMap&lt;ResourceHandle, Area&lt;NumericalContext&gt;&gt;);
 <span class="kw">impl </span>ImageSizes {
-    <span class="kw">pub fn </span>get&lt;IN: Into&lt;ImageHandle&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: IN) -&gt; Area&lt;NumericalContext&gt; {
+    <span class="kw">pub fn </span>get&lt;IN: Into&lt;ResourceHandle&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: IN) -&gt; Area&lt;NumericalContext&gt; {
         <span class="self">self</span>.<span class="number">0</span>.get(<span class="kw-2">&amp;</span>name.into()).copied().expect(<span class="string">&quot;size&quot;</span>)
     }
 }
 <span class="attr">#[derive(Event, Copy, Clone)]
-</span><span class="kw">pub struct </span>ImageLoaded(<span class="kw">pub </span>ImageHandle);
+</span><span class="kw">pub struct </span>ImageLoaded(<span class="kw">pub </span>ResourceHandle);
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>load_images(
     <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))] </span><span class="kw-2">mut </span>image_renderer: ResMut&lt;ImageRenderer&gt;,
     <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)] </span><span class="kw-2">mut </span>image_renderer: NonSendMut&lt;ImageRenderer&gt;,

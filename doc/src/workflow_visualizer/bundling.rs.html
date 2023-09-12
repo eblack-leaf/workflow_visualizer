@@ -201,11 +201,11 @@
 <span class="attr">#[derive(
     Component, Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Debug,
 )]
-</span><span class="kw">pub struct </span>ImageHandle(<span class="kw">pub </span>i32);
+</span><span class="kw">pub struct </span>ResourceHandle(<span class="kw">pub </span>i32);
 
-<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>ImageHandle {
+<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>ResourceHandle {
     <span class="kw">fn </span>from(value: i32) -&gt; <span class="self">Self </span>{
-        ImageHandle(value)
+        ResourceHandle(value)
     }
 }
 </code></pre></div></section></main></body></html>
