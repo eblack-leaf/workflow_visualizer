@@ -4,13 +4,14 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{
     Bundle, Changed, Component, Or, Query, RemovedComponents, Res, Resource, Without,
 };
+use bevy_ecs::query::With;
 use bevy_ecs::system::ResMut;
 
 use crate::bundling::ResourceHandle;
 use crate::images::renderer::{ImageFade, ImageOrientations};
 use crate::{
-    Animate, Animation, Area, Disabled, EnableVisibility, InterfaceContext, Interpolation, Layer,
-    Orientation, Position, Section, Tag, Visibility,
+    Animate, Animation, Area, Color, Disabled, EnableVisibility, IconScale, InterfaceContext,
+    Interpolation, Layer, Orientation, Position, Section, Tag, Visibility,
 };
 
 pub type ImageTag = Tag<Image>;
@@ -19,10 +20,11 @@ pub struct Image {
     section: Section<InterfaceContext>,
     layer: Layer,
     visibility: EnableVisibility,
-    name: ResourceHandle,
+    handle: ResourceHandle,
     fade: ImageFade,
     cache: Cache,
     difference: Difference,
+    color: Color,
     tag: ImageTag,
 }
 impl Image {
@@ -35,10 +37,11 @@ impl Image {
             section: Section::default(),
             layer: layer.into(),
             visibility: EnableVisibility::default(),
-            name: name.into(),
+            handle: name.into(),
             fade: fade.into(),
             cache: Cache::default(),
             difference: Difference::default(),
+            color: ImageIcon::INVALID_COLOR,
             tag: ImageTag::new(),
         }
     }
@@ -105,6 +108,49 @@ pub(crate) fn aspect_ratio_aligned_dimension(
         *area = Area::new(attempted_width, attempted_height);
     }
 }
+pub type ImageIconTag = Tag<ImageIcon>;
+#[derive(Bundle)]
+pub struct ImageIcon {
+    section: Section<InterfaceContext>,
+    layer: Layer,
+    visibility: EnableVisibility,
+    handle: ResourceHandle,
+    fade: ImageFade,
+    cache: Cache,
+    difference: Difference,
+    tag: ImageTag,
+    image_icon_tag: ImageIconTag,
+    scale: IconScale,
+    color: Color,
+}
+impl ImageIcon {
+    pub fn new<RH: Into<ResourceHandle>, IS: Into<IconScale>, L: Into<Layer>, C: Into<Color>>(
+        handle: RH,
+        scale: IS,
+        layer: L,
+        color: C,
+    ) -> Self {
+        Self {
+            handle: handle.into(),
+            scale: scale.into(),
+            layer: layer.into(),
+            color: color.into(),
+            fade: ImageFade::OPAQUE,
+            cache: Cache::default(),
+            difference: Difference::default(),
+            tag: ImageTag::new(),
+            image_icon_tag: ImageIconTag::new(),
+            visibility: EnableVisibility::new(),
+            section: Section::default(),
+        }
+    }
+    pub(crate) const INVALID_COLOR: Color = Color {
+        red: -1.0,
+        green: -1.0,
+        blue: -1.0,
+        alpha: -1.0,
+    };
+}
 #[derive(Component, Default)]
 pub(crate) struct Cache {
     pub(crate) name: Option<ResourceHandle>,
@@ -112,6 +158,7 @@ pub(crate) struct Cache {
     pub(crate) pos: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) layer: Option<Layer>,
+    pub(crate) icon_color: Option<Color>,
 }
 
 #[derive(Component, Clone, Default)]
@@ -121,6 +168,30 @@ pub(crate) struct Difference {
     pub(crate) pos: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) layer: Option<Layer>,
+    pub(crate) icon_color: Option<Color>,
+}
+pub(crate) fn set_from_scale(
+    mut image_icons: Query<(&IconScale, &mut Area<InterfaceContext>), Changed<IconScale>>,
+) {
+    for (scale, mut area) in image_icons.iter_mut() {
+        area.width = scale.width();
+        area.height = scale.height();
+    }
+}
+pub(crate) fn icon_color_diff(
+    mut image_icons: Query<
+        (&Color, &mut Cache, &mut Difference),
+        (Changed<Color>, With<ImageIconTag>),
+    >,
+) {
+    for (color, mut cache, mut difference) in image_icons.iter_mut() {
+        if let Some(cached) = cache.icon_color.as_ref() {
+            if *cached != *color {
+                difference.icon_color.replace(*color);
+            }
+        }
+        cache.icon_color.replace(*color);
+    }
 }
 pub(crate) fn name_diff(
     mut images: Query<(&ResourceHandle, &mut Cache, &mut Difference), Changed<ResourceHandle>>,
@@ -209,14 +280,27 @@ pub(crate) fn management(
             &Visibility,
             &mut Cache,
             &mut Difference,
+            &Color,
+            Option<&ImageIconTag>,
         ),
         Changed<Visibility>,
     >,
     mut removed: RemovedComponents<ImageTag>,
     mut extraction: ResMut<Extraction>,
 ) {
-    for (entity, pos, area, layer, name, fade, visibility, mut cache, mut difference) in
-        images.iter_mut()
+    for (
+        entity,
+        pos,
+        area,
+        layer,
+        name,
+        fade,
+        visibility,
+        mut cache,
+        mut difference,
+        icon_color,
+        image_icon,
+    ) in images.iter_mut()
     {
         if visibility.visible() {
             cache.pos.replace(*pos);
@@ -229,6 +313,10 @@ pub(crate) fn management(
             difference.layer.replace(cache.layer.unwrap());
             difference.fade.replace(cache.fade.unwrap());
             difference.name.replace(cache.name.unwrap());
+            if image_icon.is_some() {
+                cache.icon_color.replace(*icon_color);
+                difference.icon_color.replace(*icon_color);
+            }
         } else {
             extraction.remove(entity);
         }

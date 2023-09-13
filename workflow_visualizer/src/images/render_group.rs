@@ -1,7 +1,7 @@
 use crate::bundling::ResourceHandle;
-use crate::images::interface::Extraction;
+use crate::images::interface::{Extraction, ImageIcon};
 use crate::images::renderer::ImageRenderer;
-use crate::{AlignedUniform, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
+use crate::{AlignedUniform, Color, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
 #[cfg(target_family = "wasm")]
 use bevy_ecs::prelude::{NonSend, NonSendMut};
 use bevy_ecs::prelude::{Res, ResMut};
@@ -12,6 +12,7 @@ pub(crate) struct ImageRenderGroup {
     pub(crate) fade_and_layer: AlignedUniform<f32>,
     pub(crate) texture_coordinates: Uniform<TextureCoordinates>,
     pub(crate) placement: AlignedUniform<f32>,
+    pub(crate) icon_color: Uniform<Color>,
 }
 impl ImageRenderGroup {
     pub(crate) fn new(
@@ -20,6 +21,7 @@ impl ImageRenderGroup {
         fade_uniform: AlignedUniform<f32>,
         texture_coordinates: Uniform<TextureCoordinates>,
         placement: AlignedUniform<f32>,
+        icon_color_uniform: Uniform<Color>,
     ) -> Self {
         Self {
             image_name: name,
@@ -27,6 +29,7 @@ impl ImageRenderGroup {
             fade_and_layer: fade_uniform,
             texture_coordinates,
             placement,
+            icon_color: icon_color_uniform,
         }
     }
 }
@@ -66,6 +69,10 @@ pub(crate) fn read_extraction(
                 &gfx.device,
                 Some([position.x, position.y, area.width, area.height]),
             );
+            let color_uniform = Uniform::new(
+                &gfx.device,
+                diff.icon_color.unwrap_or(ImageIcon::INVALID_COLOR),
+            );
             let bind_group = gfx.device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("images-uniform-bind-group"),
                 layout: &image_renderer.render_group_uniforms_layout,
@@ -73,6 +80,7 @@ pub(crate) fn read_extraction(
                     fade_and_layer.uniform.bind_group_entry(0),
                     coordinates_uniform.bind_group_entry(1),
                     placement_uniform.uniform.bind_group_entry(2),
+                    color_uniform.bind_group_entry(3),
                 ],
             });
             let render_group = ImageRenderGroup::new(
@@ -81,6 +89,7 @@ pub(crate) fn read_extraction(
                 fade_and_layer,
                 coordinates_uniform,
                 placement_uniform,
+                color_uniform,
             );
             image_renderer.render_groups.insert(entity, render_group);
         }
@@ -123,6 +132,9 @@ pub(crate) fn read_extraction(
                         .coordinates,
                 );
                 render_group.image_name = name;
+            }
+            if let Some(icon_color) = diff.icon_color {
+                render_group.icon_color.update(&gfx.queue, icon_color);
             }
             image_renderer.render_groups.insert(entity, render_group);
         }

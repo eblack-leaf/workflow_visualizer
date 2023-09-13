@@ -71,12 +71,23 @@ var image_sampler: sampler;
 @group(2)
 @binding(0)
 var image_texture: texture_2d<f32>;
+@group(3)
+@binding(3)
+var<uniform> icon_color: vec4<f32>;
 @fragment
 fn fragment_entry(vertex_output: VertexOutput) -> @location(0) vec4<f32> {
     let image_data = textureSample(image_texture, image_sampler, vertex_output.sample_coords);
-    if (image_data.a <= 0.0) {
-        discard;
+    var color = vec4<f32>(image_data.rgba);
+    if (icon_color.a <= 0.0) {
+        let alpha = image_data.a * vertex_output.fade;
+        if (alpha <= 0.0) {
+            discard;
+        }
+        color = vec4<f32>(image_data.rgb, alpha);
+    } else {
+        let alpha = image_data.a * icon_color.a;
+        if (alpha <= 0.0) { discard; }
+        color = vec4<f32>(icon_color.rgb, alpha);
     }
-    let color = vec4<f32>(image_data.rgb, image_data.a);
     return color;
 }

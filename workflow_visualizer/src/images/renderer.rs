@@ -14,7 +14,6 @@ use crate::bundling::ResourceHandle;
 use crate::images::render_group::ImageRenderGroup;
 use crate::orientation::Orientation;
 use crate::texture_atlas::{AtlasLocation, TextureSampler};
-use crate::uniform::vertex_bind_group_layout_entry;
 use crate::{
     Animate, Animation, Area, AtlasBlock, AtlasDimension, AtlasTextureDimensions, GfxSurface,
     GfxSurfaceConfiguration, Interpolation, MsaaRenderAdapter, NumericalContext, RawPosition,
@@ -228,9 +227,46 @@ impl Render for ImageRenderer {
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     label: Some("render-group"),
                     entries: &[
-                        vertex_bind_group_layout_entry(0),
-                        vertex_bind_group_layout_entry(1),
-                        vertex_bind_group_layout_entry(2),
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 0,
+                            visibility: wgpu::ShaderStages::VERTEX,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: None,
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 1,
+                            visibility: wgpu::ShaderStages::VERTEX,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: None,
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 2,
+                            visibility: wgpu::ShaderStages::VERTEX,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: None,
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 3,
+                            visibility: wgpu::ShaderStages::FRAGMENT,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: None,
+                            },
+                            count: None,
+                        },
                     ],
                 });
         let pipeline_layout_descriptor = wgpu::PipelineLayoutDescriptor {

@@ -1,8 +1,9 @@
 use crate::icon::cache::{Cache, Difference};
-use crate::icon::component::{IconHandle, IconScale};
+use crate::icon::component::IconHandle;
 use crate::icon::renderer::IconRenderer;
 use crate::{
-    Area, Color, GfxSurface, InterfaceContext, Layer, NullBit, Position, ScaleFactor, Visibility,
+    Area, Color, GfxSurface, IconScale, InterfaceContext, Layer, NullBit, Position, ScaleFactor,
+    Visibility,
 };
 #[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::ResMut;
@@ -17,7 +18,7 @@ pub(crate) fn calc_area(
     >,
 ) {
     for (mut area, scale) in icons.iter_mut() {
-        let new_area = Area::new(scale.width_px(), scale.height_px());
+        let new_area = Area::new(scale.width(), scale.height());
         *area = new_area;
     }
 }

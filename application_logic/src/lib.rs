@@ -8,4 +8,5 @@ mod entry;
 mod entry_list;
 mod paging;
 mod positioning;
+mod resources;
 mod workflow;

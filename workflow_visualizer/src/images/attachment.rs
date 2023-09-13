@@ -2,7 +2,7 @@ use bevy_ecs::prelude::IntoSystemConfigs;
 
 use crate::images::interface::{
     apply_aspect_animations, area_diff, aspect_ratio_aligned_dimension, extract, fade_diff,
-    layer_diff, management, name_diff, pos_diff, Extraction,
+    icon_color_diff, layer_diff, management, name_diff, pos_diff, set_from_scale, Extraction,
 };
 use crate::images::render_group::read_extraction;
 use crate::images::renderer::{
@@ -38,8 +38,10 @@ impl Attach for ImageAttachment {
             // load_images.in_set(SyncPoint::Initialization),
             apply_animations.in_set(SyncPoint::Animation),
             apply_aspect_animations.in_set(SyncPoint::Animation),
+            set_from_scale.in_set(SyncPoint::Reconfigure),
             aspect_ratio_aligned_dimension.in_set(SyncPoint::Reconfigure),
             management.in_set(SyncPoint::Resolve),
+            icon_color_diff.in_set(SyncPoint::PushDiff),
             pos_diff.in_set(SyncPoint::PushDiff),
             area_diff.in_set(SyncPoint::PushDiff),
             layer_diff.in_set(SyncPoint::PushDiff),

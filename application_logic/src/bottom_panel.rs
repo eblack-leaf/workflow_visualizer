@@ -3,13 +3,14 @@ use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Resource};
 use workflow_visualizer::{
-    bevy_ecs, Button, ButtonBorder, ButtonType, Color, ResponsiveGridView, ResponsiveUnit, Sender,
-    Triggered,
+    bevy_ecs, BundlePlacement, Button, ButtonBorder, ButtonType, Color, Image, ImageFade,
+    ResponsiveGridView, ResponsiveUnit, Section, Sender, Triggered,
 };
 
 use crate::entry_list::EntryScale;
 use crate::entry_list::{EntryListLayout, ListDimensions};
 use crate::paging::{PageLeft, PageRight};
+use crate::resources::TEST_HANDLE;
 use crate::workflow::{Action, Token, TokenName};
 use crate::Engen;
 

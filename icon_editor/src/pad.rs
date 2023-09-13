@@ -4,11 +4,11 @@ use workflow_visualizer::bevy_ecs::prelude::{
     Commands, Entity, IntoSystemConfigs, Query, Res, ResMut, Resource, With,
 };
 use workflow_visualizer::{
-    bevy_ecs, ActiveInteraction, Attach, BundleExtension, BundlePlacement, BundledIcon, Button,
-    ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap, IconBitmapRequest, IconHandle,
-    IconScale, Interactable, InteractionTracker, InterfaceContext, Panel, PanelTag, PanelType,
-    Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit, SyncPoint, Text,
-    TextValue, TextWrapStyle, Triggered, Visualizer,
+    bevy_ecs, ActiveInteraction, Attach, BitmapIconScale, BundleExtension, BundlePlacement,
+    BundledIcon, Button, ButtonBorder, ButtonType, Color, GridPoint, Icon, IconBitmap,
+    IconBitmapRequest, IconHandle, Interactable, InteractionTracker, InterfaceContext, Panel,
+    PanelTag, PanelType, Position, RawMarker, ResponsiveGridPoint, ResponsiveGridView,
+    ResponsiveUnit, SyncPoint, Text, TextValue, TextWrapStyle, Triggered, Visualizer,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
@@ -70,7 +70,9 @@ pub(crate) fn pad_icons(mut pad: ResMut<Pad>, mut cmd: Commands) {
                 .spawn(
                     Icon::new(
                         IconHandles::Square,
-                        IconScale::Custom(RawMarker::from(Pad::ICON_MARKERS).to_pixel() as u32),
+                        BitmapIconScale::Custom(
+                            RawMarker::from(Pad::ICON_MARKERS).to_pixel() as u32
+                        ),
                         Pad::PAD_LAYER - 1,
                         color_from_coverage(0),
                     )

@@ -47,10 +47,6 @@ pub fn tessellate_svg(svg: SvgData) -> Option<TessellatedSvg> {
         for node in svg.root.descendants() {
             if let usvg::NodeKind::Path(ref p) = *node.borrow() {
                 if let Some(ref fill) = p.fill {
-                    let _color = match fill.paint {
-                        usvg::Paint::Color(c) => c,
-                        _ => FALLBACK_COLOR,
-                    };
                     fill_tess
                         .tessellate(
                             convert_path(p),
@@ -75,8 +71,8 @@ pub fn tessellate_svg(svg: SvgData) -> Option<TessellatedSvg> {
         println!("{:?}", geometry.vertices.len());
         println!("{:?}", geometry.indices.len());
         for vertex in geometry.vertices.iter_mut() {
-            vertex.x /= size.width();
-            vertex.y /= size.height();
+            vertex.x /= _view_box.rect.width();
+            vertex.y /= _view_box.rect.height();
         }
         return Some(TessellatedSvg::new(geometry));
     }
@@ -100,10 +96,10 @@ impl StrokeVertexConstructor<RawPosition> for Ctor {
 #[cfg(test)]
 #[test]
 fn tester() {
-    let tessellated = tessellate_svg(include_bytes!("svg/microchip-solid.svg").to_vec());
+    let tessellated = tessellate_svg(include_bytes!("svg/indicator.svg").to_vec());
     if let Some(tess) = tessellated {
         std::fs::write(
-            "/home/omi-voshuli/Desktop/dev/workflow_visualizer/workflow_visualizer/src/svg_icon/tessellated_svg/microchip-solid.tess",
+            "/home/omi-voshuli/Desktop/dev/workflow_visualizer/workflow_visualizer/src/svg_icon/tessellated_svg/indicator.tess",
                        serde_json::to_string(&tess).expect("serialize")).expect("write");
     }
 }
@@ -121,7 +117,7 @@ impl BundledSvg {
                     .expect("svg load")
             }
             BundledSvg::Test => {
-                serde_json::from_slice(include_bytes!("tessellated_svg/microchip-solid.tess"))
+                serde_json::from_slice(include_bytes!("tessellated_svg/indicator.tess"))
                     .expect("svg load")
             }
         }

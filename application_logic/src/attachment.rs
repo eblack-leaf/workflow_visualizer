@@ -1,6 +1,6 @@
 use workflow_visualizer::bevy_ecs::prelude::{IntoSystemConfigs, ResMut};
 use workflow_visualizer::{
-    Attach, BundledIcon, BundledSvg, IconBitmap, IconBitmapRequest, IconHandle, Idle,
+    Attach, BundledIcon, BundledSvg, IconBitmap, IconBitmapRequest, IconHandle, Idle, ImageRequest,
     ResourceHandle, SvgRequest, SyncPoint, TessellatedSvg, Visualizer,
 };
 
@@ -32,34 +32,7 @@ impl Attach for EntryAttachment {
         visualizer.add_event::<ReadOtp>();
         visualizer.add_event::<EntryAddToken>();
         visualizer.add_event::<EntryRemoveToken>();
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::Edit.handle(),
-            BundledSvg::Test.tessellation(),
-        ));
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::Add.handle(),
-            BundledSvg::Activity.tessellation(),
-        ));
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::PageLeft.handle(),
-            BundledSvg::Activity.tessellation(),
-        ));
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::PageRight.handle(),
-            BundledSvg::Activity.tessellation(),
-        ));
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::Run.handle(),
-            BundledSvg::Activity.tessellation(),
-        ));
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::Delete.handle(),
-            BundledSvg::Activity.tessellation(),
-        ));
-        visualizer.spawn(SvgRequest::new(
-            IconHandles::Generate.handle(),
-            BundledSvg::Activity.tessellation(),
-        ));
+        crate::resources::add(visualizer);
         visualizer
             .job
             .container

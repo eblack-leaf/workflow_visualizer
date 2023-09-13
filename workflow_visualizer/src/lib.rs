@@ -17,9 +17,10 @@ pub use grid::{
     RawMarker, RawMarkerGrouping, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit,
     ResponsiveView,
 };
+pub use icon_scaling::IconScale;
 pub use images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageLoaded, ImageOrientations, ImageRequest,
-    ImageSizes, ImageTag,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageIcon, ImageIconTag, ImageLoaded,
+    ImageOrientations, ImageRequest, ImageSizes, ImageTag,
 };
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
@@ -33,9 +34,7 @@ pub use interaction::{
 pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use orientation::{AspectRatio, Orientation};
 pub use render::{Render, RenderPassHandle, RenderPhase};
-pub use svg_icon::{
-    BundledSvg, SvgData, SvgIcon, SvgIconScale, SvgRequest, SvgTag, TessellatedSvg,
-};
+pub use svg_icon::{BundledSvg, SvgData, SvgIcon, SvgRequest, SvgTag, TessellatedSvg};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
 pub use wgpu;
@@ -53,7 +52,7 @@ pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconScale, IconTag,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconTag,
 };
 pub use crate::job::Job;
 pub use crate::line::{Line, LineRender, LineTag};
@@ -87,6 +86,7 @@ mod focus;
 mod gfx;
 mod grid;
 mod icon;
+mod icon_scaling;
 mod images;
 mod instance;
 mod interaction;

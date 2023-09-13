@@ -33,18 +33,6 @@ impl<Data: bytemuck::Pod + bytemuck::Zeroable> Uniform<Data> {
     }
 }
 
-pub fn vertex_bind_group_layout_entry(binding: u32) -> BindGroupLayoutEntry {
-    wgpu::BindGroupLayoutEntry {
-        binding,
-        visibility: wgpu::ShaderStages::VERTEX,
-        ty: wgpu::BindingType::Buffer {
-            ty: wgpu::BufferBindingType::Uniform,
-            has_dynamic_offset: false,
-            min_binding_size: None,
-        },
-        count: None,
-    }
-}
 #[allow(unused)]
 pub type AlignedUniformData<Repr> = [Repr; 4];
 pub struct AlignedUniform<Repr: Default + Copy + Clone + Pod + Zeroable> {

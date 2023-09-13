@@ -102,10 +102,7 @@ impl Render for PanelRenderer {
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
-            multisample: wgpu::MultisampleState {
-                count: msaa.requested(),
-                ..wgpu::MultisampleState::default()
-            },
+            multisample: msaa.multisample_state(),
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: "fragment_entry",

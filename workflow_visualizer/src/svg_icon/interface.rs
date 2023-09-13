@@ -1,3 +1,4 @@
+use crate::icon_scaling::IconScale;
 use crate::{
     Area, Color, Disabled, EnableVisibility, InterfaceContext, Layer, Position, ResourceHandle,
     Section, Tag, Visibility,
@@ -6,7 +7,6 @@ use bevy_ecs::bundle::Bundle;
 use bevy_ecs::component::Component;
 use bevy_ecs::query::{Changed, Without};
 use bevy_ecs::system::Query;
-use serde::{Deserialize, Serialize};
 
 #[derive(Bundle)]
 pub struct SvgIcon {
@@ -18,34 +18,11 @@ pub struct SvgIcon {
     enable_visibility: EnableVisibility,
     cache: Cache,
     difference: Difference,
-    pub scale: SvgIconScale,
+    pub scale: IconScale,
 }
-#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Debug, Serialize, Deserialize)]
-pub enum SvgIconScale {
-    Custom(u32),
-    Asymmetrical((u32, u32)),
-}
-impl From<u32> for SvgIconScale {
-    fn from(value: u32) -> Self {
-        Self::Custom(value)
-    }
-}
-impl SvgIconScale {
-    pub fn as_area(&self) -> Area<InterfaceContext> {
-        match &self {
-            SvgIconScale::Custom(dim) => Area::from((*dim, *dim)),
-            SvgIconScale::Asymmetrical((width, height)) => Area::from((*width, *height)),
-        }
-    }
-    pub fn width(&self) -> f32 {
-        self.as_area().width
-    }
-    pub fn height(&self) -> f32 {
-        self.as_area().height
-    }
-}
+
 pub(crate) fn scale_change(
-    mut svgs: Query<(&SvgIconScale, &mut Area<InterfaceContext>), Changed<SvgIconScale>>,
+    mut svgs: Query<(&IconScale, &mut Area<InterfaceContext>), Changed<IconScale>>,
 ) {
     for (scale, mut area) in svgs.iter_mut() {
         area.width = scale.width();
@@ -53,7 +30,7 @@ pub(crate) fn scale_change(
     }
 }
 impl SvgIcon {
-    pub fn new<H: Into<ResourceHandle>, L: Into<Layer>, C: Into<Color>, S: Into<SvgIconScale>>(
+    pub fn new<H: Into<ResourceHandle>, L: Into<Layer>, C: Into<Color>, S: Into<IconScale>>(
         handle: H,
         scale: S,
         layer: L,
