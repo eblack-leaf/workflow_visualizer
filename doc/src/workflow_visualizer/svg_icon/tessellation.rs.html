@@ -137,6 +137,11 @@
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::svg_icon::svg_glue::{convert_path, convert_stroke, FALLBACK_COLOR};
 <span class="kw">use </span><span class="kw">crate</span>::svg_icon::SvgData;
 <span class="kw">use crate</span>::{RawPosition, ResourceHandle};
@@ -239,16 +244,17 @@
 <span class="attr">#[cfg(test)]
 #[test]
 </span><span class="kw">fn </span>tester() {
-    <span class="kw">let </span>tessellated = tessellate_svg(<span class="macro">include_bytes!</span>(<span class="string">&quot;svg/activity.svg&quot;</span>).to_vec());
+    <span class="kw">let </span>tessellated = tessellate_svg(<span class="macro">include_bytes!</span>(<span class="string">&quot;svg/microchip-solid.svg&quot;</span>).to_vec());
     <span class="kw">if let </span><span class="prelude-val">Some</span>(tess) = tessellated {
         std::fs::write(
-            <span class="string">&quot;/home/omi-voshuli/Desktop/dev/workflow_visualizer/workflow_visualizer/src/svg_icon/tessellated_svg/activity.tess&quot;</span>,
+            <span class="string">&quot;/home/omi-voshuli/Desktop/dev/workflow_visualizer/workflow_visualizer/src/svg_icon/tessellated_svg/microchip-solid.tess&quot;</span>,
                        serde_json::to_string(<span class="kw-2">&amp;</span>tess).expect(<span class="string">&quot;serialize&quot;</span>)).expect(<span class="string">&quot;write&quot;</span>);
     }
 }
 <span class="attr">#[allow(unused)]
 </span><span class="kw">pub enum </span>BundledSvg {
     Activity,
+    Test,
 }
 <span class="kw">impl </span>BundledSvg {
     <span class="attr">#[allow(unused)]
@@ -256,6 +262,10 @@
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self </span>{
             BundledSvg::Activity =&gt; {
                 serde_json::from_slice(<span class="macro">include_bytes!</span>(<span class="string">&quot;tessellated_svg/activity.tess&quot;</span>))
+                    .expect(<span class="string">&quot;svg load&quot;</span>)
+            }
+            BundledSvg::Test =&gt; {
+                serde_json::from_slice(<span class="macro">include_bytes!</span>(<span class="string">&quot;tessellated_svg/microchip-solid.tess&quot;</span>))
                     .expect(<span class="string">&quot;svg load&quot;</span>)
             }
         }

@@ -138,6 +138,11 @@
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>lyon::math::Point;
 <span class="kw">use </span>lyon::path::PathEvent;
 <span class="kw">use </span>lyon::tessellation;
@@ -179,62 +184,67 @@
                     <span class="prelude-val">None
                 </span>}
             }
-            <span class="prelude-val">Some</span>(segment) =&gt; {
-                <span class="kw">match </span>segment {
-                    PathSegment::MoveTo(point) =&gt; {
-                        <span class="kw">if </span><span class="self">self</span>.needs_end {
-                            <span class="kw">let </span>last = <span class="self">self</span>.prev;
-                            <span class="kw">let </span>first = <span class="self">self</span>.first;
-                            <span class="self">self</span>.needs_end = <span class="bool-val">false</span>;
-                            <span class="self">self</span>.prev = create_point(<span class="kw-2">&amp;</span>(point.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(point.y <span class="kw">as </span>f64));
-                            <span class="self">self</span>.deferred = <span class="prelude-val">Some</span>(PathEvent::Begin { at: <span class="self">self</span>.prev });
-                            <span class="self">self</span>.first = <span class="self">self</span>.prev;
-                            <span class="prelude-val">Some</span>(PathEvent::End {
-                                last,
-                                first,
-                                close: <span class="bool-val">false</span>,
-                            })
-                        } <span class="kw">else </span>{
-                            <span class="self">self</span>.first = create_point(<span class="kw-2">&amp;</span>(point.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(point.y <span class="kw">as </span>f64));
-                            <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
-                            <span class="prelude-val">Some</span>(PathEvent::Begin { at: <span class="self">self</span>.first })
-                        }
-                    }
-                    PathSegment::LineTo(point) =&gt; {
-                        <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
-                        <span class="kw">let </span>from = <span class="self">self</span>.prev;
-                        <span class="self">self</span>.prev = create_point(<span class="kw-2">&amp;</span>(point.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(point.y <span class="kw">as </span>f64));
-                        <span class="prelude-val">Some</span>(PathEvent::Line {
-                            from,
-                            to: <span class="self">self</span>.prev,
-                        })
-                    }
-                    PathSegment::QuadTo(a, b) =&gt; {
-                        <span class="comment">// PathEvent::Quad?
-                        </span><span class="prelude-val">None
-                    </span>}
-                    PathSegment::CubicTo(a, b, c) =&gt; {
-                        <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
-                        <span class="kw">let </span>from = <span class="self">self</span>.prev;
-                        <span class="self">self</span>.prev = create_point(<span class="kw-2">&amp;</span>(c.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(c.y <span class="kw">as </span>f64));
-                        <span class="prelude-val">Some</span>(PathEvent::Cubic {
-                            from,
-                            ctrl1: create_point(<span class="kw-2">&amp;</span>(a.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(a.y <span class="kw">as </span>f64)),
-                            ctrl2: create_point(<span class="kw-2">&amp;</span>(b.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(b.y <span class="kw">as </span>f64)),
-                            to: <span class="self">self</span>.prev,
-                        })
-                    }
-                    PathSegment::Close =&gt; {
+            <span class="prelude-val">Some</span>(segment) =&gt; <span class="kw">match </span>segment {
+                PathSegment::MoveTo(point) =&gt; {
+                    <span class="kw">if </span><span class="self">self</span>.needs_end {
+                        <span class="kw">let </span>last = <span class="self">self</span>.prev;
+                        <span class="kw">let </span>first = <span class="self">self</span>.first;
                         <span class="self">self</span>.needs_end = <span class="bool-val">false</span>;
-                        <span class="self">self</span>.prev = <span class="self">self</span>.first;
+                        <span class="self">self</span>.prev = create_point(<span class="kw-2">&amp;</span>(point.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(point.y <span class="kw">as </span>f64));
+                        <span class="self">self</span>.deferred = <span class="prelude-val">Some</span>(PathEvent::Begin { at: <span class="self">self</span>.prev });
+                        <span class="self">self</span>.first = <span class="self">self</span>.prev;
                         <span class="prelude-val">Some</span>(PathEvent::End {
-                            last: <span class="self">self</span>.prev,
-                            first: <span class="self">self</span>.first,
-                            close: <span class="bool-val">true</span>,
+                            last,
+                            first,
+                            close: <span class="bool-val">false</span>,
                         })
+                    } <span class="kw">else </span>{
+                        <span class="self">self</span>.first = create_point(<span class="kw-2">&amp;</span>(point.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(point.y <span class="kw">as </span>f64));
+                        <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
+                        <span class="prelude-val">Some</span>(PathEvent::Begin { at: <span class="self">self</span>.first })
                     }
                 }
-            }
+                PathSegment::LineTo(point) =&gt; {
+                    <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
+                    <span class="kw">let </span>from = <span class="self">self</span>.prev;
+                    <span class="self">self</span>.prev = create_point(<span class="kw-2">&amp;</span>(point.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(point.y <span class="kw">as </span>f64));
+                    <span class="prelude-val">Some</span>(PathEvent::Line {
+                        from,
+                        to: <span class="self">self</span>.prev,
+                    })
+                }
+                PathSegment::QuadTo(a, b) =&gt; {
+                    <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
+                    <span class="kw">let </span>from = <span class="self">self</span>.prev;
+                    <span class="kw">let </span>to = create_point(<span class="kw-2">&amp;</span>(b.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(b.y <span class="kw">as </span>f64));
+                    <span class="self">self</span>.prev = to;
+                    <span class="prelude-val">Some</span>(PathEvent::Quadratic {
+                        from,
+                        ctrl: create_point(<span class="kw-2">&amp;</span>(a.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(a.y <span class="kw">as </span>f64)),
+                        to,
+                    })
+                }
+                PathSegment::CubicTo(a, b, c) =&gt; {
+                    <span class="self">self</span>.needs_end = <span class="bool-val">true</span>;
+                    <span class="kw">let </span>from = <span class="self">self</span>.prev;
+                    <span class="self">self</span>.prev = create_point(<span class="kw-2">&amp;</span>(c.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(c.y <span class="kw">as </span>f64));
+                    <span class="prelude-val">Some</span>(PathEvent::Cubic {
+                        from,
+                        ctrl1: create_point(<span class="kw-2">&amp;</span>(a.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(a.y <span class="kw">as </span>f64)),
+                        ctrl2: create_point(<span class="kw-2">&amp;</span>(b.x <span class="kw">as </span>f64), <span class="kw-2">&amp;</span>(b.y <span class="kw">as </span>f64)),
+                        to: <span class="self">self</span>.prev,
+                    })
+                }
+                PathSegment::Close =&gt; {
+                    <span class="self">self</span>.needs_end = <span class="bool-val">false</span>;
+                    <span class="self">self</span>.prev = <span class="self">self</span>.first;
+                    <span class="prelude-val">Some</span>(PathEvent::End {
+                        last: <span class="self">self</span>.prev,
+                        first: <span class="self">self</span>.first,
+                        close: <span class="bool-val">true</span>,
+                    })
+                }
+            },
         }
     }
 }
