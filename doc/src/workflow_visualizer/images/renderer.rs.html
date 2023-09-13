@@ -354,6 +354,7 @@
 <a href="#354" id="354">354</a>
 <a href="#355" id="355">355</a>
 <a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::event::EventWriter;
 <span class="kw">use </span>std::collections::HashMap;
 
@@ -447,10 +448,11 @@
 <span class="attr">#[derive(Component, Clone, Serialize, Deserialize, Debug)]
 </span><span class="kw">pub struct </span>ImageRequest {
     <span class="kw">pub </span>handle: ResourceHandle,
-    <span class="kw">pub </span>data: Vec&lt;u8&gt;,
+    <span class="kw">pub </span>data: ImageData,
 }
+<span class="kw">pub type </span>ImageData = Vec&lt;u8&gt;;
 <span class="kw">impl </span>ImageRequest {
-    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ResourceHandle&gt;, D: Into&lt;Vec&lt;u8&gt;&gt;&gt;(handle: IN, data: D) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new&lt;IN: Into&lt;ResourceHandle&gt;, D: Into&lt;ImageData&gt;&gt;(handle: IN, data: D) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             handle: handle.into(),
             data: data.into(),
@@ -458,13 +460,13 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageData {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ImageBackend {
     <span class="attr">#[allow(unused)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) atlas: TextureAtlas,
     <span class="kw">pub</span>(<span class="kw">crate</span>) bind_group: TextureBindGroup,
     <span class="kw">pub</span>(<span class="kw">crate</span>) coordinates: TextureCoordinates,
 }
-<span class="kw">impl </span>ImageData {
+<span class="kw">impl </span>ImageBackend {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         atlas: TextureAtlas,
         bind_group: TextureBindGroup,
@@ -484,7 +486,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_groups: HashMap&lt;Entity, ImageRenderGroup&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) vertex_buffer: wgpu::Buffer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) sampler_bind_group: wgpu::BindGroup,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) images: HashMap&lt;ResourceHandle, ImageData&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) images: HashMap&lt;ResourceHandle, ImageBackend&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_layout: wgpu::BindGroupLayout,
     <span class="kw">pub</span>(<span class="kw">crate</span>) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
@@ -542,7 +544,7 @@
             </span>.insert(request.handle, Orientation::new(dimensions.dimensions));
         image_renderer.images.insert(
             request.handle,
-            ImageData::new(atlas, bind_group, coordinates),
+            ImageBackend::new(atlas, bind_group, coordinates),
         );
         event_writer.send(ImageLoaded(request.handle));
         cmd.entity(entity).despawn();
