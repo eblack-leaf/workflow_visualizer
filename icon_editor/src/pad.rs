@@ -161,7 +161,7 @@ pub(crate) fn setup(mut cmd: Commands) {
             Panel::new(
                 PanelType::BorderedFlat,
                 Pad::PAD_LAYER,
-                Color::MEDIUM_GREY,
+                Color::GREY_MEDIUM,
                 Color::OFF_WHITE,
             )
             .responsively_viewed(ResponsiveGridView::all_same((
@@ -217,7 +217,7 @@ pub(crate) fn setup(mut cmd: Commands) {
             Button::new(
                 ButtonType::Press,
                 Pad::PAD_LAYER,
-                Color::DARK_GREY,
+                Color::GREY_DARK,
                 Color::OFF_WHITE,
                 IconHandles::ArrowLeft,
                 "",
@@ -242,7 +242,7 @@ pub(crate) fn setup(mut cmd: Commands) {
             Button::new(
                 ButtonType::Press,
                 Pad::PAD_LAYER,
-                Color::DARK_GREY,
+                Color::GREY_DARK,
                 Color::OFF_WHITE,
                 IconHandles::ArrowRight,
                 "",
@@ -266,7 +266,7 @@ pub(crate) fn setup(mut cmd: Commands) {
             Button::new(
                 ButtonType::Press,
                 Pad::PAD_PADDING,
-                Color::DARK_GREY,
+                Color::GREY_DARK,
                 Color::OFF_WHITE,
                 IconHandles::Generate,
                 "write-out",

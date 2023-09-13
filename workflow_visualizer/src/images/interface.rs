@@ -132,6 +132,7 @@ pub enum BundledImageIcon {
     LayoutFluid,
     Pencil,
     Plus,
+    CompassDrafting,
 }
 impl BundledImageIcon {
     pub fn data(&self) -> ImageData {
@@ -150,6 +151,9 @@ impl BundledImageIcon {
             }
             BundledImageIcon::Pencil => include_bytes!("bundled_image_icons/pencil.png").to_vec(),
             BundledImageIcon::Plus => include_bytes!("bundled_image_icons/plus.png").to_vec(),
+            BundledImageIcon::CompassDrafting => {
+                include_bytes!("bundled_image_icons/compass-drafting-solid.png").to_vec()
+            }
         }
     }
 }

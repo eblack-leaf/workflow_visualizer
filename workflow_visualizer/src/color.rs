@@ -51,31 +51,62 @@ impl ColorBuilder {
         )
     }
 }
+macro_rules! medium {
+    ($color:expr) => {
+        (
+            $color.0 * Self::MEDIUM_FACTOR,
+            $color.1 * Self::MEDIUM_FACTOR,
+            $color.2 * Self::MEDIUM_FACTOR,
+        )
+    };
+}
+macro_rules! dark {
+    ($color:expr) => {
+        (
+            $color.0 * Self::DARK_FACTOR,
+            $color.1 * Self::DARK_FACTOR,
+            $color.2 * Self::DARK_FACTOR,
+        )
+    };
+}
+macro_rules! light {
+    ($color:expr) => {
+        (
+            $color.0 * Self::LIGHT_FACTOR,
+            $color.1 * Self::LIGHT_FACTOR,
+            $color.2 * Self::LIGHT_FACTOR,
+        )
+    };
+}
 impl Color {
+    pub(crate) const MEDIUM_FACTOR: f32 = 0.5;
+    pub(crate) const DARK_FACTOR: f32 = 0.25;
+    pub(crate) const LIGHT_FACTOR: f32 = 1.2;
     pub const WHITE: Rgb = (1.0, 1.0, 1.0);
     pub const DARK_ORANGE: Rgb = (0.035, 0.0125, 0.00);
-    pub const DARK_CYAN: Rgb = (0.0, 0.025, 0.0125);
-    pub const CYAN: Rgb = (0.0, 0.75, 0.35);
-    pub const CYAN_MEDIUM: Rgb = (0.0, 0.45, 0.145);
+    pub const CYAN_DARK: Rgb = dark!(Self::CYAN);
+    pub const CYAN: Rgb = (0.0, 0.7, 0.58);
+    pub const CYAN_MEDIUM: Rgb = medium!(Self::CYAN);
     pub const OFF_WHITE: Rgb = (0.8, 0.8, 0.8);
-    pub const DARK_GREY: Rgb = (0.025, 0.025, 0.025);
-    pub const MEDIUM_GREY: Rgb = (0.05, 0.05, 0.05);
+    pub const GREY_DARK: Rgb = dark!(Self::GREY);
+    pub const GREY_MEDIUM: Rgb = medium!(Self::GREY);
     pub const GREY: Rgb = (0.25, 0.25, 0.25);
     pub const BLACK: Rgb = (0.0, 0.0, 0.0);
-    pub const LIGHT_RED: Rgb = (0.9, 0.02, 0.02);
-    pub const RED: Rgb = (0.8, 0.01, 0.01);
-    pub const MEDIUM_RED: Rgb = (0.4, 0.005, 0.005);
-    pub const DARK_RED: Rgb = (0.2, 0.0025, 0.0025);
-    pub const LIGHT_RED_ORANGE: Rgb = (0.9, 0.35, 0.1);
-    pub const RED_ORANGE: Rgb = (0.7, 0.225, 0.045);
-    pub const MEDIUM_RED_ORANGE: Rgb = (0.4, 0.125, 0.025);
-    pub const DARK_RED_ORANGE: Rgb = (0.2, 0.07, 0.0125);
-    pub const LIGHT_GREEN: Rgb = (0.02, 0.9, 0.02);
-    pub const GREEN: Rgb = (0.01, 0.7, 0.01);
-    pub const MEDIUM_GREEN: Rgb = (0.001, 0.16, 0.001);
-    pub const DARK_GREEN: Rgb = (0.0005, 0.08, 0.0005);
-    pub const BLUE_DARK: Rgb = (0.0, 0.05, 0.10);
-    pub const BLUE: Rgb = (0.1, 0.1, 0.9);
+    pub const LIGHT_RED: Rgb = light!(Self::RED);
+    pub const RED: Rgb = (0.6, 0.1, 0.0);
+    pub const RED_MEDIUM: Rgb = medium!(Self::RED);
+    pub const DARK_RED: Rgb = dark!(Self::RED);
+    pub const LIGHT_RED_ORANGE: Rgb = light!(Self::RED_ORANGE);
+    pub const RED_ORANGE: Rgb = (0.9, 0.45, 0.0);
+    pub const RED_ORANGE_MEDIUM: Rgb = medium!(Self::RED_ORANGE);
+    pub const RED_ORANGE_DARK: Rgb = dark!(Self::RED_ORANGE);
+    pub const LIGHT_GREEN: Rgb = light!(Self::GREEN);
+    pub const GREEN: Rgb = (0.0, 0.7, 0.0);
+    pub const MEDIUM_GREEN: Rgb = medium!(Self::GREEN);
+    pub const DARK_GREEN: Rgb = dark!(Self::GREEN);
+    pub const BLUE_DARK: Rgb = dark!(Self::BLUE);
+    pub const BLUE: Rgb = (0.0, 0.25, 0.5);
+    pub const BLUE_MEDIUM: Rgb = medium!(Self::BLUE);
     pub const OFF_BLACK: Rgb = (0.005, 0.005, 0.005);
     pub const BLANK: Rgba = (0.0, 0.0, 0.0, 0.0);
     pub fn from_rgb(red: f32, green: f32, blue: f32) -> Self {

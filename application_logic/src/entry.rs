@@ -139,16 +139,16 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Panel::new(
             PanelType::Flat,
             6,
-            Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(1f32),
-            Color::from(Color::MEDIUM_RED_ORANGE).with_alpha(1f32),
+            Color::from(Color::RED_ORANGE_MEDIUM).with_alpha(1f32),
+            Color::from(Color::RED_ORANGE_MEDIUM).with_alpha(1f32),
         ))
         .id();
     let delete_panel = cmd
         .spawn(Panel::new(
             PanelType::Flat,
             7,
-            Color::from(Color::MEDIUM_RED).with_alpha(1f32),
-            Color::from(Color::MEDIUM_RED).with_alpha(1f32),
+            Color::from(Color::RED_MEDIUM).with_alpha(1f32),
+            Color::from(Color::RED_MEDIUM).with_alpha(1f32),
         ))
         .id();
     let name = cmd
@@ -176,7 +176,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Button::new(
             ButtonType::Press,
             4,
-            Color::from(Color::LIGHT_GREEN).with_alpha(1f32),
+            Color::from(Color::GREEN).with_alpha(1f32),
             Color::from(Color::DARK_GREEN).with_alpha(1f32),
             IconHandles::Generate.handle(),
             "",
@@ -189,8 +189,8 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Button::new(
             ButtonType::Press,
             4,
-            Color::from(Color::LIGHT_RED_ORANGE).with_alpha(1f32),
-            Color::from(Color::DARK_RED_ORANGE).with_alpha(1f32),
+            Color::from(Color::RED_ORANGE).with_alpha(1f32),
+            Color::from(Color::RED_ORANGE_DARK).with_alpha(1f32),
             IconHandles::Edit.handle(),
             "",
             15,
@@ -202,7 +202,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Button::new(
             ButtonType::Press,
             4,
-            Color::from(Color::LIGHT_RED).with_alpha(1f32),
+            Color::from(Color::RED).with_alpha(1f32),
             Color::from(Color::DARK_RED).with_alpha(1f32),
             IconHandles::Delete.handle(),
             "",
