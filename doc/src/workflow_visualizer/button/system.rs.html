@@ -325,9 +325,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 <span class="kw">use crate</span>::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
-    DeviceContext, Icon, IconHandle, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag,
-    PanelType, Position, RawMarker, ResourceHandle, ScaleFactor, Section, SvgIcon, Text, TextValue,
-    TextWrapStyle, Toggled,
+    DeviceContext, Icon, IconHandle, ImageIcon, InterfaceContext, Layer, MonoSpacedFont, Panel,
+    PanelTag, PanelType, Position, RawMarker, ResourceHandle, ScaleFactor, Section, SvgIcon, Text,
+    TextValue, TextWrapStyle, Toggled,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(
@@ -390,7 +390,7 @@
             ))
             .id();
         <span class="kw">let </span>icon = cmd
-            .spawn(SvgIcon::new(
+            .spawn(ImageIcon::new(
                 <span class="kw-2">*</span>icon_id,
                 scaling.icon,
                 <span class="kw-2">*</span>layer - Layer::from(<span class="number">1</span>),

@@ -100,13 +100,15 @@
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::ButtonAttachment;
 
+<span class="kw">use </span><span class="kw">crate</span>::icon_scaling::IconScale;
 <span class="kw">use crate</span>::{
-    Color, IconHandle, IconScale, Interactable, InterfaceContext, Layer, ResourceHandle, Section,
-    SvgIconScale, Tag, TextScale, TextValue,
+    Color, Interactable, InterfaceContext, Layer, ResourceHandle, Section, Tag, TextScale,
+    TextValue,
 };
 
 <span class="kw">mod </span>attachment;
@@ -141,7 +143,7 @@
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>Scaling {
     <span class="kw">pub </span>text: TextScale,
-    <span class="kw">pub </span>icon: SvgIconScale,
+    <span class="kw">pub </span>icon: IconScale,
 }
 
 <span class="attr">#[derive(Component, Copy, Clone)]
@@ -163,7 +165,7 @@
         S: Into&lt;String&gt;,
         H: Into&lt;ResourceHandle&gt;,
         TS: Into&lt;TextScale&gt;,
-        IS: Into&lt;SvgIconScale&gt;,
+        IS: Into&lt;IconScale&gt;,
     &gt;(
         button_type: ButtonType,
         layer: L,

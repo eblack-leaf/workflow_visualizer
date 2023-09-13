@@ -129,9 +129,10 @@
     RawMarker, RawMarkerGrouping, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit,
     ResponsiveView,
 };
+<span class="kw">pub use </span>icon_scaling::IconScale;
 <span class="kw">pub use </span>images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageLoaded, ImageOrientations, ImageRequest,
-    ImageSizes, ImageTag,
+    AspectRatioAlignedDimension, Image, ImageFade, ImageIcon, ImageIconTag, ImageLoaded,
+    ImageOrientations, ImageRequest, ImageSizes, ImageTag,
 };
 <span class="kw">pub use </span>instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,
@@ -145,9 +146,7 @@
 <span class="kw">pub use </span>job::{Exit, Idle, JobSyncPoint, Tag};
 <span class="kw">pub use </span>orientation::{AspectRatio, Orientation};
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
-<span class="kw">pub use </span>svg_icon::{
-    BundledSvg, SvgData, SvgIcon, SvgIconScale, SvgRequest, SvgTag, TessellatedSvg,
-};
+<span class="kw">pub use </span>svg_icon::{BundledSvg, SvgData, SvgIcon, SvgRequest, SvgTag, TessellatedSvg};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
 <span class="kw">pub use </span>wgpu;
@@ -165,7 +164,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxOptions, GfxSurface};
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">pub use </span><span class="kw">crate</span>::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconScale, IconTag,
+    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconTag,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::job::Job;
 <span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender, LineTag};
@@ -199,6 +198,7 @@
 <span class="kw">mod </span>gfx;
 <span class="kw">mod </span>grid;
 <span class="kw">mod </span>icon;
+<span class="kw">mod </span>icon_scaling;
 <span class="kw">mod </span>images;
 <span class="kw">mod </span>instance;
 <span class="kw">mod </span>interaction;
