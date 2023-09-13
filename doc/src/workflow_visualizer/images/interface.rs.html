@@ -369,6 +369,10 @@
 <a href="#369" id="369">369</a>
 <a href="#370" id="370">370</a>
 <a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -503,6 +507,7 @@
     LayoutFluid,
     Pencil,
     Plus,
+    CompassDrafting,
 }
 <span class="kw">impl </span>BundledImageIcon {
     <span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ImageData {
@@ -521,6 +526,9 @@
             }
             BundledImageIcon::Pencil =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/pencil.png&quot;</span>).to_vec(),
             BundledImageIcon::Plus =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/plus.png&quot;</span>).to_vec(),
+            BundledImageIcon::CompassDrafting =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/compass-drafting-solid.png&quot;</span>).to_vec()
+            }
         }
     }
 }

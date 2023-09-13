@@ -51,14 +51,12 @@
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
-<a href="#54" id="54">54</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Component;
 
-<span class="kw">use </span><span class="kw">crate</span>::icon::component::IconHandle;
-<span class="kw">use crate</span>::{Area, Color, InterfaceContext, Layer, Position};
+<span class="kw">use crate</span>::{Area, Color, InterfaceContext, Layer, Position, ResourceHandle};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Attributes {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) icon_id: <span class="prelude-ty">Option</span>&lt;IconHandle&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) icon_id: <span class="prelude-ty">Option</span>&lt;ResourceHandle&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) position: <span class="prelude-ty">Option</span>&lt;Position&lt;InterfaceContext&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) area: <span class="prelude-ty">Option</span>&lt;Area&lt;InterfaceContext&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) positive_space_color: <span class="prelude-ty">Option</span>&lt;Color&gt;,
