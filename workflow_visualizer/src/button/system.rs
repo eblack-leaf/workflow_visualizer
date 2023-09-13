@@ -6,9 +6,9 @@ use crate::bundling::{Despawned, Disabled};
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
 use crate::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
-    DeviceContext, Icon, IconHandle, ImageIcon, InterfaceContext, Layer, MonoSpacedFont, Panel,
-    PanelTag, PanelType, Position, RawMarker, ResourceHandle, ScaleFactor, Section, SvgIcon, Text,
-    TextValue, TextWrapStyle, Toggled,
+    DeviceContext, ImageIcon, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType,
+    Position, RawMarker, ResourceHandle, ScaleFactor, Section, SvgIcon, Text, TextValue,
+    TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(

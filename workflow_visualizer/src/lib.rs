@@ -51,9 +51,7 @@ pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
 pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
-pub use crate::icon::{
-    BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconHandle, IconPixelData, IconTag,
-};
+pub use crate::icon::{BundledIcon, Icon, IconBitmap, IconBitmapRequest, IconPixelData, IconTag};
 pub use crate::job::Job;
 pub use crate::line::{Line, LineRender, LineTag};
 pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelTag, PanelType};

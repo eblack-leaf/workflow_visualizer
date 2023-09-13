@@ -1,9 +1,8 @@
 use crate::icon::cache::{Cache, Difference};
-use crate::icon::component::IconHandle;
 use crate::icon::renderer::IconRenderer;
 use crate::{
-    Area, Color, GfxSurface, IconScale, InterfaceContext, Layer, NullBit, Position, ScaleFactor,
-    Visibility,
+    Area, Color, GfxSurface, IconScale, InterfaceContext, Layer, NullBit, Position, ResourceHandle,
+    ScaleFactor, Visibility,
 };
 #[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::ResMut;
@@ -31,7 +30,7 @@ pub(crate) fn management(
             &Area<InterfaceContext>,
             &Layer,
             &Color,
-            &IconHandle,
+            &ResourceHandle,
             &Visibility,
             &mut Difference,
         ),
@@ -120,7 +119,7 @@ pub(crate) fn positive_space_color_diff(
 }
 
 pub(crate) fn icon_id_diff(
-    mut icons: Query<(&IconHandle, &mut Cache, &mut Difference), Changed<IconHandle>>,
+    mut icons: Query<(&ResourceHandle, &mut Cache, &mut Difference), Changed<ResourceHandle>>,
 ) {
     for (id, mut cache, mut difference) in icons.iter_mut() {
         if let Some(cached_id) = cache.attributes.icon_id.as_ref() {

@@ -1,10 +1,9 @@
 use bevy_ecs::prelude::Component;
 
-use crate::icon::component::IconHandle;
-use crate::{Area, Color, InterfaceContext, Layer, Position};
+use crate::{Area, Color, InterfaceContext, Layer, Position, ResourceHandle};
 
 pub(crate) struct Attributes {
-    pub(crate) icon_id: Option<IconHandle>,
+    pub(crate) icon_id: Option<ResourceHandle>,
     pub(crate) position: Option<Position<InterfaceContext>>,
     pub(crate) area: Option<Area<InterfaceContext>>,
     pub(crate) positive_space_color: Option<Color>,

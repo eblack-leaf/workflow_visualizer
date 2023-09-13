@@ -1,8 +1,5 @@
 use workflow_visualizer::bevy_ecs::prelude::{IntoSystemConfigs, ResMut};
-use workflow_visualizer::{
-    Attach, BundledIcon, BundledSvg, IconBitmap, IconBitmapRequest, IconHandle, Idle, ImageRequest,
-    ResourceHandle, SvgRequest, SyncPoint, TessellatedSvg, Visualizer,
-};
+use workflow_visualizer::{Attach, Idle, ResourceHandle, SyncPoint, Visualizer};
 
 use crate::entry::{EntryAddToken, EntryRemoveToken, ReadOtp};
 use crate::entry_list::{ListDimensions, ReceivedTokens};

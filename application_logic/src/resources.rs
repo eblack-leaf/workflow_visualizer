@@ -21,14 +21,14 @@ pub(crate) fn add(visualizer: &mut Visualizer) {
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Run.handle(),
-        BundledImageIcon::Home.data(),
+        BundledImageIcon::Plus.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Delete.handle(),
-        BundledImageIcon::Home.data(),
+        BundledImageIcon::AngleRight.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Generate.handle(),
-        BundledImageIcon::Home.data(),
+        BundledImageIcon::AngleLeft.data(),
     ));
 }
