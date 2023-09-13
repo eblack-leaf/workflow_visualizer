@@ -39,62 +39,67 @@ impl<'l> Iterator for PathConvIter<'l> {
                     None
                 }
             }
-            Some(segment) => {
-                match segment {
-                    PathSegment::MoveTo(point) => {
-                        if self.needs_end {
-                            let last = self.prev;
-                            let first = self.first;
-                            self.needs_end = false;
-                            self.prev = create_point(&(point.x as f64), &(point.y as f64));
-                            self.deferred = Some(PathEvent::Begin { at: self.prev });
-                            self.first = self.prev;
-                            Some(PathEvent::End {
-                                last,
-                                first,
-                                close: false,
-                            })
-                        } else {
-                            self.first = create_point(&(point.x as f64), &(point.y as f64));
-                            self.needs_end = true;
-                            Some(PathEvent::Begin { at: self.first })
-                        }
-                    }
-                    PathSegment::LineTo(point) => {
-                        self.needs_end = true;
-                        let from = self.prev;
-                        self.prev = create_point(&(point.x as f64), &(point.y as f64));
-                        Some(PathEvent::Line {
-                            from,
-                            to: self.prev,
-                        })
-                    }
-                    PathSegment::QuadTo(a, b) => {
-                        // PathEvent::Quad?
-                        None
-                    }
-                    PathSegment::CubicTo(a, b, c) => {
-                        self.needs_end = true;
-                        let from = self.prev;
-                        self.prev = create_point(&(c.x as f64), &(c.y as f64));
-                        Some(PathEvent::Cubic {
-                            from,
-                            ctrl1: create_point(&(a.x as f64), &(a.y as f64)),
-                            ctrl2: create_point(&(b.x as f64), &(b.y as f64)),
-                            to: self.prev,
-                        })
-                    }
-                    PathSegment::Close => {
+            Some(segment) => match segment {
+                PathSegment::MoveTo(point) => {
+                    if self.needs_end {
+                        let last = self.prev;
+                        let first = self.first;
                         self.needs_end = false;
-                        self.prev = self.first;
+                        self.prev = create_point(&(point.x as f64), &(point.y as f64));
+                        self.deferred = Some(PathEvent::Begin { at: self.prev });
+                        self.first = self.prev;
                         Some(PathEvent::End {
-                            last: self.prev,
-                            first: self.first,
-                            close: true,
+                            last,
+                            first,
+                            close: false,
                         })
+                    } else {
+                        self.first = create_point(&(point.x as f64), &(point.y as f64));
+                        self.needs_end = true;
+                        Some(PathEvent::Begin { at: self.first })
                     }
                 }
-            }
+                PathSegment::LineTo(point) => {
+                    self.needs_end = true;
+                    let from = self.prev;
+                    self.prev = create_point(&(point.x as f64), &(point.y as f64));
+                    Some(PathEvent::Line {
+                        from,
+                        to: self.prev,
+                    })
+                }
+                PathSegment::QuadTo(a, b) => {
+                    self.needs_end = true;
+                    let from = self.prev;
+                    let to = create_point(&(b.x as f64), &(b.y as f64));
+                    self.prev = to;
+                    Some(PathEvent::Quadratic {
+                        from,
+                        ctrl: create_point(&(a.x as f64), &(a.y as f64)),
+                        to,
+                    })
+                }
+                PathSegment::CubicTo(a, b, c) => {
+                    self.needs_end = true;
+                    let from = self.prev;
+                    self.prev = create_point(&(c.x as f64), &(c.y as f64));
+                    Some(PathEvent::Cubic {
+                        from,
+                        ctrl1: create_point(&(a.x as f64), &(a.y as f64)),
+                        ctrl2: create_point(&(b.x as f64), &(b.y as f64)),
+                        to: self.prev,
+                    })
+                }
+                PathSegment::Close => {
+                    self.needs_end = false;
+                    self.prev = self.first;
+                    Some(PathEvent::End {
+                        last: self.prev,
+                        first: self.first,
+                        close: true,
+                    })
+                }
+            },
         }
     }
 }

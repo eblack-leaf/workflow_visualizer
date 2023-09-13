@@ -34,7 +34,7 @@ impl Attach for EntryAttachment {
         visualizer.add_event::<EntryRemoveToken>();
         visualizer.spawn(SvgRequest::new(
             IconHandles::Edit.handle(),
-            BundledSvg::Activity.tessellation(),
+            BundledSvg::Test.tessellation(),
         ));
         visualizer.spawn(SvgRequest::new(
             IconHandles::Add.handle(),

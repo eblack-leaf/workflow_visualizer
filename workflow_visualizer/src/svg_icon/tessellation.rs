@@ -100,16 +100,17 @@ impl StrokeVertexConstructor<RawPosition> for Ctor {
 #[cfg(test)]
 #[test]
 fn tester() {
-    let tessellated = tessellate_svg(include_bytes!("svg/activity.svg").to_vec());
+    let tessellated = tessellate_svg(include_bytes!("svg/microchip-solid.svg").to_vec());
     if let Some(tess) = tessellated {
         std::fs::write(
-            "/home/omi-voshuli/Desktop/dev/workflow_visualizer/workflow_visualizer/src/svg_icon/tessellated_svg/activity.tess",
+            "/home/omi-voshuli/Desktop/dev/workflow_visualizer/workflow_visualizer/src/svg_icon/tessellated_svg/microchip-solid.tess",
                        serde_json::to_string(&tess).expect("serialize")).expect("write");
     }
 }
 #[allow(unused)]
 pub enum BundledSvg {
     Activity,
+    Test,
 }
 impl BundledSvg {
     #[allow(unused)]
@@ -117,6 +118,10 @@ impl BundledSvg {
         match &self {
             BundledSvg::Activity => {
                 serde_json::from_slice(include_bytes!("tessellated_svg/activity.tess"))
+                    .expect("svg load")
+            }
+            BundledSvg::Test => {
+                serde_json::from_slice(include_bytes!("tessellated_svg/microchip-solid.tess"))
                     .expect("svg load")
             }
         }
