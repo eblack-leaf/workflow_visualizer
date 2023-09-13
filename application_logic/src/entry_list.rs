@@ -154,7 +154,7 @@ pub(crate) struct EntryScale {
 
 pub(crate) fn setup_entry_scale(mut cmd: Commands) {
     let entry_scale = EntryScale {
-        button_icon_scale: 24,
+        button_icon_scale: 20,
         text_scale: 18,
     };
     cmd.insert_resource(entry_scale);

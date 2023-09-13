@@ -19,8 +19,8 @@ pub use grid::{
 };
 pub use icon_scaling::IconScale;
 pub use images::{
-    AspectRatioAlignedDimension, Image, ImageFade, ImageIcon, ImageIconTag, ImageLoaded,
-    ImageOrientations, ImageRequest, ImageSizes, ImageTag,
+    AspectRatioAlignedDimension, BundledImageIcon, Image, ImageData, ImageFade, ImageIcon,
+    ImageIconTag, ImageLoaded, ImageOrientations, ImageRequest, ImageSizes, ImageTag,
 };
 pub use instance::{
     AttributeWrite, CpuAttributeBuffer, GpuAttributeBuffer, Index, Indexer,

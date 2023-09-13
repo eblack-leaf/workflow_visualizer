@@ -8,7 +8,7 @@ use bevy_ecs::query::With;
 use bevy_ecs::system::ResMut;
 
 use crate::bundling::ResourceHandle;
-use crate::images::renderer::{ImageFade, ImageOrientations};
+use crate::images::renderer::{ImageBackend, ImageData, ImageFade, ImageOrientations};
 use crate::{
     Animate, Animation, Area, Color, Disabled, EnableVisibility, IconScale, InterfaceContext,
     Interpolation, Layer, Orientation, Position, Section, Tag, Visibility,
@@ -122,6 +122,36 @@ pub struct ImageIcon {
     image_icon_tag: ImageIconTag,
     scale: IconScale,
     color: Color,
+}
+pub enum BundledImageIcon {
+    Home,
+    AngleLeft,
+    AngleRight,
+    Camera,
+    Info,
+    LayoutFluid,
+    Pencil,
+    Plus,
+}
+impl BundledImageIcon {
+    pub fn data(&self) -> ImageData {
+        match &self {
+            BundledImageIcon::Home => include_bytes!("bundled_image_icons/home.png").to_vec(),
+            BundledImageIcon::AngleLeft => {
+                include_bytes!("bundled_image_icons/angle-left.png").to_vec()
+            }
+            BundledImageIcon::AngleRight => {
+                include_bytes!("bundled_image_icons/angle-right.png").to_vec()
+            }
+            BundledImageIcon::Camera => include_bytes!("bundled_image_icons/camera.png").to_vec(),
+            BundledImageIcon::Info => include_bytes!("bundled_image_icons/info.png").to_vec(),
+            BundledImageIcon::LayoutFluid => {
+                include_bytes!("bundled_image_icons/layout-fluid.png").to_vec()
+            }
+            BundledImageIcon::Pencil => include_bytes!("bundled_image_icons/pencil.png").to_vec(),
+            BundledImageIcon::Plus => include_bytes!("bundled_image_icons/plus.png").to_vec(),
+        }
+    }
 }
 impl ImageIcon {
     pub fn new<RH: Into<ResourceHandle>, IS: Into<IconScale>, L: Into<Layer>, C: Into<Color>>(

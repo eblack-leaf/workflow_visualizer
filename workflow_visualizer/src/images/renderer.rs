@@ -91,10 +91,11 @@ impl From<u32> for ImageFade {
 #[derive(Component, Clone, Serialize, Deserialize, Debug)]
 pub struct ImageRequest {
     pub handle: ResourceHandle,
-    pub data: Vec<u8>,
+    pub data: ImageData,
 }
+pub type ImageData = Vec<u8>;
 impl ImageRequest {
-    pub fn new<IN: Into<ResourceHandle>, D: Into<Vec<u8>>>(handle: IN, data: D) -> Self {
+    pub fn new<IN: Into<ResourceHandle>, D: Into<ImageData>>(handle: IN, data: D) -> Self {
         Self {
             handle: handle.into(),
             data: data.into(),
@@ -102,13 +103,13 @@ impl ImageRequest {
     }
 }
 
-pub(crate) struct ImageData {
+pub(crate) struct ImageBackend {
     #[allow(unused)]
     pub(crate) atlas: TextureAtlas,
     pub(crate) bind_group: TextureBindGroup,
     pub(crate) coordinates: TextureCoordinates,
 }
-impl ImageData {
+impl ImageBackend {
     pub(crate) fn new(
         atlas: TextureAtlas,
         bind_group: TextureBindGroup,
@@ -128,7 +129,7 @@ pub(crate) struct ImageRenderer {
     pub(crate) render_groups: HashMap<Entity, ImageRenderGroup>,
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) sampler_bind_group: wgpu::BindGroup,
-    pub(crate) images: HashMap<ResourceHandle, ImageData>,
+    pub(crate) images: HashMap<ResourceHandle, ImageBackend>,
     pub(crate) render_group_layout: wgpu::BindGroupLayout,
     pub(crate) render_group_uniforms_layout: wgpu::BindGroupLayout,
 }
@@ -186,7 +187,7 @@ pub(crate) fn load_images(
             .insert(request.handle, Orientation::new(dimensions.dimensions));
         image_renderer.images.insert(
             request.handle,
-            ImageData::new(atlas, bind_group, coordinates),
+            ImageBackend::new(atlas, bind_group, coordinates),
         );
         event_writer.send(ImageLoaded(request.handle));
         cmd.entity(entity).despawn();
