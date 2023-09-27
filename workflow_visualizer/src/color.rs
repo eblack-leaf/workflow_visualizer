@@ -102,8 +102,8 @@ impl Color {
     pub const RED_ORANGE_DARK: Rgb = dark!(Self::RED_ORANGE);
     pub const LIGHT_GREEN: Rgb = light!(Self::GREEN);
     pub const GREEN: Rgb = (0.0, 0.7, 0.0);
-    pub const MEDIUM_GREEN: Rgb = medium!(Self::GREEN);
-    pub const DARK_GREEN: Rgb = dark!(Self::GREEN);
+    pub const GREEN_MEDIUM: Rgb = medium!(Self::GREEN);
+    pub const GREEN_DARK: Rgb = dark!(Self::GREEN);
     pub const BLUE_DARK: Rgb = dark!(Self::BLUE);
     pub const BLUE: Rgb = (0.0, 0.25, 0.5);
     pub const BLUE_MEDIUM: Rgb = medium!(Self::BLUE);

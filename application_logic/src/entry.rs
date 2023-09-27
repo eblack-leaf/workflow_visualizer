@@ -131,8 +131,8 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
         .spawn(Panel::new(
             PanelType::Flat,
             5,
-            Color::from(Color::MEDIUM_GREEN).with_alpha(1f32),
-            Color::from(Color::MEDIUM_GREEN).with_alpha(1f32),
+            Color::from(Color::GREEN_DARK).with_alpha(1f32),
+            Color::from(Color::GREEN_DARK).with_alpha(1f32),
         ))
         .id();
     let edit_panel = cmd
@@ -156,7 +156,7 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             "",
             entry_scale.text_scale,
-            Color::from(Color::OFF_BLACK).with_alpha(1f32),
+            Color::from(Color::OFF_WHITE).with_alpha(1f32),
             TextWrapStyle::letter(),
         ))
         .id();
@@ -165,19 +165,19 @@ pub(crate) fn create_entry(cmd: &mut Commands, entry_scale: &EntryScale) -> Entr
             4,
             "------",
             entry_scale.text_scale,
-            Color::from(Color::OFF_BLACK).with_alpha(1f32),
+            Color::from(Color::OFF_WHITE).with_alpha(1f32),
             TextWrapStyle::letter(),
         ))
         .id();
     let line = cmd
-        .spawn(Line::new(4, Color::from(Color::OFF_BLACK).with_alpha(1f32)))
+        .spawn(Line::new(4, Color::from(Color::OFF_WHITE).with_alpha(1f32)))
         .id();
     let generate_button = cmd
         .spawn(Button::new(
             ButtonType::Press,
             4,
             Color::from(Color::GREEN).with_alpha(1f32),
-            Color::from(Color::DARK_GREEN).with_alpha(1f32),
+            Color::from(Color::GREEN_DARK).with_alpha(1f32),
             IconHandles::Generate.handle(),
             "",
             15,

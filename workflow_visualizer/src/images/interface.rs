@@ -124,35 +124,43 @@ pub struct ImageIcon {
     color: Color,
 }
 pub enum BundledImageIcon {
-    Home,
-    AngleLeft,
-    AngleRight,
-    Camera,
-    Info,
-    LayoutFluid,
-    Pencil,
-    Plus,
-    CompassDrafting,
+    Activity,
+    Airplay,
+    AlertCircle,
+    AlertOctagon,
+    AlertTriangle,
+    AlignCenter,
+    AlignJustify,
+    AlignLeft,
+    AlignRight,
+    ArrowRight,
+    ArrowLeft
 }
 impl BundledImageIcon {
     pub fn data(&self) -> ImageData {
         match &self {
-            BundledImageIcon::Home => include_bytes!("bundled_image_icons/home.png").to_vec(),
-            BundledImageIcon::AngleLeft => {
-                include_bytes!("bundled_image_icons/angle-left.png").to_vec()
+            BundledImageIcon::Activity => include_bytes!("bundled_image_icons/activity.png").to_vec(),
+            BundledImageIcon::Airplay => {
+                include_bytes!("bundled_image_icons/airplay.png").to_vec()
             }
-            BundledImageIcon::AngleRight => {
-                include_bytes!("bundled_image_icons/angle-right.png").to_vec()
+            BundledImageIcon::AlertCircle => {
+                include_bytes!("bundled_image_icons/alert-circle.png").to_vec()
             }
-            BundledImageIcon::Camera => include_bytes!("bundled_image_icons/camera.png").to_vec(),
-            BundledImageIcon::Info => include_bytes!("bundled_image_icons/info.png").to_vec(),
-            BundledImageIcon::LayoutFluid => {
-                include_bytes!("bundled_image_icons/layout-fluid.png").to_vec()
+            BundledImageIcon::AlignCenter => include_bytes!("bundled_image_icons/align-center.png").to_vec(),
+            BundledImageIcon::AlignJustify => include_bytes!("bundled_image_icons/align-justify.png").to_vec(),
+            BundledImageIcon::AlignLeft => {
+                include_bytes!("bundled_image_icons/align-left.png").to_vec()
             }
-            BundledImageIcon::Pencil => include_bytes!("bundled_image_icons/pencil.png").to_vec(),
-            BundledImageIcon::Plus => include_bytes!("bundled_image_icons/plus.png").to_vec(),
-            BundledImageIcon::CompassDrafting => {
-                include_bytes!("bundled_image_icons/compass-drafting-solid.png").to_vec()
+            BundledImageIcon::AlertTriangle => include_bytes!("bundled_image_icons/alert-triangle.png").to_vec(),
+            BundledImageIcon::AlertOctagon => include_bytes!("bundled_image_icons/alert-octagon.png").to_vec(),
+            BundledImageIcon::AlignRight => {
+                include_bytes!("bundled_image_icons/align-right.png").to_vec()
+            }
+            BundledImageIcon::ArrowRight => {
+                include_bytes!("bundled_image_icons/arrow-right.png").to_vec()
+            }
+            BundledImageIcon::ArrowLeft => {
+                include_bytes!("bundled_image_icons/arrow-left.png").to_vec()
             }
         }
     }
