@@ -3,7 +3,7 @@ use bytemuck::{Pod, Zeroable};
 use std::marker::PhantomData;
 
 use wgpu::util::DeviceExt;
-use wgpu::{BindGroupEntry, BindGroupLayoutEntry, Buffer};
+use wgpu::{BindGroupEntry, Buffer};
 
 /// Wrapper around wgpu::Buffer for use as a Uniform Buffer
 pub struct Uniform<Data: bytemuck::Pod + bytemuck::Zeroable> {

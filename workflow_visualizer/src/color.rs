@@ -79,50 +79,50 @@ macro_rules! light {
     };
 }
 impl Color {
-    pub(crate) const MEDIUM_FACTOR: f32 = 0.45;
-    pub(crate) const DARK_FACTOR: f32 = 0.2;
-    pub(crate) const LIGHT_FACTOR: f32 = 1.2;
+    pub(crate) const MEDIUM_FACTOR: f32 = 0.25;
+    pub(crate) const DARK_FACTOR: f32 = 0.1;
+    pub(crate) const LIGHT_FACTOR: f32 = 0.5;
     pub const WHITE: Rgb = (1.0, 1.0, 1.0);
     pub const DARK_ORANGE: Rgb = (0.035, 0.0125, 0.00);
     pub const CYAN_DARK: Rgb = dark!(Self::CYAN);
-    pub const CYAN: Rgb = (0.0, 0.7, 0.58);
+    pub const CYAN: Rgb = (0.4, 0.85, 0.76);
     pub const CYAN_MEDIUM: Rgb = medium!(Self::CYAN);
     pub const OFF_WHITE: Rgb = (0.8, 0.8, 0.8);
     pub const GREY_DARK: Rgb = dark!(Self::GREY);
     pub const GREY_MEDIUM: Rgb = medium!(Self::GREY);
-    pub const GREY: Rgb = (0.25, 0.25, 0.25);
+    pub const GREY: Rgb = (0.5, 0.5, 0.5);
     pub const BLACK: Rgb = (0.0, 0.0, 0.0);
     pub const LIGHT_RED: Rgb = light!(Self::RED);
-    pub const RED: Rgb = (0.6, 0.1, 0.0);
+    pub const RED: Rgb = (0.8, 0.23, 0.23);
     pub const RED_MEDIUM: Rgb = medium!(Self::RED);
-    pub const DARK_RED: Rgb = dark!(Self::RED);
+    pub const RED_DARK: Rgb = dark!(Self::RED);
     pub const LIGHT_RED_ORANGE: Rgb = light!(Self::RED_ORANGE);
-    pub const RED_ORANGE: Rgb = (0.9, 0.45, 0.0);
+    pub const RED_ORANGE: Rgb = (0.82, 0.38, 0.09);
     pub const RED_ORANGE_MEDIUM: Rgb = medium!(Self::RED_ORANGE);
     pub const RED_ORANGE_DARK: Rgb = dark!(Self::RED_ORANGE);
     pub const LIGHT_GREEN: Rgb = light!(Self::GREEN);
-    pub const GREEN: Rgb = (0.0, 0.7, 0.0);
+    pub const GREEN: Rgb = (0.43, 0.92, 0.39);
     pub const GREEN_MEDIUM: Rgb = medium!(Self::GREEN);
     pub const GREEN_DARK: Rgb = dark!(Self::GREEN);
     pub const BLUE_DARK: Rgb = dark!(Self::BLUE);
-    pub const BLUE: Rgb = (0.0, 0.25, 0.5);
+    pub const BLUE: Rgb = (0.34, 0.66, 0.91);
     pub const BLUE_MEDIUM: Rgb = medium!(Self::BLUE);
     pub const OFF_BLACK: Rgb = (0.005, 0.005, 0.005);
     pub const BLANK: Rgba = (0.0, 0.0, 0.0, 0.0);
     pub fn from_rgb(red: f32, green: f32, blue: f32) -> Self {
         Self {
-            red,
-            green,
-            blue,
+            red: red.min(1f32).max(0f32),
+            green: green.min(1f32).max(0f32),
+            blue: blue.min(1f32).max(0f32),
             alpha: 1f32,
         }
     }
     pub fn from_rgba(red: f32, green: f32, blue: f32, alpha: f32) -> Self {
         Self {
-            red,
-            green,
-            blue,
-            alpha,
+            red: red.min(1f32).max(0f32),
+            green: green.min(1f32).max(0f32),
+            blue: blue.min(1f32).max(0f32),
+            alpha: alpha.min(1f32).max(0f32),
         }
     }
     pub fn red(&self) -> f32 {

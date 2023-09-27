@@ -1,23 +1,22 @@
 use crate::attachment::IconHandles;
 use workflow_visualizer::{BundledImageIcon, ImageRequest, Visualizer};
-pub(crate) const TEST_HANDLE: i32 = 0;
 
 pub(crate) fn add(visualizer: &mut Visualizer) {
     visualizer.spawn(ImageRequest::new(
         IconHandles::Edit.handle(),
-        BundledImageIcon::AlignJustify.data(),
+        BundledImageIcon::Edit.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Add.handle(),
-        BundledImageIcon::AlertTriangle.data(),
+        BundledImageIcon::Plus.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::PageLeft.handle(),
-        BundledImageIcon::ArrowLeft.data(),
+        BundledImageIcon::ChevronLeft.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::PageRight.handle(),
-        BundledImageIcon::ArrowRight.data(),
+        BundledImageIcon::ChevronRight.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Run.handle(),
@@ -25,10 +24,10 @@ pub(crate) fn add(visualizer: &mut Visualizer) {
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Delete.handle(),
-        BundledImageIcon::Airplay.data(),
+        BundledImageIcon::Delete.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Generate.handle(),
-        BundledImageIcon::AlertCircle.data(),
+        BundledImageIcon::Play.data(),
     ));
 }
