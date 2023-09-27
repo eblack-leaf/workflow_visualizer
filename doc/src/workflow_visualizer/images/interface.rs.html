@@ -373,6 +373,14 @@
 <a href="#373" id="373">373</a>
 <a href="#374" id="374">374</a>
 <a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::entity::Entity;
@@ -499,35 +507,43 @@
     color: Color,
 }
 <span class="kw">pub enum </span>BundledImageIcon {
-    Home,
-    AngleLeft,
-    AngleRight,
-    Camera,
-    Info,
-    LayoutFluid,
-    Pencil,
-    Plus,
-    CompassDrafting,
+    Activity,
+    Airplay,
+    AlertCircle,
+    AlertOctagon,
+    AlertTriangle,
+    AlignCenter,
+    AlignJustify,
+    AlignLeft,
+    AlignRight,
+    ArrowRight,
+    ArrowLeft
 }
 <span class="kw">impl </span>BundledImageIcon {
     <span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ImageData {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self </span>{
-            BundledImageIcon::Home =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/home.png&quot;</span>).to_vec(),
-            BundledImageIcon::AngleLeft =&gt; {
-                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/angle-left.png&quot;</span>).to_vec()
+            BundledImageIcon::Activity =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/activity.png&quot;</span>).to_vec(),
+            BundledImageIcon::Airplay =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/airplay.png&quot;</span>).to_vec()
             }
-            BundledImageIcon::AngleRight =&gt; {
-                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/angle-right.png&quot;</span>).to_vec()
+            BundledImageIcon::AlertCircle =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/alert-circle.png&quot;</span>).to_vec()
             }
-            BundledImageIcon::Camera =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/camera.png&quot;</span>).to_vec(),
-            BundledImageIcon::Info =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/info.png&quot;</span>).to_vec(),
-            BundledImageIcon::LayoutFluid =&gt; {
-                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/layout-fluid.png&quot;</span>).to_vec()
+            BundledImageIcon::AlignCenter =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/align-center.png&quot;</span>).to_vec(),
+            BundledImageIcon::AlignJustify =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/align-justify.png&quot;</span>).to_vec(),
+            BundledImageIcon::AlignLeft =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/align-left.png&quot;</span>).to_vec()
             }
-            BundledImageIcon::Pencil =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/pencil.png&quot;</span>).to_vec(),
-            BundledImageIcon::Plus =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/plus.png&quot;</span>).to_vec(),
-            BundledImageIcon::CompassDrafting =&gt; {
-                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/compass-drafting-solid.png&quot;</span>).to_vec()
+            BundledImageIcon::AlertTriangle =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/alert-triangle.png&quot;</span>).to_vec(),
+            BundledImageIcon::AlertOctagon =&gt; <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/alert-octagon.png&quot;</span>).to_vec(),
+            BundledImageIcon::AlignRight =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/align-right.png&quot;</span>).to_vec()
+            }
+            BundledImageIcon::ArrowRight =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/arrow-right.png&quot;</span>).to_vec()
+            }
+            BundledImageIcon::ArrowLeft =&gt; {
+                <span class="macro">include_bytes!</span>(<span class="string">&quot;bundled_image_icons/arrow-left.png&quot;</span>).to_vec()
             }
         }
     }
