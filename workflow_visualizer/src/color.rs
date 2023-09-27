@@ -79,8 +79,8 @@ macro_rules! light {
     };
 }
 impl Color {
-    pub(crate) const MEDIUM_FACTOR: f32 = 0.25;
-    pub(crate) const DARK_FACTOR: f32 = 0.1;
+    pub(crate) const MEDIUM_FACTOR: f32 = 0.35;
+    pub(crate) const DARK_FACTOR: f32 = 0.125;
     pub(crate) const LIGHT_FACTOR: f32 = 0.5;
     pub const WHITE: Rgb = (1.0, 1.0, 1.0);
     pub const DARK_ORANGE: Rgb = (0.035, 0.0125, 0.00);

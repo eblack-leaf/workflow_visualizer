@@ -4,7 +4,7 @@ use workflow_visualizer::{BundledImageIcon, ImageRequest, Visualizer};
 pub(crate) fn add(visualizer: &mut Visualizer) {
     visualizer.spawn(ImageRequest::new(
         IconHandles::Edit.handle(),
-        BundledImageIcon::Edit.data(),
+        BundledImageIcon::EditThree.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Add.handle(),
@@ -24,10 +24,10 @@ pub(crate) fn add(visualizer: &mut Visualizer) {
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Delete.handle(),
-        BundledImageIcon::Delete.data(),
+        BundledImageIcon::Trash.data(),
     ));
     visualizer.spawn(ImageRequest::new(
         IconHandles::Generate.handle(),
-        BundledImageIcon::Play.data(),
+        BundledImageIcon::Code.data(),
     ));
 }
