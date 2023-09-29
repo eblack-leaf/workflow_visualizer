@@ -43,6 +43,11 @@ impl Media {
                 src, ty
             );
             Self::media_overlay(element_html);
+            return;
+        }
+        #[cfg(not(target_family = "wasm"))]
+        {
+            open::that(src);
         }
     }
     #[allow(unused)]
@@ -57,6 +62,11 @@ impl Media {
                 src
             );
             Self::media_overlay(element_html);
+            return;
+        }
+        #[cfg(not(target_family = "wasm"))]
+        {
+            open::that(src);
         }
     }
     #[allow(unused)]

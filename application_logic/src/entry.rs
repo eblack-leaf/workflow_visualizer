@@ -239,7 +239,11 @@ pub(crate) fn process_entry_buttons(
         if let Ok(trigger) = triggers.get(entry.edit_button) {
             if trigger.active() {
                 // trigger edit animation
-                Media::document("/Homework3-2.pdf");
+                #[cfg(target_family = "wasm")]
+                let src = "/Homework3-2.pdf";
+                #[cfg(not(target_family = "wasm"))]
+                let src = "/home/omi-voshuli/Documents/CS471/Homework3-2.pdf";
+                Media::document(src);
             }
         }
         if let Ok(trigger) = triggers.get(entry.delete_button) {
