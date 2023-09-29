@@ -1,33 +1,34 @@
 use crate::attachment::IconHandles;
-use workflow_visualizer::{BundledImageIcon, ImageRequest, Visualizer};
+use workflow_visualizer::BundledIcon;
+use workflow_visualizer::{IconRequest, Visualizer};
 
 pub(crate) fn add(visualizer: &mut Visualizer) {
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::Edit.handle(),
-        BundledImageIcon::EditThree.data(),
+        BundledIcon::EditThree.data(),
     ));
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::Add.handle(),
-        BundledImageIcon::Plus.data(),
+        BundledIcon::Plus.data(),
     ));
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::PageLeft.handle(),
-        BundledImageIcon::ChevronLeft.data(),
+        BundledIcon::ChevronLeft.data(),
     ));
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::PageRight.handle(),
-        BundledImageIcon::ChevronRight.data(),
+        BundledIcon::ChevronRight.data(),
     ));
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::Run.handle(),
-        BundledImageIcon::Activity.data(),
+        BundledIcon::Activity.data(),
     ));
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::Delete.handle(),
-        BundledImageIcon::Trash.data(),
+        BundledIcon::Trash.data(),
     ));
-    visualizer.spawn(ImageRequest::new(
+    visualizer.spawn(IconRequest::new(
         IconHandles::Generate.handle(),
-        BundledImageIcon::Code.data(),
+        BundledIcon::Code.data(),
     ));
 }

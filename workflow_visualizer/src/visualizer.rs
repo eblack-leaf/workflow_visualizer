@@ -18,7 +18,6 @@ use crate::coord::CoordinateAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
 use crate::grid::GridAttachment;
-use crate::icon::{IconAttachment, IconRendererAttachment};
 use crate::images::ImageAttachment;
 use crate::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 use crate::job::{attempt_to_idle, Task, TaskLabel};
@@ -27,7 +26,6 @@ use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
 use crate::path::PathAttachment;
 use crate::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
-use crate::svg_icon::SvgIconAttachment;
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
 use crate::time::TimerAttachment;
@@ -164,7 +162,6 @@ impl Visualizer {
         self.invoke_attach::<PathAttachment>();
         self.invoke_attach::<PanelAttachment>();
         self.invoke_attach::<LineAttachment>();
-        self.invoke_attach::<IconAttachment>();
         self.invoke_attach::<VisibilityAttachment>();
         self.invoke_attach::<InteractionAttachment>();
         self.invoke_attach::<FocusAttachment>();
@@ -175,10 +172,8 @@ impl Visualizer {
         self.invoke_attach::<ButtonAttachment>();
         self.invoke_attach::<ImageAttachment>();
         self.invoke_attach::<CoordinateAttachment>();
-        self.invoke_attach::<SvgIconAttachment>();
         self.invoke_attach::<ColorAttachment>();
         self.attach_from_queue();
-        self.invoke_attach::<IconRendererAttachment>();
         self.setup();
         self.render_task_manager.transparent.sort_by(
             |(order, _), (rhs_order, _)| -> std::cmp::Ordering {

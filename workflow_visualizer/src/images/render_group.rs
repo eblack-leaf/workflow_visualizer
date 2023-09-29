@@ -1,5 +1,6 @@
 use crate::bundling::ResourceHandle;
-use crate::images::interface::{Extraction, ImageIcon};
+use crate::icon::Icon;
+use crate::images::interface::Extraction;
 use crate::images::renderer::ImageRenderer;
 use crate::{AlignedUniform, Color, GfxSurface, ScaleFactor, TextureCoordinates, Uniform};
 #[cfg(target_family = "wasm")]
@@ -69,10 +70,8 @@ pub(crate) fn read_extraction(
                 &gfx.device,
                 Some([position.x, position.y, area.width, area.height]),
             );
-            let color_uniform = Uniform::new(
-                &gfx.device,
-                diff.icon_color.unwrap_or(ImageIcon::INVALID_COLOR),
-            );
+            let color_uniform =
+                Uniform::new(&gfx.device, diff.icon_color.unwrap_or(Icon::INVALID_COLOR));
             let bind_group = gfx.device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("images-uniform-bind-group"),
                 layout: &image_renderer.render_group_uniforms_layout,

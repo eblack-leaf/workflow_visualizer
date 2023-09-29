@@ -4,11 +4,11 @@ use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, 
 
 use crate::bundling::{Despawned, Disabled};
 use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+use crate::icon::Icon;
 use crate::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
-    DeviceContext, ImageIcon, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType,
-    Position, RawMarker, ResourceHandle, ScaleFactor, Section, SvgIcon, Text, TextValue,
-    TextWrapStyle, Toggled,
+    DeviceContext, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position,
+    RawMarker, ResourceHandle, ScaleFactor, Section, Text, TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -71,7 +71,7 @@ pub(crate) fn spawn(
             ))
             .id();
         let icon = cmd
-            .spawn(ImageIcon::new(
+            .spawn(Icon::new(
                 *icon_id,
                 scaling.icon,
                 *layer - Layer::from(1),

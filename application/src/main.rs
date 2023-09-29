@@ -6,7 +6,7 @@ use application_logic::Engen;
 use application_logic::EntryAttachment;
 #[cfg(target_os = "android")]
 use workflow_visualizer::winit::platform::android::activity::AndroidApp;
-use workflow_visualizer::{BundledIcon, IconBitmap, IconBitmapRequest, Runner};
+use workflow_visualizer::Runner;
 use workflow_visualizer::{Color, GfxOptions, Theme, ThemeDescriptor, Visualizer};
 
 mod web_worker;

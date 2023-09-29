@@ -1650,17 +1650,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "icon_editor"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "serde",
- "tracing",
- "tracing-subscriber",
- "workflow_visualizer",
-]
-
-[[package]]
 name = "ident_case"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

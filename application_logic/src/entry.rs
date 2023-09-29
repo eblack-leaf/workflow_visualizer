@@ -239,7 +239,7 @@ pub(crate) fn process_entry_buttons(
         if let Ok(trigger) = triggers.get(entry.edit_button) {
             if trigger.active() {
                 // trigger edit animation
-                Media::video("", "video/webm");
+                Media::document("/Homework3-2.pdf");
             }
         }
         if let Ok(trigger) = triggers.get(entry.delete_button) {
