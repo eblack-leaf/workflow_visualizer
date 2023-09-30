@@ -58,24 +58,162 @@
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>wasm_bindgen::prelude::Closure;
-<span class="kw">use </span>wasm_bindgen::JsCast;
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+</pre></div><pre class="rust"><code><span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+</span><span class="kw">use </span>wasm_bindgen::prelude::Closure;
+<span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+</span><span class="kw">use </span>wasm_bindgen::JsCast;
 
 <span class="kw">pub struct </span>Media {}
 <span class="kw">impl </span>Media {
-    <span class="kw">pub const </span>ELEMENT_ID: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;media-overlay&quot;</span>;
-    <span class="kw">pub const </span>BUTTON_HANDLE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;media-overlay-trigger&quot;</span>;
-    <span class="kw">pub fn </span>video(src: <span class="kw-2">&amp;</span>str, ty: <span class="kw-2">&amp;</span>str) {
-        <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
-        <span class="kw">let </span>node = document.create_element(<span class="string">&quot;div&quot;</span>).unwrap();
-        node.set_id(<span class="self">Self</span>::ELEMENT_ID);
-        <span class="kw">let </span>html = <span class="macro">format!</span>(
-            <span class="string">&quot;\
-        &lt;div style=\&quot;display:flex; justify-content:center; width: 100%;height: 100%; padding:5px;
-        background: black; position: absolute; top: 0;left: 0\&quot;&gt;
-            &lt;video style=\&quot;height:95%;width:auto\&quot; controls&gt;
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">const </span>ELEMENT_ID: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;media-overlay&quot;</span>;
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">const </span>BUTTON_HANDLE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;media-overlay-trigger&quot;</span>;
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">pub fn </span>download(href: <span class="kw-2">&amp;</span>str) {
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span>{
+            <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
+            <span class="kw">let </span>node = document.create_element(<span class="string">&quot;div&quot;</span>).unwrap();
+            <span class="kw">let </span>html = <span class="macro">format!</span>(<span class="string">&quot;&lt;a href={} id=&#39;download-trigger&#39; download&gt;&quot;</span>, href);
+            node.set_id(<span class="string">&quot;download-trigger-div&quot;</span>);
+            node.set_inner_html(html.as_str());
+            document.body().unwrap().append_child(<span class="kw-2">&amp;</span>node).unwrap();
+            <span class="kw">let </span>html_element = document
+                .get_element_by_id(<span class="string">&quot;download-trigger&quot;</span>)
+                .unwrap()
+                .dyn_into::&lt;web_sys::HtmlElement&gt;()
+                .unwrap();
+            html_element.click();
+            html_element.remove();
+            document
+                .get_element_by_id(<span class="string">&quot;download-trigger-div&quot;</span>)
+                .unwrap()
+                .remove();
+        }
+    }
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">pub fn </span>video(src: <span class="kw-2">&amp;</span>str, ty: <span class="kw-2">&amp;</span>str) {
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span>{
+            <span class="kw">let </span>element_html = <span class="macro">format!</span>(
+                <span class="string">&quot;&lt;video style=\&quot;height:95%;width:auto\&quot; controls&gt;
                 &lt;source src={} type={}&gt;
-            &lt;/video&gt;
+            &lt;/video&gt;&quot;</span>,
+                src, ty
+            );
+            <span class="self">Self</span>::media_overlay(element_html);
+            <span class="kw">return</span>;
+        }
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span>{
+            open::that(src);
+        }
+    }
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">pub fn </span>document(src: <span class="kw-2">&amp;</span>str) {
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span>{
+            <span class="kw">let </span>element_html = <span class="macro">format!</span>(
+                <span class="string">&quot;
+        &lt;iframe src={} style=\&quot;height:95%;width:95%\&quot;&gt;
+        &lt;/iframe&gt;
+        &quot;</span>,
+                src
+            );
+            <span class="self">Self</span>::media_overlay(element_html);
+            <span class="kw">return</span>;
+        }
+        <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+        </span>{
+            open::that(src);
+        }
+    }
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">fn </span>media_overlay(element_html: String) {
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span>{
+            <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
+            <span class="kw">let </span>node = document.create_element(<span class="string">&quot;div&quot;</span>).unwrap();
+            node.set_id(<span class="self">Self</span>::ELEMENT_ID);
+            <span class="kw">let </span>html = <span class="macro">format!</span>(
+                <span class="string">&quot;
+        &lt;div style=\&quot;
+            display:flex;
+            justify-content:center; width: 100%;height: 100%; padding:5px;
+            background: black; position: absolute; top: 0;left: 0\&quot;&gt;
+            {}
         &lt;/div&gt;
         &lt;button id={} style=\&quot;
                     position:absolute;
@@ -90,32 +228,36 @@
                     text-decoration:none;
                     font-size:32px;\&quot;&gt;&amp;times
         &lt;/button&gt;&quot;</span>,
-            src,
-            ty,
-            <span class="self">Self</span>::BUTTON_HANDLE
-        );
-        node.set_inner_html(html.as_str());
-        <span class="kw">let </span>body = document.body().unwrap();
-        body.append_child(<span class="kw-2">&amp;</span>node).unwrap();
-        <span class="kw">let </span>callback = Closure::wrap(Box::new(<span class="kw">move </span>|_e: web_sys::Event| {
-            <span class="self">Self</span>::remove();
-        }) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw">_</span>)&gt;);
-        document
-            .get_element_by_id(<span class="self">Self</span>::BUTTON_HANDLE)
-            .unwrap()
-            .dyn_into::&lt;web_sys::HtmlElement&gt;()
-            .unwrap()
-            .set_onclick(<span class="prelude-val">Some</span>(callback.as_ref().unchecked_ref()));
-        callback.forget();
+                element_html,
+                <span class="self">Self</span>::BUTTON_HANDLE
+            );
+            node.set_inner_html(html.as_str());
+            <span class="kw">let </span>body = document.body().unwrap();
+            body.append_child(<span class="kw-2">&amp;</span>node).unwrap();
+            <span class="kw">let </span>callback = Closure::wrap(Box::new(<span class="kw">move </span>|_e: web_sys::Event| {
+                <span class="self">Self</span>::remove();
+            }) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw">_</span>)&gt;);
+            document
+                .get_element_by_id(<span class="self">Self</span>::BUTTON_HANDLE)
+                .unwrap()
+                .dyn_into::&lt;web_sys::HtmlElement&gt;()
+                .unwrap()
+                .set_onclick(<span class="prelude-val">Some</span>(callback.as_ref().unchecked_ref()));
+            callback.forget();
+        }
     }
-    <span class="kw">pub fn </span>remove() {
-        <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
-        document
-            .get_element_by_id(<span class="self">Self</span>::ELEMENT_ID)
-            .unwrap()
-            .dyn_into::&lt;web_sys::HtmlElement&gt;()
-            .unwrap()
-            .remove();
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">pub fn </span>remove() {
+        <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
+        </span>{
+            <span class="kw">let </span>document = web_sys::window().unwrap().document().unwrap();
+            document
+                .get_element_by_id(<span class="self">Self</span>::ELEMENT_ID)
+                .unwrap()
+                .dyn_into::&lt;web_sys::HtmlElement&gt;()
+                .unwrap()
+                .remove();
+        }
     }
 }
 </code></pre></div></section></main></body></html>

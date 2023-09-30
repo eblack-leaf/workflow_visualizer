@@ -486,11 +486,6 @@
 <a href="#486" id="486">486</a>
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
-<a href="#489" id="489">489</a>
-<a href="#490" id="490">490</a>
-<a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -511,7 +506,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
 <span class="kw">use </span><span class="kw">crate</span>::grid::GridAttachment;
-<span class="kw">use </span><span class="kw">crate</span>::icon::{IconAttachment, IconRendererAttachment};
 <span class="kw">use </span><span class="kw">crate</span>::images::ImageAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
@@ -520,7 +514,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::panel::PanelAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::path::PathAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
-<span class="kw">use </span><span class="kw">crate</span>::svg_icon::SvgIconAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::sync::set_sync_points;
 <span class="kw">use </span><span class="kw">crate</span>::text::TextAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::time::TimerAttachment;
@@ -657,7 +650,6 @@
         <span class="self">self</span>.invoke_attach::&lt;PathAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;PanelAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;LineAttachment&gt;();
-        <span class="self">self</span>.invoke_attach::&lt;IconAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;VisibilityAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;InteractionAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;FocusAttachment&gt;();
@@ -668,10 +660,8 @@
         <span class="self">self</span>.invoke_attach::&lt;ButtonAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ImageAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;CoordinateAttachment&gt;();
-        <span class="self">self</span>.invoke_attach::&lt;SvgIconAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ColorAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
-        <span class="self">self</span>.invoke_attach::&lt;IconRendererAttachment&gt;();
         <span class="self">self</span>.setup();
         <span class="self">self</span>.render_task_manager.transparent.sort_by(
             |(order, <span class="kw">_</span>), (rhs_order, <span class="kw">_</span>)| -&gt; std::cmp::Ordering {
