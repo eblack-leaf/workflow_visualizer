@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"workflow_visualizer":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.72.1/core/ops/arith/trait.Neg.html\" title=\"trait core::ops::arith::Neg\">Neg</a> for <a class=\"struct\" href=\"workflow_visualizer/struct.RawMarker.html\" title=\"struct workflow_visualizer::RawMarker\">RawMarker</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

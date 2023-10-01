@@ -69,12 +69,24 @@
 <a href="#69" id="69">69</a>
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Add, Div, Mul, Sub};
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Add, Div, Mul, Neg, Sub};
 
 <span class="doccomment">/// Index of 8px alignment location
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Default)]
 </span><span class="kw">pub struct </span>RawMarker(<span class="kw">pub </span>i32);
+<span class="kw">impl </span>Neg <span class="kw">for </span>RawMarker {
+    <span class="kw">type </span>Output = <span class="self">Self</span>;
 
+    <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">Self</span>(-<span class="self">self</span>.<span class="number">0</span>)
+    }
+}
 <span class="kw">impl </span>RawMarker {
     <span class="kw">pub const </span>PX: f32 = <span class="number">4f32</span>;
     <span class="kw">pub fn </span>to_pixel(<span class="self">self</span>) -&gt; f32 {

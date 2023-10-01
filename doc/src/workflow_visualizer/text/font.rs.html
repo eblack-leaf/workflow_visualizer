@@ -145,6 +145,7 @@
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, Sub};
 
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
@@ -161,6 +162,7 @@
 
 <span class="kw">impl </span>MonoSpacedFont {
     <span class="kw">pub const </span>DEFAULT_OPT_SCALE: u32 = <span class="number">80u32</span>;
+    <span class="kw">const </span>TEXT_GRID_THRESHOLD: f32 = <span class="number">0.95f32</span>;
 
     <span class="kw">pub const </span>FACTOR_BASE_SCALE: u32 = <span class="number">40u32</span>;
     <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400u32</span>;
@@ -219,12 +221,12 @@
         <span class="kw">let </span>scale = <span class="kw">match </span>known {
             TextGridViewKnown::Width(markers) =&gt; {
                 <span class="kw">let </span>px = markers.to_pixel();
-                <span class="kw">let </span>px = px * <span class="number">0.90 </span>/ characters <span class="kw">as </span>f32;
+                <span class="kw">let </span>px = px * <span class="self">Self</span>::TEXT_GRID_THRESHOLD / characters <span class="kw">as </span>f32;
                 <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px <span class="kw">as </span>u32))
             }
             TextGridViewKnown::Height(markers) =&gt; {
                 <span class="kw">let </span>px = markers.to_pixel();
-                <span class="kw">let </span>px = px * <span class="number">0.90 </span>/ characters <span class="kw">as </span>f32;
+                <span class="kw">let </span>px = px * <span class="self">Self</span>::TEXT_GRID_THRESHOLD;
                 <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(px <span class="kw">as </span>u32))
             }
             TextGridViewKnown::Scale(scale) =&gt; scale,
