@@ -43,6 +43,7 @@ pub(crate) struct FocusRecorder {
 }
 
 impl FocusRecorder {
+    #[allow(unused)]
     fn record_time_focus(&mut self, entity: Entity) {
         if let Some(count) = self.times_focused.get_mut(&entity) {
             *count += 1;

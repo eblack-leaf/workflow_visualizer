@@ -23,6 +23,7 @@ mod marker;
 mod responsive;
 mod system;
 mod view;
+
 /// Span used for setting the number of columns available in the Grid
 #[derive(Resource, Hash, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
 pub enum HorizontalSpan {

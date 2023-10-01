@@ -1,3 +1,4 @@
+use bevy_ecs::bundle::Bundle;
 use std::marker::PhantomData;
 
 use bevy_ecs::prelude::{Changed, Component, Entity, Query, Res};
@@ -66,16 +67,18 @@ pub struct Animation<T: Animate> {
     timer: Timer,
     interpolations: Vec<Interpolation>,
     done: bool,
+    start: Option<T>,
     end: Option<T>,
     _phantom: PhantomData<T>,
 }
 
 impl<T: Animate> Animation<T> {
-    pub fn new(timer: Timer, interpolations: Vec<Interpolation>, end: T) -> Self {
+    pub fn new(timer: Timer, interpolations: Vec<Interpolation>, start: T, end: T) -> Self {
         Self {
             timer,
             interpolations,
             done: false,
+            start: Some(start),
             end: Some(end),
             _phantom: PhantomData,
         }
@@ -98,7 +101,7 @@ impl<T: Animate> Animation<T> {
 
 pub trait Animate
 where
-    Self: Sized + Clone,
+    Self: Sized + Clone + Bundle,
 {
     fn interpolations(&self, end: &Self) -> Vec<Interpolation>;
     fn animate<TD: Into<TimeDelta>>(&self, end: Self, animation_time: TD) -> QueuedAnimation<Self> {
@@ -106,6 +109,7 @@ where
         QueuedAnimation(Some(Animation::new(
             timer,
             Self::interpolations(self, &end),
+            self.clone(),
             end.clone(),
         )))
     }
@@ -137,12 +141,15 @@ pub(crate) fn pull_from_queue<T: Animate + Send + Sync + 'static + Component>(
     }
 }
 pub(crate) fn start_animations<T: Animate + Send + Sync + 'static>(
-    mut animations: Query<&mut Animation<T>, Changed<Animation<T>>>,
+    mut animations: Query<(Entity, &mut Animation<T>), Changed<Animation<T>>>,
+    mut cmd: Commands,
     time_tracker: Res<TimeTracker>,
 ) {
-    for mut animation in animations.iter_mut() {
+    for (entity, mut animation) in animations.iter_mut() {
         if animation.timer.not_started() {
             animation.timer.start(time_tracker.mark());
+            cmd.entity(entity)
+                .insert(animation.start.as_ref().expect("anim-start").clone());
         }
     }
 }

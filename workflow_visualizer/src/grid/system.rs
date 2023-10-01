@@ -28,6 +28,7 @@ pub(crate) struct GridConfigRecorder {
 }
 
 impl GridConfigRecorder {
+    #[allow(unused)]
     pub(crate) fn record_span_configured(&mut self, span: HorizontalSpan) {
         if let Some(count) = self.times_span_configured.get_mut(&span) {
             *count += 1;
