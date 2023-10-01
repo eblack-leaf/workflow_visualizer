@@ -98,6 +98,17 @@ impl GridView {
         self.vertical.end = bottom.into();
         self
     }
+    pub fn positioned<GP: Into<GridPoint>>(&self, position: GP) -> Self {
+        let position = position.into();
+        self.with_left(position.x).with_top(position.y)
+    }
+    pub fn padded<R: Into<RawMarker>>(&self, padding: R) -> Self {
+        let padding = padding.into();
+        self.with_top(self.top().raw_offset(-padding))
+            .with_left(self.left().raw_offset(-padding))
+            .with_right(self.right().raw_offset(padding))
+            .with_bottom(self.bottom().raw_offset(padding))
+    }
 }
 impl<T: Into<GridRange>> From<(T, T)> for GridView {
     fn from(value: (T, T)) -> Self {

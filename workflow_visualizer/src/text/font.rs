@@ -14,6 +14,7 @@ pub struct MonoSpacedFont {
 
 impl MonoSpacedFont {
     pub const DEFAULT_OPT_SCALE: u32 = 80u32;
+    const TEXT_GRID_THRESHOLD: f32 = 0.95f32;
 
     pub const FACTOR_BASE_SCALE: u32 = 40u32;
     pub const MAX_CHECKED_TEXT_SCALE: u32 = 400u32;
@@ -72,12 +73,12 @@ impl MonoSpacedFont {
         let scale = match known {
             TextGridViewKnown::Width(markers) => {
                 let px = markers.to_pixel();
-                let px = px * 0.90 / characters as f32;
+                let px = px * Self::TEXT_GRID_THRESHOLD / characters as f32;
                 self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
             }
             TextGridViewKnown::Height(markers) => {
                 let px = markers.to_pixel();
-                let px = px * 0.90 / characters as f32;
+                let px = px * Self::TEXT_GRID_THRESHOLD;
                 self.text_scale_from_dimension(KnownTextDimension::Height(px as u32))
             }
             TextGridViewKnown::Scale(scale) => scale,

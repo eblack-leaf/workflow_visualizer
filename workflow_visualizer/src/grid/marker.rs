@@ -1,9 +1,15 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 /// Index of 8px alignment location
 #[derive(Copy, Clone, PartialEq, Default)]
 pub struct RawMarker(pub i32);
+impl Neg for RawMarker {
+    type Output = Self;
 
+    fn neg(self) -> Self::Output {
+        Self(-self.0)
+    }
+}
 impl RawMarker {
     pub const PX: f32 = 4f32;
     pub fn to_pixel(self) -> f32 {
