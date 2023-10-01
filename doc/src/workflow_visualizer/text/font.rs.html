@@ -96,6 +96,55 @@
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, Sub};
 
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
@@ -103,7 +152,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::NumericalContext;
 <span class="kw">use </span><span class="kw">crate</span>::text::component::TextScale;
-<span class="kw">use </span><span class="kw">crate</span>::Area;
+<span class="kw">use crate</span>::{Area, GridPoint, GridView, GridViewBuilder, RawMarker};
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>MonoSpacedFont {
@@ -114,7 +163,7 @@
     <span class="kw">pub const </span>DEFAULT_OPT_SCALE: u32 = <span class="number">80u32</span>;
 
     <span class="kw">pub const </span>FACTOR_BASE_SCALE: u32 = <span class="number">40u32</span>;
-    <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400</span>;
+    <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400u32</span>;
     <span class="kw">pub fn </span>jet_brains_mono&lt;T: Into&lt;TextScale&gt;&gt;(opt_scale: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(
             <span class="macro">include_bytes!</span>(<span class="string">&quot;JetBrainsMono-Regular.ttf&quot;</span>).as_slice(),
@@ -161,6 +210,38 @@
         }
         TextScale(<span class="number">0</span>)
     }
+    <span class="kw">pub fn </span>text_grid_view(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        position: GridPoint,
+        known: TextGridViewKnown,
+        characters: u32,
+    ) -&gt; TextGridView {
+        <span class="kw">let </span>scale = <span class="kw">match </span>known {
+            TextGridViewKnown::Width(markers) =&gt; {
+                <span class="kw">let </span>px = markers.to_pixel();
+                <span class="kw">let </span>px = px * <span class="number">0.90 </span>/ characters <span class="kw">as </span>f32;
+                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px <span class="kw">as </span>u32))
+            }
+            TextGridViewKnown::Height(markers) =&gt; {
+                <span class="kw">let </span>px = markers.to_pixel();
+                <span class="kw">let </span>px = px * <span class="number">0.90 </span>/ characters <span class="kw">as </span>f32;
+                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(px <span class="kw">as </span>u32))
+            }
+            TextGridViewKnown::Scale(scale) =&gt; scale,
+        };
+        <span class="kw">let </span>letter_dims = <span class="self">self</span>.character_dimensions(scale.px());
+        <span class="kw">let </span>width = RawMarker::from_pixel_inclusive(letter_dims.width * characters <span class="kw">as </span>f32);
+        <span class="kw">let </span>height = RawMarker::from_pixel_inclusive(letter_dims.height);
+        TextGridView::new(
+            scale,
+            GridViewBuilder::new()
+                .with_left(position.x)
+                .with_top(position.y)
+                .with_right(position.x.raw_offset(width))
+                .with_bottom(position.y.raw_offset(height))
+                .build(),
+        )
+    }
     <span class="kw">pub fn </span>font_slice(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[fdFont] {
         <span class="self">self</span>.font_storage.as_slice()
     }
@@ -179,6 +260,23 @@
             .new_line_size;
         (metrics.advance_width.ceil(), height.ceil()).into()
     }
+}
+<span class="kw">pub struct </span>TextGridView {
+    <span class="kw">pub </span>scale: TextScale,
+    <span class="kw">pub </span>view: GridView,
+}
+<span class="kw">impl </span>TextGridView {
+    <span class="kw">pub fn </span>new&lt;TS: Into&lt;TextScale&gt;, GV: Into&lt;GridView&gt;&gt;(scale: TS, view: GV) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            scale: scale.into(),
+            view: view.into(),
+        }
+    }
+}
+<span class="kw">pub enum </span>TextGridViewKnown {
+    Width(RawMarker),
+    Height(RawMarker),
+    Scale(TextScale),
 }
 <span class="kw">pub enum </span>KnownTextDimension {
     Width(u32),
