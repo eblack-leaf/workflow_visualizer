@@ -2,11 +2,11 @@ use crate::attachment::IconHandles;
 use workflow_visualizer::bevy_ecs::prelude::{
     Changed, Commands, Component, Entity, Event, EventReader, NonSend, Query, Res, ResMut,
 };
+use workflow_visualizer::Despawn;
 use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonType, Color, Line, Panel, PanelType, Sender, Text,
     TextValue, TextWrapStyle, Triggered,
 };
-use workflow_visualizer::{Despawn};
 
 use crate::enable::EntryEnabled;
 use crate::entry_list::{EntryIndex, EntryScale, RemovedEntryIndices, TotalEntries};
