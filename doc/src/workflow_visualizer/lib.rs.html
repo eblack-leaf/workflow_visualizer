@@ -106,6 +106,8 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="comment">// #![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -166,8 +168,9 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::scale_factor::{ScaleFactor, WindowAppearanceFactor};
 <span class="kw">pub use </span><span class="kw">crate</span>::sync::SyncPoint;
 <span class="kw">pub use </span><span class="kw">crate</span>::text::{
-    KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement,
-    TextLetterDimensions, TextLineStructure, TextScale, TextTag, TextValue, TextWrapStyle, TextGridViewKnown, TextGridView
+    KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement, TextGridView,
+    TextGridViewKnown, TextLetterDimensions, TextLineStructure, TextScale, TextTag, TextValue,
+    TextWrapStyle,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::texture_atlas::{
     AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
@@ -196,6 +199,7 @@
 <span class="kw">mod </span>interaction;
 <span class="kw">mod </span>job;
 <span class="kw">mod </span>line;
+<span class="kw">mod </span>list;
 <span class="kw">mod </span>media;
 <span class="kw">mod </span>orientation;
 <span class="kw">mod </span>panel;
