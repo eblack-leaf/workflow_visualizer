@@ -11,17 +11,14 @@ serde_json = "1.0.103"
 [dependencies]
 winit = { version = "0.28.6", features = ["android-game-activity"]}
 wgpu = { version = "0.17.0", features = ["webgl"] }
-lyon = { version = "1.0.1"}
-usvg = { version = "0.35.0" }
 bevy_ecs = { version = "0.11.0" }
 image = { version = "0.24.6" , features = ["png", "jpeg"]}
 bytemuck = { version = "1.13.1", features = ["derive"] }
 fontdue = "0.7.3"
-gloo-worker = { version = "0.3.0", features = ["futures"] }
-gloo-console = "0.2.3"
+gloo-worker = { version = "0.4.0", features = ["futures"] }
+gloo-console = "0.3.0"
 nalgebra = { version = "0.32.2" }
 serde = { version = "1.0.160", features = ["derive"] }
-serde_json = { version = "1.0.96" }
 compact_str = "0.7.0"
 tracing = "0.1.37"
 wasm-bindgen-futures = "0.4.36"
