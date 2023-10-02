@@ -6,7 +6,7 @@ use workflow_visualizer::{
     bevy_ecs, Button, ButtonBorder, ButtonType, Color, Line, Panel, PanelType, Sender, Text,
     TextValue, TextWrapStyle, Triggered,
 };
-use workflow_visualizer::{Despawn, Media};
+use workflow_visualizer::{Despawn};
 
 use crate::enable::EntryEnabled;
 use crate::entry_list::{EntryIndex, EntryScale, RemovedEntryIndices, TotalEntries};
@@ -242,8 +242,8 @@ pub(crate) fn process_entry_buttons(
                 #[cfg(target_family = "wasm")]
                 let src = "/Homework3-2.pdf";
                 #[cfg(not(target_family = "wasm"))]
-                let src = "/home/omi-voshuli/Documents/CS471/Homework3-2.pdf";
-                Media::document(src);
+                let _src = "/home/omi-voshuli/Documents/CS471/Homework3-2.pdf";
+                // Media::document(src);
             }
         }
         if let Ok(trigger) = triggers.get(entry.delete_button) {
