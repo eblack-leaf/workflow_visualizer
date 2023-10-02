@@ -59,7 +59,7 @@ pub use crate::scale_factor::{ScaleFactor, WindowAppearanceFactor};
 pub use crate::sync::SyncPoint;
 pub use crate::text::{
     KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement,
-    TextLetterDimensions, TextLineStructure, TextScale, TextTag, TextValue, TextWrapStyle,
+    TextLetterDimensions, TextLineStructure, TextScale, TextTag, TextValue, TextWrapStyle, TextGridViewKnown, TextGridView
 };
 pub use crate::texture_atlas::{
     AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
