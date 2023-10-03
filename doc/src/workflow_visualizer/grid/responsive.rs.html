@@ -76,6 +76,9 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -90,8 +93,11 @@
 }
 
 <span class="kw">impl</span>&lt;F&gt; ResponsiveView&lt;F&gt; {
-    <span class="kw">pub fn </span>get_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>HorizontalSpan) -&gt; <span class="kw-2">&amp;</span>F {
-        <span class="self">self</span>.mapping.get(span).expect(<span class="string">&quot;no view&quot;</span>)
+    <span class="kw">pub fn </span>get_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: HorizontalSpan) -&gt; <span class="kw-2">&amp;</span>F {
+        <span class="self">self</span>.mapping.get(<span class="kw-2">&amp;</span>span).expect(<span class="string">&quot;no view&quot;</span>)
+    }
+    <span class="kw">pub fn </span>get_span_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, span: HorizontalSpan) -&gt; <span class="kw-2">&amp;mut </span>F {
+        <span class="self">self</span>.mapping.get_mut(<span class="kw-2">&amp;</span>span).expect(<span class="string">&quot;no view&quot;</span>)
     }
     <span class="kw">pub fn </span>with_span_four&lt;T: Into&lt;F&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, view: T) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.mapping.insert(HorizontalSpan::Four, view.into());

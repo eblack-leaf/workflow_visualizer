@@ -293,6 +293,19 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::hash::Hash;
 
@@ -393,10 +406,23 @@
         <span class="self">self</span>.vertical.end = bottom.into();
         <span class="self">self
     </span>}
-    <span class="kw">pub fn </span>positioned&lt;GP: Into&lt;GridPoint&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, position: GP) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>position = position.into();
-        <span class="self">self</span>.with_left(position.x).with_top(position.y)
-    }
+    <span class="kw">pub fn </span>adjusted&lt;R: Into&lt;RawMarker&gt;&gt;(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        horizontal: <span class="prelude-ty">Option</span>&lt;R&gt;,
+        vertical: <span class="prelude-ty">Option</span>&lt;R&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(h) = horizontal {
+            <span class="kw">let </span>marker = h.into();
+            <span class="self">self</span>.horizontal.begin = <span class="self">self</span>.horizontal.begin.raw_offset(marker);
+            <span class="self">self</span>.horizontal.end = <span class="self">self</span>.horizontal.end.raw_offset(marker);
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = vertical {
+            <span class="kw">let </span>marker = v.into();
+            <span class="self">self</span>.vertical.begin = <span class="self">self</span>.vertical.begin.raw_offset(marker);
+            <span class="self">self</span>.vertical.end = <span class="self">self</span>.vertical.end.raw_offset(marker);
+        }
+        <span class="self">self
+    </span>}
     <span class="kw">pub fn </span>padded&lt;R: Into&lt;RawMarker&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, padding: R) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>padding = padding.into();
         <span class="self">self</span>.with_top(<span class="self">self</span>.top().raw_offset(-padding))

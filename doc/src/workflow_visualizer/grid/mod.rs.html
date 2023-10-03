@@ -244,6 +244,16 @@
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::component::Component;
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Resource};
 
@@ -368,6 +378,16 @@
         <span class="kw">let </span>end = <span class="self">self</span>.calc_vertical_location(view.vertical.end);
         <span class="kw">let </span>begin = <span class="self">self</span>.calc_vertical_location(view.vertical.begin);
         end - begin
+    }
+    <span class="kw">pub fn </span>span(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HorizontalSpan {
+        <span class="self">self</span>.span
+    }
+    <span class="kw">pub fn </span>distance(<span class="kw-2">&amp;</span><span class="self">self</span>, first: GridPoint, second: GridPoint) -&gt; (RawMarker, RawMarker) {
+        <span class="kw">let </span>fx = <span class="self">self</span>.calc_horizontal_location(first.x);
+        <span class="kw">let </span>fy = <span class="self">self</span>.calc_vertical_location(first.y);
+        <span class="kw">let </span>sx = <span class="self">self</span>.calc_horizontal_location(second.x);
+        <span class="kw">let </span>sy = <span class="self">self</span>.calc_vertical_location(second.y);
+        (fx - sx, fy - sy)
     }
     <span class="kw">pub fn </span>horizontal_markers(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="self">self</span>.horizontal_markers <span class="kw">as </span>i32

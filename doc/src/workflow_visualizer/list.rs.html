@@ -119,8 +119,6 @@
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
 <a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{GridPoint, RawMarker};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::hash::Hash;
@@ -128,8 +126,6 @@
 <span class="kw">pub struct </span>List&lt;Key: Copy + Clone + Hash + Eq + PartialEq&gt; {
     <span class="kw">pub </span>entries: Vec&lt;Key&gt;,
     <span class="kw">pub </span>page: u32,
-    <span class="kw">pub </span>page_left: bool,
-    <span class="kw">pub </span>page_right: bool,
     <span class="kw">pub </span>page_max: u32,
     <span class="kw">pub </span>entries_per_page: EntriesPerPage,
     <span class="kw">pub </span>anchor: GridPoint,
@@ -156,8 +152,6 @@
         <span class="self">Self </span>{
             entries: <span class="macro">vec!</span>[],
             page: <span class="number">0</span>,
-            page_left: <span class="bool-val">false</span>,
-            page_right: <span class="bool-val">false</span>,
             page_max: <span class="number">0</span>,
             entries_per_page: EntriesPerPage::new(vertical_markers, <span class="kw-2">&amp;</span>entry_descriptor),
             anchor,
@@ -211,13 +205,15 @@
         }
         mapping
     }
-    <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, key: Key) {
+    <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, key: Key) -&gt; GridPoint {
         <span class="self">self</span>.entries.insert(index, key);
         <span class="self">self</span>.calc_page_max();
+        <span class="self">self</span>.entry_position((index - <span class="number">1</span>) <span class="kw">as </span>i32)
     }
-    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: Key) {
+    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: Key) -&gt; GridPoint {
         <span class="self">self</span>.entries.push(key);
         <span class="self">self</span>.calc_page_max();
+        <span class="self">self</span>.entry_position((<span class="self">self</span>.entries.len() - <span class="number">1</span>) <span class="kw">as </span>i32)
     }
     <span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: Key) {
         <span class="self">self</span>.entries.retain(|e| <span class="kw-2">*</span>e != key);
