@@ -145,6 +145,7 @@
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::prelude::{
@@ -198,7 +199,8 @@
             <span class="self">self</span>.times_focused.insert(entity, <span class="number">1</span>);
         }
     }
-    <span class="kw">fn </span>record_loop_focused(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity) {
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">fn </span>record_loop_focused(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(count) = <span class="self">self</span>.loops_focused.get_mut(<span class="kw-2">&amp;</span>entity) {
             <span class="kw-2">*</span>count += <span class="number">1</span>;
         } <span class="kw">else </span>{
