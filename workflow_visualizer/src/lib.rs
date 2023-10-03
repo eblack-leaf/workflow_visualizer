@@ -52,6 +52,7 @@ pub use crate::gfx::{GfxOptions, GfxSurface};
 pub use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 pub use crate::job::Job;
 pub use crate::line::{Line, LineRender, LineTag};
+pub use crate::list::{EntriesPerPage, List, ListEntryDescriptor};
 pub use crate::media::Media;
 pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelTag, PanelType};
 pub use crate::path::{Path, PathView, ResponsivePathView};

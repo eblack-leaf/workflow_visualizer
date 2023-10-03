@@ -51,6 +51,7 @@ impl FocusRecorder {
             self.times_focused.insert(entity, 1);
         }
     }
+    #[allow(unused)]
     fn record_loop_focused(&mut self, entity: Entity) {
         if let Some(count) = self.loops_focused.get_mut(&entity) {
             *count += 1;

@@ -1,14 +1,17 @@
-use crate::{GridView, RawMarker};
+use std::collections::HashMap;
+use crate::{GridPoint, GridView, InterfaceContext, Position, RawMarker};
 use bevy_ecs::entity::Entity;
+use bevy_ecs::system::Commands;
 
 pub struct List {
     pub entries: Vec<Entity>,
+    pub positions: Vec<Position<InterfaceContext>>,
     pub page: u32,
     pub page_left: bool,
     pub page_right: bool,
     pub page_max: u32,
     pub entries_per_page: EntriesPerPage,
-    pub grid_view: GridView,
+    pub anchor: GridPoint,
     pub entry_descriptor: ListEntryDescriptor,
 }
 pub struct EntriesPerPage(u32);
@@ -22,20 +25,34 @@ impl EntriesPerPage {
 }
 impl List {
     pub fn new(
-        grid_view: GridView,
+        anchor: GridPoint,
+        horizontal_markers: RawMarker,
         vertical_markers: RawMarker,
-        entry_descriptor: ListEntryDescriptor,
+        entry_height: RawMarker,
+        padding: RawMarker,
     ) -> Self {
+        let entry_descriptor = ListEntryDescriptor::new(horizontal_markers, entry_height, padding);
         Self {
             entries: vec![],
+            positions: vec![],
             page: 0,
             page_left: false,
             page_right: false,
             page_max: 0,
-            entries_per_page: EntriesPerPage::new(vertical_markers, &entry_descriptor),
-            grid_view,
+            entries_per_page: EntriesPerPage::new(
+                vertical_markers,
+                &entry_descriptor,
+            ),
+            anchor,
             entry_descriptor,
         }
+    }
+    /// Enable/Disable entries
+    pub fn enablement(&self, cmd: &mut Commands) {
+        todo!()
+    }
+    pub fn positions(&self) -> HashMap<Entity, GridPoint> {
+        todo!()
     }
     pub fn insert(&mut self, index: usize, entity: Entity) {
         self.entries.insert(index, entity);

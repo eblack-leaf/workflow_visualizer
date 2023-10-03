@@ -2424,6 +2424,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26072860ba924cbfa98ea39c8c19b4dd6a4a25423dbdf219c1eca91aa0cf6964"
 
 [[package]]
+name = "placement_tool"
+version = "0.1.0"
+dependencies = [
+ "placement_tool_logic",
+ "workflow_visualizer",
+]
+
+[[package]]
+name = "placement_tool_logic"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "serde",
+ "workflow_visualizer",
+]
+
+[[package]]
 name = "png"
 version = "0.17.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
