@@ -3,7 +3,7 @@ use workflow_visualizer::bevy_ecs::component::Component;
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::event::EventReader;
 use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Event, Query, Resource};
-use workflow_visualizer::{bevy_ecs, Grid, GridPoint, RawMarker, ResponsiveUnit, ScaleFactor};
+use workflow_visualizer::{bevy_ecs, ScaleFactor};
 
 use crate::enable::EntryEnabled;
 use crate::entry::{Entry, EntryName, EntryOtp};

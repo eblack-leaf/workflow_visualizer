@@ -5,7 +5,7 @@ use fontdue::{Font as fdFont, FontSettings};
 
 use crate::coord::NumericalContext;
 use crate::text::component::TextScale;
-use crate::{Area, GridPoint, GridView, GridViewBuilder, RawMarker};
+use crate::Area;
 
 #[derive(Resource)]
 pub struct MonoSpacedFont {
@@ -64,38 +64,6 @@ impl MonoSpacedFont {
         }
         TextScale(0)
     }
-    pub fn text_grid_view(
-        &self,
-        position: GridPoint,
-        known: TextGridViewKnown,
-        characters: u32,
-    ) -> TextGridView {
-        let scale = match known {
-            TextGridViewKnown::Width(markers) => {
-                let px = markers.to_pixel();
-                let px = px * Self::TEXT_GRID_THRESHOLD / characters as f32;
-                self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
-            }
-            TextGridViewKnown::Height(markers) => {
-                let px = markers.to_pixel();
-                let px = px * Self::TEXT_GRID_THRESHOLD;
-                self.text_scale_from_dimension(KnownTextDimension::Height(px as u32))
-            }
-            TextGridViewKnown::Scale(scale) => scale,
-        };
-        let letter_dims = self.character_dimensions(scale.px());
-        let width = RawMarker::from_pixel_inclusive(letter_dims.width * characters as f32);
-        let height = RawMarker::from_pixel_inclusive(letter_dims.height);
-        TextGridView::new(
-            scale,
-            GridViewBuilder::new()
-                .with_left(position.x)
-                .with_top(position.y)
-                .with_right(position.x.raw_offset(width))
-                .with_bottom(position.y.raw_offset(height))
-                .build(),
-        )
-    }
     pub fn font_slice(&self) -> &[fdFont] {
         self.font_storage.as_slice()
     }
@@ -115,23 +83,7 @@ impl MonoSpacedFont {
         (metrics.advance_width.ceil(), height.ceil()).into()
     }
 }
-pub struct TextGridView {
-    pub scale: TextScale,
-    pub view: GridView,
-}
-impl TextGridView {
-    pub fn new<TS: Into<TextScale>, GV: Into<GridView>>(scale: TS, view: GV) -> Self {
-        Self {
-            scale: scale.into(),
-            view: view.into(),
-        }
-    }
-}
-pub enum TextGridViewKnown {
-    Width(RawMarker),
-    Height(RawMarker),
-    Scale(TextScale),
-}
+
 pub enum KnownTextDimension {
     Width(u32),
     Height(u32),

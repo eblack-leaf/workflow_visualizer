@@ -2,10 +2,7 @@ use crate::attachment::IconHandles;
 use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
 use workflow_visualizer::bevy_ecs::entity::Entity;
 use workflow_visualizer::bevy_ecs::prelude::{Commands, Local, NonSend, Query, Resource};
-use workflow_visualizer::{
-    bevy_ecs, Button, ButtonBorder, ButtonType, Color, ResponsiveGridView, ResponsiveUnit, Sender,
-    Triggered,
-};
+use workflow_visualizer::{bevy_ecs, Button, ButtonBorder, ButtonType, Color, Sender, Triggered};
 
 use crate::entry_list::EntryScale;
 use crate::entry_list::{EntryListLayout, ListDimensions};

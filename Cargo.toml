@@ -1,5 +1,5 @@
 [workspace]
-members = ["workflow_visualizer", "application", "website", "application_logic", "placement_tool", "placement_tool_logic"]
+members = ["workflow_visualizer", "application", "website", "application_logic"]
 resolver = "2"
 [profile.release]
 debug = 1

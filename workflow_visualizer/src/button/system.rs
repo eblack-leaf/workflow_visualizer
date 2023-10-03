@@ -8,7 +8,7 @@ use crate::icon::Icon;
 use crate::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
     DeviceContext, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position,
-    RawMarker, ResourceHandle, ScaleFactor, Section, Text, TextValue, TextWrapStyle, Toggled,
+    ResourceHandle, ScaleFactor, Section, Text, TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -202,13 +202,13 @@ pub(crate) fn placement(
             let len = button_text.0.len() as f32;
             let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
                 + scaling.icon.width() / 2f32
-                + RawMarker(2).to_pixel();
+                + 4f32;
             let y = center.y - logical_dimensions.height / 2f32;
             let width = logical_dimensions.width * len;
             let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
-            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.width();
-            let icon_y = text_section.top() + RawMarker(1).to_pixel();
+            let icon_x = text_section.left() - 4f32 - scaling.icon.width();
+            let icon_y = text_section.top() + 2f32;
             (Some(text_section), Position::new(icon_x, icon_y))
         };
         if let Some(icon_entity) = icon_ref.0 {

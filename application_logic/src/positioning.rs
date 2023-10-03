@@ -5,7 +5,6 @@ use workflow_visualizer::bevy_ecs;
 use workflow_visualizer::bevy_ecs::change_detection::{DetectChanges, Res, ResMut};
 use workflow_visualizer::bevy_ecs::component::Component;
 use workflow_visualizer::bevy_ecs::prelude::{Changed, Commands, Query, Resource};
-use workflow_visualizer::{GridPoint, RawMarker, ResponsiveGridView, ResponsivePathView};
 #[derive(Component)]
 pub(crate) struct EntryListPosition(pub(crate) Option<u32>);
 

@@ -17,14 +17,13 @@ use crate::color::ColorAttachment;
 use crate::coord::CoordinateAttachment;
 use crate::focus::FocusAttachment;
 use crate::gfx::GfxSurfaceConfiguration;
-use crate::grid::GridAttachment;
+
 use crate::images::ImageAttachment;
 use crate::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::line::LineAttachment;
 use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
-use crate::path::PathAttachment;
 use crate::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
 use crate::sync::set_sync_points;
 use crate::text::TextAttachment;
@@ -158,8 +157,6 @@ impl Visualizer {
         set_sync_points(self);
         self.invoke_attach::<WindowAttachment>();
         self.invoke_attach::<ViewportAttachment>();
-        self.invoke_attach::<GridAttachment>();
-        self.invoke_attach::<PathAttachment>();
         self.invoke_attach::<PanelAttachment>();
         self.invoke_attach::<LineAttachment>();
         self.invoke_attach::<VisibilityAttachment>();
