@@ -97,6 +97,7 @@ mod panel;
 mod path;
 mod render;
 mod scale_factor;
+mod scene;
 mod sync;
 mod text;
 mod texture_atlas;

@@ -47,6 +47,17 @@ impl NodeEntry {
             cmd.entity(*entity).insert(Disabled::default());
         }
     }
+    pub(crate) fn enable(&self, cmd: &mut Commands) {
+        if let Some(entity) = self.selector.as_ref() {
+            cmd.entity(*entity).remove::<Disabled>();
+        }
+        if let Some(entity) = self.deleter.as_ref() {
+            cmd.entity(*entity).remove::<Disabled>();
+        }
+        if let Some(entity) = self.panel.as_ref() {
+            cmd.entity(*entity).remove::<Disabled>();
+        }
+    }
 }
 pub(crate) fn place_node_entry(
     name: String,
@@ -132,6 +143,14 @@ pub(crate) fn process_triggers_node_panel(
     mut node_panel: ResMut<NodePanel>,
     mut selected: ResMut<SelectedNode>,
 ) {
+    if let Some(entity) = node_panel.add.as_ref() {
+        if let Ok(trigger) = triggers.get(*entity) {
+            if trigger.active() {
+                let key = node_panel.key_factory.generate();
+                node_panel.node_list.add(key);
+            }
+        }
+    }
     let mut removed = HashSet::new();
     for (key, entry) in node_panel.node_entries.iter() {
         if let Some(entity) = entry.selector.as_ref() {
@@ -154,17 +173,81 @@ pub(crate) fn process_triggers_node_panel(
         node_panel.node_entries.remove(&node);
     }
 }
+pub(crate) fn list_management(mut node_panel: ResMut<NodePanel>, mut cmd: Commands) {
+    for enable in node_panel.node_list.enablement() {
+        let node_entry = node_panel.node_entries.get(&enable.0);
+        if let Some(entry) = node_entry {
+            if !enable.1 {
+                entry.disable(&mut cmd);
+            } else {
+                entry.enable(&mut cmd);
+            }
+        }
+    }
+}
 pub(crate) fn node_panel(mut cmd: Commands, grid: Res<Grid>) {
     let button_panel_offset = 10;
+    let list_top = 1.near().raw_offset(button_panel_offset);
     let view = GridViewBuilder::new()
-        .with_top(1.near().raw_offset(button_panel_offset))
+        .with_top(list_top)
         .with_left(1.near())
         .with_right(NodePanel::NODE_LIST_RIGHT.far())
         .with_bottom(NodePanel::NODE_LIST_BOTTOM.far())
         .build();
-    let page_left = cmd.spawn(()).id();
-    let page_right = cmd.spawn(()).id();
-    let add = cmd.spawn(()).id();
+    let page_left_view = GridViewBuilder::new().build();
+    let control_panel_height =
+        grid.calc_vertical_location(list_top) - NodePanel::NODE_ENTRY_PADDING;
+    let icon_scale_marker = (control_panel_height - RawMarker(2)).0 as u32;
+    let page_left = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                NodePanel::NODE_LIST_LAYER,
+                Color::OFF_WHITE,
+                Color::OFF_BLACK,
+                ResourceHandles::NodeIcon.handle(),
+                "",
+                0,
+                icon_scale_marker,
+                ButtonBorder::None,
+            )
+            .responsively_viewed(page_left_view.all_same()),
+        )
+        .id();
+    let page_right_view = GridViewBuilder::new().build();
+    let page_right = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                NodePanel::NODE_LIST_LAYER,
+                Color::OFF_WHITE,
+                Color::OFF_BLACK,
+                ResourceHandles::NodeIcon.handle(),
+                "",
+                0,
+                icon_scale_marker,
+                ButtonBorder::None,
+            )
+            .responsively_viewed(page_right_view.all_same()),
+        )
+        .id();
+    let add_view = GridViewBuilder::new().build();
+    let add = cmd
+        .spawn(
+            Button::new(
+                ButtonType::Press,
+                NodePanel::NODE_LIST_LAYER,
+                Color::OFF_WHITE,
+                Color::OFF_BLACK,
+                ResourceHandles::NodeIcon.handle(),
+                "",
+                0,
+                icon_scale_marker,
+                ButtonBorder::None,
+            )
+            .responsively_viewed(add_view.all_same()),
+        )
+        .id();
     cmd.insert_resource(NodePanel {
         node_list: List::new(
             GridPoint::new(view.left(), view.top()),
