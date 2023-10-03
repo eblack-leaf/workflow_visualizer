@@ -98,9 +98,22 @@ impl GridView {
         self.vertical.end = bottom.into();
         self
     }
-    pub fn positioned<GP: Into<GridPoint>>(&self, position: GP) -> Self {
-        let position = position.into();
-        self.with_left(position.x).with_top(position.y)
+    pub fn adjusted<R: Into<RawMarker>>(
+        mut self,
+        horizontal: Option<R>,
+        vertical: Option<R>,
+    ) -> Self {
+        if let Some(h) = horizontal {
+            let marker = h.into();
+            self.horizontal.begin = self.horizontal.begin.raw_offset(marker);
+            self.horizontal.end = self.horizontal.end.raw_offset(marker);
+        }
+        if let Some(v) = vertical {
+            let marker = v.into();
+            self.vertical.begin = self.vertical.begin.raw_offset(marker);
+            self.vertical.end = self.vertical.end.raw_offset(marker);
+        }
+        self
     }
     pub fn padded<R: Into<RawMarker>>(&self, padding: R) -> Self {
         let padding = padding.into();

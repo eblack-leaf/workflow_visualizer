@@ -5,8 +5,6 @@ use std::hash::Hash;
 pub struct List<Key: Copy + Clone + Hash + Eq + PartialEq> {
     pub entries: Vec<Key>,
     pub page: u32,
-    pub page_left: bool,
-    pub page_right: bool,
     pub page_max: u32,
     pub entries_per_page: EntriesPerPage,
     pub anchor: GridPoint,
@@ -33,8 +31,6 @@ impl<Key: Copy + Clone + Hash + Eq + PartialEq> List<Key> {
         Self {
             entries: vec![],
             page: 0,
-            page_left: false,
-            page_right: false,
             page_max: 0,
             entries_per_page: EntriesPerPage::new(vertical_markers, &entry_descriptor),
             anchor,
@@ -88,13 +84,15 @@ impl<Key: Copy + Clone + Hash + Eq + PartialEq> List<Key> {
         }
         mapping
     }
-    pub fn insert(&mut self, index: usize, key: Key) {
+    pub fn insert(&mut self, index: usize, key: Key) -> GridPoint {
         self.entries.insert(index, key);
         self.calc_page_max();
+        self.entry_position((index - 1) as i32)
     }
-    pub fn add(&mut self, key: Key) {
+    pub fn add(&mut self, key: Key) -> GridPoint {
         self.entries.push(key);
         self.calc_page_max();
+        self.entry_position((self.entries.len() - 1) as i32)
     }
     pub fn remove(&mut self, key: Key) {
         self.entries.retain(|e| *e != key);

@@ -123,6 +123,16 @@ impl Grid {
         let begin = self.calc_vertical_location(view.vertical.begin);
         end - begin
     }
+    pub fn span(&self) -> HorizontalSpan {
+        self.span
+    }
+    pub fn distance(&self, first: GridPoint, second: GridPoint) -> (RawMarker, RawMarker) {
+        let fx = self.calc_horizontal_location(first.x);
+        let fy = self.calc_vertical_location(first.y);
+        let sx = self.calc_horizontal_location(second.x);
+        let sy = self.calc_vertical_location(second.y);
+        (fx - sx, fy - sy)
+    }
     pub fn horizontal_markers(&self) -> i32 {
         self.horizontal_markers as i32
     }

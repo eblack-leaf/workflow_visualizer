@@ -12,8 +12,11 @@ pub struct ResponsiveView<T> {
 }
 
 impl<F> ResponsiveView<F> {
-    pub fn get_span(&self, span: &HorizontalSpan) -> &F {
-        self.mapping.get(span).expect("no view")
+    pub fn get_span(&self, span: HorizontalSpan) -> &F {
+        self.mapping.get(&span).expect("no view")
+    }
+    pub fn get_span_mut(&mut self, span: HorizontalSpan) -> &mut F {
+        self.mapping.get_mut(&span).expect("no view")
     }
     pub fn with_span_four<T: Into<F>>(mut self, view: T) -> Self {
         self.mapping.insert(HorizontalSpan::Four, view.into());
