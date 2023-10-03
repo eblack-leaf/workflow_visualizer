@@ -44,7 +44,7 @@
         <span class="self">Self </span>{ identifier }
     }
     <span class="attr">#[allow(unused)]
-    </span><span class="kw">fn </span>identifier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+    </span><span class="kw">pub fn </span>identifier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="self">self</span>.identifier
     }
 }
@@ -59,7 +59,7 @@
     }
     <span class="kw">pub fn </span>generate(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Key {
         <span class="kw">let </span>key = Key::new(<span class="self">self</span>.current);
-        <span class="self">self</span>.current += <span class="number">1</span>;
+        <span class="self">self</span>.current = <span class="self">self</span>.current.checked_add(<span class="number">1</span>).unwrap_or_default();
         key
     }
 }
