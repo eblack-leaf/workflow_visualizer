@@ -9,7 +9,7 @@ impl Key {
         Self { identifier }
     }
     #[allow(unused)]
-    fn identifier(&self) -> u32 {
+    pub fn identifier(&self) -> u32 {
         self.identifier
     }
 }
@@ -24,7 +24,7 @@ impl KeyFactory {
     }
     pub fn generate(&mut self) -> Key {
         let key = Key::new(self.current);
-        self.current += 1;
+        self.current = self.current.checked_add(1).unwrap_or_default();
         key
     }
 }

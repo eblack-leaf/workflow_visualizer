@@ -124,9 +124,21 @@ pub struct GridPoint {
     pub x: GridLocation,
     pub y: GridLocation,
 }
+
 impl GridPoint {
     pub fn all_same(self) -> ResponsiveGridPoint {
         ResponsiveGridPoint::all_same(self)
+    }
+    pub fn new(x: GridLocation, y: GridLocation) -> Self {
+        Self { x, y }
+    }
+    pub fn with_x(mut self, x: GridLocation) -> Self {
+        self.x = x;
+        self
+    }
+    pub fn with_y(mut self, y: GridLocation) -> Self {
+        self.y = y;
+        self
     }
 }
 impl<T: Into<GridLocation>> From<(T, T)> for GridPoint {
