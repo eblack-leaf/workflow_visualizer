@@ -2,11 +2,9 @@ use bevy_ecs::prelude::{Bundle, Component, Entity};
 
 pub(crate) use attachment::ButtonAttachment;
 
-use crate::icon::IconScale;
 use crate::snap_grid::FloatPlacer;
 use crate::{
-    Color, Interactable, InterfaceContext, Layer, ResourceHandle, Section, Tag, TextScale,
-    TextValue,
+    Color, Interactable, InterfaceContext, Layer, ResourceHandle, Section, Tag, TextValue,
 };
 
 mod attachment;

@@ -3,11 +3,12 @@ use bevy_ecs::prelude::Entity;
 use bevy_ecs::system::Commands;
 use std::collections::HashMap;
 use std::hash::Hash;
-
+#[allow(unused)]
 pub struct Scene<Key: Copy + Clone + Hash + Eq + PartialEq> {
     pub entities: Vec<Entity>,
     pub associations: HashMap<Key, Entity>,
 }
+#[allow(unused)]
 impl<Key: Copy + Clone + Hash + Eq + PartialEq> Scene<Key> {
     pub fn new() -> Self {
         Self {

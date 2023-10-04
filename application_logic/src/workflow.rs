@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
@@ -23,7 +22,7 @@ impl Engen {
 }
 impl Default for Engen {
     fn default() -> Self {
-        let mut engen = Engen::new();
+        let engen = Engen::new();
         engen
     }
 }
@@ -32,13 +31,13 @@ impl Workflow for Engen {
     type Action = Action;
     type Response = Response;
 
-    fn handle_response(visualizer: &mut Visualizer, response: Self::Response) {
+    fn handle_response(_visualizer: &mut Visualizer, response: Self::Response) {
         match response {
             Response::ExitConfirmed => {}
         }
     }
 
-    async fn handle_action(engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
+    async fn handle_action(_engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
         match action {
             Action::ExitRequest => Response::ExitConfirmed,
         }
@@ -51,7 +50,6 @@ impl Workflow for Engen {
     fn is_exit_response(res: &Self::Response) -> bool {
         match res {
             Response::ExitConfirmed => true,
-            _ => false,
         }
     }
 }

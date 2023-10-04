@@ -1,6 +1,6 @@
-use bevy_ecs::prelude::{Changed, Component, DetectChanges, IntoSystemConfigs, Query, Res};
+use bevy_ecs::prelude::Component;
 
-use crate::{Attach, GridLocation, InterfaceContext, Position, SyncPoint, Visualizer};
+use crate::{GridLocation, InterfaceContext, Position};
 
 /// Collection of specific points rendered from a PathView
 #[derive(Component, Clone)]

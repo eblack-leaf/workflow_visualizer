@@ -8,7 +8,6 @@ use bevy_ecs::prelude::{IntoSystemConfigs, Res, Resource};
 use bevy_ecs::query::{Changed, Or};
 use bevy_ecs::system::{Commands, Query};
 use std::collections::HashMap;
-use std::hash::Hash;
 
 #[repr(i32)]
 #[derive(Copy, Clone)]
@@ -36,13 +35,13 @@ impl Breakpoint {
         (*self as i32) as f32
     }
     pub fn establish(width: CoordinateUnit) -> Self {
-        return if width <= Self::Mobile.value() {
+        if width <= Self::Mobile.value() {
             Self::Mobile
         } else if width <= Self::Tablet.value() {
             Self::Tablet
         } else {
             Self::Desktop
-        };
+        }
     }
 }
 #[derive(Copy, Clone, Default, Eq, PartialEq)]
@@ -176,7 +175,7 @@ impl GridPlacer {
             placements: HashMap::new(),
         }
     }
-    pub fn add(&mut self, placement: GridPlacementDescriptor) {
+    pub fn add(&mut self, _placement: GridPlacementDescriptor) {
         todo!()
     }
 }
@@ -226,24 +225,24 @@ impl SnapGrid {
             row: Row::new(area.height, Breakpoint::establish(area.height)),
         }
     }
-    pub fn view_coordinates(&self, view: ResponsiveGridView) -> Section<InterfaceContext> {
+    pub fn view_coordinates(&self, _view: ResponsiveGridView) -> Section<InterfaceContext> {
         todo!()
     }
-    pub fn range_coordinates(&self, range: ResponsiveGridRange) -> CoordinateUnit {
+    pub fn range_coordinates(&self, _range: ResponsiveGridRange) -> CoordinateUnit {
         todo!()
     }
     pub fn location_coordinates(
         &self,
-        location: ResponsiveGridLocation,
+        _location: ResponsiveGridLocation,
     ) -> Position<InterfaceContext> {
         todo!()
     }
     pub fn animate_location(
         &self,
-        begin: ResponsiveGridLocation,
-        other: ResponsiveGridLocation,
-        interval: TimeDelta,
-        delay: Option<TimeDelta>,
+        _begin: ResponsiveGridLocation,
+        _other: ResponsiveGridLocation,
+        _interval: TimeDelta,
+        _delay: Option<TimeDelta>,
     ) -> (
         QueuedAnimation<Position<InterfaceContext>>,
         DelayedBundle<ResponsiveGridLocation>,
@@ -252,10 +251,10 @@ impl SnapGrid {
     }
     pub fn animate_view(
         &self,
-        begin: ResponsiveGridView,
-        end: ResponsiveGridView,
-        interval: TimeDelta,
-        delay: Option<TimeDelta>,
+        _begin: ResponsiveGridView,
+        _end: ResponsiveGridView,
+        _interval: TimeDelta,
+        _delay: Option<TimeDelta>,
     ) -> (
         QueuedAnimation<Position<InterfaceContext>>,
         QueuedAnimation<Area<InterfaceContext>>,
@@ -276,7 +275,7 @@ pub(crate) fn calculate(
     >,
     grid: Res<SnapGrid>,
 ) {
-    for (mut position, mut area, location, view) in gridded.iter_mut() {
+    for (mut position, area, location, view) in gridded.iter_mut() {
         if let Some(loc) = location {
             *position = grid.location_coordinates(*loc);
         } else if let Some(view) = view {
@@ -293,8 +292,8 @@ pub struct FloatLocation {
 }
 impl FloatLocation {
     pub fn new(percent: f32) -> Self {
-        assert_eq!(percent <= 0f32, true);
-        assert_eq!(percent >= 1f32, true);
+        assert!(percent <= 0f32);
+        assert!(percent >= 1f32);
         Self { percent }
     }
     pub fn percent(&self) -> f32 {
@@ -332,7 +331,7 @@ pub enum FloatPlacementDescriptor {
     View(FloatView),
 }
 impl FloatPlacementDescriptor {
-    pub fn calculate(&self, section: Section<InterfaceContext>) -> FloatPlacement {
+    pub fn calculate(&self, _section: Section<InterfaceContext>) -> FloatPlacement {
         todo!()
     }
 }
