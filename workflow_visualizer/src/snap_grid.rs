@@ -1,5 +1,7 @@
-use bevy_ecs::component::Component;
 use crate::{Area, CoordinateUnit, InterfaceContext, NumericalContext, Position, Section};
+use bevy_ecs::component::Component;
+use std::collections::HashMap;
+use std::hash::Hash;
 
 #[repr(i32)]
 #[derive(Copy, Clone)]
@@ -63,10 +65,7 @@ pub struct GridLocation {
 }
 impl GridLocation {
     pub fn new(marker: GridMarker, bias: GridBias) -> Self {
-        Self {
-            marker,
-            bias,
-        }
+        Self { marker, bias }
     }
 }
 #[derive(Copy, Clone)]
@@ -92,7 +91,6 @@ impl ResponsiveGridLocation {
         self.desktop.replace(location);
         self
     }
-
 }
 
 #[derive(Copy, Clone)]
@@ -102,10 +100,7 @@ pub struct ResponsiveGridRange {
 }
 impl ResponsiveGridRange {
     pub fn new(begin: ResponsiveGridLocation, end: ResponsiveGridLocation) -> Self {
-        Self {
-            begin,
-            end,
-        }
+        Self { begin, end }
     }
 }
 #[derive(Component, Copy, Clone)]
@@ -119,6 +114,23 @@ impl ResponsiveGridView {
             horizontal,
             vertical,
         }
+    }
+}
+pub enum GridPlacement {
+    Location(ResponsiveGridLocation),
+    View(ResponsiveGridView),
+}
+pub struct GridLayout<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
+    pub arrangement: HashMap<Key, GridPlacement>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> GridLayout<Key> {
+    pub fn new() -> Self {
+        Self {
+            arrangement: HashMap::new(),
+        }
+    }
+    pub fn add(&mut self, placement: GridPlacement) {
+        todo!()
     }
 }
 pub struct Column {
@@ -147,7 +159,7 @@ impl Row {
         }
     }
 }
-
+/// Macro placement tool segmented into fixed number of columns/rows.
 pub struct SnapGrid {
     pub horizontal_breakpoint: Breakpoint,
     pub vertical_breakpoint: Breakpoint,
@@ -155,7 +167,7 @@ pub struct SnapGrid {
     pub row: Row,
 }
 impl SnapGrid {
-    pub const GUTTER_BASE: CoordinateUnit = 2f32;
+    pub const GUTTER_BASE: CoordinateUnit = 4f32;
     pub fn new(area: Area<NumericalContext>) -> Self {
         let horizontal_breakpoint = Breakpoint::establish(area.width);
         let vertical_breakpoint = Breakpoint::establish(area.height);
@@ -172,7 +184,78 @@ impl SnapGrid {
     pub fn range_coordinates(&self, range: ResponsiveGridRange) -> CoordinateUnit {
         todo!()
     }
-    pub fn location_coordinates(&self, location: ResponsiveGridLocation) -> Position<InterfaceContext> {
+    pub fn location_coordinates(
+        &self,
+        location: ResponsiveGridLocation,
+    ) -> Position<InterfaceContext> {
+        todo!()
+    }
+}
+pub struct FloatLocation {
+    percent: f32,
+}
+impl FloatLocation {
+    pub fn new(percent: f32) -> Self {
+        assert_eq!(percent <= 0f32, true);
+        assert_eq!(percent >= 1f32, true);
+        Self { percent }
+    }
+    pub fn percent(&self) -> f32 {
+        self.percent
+    }
+}
+impl From<f32> for FloatLocation {
+    fn from(value: f32) -> Self {
+        FloatLocation::new(value)
+    }
+}
+pub struct FloatRange {
+    pub begin: FloatLocation,
+    pub end: FloatLocation,
+}
+impl FloatRange {
+    pub fn new(begin: FloatLocation, end: FloatLocation) -> Self {
+        Self { begin, end }
+    }
+}
+pub struct FloatView {
+    pub horizontal: FloatRange,
+    pub vertical: FloatRange,
+}
+impl FloatView {
+    pub fn new(horizontal: FloatRange, vertical: FloatRange) -> Self {
+        Self {
+            horizontal,
+            vertical,
+        }
+    }
+}
+pub enum FloatPlacement {
+    Location(FloatLocation),
+    View(FloatView),
+}
+pub enum FloatAppliedPlacement {
+    Position(Position<InterfaceContext>),
+    Section(Section<InterfaceContext>),
+}
+/// Float Layout tool for micro placements within a responsively bound section.
+/// This is useful when the segments of the grid are not precise enough.
+pub struct FloatLayout<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
+    pub placements: HashMap<Key, FloatPlacement>,
+}
+impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> FloatLayout<Key> {
+    pub fn new() -> Self {
+        Self {
+            placements: HashMap::new(),
+        }
+    }
+    pub fn add(&mut self, placement: FloatPlacement) {
+        todo!()
+    }
+    pub fn apply(
+        &self,
+        view_coordinates: Section<InterfaceContext>,
+    ) -> HashMap<Key, FloatAppliedPlacement> {
         todo!()
     }
 }
