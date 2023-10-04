@@ -110,7 +110,6 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="comment">// #![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -123,12 +122,8 @@
     despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
     Disabled, ResourceHandle,
 };
-<span class="kw">pub use </span>button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
-<span class="kw">pub use </span>grid::{
-    BundlePlacement, Grid, GridLocation, GridLocationDescriptor, GridMarker, GridMarkerBias,
-    GridPoint, GridPointBuilder, GridRange, GridView, GridViewBuilder, HorizontalSpan, Placement,
-    RawMarker, RawMarkerGrouping, ResponsiveGridPoint, ResponsiveGridView, ResponsiveUnit,
-    ResponsiveView,
+<span class="kw">pub use </span>button::{
+    BackgroundColor, Button, ButtonBorder, ButtonIcon, ButtonTag, ButtonText, ButtonType,
 };
 <span class="kw">pub use </span>icon::{BundledIcon, Icon, IconRequest, IconScale, IconTag};
 <span class="kw">pub use </span>images::{
@@ -165,16 +160,21 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">pub use </span><span class="kw">crate</span>::job::Job;
 <span class="kw">pub use </span><span class="kw">crate</span>::line::{Line, LineRender, LineTag};
-<span class="kw">pub use </span><span class="kw">crate</span>::list::{EntriesPerPage, List, ListEntryDescriptor};
 <span class="kw">pub use </span><span class="kw">crate</span>::media::Media;
 <span class="kw">pub use </span><span class="kw">crate</span>::panel::{BorderColor, Panel, PanelContentArea, PanelTag, PanelType};
-<span class="kw">pub use </span><span class="kw">crate</span>::path::{Path, PathView, ResponsivePathView};
+<span class="kw">pub use </span><span class="kw">crate</span>::path::{Path, PathView};
 <span class="kw">pub use </span><span class="kw">crate</span>::scale_factor::{ScaleFactor, WindowAppearanceFactor};
+<span class="kw">pub use </span><span class="kw">crate</span>::snap_grid::{
+    Column, FloatArrangement, FloatLocation, FloatPlacementDescriptor, FloatPlacer, FloatRange,
+    FloatView, GridBias, GridLocation, GridMarker, GridPlacementDescriptor, GridPlacer, GridRange,
+    GridUnit, GridView, ResponsiveGridLocation, ResponsiveGridRange, ResponsiveGridView, Row,
+    SnapGrid,
+};
 <span class="kw">pub use </span><span class="kw">crate</span>::sync::SyncPoint;
 <span class="kw">pub use </span><span class="kw">crate</span>::text::{
-    KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement, TextGridView,
-    TextGridViewKnown, TextLetterDimensions, TextLineStructure, TextScale, TextTag, TextValue,
-    TextWrapStyle,
+    KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement,
+    TextLetterDimensions, TextLineStructure, TextScale, TextSectionDescriptor,
+    TextSectionDescriptorKnown, TextTag, TextValue, TextWrapStyle,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::texture_atlas::{
     AtlasBlock, AtlasDimension, AtlasFreeLocations, AtlasPosition, AtlasTexture,
@@ -196,14 +196,12 @@
 <span class="kw">mod </span>diagnostics;
 <span class="kw">mod </span>focus;
 <span class="kw">mod </span>gfx;
-<span class="kw">mod </span>grid;
 <span class="kw">mod </span>icon;
 <span class="kw">mod </span>images;
 <span class="kw">mod </span>instance;
 <span class="kw">mod </span>interaction;
 <span class="kw">mod </span>job;
 <span class="kw">mod </span>line;
-<span class="kw">mod </span>list;
 <span class="kw">mod </span>media;
 <span class="kw">mod </span>orientation;
 <span class="kw">mod </span>panel;

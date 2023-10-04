@@ -26,16 +26,12 @@
 <a href="#26" id="26">26</a>
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
-<a href="#29" id="29">29</a>
-<a href="#30" id="30">30</a>
-<a href="#31" id="31">31</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
 <span class="kw">use </span><span class="kw">crate</span>::line::renderer::LineRenderer;
 <span class="kw">use </span><span class="kw">crate</span>::line::system::{
     calc_section, create_render_group, push_color, push_layer, push_uniforms, scale_path,
 };
-<span class="kw">use </span><span class="kw">crate</span>::path::view_changed;
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LineAttachment;
@@ -44,9 +40,7 @@
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         visualizer.register_renderer::&lt;LineRenderer&gt;();
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            calc_section
-                .in_set(SyncPoint::Reconfigure)
-                .after(view_changed),
+            calc_section.in_set(SyncPoint::Reconfigure),
             scale_path.in_set(SyncPoint::Resolve),
             push_layer.in_set(SyncPoint::PushDiff),
             push_color.in_set(SyncPoint::PushDiff),

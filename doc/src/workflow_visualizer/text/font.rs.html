@@ -146,6 +146,13 @@
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, Sub};
 
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
@@ -153,7 +160,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::NumericalContext;
 <span class="kw">use </span><span class="kw">crate</span>::text::component::TextScale;
-<span class="kw">use crate</span>::{Area, GridPoint, GridView, GridViewBuilder, RawMarker};
+<span class="kw">use crate</span>::{Area, CoordinateUnit, InterfaceContext, Position, Section};
 
 <span class="attr">#[derive(Resource)]
 </span><span class="kw">pub struct </span>MonoSpacedFont {
@@ -212,37 +219,40 @@
         }
         TextScale(<span class="number">0</span>)
     }
-    <span class="kw">pub fn </span>text_grid_view(
+    <span class="kw">pub fn </span>text_section_descriptor(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        position: GridPoint,
-        known: TextGridViewKnown,
+        position: Position&lt;InterfaceContext&gt;,
+        known: TextSectionDescriptorKnown,
         characters: u32,
-    ) -&gt; TextGridView {
+    ) -&gt; TextSectionDescriptor {
         <span class="kw">let </span>scale = <span class="kw">match </span>known {
-            TextGridViewKnown::Width(markers) =&gt; {
-                <span class="kw">let </span>px = markers.to_pixel();
-                <span class="kw">let </span>px = px * <span class="self">Self</span>::TEXT_GRID_THRESHOLD / characters <span class="kw">as </span>f32;
+            TextSectionDescriptorKnown::Width(width) =&gt; {
+                <span class="kw">let </span>px = width * <span class="self">Self</span>::TEXT_GRID_THRESHOLD / characters <span class="kw">as </span>f32;
                 <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px <span class="kw">as </span>u32))
             }
-            TextGridViewKnown::Height(markers) =&gt; {
-                <span class="kw">let </span>px = markers.to_pixel();
-                <span class="kw">let </span>px = px * <span class="self">Self</span>::TEXT_GRID_THRESHOLD;
+            TextSectionDescriptorKnown::Height(markers) =&gt; {
+                <span class="kw">let </span>px = markers * <span class="self">Self</span>::TEXT_GRID_THRESHOLD;
                 <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(px <span class="kw">as </span>u32))
             }
-            TextGridViewKnown::Scale(scale) =&gt; scale,
+            TextSectionDescriptorKnown::Scale(scale) =&gt; scale,
+            TextSectionDescriptorKnown::WidthAndHeight(area) =&gt; {
+                <span class="kw">let </span>px = area.width * <span class="self">Self</span>::TEXT_GRID_THRESHOLD / characters <span class="kw">as </span>f32;
+                <span class="kw">let </span>height_px = area.height * <span class="self">Self</span>::TEXT_GRID_THRESHOLD;
+                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px <span class="kw">as </span>u32))
+                    .<span class="number">0
+                    </span>.min(
+                        <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(
+                            height_px <span class="kw">as </span>u32,
+                        ))
+                        .<span class="number">0</span>,
+                    )
+                    .into()
+            }
         };
         <span class="kw">let </span>letter_dims = <span class="self">self</span>.character_dimensions(scale.px());
-        <span class="kw">let </span>width = RawMarker::from_pixel_inclusive(letter_dims.width * characters <span class="kw">as </span>f32);
-        <span class="kw">let </span>height = RawMarker::from_pixel_inclusive(letter_dims.height);
-        TextGridView::new(
-            scale,
-            GridViewBuilder::new()
-                .with_left(position.x)
-                .with_top(position.y)
-                .with_right(position.x.raw_offset(width))
-                .with_bottom(position.y.raw_offset(height))
-                .build(),
-        )
+        <span class="kw">let </span>width = letter_dims.width * characters <span class="kw">as </span>f32;
+        <span class="kw">let </span>height = letter_dims.height;
+        TextSectionDescriptor::new(scale, Section::new(position, Area::new(width, height)))
     }
     <span class="kw">pub fn </span>font_slice(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[fdFont] {
         <span class="self">self</span>.font_storage.as_slice()
@@ -263,22 +273,26 @@
         (metrics.advance_width.ceil(), height.ceil()).into()
     }
 }
-<span class="kw">pub struct </span>TextGridView {
+<span class="kw">pub struct </span>TextSectionDescriptor {
     <span class="kw">pub </span>scale: TextScale,
-    <span class="kw">pub </span>view: GridView,
+    <span class="kw">pub </span>section: Section&lt;InterfaceContext&gt;,
 }
-<span class="kw">impl </span>TextGridView {
-    <span class="kw">pub fn </span>new&lt;TS: Into&lt;TextScale&gt;, GV: Into&lt;GridView&gt;&gt;(scale: TS, view: GV) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>TextSectionDescriptor {
+    <span class="kw">pub fn </span>new&lt;TS: Into&lt;TextScale&gt;, S: Into&lt;Section&lt;InterfaceContext&gt;&gt;&gt;(
+        scale: TS,
+        section: S,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             scale: scale.into(),
-            view: view.into(),
+            section: section.into(),
         }
     }
 }
-<span class="kw">pub enum </span>TextGridViewKnown {
-    Width(RawMarker),
-    Height(RawMarker),
+<span class="kw">pub enum </span>TextSectionDescriptorKnown {
+    Width(CoordinateUnit),
+    Height(CoordinateUnit),
     Scale(TextScale),
+    WidthAndHeight(Area&lt;InterfaceContext&gt;),
 }
 <span class="kw">pub enum </span>KnownTextDimension {
     Width(u32),

@@ -484,8 +484,6 @@
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
 <a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
-<a href="#488" id="488">488</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -505,15 +503,14 @@
 <span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::focus::FocusAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurfaceConfiguration;
-<span class="kw">use </span><span class="kw">crate</span>::grid::GridAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::images::ImageAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::interaction::{InteractionAttachment, InteractionDevice, MouseAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::job::{attempt_to_idle, Task, TaskLabel};
 <span class="kw">use </span><span class="kw">crate</span>::line::LineAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::orientation::OrientationAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::panel::PanelAttachment;
-<span class="kw">use </span><span class="kw">crate</span>::path::PathAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
+<span class="kw">use </span><span class="kw">crate</span>::snap_grid::SnapGridAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::sync::set_sync_points;
 <span class="kw">use </span><span class="kw">crate</span>::text::TextAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::time::TimerAttachment;
@@ -646,8 +643,7 @@
         set_sync_points(<span class="self">self</span>);
         <span class="self">self</span>.invoke_attach::&lt;WindowAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ViewportAttachment&gt;();
-        <span class="self">self</span>.invoke_attach::&lt;GridAttachment&gt;();
-        <span class="self">self</span>.invoke_attach::&lt;PathAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;SnapGridAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;PanelAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;LineAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;VisibilityAttachment&gt;();

@@ -20,6 +20,9 @@
 <a href="#20" id="20">20</a>
 <a href="#21" id="21">21</a>
 <a href="#22" id="22">22</a>
+<a href="#23" id="23">23</a>
+<a href="#24" id="24">24</a>
+<a href="#25" id="25">25</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::button::system;
 <span class="kw">use crate</span>::{Attach, SyncPoint, Visualizer};
 <span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
@@ -30,7 +33,10 @@
     <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
             system::spawn.in_set(SyncPoint::Spawn),
-            system::placement.in_set(SyncPoint::SecondaryEffects),
+            system::place.in_set(SyncPoint::Spawn).after(system::spawn),
+            system::scale_change
+                .in_set(SyncPoint::SecondaryEffects)
+                .after(<span class="kw">crate</span>::snap_grid::reapply),
             system::border_change.in_set(SyncPoint::Reconfigure),
             system::color_invert.in_set(SyncPoint::Reconfigure),
             system::secondary_despawn

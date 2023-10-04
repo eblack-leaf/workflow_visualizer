@@ -101,14 +101,18 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component, Entity};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>attachment::ButtonAttachment;
 
-<span class="kw">use </span><span class="kw">crate</span>::icon::IconScale;
+<span class="kw">use </span><span class="kw">crate</span>::snap_grid::FloatPlacer;
 <span class="kw">use crate</span>::{
-    Color, Interactable, InterfaceContext, Layer, ResourceHandle, Section, Tag, TextScale,
-    TextValue,
+    Color, Interactable, InterfaceContext, Layer, ResourceHandle, Section, Tag, TextValue,
 };
 
 <span class="kw">mod </span>attachment;
@@ -116,13 +120,13 @@
 
 <span class="kw">pub type </span>ButtonTag = Tag&lt;Button&gt;;
 
-<span class="attr">#[derive(Bundle, Clone)]
+<span class="attr">#[derive(Bundle)]
 </span><span class="kw">pub struct </span>Button {
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    icon_id: ResourceHandle,
-    button_text: TextValue,
+    button_icon: ButtonIcon,
+    button_text: ButtonText,
     section: Section&lt;InterfaceContext&gt;,
     color: Color,
     background_color: BackgroundColor,
@@ -130,20 +134,38 @@
     icon_entity: IconEntity,
     text_entity: TextEntity,
     interactable: Interactable,
-    scaling: Scaling,
     border: ButtonBorder,
+    float_placer: FloatPlacer,
 }
 
+<span class="attr">#[derive(Component, Clone)]
+</span><span class="kw">pub struct </span>ButtonText {
+    <span class="kw">pub </span>desc: <span class="prelude-ty">Option</span>&lt;TextValue&gt;,
+}
+<span class="kw">impl </span>ButtonText {
+    <span class="kw">pub fn </span>none() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ desc: <span class="prelude-val">None </span>}
+    }
+    <span class="kw">pub fn </span>some(desc: TextValue) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ desc: <span class="prelude-val">Some</span>(desc) }
+    }
+}
+<span class="attr">#[derive(Component)]
+</span><span class="kw">pub struct </span>ButtonIcon {
+    <span class="kw">pub </span>desc: <span class="prelude-ty">Option</span>&lt;ResourceHandle&gt;,
+}
+<span class="kw">impl </span>ButtonIcon {
+    <span class="kw">pub fn </span>none() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ desc: <span class="prelude-val">None </span>}
+    }
+    <span class="kw">pub fn </span>some(desc: ResourceHandle) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ desc: <span class="prelude-val">Some</span>(desc) }
+    }
+}
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub enum </span>ButtonBorder {
     Border,
     <span class="prelude-val">None</span>,
-}
-
-<span class="attr">#[derive(Component, Copy, Clone)]
-</span><span class="kw">pub struct </span>Scaling {
-    <span class="kw">pub </span>text: TextScale,
-    <span class="kw">pub </span>icon: IconScale,
 }
 
 <span class="attr">#[derive(Component, Copy, Clone)]
@@ -159,30 +181,21 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TextEntity(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="prelude-ty">Option</span>&lt;Entity&gt;);
 
 <span class="kw">impl </span>Button {
-    <span class="kw">pub fn </span>new&lt;
-        L: Into&lt;Layer&gt;,
-        C: Into&lt;Color&gt;,
-        S: Into&lt;String&gt;,
-        H: Into&lt;ResourceHandle&gt;,
-        TS: Into&lt;TextScale&gt;,
-        IS: Into&lt;IconScale&gt;,
-    &gt;(
+    <span class="kw">pub fn </span>new&lt;L: Into&lt;Layer&gt;, C: Into&lt;Color&gt;&gt;(
         button_type: ButtonType,
         layer: L,
         foreground_color: C,
         background_color: C,
-        handle: H,
-        button_text: S,
-        text_scale: TS,
-        icon_scale: IS,
+        button_text: ButtonText,
+        button_icon: ButtonIcon,
         border: ButtonBorder,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             tag: ButtonTag::new(),
             layer: layer.into(),
             button_type,
-            icon_id: handle.into(),
-            button_text: TextValue(button_text.into()),
+            button_icon,
+            button_text,
             section: Section::default(),
             color: foreground_color.into(),
             background_color: BackgroundColor(background_color.into()),
@@ -190,11 +203,8 @@
             icon_entity: IconEntity(<span class="prelude-val">None</span>),
             text_entity: TextEntity(<span class="prelude-val">None</span>),
             interactable: Interactable::default(),
-            scaling: Scaling {
-                text: text_scale.into(),
-                icon: icon_scale.into(),
-            },
             border,
+            float_placer: FloatPlacer::new(),
         }
     }
 }

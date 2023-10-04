@@ -259,10 +259,167 @@
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
-</pre></div><pre class="rust"><code><span class="kw">use crate</span>::{Area, CoordinateUnit, InterfaceContext, NumericalContext, Position, Section};
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+</pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
+    Area, Attach, CoordinateUnit, DelayedBundle, InterfaceContext, Position, QueuedAnimation,
+    Section, SyncPoint, TimeDelta, ViewportHandle, Visualizer,
+};
 <span class="kw">use </span>bevy_ecs::component::Component;
+<span class="kw">use </span>bevy_ecs::entity::Entity;
+<span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfigs, Res, Resource};
+<span class="kw">use </span>bevy_ecs::query::{Changed, Or};
+<span class="kw">use </span>bevy_ecs::system::{Commands, Query};
 <span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::hash::Hash;
 
 <span class="attr">#[repr(i32)]
 #[derive(Copy, Clone)]
@@ -290,13 +447,13 @@
         (<span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>i32) <span class="kw">as </span>f32
     }
     <span class="kw">pub fn </span>establish(width: CoordinateUnit) -&gt; <span class="self">Self </span>{
-        <span class="kw">return if </span>width &lt;= <span class="self">Self</span>::Mobile.value() {
+        <span class="kw">if </span>width &lt;= <span class="self">Self</span>::Mobile.value() {
             <span class="self">Self</span>::Mobile
         } <span class="kw">else if </span>width &lt;= <span class="self">Self</span>::Tablet.value() {
             <span class="self">Self</span>::Tablet
         } <span class="kw">else </span>{
             <span class="self">Self</span>::Desktop
-        };
+        }
     }
 }
 <span class="attr">#[derive(Copy, Clone, Default, Eq, PartialEq)]
@@ -329,7 +486,7 @@
         <span class="self">Self </span>{ marker, bias }
     }
 }
-<span class="attr">#[derive(Copy, Clone)]
+<span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>ResponsiveGridLocation {
     <span class="kw">pub </span>mobile: GridLocation,
     <span class="kw">pub </span>tablet: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
@@ -344,6 +501,13 @@
             desktop: <span class="prelude-val">None</span>,
         }
     }
+    <span class="kw">pub fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>, breakpoint: Breakpoint) -&gt; GridLocation {
+        <span class="kw">match </span>breakpoint {
+            Breakpoint::Mobile =&gt; <span class="self">self</span>.mobile,
+            Breakpoint::Tablet =&gt; <span class="self">self</span>.tablet.unwrap_or(<span class="self">self</span>.mobile),
+            Breakpoint::Desktop =&gt; <span class="self">self</span>.desktop.unwrap_or(<span class="self">self</span>.tablet.unwrap_or(<span class="self">self</span>.mobile)),
+        }
+    }
     <span class="kw">pub fn </span>with_tablet(<span class="kw-2">mut </span><span class="self">self</span>, location: GridLocation) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.tablet.replace(location);
         <span class="self">self
@@ -353,7 +517,15 @@
         <span class="self">self
     </span>}
 }
-
+<span class="kw">pub struct </span>GridRange {
+    <span class="kw">pub </span>begin: GridLocation,
+    <span class="kw">pub </span>end: GridLocation,
+}
+<span class="kw">impl </span>GridRange {
+    <span class="kw">pub fn </span>new(begin: GridLocation, end: GridLocation) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ begin, end }
+    }
+}
 <span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>ResponsiveGridRange {
     <span class="kw">pub </span>begin: ResponsiveGridLocation,
@@ -363,6 +535,21 @@
     <span class="kw">pub fn </span>new(begin: ResponsiveGridLocation, end: ResponsiveGridLocation) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ begin, end }
     }
+    <span class="kw">pub fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>, breakpoint: Breakpoint) -&gt; GridRange {
+        GridRange::new(<span class="self">self</span>.begin.current(breakpoint), <span class="self">self</span>.end.current(breakpoint))
+    }
+}
+<span class="kw">pub struct </span>GridView {
+    <span class="kw">pub </span>horizontal: GridRange,
+    <span class="kw">pub </span>vertical: GridRange,
+}
+<span class="kw">impl </span>GridView {
+    <span class="kw">pub fn </span>new(horizontal: GridRange, vertical: GridRange) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            horizontal,
+            vertical,
+        }
+    }
 }
 <span class="attr">#[derive(Component, Copy, Clone)]
 </span><span class="kw">pub struct </span>ResponsiveGridView {
@@ -370,6 +557,16 @@
     <span class="kw">pub </span>vertical: ResponsiveGridRange,
 }
 <span class="kw">impl </span>ResponsiveGridView {
+    <span class="kw">pub fn </span>current(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        horizontal_breakpoint: Breakpoint,
+        vertical_breakpoint: Breakpoint,
+    ) -&gt; GridView {
+        GridView::new(
+            <span class="self">self</span>.horizontal.current(horizontal_breakpoint),
+            <span class="self">self</span>.vertical.current(vertical_breakpoint),
+        )
+    }
     <span class="kw">pub fn </span>new(horizontal: ResponsiveGridRange, vertical: ResponsiveGridRange) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             horizontal,
@@ -377,26 +574,28 @@
         }
     }
 }
-<span class="kw">pub enum </span>GridPlacement {
+<span class="kw">pub enum </span>GridPlacementDescriptor {
     Location(ResponsiveGridLocation),
     View(ResponsiveGridView),
 }
-<span class="kw">pub struct </span>GridLayout&lt;Key: Eq + Hash + PartialEq + Copy + Clone + <span class="lifetime">&#39;static</span>&gt; {
-    <span class="kw">pub </span>arrangement: HashMap&lt;Key, GridPlacement&gt;,
+<span class="kw">pub struct </span>GridPlacer {
+    <span class="kw">pub </span>placements: HashMap&lt;Entity, GridPlacementDescriptor&gt;,
 }
-<span class="kw">impl</span>&lt;Key: Eq + Hash + PartialEq + Copy + Clone + <span class="lifetime">&#39;static</span>&gt; GridLayout&lt;Key&gt; {
+<span class="kw">impl </span>GridPlacer {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            arrangement: HashMap::new(),
+            placements: HashMap::new(),
         }
     }
-    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, placement: GridPlacement) {
+    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _placement: GridPlacementDescriptor) {
         <span class="macro">todo!</span>()
     }
 }
-<span class="kw">pub struct </span>Column {
+<span class="attr">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>Column {
     <span class="kw">pub </span>content: CoordinateUnit,
     <span class="kw">pub </span>gutter: CoordinateUnit,
+    <span class="kw">pub </span>breakpoint: Breakpoint,
 }
 <span class="kw">impl </span>Column {
     <span class="kw">pub fn </span>new(width: CoordinateUnit, breakpoint: Breakpoint) -&gt; <span class="self">Self </span>{
@@ -404,12 +603,15 @@
             content: (width - breakpoint.gutter() * (breakpoint.segments() + <span class="number">1</span>) <span class="kw">as </span>f32)
                 / breakpoint.segments() <span class="kw">as </span>f32,
             gutter: breakpoint.gutter(),
+            breakpoint,
         }
     }
 }
-<span class="kw">pub struct </span>Row {
+<span class="attr">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>Row {
     <span class="kw">pub </span>content: CoordinateUnit,
     <span class="kw">pub </span>gutter: CoordinateUnit,
+    <span class="kw">pub </span>breakpoint: Breakpoint,
 }
 <span class="kw">impl </span>Row {
     <span class="kw">pub fn </span>new(height: CoordinateUnit, breakpoint: Breakpoint) -&gt; <span class="self">Self </span>{
@@ -417,39 +619,84 @@
             content: (height - breakpoint.gutter() * (breakpoint.segments() + <span class="number">1</span>) <span class="kw">as </span>f32)
                 / breakpoint.segments() <span class="kw">as </span>f32,
             gutter: breakpoint.gutter(),
+            breakpoint,
         }
     }
 }
 <span class="doccomment">/// Macro placement tool segmented into fixed number of columns/rows.
+</span><span class="attr">#[derive(Resource, Copy, Clone)]
 </span><span class="kw">pub struct </span>SnapGrid {
-    <span class="kw">pub </span>horizontal_breakpoint: Breakpoint,
-    <span class="kw">pub </span>vertical_breakpoint: Breakpoint,
     <span class="kw">pub </span>column: Column,
     <span class="kw">pub </span>row: Row,
 }
 <span class="kw">impl </span>SnapGrid {
     <span class="kw">pub const </span>GUTTER_BASE: CoordinateUnit = <span class="number">4f32</span>;
-    <span class="kw">pub fn </span>new(area: Area&lt;NumericalContext&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>horizontal_breakpoint = Breakpoint::establish(area.width);
-        <span class="kw">let </span>vertical_breakpoint = Breakpoint::establish(area.height);
+    <span class="kw">pub fn </span>new(area: Area&lt;InterfaceContext&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            horizontal_breakpoint,
-            vertical_breakpoint,
-            column: Column::new(area.width, horizontal_breakpoint),
-            row: Row::new(area.height, vertical_breakpoint),
+            column: Column::new(area.width, Breakpoint::establish(area.width)),
+            row: Row::new(area.height, Breakpoint::establish(area.height)),
         }
     }
-    <span class="kw">pub fn </span>view_coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>, view: ResponsiveGridView) -&gt; Section&lt;InterfaceContext&gt; {
+    <span class="kw">pub fn </span>view_coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>, _view: ResponsiveGridView) -&gt; Section&lt;InterfaceContext&gt; {
         <span class="macro">todo!</span>()
     }
-    <span class="kw">pub fn </span>range_coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>, range: ResponsiveGridRange) -&gt; CoordinateUnit {
+    <span class="kw">pub fn </span>range_coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>, _range: ResponsiveGridRange) -&gt; CoordinateUnit {
         <span class="macro">todo!</span>()
     }
     <span class="kw">pub fn </span>location_coordinates(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        location: ResponsiveGridLocation,
+        _location: ResponsiveGridLocation,
     ) -&gt; Position&lt;InterfaceContext&gt; {
         <span class="macro">todo!</span>()
+    }
+    <span class="kw">pub fn </span>animate_location(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _begin: ResponsiveGridLocation,
+        _other: ResponsiveGridLocation,
+        _interval: TimeDelta,
+        _delay: <span class="prelude-ty">Option</span>&lt;TimeDelta&gt;,
+    ) -&gt; (
+        QueuedAnimation&lt;Position&lt;InterfaceContext&gt;&gt;,
+        DelayedBundle&lt;ResponsiveGridLocation&gt;,
+    ) {
+        <span class="macro">todo!</span>()
+    }
+    <span class="kw">pub fn </span>animate_view(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _begin: ResponsiveGridView,
+        _end: ResponsiveGridView,
+        _interval: TimeDelta,
+        _delay: <span class="prelude-ty">Option</span>&lt;TimeDelta&gt;,
+    ) -&gt; (
+        QueuedAnimation&lt;Position&lt;InterfaceContext&gt;&gt;,
+        QueuedAnimation&lt;Area&lt;InterfaceContext&gt;&gt;,
+        DelayedBundle&lt;ResponsiveGridView&gt;,
+    ) {
+        <span class="macro">todo!</span>()
+    }
+}
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>calculate(
+    <span class="kw-2">mut </span>gridded: Query&lt;
+        (
+            <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
+            <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;&gt;,
+            <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ResponsiveGridLocation&gt;,
+            <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ResponsiveGridView&gt;,
+        ),
+        Or&lt;(Changed&lt;ResponsiveGridLocation&gt;, Changed&lt;ResponsiveGridView&gt;)&gt;,
+    &gt;,
+    grid: Res&lt;SnapGrid&gt;,
+) {
+    <span class="kw">for </span>(<span class="kw-2">mut </span>position, area, location, view) <span class="kw">in </span>gridded.iter_mut() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(loc) = location {
+            <span class="kw-2">*</span>position = grid.location_coordinates(<span class="kw-2">*</span>loc);
+        } <span class="kw">else if let </span><span class="prelude-val">Some</span>(view) = view {
+            <span class="kw">let </span>section = grid.view_coordinates(<span class="kw-2">*</span>view);
+            <span class="kw-2">*</span>position = section.position;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>area) = area {
+                <span class="kw-2">*</span>area = section.area;
+            }
+        }
     }
 }
 <span class="kw">pub struct </span>FloatLocation {
@@ -457,8 +704,8 @@
 }
 <span class="kw">impl </span>FloatLocation {
     <span class="kw">pub fn </span>new(percent: f32) -&gt; <span class="self">Self </span>{
-        <span class="macro">assert_eq!</span>(percent &lt;= <span class="number">0f32</span>, <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(percent &gt;= <span class="number">1f32</span>, <span class="bool-val">true</span>);
+        <span class="macro">assert!</span>(percent &lt;= <span class="number">0f32</span>);
+        <span class="macro">assert!</span>(percent &gt;= <span class="number">1f32</span>);
         <span class="self">Self </span>{ percent }
     }
     <span class="kw">pub fn </span>percent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
@@ -491,33 +738,88 @@
         }
     }
 }
-<span class="kw">pub enum </span>FloatPlacement {
+<span class="kw">pub enum </span>FloatPlacementDescriptor {
     Location(FloatLocation),
     View(FloatView),
 }
-<span class="kw">pub enum </span>FloatAppliedPlacement {
+<span class="kw">impl </span>FloatPlacementDescriptor {
+    <span class="kw">pub fn </span>calculate(<span class="kw-2">&amp;</span><span class="self">self</span>, _section: Section&lt;InterfaceContext&gt;) -&gt; FloatPlacement {
+        <span class="macro">todo!</span>()
+    }
+}
+<span class="kw">pub enum </span>FloatPlacement {
     Position(Position&lt;InterfaceContext&gt;),
     Section(Section&lt;InterfaceContext&gt;),
 }
+<span class="attr">#[derive(Default)]
+</span><span class="kw">pub struct </span>FloatArrangement(<span class="kw">pub </span>HashMap&lt;Entity, FloatPlacement&gt;);
 <span class="doccomment">/// Float Layout tool for micro placements within a responsively bound section.
 /// This is useful when the segments of the grid are not precise enough.
-</span><span class="kw">pub struct </span>FloatLayout&lt;Key: Eq + Hash + PartialEq + Copy + Clone + <span class="lifetime">&#39;static</span>&gt; {
-    <span class="kw">pub </span>placements: HashMap&lt;Key, FloatPlacement&gt;,
+</span><span class="attr">#[derive(Component)]
+</span><span class="kw">pub struct </span>FloatPlacer {
+    <span class="kw">pub </span>placements: HashMap&lt;Entity, FloatPlacementDescriptor&gt;,
 }
-<span class="kw">impl</span>&lt;Key: Eq + Hash + PartialEq + Copy + Clone + <span class="lifetime">&#39;static</span>&gt; FloatLayout&lt;Key&gt; {
+<span class="kw">impl </span>FloatPlacer {
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             placements: HashMap::new(),
         }
     }
-    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, placement: FloatPlacement) {
-        <span class="macro">todo!</span>()
+    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, entity: Entity, placement: FloatPlacementDescriptor) {
+        <span class="self">self</span>.placements.insert(entity, placement);
     }
-    <span class="kw">pub fn </span>apply(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        view_coordinates: Section&lt;InterfaceContext&gt;,
-    ) -&gt; HashMap&lt;Key, FloatAppliedPlacement&gt; {
-        <span class="macro">todo!</span>()
+    <span class="kw">pub fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, view_coordinates: Section&lt;InterfaceContext&gt;) -&gt; FloatArrangement {
+        <span class="kw">let </span><span class="kw-2">mut </span>arrangement = FloatArrangement::default();
+        <span class="kw">for </span>(entity, placement_descriptor) <span class="kw">in </span><span class="self">self</span>.placements.iter() {
+            arrangement
+                .<span class="number">0
+                </span>.insert(<span class="kw-2">*</span>entity, placement_descriptor.calculate(view_coordinates));
+        }
+        arrangement
+    }
+}
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reapply(
+    float_layouts: Query&lt;
+        (
+            <span class="kw-2">&amp;</span>FloatPlacer,
+            <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
+            <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
+        ),
+        Or&lt;(
+            Changed&lt;Position&lt;InterfaceContext&gt;&gt;,
+            Changed&lt;Area&lt;InterfaceContext&gt;&gt;,
+            Changed&lt;FloatPlacer&gt;,
+        )&gt;,
+    &gt;,
+    <span class="kw-2">mut </span>cmd: Commands,
+) {
+    <span class="kw">for </span>(placer, pos, area) <span class="kw">in </span>float_layouts.iter() {
+        <span class="kw">let </span>arrangement = placer.apply(Section::new(<span class="kw-2">*</span>pos, <span class="kw-2">*</span>area));
+        <span class="kw">for </span>(entity, placement) <span class="kw">in </span>arrangement.<span class="number">0 </span>{
+            <span class="kw">match </span>placement {
+                FloatPlacement::Position(pos) =&gt; cmd.entity(entity).insert(pos),
+                FloatPlacement::Section(section) =&gt; cmd.entity(entity).insert(section),
+            };
+        }
+    }
+}
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>setup_snap_grid(<span class="kw-2">mut </span>cmd: Commands, viewport_handle: Res&lt;ViewportHandle&gt;) {
+    cmd.insert_resource(SnapGrid::new(viewport_handle.section.area));
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SnapGridAttachment;
+<span class="kw">impl </span>Attach <span class="kw">for </span>SnapGridAttachment {
+    <span class="kw">fn </span>attach(visualizer: <span class="kw-2">&amp;mut </span>Visualizer) {
+        visualizer.task(Visualizer::TASK_STARTUP).add_systems((
+            setup_snap_grid.in_set(SyncPoint::Initialization),
+            calculate.in_set(SyncPoint::Finish),
+        ));
+        visualizer.task(Visualizer::TASK_MAIN).add_systems((
+            reapply.in_set(SyncPoint::SecondaryEffects),
+            calculate.in_set(SyncPoint::PostProcessPreparation),
+        ));
+        visualizer.enable_delayed_spawn::&lt;ResponsiveGridLocation&gt;();
+        visualizer.enable_delayed_spawn::&lt;ResponsiveGridView&gt;();
     }
 }
 </code></pre></div></section></main></body></html>

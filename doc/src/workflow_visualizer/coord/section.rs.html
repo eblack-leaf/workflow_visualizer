@@ -115,6 +115,7 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
@@ -136,7 +137,8 @@
             area: area.into(),
         }
     }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>center(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Position&lt;Context&gt; {
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>center(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Position&lt;Context&gt; {
         <span class="kw">let </span>x = <span class="self">self</span>.position.x + <span class="self">self</span>.width() / <span class="number">2f32</span>;
         <span class="kw">let </span>y = <span class="self">self</span>.position.y + <span class="self">self</span>.height() / <span class="number">2f32</span>;
         Position::new(x, y)
