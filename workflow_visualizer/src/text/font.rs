@@ -76,8 +76,7 @@ impl MonoSpacedFont {
                 self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
             }
             TextSectionDescriptorKnown::Height(markers) => {
-                let px = markers.to_pixel();
-                let px = px * Self::TEXT_GRID_THRESHOLD;
+                let px = markers * Self::TEXT_GRID_THRESHOLD;
                 self.text_scale_from_dimension(KnownTextDimension::Height(px as u32))
             }
             TextSectionDescriptorKnown::Scale(scale) => scale,

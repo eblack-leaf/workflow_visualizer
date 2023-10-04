@@ -3,15 +3,13 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
 use crate::bundling::{Despawned, Disabled};
-use crate::button::{
-    ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntity, TextEntity,
-};
+use crate::button::{ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntity, TextEntity};
 use crate::icon::Icon;
+use crate::snap_grid::{FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView};
 use crate::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
-    DeviceContext, IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType,
-    Position, ResourceHandle, ScaleFactor, Section, Text, TextScale, TextValue,
-    TextWrapStyle, Toggled,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color, IconScale,
+    InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text, TextScale,
+    TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -36,14 +34,11 @@ pub(crate) fn spawn(
             &Layer,
             &BackgroundColor,
             &Color,
-            &ResourceHandle,
-            Option<&TextValue>,
+            &ButtonText,
+            &ButtonIcon,
             &mut PanelEntity,
             &mut IconEntity,
             &mut TextEntity,
-            Option<&TextScale>,
-            Option<&IconScale>,
-            Option<&ResourceHandle>,
             &ButtonBorder,
         ),
         Added<PanelEntity>,
@@ -55,14 +50,11 @@ pub(crate) fn spawn(
         layer,
         background_color,
         color,
-        icon_id,
         button_text,
+        button_icon,
         mut panel_entity,
         mut icon_entity,
         mut text_entity,
-        text_scale,
-        icon_scale,
-        handle,
         border,
     ) in buttons.iter_mut()
     {
@@ -77,23 +69,18 @@ pub(crate) fn spawn(
                 *color,
             ))
             .id();
-        if let Some(handle) = handle {
-            icon_entity.0.replace(
-                cmd.spawn(Icon::new(
-                    handle,
-                    *icon_scale.unwrap_or_default(),
-                    *layer - Layer::from(1),
-                    *color,
-                ))
-                .id(),
-            );
+        if let Some(icon) = button_icon.desc.as_ref() {
+            let entity = cmd
+                .spawn(Icon::new(*icon, 0, *layer - Layer::from(1), *color))
+                .id();
+            icon_entity.0.replace(entity);
         }
-        if let Some(text) = button_text {
+        if let Some(text) = button_text.desc.as_ref() {
             text_entity.0.replace(
                 cmd.spawn(Text::new(
                     *layer - Layer::from(1),
                     text.0.clone(),
-                    text_scale.unwrap_or_default(),
+                    0,
                     *color,
                     TextWrapStyle::letter(),
                 ))
@@ -103,7 +90,70 @@ pub(crate) fn spawn(
         panel_entity.0.replace(panel);
     }
 }
-
+pub(crate) fn place(mut buttons: Query<(&IconEntity, &TextEntity, &mut FloatPlacer)>) {
+    for (icon_entity, text_entity, mut placer) in buttons.iter_mut() {
+        if icon_entity.0.is_some() && text_entity.0.is_some() {
+            let icon_placement = FloatPlacementDescriptor::View(FloatView::new(
+                FloatRange::new(0.1.into(), 0.3.into()),
+                FloatRange::new(0.1.into(), 0.9.into()),
+            ));
+            placer.add(icon_entity.0.unwrap(), icon_placement);
+            placer.add(
+                text_entity.0.unwrap(),
+                FloatPlacementDescriptor::View(FloatView::new(
+                    FloatRange::new(0.4.into(), 0.9.into()),
+                    FloatRange::new(0.1.into(), 0.9.into()),
+                )),
+            );
+        } else if icon_entity.0.is_some() {
+            placer.add(
+                icon_entity.0.unwrap(),
+                FloatPlacementDescriptor::View(FloatView::new(
+                    FloatRange::new(0.1.into(), 0.9.into()),
+                    FloatRange::new(0.1.into(), 0.9.into()),
+                )),
+            );
+        } else if text_entity.0.is_some() {
+            placer.add(
+                text_entity.0.unwrap(),
+                FloatPlacementDescriptor::View(FloatView::new(
+                    FloatRange::new(0.1.into(), 0.9.into()),
+                    FloatRange::new(0.1.into(), 0.9.into()),
+                )),
+            );
+        }
+    }
+}
+pub(crate) fn scale_change(
+    font: Res<MonoSpacedFont>,
+    buttons: Query<(&IconEntity, &TextEntity)>,
+    mut listeners: Query<(
+        &Position<InterfaceContext>,
+        &Area<InterfaceContext>,
+        Option<&mut TextScale>,
+        Option<&mut IconScale>,
+        Option<&TextValue>,
+    )>,
+) {
+    for (icon_entity, text_entity) in buttons.iter() {
+        if let Some(entity) = icon_entity.0 {
+            if let Ok((_, area, _, scale, _)) = listeners.get_mut(entity) {
+                *scale.unwrap() = IconScale::Asymmetrical((area.width as u32, area.height as u32));
+            }
+        }
+        if let Some(entity) = text_entity.0 {
+            if let Ok((pos, area, scale, _, text_value)) = listeners.get_mut(entity) {
+                *scale.unwrap() = font
+                    .text_section_descriptor(
+                        *pos,
+                        TextSectionDescriptorKnown::WidthAndHeight(*area),
+                        text_value.unwrap().0.len() as u32,
+                    )
+                    .scale;
+            }
+        }
+    }
+}
 pub(crate) fn color_invert(
     buttons: Query<
         (
@@ -156,83 +206,6 @@ pub(crate) fn color_invert(
             if let Ok(mut text_color) = color_inverters.get_mut(text_entity) {
                 if *text_color != foreground_element_color_adjust {
                     *text_color = foreground_element_color_adjust;
-                }
-            }
-        }
-    }
-}
-
-pub(crate) fn placement(
-    buttons: Query<
-        (
-            &Position<InterfaceContext>,
-            &Area<InterfaceContext>,
-            &PanelEntity,
-            &IconEntity,
-            &TextEntity,
-            Option<&TextValue>,
-            Option<&TextScale>,
-            Option<&IconScale>,
-        ),
-        Or<(
-            Changed<Position<InterfaceContext>>,
-            Changed<Area<InterfaceContext>>,
-        )>,
-    >,
-    mut listeners: Query<
-        (&mut Position<InterfaceContext>, &mut Area<InterfaceContext>),
-        Without<PanelEntity>,
-    >,
-    aligned_fonts: Res<MonoSpacedFont>,
-    scale_factor: Res<ScaleFactor>,
-) {
-    for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, text_scale) in
-        buttons.iter()
-    {
-        if let Some(panel_entity) = panel_ref.0 {
-            if let Ok((mut pos, mut area)) = listeners.get_mut(panel_entity) {
-                *pos = *button_pos;
-                *area = *button_area;
-            }
-        }
-        let section = Section::new(*button_pos, *button_area);
-        let center = section.center();
-        let (text_placement, icon_placement) = if button_text.0.is_empty() {
-            (
-                None,
-                Position::new(
-                    center.x - text_scale.icon.width() / 2f32,
-                    center.y - text_scale.icon.height() / 2f32,
-                ),
-            )
-        } else {
-            let dimensions =
-                aligned_fonts.character_dimensions(text_scale.text.px() * scale_factor.factor());
-            let logical_dimensions =
-                Area::<DeviceContext>::new(dimensions.width, dimensions.height)
-                    .to_interface(scale_factor.factor());
-            let len = button_text.0.len() as f32;
-            let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
-                + text_scale.icon.width() / 2f32
-                + RawMarker(2).to_pixel();
-            let y = center.y - logical_dimensions.height / 2f32;
-            let width = logical_dimensions.width * len;
-            let height = logical_dimensions.height;
-            let text_section = Section::new((x, y), (width, height));
-            let icon_x = text_section.left() - RawMarker(2).to_pixel() - text_scale.icon.width();
-            let icon_y = text_section.top() + RawMarker(1).to_pixel();
-            (Some(text_section), Position::new(icon_x, icon_y))
-        };
-        if let Some(icon_entity) = icon_ref.0 {
-            if let Ok((mut pos, _)) = listeners.get_mut(icon_entity) {
-                *pos = icon_placement;
-            }
-        }
-        if let Some(text_entity) = text_ref.0 {
-            if let Ok((mut pos, mut area)) = listeners.get_mut(text_entity) {
-                if let Some(placement) = text_placement {
-                    *pos = placement.position;
-                    *area = placement.area;
                 }
             }
         }

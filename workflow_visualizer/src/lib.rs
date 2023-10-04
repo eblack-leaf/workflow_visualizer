@@ -10,7 +10,9 @@ pub use bundling::{
     despawn, BundleBuilder, BundleExtension, DelayedBundle, DelayedSpawn, Despawn, Despawned,
     Disabled, ResourceHandle,
 };
-pub use button::{BackgroundColor, Button, ButtonBorder, ButtonTag, ButtonType};
+pub use button::{
+    BackgroundColor, Button, ButtonBorder, ButtonIcon, ButtonTag, ButtonText, ButtonType,
+};
 pub use icon::{BundledIcon, Icon, IconRequest, IconScale, IconTag};
 pub use images::{
     AspectRatioAlignedDimension, Image, ImageData, ImageFade, ImageLoaded, ImageOrientations,
@@ -48,8 +50,14 @@ pub use crate::job::Job;
 pub use crate::line::{Line, LineRender, LineTag};
 pub use crate::media::Media;
 pub use crate::panel::{BorderColor, Panel, PanelContentArea, PanelTag, PanelType};
-pub use crate::path::{Path, PathView, ResponsivePathView};
+pub use crate::path::{Path, PathView};
 pub use crate::scale_factor::{ScaleFactor, WindowAppearanceFactor};
+pub use crate::snap_grid::{
+    Column, FloatArrangement, FloatLocation, FloatPlacementDescriptor, FloatPlacer, FloatRange,
+    FloatView, GridBias, GridLocation, GridMarker, GridPlacementDescriptor, GridPlacer, GridRange,
+    GridUnit, GridView, ResponsiveGridLocation, ResponsiveGridRange, ResponsiveGridView, Row,
+    SnapGrid,
+};
 pub use crate::sync::SyncPoint;
 pub use crate::text::{
     KnownTextDimension, MonoSpacedFont, Text, TextGridLocation, TextGridPlacement,

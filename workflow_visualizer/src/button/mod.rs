@@ -3,6 +3,7 @@ use bevy_ecs::prelude::{Bundle, Component, Entity};
 pub(crate) use attachment::ButtonAttachment;
 
 use crate::icon::IconScale;
+use crate::snap_grid::FloatPlacer;
 use crate::{
     Color, Interactable, InterfaceContext, Layer, ResourceHandle, Section, Tag, TextScale,
     TextValue,
@@ -13,13 +14,13 @@ mod system;
 
 pub type ButtonTag = Tag<Button>;
 
-#[derive(Bundle, Clone)]
+#[derive(Bundle)]
 pub struct Button {
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    button_icon: Option<ButtonIcon>,
-    button_text: Option<ButtonText>,
+    button_icon: ButtonIcon,
+    button_text: ButtonText,
     section: Section<InterfaceContext>,
     color: Color,
     background_color: BackgroundColor,
@@ -28,16 +29,32 @@ pub struct Button {
     text_entity: TextEntity,
     interactable: Interactable,
     border: ButtonBorder,
+    float_placer: FloatPlacer,
 }
-#[derive(Bundle, Clone)]
+
+#[derive(Component, Clone)]
 pub struct ButtonText {
-    pub scale: TextScale,
-    pub value: TextValue,
+    pub desc: Option<TextValue>,
 }
-#[derive(Bundle)]
+impl ButtonText {
+    pub fn none() -> Self {
+        Self { desc: None }
+    }
+    pub fn some(desc: TextValue) -> Self {
+        Self { desc: Some(desc) }
+    }
+}
+#[derive(Component)]
 pub struct ButtonIcon {
-    pub scale: IconScale,
-    pub icon: ResourceHandle,
+    pub desc: Option<ResourceHandle>,
+}
+impl ButtonIcon {
+    pub fn none() -> Self {
+        Self { desc: None }
+    }
+    pub fn some(desc: ResourceHandle) -> Self {
+        Self { desc: Some(desc) }
+    }
 }
 #[derive(Component, Copy, Clone)]
 pub enum ButtonBorder {
@@ -63,8 +80,8 @@ impl Button {
         layer: L,
         foreground_color: C,
         background_color: C,
-        button_text: Option<ButtonText>,
-        button_icon: Option<ButtonIcon>,
+        button_text: ButtonText,
+        button_icon: ButtonIcon,
         border: ButtonBorder,
     ) -> Self {
         Self {
@@ -81,6 +98,7 @@ impl Button {
             text_entity: TextEntity(None),
             interactable: Interactable::default(),
             border,
+            float_placer: FloatPlacer::new(),
         }
     }
 }

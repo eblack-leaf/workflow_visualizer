@@ -23,7 +23,6 @@ use crate::job::{attempt_to_idle, Task, TaskLabel};
 use crate::line::LineAttachment;
 use crate::orientation::OrientationAttachment;
 use crate::panel::PanelAttachment;
-use crate::path::PathAttachment;
 use crate::render::{internal_render, invoke_render, Render, RenderPhase, RenderTaskManager};
 use crate::snap_grid::SnapGridAttachment;
 use crate::sync::set_sync_points;
@@ -159,7 +158,6 @@ impl Visualizer {
         self.invoke_attach::<WindowAttachment>();
         self.invoke_attach::<ViewportAttachment>();
         self.invoke_attach::<SnapGridAttachment>();
-        self.invoke_attach::<PathAttachment>();
         self.invoke_attach::<PanelAttachment>();
         self.invoke_attach::<LineAttachment>();
         self.invoke_attach::<VisibilityAttachment>();

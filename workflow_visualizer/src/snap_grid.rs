@@ -1,10 +1,10 @@
 use crate::{
-    Area, Attach, CoordinateUnit, DelayedBundle, InterfaceContext,
-    Position, QueuedAnimation, Section, SyncPoint, TimeDelta, ViewportHandle, Visualizer,
+    Area, Attach, CoordinateUnit, DelayedBundle, InterfaceContext, Position, QueuedAnimation,
+    Section, SyncPoint, TimeDelta, ViewportHandle, Visualizer,
 };
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{IntoSystemConfigs, Res};
+use bevy_ecs::prelude::{IntoSystemConfigs, Res, Resource};
 use bevy_ecs::query::{Changed, Or};
 use bevy_ecs::system::{Commands, Query};
 use std::collections::HashMap;
@@ -75,7 +75,7 @@ impl GridLocation {
         Self { marker, bias }
     }
 }
-#[derive(Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub struct ResponsiveGridLocation {
     pub mobile: GridLocation,
     pub tablet: Option<GridLocation>,
@@ -180,6 +180,7 @@ impl GridPlacer {
         todo!()
     }
 }
+#[derive(Copy, Clone)]
 pub struct Column {
     pub content: CoordinateUnit,
     pub gutter: CoordinateUnit,
@@ -195,6 +196,7 @@ impl Column {
         }
     }
 }
+#[derive(Copy, Clone)]
 pub struct Row {
     pub content: CoordinateUnit,
     pub gutter: CoordinateUnit,
@@ -211,6 +213,7 @@ impl Row {
     }
 }
 /// Macro placement tool segmented into fixed number of columns/rows.
+#[derive(Resource, Copy, Clone)]
 pub struct SnapGrid {
     pub column: Column,
     pub row: Row,
@@ -279,7 +282,7 @@ pub(crate) fn calculate(
         } else if let Some(view) = view {
             let section = grid.view_coordinates(*view);
             *position = section.position;
-            if let Some(area) = area {
+            if let Some(mut area) = area {
                 *area = section.area;
             }
         }
@@ -382,10 +385,10 @@ pub(crate) fn reapply(
     for (placer, pos, area) in float_layouts.iter() {
         let arrangement = placer.apply(Section::new(*pos, *area));
         for (entity, placement) in arrangement.0 {
-            cmd.entity(entity).insert(match placement {
-                FloatPlacement::Position(pos) => pos,
-                FloatPlacement::Section(section) => section,
-            })
+            match placement {
+                FloatPlacement::Position(pos) => cmd.entity(entity).insert(pos),
+                FloatPlacement::Section(section) => cmd.entity(entity).insert(section),
+            };
         }
     }
 }

@@ -4,7 +4,6 @@ use crate::line::renderer::LineRenderer;
 use crate::line::system::{
     calc_section, create_render_group, push_color, push_layer, push_uniforms, scale_path,
 };
-use crate::path::view_changed;
 use crate::{Attach, SyncPoint, Visualizer};
 
 pub(crate) struct LineAttachment;
@@ -13,9 +12,7 @@ impl Attach for LineAttachment {
     fn attach(visualizer: &mut Visualizer) {
         visualizer.register_renderer::<LineRenderer>();
         visualizer.job.task(Visualizer::TASK_MAIN).add_systems((
-            calc_section
-                .in_set(SyncPoint::Reconfigure)
-                .after(view_changed),
+            calc_section.in_set(SyncPoint::Reconfigure),
             scale_path.in_set(SyncPoint::Resolve),
             push_layer.in_set(SyncPoint::PushDiff),
             push_color.in_set(SyncPoint::PushDiff),
