@@ -2,6 +2,9 @@ use crate::{Area, CoordinateUnit, InterfaceContext, NumericalContext, Position, 
 use bevy_ecs::component::Component;
 use std::collections::HashMap;
 use std::hash::Hash;
+use bevy_ecs::entity::Entity;
+use bevy_ecs::query::Changed;
+use bevy_ecs::system::Query;
 
 #[repr(i32)]
 #[derive(Copy, Clone)]
@@ -238,12 +241,15 @@ pub enum FloatAppliedPlacement {
     Position(Position<InterfaceContext>),
     Section(Section<InterfaceContext>),
 }
+#[derive(Component)]
+pub struct FloatLayoutApplied(pub HashMap<Entity, FloatAppliedPlacement>);
 /// Float Layout tool for micro placements within a responsively bound section.
 /// This is useful when the segments of the grid are not precise enough.
-pub struct FloatLayout<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> {
-    pub placements: HashMap<Key, FloatPlacement>,
+#[derive(Component)]
+pub struct FloatLayout {
+    pub placements: HashMap<Entity, FloatPlacement>,
 }
-impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> FloatLayout<Key> {
+impl FloatLayout {
     pub fn new() -> Self {
         Self {
             placements: HashMap::new(),
@@ -255,7 +261,10 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> FloatLayout<Key> {
     pub fn apply(
         &self,
         view_coordinates: Section<InterfaceContext>,
-    ) -> HashMap<Key, FloatAppliedPlacement> {
+    ) -> FloatLayoutApplied {
         todo!()
     }
+}
+pub(crate) fn reapply(float_layouts: Query<&FloatLayout, Changed<FloatLayout>>) {
+    // reapply if changed and forward to placed entities
 }
