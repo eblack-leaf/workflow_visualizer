@@ -167,6 +167,7 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::ops::{Add, AddAssign, Div, Sub};
@@ -178,14 +179,15 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::{CoordinateContext, NumericalContext, WindowAppearanceContext};
 <span class="kw">use crate</span>::{
-    Animate, Animation, DeviceContext, InterfaceContext, Interpolation, WindowAppearanceFactor,
+    Animate, Animation, CoordinateUnit, DeviceContext, InterfaceContext, Interpolation,
+    WindowAppearanceFactor,
 };
 
 <span class="doccomment">/// Position denotes 2d coordinates in space with float32 precision
 </span><span class="attr">#[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 </span><span class="kw">pub struct </span>Position&lt;Context: CoordinateContext&gt; {
-    <span class="kw">pub </span>x: f32,
-    <span class="kw">pub </span>y: f32,
+    <span class="kw">pub </span>x: CoordinateUnit,
+    <span class="kw">pub </span>y: CoordinateUnit,
     _context: PhantomData&lt;Context&gt;,
 }
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; Debug <span class="kw">for </span>Position&lt;Context&gt; {
@@ -194,7 +196,7 @@
     }
 }
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; Position&lt;Context&gt; {
-    <span class="kw">pub fn </span>new(x: f32, y: f32) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(x: CoordinateUnit, y: CoordinateUnit) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             x,
             y,
@@ -215,14 +217,14 @@
 }
 <span class="kw">impl </span>Position&lt;InterfaceContext&gt; {
     <span class="doccomment">/// useful for converting to a device position accounting for scale factor
-    </span><span class="kw">pub fn </span>to_device(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Position&lt;DeviceContext&gt; {
+    </span><span class="kw">pub fn </span>to_device(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: CoordinateUnit) -&gt; Position&lt;DeviceContext&gt; {
         Position::&lt;DeviceContext&gt;::new(<span class="self">self</span>.x * scale_factor, <span class="self">self</span>.y * scale_factor)
     }
 }
 
 <span class="kw">impl </span>Position&lt;DeviceContext&gt; {
     <span class="doccomment">/// converts to interface context accounting for scale factor
-    </span><span class="kw">pub fn </span>to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Position&lt;InterfaceContext&gt; {
+    </span><span class="kw">pub fn </span>to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: CoordinateUnit) -&gt; Position&lt;InterfaceContext&gt; {
         Position::&lt;InterfaceContext&gt;::new(<span class="self">self</span>.x / scale_factor, <span class="self">self</span>.y / scale_factor)
     }
     <span class="kw">pub fn </span>to_window_appearance(
@@ -271,42 +273,42 @@
 </span><span class="attr">#[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize, Debug)]
 </span><span class="kw">pub struct </span>RawPosition {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) x: f32,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) y: f32,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) x: CoordinateUnit,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) y: CoordinateUnit,
 }
 
 <span class="kw">impl </span>RawPosition {
-    <span class="kw">pub fn </span>new(x: f32, y: f32) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(x: CoordinateUnit, y: CoordinateUnit) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ x, y }
     }
 }
-<span class="kw">impl</span>&lt;Context: CoordinateContext&gt; From&lt;(f32, f32)&gt; <span class="kw">for </span>Position&lt;Context&gt; {
-    <span class="kw">fn </span>from(value: (f32, f32)) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Context: CoordinateContext&gt; From&lt;(CoordinateUnit, CoordinateUnit)&gt; <span class="kw">for </span>Position&lt;Context&gt; {
+    <span class="kw">fn </span>from(value: (CoordinateUnit, CoordinateUnit)) -&gt; <span class="self">Self </span>{
         Position::&lt;Context&gt;::new(value.<span class="number">0</span>, value.<span class="number">1</span>)
     }
 }
 
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; From&lt;(f64, f64)&gt; <span class="kw">for </span>Position&lt;Context&gt; {
     <span class="kw">fn </span>from(value: (f64, f64)) -&gt; <span class="self">Self </span>{
-        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>f32, value.<span class="number">1 </span><span class="kw">as </span>f32)
+        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>CoordinateUnit, value.<span class="number">1 </span><span class="kw">as </span>CoordinateUnit)
     }
 }
 
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; From&lt;(u32, u32)&gt; <span class="kw">for </span>Position&lt;Context&gt; {
     <span class="kw">fn </span>from(value: (u32, u32)) -&gt; <span class="self">Self </span>{
-        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>f32, value.<span class="number">1 </span><span class="kw">as </span>f32)
+        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>CoordinateUnit, value.<span class="number">1 </span><span class="kw">as </span>CoordinateUnit)
     }
 }
 
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; From&lt;(i32, i32)&gt; <span class="kw">for </span>Position&lt;Context&gt; {
     <span class="kw">fn </span>from(value: (i32, i32)) -&gt; <span class="self">Self </span>{
-        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>f32, value.<span class="number">1 </span><span class="kw">as </span>f32)
+        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>CoordinateUnit, value.<span class="number">1 </span><span class="kw">as </span>CoordinateUnit)
     }
 }
 
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; From&lt;(usize, usize)&gt; <span class="kw">for </span>Position&lt;Context&gt; {
     <span class="kw">fn </span>from(value: (usize, usize)) -&gt; <span class="self">Self </span>{
-        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>f32, value.<span class="number">1 </span><span class="kw">as </span>f32)
+        Position::&lt;Context&gt;::new(value.<span class="number">0 </span><span class="kw">as </span>CoordinateUnit, value.<span class="number">1 </span><span class="kw">as </span>CoordinateUnit)
     }
 }
 <span class="kw">impl</span>&lt;Context: CoordinateContext&gt; AddAssign <span class="kw">for </span>Position&lt;Context&gt; {

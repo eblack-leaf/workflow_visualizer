@@ -110,12 +110,17 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 
 <span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
 <span class="kw">use </span><span class="kw">crate</span>::coord::position::Position;
 <span class="kw">use </span><span class="kw">crate</span>::coord::CoordinateContext;
-<span class="kw">use crate</span>::{DeviceContext, InterfaceContext};
+<span class="kw">use crate</span>::{CoordinateUnit, DeviceContext, InterfaceContext};
 
 <span class="doccomment">/// A section is a bundle for Position/Area
 </span><span class="attr">#[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
@@ -137,28 +142,33 @@
         Position::new(x, y)
     }
     <span class="doccomment">/// Can be instantiated with specific points
-    </span><span class="kw">pub fn </span>from_left_top_right_bottom(left: f32, top: f32, right: f32, bottom: f32) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>from_left_top_right_bottom(
+        left: CoordinateUnit,
+        top: CoordinateUnit,
+        right: CoordinateUnit,
+        bottom: CoordinateUnit,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             position: (left, top).into(),
             area: (right - left, bottom - top).into(),
         }
     }
-    <span class="kw">pub fn </span>width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="self">self</span>.area.width
     }
-    <span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="self">self</span>.area.height
     }
-    <span class="kw">pub fn </span>left(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>left(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="self">self</span>.position.x
     }
-    <span class="kw">pub fn </span>right(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>right(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="self">self</span>.position.x + <span class="self">self</span>.area.width
     }
-    <span class="kw">pub fn </span>top(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>top(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="self">self</span>.position.y
     }
-    <span class="kw">pub fn </span>bottom(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; f32 {
+    <span class="kw">pub fn </span>bottom(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="self">self</span>.position.y + <span class="self">self</span>.area.height
     }
     <span class="doccomment">/// returns if any port of this section is touching the other
@@ -199,7 +209,7 @@
     }
 }
 <span class="kw">impl </span>Section&lt;InterfaceContext&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_device(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Section&lt;DeviceContext&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_device(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: CoordinateUnit) -&gt; Section&lt;DeviceContext&gt; {
         Section::&lt;DeviceContext&gt;::new(
             <span class="self">self</span>.position.to_device(scale_factor),
             <span class="self">self</span>.area.to_device(scale_factor),
@@ -208,7 +218,7 @@
 }
 <span class="kw">impl </span>Section&lt;DeviceContext&gt; {
     <span class="attr">#[allow(unused)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: f32) -&gt; Section&lt;InterfaceContext&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_factor: CoordinateUnit) -&gt; Section&lt;InterfaceContext&gt; {
         Section::&lt;InterfaceContext&gt;::new(
             <span class="self">self</span>.position.to_interface(scale_factor),
             <span class="self">self</span>.area.to_interface(scale_factor),

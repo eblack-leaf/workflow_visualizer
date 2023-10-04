@@ -60,6 +60,7 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::bundle::Bundle;
 <span class="kw">use </span>bevy_ecs::prelude::IntoSystemConfigs;
 
@@ -96,6 +97,7 @@
 <span class="kw">impl </span>CoordinateContext <span class="kw">for </span>InterfaceContext {}
 <span class="kw">impl </span>CoordinateContext <span class="kw">for </span>NumericalContext {}
 <span class="kw">impl </span>CoordinateContext <span class="kw">for </span>WindowAppearanceContext {}
+<span class="kw">pub type </span>CoordinateUnit = f32;
 <span class="doccomment">/// Coordinate is a bundle of Section + Layer to denote coordinates in the world
 </span><span class="attr">#[derive(Bundle, Copy, Clone, Default)]
 </span><span class="kw">pub struct </span>Coordinate&lt;Context: CoordinateContext&gt; {

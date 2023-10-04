@@ -110,6 +110,7 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="comment">// #![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -155,8 +156,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::color::{Color, ColorBuilder, Rgb, Rgba};
 <span class="kw">pub use </span><span class="kw">crate</span>::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
-    WindowAppearanceContext,
+    section::Section, Coordinate, CoordinateUnit, DeviceContext, InterfaceContext,
+    NumericalContext, WindowAppearanceContext,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 <span class="kw">pub use </span><span class="kw">crate</span>::focus::{Focus, FocusInputListener};
@@ -210,6 +211,7 @@
 <span class="kw">mod </span>render;
 <span class="kw">mod </span>scale_factor;
 <span class="kw">mod </span>scene;
+<span class="kw">mod </span>snap_grid;
 <span class="kw">mod </span>sync;
 <span class="kw">mod </span>text;
 <span class="kw">mod </span>texture_atlas;
