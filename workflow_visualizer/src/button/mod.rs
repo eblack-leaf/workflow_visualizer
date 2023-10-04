@@ -18,8 +18,8 @@ pub struct Button {
     tag: ButtonTag,
     layer: Layer,
     button_type: ButtonType,
-    icon_id: ResourceHandle,
-    button_text: TextValue,
+    button_icon: Option<ButtonIcon>,
+    button_text: Option<ButtonText>,
     section: Section<InterfaceContext>,
     color: Color,
     background_color: BackgroundColor,
@@ -27,20 +27,22 @@ pub struct Button {
     icon_entity: IconEntity,
     text_entity: TextEntity,
     interactable: Interactable,
-    scaling: Scaling,
     border: ButtonBorder,
 }
-
+#[derive(Bundle, Clone)]
+pub struct ButtonText {
+    pub scale: TextScale,
+    pub value: TextValue,
+}
+#[derive(Bundle)]
+pub struct ButtonIcon {
+    pub scale: IconScale,
+    pub icon: ResourceHandle,
+}
 #[derive(Component, Copy, Clone)]
 pub enum ButtonBorder {
     Border,
     None,
-}
-
-#[derive(Component, Copy, Clone)]
-pub struct Scaling {
-    pub text: TextScale,
-    pub icon: IconScale,
 }
 
 #[derive(Component, Copy, Clone)]
@@ -56,30 +58,21 @@ pub(crate) struct IconEntity(pub(crate) Option<Entity>);
 pub(crate) struct TextEntity(pub(crate) Option<Entity>);
 
 impl Button {
-    pub fn new<
-        L: Into<Layer>,
-        C: Into<Color>,
-        S: Into<String>,
-        H: Into<ResourceHandle>,
-        TS: Into<TextScale>,
-        IS: Into<IconScale>,
-    >(
+    pub fn new<L: Into<Layer>, C: Into<Color>>(
         button_type: ButtonType,
         layer: L,
         foreground_color: C,
         background_color: C,
-        handle: H,
-        button_text: S,
-        text_scale: TS,
-        icon_scale: IS,
+        button_text: Option<ButtonText>,
+        button_icon: Option<ButtonIcon>,
         border: ButtonBorder,
     ) -> Self {
         Self {
             tag: ButtonTag::new(),
             layer: layer.into(),
             button_type,
-            icon_id: handle.into(),
-            button_text: TextValue(button_text.into()),
+            button_icon,
+            button_text,
             section: Section::default(),
             color: foreground_color.into(),
             background_color: BackgroundColor(background_color.into()),
@@ -87,10 +80,6 @@ impl Button {
             icon_entity: IconEntity(None),
             text_entity: TextEntity(None),
             interactable: Interactable::default(),
-            scaling: Scaling {
-                text: text_scale.into(),
-                icon: icon_scale.into(),
-            },
             border,
         }
     }

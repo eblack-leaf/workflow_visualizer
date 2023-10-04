@@ -3,12 +3,15 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
 
 use crate::bundling::{Despawned, Disabled};
-use crate::button::{ButtonBorder, IconEntity, PanelEntity, Scaling, TextEntity};
+use crate::button::{
+    ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntity, TextEntity,
+};
 use crate::icon::Icon;
 use crate::{
     ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color,
-    DeviceContext, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position,
-    RawMarker, ResourceHandle, ScaleFactor, Section, Text, TextValue, TextWrapStyle, Toggled,
+    DeviceContext, IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType,
+    Position, ResourceHandle, ScaleFactor, Section, Text, TextScale, TextValue,
+    TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -34,11 +37,13 @@ pub(crate) fn spawn(
             &BackgroundColor,
             &Color,
             &ResourceHandle,
-            &TextValue,
+            Option<&TextValue>,
             &mut PanelEntity,
             &mut IconEntity,
             &mut TextEntity,
-            &Scaling,
+            Option<&TextScale>,
+            Option<&IconScale>,
+            Option<&ResourceHandle>,
             &ButtonBorder,
         ),
         Added<PanelEntity>,
@@ -55,7 +60,9 @@ pub(crate) fn spawn(
         mut panel_entity,
         mut icon_entity,
         mut text_entity,
-        scaling,
+        text_scale,
+        icon_scale,
+        handle,
         border,
     ) in buttons.iter_mut()
     {
@@ -70,26 +77,30 @@ pub(crate) fn spawn(
                 *color,
             ))
             .id();
-        let icon = cmd
-            .spawn(Icon::new(
-                *icon_id,
-                scaling.icon,
-                *layer - Layer::from(1),
-                *color,
-            ))
-            .id();
-        let text = cmd
-            .spawn(Text::new(
-                *layer - Layer::from(1),
-                button_text.0.clone(),
-                scaling.text.0,
-                *color,
-                TextWrapStyle::letter(),
-            ))
-            .id();
+        if let Some(handle) = handle {
+            icon_entity.0.replace(
+                cmd.spawn(Icon::new(
+                    handle,
+                    *icon_scale.unwrap_or_default(),
+                    *layer - Layer::from(1),
+                    *color,
+                ))
+                .id(),
+            );
+        }
+        if let Some(text) = button_text {
+            text_entity.0.replace(
+                cmd.spawn(Text::new(
+                    *layer - Layer::from(1),
+                    text.0.clone(),
+                    text_scale.unwrap_or_default(),
+                    *color,
+                    TextWrapStyle::letter(),
+                ))
+                .id(),
+            );
+        }
         panel_entity.0.replace(panel);
-        icon_entity.0.replace(icon);
-        text_entity.0.replace(text);
     }
 }
 
@@ -159,8 +170,9 @@ pub(crate) fn placement(
             &PanelEntity,
             &IconEntity,
             &TextEntity,
-            &TextValue,
-            &Scaling,
+            Option<&TextValue>,
+            Option<&TextScale>,
+            Option<&IconScale>,
         ),
         Or<(
             Changed<Position<InterfaceContext>>,
@@ -174,7 +186,7 @@ pub(crate) fn placement(
     aligned_fonts: Res<MonoSpacedFont>,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, scaling) in
+    for (button_pos, button_area, panel_ref, icon_ref, text_ref, button_text, text_scale) in
         buttons.iter()
     {
         if let Some(panel_entity) = panel_ref.0 {
@@ -189,25 +201,25 @@ pub(crate) fn placement(
             (
                 None,
                 Position::new(
-                    center.x - scaling.icon.width() / 2f32,
-                    center.y - scaling.icon.height() / 2f32,
+                    center.x - text_scale.icon.width() / 2f32,
+                    center.y - text_scale.icon.height() / 2f32,
                 ),
             )
         } else {
             let dimensions =
-                aligned_fonts.character_dimensions(scaling.text.px() * scale_factor.factor());
+                aligned_fonts.character_dimensions(text_scale.text.px() * scale_factor.factor());
             let logical_dimensions =
                 Area::<DeviceContext>::new(dimensions.width, dimensions.height)
                     .to_interface(scale_factor.factor());
             let len = button_text.0.len() as f32;
             let x = center.x - logical_dimensions.width * (len / 2f32).ceil()
-                + scaling.icon.width() / 2f32
+                + text_scale.icon.width() / 2f32
                 + RawMarker(2).to_pixel();
             let y = center.y - logical_dimensions.height / 2f32;
             let width = logical_dimensions.width * len;
             let height = logical_dimensions.height;
             let text_section = Section::new((x, y), (width, height));
-            let icon_x = text_section.left() - RawMarker(2).to_pixel() - scaling.icon.width();
+            let icon_x = text_section.left() - RawMarker(2).to_pixel() - text_scale.icon.width();
             let icon_y = text_section.top() + RawMarker(1).to_pixel();
             (Some(text_section), Position::new(icon_x, icon_y))
         };

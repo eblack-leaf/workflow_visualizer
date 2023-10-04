@@ -5,7 +5,7 @@ use fontdue::{Font as fdFont, FontSettings};
 
 use crate::coord::NumericalContext;
 use crate::text::component::TextScale;
-use crate::{Area, GridPoint, GridView, GridViewBuilder, RawMarker};
+use crate::{Area, CoordinateUnit, InterfaceContext, Position, Section};
 
 #[derive(Resource)]
 pub struct MonoSpacedFont {
@@ -64,37 +64,41 @@ impl MonoSpacedFont {
         }
         TextScale(0)
     }
-    pub fn text_grid_view(
+    pub fn text_section_descriptor(
         &self,
-        position: GridPoint,
-        known: TextGridViewKnown,
+        position: Position<InterfaceContext>,
+        known: TextSectionDescriptorKnown,
         characters: u32,
-    ) -> TextGridView {
+    ) -> TextSectionDescriptor {
         let scale = match known {
-            TextGridViewKnown::Width(markers) => {
-                let px = markers.to_pixel();
-                let px = px * Self::TEXT_GRID_THRESHOLD / characters as f32;
+            TextSectionDescriptorKnown::Width(width) => {
+                let px = width * Self::TEXT_GRID_THRESHOLD / characters as f32;
                 self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
             }
-            TextGridViewKnown::Height(markers) => {
+            TextSectionDescriptorKnown::Height(markers) => {
                 let px = markers.to_pixel();
                 let px = px * Self::TEXT_GRID_THRESHOLD;
                 self.text_scale_from_dimension(KnownTextDimension::Height(px as u32))
             }
-            TextGridViewKnown::Scale(scale) => scale,
+            TextSectionDescriptorKnown::Scale(scale) => scale,
+            TextSectionDescriptorKnown::WidthAndHeight(area) => {
+                let px = area.width * Self::TEXT_GRID_THRESHOLD / characters as f32;
+                let height_px = area.height * Self::TEXT_GRID_THRESHOLD;
+                self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
+                    .0
+                    .min(
+                        self.text_scale_from_dimension(KnownTextDimension::Height(
+                            height_px as u32,
+                        ))
+                        .0,
+                    )
+                    .into()
+            }
         };
         let letter_dims = self.character_dimensions(scale.px());
-        let width = RawMarker::from_pixel_inclusive(letter_dims.width * characters as f32);
-        let height = RawMarker::from_pixel_inclusive(letter_dims.height);
-        TextGridView::new(
-            scale,
-            GridViewBuilder::new()
-                .with_left(position.x)
-                .with_top(position.y)
-                .with_right(position.x.raw_offset(width))
-                .with_bottom(position.y.raw_offset(height))
-                .build(),
-        )
+        let width = letter_dims.width * characters as f32;
+        let height = letter_dims.height;
+        TextSectionDescriptor::new(scale, Section::new(position, Area::new(width, height)))
     }
     pub fn font_slice(&self) -> &[fdFont] {
         self.font_storage.as_slice()
@@ -115,22 +119,26 @@ impl MonoSpacedFont {
         (metrics.advance_width.ceil(), height.ceil()).into()
     }
 }
-pub struct TextGridView {
+pub struct TextSectionDescriptor {
     pub scale: TextScale,
-    pub view: GridView,
+    pub section: Section<InterfaceContext>,
 }
-impl TextGridView {
-    pub fn new<TS: Into<TextScale>, GV: Into<GridView>>(scale: TS, view: GV) -> Self {
+impl TextSectionDescriptor {
+    pub fn new<TS: Into<TextScale>, S: Into<Section<InterfaceContext>>>(
+        scale: TS,
+        section: S,
+    ) -> Self {
         Self {
             scale: scale.into(),
-            view: view.into(),
+            section: section.into(),
         }
     }
 }
-pub enum TextGridViewKnown {
-    Width(RawMarker),
-    Height(RawMarker),
+pub enum TextSectionDescriptorKnown {
+    Width(CoordinateUnit),
+    Height(CoordinateUnit),
     Scale(TextScale),
+    WidthAndHeight(Area<InterfaceContext>),
 }
 pub enum KnownTextDimension {
     Width(u32),
