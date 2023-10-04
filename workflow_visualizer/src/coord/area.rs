@@ -8,13 +8,14 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::coord::{CoordinateContext, NumericalContext, WindowAppearanceContext};
 use crate::{
-    Animate, Animation, DeviceContext, InterfaceContext, Interpolation, WindowAppearanceFactor,
+    Animate, Animation, CoordinateUnit, DeviceContext, InterfaceContext, Interpolation,
+    WindowAppearanceFactor,
 };
 /// Area is for width/height of an entity
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Area<Context: CoordinateContext> {
-    pub width: f32,
-    pub height: f32,
+    pub width: CoordinateUnit,
+    pub height: CoordinateUnit,
     _context: PhantomData<Context>,
 }
 impl<Context: CoordinateContext> Debug for Area<Context> {
@@ -23,7 +24,7 @@ impl<Context: CoordinateContext> Debug for Area<Context> {
     }
 }
 impl<Context: CoordinateContext> Area<Context> {
-    pub fn new(width: f32, height: f32) -> Self {
+    pub fn new(width: CoordinateUnit, height: CoordinateUnit) -> Self {
         Self {
             width,
             height,
@@ -44,14 +45,14 @@ impl<Context: CoordinateContext> Area<Context> {
 }
 impl Area<InterfaceContext> {
     /// accounts for scale factor to convert this to device area
-    pub fn to_device(&self, scale_factor: f32) -> Area<DeviceContext> {
+    pub fn to_device(&self, scale_factor: CoordinateUnit) -> Area<DeviceContext> {
         Area::<DeviceContext>::new(self.width * scale_factor, self.height * scale_factor)
     }
 }
 
 impl Area<DeviceContext> {
     /// accounts for scale factor to convert this to interface area
-    pub fn to_interface(&self, scale_factor: f32) -> Area<InterfaceContext> {
+    pub fn to_interface(&self, scale_factor: CoordinateUnit) -> Area<InterfaceContext> {
         Area::<InterfaceContext>::new(self.width / scale_factor, self.height / scale_factor)
     }
     pub fn to_window_appearance(
@@ -79,36 +80,36 @@ impl Area<WindowAppearanceContext> {
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default)]
 pub struct RawArea {
-    width: f32,
-    height: f32,
+    width: CoordinateUnit,
+    height: CoordinateUnit,
 }
 
 impl RawArea {
-    pub fn new(width: f32, height: f32) -> Self {
+    pub fn new(width: CoordinateUnit, height: CoordinateUnit) -> Self {
         Self { width, height }
     }
 }
 impl<Context: CoordinateContext> From<(usize, usize)> for Area<Context> {
     fn from(value: (usize, usize)) -> Self {
-        Self::new(value.0 as f32, value.1 as f32)
+        Self::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 
 impl<Context: CoordinateContext> From<(i32, i32)> for Area<Context> {
     fn from(value: (i32, i32)) -> Self {
-        Self::new(value.0 as f32, value.1 as f32)
+        Self::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 
-impl<Context: CoordinateContext> From<(f32, f32)> for Area<Context> {
-    fn from(value: (f32, f32)) -> Self {
+impl<Context: CoordinateContext> From<(CoordinateUnit, CoordinateUnit)> for Area<Context> {
+    fn from(value: (CoordinateUnit, CoordinateUnit)) -> Self {
         Self::new(value.0, value.1)
     }
 }
 
 impl<Context: CoordinateContext> From<(u32, u32)> for Area<Context> {
     fn from(value: (u32, u32)) -> Self {
-        Self::new(value.0 as f32, value.1 as f32)
+        Self::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 

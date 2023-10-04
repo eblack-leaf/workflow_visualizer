@@ -34,6 +34,7 @@ impl CoordinateContext for DeviceContext {}
 impl CoordinateContext for InterfaceContext {}
 impl CoordinateContext for NumericalContext {}
 impl CoordinateContext for WindowAppearanceContext {}
+pub type CoordinateUnit = f32;
 /// Coordinate is a bundle of Section + Layer to denote coordinates in the world
 #[derive(Bundle, Copy, Clone, Default)]
 pub struct Coordinate<Context: CoordinateContext> {

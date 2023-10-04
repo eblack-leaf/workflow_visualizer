@@ -1,5 +1,6 @@
 use std::ops::{Add, Sub};
 
+use crate::CoordinateUnit;
 use bevy_ecs::component::Component;
 use bytemuck::{Pod, Zeroable};
 
@@ -8,22 +9,22 @@ use bytemuck::{Pod, Zeroable};
 #[repr(C)]
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default, Pod, Zeroable)]
 pub struct Layer {
-    pub z: f32,
+    pub z: CoordinateUnit,
 }
 
 impl Layer {
-    pub fn new(z: f32) -> Self {
+    pub fn new(z: CoordinateUnit) -> Self {
         Self { z }
     }
 }
 impl From<u32> for Layer {
     fn from(value: u32) -> Self {
-        Self::new(value as f32)
+        Self::new(value as CoordinateUnit)
     }
 }
 impl From<i32> for Layer {
     fn from(value: i32) -> Self {
-        Layer::new(value as f32)
+        Layer::new(value as CoordinateUnit)
     }
 }
 

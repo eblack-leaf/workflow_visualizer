@@ -9,14 +9,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::coord::{CoordinateContext, NumericalContext, WindowAppearanceContext};
 use crate::{
-    Animate, Animation, DeviceContext, InterfaceContext, Interpolation, WindowAppearanceFactor,
+    Animate, Animation, CoordinateUnit, DeviceContext, InterfaceContext, Interpolation,
+    WindowAppearanceFactor,
 };
 
 /// Position denotes 2d coordinates in space with float32 precision
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
 pub struct Position<Context: CoordinateContext> {
-    pub x: f32,
-    pub y: f32,
+    pub x: CoordinateUnit,
+    pub y: CoordinateUnit,
     _context: PhantomData<Context>,
 }
 impl<Context: CoordinateContext> Debug for Position<Context> {
@@ -25,7 +26,7 @@ impl<Context: CoordinateContext> Debug for Position<Context> {
     }
 }
 impl<Context: CoordinateContext> Position<Context> {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: CoordinateUnit, y: CoordinateUnit) -> Self {
         Self {
             x,
             y,
@@ -46,14 +47,14 @@ impl<Context: CoordinateContext> Position<Context> {
 }
 impl Position<InterfaceContext> {
     /// useful for converting to a device position accounting for scale factor
-    pub fn to_device(&self, scale_factor: f32) -> Position<DeviceContext> {
+    pub fn to_device(&self, scale_factor: CoordinateUnit) -> Position<DeviceContext> {
         Position::<DeviceContext>::new(self.x * scale_factor, self.y * scale_factor)
     }
 }
 
 impl Position<DeviceContext> {
     /// converts to interface context accounting for scale factor
-    pub fn to_interface(&self, scale_factor: f32) -> Position<InterfaceContext> {
+    pub fn to_interface(&self, scale_factor: CoordinateUnit) -> Position<InterfaceContext> {
         Position::<InterfaceContext>::new(self.x / scale_factor, self.y / scale_factor)
     }
     pub fn to_window_appearance(
@@ -102,42 +103,42 @@ impl<Context: CoordinateContext> Div for Position<Context> {
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone, Default, Serialize, Deserialize, Debug)]
 pub struct RawPosition {
-    pub(crate) x: f32,
-    pub(crate) y: f32,
+    pub(crate) x: CoordinateUnit,
+    pub(crate) y: CoordinateUnit,
 }
 
 impl RawPosition {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: CoordinateUnit, y: CoordinateUnit) -> Self {
         Self { x, y }
     }
 }
-impl<Context: CoordinateContext> From<(f32, f32)> for Position<Context> {
-    fn from(value: (f32, f32)) -> Self {
+impl<Context: CoordinateContext> From<(CoordinateUnit, CoordinateUnit)> for Position<Context> {
+    fn from(value: (CoordinateUnit, CoordinateUnit)) -> Self {
         Position::<Context>::new(value.0, value.1)
     }
 }
 
 impl<Context: CoordinateContext> From<(f64, f64)> for Position<Context> {
     fn from(value: (f64, f64)) -> Self {
-        Position::<Context>::new(value.0 as f32, value.1 as f32)
+        Position::<Context>::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 
 impl<Context: CoordinateContext> From<(u32, u32)> for Position<Context> {
     fn from(value: (u32, u32)) -> Self {
-        Position::<Context>::new(value.0 as f32, value.1 as f32)
+        Position::<Context>::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 
 impl<Context: CoordinateContext> From<(i32, i32)> for Position<Context> {
     fn from(value: (i32, i32)) -> Self {
-        Position::<Context>::new(value.0 as f32, value.1 as f32)
+        Position::<Context>::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 
 impl<Context: CoordinateContext> From<(usize, usize)> for Position<Context> {
     fn from(value: (usize, usize)) -> Self {
-        Position::<Context>::new(value.0 as f32, value.1 as f32)
+        Position::<Context>::new(value.0 as CoordinateUnit, value.1 as CoordinateUnit)
     }
 }
 impl<Context: CoordinateContext> AddAssign for Position<Context> {

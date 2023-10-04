@@ -43,8 +43,8 @@ pub use workflow::{start_web_worker, Runner, Sender, Workflow};
 pub use crate::color::{Color, ColorBuilder, Rgb, Rgba};
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
-    section::Section, Coordinate, DeviceContext, InterfaceContext, NumericalContext,
-    WindowAppearanceContext,
+    section::Section, Coordinate, CoordinateUnit, DeviceContext, InterfaceContext,
+    NumericalContext, WindowAppearanceContext,
 };
 pub use crate::diagnostics::{Diagnostics, DiagnosticsHandle, Record};
 pub use crate::focus::{Focus, FocusInputListener};
@@ -98,6 +98,7 @@ mod path;
 mod render;
 mod scale_factor;
 mod scene;
+mod snap_grid;
 mod sync;
 mod text;
 mod texture_atlas;

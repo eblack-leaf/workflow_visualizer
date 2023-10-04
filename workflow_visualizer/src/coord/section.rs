@@ -3,7 +3,7 @@ use bevy_ecs::bundle::Bundle;
 use crate::coord::area::Area;
 use crate::coord::position::Position;
 use crate::coord::CoordinateContext;
-use crate::{DeviceContext, InterfaceContext};
+use crate::{CoordinateUnit, DeviceContext, InterfaceContext};
 
 /// A section is a bundle for Position/Area
 #[derive(Bundle, Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
@@ -25,28 +25,33 @@ impl<Context: CoordinateContext> Section<Context> {
         Position::new(x, y)
     }
     /// Can be instantiated with specific points
-    pub fn from_left_top_right_bottom(left: f32, top: f32, right: f32, bottom: f32) -> Self {
+    pub fn from_left_top_right_bottom(
+        left: CoordinateUnit,
+        top: CoordinateUnit,
+        right: CoordinateUnit,
+        bottom: CoordinateUnit,
+    ) -> Self {
         Self {
             position: (left, top).into(),
             area: (right - left, bottom - top).into(),
         }
     }
-    pub fn width(&self) -> f32 {
+    pub fn width(&self) -> CoordinateUnit {
         self.area.width
     }
-    pub fn height(&self) -> f32 {
+    pub fn height(&self) -> CoordinateUnit {
         self.area.height
     }
-    pub fn left(&self) -> f32 {
+    pub fn left(&self) -> CoordinateUnit {
         self.position.x
     }
-    pub fn right(&self) -> f32 {
+    pub fn right(&self) -> CoordinateUnit {
         self.position.x + self.area.width
     }
-    pub fn top(&self) -> f32 {
+    pub fn top(&self) -> CoordinateUnit {
         self.position.y
     }
-    pub fn bottom(&self) -> f32 {
+    pub fn bottom(&self) -> CoordinateUnit {
         self.position.y + self.area.height
     }
     /// returns if any port of this section is touching the other
@@ -87,7 +92,7 @@ impl<Context: CoordinateContext> Section<Context> {
     }
 }
 impl Section<InterfaceContext> {
-    pub(crate) fn to_device(&self, scale_factor: f32) -> Section<DeviceContext> {
+    pub(crate) fn to_device(&self, scale_factor: CoordinateUnit) -> Section<DeviceContext> {
         Section::<DeviceContext>::new(
             self.position.to_device(scale_factor),
             self.area.to_device(scale_factor),
@@ -96,7 +101,7 @@ impl Section<InterfaceContext> {
 }
 impl Section<DeviceContext> {
     #[allow(unused)]
-    pub(crate) fn to_interface(&self, scale_factor: f32) -> Section<InterfaceContext> {
+    pub(crate) fn to_interface(&self, scale_factor: CoordinateUnit) -> Section<InterfaceContext> {
         Section::<InterfaceContext>::new(
             self.position.to_interface(scale_factor),
             self.area.to_interface(scale_factor),
