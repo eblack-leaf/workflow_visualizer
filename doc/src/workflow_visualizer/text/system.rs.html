@@ -709,7 +709,6 @@
 <a href="#709" id="709">709</a>
 <a href="#710" id="710">710</a>
 <a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
@@ -936,16 +935,15 @@
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>scale_change(
-    <span class="kw-2">mut </span>text_query: Query&lt;(<span class="kw-2">&amp;mut </span>TextLetterDimensions, <span class="kw-2">&amp;mut </span>TextScale), Changed&lt;TextScale&gt;&gt;,
+    <span class="kw-2">mut </span>text_query: Query&lt;(<span class="kw-2">&amp;mut </span>TextLetterDimensions, <span class="kw-2">&amp;</span>TextScale), Changed&lt;TextScale&gt;&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
     fonts: Res&lt;MonoSpacedFont&gt;,
 ) {
-    <span class="kw">for </span>(<span class="kw-2">mut </span>text_letter_dimensions, <span class="kw-2">mut </span>text_scale) <span class="kw">in </span>text_query.iter_mut() {
-        text_scale.<span class="number">0 </span>= (text_scale.<span class="number">0 </span><span class="kw">as </span>f32 * scale_factor.factor()) <span class="kw">as </span>u32;
+    <span class="kw">for </span>(<span class="kw-2">mut </span>text_letter_dimensions, text_scale) <span class="kw">in </span>text_query.iter_mut() {
         <span class="kw">let </span>letter_dimensions = fonts.character_dimensions(text_scale.px());
-        <span class="kw">let </span>letter_dimensions =
-            Area::&lt;DeviceContext&gt;::from((letter_dimensions.width, letter_dimensions.height));
-        <span class="kw-2">*</span>text_letter_dimensions = TextLetterDimensions(letter_dimensions);
+        <span class="kw">let </span>area = Area::&lt;InterfaceContext&gt;::new(letter_dimensions.width, letter_dimensions.height)
+            .to_device(scale_factor.factor());
+        <span class="kw-2">*</span>text_letter_dimensions = TextLetterDimensions(area);
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>manage(

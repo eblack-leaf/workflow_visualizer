@@ -153,6 +153,10 @@
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, Sub};
 
 <span class="kw">use </span>bevy_ecs::prelude::Resource;
@@ -169,7 +173,6 @@
 
 <span class="kw">impl </span>MonoSpacedFont {
     <span class="kw">pub const </span>DEFAULT_OPT_SCALE: u32 = <span class="number">80u32</span>;
-    <span class="kw">const </span>TEXT_GRID_THRESHOLD: f32 = <span class="number">0.95f32</span>;
 
     <span class="kw">pub const </span>FACTOR_BASE_SCALE: u32 = <span class="number">40u32</span>;
     <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400u32</span>;
@@ -199,9 +202,9 @@
             KnownTextDimension::Width(width) =&gt; {
                 <span class="kw">for </span>scale <span class="kw">in </span><span class="number">0</span>..<span class="self">Self</span>::MAX_CHECKED_TEXT_SCALE {
                     <span class="kw">let </span>dimensions = <span class="self">self</span>.character_dimensions(scale <span class="kw">as </span>f32);
-                    <span class="kw">if </span>dimensions.width <span class="kw">as </span>u32 &gt; width {
+                    <span class="kw">if </span>dimensions.width &gt; width {
                         <span class="kw">return </span>TextScale(scale.sub(<span class="number">1</span>).max(<span class="number">0</span>));
-                    } <span class="kw">else if </span>dimensions.width <span class="kw">as </span>u32 == width {
+                    } <span class="kw">else if </span>dimensions.width == width {
                         <span class="kw">return </span>TextScale(scale);
                     }
                 }
@@ -209,12 +212,22 @@
             KnownTextDimension::Height(height) =&gt; {
                 <span class="kw">for </span>scale <span class="kw">in </span><span class="number">0</span>..<span class="self">Self</span>::MAX_CHECKED_TEXT_SCALE {
                     <span class="kw">let </span>dimensions = <span class="self">self</span>.character_dimensions(scale <span class="kw">as </span>f32);
-                    <span class="kw">if </span>dimensions.height <span class="kw">as </span>u32 &gt; height {
+                    <span class="kw">if </span>dimensions.height &gt; height {
                         <span class="kw">return </span>TextScale(scale.sub(<span class="number">1</span>).max(<span class="number">0</span>));
-                    } <span class="kw">else if </span>dimensions.height <span class="kw">as </span>u32 == height {
+                    } <span class="kw">else if </span>dimensions.height == height {
                         <span class="kw">return </span>TextScale(scale);
                     }
                 }
+            }
+            KnownTextDimension::WidthAndHeight(area) =&gt; {
+                <span class="kw">return </span><span class="self">self
+                    </span>.text_scale_from_dimension(KnownTextDimension::Width(area.width))
+                    .<span class="number">0
+                    </span>.min(
+                        <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(area.height))
+                            .<span class="number">0</span>,
+                    )
+                    .into()
             }
         }
         TextScale(<span class="number">0</span>)
@@ -227,26 +240,20 @@
     ) -&gt; TextSectionDescriptor {
         <span class="kw">let </span>scale = <span class="kw">match </span>known {
             TextSectionDescriptorKnown::Width(width) =&gt; {
-                <span class="kw">let </span>px = width * <span class="self">Self</span>::TEXT_GRID_THRESHOLD / characters <span class="kw">as </span>f32;
-                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px <span class="kw">as </span>u32))
+                <span class="kw">let </span>px = width / characters <span class="kw">as </span>f32;
+                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px))
             }
             TextSectionDescriptorKnown::Height(markers) =&gt; {
-                <span class="kw">let </span>px = markers * <span class="self">Self</span>::TEXT_GRID_THRESHOLD;
-                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(px <span class="kw">as </span>u32))
+                <span class="kw">let </span>px = markers;
+                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(px))
             }
             TextSectionDescriptorKnown::Scale(scale) =&gt; scale,
             TextSectionDescriptorKnown::WidthAndHeight(area) =&gt; {
-                <span class="kw">let </span>px = area.width * <span class="self">Self</span>::TEXT_GRID_THRESHOLD / characters <span class="kw">as </span>f32;
-                <span class="kw">let </span>height_px = area.height * <span class="self">Self</span>::TEXT_GRID_THRESHOLD;
-                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Width(px <span class="kw">as </span>u32))
-                    .<span class="number">0
-                    </span>.min(
-                        <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::Height(
-                            height_px <span class="kw">as </span>u32,
-                        ))
-                        .<span class="number">0</span>,
-                    )
-                    .into()
+                <span class="kw">let </span>px = area.width / characters <span class="kw">as </span>f32;
+                <span class="kw">let </span>height_px = area.height;
+                <span class="self">self</span>.text_scale_from_dimension(KnownTextDimension::WidthAndHeight(Area::new(
+                    px, height_px,
+                )))
             }
         };
         <span class="kw">let </span>letter_dims = <span class="self">self</span>.character_dimensions(scale.px());
@@ -295,8 +302,9 @@
     WidthAndHeight(Area&lt;InterfaceContext&gt;),
 }
 <span class="kw">pub enum </span>KnownTextDimension {
-    Width(u32),
-    Height(u32),
+    Width(CoordinateUnit),
+    Height(CoordinateUnit),
+    WidthAndHeight(Area&lt;InterfaceContext&gt;),
 }
 <span class="attr">#[cfg(test)]
 #[test]

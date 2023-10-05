@@ -302,6 +302,37 @@
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
@@ -311,9 +342,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::icon::Icon;
 <span class="kw">use </span><span class="kw">crate</span>::snap_grid::{FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView};
 <span class="kw">use crate</span>::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color, IconScale,
-    InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text, TextScale,
-    TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, Button, ButtonTag, ButtonType, Color,
+    IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text,
+    TextScale, TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>border_change(
@@ -394,35 +425,49 @@
         panel_entity.<span class="number">0</span>.replace(panel);
     }
 }
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>place(<span class="kw-2">mut </span>buttons: Query&lt;(<span class="kw-2">&amp;</span>IconEntity, <span class="kw-2">&amp;</span>TextEntity, <span class="kw-2">&amp;mut </span>FloatPlacer)&gt;) {
-    <span class="kw">for </span>(icon_entity, text_entity, <span class="kw-2">mut </span>placer) <span class="kw">in </span>buttons.iter_mut() {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>place(
+    <span class="kw-2">mut </span>buttons: Query&lt;
+        (<span class="kw-2">&amp;</span>PanelEntity, <span class="kw-2">&amp;</span>IconEntity, <span class="kw-2">&amp;</span>TextEntity, <span class="kw-2">&amp;mut </span>FloatPlacer),
+        Or&lt;(Changed&lt;IconEntity&gt;, Changed&lt;TextEntity&gt;)&gt;,
+    &gt;,
+) {
+    <span class="kw">for </span>(panel_entity, icon_entity, text_entity, <span class="kw-2">mut </span>placer) <span class="kw">in </span>buttons.iter_mut() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(entity) = panel_entity.<span class="number">0 </span>{
+            placer.add(
+                entity,
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                    FloatRange::new(<span class="number">0.0</span>.into(), <span class="number">1.0</span>.into()),
+                    FloatRange::new(<span class="number">0.0</span>.into(), <span class="number">1.0</span>.into()),
+                )),
+            );
+        }
         <span class="kw">if </span>icon_entity.<span class="number">0</span>.is_some() &amp;&amp; text_entity.<span class="number">0</span>.is_some() {
-            <span class="kw">let </span>icon_placement = FloatPlacementDescriptor::View(FloatView::new(
-                FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.3</span>.into()),
-                FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.9</span>.into()),
+            <span class="kw">let </span>icon_placement = FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                FloatRange::new(<span class="number">0.05</span>.into(), <span class="number">0.3</span>.into()),
+                FloatRange::new(<span class="number">0.2</span>.into(), <span class="number">0.8</span>.into()),
             ));
             placer.add(icon_entity.<span class="number">0</span>.unwrap(), icon_placement);
             placer.add(
                 text_entity.<span class="number">0</span>.unwrap(),
-                FloatPlacementDescriptor::View(FloatView::new(
-                    FloatRange::new(<span class="number">0.4</span>.into(), <span class="number">0.9</span>.into()),
-                    FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.9</span>.into()),
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                    FloatRange::new(<span class="number">0.35</span>.into(), Button::TEXT_HEIGHT_FACTOR.into()),
+                    FloatRange::new(<span class="number">0.05</span>.into(), Button::TEXT_HEIGHT_FACTOR.into()),
                 )),
             );
-        } <span class="kw">else if </span>icon_entity.<span class="number">0</span>.is_some() {
+        } <span class="kw">else if </span>icon_entity.<span class="number">0</span>.is_some() &amp;&amp; text_entity.<span class="number">0</span>.is_none() {
             placer.add(
                 icon_entity.<span class="number">0</span>.unwrap(),
-                FloatPlacementDescriptor::View(FloatView::new(
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
                     FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.9</span>.into()),
                     FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.9</span>.into()),
                 )),
             );
-        } <span class="kw">else if </span>text_entity.<span class="number">0</span>.is_some() {
+        } <span class="kw">else if </span>text_entity.<span class="number">0</span>.is_some() &amp;&amp; icon_entity.<span class="number">0</span>.is_none() {
             placer.add(
                 text_entity.<span class="number">0</span>.unwrap(),
-                FloatPlacementDescriptor::View(FloatView::new(
-                    FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.9</span>.into()),
-                    FloatRange::new(<span class="number">0.1</span>.into(), <span class="number">0.9</span>.into()),
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                    FloatRange::new(<span class="number">0.05</span>.into(), Button::TEXT_HEIGHT_FACTOR.into()),
+                    FloatRange::new(<span class="number">0.05</span>.into(), Button::TEXT_HEIGHT_FACTOR.into()),
                 )),
             );
         }
@@ -430,30 +475,47 @@
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>scale_change(
     font: Res&lt;MonoSpacedFont&gt;,
-    buttons: Query&lt;(<span class="kw-2">&amp;</span>IconEntity, <span class="kw-2">&amp;</span>TextEntity)&gt;,
-    <span class="kw-2">mut </span>listeners: Query&lt;(
-        <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
-        <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
-        <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>TextScale&gt;,
-        <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>IconScale&gt;,
-        <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TextValue&gt;,
-    )&gt;,
+    buttons: Query&lt;
+        (<span class="kw-2">&amp;</span>IconEntity, <span class="kw-2">&amp;</span>TextEntity, <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;),
+        (
+            With&lt;ButtonTag&gt;,
+            Or&lt;(Changed&lt;IconEntity&gt;, Changed&lt;TextEntity&gt;)&gt;,
+        ),
+    &gt;,
+    <span class="kw-2">mut </span>listeners: Query&lt;
+        (
+            <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
+            <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
+            <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>TextScale&gt;,
+            <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>IconScale&gt;,
+            <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TextValue&gt;,
+        ),
+        Without&lt;ButtonTag&gt;,
+    &gt;,
 ) {
-    <span class="kw">for </span>(icon_entity, text_entity) <span class="kw">in </span>buttons.iter() {
+    <span class="kw">for </span>(icon_entity, text_entity, button_area) <span class="kw">in </span>buttons.iter() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(entity) = icon_entity.<span class="number">0 </span>{
             <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw">_</span>, area, <span class="kw">_</span>, scale, <span class="kw">_</span>)) = listeners.get_mut(entity) {
-                <span class="kw-2">*</span>scale.unwrap() = IconScale::Asymmetrical((area.width <span class="kw">as </span>u32, area.height <span class="kw">as </span>u32));
+                <span class="kw-2">*</span>scale.unwrap() = IconScale::Symmetrical(area.width.min(area.height) <span class="kw">as </span>u32);
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(entity) = text_entity.<span class="number">0 </span>{
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>((pos, area, scale, <span class="kw">_</span>, text_value)) = listeners.get_mut(entity) {
-                <span class="kw-2">*</span>scale.unwrap() = font
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>pos, area, scale, <span class="kw">_</span>, text_value)) = listeners.get_mut(entity) {
+                <span class="kw">let </span>new_scale = font
                     .text_section_descriptor(
                         <span class="kw-2">*</span>pos,
                         TextSectionDescriptorKnown::WidthAndHeight(<span class="kw-2">*</span>area),
                         text_value.unwrap().<span class="number">0</span>.len() <span class="kw">as </span>u32,
                     )
                     .scale;
+                <span class="kw-2">*</span>scale.unwrap() = new_scale;
+                <span class="kw">let </span>dims = font.character_dimensions(new_scale.px());
+                <span class="kw">let </span>expected_height = button_area.height * Button::TEXT_HEIGHT_FACTOR;
+                <span class="kw">if </span>dims.height &lt; expected_height {
+                    <span class="kw">let </span>diff = expected_height - dims.height;
+                    <span class="kw">let </span>diff = diff / <span class="number">2f32</span>;
+                    pos.y += diff;
+                }
             }
         }
     }
