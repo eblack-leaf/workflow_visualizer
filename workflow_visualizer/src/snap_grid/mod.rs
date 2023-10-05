@@ -89,7 +89,7 @@ pub struct SnapGrid {
     pub breakpoint: Breakpoint,
 }
 impl SnapGrid {
-    pub const GUTTER_BASE: CoordinateUnit = 4f32;
+    pub const GUTTER_BASE: CoordinateUnit = 8f32;
     pub fn new(area: Area<InterfaceContext>) -> Self {
         let breakpoint = Breakpoint::establish(area.width);
         Self {
