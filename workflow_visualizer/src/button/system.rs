@@ -132,7 +132,7 @@ pub(crate) fn place(
                 text_entity.0.unwrap(),
                 FloatPlacementDescriptor::ViewDesc(FloatView::new(
                     FloatRange::new(0.05.into(), 0.95.into()),
-                    FloatRange::new(0.2.into(), 0.8.into()),
+                    FloatRange::new(0.1.into(), 0.85.into()),
                 )),
             );
         }
