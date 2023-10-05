@@ -346,7 +346,7 @@
     <span class="kw">pub </span>breakpoint: Breakpoint,
 }
 <span class="kw">impl </span>SnapGrid {
-    <span class="kw">pub const </span>GUTTER_BASE: CoordinateUnit = <span class="number">4f32</span>;
+    <span class="kw">pub const </span>GUTTER_BASE: CoordinateUnit = <span class="number">8f32</span>;
     <span class="kw">pub fn </span>new(area: Area&lt;InterfaceContext&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>breakpoint = Breakpoint::establish(area.width);
         <span class="self">Self </span>{
