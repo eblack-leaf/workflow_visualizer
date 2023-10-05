@@ -22,6 +22,9 @@ impl<Key: Copy + Clone + Hash + Eq + PartialEq> Scene<Key> {
     pub fn add_associated(&mut self, key: Key, entity: Entity) {
         self.associations.insert(key, entity);
     }
+    pub fn get(&self, key: Key) -> Entity {
+        *self.associations.get(&key).expect("scene::get")
+    }
     pub fn enable_all(&self, cmd: &mut Commands) {
         for entity in self.entities.iter() {
             cmd.entity(*entity).insert(Disabled::default());

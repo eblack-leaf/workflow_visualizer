@@ -30,6 +30,7 @@ pub use interaction::{
 pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use orientation::{AspectRatio, Orientation};
 pub use render::{Render, RenderPassHandle, RenderPhase};
+pub use scene::Scene;
 pub use snap_grid::FloatArrangement;
 pub use snap_grid::FloatLocation;
 pub use snap_grid::FloatPlacementDescriptor;
