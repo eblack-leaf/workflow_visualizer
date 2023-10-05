@@ -123,8 +123,8 @@ pub(crate) fn place(
             placer.add(
                 icon_entity.0.unwrap(),
                 FloatPlacementDescriptor::ViewDesc(FloatView::new(
-                    FloatRange::new(0.2.into(), 0.8.into()),
-                    FloatRange::new(0.2.into(), 0.8.into()),
+                    FloatRange::new(0.25.into(), 0.75.into()),
+                    FloatRange::new(0.15.into(), 0.9.into()),
                 )),
             );
         } else if text_entity.0.is_some() && icon_entity.0.is_none() {
