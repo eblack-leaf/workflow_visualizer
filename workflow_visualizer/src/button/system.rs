@@ -168,6 +168,16 @@ pub(crate) fn scale_change(
             if let Ok((mut pos, area, _, scale, _)) = listeners.get_mut(entity) {
                 let dim = area.width.min(area.height) as u32;
                 *scale.unwrap() = IconScale::Symmetrical(dim);
+                if text_entity.0.is_none() {
+                    let center_x = pos.y + (dim / 2u32) as f32;
+                    let button_center_x = button_pos.y + button_area.width / 2f32;
+                    let diff = (button_center_x - center_x).abs();
+                    if button_center_x > center_x {
+                        pos.x += diff;
+                    } else {
+                        pos.x -= diff;
+                    }
+                }
                 let center_y = pos.y + (dim / 2u32) as f32;
                 let button_center_y = button_pos.y + button_area.height / 2f32;
                 let diff = (button_center_y - center_y).abs();
