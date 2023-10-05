@@ -27,9 +27,11 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::prelude::Component;
 
-<span class="kw">use crate</span>::{GridLocation, InterfaceContext, Position};
+<span class="kw">use </span><span class="kw">crate</span>::snap_grid::GridLocation;
+<span class="kw">use crate</span>::{InterfaceContext, Position};
 
 <span class="doccomment">/// Collection of specific points rendered from a PathView
 </span><span class="attr">#[derive(Component, Clone)]
