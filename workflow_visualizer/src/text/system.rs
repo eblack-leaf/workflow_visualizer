@@ -224,16 +224,15 @@ pub(crate) fn filter(
     }
 }
 pub(crate) fn scale_change(
-    mut text_query: Query<(&mut TextLetterDimensions, &mut TextScale), Changed<TextScale>>,
+    mut text_query: Query<(&mut TextLetterDimensions, &TextScale), Changed<TextScale>>,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<MonoSpacedFont>,
 ) {
-    for (mut text_letter_dimensions, mut text_scale) in text_query.iter_mut() {
-        text_scale.0 = (text_scale.0 as f32 * scale_factor.factor()) as u32;
+    for (mut text_letter_dimensions, text_scale) in text_query.iter_mut() {
         let letter_dimensions = fonts.character_dimensions(text_scale.px());
-        let letter_dimensions =
-            Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
-        *text_letter_dimensions = TextLetterDimensions(letter_dimensions);
+        let area = Area::<InterfaceContext>::new(letter_dimensions.width, letter_dimensions.height)
+            .to_device(scale_factor.factor());
+        *text_letter_dimensions = TextLetterDimensions(area);
     }
 }
 pub(crate) fn manage(

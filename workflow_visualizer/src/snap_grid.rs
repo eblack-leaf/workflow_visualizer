@@ -6,7 +6,7 @@ use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{IntoSystemConfigs, Res, Resource};
 use bevy_ecs::query::{Changed, Or};
-use bevy_ecs::system::{Commands, Query};
+use bevy_ecs::system::{Commands, ParamSet, Query};
 use std::collections::HashMap;
 
 #[repr(i32)]
@@ -46,7 +46,7 @@ impl Breakpoint {
 }
 #[derive(Copy, Clone, Default, Eq, PartialEq)]
 pub struct GridMarker(pub i32);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum GridBias {
     Near,
     Far,
@@ -74,13 +74,37 @@ impl GridLocation {
         Self { marker, bias }
     }
 }
-#[derive(Component, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct ResponsiveGridLocation {
     pub mobile: GridLocation,
     pub tablet: Option<GridLocation>,
     pub desktop: Option<GridLocation>,
 }
-
+#[derive(Copy, Clone)]
+pub struct GridPoint {
+    pub x: GridLocation,
+    pub y: GridLocation,
+}
+impl GridPoint {
+    pub fn new(x: GridLocation, y: GridLocation) -> Self {
+        Self { x, y }
+    }
+}
+#[derive(Component, Copy, Clone)]
+pub struct ResponsiveGridPoint {
+    pub x: ResponsiveGridLocation,
+    pub y: ResponsiveGridLocation,
+}
+impl ResponsiveGridPoint {
+    pub fn new(x: ResponsiveGridLocation, y: ResponsiveGridLocation) -> Self {
+        Self { x, y }
+    }
+    pub fn current(&self, horizontal: Breakpoint, vertical: Breakpoint) -> GridPoint {
+        let x = self.x.current(horizontal);
+        let y = self.y.current(vertical);
+        GridPoint::new(x, y)
+    }
+}
 impl ResponsiveGridLocation {
     pub fn new(mobile: GridLocation) -> Self {
         Self {
@@ -201,6 +225,11 @@ pub struct Row {
     pub gutter: CoordinateUnit,
     pub breakpoint: Breakpoint,
 }
+#[derive(Copy, Clone)]
+pub enum GridDirection {
+    Horizontal,
+    Vertical,
+}
 impl Row {
     pub fn new(height: CoordinateUnit, breakpoint: Breakpoint) -> Self {
         Self {
@@ -225,27 +254,102 @@ impl SnapGrid {
             row: Row::new(area.height, Breakpoint::establish(area.height)),
         }
     }
-    pub fn view_coordinates(&self, _view: ResponsiveGridView) -> Section<InterfaceContext> {
-        todo!()
-    }
-    pub fn range_coordinates(&self, _range: ResponsiveGridRange) -> CoordinateUnit {
-        todo!()
-    }
     pub fn location_coordinates(
         &self,
-        _location: ResponsiveGridLocation,
+        direction: GridDirection,
+        location: GridLocation,
+    ) -> CoordinateUnit {
+        match direction {
+            GridDirection::Horizontal => {
+                self.column.content * location.marker.0 as f32
+                    + self.column.gutter * location.marker.0 as f32
+                    - if location.bias == GridBias::Near {
+                        self.column.content
+                    } else {
+                        0f32
+                    }
+            }
+            GridDirection::Vertical => {
+                self.row.content * location.marker.0 as f32
+                    + self.row.gutter * location.marker.0 as f32
+                    - if location.bias == GridBias::Near {
+                        self.row.content
+                    } else {
+                        0f32
+                    }
+            }
+        }
+    }
+    pub fn view_coordinates(&self, view: GridView) -> Section<InterfaceContext> {
+        Section::from_left_top_right_bottom(
+            self.location_coordinates(GridDirection::Horizontal, view.horizontal.begin),
+            self.location_coordinates(GridDirection::Vertical, view.vertical.begin),
+            self.location_coordinates(GridDirection::Horizontal, view.horizontal.end),
+            self.location_coordinates(GridDirection::Vertical, view.vertical.end),
+        )
+    }
+    pub fn range_coordinates(
+        &self,
+        direction: GridDirection,
+        range: GridRange,
+    ) -> (CoordinateUnit, CoordinateUnit) {
+        (
+            self.location_coordinates(direction, range.begin),
+            self.location_coordinates(direction, range.end),
+        )
+    }
+    pub fn point_coordinates(&self, point: GridPoint) -> Position<InterfaceContext> {
+        Position::new(
+            self.location_coordinates(GridDirection::Horizontal, point.x),
+            self.location_coordinates(GridDirection::Vertical, point.y),
+        )
+    }
+    pub fn responsive_view_coordinates(
+        &self,
+        view: ResponsiveGridView,
+    ) -> Section<InterfaceContext> {
+        self.view_coordinates(view.current(self.column.breakpoint, self.row.breakpoint))
+    }
+    pub fn responsive_point_coordinates(
+        &self,
+        point: ResponsiveGridPoint,
     ) -> Position<InterfaceContext> {
-        todo!()
+        self.point_coordinates(point.current(self.column.breakpoint, self.row.breakpoint))
+    }
+    pub fn responsive_range_coordinates(
+        &self,
+        direction: GridDirection,
+        range: ResponsiveGridRange,
+    ) -> (CoordinateUnit, CoordinateUnit) {
+        match direction {
+            GridDirection::Horizontal => {
+                self.range_coordinates(direction, range.current(self.column.breakpoint))
+            }
+            GridDirection::Vertical => {
+                self.range_coordinates(direction, range.current(self.row.breakpoint))
+            }
+        }
+    }
+    pub fn responsive_location_coordinates(
+        &self,
+        direction: GridDirection,
+        location: ResponsiveGridLocation,
+    ) -> CoordinateUnit {
+        let location = match direction {
+            GridDirection::Horizontal => location.current(self.column.breakpoint),
+            GridDirection::Vertical => location.current(self.row.breakpoint),
+        };
+        self.location_coordinates(direction, location)
     }
     pub fn animate_location(
         &self,
-        _begin: ResponsiveGridLocation,
-        _other: ResponsiveGridLocation,
+        _begin: ResponsiveGridPoint,
+        _other: ResponsiveGridPoint,
         _interval: TimeDelta,
         _delay: Option<TimeDelta>,
     ) -> (
         QueuedAnimation<Position<InterfaceContext>>,
-        DelayedBundle<ResponsiveGridLocation>,
+        DelayedBundle<ResponsiveGridPoint>,
     ) {
         todo!()
     }
@@ -268,18 +372,18 @@ pub(crate) fn calculate(
         (
             &mut Position<InterfaceContext>,
             Option<&mut Area<InterfaceContext>>,
-            Option<&ResponsiveGridLocation>,
+            Option<&ResponsiveGridPoint>,
             Option<&ResponsiveGridView>,
         ),
-        Or<(Changed<ResponsiveGridLocation>, Changed<ResponsiveGridView>)>,
+        Or<(Changed<ResponsiveGridPoint>, Changed<ResponsiveGridView>)>,
     >,
     grid: Res<SnapGrid>,
 ) {
     for (mut position, area, location, view) in gridded.iter_mut() {
         if let Some(loc) = location {
-            *position = grid.location_coordinates(*loc);
+            *position = grid.responsive_point_coordinates(*loc);
         } else if let Some(view) = view {
-            let section = grid.view_coordinates(*view);
+            let section = grid.responsive_view_coordinates(*view);
             *position = section.position;
             if let Some(mut area) = area {
                 *area = section.area;
@@ -292,8 +396,8 @@ pub struct FloatLocation {
 }
 impl FloatLocation {
     pub fn new(percent: f32) -> Self {
-        assert!(percent <= 0f32);
-        assert!(percent >= 1f32);
+        assert!(percent >= 0f32);
+        assert!(percent <= 1f32);
         Self { percent }
     }
     pub fn percent(&self) -> f32 {
@@ -304,6 +408,10 @@ impl From<f32> for FloatLocation {
     fn from(value: f32) -> Self {
         FloatLocation::new(value)
     }
+}
+pub struct FloatPoint {
+    pub x: FloatLocation,
+    pub y: FloatLocation,
 }
 pub struct FloatRange {
     pub begin: FloatLocation,
@@ -327,17 +435,32 @@ impl FloatView {
     }
 }
 pub enum FloatPlacementDescriptor {
-    Location(FloatLocation),
-    View(FloatView),
+    LocationDesc(FloatPoint),
+    ViewDesc(FloatView),
 }
 impl FloatPlacementDescriptor {
-    pub fn calculate(&self, _section: Section<InterfaceContext>) -> FloatPlacement {
-        todo!()
+    pub fn calculate(&self, section: Section<InterfaceContext>) -> FloatPlacement {
+        match &self {
+            FloatPlacementDescriptor::LocationDesc(point) => {
+                FloatPlacement::FloatPosition(Position::new(
+                    section.position.x + point.x.percent() * section.width(),
+                    section.position.y + point.y.percent() * section.height(),
+                ))
+            }
+            FloatPlacementDescriptor::ViewDesc(view) => {
+                FloatPlacement::FloatSection(Section::from_left_top_right_bottom(
+                    section.position.x + view.horizontal.begin.percent() * section.width(),
+                    section.position.y + view.vertical.begin.percent() * section.height(),
+                    section.position.x + view.horizontal.end.percent() * section.width(),
+                    section.position.y + view.vertical.end.percent() * section.height(),
+                ))
+            }
+        }
     }
 }
 pub enum FloatPlacement {
-    Position(Position<InterfaceContext>),
-    Section(Section<InterfaceContext>),
+    FloatPosition(Position<InterfaceContext>),
+    FloatSection(Section<InterfaceContext>),
 }
 #[derive(Default)]
 pub struct FloatArrangement(pub HashMap<Entity, FloatPlacement>);
@@ -367,27 +490,49 @@ impl FloatPlacer {
     }
 }
 pub(crate) fn reapply(
-    float_layouts: Query<
-        (
-            &FloatPlacer,
-            &Position<InterfaceContext>,
-            &Area<InterfaceContext>,
-        ),
-        Or<(
-            Changed<Position<InterfaceContext>>,
-            Changed<Area<InterfaceContext>>,
-            Changed<FloatPlacer>,
+    mut float_layouts: ParamSet<(
+        Query<
+            (
+                &FloatPlacer,
+                &Position<InterfaceContext>,
+                &Area<InterfaceContext>,
+            ),
+            Or<(
+                Changed<Position<InterfaceContext>>,
+                Changed<Area<InterfaceContext>>,
+                Changed<FloatPlacer>,
+            )>,
+        >,
+        Query<(
+            &mut Position<InterfaceContext>,
+            Option<&mut Area<InterfaceContext>>,
         )>,
-    >,
-    mut cmd: Commands,
+    )>,
 ) {
-    for (placer, pos, area) in float_layouts.iter() {
+    let mut pos_changes = HashMap::new();
+    let mut section_changes = HashMap::new();
+    for (placer, pos, area) in float_layouts.p0().iter() {
         let arrangement = placer.apply(Section::new(*pos, *area));
         for (entity, placement) in arrangement.0 {
             match placement {
-                FloatPlacement::Position(pos) => cmd.entity(entity).insert(pos),
-                FloatPlacement::Section(section) => cmd.entity(entity).insert(section),
+                FloatPlacement::FloatPosition(pos) => {
+                    pos_changes.insert(entity, pos);
+                }
+                FloatPlacement::FloatSection(section) => {
+                    section_changes.insert(entity, section);
+                }
             };
+        }
+    }
+    for change in pos_changes {
+        if let Ok((mut pos, _)) = float_layouts.p1().get_mut(change.0) {
+            *pos = change.1;
+        }
+    }
+    for change in section_changes {
+        if let Ok((mut pos, area)) = float_layouts.p1().get_mut(change.0) {
+            *pos = change.1.position;
+            *area.unwrap() = change.1.area;
         }
     }
 }
@@ -406,7 +551,7 @@ impl Attach for SnapGridAttachment {
             reapply.in_set(SyncPoint::SecondaryEffects),
             calculate.in_set(SyncPoint::PostProcessPreparation),
         ));
-        visualizer.enable_delayed_spawn::<ResponsiveGridLocation>();
+        visualizer.enable_delayed_spawn::<ResponsiveGridPoint>();
         visualizer.enable_delayed_spawn::<ResponsiveGridView>();
     }
 }

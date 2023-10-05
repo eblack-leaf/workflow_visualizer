@@ -54,9 +54,9 @@ pub use crate::path::{Path, PathView};
 pub use crate::scale_factor::{ScaleFactor, WindowAppearanceFactor};
 pub use crate::snap_grid::{
     Column, FloatArrangement, FloatLocation, FloatPlacementDescriptor, FloatPlacer, FloatRange,
-    FloatView, GridBias, GridLocation, GridMarker, GridPlacementDescriptor, GridPlacer, GridRange,
-    GridUnit, GridView, ResponsiveGridLocation, ResponsiveGridRange, ResponsiveGridView, Row,
-    SnapGrid,
+    FloatView, GridBias, GridDirection, GridLocation, GridMarker, GridPlacementDescriptor,
+    GridPlacer, GridPoint, GridRange, GridUnit, GridView, ResponsiveGridLocation,
+    ResponsiveGridPoint, ResponsiveGridRange, ResponsiveGridView, Row, SnapGrid,
 };
 pub use crate::sync::SyncPoint;
 pub use crate::text::{

@@ -14,7 +14,6 @@ pub struct MonoSpacedFont {
 
 impl MonoSpacedFont {
     pub const DEFAULT_OPT_SCALE: u32 = 80u32;
-    const TEXT_GRID_THRESHOLD: f32 = 0.95f32;
 
     pub const FACTOR_BASE_SCALE: u32 = 40u32;
     pub const MAX_CHECKED_TEXT_SCALE: u32 = 400u32;
@@ -44,9 +43,9 @@ impl MonoSpacedFont {
             KnownTextDimension::Width(width) => {
                 for scale in 0..Self::MAX_CHECKED_TEXT_SCALE {
                     let dimensions = self.character_dimensions(scale as f32);
-                    if dimensions.width as u32 > width {
+                    if dimensions.width > width {
                         return TextScale(scale.sub(1).max(0));
-                    } else if dimensions.width as u32 == width {
+                    } else if dimensions.width == width {
                         return TextScale(scale);
                     }
                 }
@@ -54,12 +53,22 @@ impl MonoSpacedFont {
             KnownTextDimension::Height(height) => {
                 for scale in 0..Self::MAX_CHECKED_TEXT_SCALE {
                     let dimensions = self.character_dimensions(scale as f32);
-                    if dimensions.height as u32 > height {
+                    if dimensions.height > height {
                         return TextScale(scale.sub(1).max(0));
-                    } else if dimensions.height as u32 == height {
+                    } else if dimensions.height == height {
                         return TextScale(scale);
                     }
                 }
+            }
+            KnownTextDimension::WidthAndHeight(area) => {
+                return self
+                    .text_scale_from_dimension(KnownTextDimension::Width(area.width))
+                    .0
+                    .min(
+                        self.text_scale_from_dimension(KnownTextDimension::Height(area.height))
+                            .0,
+                    )
+                    .into()
             }
         }
         TextScale(0)
@@ -72,26 +81,20 @@ impl MonoSpacedFont {
     ) -> TextSectionDescriptor {
         let scale = match known {
             TextSectionDescriptorKnown::Width(width) => {
-                let px = width * Self::TEXT_GRID_THRESHOLD / characters as f32;
-                self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
+                let px = width / characters as f32;
+                self.text_scale_from_dimension(KnownTextDimension::Width(px))
             }
             TextSectionDescriptorKnown::Height(markers) => {
-                let px = markers * Self::TEXT_GRID_THRESHOLD;
-                self.text_scale_from_dimension(KnownTextDimension::Height(px as u32))
+                let px = markers;
+                self.text_scale_from_dimension(KnownTextDimension::Height(px))
             }
             TextSectionDescriptorKnown::Scale(scale) => scale,
             TextSectionDescriptorKnown::WidthAndHeight(area) => {
-                let px = area.width * Self::TEXT_GRID_THRESHOLD / characters as f32;
-                let height_px = area.height * Self::TEXT_GRID_THRESHOLD;
-                self.text_scale_from_dimension(KnownTextDimension::Width(px as u32))
-                    .0
-                    .min(
-                        self.text_scale_from_dimension(KnownTextDimension::Height(
-                            height_px as u32,
-                        ))
-                        .0,
-                    )
-                    .into()
+                let px = area.width / characters as f32;
+                let height_px = area.height;
+                self.text_scale_from_dimension(KnownTextDimension::WidthAndHeight(Area::new(
+                    px, height_px,
+                )))
             }
         };
         let letter_dims = self.character_dimensions(scale.px());
@@ -140,8 +143,9 @@ pub enum TextSectionDescriptorKnown {
     WidthAndHeight(Area<InterfaceContext>),
 }
 pub enum KnownTextDimension {
-    Width(u32),
-    Height(u32),
+    Width(CoordinateUnit),
+    Height(CoordinateUnit),
+    WidthAndHeight(Area<InterfaceContext>),
 }
 #[cfg(test)]
 #[test]

@@ -7,9 +7,9 @@ use crate::button::{ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntit
 use crate::icon::Icon;
 use crate::snap_grid::{FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView};
 use crate::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color, IconScale,
-    InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text, TextScale,
-    TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, Button, ButtonTag, ButtonType, Color,
+    IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text,
+    TextScale, TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -90,35 +90,49 @@ pub(crate) fn spawn(
         panel_entity.0.replace(panel);
     }
 }
-pub(crate) fn place(mut buttons: Query<(&IconEntity, &TextEntity, &mut FloatPlacer)>) {
-    for (icon_entity, text_entity, mut placer) in buttons.iter_mut() {
+pub(crate) fn place(
+    mut buttons: Query<
+        (&PanelEntity, &IconEntity, &TextEntity, &mut FloatPlacer),
+        Or<(Changed<IconEntity>, Changed<TextEntity>)>,
+    >,
+) {
+    for (panel_entity, icon_entity, text_entity, mut placer) in buttons.iter_mut() {
+        if let Some(entity) = panel_entity.0 {
+            placer.add(
+                entity,
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                    FloatRange::new(0.0.into(), 1.0.into()),
+                    FloatRange::new(0.0.into(), 1.0.into()),
+                )),
+            );
+        }
         if icon_entity.0.is_some() && text_entity.0.is_some() {
-            let icon_placement = FloatPlacementDescriptor::View(FloatView::new(
-                FloatRange::new(0.1.into(), 0.3.into()),
-                FloatRange::new(0.1.into(), 0.9.into()),
+            let icon_placement = FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                FloatRange::new(0.05.into(), 0.3.into()),
+                FloatRange::new(0.2.into(), 0.8.into()),
             ));
             placer.add(icon_entity.0.unwrap(), icon_placement);
             placer.add(
                 text_entity.0.unwrap(),
-                FloatPlacementDescriptor::View(FloatView::new(
-                    FloatRange::new(0.4.into(), 0.9.into()),
-                    FloatRange::new(0.1.into(), 0.9.into()),
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                    FloatRange::new(0.35.into(), Button::TEXT_HEIGHT_FACTOR.into()),
+                    FloatRange::new(0.05.into(), Button::TEXT_HEIGHT_FACTOR.into()),
                 )),
             );
-        } else if icon_entity.0.is_some() {
+        } else if icon_entity.0.is_some() && text_entity.0.is_none() {
             placer.add(
                 icon_entity.0.unwrap(),
-                FloatPlacementDescriptor::View(FloatView::new(
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
                     FloatRange::new(0.1.into(), 0.9.into()),
                     FloatRange::new(0.1.into(), 0.9.into()),
                 )),
             );
-        } else if text_entity.0.is_some() {
+        } else if text_entity.0.is_some() && icon_entity.0.is_none() {
             placer.add(
                 text_entity.0.unwrap(),
-                FloatPlacementDescriptor::View(FloatView::new(
-                    FloatRange::new(0.1.into(), 0.9.into()),
-                    FloatRange::new(0.1.into(), 0.9.into()),
+                FloatPlacementDescriptor::ViewDesc(FloatView::new(
+                    FloatRange::new(0.05.into(), Button::TEXT_HEIGHT_FACTOR.into()),
+                    FloatRange::new(0.05.into(), Button::TEXT_HEIGHT_FACTOR.into()),
                 )),
             );
         }
@@ -126,30 +140,47 @@ pub(crate) fn place(mut buttons: Query<(&IconEntity, &TextEntity, &mut FloatPlac
 }
 pub(crate) fn scale_change(
     font: Res<MonoSpacedFont>,
-    buttons: Query<(&IconEntity, &TextEntity)>,
-    mut listeners: Query<(
-        &Position<InterfaceContext>,
-        &Area<InterfaceContext>,
-        Option<&mut TextScale>,
-        Option<&mut IconScale>,
-        Option<&TextValue>,
-    )>,
+    buttons: Query<
+        (&IconEntity, &TextEntity, &Area<InterfaceContext>),
+        (
+            With<ButtonTag>,
+            Or<(Changed<IconEntity>, Changed<TextEntity>)>,
+        ),
+    >,
+    mut listeners: Query<
+        (
+            &mut Position<InterfaceContext>,
+            &Area<InterfaceContext>,
+            Option<&mut TextScale>,
+            Option<&mut IconScale>,
+            Option<&TextValue>,
+        ),
+        Without<ButtonTag>,
+    >,
 ) {
-    for (icon_entity, text_entity) in buttons.iter() {
+    for (icon_entity, text_entity, button_area) in buttons.iter() {
         if let Some(entity) = icon_entity.0 {
             if let Ok((_, area, _, scale, _)) = listeners.get_mut(entity) {
-                *scale.unwrap() = IconScale::Asymmetrical((area.width as u32, area.height as u32));
+                *scale.unwrap() = IconScale::Symmetrical(area.width.min(area.height) as u32);
             }
         }
         if let Some(entity) = text_entity.0 {
-            if let Ok((pos, area, scale, _, text_value)) = listeners.get_mut(entity) {
-                *scale.unwrap() = font
+            if let Ok((mut pos, area, scale, _, text_value)) = listeners.get_mut(entity) {
+                let new_scale = font
                     .text_section_descriptor(
                         *pos,
                         TextSectionDescriptorKnown::WidthAndHeight(*area),
                         text_value.unwrap().0.len() as u32,
                     )
                     .scale;
+                *scale.unwrap() = new_scale;
+                let dims = font.character_dimensions(new_scale.px());
+                let expected_height = button_area.height * Button::TEXT_HEIGHT_FACTOR;
+                if dims.height < expected_height {
+                    let diff = expected_height - dims.height;
+                    let diff = diff / 2f32;
+                    pos.y += diff;
+                }
             }
         }
     }
