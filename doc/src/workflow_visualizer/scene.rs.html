@@ -74,8 +74,8 @@
     <span class="kw">pub fn </span>add_associated(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: Key, entity: Entity) {
         <span class="self">self</span>.associations.insert(key, entity);
     }
-    <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Key) -&gt; Entity {
-        <span class="kw-2">*</span><span class="self">self</span>.associations.get(<span class="kw-2">&amp;</span>key).expect(<span class="string">&quot;scene::get&quot;</span>)
+    <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Key) -&gt; <span class="prelude-ty">Option</span>&lt;Entity&gt; {
+        <span class="self">self</span>.associations.get(<span class="kw-2">&amp;</span>key).copied()
     }
     <span class="kw">pub fn </span>enable_all(<span class="kw-2">&amp;</span><span class="self">self</span>, cmd: <span class="kw-2">&amp;mut </span>Commands) {
         <span class="kw">for </span>entity <span class="kw">in </span><span class="self">self</span>.entities.iter() {

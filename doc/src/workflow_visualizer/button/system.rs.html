@@ -350,6 +350,16 @@
 <a href="#350" id="350">350</a>
 <a href="#351" id="351">351</a>
 <a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
@@ -520,6 +530,16 @@
             <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>pos, area, <span class="kw">_</span>, scale, <span class="kw">_</span>)) = listeners.get_mut(entity) {
                 <span class="kw">let </span>dim = area.width.min(area.height) <span class="kw">as </span>u32;
                 <span class="kw-2">*</span>scale.unwrap() = IconScale::Symmetrical(dim);
+                <span class="kw">if </span>text_entity.<span class="number">0</span>.is_none() {
+                    <span class="kw">let </span>center_x = pos.x + (dim / <span class="number">2u32</span>) <span class="kw">as </span>f32;
+                    <span class="kw">let </span>button_center_x = button_pos.x + button_area.width / <span class="number">2f32</span>;
+                    <span class="kw">let </span>diff = (button_center_x - center_x).abs();
+                    <span class="kw">if </span>button_center_x &gt; center_x {
+                        pos.x += diff;
+                    } <span class="kw">else </span>{
+                        pos.x -= diff;
+                    }
+                }
                 <span class="kw">let </span>center_y = pos.y + (dim / <span class="number">2u32</span>) <span class="kw">as </span>f32;
                 <span class="kw">let </span>button_center_y = button_pos.y + button_area.height / <span class="number">2f32</span>;
                 <span class="kw">let </span>diff = (button_center_y - center_y).abs();
