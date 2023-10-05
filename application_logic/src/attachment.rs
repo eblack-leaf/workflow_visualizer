@@ -13,8 +13,8 @@ impl Attach for EntryAttachment {
             Button::new(
                 ButtonType::Press,
                 5,
-                Color::GREY,
-                Color::RED_ORANGE_DARK,
+                Color::OFF_BLACK,
+                Color::OFF_WHITE,
                 ButtonText::some(TextValue("hello".to_string())),
                 ButtonIcon::some(0.into()),
                 ButtonBorder::None,
