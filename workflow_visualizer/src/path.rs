@@ -1,6 +1,7 @@
 use bevy_ecs::prelude::Component;
 
-use crate::{GridLocation, InterfaceContext, Position};
+use crate::snap_grid::GridLocation;
+use crate::{InterfaceContext, Position};
 
 /// Collection of specific points rendered from a PathView
 #[derive(Component, Clone)]

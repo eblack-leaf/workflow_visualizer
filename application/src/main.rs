@@ -39,7 +39,7 @@ fn main() {
     let runner = Runner::new().with_attachment::<EntryAttachment>();
     #[cfg(not(target_family = "wasm"))]
     runner
-        .with_desktop_dimensions((400, 600))
+        .with_desktop_dimensions((360, 800))
         .native_run::<Engen>(visualizer);
     #[cfg(target_family = "wasm")]
     {

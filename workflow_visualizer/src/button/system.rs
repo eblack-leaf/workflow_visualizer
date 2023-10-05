@@ -7,9 +7,9 @@ use crate::button::{ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntit
 use crate::icon::Icon;
 use crate::snap_grid::{FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView};
 use crate::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, Button, ButtonTag, ButtonType, Color,
-    IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text,
-    TextScale, TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color, IconScale,
+    InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text, TextScale,
+    TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -109,30 +109,30 @@ pub(crate) fn place(
         if icon_entity.0.is_some() && text_entity.0.is_some() {
             let icon_placement = FloatPlacementDescriptor::ViewDesc(FloatView::new(
                 FloatRange::new(0.05.into(), 0.3.into()),
-                FloatRange::new(0.2.into(), 0.8.into()),
+                FloatRange::new(0.25.into(), 0.8.into()),
             ));
             placer.add(icon_entity.0.unwrap(), icon_placement);
             placer.add(
                 text_entity.0.unwrap(),
                 FloatPlacementDescriptor::ViewDesc(FloatView::new(
-                    FloatRange::new(0.35.into(), Button::TEXT_HEIGHT_FACTOR.into()),
-                    FloatRange::new(0.05.into(), Button::TEXT_HEIGHT_FACTOR.into()),
+                    FloatRange::new(0.35.into(), 0.95.into()),
+                    FloatRange::new(0.15.into(), 0.85.into()),
                 )),
             );
         } else if icon_entity.0.is_some() && text_entity.0.is_none() {
             placer.add(
                 icon_entity.0.unwrap(),
                 FloatPlacementDescriptor::ViewDesc(FloatView::new(
-                    FloatRange::new(0.1.into(), 0.9.into()),
-                    FloatRange::new(0.1.into(), 0.9.into()),
+                    FloatRange::new(0.2.into(), 0.8.into()),
+                    FloatRange::new(0.2.into(), 0.8.into()),
                 )),
             );
         } else if text_entity.0.is_some() && icon_entity.0.is_none() {
             placer.add(
                 text_entity.0.unwrap(),
                 FloatPlacementDescriptor::ViewDesc(FloatView::new(
-                    FloatRange::new(0.05.into(), Button::TEXT_HEIGHT_FACTOR.into()),
-                    FloatRange::new(0.05.into(), Button::TEXT_HEIGHT_FACTOR.into()),
+                    FloatRange::new(0.05.into(), 0.95.into()),
+                    FloatRange::new(0.15.into(), 0.85.into()),
                 )),
             );
         }
@@ -141,7 +141,12 @@ pub(crate) fn place(
 pub(crate) fn scale_change(
     font: Res<MonoSpacedFont>,
     buttons: Query<
-        (&IconEntity, &TextEntity, &Area<InterfaceContext>),
+        (
+            &IconEntity,
+            &TextEntity,
+            &Position<InterfaceContext>,
+            &Area<InterfaceContext>,
+        ),
         (
             With<ButtonTag>,
             Or<(Changed<IconEntity>, Changed<TextEntity>)>,
@@ -158,10 +163,19 @@ pub(crate) fn scale_change(
         Without<ButtonTag>,
     >,
 ) {
-    for (icon_entity, text_entity, button_area) in buttons.iter() {
+    for (icon_entity, text_entity, button_pos, button_area) in buttons.iter() {
         if let Some(entity) = icon_entity.0 {
-            if let Ok((_, area, _, scale, _)) = listeners.get_mut(entity) {
-                *scale.unwrap() = IconScale::Symmetrical(area.width.min(area.height) as u32);
+            if let Ok((mut pos, area, _, scale, _)) = listeners.get_mut(entity) {
+                let dim = area.width.min(area.height) as u32;
+                *scale.unwrap() = IconScale::Symmetrical(dim);
+                let center_y = pos.y + (dim / 2u32) as f32;
+                let button_center_y = button_pos.y + button_area.height / 2f32;
+                let diff = (button_center_y - center_y).abs();
+                if button_center_y > center_y {
+                    pos.y += diff;
+                } else if center_y > button_center_y {
+                    pos.y -= diff;
+                }
             }
         }
         if let Some(entity) = text_entity.0 {
@@ -174,11 +188,14 @@ pub(crate) fn scale_change(
                     )
                     .scale;
                 *scale.unwrap() = new_scale;
+                // TODO integrate this into text_section_descriptor to get correct text for bounds
+                // usage with pos.y = text_section.top(); from font.text_section_descriptor
                 let dims = font.character_dimensions(new_scale.px());
-                let expected_height = button_area.height * Button::TEXT_HEIGHT_FACTOR;
-                if dims.height < expected_height {
-                    let diff = expected_height - dims.height;
-                    let diff = diff / 2f32;
+                let expected = button_area.height * 0.75;
+                let actual = dims.height;
+                if actual < expected {
+                    let mut diff = expected - actual;
+                    diff /= 2f32;
                     pos.y += diff;
                 }
             }

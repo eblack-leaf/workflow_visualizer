@@ -78,21 +78,21 @@ pub(crate) fn place(
             .iter()
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
-        for (_key, glyph_position) in placement.0.iter_mut() {
-            let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
-                && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
-            {
-                8.5f32
-            } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
-                11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
-            } else {
-                0f32
-            };
-            if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE {
-                let factor = text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32;
-                glyph_position.y -= base * factor;
-            }
-        }
+        // for (_key, glyph_position) in placement.0.iter_mut() {
+        //     let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
+        //         && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
+        //     {
+        //         8.5f32
+        //     } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
+        //         11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
+        //     } else {
+        //         0f32
+        //     };
+        //     if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE {
+        //         let factor = text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32;
+        //         glyph_position.y -= base * factor;
+        //     }
+        // }
     }
 }
 pub(crate) fn letter_differential(
@@ -192,6 +192,7 @@ pub(crate) fn filter(
             grid_placement.0 = HashMap::new();
             let mut filter_queue = HashSet::new();
             let position = pos.to_device(scale_factor.factor());
+            // let position = Position::new(position.x.floor(), position.y.floor());
             let v_sec = v_sec.to_device(scale_factor.factor());
             for (key, glyph_pos) in placement.0.iter() {
                 if glyph_pos.parent.is_ascii_control() {
@@ -224,15 +225,16 @@ pub(crate) fn filter(
     }
 }
 pub(crate) fn scale_change(
-    mut text_query: Query<(&mut TextLetterDimensions, &TextScale), Changed<TextScale>>,
+    mut text_query: Query<(&mut TextLetterDimensions, &mut TextScale), Changed<TextScale>>,
     scale_factor: Res<ScaleFactor>,
     fonts: Res<MonoSpacedFont>,
 ) {
-    for (mut text_letter_dimensions, text_scale) in text_query.iter_mut() {
+    for (mut text_letter_dimensions, mut text_scale) in text_query.iter_mut() {
+        text_scale.0 = (text_scale.0 as f32 * scale_factor.factor()) as u32;
         let letter_dimensions = fonts.character_dimensions(text_scale.px());
-        let area = Area::<InterfaceContext>::new(letter_dimensions.width, letter_dimensions.height)
-            .to_device(scale_factor.factor());
-        *text_letter_dimensions = TextLetterDimensions(area);
+        let letter_dimensions =
+            Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
+        *text_letter_dimensions = TextLetterDimensions(letter_dimensions);
     }
 }
 pub(crate) fn manage(
@@ -434,10 +436,10 @@ pub(crate) fn render_group_differences(
             draw_section_resize_needed = true;
         }
         if let Some(position) = difference.position {
-            render_group
-                .position_write
-                .write
-                .replace(position.to_device(scale_factor.factor()));
+            let scaled = position.to_device(scale_factor.factor());
+            // TODO without .floor() here glyph positioning is not on pixel boundary and skews px placement
+            let scaled = Position::new(scaled.x.floor(), scaled.y.floor());
+            render_group.position_write.write.replace(scaled);
             draw_section_resize_needed = true;
         }
         if let Some(layer) = difference.layer {
@@ -451,9 +453,12 @@ pub(crate) fn render_group_differences(
         }
         for (key, glyph_position) in difference.added.iter() {
             let index = render_group.indexer.next(*key);
+            let glyph_position_raw =
+                Position::<DeviceContext>::new(glyph_position.x.floor(), glyph_position.y.floor())
+                    .as_raw();
             render_group
                 .glyph_positions
-                .queue_write(index, glyph_position.as_raw());
+                .queue_write(index, glyph_position_raw);
             render_group
                 .null_bits
                 .queue_write(index, NullBit::not_null());
@@ -472,9 +477,12 @@ pub(crate) fn render_group_differences(
         }
         for (key, glyph_position) in difference.updated.iter() {
             let index = render_group.indexer.get_index(*key).unwrap();
+            let glyph_position_raw =
+                Position::<DeviceContext>::new(glyph_position.x.floor(), glyph_position.y.floor())
+                    .as_raw();
             render_group
                 .glyph_positions
-                .queue_write(index, glyph_position.as_raw());
+                .queue_write(index, glyph_position_raw);
         }
         for (key, glyph) in difference.glyph_add.iter() {
             render_group.keyed_glyph_ids.ids.insert(*key, glyph.id);

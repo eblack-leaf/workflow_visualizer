@@ -73,7 +73,6 @@ pub(crate) struct IconEntity(pub(crate) Option<Entity>);
 pub(crate) struct TextEntity(pub(crate) Option<Entity>);
 
 impl Button {
-    pub const TEXT_HEIGHT_FACTOR: f32 = 0.95;
     pub fn new<L: Into<Layer>, C: Into<Color>>(
         button_type: ButtonType,
         layer: L,
