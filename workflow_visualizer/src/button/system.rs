@@ -199,7 +199,7 @@ pub(crate) fn scale_change(
                     .scale;
                 *scale.unwrap() = new_scale;
                 // TODO integrate this into text_section_descriptor to get correct text for bounds
-                // usage with pos.y = text_section.top(); from font.text_section_descriptor
+                // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 let dims = font.character_dimensions(new_scale.px());
                 let expected = button_area.height * 0.75;
                 let actual = dims.height;
