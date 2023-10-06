@@ -15,7 +15,7 @@ pub use marker::GridPoint;
 pub use marker::{GridBias, GridLocation, GridMarker, GridUnit};
 pub use marker::{GridDirection, GridRange, GridView};
 pub use responsive::{
-    GridPlacer, ResponsiveGridLocation, ResponsiveGridPlacementDescriptor, ResponsiveGridPoint,
+    ResponsiveGridLocation, ResponsiveGridPoint,
     ResponsiveGridRange, ResponsiveGridView,
 };
 
@@ -68,7 +68,8 @@ pub struct Row {
 
 impl Row {
     pub fn new(height: CoordinateUnit, breakpoint: Breakpoint) -> Self {
-        let actual = height.min(breakpoint.value());
+        let diff = (height - breakpoint.value()).max(0f32);
+        let actual = height.min(breakpoint.value()) + diff * 0.2f32;
         Self {
             content: (actual - breakpoint.gutter() * (breakpoint.segments() + 1) as f32)
                 / breakpoint.segments() as f32,
@@ -152,13 +153,13 @@ impl SnapGrid {
         &self,
         view: ResponsiveGridView,
     ) -> Section<InterfaceContext> {
-        self.view_coordinates(view.current(self.breakpoint, self.breakpoint))
+        self.view_coordinates(view.current(self.breakpoint))
     }
     pub fn responsive_point_coordinates(
         &self,
         point: ResponsiveGridPoint,
     ) -> Position<InterfaceContext> {
-        self.point_coordinates(point.current(self.breakpoint, self.breakpoint))
+        self.point_coordinates(point.current(self.breakpoint))
     }
     pub fn responsive_range_coordinates(
         &self,

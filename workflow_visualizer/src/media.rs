@@ -33,7 +33,7 @@ impl Media {
         }
     }
     #[allow(unused)]
-    pub fn video(src: &str, ty: &str) {
+    pub fn web_video(src: &str, ty: &str) {
         #[cfg(target_family = "wasm")]
         {
             let element_html = format!(
@@ -45,13 +45,15 @@ impl Media {
             Self::media_overlay(element_html);
             return;
         }
+    }
+    pub fn native_video(src: &str) {
         #[cfg(not(target_family = "wasm"))]
         {
             open::that(src);
         }
     }
     #[allow(unused)]
-    pub fn document(src: &str) {
+    pub fn web_document(src: &str) {
         #[cfg(target_family = "wasm")]
         {
             let element_html = format!(
@@ -64,6 +66,9 @@ impl Media {
             Self::media_overlay(element_html);
             return;
         }
+    }
+    #[allow(unused)]
+    pub fn native_document(src: &str) {
         #[cfg(not(target_family = "wasm"))]
         {
             open::that(src);
