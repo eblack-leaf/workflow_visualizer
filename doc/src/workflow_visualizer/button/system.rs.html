@@ -561,7 +561,7 @@
                     .scale;
                 <span class="kw-2">*</span>scale.unwrap() = new_scale;
                 <span class="comment">// TODO integrate this into text_section_descriptor to get correct text for bounds
-                // usage with pos.y = text_section.top(); from font.text_section_descriptor
+                // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 </span><span class="kw">let </span>dims = font.character_dimensions(new_scale.px());
                 <span class="kw">let </span>expected = button_area.height * <span class="number">0.75</span>;
                 <span class="kw">let </span>actual = dims.height;
