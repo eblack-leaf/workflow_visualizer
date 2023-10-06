@@ -255,6 +255,7 @@
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     Area, Attach, CoordinateUnit, DelayedBundle, InterfaceContext, Position, QueuedAnimation,
     Section, SyncPoint, TimeDelta, ViewportHandle, Visualizer,
@@ -272,7 +273,7 @@
 <span class="kw">pub use </span>marker::{GridBias, GridLocation, GridMarker, GridUnit};
 <span class="kw">pub use </span>marker::{GridDirection, GridRange, GridView};
 <span class="kw">pub use </span>responsive::{
-    GridPlacer, ResponsiveGridLocation, ResponsiveGridPlacementDescriptor, ResponsiveGridPoint,
+    ResponsiveGridLocation, ResponsiveGridPoint,
     ResponsiveGridRange, ResponsiveGridView,
 };
 
@@ -325,7 +326,8 @@
 
 <span class="kw">impl </span>Row {
     <span class="kw">pub fn </span>new(height: CoordinateUnit, breakpoint: Breakpoint) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>actual = height.min(breakpoint.value());
+        <span class="kw">let </span>diff = (height - breakpoint.value()).max(<span class="number">0f32</span>);
+        <span class="kw">let </span>actual = height.min(breakpoint.value()) + diff * <span class="number">0.2f32</span>;
         <span class="self">Self </span>{
             content: (actual - breakpoint.gutter() * (breakpoint.segments() + <span class="number">1</span>) <span class="kw">as </span>f32)
                 / breakpoint.segments() <span class="kw">as </span>f32,
@@ -409,13 +411,13 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         view: ResponsiveGridView,
     ) -&gt; Section&lt;InterfaceContext&gt; {
-        <span class="self">self</span>.view_coordinates(view.current(<span class="self">self</span>.breakpoint, <span class="self">self</span>.breakpoint))
+        <span class="self">self</span>.view_coordinates(view.current(<span class="self">self</span>.breakpoint))
     }
     <span class="kw">pub fn </span>responsive_point_coordinates(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         point: ResponsiveGridPoint,
     ) -&gt; Position&lt;InterfaceContext&gt; {
-        <span class="self">self</span>.point_coordinates(point.current(<span class="self">self</span>.breakpoint, <span class="self">self</span>.breakpoint))
+        <span class="self">self</span>.point_coordinates(point.current(<span class="self">self</span>.breakpoint))
     }
     <span class="kw">pub fn </span>responsive_range_coordinates(
         <span class="kw-2">&amp;</span><span class="self">self</span>,

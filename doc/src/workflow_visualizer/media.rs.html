@@ -129,6 +129,11 @@
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
 </span><span class="kw">use </span>wasm_bindgen::prelude::Closure;
 <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
@@ -164,7 +169,7 @@
         }
     }
     <span class="attr">#[allow(unused)]
-    </span><span class="kw">pub fn </span>video(src: <span class="kw-2">&amp;</span>str, ty: <span class="kw-2">&amp;</span>str) {
+    </span><span class="kw">pub fn </span>web_video(src: <span class="kw-2">&amp;</span>str, ty: <span class="kw-2">&amp;</span>str) {
         <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
         </span>{
             <span class="kw">let </span>element_html = <span class="macro">format!</span>(
@@ -176,13 +181,15 @@
             <span class="self">Self</span>::media_overlay(element_html);
             <span class="kw">return</span>;
         }
+    }
+    <span class="kw">pub fn </span>native_video(src: <span class="kw-2">&amp;</span>str) {
         <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
         </span>{
             open::that(src);
         }
     }
     <span class="attr">#[allow(unused)]
-    </span><span class="kw">pub fn </span>document(src: <span class="kw-2">&amp;</span>str) {
+    </span><span class="kw">pub fn </span>web_document(src: <span class="kw-2">&amp;</span>str) {
         <span class="attr">#[cfg(target_family = <span class="string">&quot;wasm&quot;</span>)]
         </span>{
             <span class="kw">let </span>element_html = <span class="macro">format!</span>(
@@ -195,6 +202,9 @@
             <span class="self">Self</span>::media_overlay(element_html);
             <span class="kw">return</span>;
         }
+    }
+    <span class="attr">#[allow(unused)]
+    </span><span class="kw">pub fn </span>native_document(src: <span class="kw-2">&amp;</span>str) {
         <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
         </span>{
             open::that(src);

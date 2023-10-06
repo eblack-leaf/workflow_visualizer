@@ -98,20 +98,6 @@
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::snap_grid::Breakpoint;
 <span class="kw">use crate</span>::{GridLocation, GridPoint, GridRange, GridView};
 <span class="kw">use </span>bevy_ecs::component::Component;
@@ -123,6 +109,7 @@
     <span class="kw">pub </span>mobile: GridLocation,
     <span class="kw">pub </span>tablet: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
     <span class="kw">pub </span>desktop: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
+    <span class="kw">pub </span>workstation: <span class="prelude-ty">Option</span>&lt;GridLocation&gt;,
 }
 
 <span class="attr">#[derive(Component, Copy, Clone)]
@@ -135,9 +122,9 @@
     <span class="kw">pub fn </span>new(x: ResponsiveGridLocation, y: ResponsiveGridLocation) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ x, y }
     }
-    <span class="kw">pub fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>, horizontal: Breakpoint, vertical: Breakpoint) -&gt; GridPoint {
-        <span class="kw">let </span>x = <span class="self">self</span>.x.current(horizontal);
-        <span class="kw">let </span>y = <span class="self">self</span>.y.current(vertical);
+    <span class="kw">pub fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>, breakpoint: Breakpoint) -&gt; GridPoint {
+        <span class="kw">let </span>x = <span class="self">self</span>.x.current(breakpoint);
+        <span class="kw">let </span>y = <span class="self">self</span>.y.current(breakpoint);
         GridPoint::new(x, y)
     }
 }
@@ -148,6 +135,7 @@
             mobile,
             tablet: <span class="prelude-val">None</span>,
             desktop: <span class="prelude-val">None</span>,
+            workstation: <span class="prelude-val">None</span>,
         }
     }
     <span class="kw">pub fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>, breakpoint: Breakpoint) -&gt; GridLocation {
@@ -155,6 +143,7 @@
             Breakpoint::Mobile =&gt; <span class="self">self</span>.mobile,
             Breakpoint::Tablet =&gt; <span class="self">self</span>.tablet.unwrap_or(<span class="self">self</span>.mobile),
             Breakpoint::Desktop =&gt; <span class="self">self</span>.desktop.unwrap_or(<span class="self">self</span>.tablet.unwrap_or(<span class="self">self</span>.mobile)),
+            Breakpoint::Workstation =&gt; <span class="self">self</span>.workstation.unwrap_or(<span class="self">self</span>.desktop.unwrap_or(<span class="self">self</span>.tablet.unwrap_or(<span class="self">self</span>.mobile))),
         }
     }
     <span class="kw">pub fn </span>with_tablet(<span class="kw-2">mut </span><span class="self">self</span>, location: GridLocation) -&gt; <span class="self">Self </span>{
@@ -163,6 +152,10 @@
     </span>}
     <span class="kw">pub fn </span>with_desktop(<span class="kw-2">mut </span><span class="self">self</span>, location: GridLocation) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.desktop.replace(location);
+        <span class="self">self
+    </span>}
+    <span class="kw">pub fn </span>with_workstation(<span class="kw-2">mut </span><span class="self">self</span>, location: GridLocation) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.workstation.replace(location);
         <span class="self">self
     </span>}
 }
@@ -192,11 +185,10 @@
     <span class="kw">pub fn </span>current(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         horizontal_breakpoint: Breakpoint,
-        vertical_breakpoint: Breakpoint,
     ) -&gt; GridView {
         GridView::new(
             <span class="self">self</span>.horizontal.current(horizontal_breakpoint),
-            <span class="self">self</span>.vertical.current(vertical_breakpoint),
+            <span class="self">self</span>.vertical.current(horizontal_breakpoint),
         )
     }
     <span class="kw">pub fn </span>new(horizontal: ResponsiveGridRange, vertical: ResponsiveGridRange) -&gt; <span class="self">Self </span>{
@@ -204,26 +196,6 @@
             horizontal,
             vertical,
         }
-    }
-}
-
-<span class="kw">pub enum </span>ResponsiveGridPlacementDescriptor {
-    Location(ResponsiveGridLocation),
-    View(ResponsiveGridView),
-}
-
-<span class="kw">pub struct </span>GridPlacer {
-    <span class="kw">pub </span>placements: HashMap&lt;Entity, ResponsiveGridPlacementDescriptor&gt;,
-}
-
-<span class="kw">impl </span>GridPlacer {
-    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            placements: HashMap::new(),
-        }
-    }
-    <span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _placement: ResponsiveGridPlacementDescriptor) {
-        <span class="macro">todo!</span>()
     }
 }
 </code></pre></div></section></main></body></html>
