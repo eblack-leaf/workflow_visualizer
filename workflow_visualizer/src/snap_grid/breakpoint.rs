@@ -4,8 +4,8 @@ use crate::{CoordinateUnit, SnapGrid};
 #[derive(Copy, Clone)]
 pub enum Breakpoint {
     Mobile = 586,
-    Tablet = 876,
-    Desktop = 1186,
+    Tablet = 926,
+    Desktop = 1340,
 }
 
 impl Breakpoint {
@@ -19,8 +19,8 @@ impl Breakpoint {
     pub fn segments(&self) -> i32 {
         match self {
             Breakpoint::Mobile => 12,
-            Breakpoint::Tablet => 16,
-            Breakpoint::Desktop => 20,
+            Breakpoint::Tablet => 18,
+            Breakpoint::Desktop => 24,
         }
     }
     pub fn value(&self) -> CoordinateUnit {
