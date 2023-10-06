@@ -42,8 +42,8 @@
 #[derive(Copy, Clone)]
 </span><span class="kw">pub enum </span>Breakpoint {
     Mobile = <span class="number">586</span>,
-    Tablet = <span class="number">876</span>,
-    Desktop = <span class="number">1186</span>,
+    Tablet = <span class="number">926</span>,
+    Desktop = <span class="number">1340</span>,
 }
 
 <span class="kw">impl </span>Breakpoint {
@@ -57,8 +57,8 @@
     <span class="kw">pub fn </span>segments(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="kw">match </span><span class="self">self </span>{
             Breakpoint::Mobile =&gt; <span class="number">12</span>,
-            Breakpoint::Tablet =&gt; <span class="number">16</span>,
-            Breakpoint::Desktop =&gt; <span class="number">20</span>,
+            Breakpoint::Tablet =&gt; <span class="number">18</span>,
+            Breakpoint::Desktop =&gt; <span class="number">24</span>,
         }
     }
     <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
