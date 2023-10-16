@@ -112,18 +112,6 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
 </pre></div><pre class="rust"><code><span class="comment">// #![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -157,24 +145,12 @@
 <span class="kw">pub use </span>orientation::{AspectRatio, Orientation};
 <span class="kw">pub use </span>render::{Render, RenderPassHandle, RenderPhase};
 <span class="kw">pub use </span>scene::Scene;
-<span class="kw">pub use </span>snap_grid::FloatArrangement;
-<span class="kw">pub use </span>snap_grid::FloatLocation;
-<span class="kw">pub use </span>snap_grid::FloatPlacementDescriptor;
-<span class="kw">pub use </span>snap_grid::FloatPlacer;
-<span class="kw">pub use </span>snap_grid::FloatRange;
-<span class="kw">pub use </span>snap_grid::FloatView;
-<span class="kw">pub use </span>snap_grid::GridBias;
-<span class="kw">pub use </span>snap_grid::GridDirection;
-<span class="kw">pub use </span>snap_grid::GridLocation;
-<span class="kw">pub use </span>snap_grid::GridMarker;
-<span class="kw">pub use </span>snap_grid::GridPoint;
-<span class="kw">pub use </span>snap_grid::GridRange;
-<span class="kw">pub use </span>snap_grid::GridUnit;
-<span class="kw">pub use </span>snap_grid::GridView;
-<span class="kw">pub use </span>snap_grid::ResponsiveGridLocation;
-<span class="kw">pub use </span>snap_grid::ResponsiveGridPoint;
-<span class="kw">pub use </span>snap_grid::ResponsiveGridRange;
-<span class="kw">pub use </span>snap_grid::ResponsiveGridView;
+<span class="kw">pub use </span>snap_grid::{
+    FloatArrangement, FloatLocation, FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView,
+    GridBias, GridDirection, GridLocation, GridMarker, GridPoint, GridRange, GridUnit, GridView,
+    ResponsiveGridLocation, ResponsiveGridPoint, ResponsiveGridRange, ResponsiveGridView,
+    ResponsiveUnit,
+};
 <span class="kw">pub use </span>viewport::{Viewport, ViewportHandle};
 <span class="kw">pub use </span>visualizer::{Attach, Attachment, Visualizer};
 <span class="kw">pub use </span>wgpu;

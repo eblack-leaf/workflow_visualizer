@@ -46,38 +46,38 @@
 <span class="attr">#[repr(i32)]
 #[derive(Copy, Clone)]
 </span><span class="kw">pub enum </span>Breakpoint {
-    Mobile = <span class="number">600</span>,
-    Tablet = <span class="number">800</span>,
-    Desktop = <span class="number">1000</span>,
-    Workstation = <span class="number">1200</span>,
+    Mobile = <span class="number">650</span>,
+    Tablet = <span class="number">950</span>,
+    Desktop = <span class="number">1250</span>,
+    Workstation = <span class="number">1550</span>,
 }
 
 <span class="kw">impl </span>Breakpoint {
     <span class="kw">pub fn </span>gutter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         <span class="kw">match </span><span class="self">self </span>{
             Breakpoint::Mobile =&gt; SnapGrid::GUTTER_BASE,
-            Breakpoint::Tablet =&gt; SnapGrid::GUTTER_BASE * <span class="number">1.5f32</span>,
-            Breakpoint::Desktop =&gt; SnapGrid::GUTTER_BASE * <span class="number">2f32</span>,
-            Breakpoint::Workstation =&gt; SnapGrid::GUTTER_BASE * <span class="number">3f32</span>,
+            Breakpoint::Tablet =&gt; SnapGrid::GUTTER_BASE * <span class="number">1.25f32</span>,
+            Breakpoint::Desktop =&gt; SnapGrid::GUTTER_BASE * <span class="number">1.75f32</span>,
+            Breakpoint::Workstation =&gt; SnapGrid::GUTTER_BASE * <span class="number">2f32</span>,
         }
     }
     <span class="kw">pub fn </span>segments(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
         <span class="kw">match </span><span class="self">self </span>{
-            Breakpoint::Mobile =&gt; <span class="number">16</span>,
-            Breakpoint::Tablet =&gt; <span class="number">20</span>,
-            Breakpoint::Desktop =&gt; <span class="number">24</span>,
-            Breakpoint::Workstation =&gt; <span class="number">28</span>,
+            Breakpoint::Mobile =&gt; <span class="number">15</span>,
+            Breakpoint::Tablet =&gt; <span class="number">17</span>,
+            Breakpoint::Desktop =&gt; <span class="number">19</span>,
+            Breakpoint::Workstation =&gt; <span class="number">21</span>,
         }
     }
     <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CoordinateUnit {
         (<span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>i32) <span class="kw">as </span>f32
     }
-    <span class="kw">pub fn </span>establish(width: CoordinateUnit) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>width &lt;= <span class="self">Self</span>::Mobile.value() {
+    <span class="kw">pub fn </span>establish(dimension: CoordinateUnit) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>dimension &lt;= <span class="self">Self</span>::Mobile.value() {
             <span class="self">Self</span>::Mobile
-        } <span class="kw">else if </span>width &lt;= <span class="self">Self</span>::Tablet.value() {
+        } <span class="kw">else if </span>dimension &lt;= <span class="self">Self</span>::Tablet.value() {
             <span class="self">Self</span>::Tablet
-        } <span class="kw">else if </span>width &lt;= <span class="self">Self</span>::Desktop.value() {
+        } <span class="kw">else if </span>dimension &lt;= <span class="self">Self</span>::Desktop.value() {
             <span class="self">Self</span>::Desktop
         } <span class="kw">else </span>{
             <span class="self">Self</span>::Workstation

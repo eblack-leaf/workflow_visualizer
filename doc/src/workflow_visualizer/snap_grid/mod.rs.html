@@ -256,6 +256,20 @@
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     Area, Attach, CoordinateUnit, DelayedBundle, InterfaceContext, Position, QueuedAnimation,
     Section, SyncPoint, TimeDelta, ViewportHandle, Visualizer,
@@ -273,8 +287,8 @@
 <span class="kw">pub use </span>marker::{GridBias, GridLocation, GridMarker, GridUnit};
 <span class="kw">pub use </span>marker::{GridDirection, GridRange, GridView};
 <span class="kw">pub use </span>responsive::{
-    ResponsiveGridLocation, ResponsiveGridPoint,
-    ResponsiveGridRange, ResponsiveGridView,
+    ResponsiveGridLocation, ResponsiveGridPoint, ResponsiveGridRange, ResponsiveGridView,
+    ResponsiveUnit,
 };
 
 <span class="kw">mod </span>breakpoint;
@@ -306,8 +320,10 @@
 <span class="attr">#[test]
 #[cfg(test)]
 </span><span class="kw">fn </span>snap_grid_coverage() {
-    <span class="kw">for </span>width <span class="kw">in </span>(<span class="number">375</span>..<span class="number">1400</span>).step_by(<span class="number">8</span>) {
-        <span class="kw">for </span>height <span class="kw">in </span>(<span class="number">375</span>..<span class="number">1400</span>).step_by(<span class="number">8</span>) {
+    <span class="kw">let </span>step: usize = <span class="number">10</span>;
+    <span class="kw">for </span>width <span class="kw">in </span>(<span class="number">375</span>..Breakpoint::Workstation.value() <span class="kw">as </span>u32 + step <span class="kw">as </span>u32 + <span class="number">2</span>).step_by(step) {
+        <span class="kw">for </span>height <span class="kw">in </span>(<span class="number">375</span>..Breakpoint::Workstation.value() <span class="kw">as </span>u32 + step <span class="kw">as </span>u32 + <span class="number">2</span>).step_by(step)
+        {
             <span class="kw">let </span>area = Area::new(width <span class="kw">as </span>f32, height <span class="kw">as </span>f32);
             <span class="kw">let </span>grid = SnapGrid::new(area);
             <span class="macro">println!</span>(
@@ -326,18 +342,30 @@
 
 <span class="kw">impl </span>Row {
     <span class="kw">pub fn </span>new(height: CoordinateUnit, breakpoint: Breakpoint) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>segments = breakpoint.segments() <span class="kw">as </span>f32;
         <span class="kw">let </span>diff = (height - breakpoint.value()).max(<span class="number">0f32</span>);
         <span class="kw">let </span>actual = height.min(breakpoint.value()) + diff * <span class="number">0.2f32</span>;
+        <span class="kw">let </span>content = <span class="self">Self</span>::content_calc(actual, breakpoint.gutter(), segments);
+        <span class="kw">let </span>threshold = breakpoint.gutter() * <span class="number">2f32</span>;
+        <span class="kw">let </span>gutter = <span class="kw">if </span>content &lt; threshold {
+            breakpoint.gutter() / <span class="number">2f32
+        </span>} <span class="kw">else </span>{
+            breakpoint.gutter()
+        };
+        <span class="kw">let </span>content = <span class="self">Self</span>::content_calc(actual, gutter, segments);
         <span class="self">Self </span>{
-            content: (actual - breakpoint.gutter() * (breakpoint.segments() + <span class="number">1</span>) <span class="kw">as </span>f32)
-                / breakpoint.segments() <span class="kw">as </span>f32,
-            gutter: breakpoint.gutter(),
+            content,
+            gutter,
             extension: <span class="kw">if </span>height &gt; actual {
                 <span class="prelude-val">Some</span>(height - actual)
             } <span class="kw">else </span>{
                 <span class="prelude-val">None
             </span>},
         }
+    }
+
+    <span class="kw">fn </span>content_calc(actual: f32, gutter: f32, segments: f32) -&gt; f32 {
+        (actual - gutter * (segments + <span class="number">1f32</span>)) / segments
     }
 }
 <span class="doccomment">/// Macro placement tool segmented into fixed number of columns/rows.
