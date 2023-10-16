@@ -3,38 +3,38 @@ use crate::{CoordinateUnit, SnapGrid};
 #[repr(i32)]
 #[derive(Copy, Clone)]
 pub enum Breakpoint {
-    Mobile = 600,
-    Tablet = 800,
-    Desktop = 1000,
-    Workstation = 1200,
+    Mobile = 650,
+    Tablet = 950,
+    Desktop = 1250,
+    Workstation = 1550,
 }
 
 impl Breakpoint {
     pub fn gutter(&self) -> CoordinateUnit {
         match self {
             Breakpoint::Mobile => SnapGrid::GUTTER_BASE,
-            Breakpoint::Tablet => SnapGrid::GUTTER_BASE * 1.5f32,
-            Breakpoint::Desktop => SnapGrid::GUTTER_BASE * 2f32,
-            Breakpoint::Workstation => SnapGrid::GUTTER_BASE * 3f32,
+            Breakpoint::Tablet => SnapGrid::GUTTER_BASE * 1.25f32,
+            Breakpoint::Desktop => SnapGrid::GUTTER_BASE * 1.75f32,
+            Breakpoint::Workstation => SnapGrid::GUTTER_BASE * 2f32,
         }
     }
     pub fn segments(&self) -> i32 {
         match self {
-            Breakpoint::Mobile => 16,
-            Breakpoint::Tablet => 20,
-            Breakpoint::Desktop => 24,
-            Breakpoint::Workstation => 28,
+            Breakpoint::Mobile => 15,
+            Breakpoint::Tablet => 17,
+            Breakpoint::Desktop => 19,
+            Breakpoint::Workstation => 20,
         }
     }
     pub fn value(&self) -> CoordinateUnit {
         (*self as i32) as f32
     }
-    pub fn establish(width: CoordinateUnit) -> Self {
-        if width <= Self::Mobile.value() {
+    pub fn establish(dimension: CoordinateUnit) -> Self {
+        if dimension <= Self::Mobile.value() {
             Self::Mobile
-        } else if width <= Self::Tablet.value() {
+        } else if dimension <= Self::Tablet.value() {
             Self::Tablet
-        } else if width <= Self::Desktop.value() {
+        } else if dimension <= Self::Desktop.value() {
             Self::Desktop
         } else {
             Self::Workstation

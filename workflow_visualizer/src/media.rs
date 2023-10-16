@@ -49,7 +49,7 @@ impl Media {
     pub fn native_video(src: &str) {
         #[cfg(not(target_family = "wasm"))]
         {
-            open::that(src);
+            let _ = open::that(src);
         }
     }
     #[allow(unused)]

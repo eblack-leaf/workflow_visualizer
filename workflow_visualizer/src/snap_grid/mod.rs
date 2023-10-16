@@ -15,8 +15,8 @@ pub use marker::GridPoint;
 pub use marker::{GridBias, GridLocation, GridMarker, GridUnit};
 pub use marker::{GridDirection, GridRange, GridView};
 pub use responsive::{
-    ResponsiveGridLocation, ResponsiveGridPoint,
-    ResponsiveGridRange, ResponsiveGridView,
+    ResponsiveGridLocation, ResponsiveGridPoint, ResponsiveGridRange, ResponsiveGridView,
+    ResponsiveUnit,
 };
 
 mod breakpoint;
@@ -48,8 +48,10 @@ impl Column {
 #[test]
 #[cfg(test)]
 fn snap_grid_coverage() {
-    for width in (375..1400).step_by(8) {
-        for height in (375..1400).step_by(8) {
+    let step: usize = 10;
+    for width in (375..Breakpoint::Workstation.value() as u32 + step as u32 + 2).step_by(step) {
+        for height in (375..Breakpoint::Workstation.value() as u32 + step as u32 + 2).step_by(step)
+        {
             let area = Area::new(width as f32, height as f32);
             let grid = SnapGrid::new(area);
             println!(
@@ -68,18 +70,30 @@ pub struct Row {
 
 impl Row {
     pub fn new(height: CoordinateUnit, breakpoint: Breakpoint) -> Self {
+        let segments = breakpoint.segments() as f32;
         let diff = (height - breakpoint.value()).max(0f32);
         let actual = height.min(breakpoint.value()) + diff * 0.2f32;
+        let content = Self::content_calc(actual, breakpoint.gutter(), segments);
+        let threshold = breakpoint.gutter() * 2f32;
+        let gutter = if content < threshold {
+            breakpoint.gutter() / 2f32
+        } else {
+            breakpoint.gutter()
+        };
+        let content = Self::content_calc(actual, gutter, segments);
         Self {
-            content: (actual - breakpoint.gutter() * (breakpoint.segments() + 1) as f32)
-                / breakpoint.segments() as f32,
-            gutter: breakpoint.gutter(),
+            content,
+            gutter,
             extension: if height > actual {
                 Some(height - actual)
             } else {
                 None
             },
         }
+    }
+
+    fn content_calc(actual: f32, gutter: f32, segments: f32) -> f32 {
+        (actual - gutter * (segments + 1f32)) / segments
     }
 }
 /// Macro placement tool segmented into fixed number of columns/rows.

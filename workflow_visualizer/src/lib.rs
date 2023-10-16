@@ -31,24 +31,12 @@ pub use job::{Exit, Idle, JobSyncPoint, Tag};
 pub use orientation::{AspectRatio, Orientation};
 pub use render::{Render, RenderPassHandle, RenderPhase};
 pub use scene::Scene;
-pub use snap_grid::FloatArrangement;
-pub use snap_grid::FloatLocation;
-pub use snap_grid::FloatPlacementDescriptor;
-pub use snap_grid::FloatPlacer;
-pub use snap_grid::FloatRange;
-pub use snap_grid::FloatView;
-pub use snap_grid::GridBias;
-pub use snap_grid::GridDirection;
-pub use snap_grid::GridLocation;
-pub use snap_grid::GridMarker;
-pub use snap_grid::GridPoint;
-pub use snap_grid::GridRange;
-pub use snap_grid::GridUnit;
-pub use snap_grid::GridView;
-pub use snap_grid::ResponsiveGridLocation;
-pub use snap_grid::ResponsiveGridPoint;
-pub use snap_grid::ResponsiveGridRange;
-pub use snap_grid::ResponsiveGridView;
+pub use snap_grid::{
+    FloatArrangement, FloatLocation, FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView,
+    GridBias, GridDirection, GridLocation, GridMarker, GridPoint, GridRange, GridUnit, GridView,
+    ResponsiveGridLocation, ResponsiveGridPoint, ResponsiveGridRange, ResponsiveGridView,
+    ResponsiveUnit,
+};
 pub use viewport::{Viewport, ViewportHandle};
 pub use visualizer::{Attach, Attachment, Visualizer};
 pub use wgpu;

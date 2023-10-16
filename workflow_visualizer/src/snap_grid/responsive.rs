@@ -1,17 +1,46 @@
 use crate::snap_grid::Breakpoint;
 use crate::{GridLocation, GridPoint, GridRange, GridView};
 use bevy_ecs::component::Component;
-use bevy_ecs::entity::Entity;
-use std::collections::HashMap;
-
 #[derive(Copy, Clone)]
-pub struct ResponsiveGridLocation {
-    pub mobile: GridLocation,
-    pub tablet: Option<GridLocation>,
-    pub desktop: Option<GridLocation>,
-    pub workstation: Option<GridLocation>,
+pub struct ResponsiveUnit<T: Copy + Clone> {
+    pub mobile: T,
+    pub tablet: Option<T>,
+    pub desktop: Option<T>,
+    pub workstation: Option<T>,
 }
-
+impl<T: Copy + Clone> ResponsiveUnit<T> {
+    pub fn new(mobile: T) -> Self {
+        Self {
+            mobile,
+            tablet: None,
+            desktop: None,
+            workstation: None,
+        }
+    }
+    pub fn current(&self, breakpoint: Breakpoint) -> T {
+        match breakpoint {
+            Breakpoint::Mobile => self.mobile,
+            Breakpoint::Tablet => self.tablet.unwrap_or(self.mobile),
+            Breakpoint::Desktop => self.desktop.unwrap_or(self.tablet.unwrap_or(self.mobile)),
+            Breakpoint::Workstation => self
+                .workstation
+                .unwrap_or(self.desktop.unwrap_or(self.tablet.unwrap_or(self.mobile))),
+        }
+    }
+    pub fn with_tablet(mut self, unit: T) -> Self {
+        self.tablet.replace(unit);
+        self
+    }
+    pub fn with_desktop(mut self, unit: T) -> Self {
+        self.desktop.replace(unit);
+        self
+    }
+    pub fn with_workstation(mut self, unit: T) -> Self {
+        self.workstation.replace(unit);
+        self
+    }
+}
+pub type ResponsiveGridLocation = ResponsiveUnit<GridLocation>;
 #[derive(Component, Copy, Clone)]
 pub struct ResponsiveGridPoint {
     pub x: ResponsiveGridLocation,
@@ -26,37 +55,6 @@ impl ResponsiveGridPoint {
         let x = self.x.current(breakpoint);
         let y = self.y.current(breakpoint);
         GridPoint::new(x, y)
-    }
-}
-
-impl ResponsiveGridLocation {
-    pub fn new(mobile: GridLocation) -> Self {
-        Self {
-            mobile,
-            tablet: None,
-            desktop: None,
-            workstation: None,
-        }
-    }
-    pub fn current(&self, breakpoint: Breakpoint) -> GridLocation {
-        match breakpoint {
-            Breakpoint::Mobile => self.mobile,
-            Breakpoint::Tablet => self.tablet.unwrap_or(self.mobile),
-            Breakpoint::Desktop => self.desktop.unwrap_or(self.tablet.unwrap_or(self.mobile)),
-            Breakpoint::Workstation => self.workstation.unwrap_or(self.desktop.unwrap_or(self.tablet.unwrap_or(self.mobile))),
-        }
-    }
-    pub fn with_tablet(mut self, location: GridLocation) -> Self {
-        self.tablet.replace(location);
-        self
-    }
-    pub fn with_desktop(mut self, location: GridLocation) -> Self {
-        self.desktop.replace(location);
-        self
-    }
-    pub fn with_workstation(mut self, location: GridLocation) -> Self {
-        self.workstation.replace(location);
-        self
     }
 }
 
@@ -82,10 +80,7 @@ pub struct ResponsiveGridView {
 }
 
 impl ResponsiveGridView {
-    pub fn current(
-        &self,
-        horizontal_breakpoint: Breakpoint,
-    ) -> GridView {
+    pub fn current(&self, horizontal_breakpoint: Breakpoint) -> GridView {
         GridView::new(
             self.horizontal.current(horizontal_breakpoint),
             self.vertical.current(horizontal_breakpoint),
