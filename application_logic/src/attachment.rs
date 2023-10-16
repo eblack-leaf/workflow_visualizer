@@ -24,9 +24,9 @@ impl Attach for EntryAttachment {
                     ResponsiveGridLocation::new(1.near())
                         .with_tablet(1.near())
                         .with_desktop(1.near()),
-                    ResponsiveGridLocation::new(3.far())
+                    ResponsiveGridLocation::new(2.far())
                         .with_tablet(3.far())
-                        .with_desktop(9.far()),
+                        .with_desktop(4.far()),
                 ),
                 ResponsiveGridRange::new(
                     ResponsiveGridLocation::new(1.near())
@@ -34,7 +34,7 @@ impl Attach for EntryAttachment {
                         .with_desktop(1.near()),
                     ResponsiveGridLocation::new(1.far())
                         .with_tablet(2.far())
-                        .with_desktop(6.far()),
+                        .with_desktop(3.far()),
                 ),
             )),
         );
