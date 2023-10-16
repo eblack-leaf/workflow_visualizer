@@ -23,7 +23,7 @@ impl Breakpoint {
             Breakpoint::Mobile => 15,
             Breakpoint::Tablet => 17,
             Breakpoint::Desktop => 19,
-            Breakpoint::Workstation => 20,
+            Breakpoint::Workstation => 21,
         }
     }
     pub fn value(&self) -> CoordinateUnit {
