@@ -27,9 +27,12 @@ impl Clipboard {
         }
     }
     pub fn write(&mut self, data: String) {
+        if self.handle.is_none() {
+            return;
+        }
         #[cfg(target_family = "wasm")]
-        if let Some(h) = self.handle.as_ref() {
-            h.write_text(data.as_str());
+        if let Some(h) = web_sys::window().expect("window").navigator().clipboard() {
+            let promise = h.write_text(data.as_str());
         }
         #[cfg(not(target_family = "wasm"))]
         if let Some(h) = self.handle.as_mut() {
