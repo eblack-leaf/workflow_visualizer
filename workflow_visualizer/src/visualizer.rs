@@ -13,6 +13,7 @@ use winit::window::Window;
 use crate::animate::{end_animations, pull_from_queue, start_animations, update_animations};
 use crate::bundling::{despawn, spawn_delayed_bundle};
 use crate::button::ButtonAttachment;
+use crate::clipboard::ClipboardAttachment;
 use crate::color::ColorAttachment;
 use crate::coord::CoordinateAttachment;
 use crate::focus::FocusAttachment;
@@ -171,6 +172,7 @@ impl Visualizer {
         self.invoke_attach::<ImageAttachment>();
         self.invoke_attach::<CoordinateAttachment>();
         self.invoke_attach::<ColorAttachment>();
+        self.invoke_attach::<ClipboardAttachment>();
         self.attach_from_queue();
         self.setup();
         self.render_task_manager.transparent.sort_by(

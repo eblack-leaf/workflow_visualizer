@@ -43,6 +43,7 @@ pub use wgpu;
 pub use winit;
 pub use workflow::{start_web_worker, Runner, Sender, Workflow};
 
+pub use crate::clipboard::Clipboard;
 pub use crate::color::{Color, ColorBuilder, Rgb, Rgba};
 pub use crate::coord::{
     area::Area, area::RawArea, layer::Layer, position::Position, position::RawPosition,
@@ -81,6 +82,7 @@ pub use crate::workflow::AndroidInterface;
 mod animate;
 mod bundling;
 mod button;
+mod clipboard;
 mod color;
 mod coord;
 mod diagnostics;
