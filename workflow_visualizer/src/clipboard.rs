@@ -1,16 +1,19 @@
 use crate::{Attach, Visualizer};
 use bevy_ecs::system::Resource;
+#[cfg(not(target_family = "wasm"))]
+use copypasta::ClipboardProvider;
+
 #[derive(Resource)]
 pub struct Clipboard {
     #[cfg(not(target_family = "wasm"))]
-    pub handle: Option<arboard::Clipboard>,
+    pub handle: Option<copypasta::ClipboardContext>,
     #[cfg(target_family = "wasm")]
     pub handle: Option<()>,
 }
 impl Clipboard {
     #[cfg(not(target_family = "wasm"))]
     pub(crate) fn new() -> Self {
-        let handle = arboard::Clipboard::new();
+        let handle = copypasta::ClipboardContext::new();
         Self {
             handle: if handle.is_ok() {
                 Some(handle.expect("clipboard"))
@@ -36,7 +39,7 @@ impl Clipboard {
         }
         #[cfg(not(target_family = "wasm"))]
         if let Some(h) = self.handle.as_mut() {
-            h.set_text(data).expect("clipboard writing");
+            h.set_contents(data).expect("clipboard writing");
         }
     }
 }
