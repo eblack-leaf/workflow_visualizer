@@ -40,7 +40,7 @@ pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
                 .container
                 .insert_resource(AndroidInterface(android_app.clone()));
         }
-        let event_loop = builder.build();
+        let event_loop = builder.build().expect("event loop");
         let (sender, receiver): (
             tokio::sync::mpsc::UnboundedSender<T::Action>,
             tokio::sync::mpsc::UnboundedReceiver<T::Action>,
@@ -64,17 +64,19 @@ pub(crate) fn internal_native_run<T: Workflow + Send + 'static>(
         let mut window: Option<Rc<Window>> = None;
         let mut initialized = false;
         let desktop_dimensions = runner._desktop_dimensions;
-        event_loop.run(move |event, event_loop_window_target, control_flow| {
-            internal_loop::<T>(
-                &mut visualizer,
-                &mut window,
-                &mut initialized,
-                event,
-                event_loop_window_target,
-                control_flow,
-                desktop_dimensions,
-            );
-        });
+        event_loop
+            .run(move |event, event_loop_window_target, control_flow| {
+                internal_loop::<T>(
+                    &mut visualizer,
+                    &mut window,
+                    &mut initialized,
+                    event,
+                    event_loop_window_target,
+                    control_flow,
+                    desktop_dimensions,
+                );
+            })
+            .expect("internal loop");
     });
 }
 #[cfg(not(target_family = "wasm"))]

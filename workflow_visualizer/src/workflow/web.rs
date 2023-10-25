@@ -108,7 +108,7 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
     mut visualizer: Visualizer,
     worker_path: String,
 ) {
-    let event_loop = EventLoopBuilder::<T::Response>::with_user_event().build();
+    let event_loop = EventLoopBuilder::<T::Response>::with_user_event().build().expect("event loop");
     let mut window = Some(Rc::new(
         WindowBuilder::new()
             .with_title("workflow_visualizer")
