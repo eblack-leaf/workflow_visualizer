@@ -15,6 +15,7 @@ pub(crate) struct Receiver<T: Send + 'static> {
     #[cfg(target_family = "wasm")]
     pub(crate) receiver: T,
 }
+
 impl<T: Send + 'static> Receiver<T> {
     #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn receive(&mut self) -> Option<T> {
@@ -26,6 +27,7 @@ impl<T: Send + 'static> Receiver<T> {
 }
 #[allow(unused)]
 pub(crate) struct Responder<T: Send + 'static + Debug>(pub(crate) EventLoopProxy<T>);
+
 impl<T: Send + 'static + Debug> Responder<T> {
     #[allow(unused)]
     pub(crate) fn respond(&self, response: T) {

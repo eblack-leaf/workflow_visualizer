@@ -43,9 +43,6 @@ impl Clipboard {
 pub(crate) struct ClipboardAttachment;
 impl Attach for ClipboardAttachment {
     fn attach(visualizer: &mut Visualizer) {
-        visualizer
-            .job
-            .container
-            .insert_non_send_resource(Clipboard::new());
+        visualizer.job.container.insert_non_send_resource(Clipboard::new());
     }
 }

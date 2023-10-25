@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::workflow::native::initialize_native_window;
 use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
 use tracing::{info, trace};
-use winit::event::{Event, KeyEvent, StartCause, WindowEvent};
+use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
 
@@ -18,9 +18,9 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
     #[allow(unused)] desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
     if visualizer.can_idle() {
-        event_loop_window_target.set_control_flow(ControlFlow::Wait);
+        control_flow.set_wait();
     } else {
-        event_loop_window_target.set_control_flow(ControlFlow::Poll);
+        control_flow.set_poll();
     }
     match event {
         Event::NewEvents(cause) => match cause {
@@ -50,13 +50,15 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 visualizer.trigger_resize(size, scale_factor);
             }
             WindowEvent::ScaleFactorChanged {
+                new_inner_size,
                 scale_factor,
-                inner_size_writer,
             } => {
-                visualizer.trigger_resize(window.as_ref().unwrap().inner_size(), scale_factor as f32);
+                info!("resizing: {:?}", *new_inner_size);
+                visualizer.trigger_resize(*new_inner_size, scale_factor as f32);
             }
             WindowEvent::Touch(touch) => {
                 visualizer.register_touch(touch);
+                info!("touch {:?}", touch);
             }
             WindowEvent::MouseInput { state, button, .. } => {
                 visualizer.register_mouse_click(state, button);
@@ -69,46 +71,35 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             WindowEvent::CursorLeft { device_id: _ } => {
                 visualizer.cancel_touches();
             }
-            WindowEvent::ActivationTokenDone { .. } => {}
-            WindowEvent::Moved(_) => {}
-            WindowEvent::Destroyed => {}
-            WindowEvent::DroppedFile(_) => {}
-            WindowEvent::HoveredFile(_) => {}
-            WindowEvent::HoveredFileCancelled => {}
-            WindowEvent::Focused(_) => {}
-            WindowEvent::KeyboardInput {
-                device_id,
-                event,
-                is_synthetic,
-            } => match event {
-                KeyEvent {
-                    physical_key,
-                    logical_key,
-                    text,
-                    location,
-                    state,
-                    repeat,
-                    platform_specific,
-                } => {}
-            },
-            WindowEvent::ModifiersChanged(_) => {}
-            WindowEvent::Ime(_) => {}
-            WindowEvent::TouchpadMagnify { .. } => {}
-            WindowEvent::SmartMagnify { .. } => {}
-            WindowEvent::TouchpadRotate { .. } => {}
-            WindowEvent::TouchpadPressure { .. } => {}
-            WindowEvent::AxisMotion { .. } => {}
-            WindowEvent::ThemeChanged(_) => {}
-            WindowEvent::Occluded(_) => {}
-            WindowEvent::RedrawRequested => {
-                visualizer.render();
+            WindowEvent::ReceivedCharacter(ch) => {
+                trace!("char: {:?}", ch);
             }
+            _ => {}
         },
         Event::UserEvent(event) => {
             if T::is_exit_response(&event) {
-                event_loop_window_target.exit();
+                control_flow.set_exit();
             }
             T::handle_response(visualizer, event);
+        }
+        Event::MainEventsCleared => {
+            visualizer.exec();
+            if visualizer.job.should_exit() {
+                visualizer
+                    .job
+                    .container
+                    .get_non_send_resource_mut::<Sender<T>>()
+                    .expect("sender")
+                    .send(T::exit_action());
+            }
+        }
+        Event::RedrawRequested(_) => {
+            visualizer.render();
+        }
+        Event::RedrawEventsCleared => {
+            if visualizer.job.resumed() && *initialized {
+                window.as_ref().unwrap().request_redraw();
+            }
         }
         Event::Suspended => {
             info!("suspending");
@@ -134,24 +125,9 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 }
             }
         }
-        Event::LoopExiting => {
+        Event::LoopDestroyed => {
             visualizer.teardown();
         }
-        Event::DeviceEvent { .. } => {}
-        Event::AboutToWait => {
-            visualizer.exec();
-            if visualizer.job.should_exit() {
-                visualizer
-                    .job
-                    .container
-                    .get_non_send_resource_mut::<Sender<T>>()
-                    .expect("sender")
-                    .send(T::exit_action());
-            }
-            // if visualizer.job.resumed() && *initialized {
-            //     window.as_ref().unwrap().request_redraw();
-            // }
-        }
-        Event::MemoryWarning => {}
+        _ => {}
     }
 }
