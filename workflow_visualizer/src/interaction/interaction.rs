@@ -34,7 +34,9 @@ impl From<MouseButton> for Interaction {
             MouseButton::Left => 0,
             MouseButton::Right => 1,
             MouseButton::Middle => 2,
-            MouseButton::Other(val) => 3 + val as u32,
+            MouseButton::Back => 3,
+            MouseButton::Forward => 4,
+            MouseButton::Other(val) => 4 + val as u32,
         };
         Interaction(i)
     }

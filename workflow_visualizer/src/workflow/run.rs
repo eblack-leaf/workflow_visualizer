@@ -3,7 +3,7 @@ use std::rc::Rc;
 #[cfg(not(target_family = "wasm"))]
 use crate::workflow::native::initialize_native_window;
 use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
-use tracing::{info, trace};
+use tracing::{info};
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
@@ -14,13 +14,12 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
     initialized: &mut bool,
     event: Event<<T as Workflow>::Response>,
     #[allow(unused)] event_loop_window_target: &EventLoopWindowTarget<<T as Workflow>::Response>,
-    control_flow: &mut ControlFlow,
     #[allow(unused)] desktop_dimensions: Option<Area<DeviceContext>>,
 ) {
     if visualizer.can_idle() {
-        control_flow.set_wait();
+        event_loop_window_target.set_control_flow(ControlFlow::Wait);
     } else {
-        control_flow.set_poll();
+        event_loop_window_target.set_control_flow(ControlFlow::Poll);
     }
     match event {
         Event::NewEvents(cause) => match cause {
@@ -50,11 +49,10 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 visualizer.trigger_resize(size, scale_factor);
             }
             WindowEvent::ScaleFactorChanged {
-                new_inner_size,
                 scale_factor,
+                ..
             } => {
-                info!("resizing: {:?}", *new_inner_size);
-                visualizer.trigger_resize(*new_inner_size, scale_factor as f32);
+                visualizer.set_scale_factor(scale_factor as f32);
             }
             WindowEvent::Touch(touch) => {
                 visualizer.register_touch(touch);
@@ -71,35 +69,33 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             WindowEvent::CursorLeft { device_id: _ } => {
                 visualizer.cancel_touches();
             }
-            WindowEvent::ReceivedCharacter(ch) => {
-                trace!("char: {:?}", ch);
+
+            WindowEvent::ActivationTokenDone { .. } => {}
+            WindowEvent::Moved(_) => {}
+            WindowEvent::Destroyed => {}
+            WindowEvent::DroppedFile(_) => {}
+            WindowEvent::HoveredFile(_) => {}
+            WindowEvent::HoveredFileCancelled => {}
+            WindowEvent::Focused(_) => {}
+            WindowEvent::KeyboardInput { .. } => {}
+            WindowEvent::ModifiersChanged(_) => {}
+            WindowEvent::Ime(_) => {}
+            WindowEvent::TouchpadMagnify { .. } => {}
+            WindowEvent::SmartMagnify { .. } => {}
+            WindowEvent::TouchpadRotate { .. } => {}
+            WindowEvent::TouchpadPressure { .. } => {}
+            WindowEvent::AxisMotion { .. } => {}
+            WindowEvent::ThemeChanged(_) => {}
+            WindowEvent::Occluded(_) => {}
+            WindowEvent::RedrawRequested => {
+                visualizer.render();
             }
-            _ => {}
         },
         Event::UserEvent(event) => {
             if T::is_exit_response(&event) {
-                control_flow.set_exit();
+                event_loop_window_target.exit();
             }
             T::handle_response(visualizer, event);
-        }
-        Event::MainEventsCleared => {
-            visualizer.exec();
-            if visualizer.job.should_exit() {
-                visualizer
-                    .job
-                    .container
-                    .get_non_send_resource_mut::<Sender<T>>()
-                    .expect("sender")
-                    .send(T::exit_action());
-            }
-        }
-        Event::RedrawRequested(_) => {
-            visualizer.render();
-        }
-        Event::RedrawEventsCleared => {
-            if visualizer.job.resumed() && *initialized {
-                window.as_ref().unwrap().request_redraw();
-            }
         }
         Event::Suspended => {
             info!("suspending");
@@ -125,9 +121,26 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 }
             }
         }
-        Event::LoopDestroyed => {
+        Event::DeviceEvent { .. } => {}
+        Event::AboutToWait => {
+            // does this get triggered many times and should be limited with bool like initialized?
+            // if so reset exec_trigger here
+            visualizer.exec();
+            if visualizer.job.should_exit() {
+                visualizer
+                    .job
+                    .container
+                    .get_non_send_resource_mut::<Sender<T>>()
+                    .expect("sender")
+                    .send(T::exit_action());
+            }
+            if visualizer.job.resumed() && *initialized {
+                window.as_ref().unwrap().request_redraw();
+            }
+        }
+        Event::LoopExiting => {
             visualizer.teardown();
         }
-        _ => {}
+        Event::MemoryWarning => {}
     }
 }

@@ -46,6 +46,7 @@ impl Media {
             return;
         }
     }
+    #[cfg(not(target_family = "wasm"))]
     pub fn native_video(src: &str) {
         #[cfg(not(target_family = "wasm"))]
         {

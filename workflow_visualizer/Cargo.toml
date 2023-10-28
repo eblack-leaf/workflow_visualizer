@@ -9,8 +9,8 @@ diagnostics = []
 [dev-dependencies]
 serde_json = "1.0.103"
 [dependencies]
-winit = { version = "0.28.6", features = ["android-game-activity"]}
-wgpu = { version = "0.17.0", features = ["webgl"] }
+winit = { version = "0.29.2", features = ["android-game-activity"]}
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", features = ["webgl"] }
 bevy_ecs = { version = "0.11.0" }
 image = { version = "0.24.6" , features = ["png", "jpeg"]}
 bytemuck = { version = "1.13.1", features = ["derive"] }

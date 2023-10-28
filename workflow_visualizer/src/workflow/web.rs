@@ -59,7 +59,7 @@ fn add_web_canvas(window: &Window) {
         .and_then(|win| win.document())
         .and_then(|doc| doc.body())
         .and_then(|body| {
-            body.append_child(&web_sys::Element::from(window.canvas()))
+            body.append_child(&web_sys::Element::from(window.canvas().expect("canvas")))
                 .ok()
         })
         .expect("couldn't append canvas to document body");
@@ -73,8 +73,8 @@ fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
             let width: u32 = body.client_width().try_into().unwrap();
             let height: u32 = body.client_height().try_into().unwrap();
             Some(PhysicalSize::new(
-                (width as f64 * scale_factor) as u32,
-                (height as f64 * scale_factor) as u32,
+                ((width as f64 * scale_factor) as u32).max(1),
+                ((height as f64 * scale_factor) as u32).max(1),
             ))
         })
         .expect("could not create inner size")
@@ -87,7 +87,7 @@ fn web_resizing(window: &Rc<Window>) {
     let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
         let scale_factor = w_window.scale_factor();
         let size = window_dimensions(scale_factor);
-        w_window.set_inner_size(size);
+        let _ = w_window.request_inner_size(size);
     }) as Box<dyn FnMut(_)>);
     let _ = web_sys::window()
         .expect("no web_sys window")
@@ -108,7 +108,7 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
     mut visualizer: Visualizer,
     worker_path: String,
 ) {
-    let event_loop = EventLoopBuilder::<T::Response>::with_user_event().build();
+    let event_loop = EventLoopBuilder::<T::Response>::with_user_event().build().expect("event-loop");
     let mut window = Some(Rc::new(
         WindowBuilder::new()
             .with_title("workflow_visualizer")
@@ -116,10 +116,10 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
             .expect("window"),
     ));
     add_web_canvas(window.as_ref().unwrap());
-    window
+    let _ = window
         .as_ref()
         .unwrap()
-        .set_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
+        .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
     visualizer.init_gfx(window.as_ref().unwrap()).await;
     web_resizing(window.as_ref().unwrap());
     let proxy = event_loop.create_proxy();
@@ -136,14 +136,13 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
         .insert_non_send_resource(Sender::new(WebSender(bridge)));
     let mut initialized = true;
     use winit::platform::web::EventLoopExtWebSys;
-    event_loop.spawn(move |event, event_loop_window_target, control_flow| {
+    let _ = event_loop.spawn(move |event, event_loop_window_target| {
         crate::workflow::run::internal_loop::<T>(
             &mut visualizer,
             &mut window,
             &mut initialized,
             event,
             event_loop_window_target,
-            control_flow,
             None,
         );
     });

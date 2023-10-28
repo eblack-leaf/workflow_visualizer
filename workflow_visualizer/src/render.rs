@@ -1,6 +1,7 @@
 #[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::Resource;
 use tracing::trace;
+use wgpu::StoreOp;
 
 use crate::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::visualizer::Visualizer;
@@ -144,7 +145,7 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
                 Some(view) => (view, Some(&surface_texture_view)),
                 None => (&surface_texture_view, None),
             };
-            let should_store = msaa.requested() == 1;
+            let should_store = if msaa.requested() == 1 { StoreOp::Store } else { StoreOp::Discard };
             let color_attachment = wgpu::RenderPassColorAttachment {
                 view: v,
                 resolve_target: rt,
@@ -160,13 +161,15 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
                     view: &depth_texture_view,
                     depth_ops: Some(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(viewport.far_layer()),
-                        store: true,
+                        store: StoreOp::Store,
                     }),
                     stencil_ops: Some(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(0u32),
-                        store: true,
+                        store: StoreOp::Store,
                     }),
                 }),
+                timestamp_writes: None,
+                occlusion_query_set: None,
             };
             let mut render_pass_handle =
                 RenderPassHandle(command_encoder.begin_render_pass(&render_pass_descriptor));

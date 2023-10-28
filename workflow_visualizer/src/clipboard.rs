@@ -32,7 +32,8 @@ impl Clipboard {
         }
         #[cfg(target_family = "wasm")]
         if let Some(h) = web_sys::window().expect("window").navigator().clipboard() {
-            let promise = h.write_text(data.as_str());
+            // TODO handle promise
+            let _promise = h.write_text(data.as_str());
         }
         #[cfg(not(target_family = "wasm"))]
         if let Some(h) = self.handle.as_mut() {
