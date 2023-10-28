@@ -65,7 +65,7 @@ fn add_web_canvas(window: &Window) {
         .expect("couldn't append canvas to document body");
 }
 #[cfg(target_arch = "wasm32")]
-fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
+pub(crate) fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
     web_sys::window()
         .and_then(|win| win.document())
         .and_then(|doc| doc.body())
@@ -73,21 +73,20 @@ fn window_dimensions(scale_factor: f64) -> PhysicalSize<u32> {
             let width: u32 = body.client_width().try_into().unwrap();
             let height: u32 = body.client_height().try_into().unwrap();
             Some(PhysicalSize::new(
-                ((width as f64 * scale_factor) as u32).max(4),
-                ((height as f64 * scale_factor) as u32).max(4),
+                (width as f64 * scale_factor) as u32,
+                (height as f64 * scale_factor) as u32,
             ))
         })
         .expect("could not create inner size")
 }
 
 #[cfg(target_arch = "wasm32")]
-fn web_resizing(window: &Rc<Window>) {
+pub(crate) fn web_resizing(window: &Rc<Window>) {
     use wasm_bindgen::prelude::*;
     let w_window = window.clone();
     let closure = Closure::wrap(Box::new(move |_e: web_sys::Event| {
         let scale_factor = w_window.scale_factor();
         let size = window_dimensions(scale_factor);
-        let size = PhysicalSize::new(size.width.max(4), size.height.max(4));
         let _ = w_window.request_inner_size(size);
     }) as Box<dyn FnMut(_)>);
     let _ = web_sys::window()
@@ -119,10 +118,10 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
             .expect("window"),
     ));
     add_web_canvas(window.as_ref().unwrap());
-    // let _ = window
-    //     .as_ref()
-    //     .unwrap()
-    //     .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
+    let _ = window
+        .as_ref()
+        .unwrap()
+        .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
     visualizer.init_gfx(window.as_ref().unwrap()).await;
     web_resizing(window.as_ref().unwrap());
     let proxy = event_loop.create_proxy();
