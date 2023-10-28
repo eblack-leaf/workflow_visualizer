@@ -149,7 +149,6 @@
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::{Arc, Mutex};
 
 <span class="kw">use </span>gloo_worker::{HandlerId, Worker, WorkerScope};
@@ -217,7 +216,7 @@
         .expect(<span class="string">&quot;couldn&#39;t append canvas to document body&quot;</span>);
 }
 <span class="attr">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
-</span><span class="kw">fn </span>window_dimensions(scale_factor: f64) -&gt; PhysicalSize&lt;u32&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>window_dimensions(scale_factor: f64) -&gt; PhysicalSize&lt;u32&gt; {
     web_sys::window()
         .and_then(|win| win.document())
         .and_then(|doc| doc.body())
@@ -225,21 +224,20 @@
             <span class="kw">let </span>width: u32 = body.client_width().try_into().unwrap();
             <span class="kw">let </span>height: u32 = body.client_height().try_into().unwrap();
             <span class="prelude-val">Some</span>(PhysicalSize::new(
-                ((width <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">4</span>),
-                ((height <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">4</span>),
+                (width <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
+                (height <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
             ))
         })
         .expect(<span class="string">&quot;could not create inner size&quot;</span>)
 }
 
 <span class="attr">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
-</span><span class="kw">fn </span>web_resizing(window: <span class="kw-2">&amp;</span>Rc&lt;Window&gt;) {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>web_resizing(window: <span class="kw-2">&amp;</span>Rc&lt;Window&gt;) {
     <span class="kw">use </span>wasm_bindgen::prelude::<span class="kw-2">*</span>;
     <span class="kw">let </span>w_window = window.clone();
     <span class="kw">let </span>closure = Closure::wrap(Box::new(<span class="kw">move </span>|_e: web_sys::Event| {
         <span class="kw">let </span>scale_factor = w_window.scale_factor();
         <span class="kw">let </span>size = window_dimensions(scale_factor);
-        <span class="kw">let </span>size = PhysicalSize::new(size.width.max(<span class="number">4</span>), size.height.max(<span class="number">4</span>));
         <span class="kw">let _ </span>= w_window.request_inner_size(size);
     }) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw">_</span>)&gt;);
     <span class="kw">let _ </span>= web_sys::window()
@@ -271,11 +269,11 @@
             .expect(<span class="string">&quot;window&quot;</span>),
     ));
     add_web_canvas(window.as_ref().unwrap());
-    <span class="comment">// let _ = window
-    //     .as_ref()
-    //     .unwrap()
-    //     .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
-    </span>visualizer.init_gfx(window.as_ref().unwrap()).<span class="kw">await</span>;
+    <span class="kw">let _ </span>= window
+        .as_ref()
+        .unwrap()
+        .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
+    visualizer.init_gfx(window.as_ref().unwrap()).<span class="kw">await</span>;
     web_resizing(window.as_ref().unwrap());
     <span class="kw">let </span>proxy = event_loop.create_proxy();
     <span class="kw">use </span>gloo_worker::Spawnable;
