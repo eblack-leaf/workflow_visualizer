@@ -187,6 +187,10 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
 </span><span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>tracing::trace;
@@ -334,7 +338,11 @@
                 <span class="prelude-val">Some</span>(view) =&gt; (view, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>surface_texture_view)),
                 <span class="prelude-val">None </span>=&gt; (<span class="kw-2">&amp;</span>surface_texture_view, <span class="prelude-val">None</span>),
             };
-            <span class="kw">let </span>should_store = <span class="kw">if </span>msaa.requested() == <span class="number">1 </span>{ StoreOp::Store } <span class="kw">else </span>{ StoreOp::Discard };
+            <span class="kw">let </span>should_store = <span class="kw">if </span>msaa.requested() == <span class="number">1 </span>{
+                StoreOp::Store
+            } <span class="kw">else </span>{
+                StoreOp::Discard
+            };
             <span class="kw">let </span>color_attachment = wgpu::RenderPassColorAttachment {
                 view: v,
                 resolve_target: rt,

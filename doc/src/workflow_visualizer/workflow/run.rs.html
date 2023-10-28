@@ -140,16 +140,12 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::workflow::native::initialize_native_window;
 <span class="kw">use crate</span>::{Area, DeviceContext, Sender, Visualizer, Workflow};
-<span class="kw">use </span>tracing::{info};
+<span class="kw">use </span>tracing::info;
 <span class="kw">use </span>winit::event::{Event, StartCause, WindowEvent};
 <span class="kw">use </span>winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 <span class="kw">use </span>winit::window::Window;
@@ -169,15 +165,7 @@
     }
     <span class="kw">match </span>event {
         Event::NewEvents(cause) =&gt; <span class="kw">match </span>cause {
-            StartCause::Init =&gt; {
-                <span class="attr">#[cfg(not(target_os = <span class="string">&quot;android&quot;</span>))]
-                </span>{
-                    <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
-                    </span>initialize_native_window(event_loop_window_target, window, desktop_dimensions);
-                    visualizer.initialize(window.as_ref().unwrap());
-                    <span class="kw-2">*</span>initialized = <span class="bool-val">true</span>;
-                }
-            }
+            StartCause::Init =&gt; {}
             <span class="kw">_ </span>=&gt; {}
         },
         Event::WindowEvent { event, .. } =&gt; <span class="kw">match </span>event {
@@ -194,10 +182,7 @@
                 <span class="kw">let </span>scale_factor = window.as_ref().unwrap().scale_factor() <span class="kw">as </span>f32;
                 visualizer.trigger_resize(size, scale_factor);
             }
-            WindowEvent::ScaleFactorChanged {
-                scale_factor,
-                ..
-            } =&gt; {
+            WindowEvent::ScaleFactorChanged { scale_factor, .. } =&gt; {
                 visualizer.set_scale_factor(scale_factor <span class="kw">as </span>f32);
             }
             WindowEvent::Touch(touch) =&gt; {
@@ -252,6 +237,13 @@
         }
         Event::Resumed =&gt; {
             <span class="macro">info!</span>(<span class="string">&quot;resuming&quot;</span>);
+            <span class="attr">#[cfg(not(target_os = <span class="string">&quot;android&quot;</span>))]
+            </span>{
+                <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
+                </span>initialize_native_window(event_loop_window_target, window, desktop_dimensions);
+                visualizer.initialize(window.as_ref().unwrap());
+                <span class="kw-2">*</span>initialized = <span class="bool-val">true</span>;
+            }
             <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
             </span>{
                 <span class="kw">if </span>!<span class="kw-2">*</span>initialized {

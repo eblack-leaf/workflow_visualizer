@@ -437,8 +437,8 @@
         <span class="kw">let </span>surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: actual_width,
-            height: actual_height,
+            width: actual_width.max(<span class="number">4</span>),
+            height: actual_height.max(<span class="number">4</span>),
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: <span class="macro">vec!</span>[surface_format],

@@ -147,6 +147,9 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::{Arc, Mutex};
 
 <span class="kw">use </span>gloo_worker::{HandlerId, Worker, WorkerScope};
@@ -222,8 +225,8 @@
             <span class="kw">let </span>width: u32 = body.client_width().try_into().unwrap();
             <span class="kw">let </span>height: u32 = body.client_height().try_into().unwrap();
             <span class="prelude-val">Some</span>(PhysicalSize::new(
-                ((width <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">1</span>),
-                ((height <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">1</span>),
+                ((width <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">4</span>),
+                ((height <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">4</span>),
             ))
         })
         .expect(<span class="string">&quot;could not create inner size&quot;</span>)
@@ -236,6 +239,7 @@
     <span class="kw">let </span>closure = Closure::wrap(Box::new(<span class="kw">move </span>|_e: web_sys::Event| {
         <span class="kw">let </span>scale_factor = w_window.scale_factor();
         <span class="kw">let </span>size = window_dimensions(scale_factor);
+        <span class="kw">let </span>size = PhysicalSize::new(size.width.max(<span class="number">4</span>), size.height.max(<span class="number">4</span>));
         <span class="kw">let _ </span>= w_window.request_inner_size(size);
     }) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw">_</span>)&gt;);
     <span class="kw">let _ </span>= web_sys::window()
@@ -257,7 +261,9 @@
     <span class="kw-2">mut </span>visualizer: Visualizer,
     worker_path: String,
 ) {
-    <span class="kw">let </span>event_loop = EventLoopBuilder::&lt;T::Response&gt;::with_user_event().build().expect(<span class="string">&quot;event-loop&quot;</span>);
+    <span class="kw">let </span>event_loop = EventLoopBuilder::&lt;T::Response&gt;::with_user_event()
+        .build()
+        .expect(<span class="string">&quot;event-loop&quot;</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>window = <span class="prelude-val">Some</span>(Rc::new(
         WindowBuilder::new()
             .with_title(<span class="string">&quot;workflow_visualizer&quot;</span>)
@@ -265,11 +271,11 @@
             .expect(<span class="string">&quot;window&quot;</span>),
     ));
     add_web_canvas(window.as_ref().unwrap());
-    <span class="kw">let _ </span>= window
-        .as_ref()
-        .unwrap()
-        .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
-    visualizer.init_gfx(window.as_ref().unwrap()).<span class="kw">await</span>;
+    <span class="comment">// let _ = window
+    //     .as_ref()
+    //     .unwrap()
+    //     .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
+    </span>visualizer.init_gfx(window.as_ref().unwrap()).<span class="kw">await</span>;
     web_resizing(window.as_ref().unwrap());
     <span class="kw">let </span>proxy = event_loop.create_proxy();
     <span class="kw">use </span>gloo_worker::Spawnable;

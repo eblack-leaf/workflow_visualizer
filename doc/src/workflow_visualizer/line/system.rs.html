@@ -171,7 +171,7 @@
             scaled.push(point.to_device(scale_factor.factor()));
         }
         <span class="kw">if </span>!scaled.is_empty() {
-            <span class="kw-2">*</span>line_render = LineRender::new(scaled.len() - <span class="number">1</span>);
+            <span class="kw-2">*</span>line_render = LineRender::new(scaled.len().checked_sub(<span class="number">1</span>).unwrap_or_default());
             <span class="kw-2">*</span>line_render_points = LineRenderPoints { points: scaled };
         }
     }

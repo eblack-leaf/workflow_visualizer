@@ -486,6 +486,7 @@
 <a href="#486" id="486">486</a>
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -633,7 +634,8 @@
     }
     <span class="doccomment">/// Tells visualizer to send a signal of resizing to be read in systems
     </span><span class="kw">pub fn </span>trigger_resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: PhysicalSize&lt;u32&gt;, scale_factor: f32) {
-        <span class="kw">let </span>resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
+        <span class="kw">let </span>resize_event =
+            WindowResize::new((size.width.max(<span class="number">4</span>), size.height.max(<span class="number">4</span>)).into(), scale_factor);
         <span class="self">self</span>.job.container.send_event(resize_event);
         <span class="self">self</span>.job
             .container

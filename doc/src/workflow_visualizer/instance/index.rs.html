@@ -142,7 +142,7 @@
         <span class="kw">let </span>index = <span class="kw">match </span><span class="self">self</span>.holes.is_empty() {
             <span class="bool-val">true </span>=&gt; {
                 <span class="self">self</span>.count += <span class="number">1</span>;
-                Index::new(<span class="self">self</span>.count - <span class="number">1</span>)
+                Index::new(<span class="self">self</span>.count.checked_sub(<span class="number">1</span>).unwrap_or(<span class="self">self</span>.count))
             }
             <span class="bool-val">false </span>=&gt; {
                 <span class="kw">let </span>index = <span class="kw-2">*</span><span class="self">self</span>.holes.iter().next().unwrap();
