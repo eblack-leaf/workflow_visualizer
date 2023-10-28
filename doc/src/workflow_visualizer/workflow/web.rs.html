@@ -147,7 +147,6 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::{Arc, Mutex};
 
 <span class="kw">use </span>gloo_worker::{HandlerId, Worker, WorkerScope};
@@ -209,7 +208,7 @@
         .and_then(|win| win.document())
         .and_then(|doc| doc.body())
         .and_then(|body| {
-            body.append_child(<span class="kw-2">&amp;</span>web_sys::Element::from(window.canvas()))
+            body.append_child(<span class="kw-2">&amp;</span>web_sys::Element::from(window.canvas().expect(<span class="string">&quot;canvas&quot;</span>)))
                 .ok()
         })
         .expect(<span class="string">&quot;couldn&#39;t append canvas to document body&quot;</span>);
@@ -223,8 +222,8 @@
             <span class="kw">let </span>width: u32 = body.client_width().try_into().unwrap();
             <span class="kw">let </span>height: u32 = body.client_height().try_into().unwrap();
             <span class="prelude-val">Some</span>(PhysicalSize::new(
-                (width <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
-                (height <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32,
+                ((width <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">1</span>),
+                ((height <span class="kw">as </span>f64 * scale_factor) <span class="kw">as </span>u32).max(<span class="number">1</span>),
             ))
         })
         .expect(<span class="string">&quot;could not create inner size&quot;</span>)
@@ -237,7 +236,7 @@
     <span class="kw">let </span>closure = Closure::wrap(Box::new(<span class="kw">move </span>|_e: web_sys::Event| {
         <span class="kw">let </span>scale_factor = w_window.scale_factor();
         <span class="kw">let </span>size = window_dimensions(scale_factor);
-        w_window.set_inner_size(size);
+        <span class="kw">let _ </span>= w_window.request_inner_size(size);
     }) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw">_</span>)&gt;);
     <span class="kw">let _ </span>= web_sys::window()
         .expect(<span class="string">&quot;no web_sys window&quot;</span>)
@@ -258,7 +257,7 @@
     <span class="kw-2">mut </span>visualizer: Visualizer,
     worker_path: String,
 ) {
-    <span class="kw">let </span>event_loop = EventLoopBuilder::&lt;T::Response&gt;::with_user_event().build();
+    <span class="kw">let </span>event_loop = EventLoopBuilder::&lt;T::Response&gt;::with_user_event().build().expect(<span class="string">&quot;event-loop&quot;</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>window = <span class="prelude-val">Some</span>(Rc::new(
         WindowBuilder::new()
             .with_title(<span class="string">&quot;workflow_visualizer&quot;</span>)
@@ -266,10 +265,10 @@
             .expect(<span class="string">&quot;window&quot;</span>),
     ));
     add_web_canvas(window.as_ref().unwrap());
-    window
+    <span class="kw">let _ </span>= window
         .as_ref()
         .unwrap()
-        .set_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
+        .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
     visualizer.init_gfx(window.as_ref().unwrap()).<span class="kw">await</span>;
     web_resizing(window.as_ref().unwrap());
     <span class="kw">let </span>proxy = event_loop.create_proxy();
@@ -286,14 +285,13 @@
         .insert_non_send_resource(Sender::new(WebSender(bridge)));
     <span class="kw">let </span><span class="kw-2">mut </span>initialized = <span class="bool-val">true</span>;
     <span class="kw">use </span>winit::platform::web::EventLoopExtWebSys;
-    event_loop.spawn(<span class="kw">move </span>|event, event_loop_window_target, control_flow| {
+    <span class="kw">let _ </span>= event_loop.spawn(<span class="kw">move </span>|event, event_loop_window_target| {
         <span class="kw">crate</span>::workflow::run::internal_loop::&lt;T&gt;(
             <span class="kw-2">&amp;mut </span>visualizer,
             <span class="kw-2">&amp;mut </span>window,
             <span class="kw-2">&amp;mut </span>initialized,
             event,
             event_loop_window_target,
-            control_flow,
             <span class="prelude-val">None</span>,
         );
     });

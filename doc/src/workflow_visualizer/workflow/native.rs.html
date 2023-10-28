@@ -101,7 +101,6 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
 </span><span class="kw">use </span>std::rc::Rc;
 <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
@@ -144,7 +143,7 @@
                 .container
                 .insert_resource(AndroidInterface(android_app.clone()));
         }
-        <span class="kw">let </span>event_loop = builder.build();
+        <span class="kw">let </span>event_loop = builder.build().expect(<span class="string">&quot;event-loop&quot;</span>);
         <span class="kw">let </span>(sender, receiver): (
             tokio::sync::mpsc::UnboundedSender&lt;T::Action&gt;,
             tokio::sync::mpsc::UnboundedReceiver&lt;T::Action&gt;,
@@ -168,14 +167,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>window: <span class="prelude-ty">Option</span>&lt;Rc&lt;Window&gt;&gt; = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>initialized = <span class="bool-val">false</span>;
         <span class="kw">let </span>desktop_dimensions = runner._desktop_dimensions;
-        event_loop.run(<span class="kw">move </span>|event, event_loop_window_target, control_flow| {
+        <span class="kw">let _ </span>= event_loop.run(<span class="kw">move </span>|event, event_loop_window_target| {
             internal_loop::&lt;T&gt;(
                 <span class="kw-2">&amp;mut </span>visualizer,
                 <span class="kw-2">&amp;mut </span>window,
                 <span class="kw-2">&amp;mut </span>initialized,
                 event,
                 event_loop_window_target,
-                control_flow,
                 desktop_dimensions,
             );
         });

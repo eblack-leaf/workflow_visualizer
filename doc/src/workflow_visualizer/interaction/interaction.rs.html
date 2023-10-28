@@ -406,6 +406,8 @@
 <a href="#406" id="406">406</a>
 <a href="#407" id="407">407</a>
 <a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>bevy_ecs::bundle::Bundle;
@@ -442,7 +444,9 @@
             MouseButton::Left =&gt; <span class="number">0</span>,
             MouseButton::Right =&gt; <span class="number">1</span>,
             MouseButton::Middle =&gt; <span class="number">2</span>,
-            MouseButton::Other(val) =&gt; <span class="number">3 </span>+ val <span class="kw">as </span>u32,
+            MouseButton::Back =&gt; <span class="number">3</span>,
+            MouseButton::Forward =&gt; <span class="number">4</span>,
+            MouseButton::Other(val) =&gt; <span class="number">4 </span>+ val <span class="kw">as </span>u32,
         };
         Interaction(i)
     }

@@ -131,12 +131,25 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::rc::Rc;
 
 <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::workflow::native::initialize_native_window;
 <span class="kw">use crate</span>::{Area, DeviceContext, Sender, Visualizer, Workflow};
-<span class="kw">use </span>tracing::{info, trace};
+<span class="kw">use </span>tracing::{info};
 <span class="kw">use </span>winit::event::{Event, StartCause, WindowEvent};
 <span class="kw">use </span>winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 <span class="kw">use </span>winit::window::Window;
@@ -147,13 +160,12 @@
     initialized: <span class="kw-2">&amp;mut </span>bool,
     event: Event&lt;&lt;T <span class="kw">as </span>Workflow&gt;::Response&gt;,
     <span class="attr">#[allow(unused)] </span>event_loop_window_target: <span class="kw-2">&amp;</span>EventLoopWindowTarget&lt;&lt;T <span class="kw">as </span>Workflow&gt;::Response&gt;,
-    control_flow: <span class="kw-2">&amp;mut </span>ControlFlow,
     <span class="attr">#[allow(unused)] </span>desktop_dimensions: <span class="prelude-ty">Option</span>&lt;Area&lt;DeviceContext&gt;&gt;,
 ) {
     <span class="kw">if </span>visualizer.can_idle() {
-        control_flow.set_wait();
+        event_loop_window_target.set_control_flow(ControlFlow::Wait);
     } <span class="kw">else </span>{
-        control_flow.set_poll();
+        event_loop_window_target.set_control_flow(ControlFlow::Poll);
     }
     <span class="kw">match </span>event {
         Event::NewEvents(cause) =&gt; <span class="kw">match </span>cause {
@@ -183,11 +195,10 @@
                 visualizer.trigger_resize(size, scale_factor);
             }
             WindowEvent::ScaleFactorChanged {
-                new_inner_size,
                 scale_factor,
+                ..
             } =&gt; {
-                <span class="macro">info!</span>(<span class="string">&quot;resizing: {:?}&quot;</span>, <span class="kw-2">*</span>new_inner_size);
-                visualizer.trigger_resize(<span class="kw-2">*</span>new_inner_size, scale_factor <span class="kw">as </span>f32);
+                visualizer.set_scale_factor(scale_factor <span class="kw">as </span>f32);
             }
             WindowEvent::Touch(touch) =&gt; {
                 visualizer.register_touch(touch);
@@ -204,35 +215,33 @@
             WindowEvent::CursorLeft { device_id: <span class="kw">_ </span>} =&gt; {
                 visualizer.cancel_touches();
             }
-            WindowEvent::ReceivedCharacter(ch) =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;char: {:?}&quot;</span>, ch);
+
+            WindowEvent::ActivationTokenDone { .. } =&gt; {}
+            WindowEvent::Moved(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::Destroyed =&gt; {}
+            WindowEvent::DroppedFile(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::HoveredFile(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::HoveredFileCancelled =&gt; {}
+            WindowEvent::Focused(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::KeyboardInput { .. } =&gt; {}
+            WindowEvent::ModifiersChanged(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::Ime(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::TouchpadMagnify { .. } =&gt; {}
+            WindowEvent::SmartMagnify { .. } =&gt; {}
+            WindowEvent::TouchpadRotate { .. } =&gt; {}
+            WindowEvent::TouchpadPressure { .. } =&gt; {}
+            WindowEvent::AxisMotion { .. } =&gt; {}
+            WindowEvent::ThemeChanged(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::Occluded(<span class="kw">_</span>) =&gt; {}
+            WindowEvent::RedrawRequested =&gt; {
+                visualizer.render();
             }
-            <span class="kw">_ </span>=&gt; {}
         },
         Event::UserEvent(event) =&gt; {
             <span class="kw">if </span>T::is_exit_response(<span class="kw-2">&amp;</span>event) {
-                control_flow.set_exit();
+                event_loop_window_target.exit();
             }
             T::handle_response(visualizer, event);
-        }
-        Event::MainEventsCleared =&gt; {
-            visualizer.exec();
-            <span class="kw">if </span>visualizer.job.should_exit() {
-                visualizer
-                    .job
-                    .container
-                    .get_non_send_resource_mut::&lt;Sender&lt;T&gt;&gt;()
-                    .expect(<span class="string">&quot;sender&quot;</span>)
-                    .send(T::exit_action());
-            }
-        }
-        Event::RedrawRequested(<span class="kw">_</span>) =&gt; {
-            visualizer.render();
-        }
-        Event::RedrawEventsCleared =&gt; {
-            <span class="kw">if </span>visualizer.job.resumed() &amp;&amp; <span class="kw-2">*</span>initialized {
-                window.as_ref().unwrap().request_redraw();
-            }
         }
         Event::Suspended =&gt; {
             <span class="macro">info!</span>(<span class="string">&quot;suspending&quot;</span>);
@@ -258,10 +267,27 @@
                 }
             }
         }
-        Event::LoopDestroyed =&gt; {
+        Event::DeviceEvent { .. } =&gt; {}
+        Event::AboutToWait =&gt; {
+            <span class="comment">// does this get triggered many times and should be limited with bool like initialized?
+            // if so reset exec_trigger here
+            </span>visualizer.exec();
+            <span class="kw">if </span>visualizer.job.should_exit() {
+                visualizer
+                    .job
+                    .container
+                    .get_non_send_resource_mut::&lt;Sender&lt;T&gt;&gt;()
+                    .expect(<span class="string">&quot;sender&quot;</span>)
+                    .send(T::exit_action());
+            }
+            <span class="kw">if </span>visualizer.job.resumed() &amp;&amp; <span class="kw-2">*</span>initialized {
+                window.as_ref().unwrap().request_redraw();
+            }
+        }
+        Event::LoopExiting =&gt; {
             visualizer.teardown();
         }
-        <span class="kw">_ </span>=&gt; {}
+        Event::MemoryWarning =&gt; {}
     }
 }
 </code></pre></div></section></main></body></html>

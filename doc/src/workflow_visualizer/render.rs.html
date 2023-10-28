@@ -184,9 +184,13 @@
 <a href="#184" id="184">184</a>
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
 </span><span class="kw">use </span>bevy_ecs::prelude::Resource;
 <span class="kw">use </span>tracing::trace;
+<span class="kw">use </span>wgpu::StoreOp;
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::{GfxSurfaceConfiguration, MsaaRenderAdapter};
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::Visualizer;
@@ -330,7 +334,7 @@
                 <span class="prelude-val">Some</span>(view) =&gt; (view, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>surface_texture_view)),
                 <span class="prelude-val">None </span>=&gt; (<span class="kw-2">&amp;</span>surface_texture_view, <span class="prelude-val">None</span>),
             };
-            <span class="kw">let </span>should_store = msaa.requested() == <span class="number">1</span>;
+            <span class="kw">let </span>should_store = <span class="kw">if </span>msaa.requested() == <span class="number">1 </span>{ StoreOp::Store } <span class="kw">else </span>{ StoreOp::Discard };
             <span class="kw">let </span>color_attachment = wgpu::RenderPassColorAttachment {
                 view: v,
                 resolve_target: rt,
@@ -346,13 +350,15 @@
                     view: <span class="kw-2">&amp;</span>depth_texture_view,
                     depth_ops: <span class="prelude-val">Some</span>(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(viewport.far_layer()),
-                        store: <span class="bool-val">true</span>,
+                        store: StoreOp::Store,
                     }),
                     stencil_ops: <span class="prelude-val">Some</span>(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(<span class="number">0u32</span>),
-                        store: <span class="bool-val">true</span>,
+                        store: StoreOp::Store,
                     }),
                 }),
+                timestamp_writes: <span class="prelude-val">None</span>,
+                occlusion_query_set: <span class="prelude-val">None</span>,
             };
             <span class="kw">let </span><span class="kw-2">mut </span>render_pass_handle =
                 RenderPassHandle(command_encoder.begin_render_pass(<span class="kw-2">&amp;</span>render_pass_descriptor));
