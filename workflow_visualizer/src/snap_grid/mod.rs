@@ -49,9 +49,8 @@ impl Column {
 #[cfg(test)]
 fn snap_grid_coverage() {
     let step: usize = 10;
-    for width in (375..Breakpoint::Workstation.value() as u32 + step as u32 + 2).step_by(step) {
-        for height in (375..Breakpoint::Workstation.value() as u32 + step as u32 + 2).step_by(step)
-        {
+    for width in (4..Breakpoint::Workstation.value() as u32 + step as u32 + 2).step_by(step) {
+        for height in (4..Breakpoint::Workstation.value() as u32 + step as u32 + 2).step_by(step) {
             let area = Area::new(width as f32, height as f32);
             let grid = SnapGrid::new(area);
             println!(

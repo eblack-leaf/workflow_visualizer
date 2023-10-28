@@ -53,7 +53,7 @@ impl<Key: Eq + Hash + PartialEq + Copy + Clone + 'static> Indexer<Key> {
         let index = match self.holes.is_empty() {
             true => {
                 self.count += 1;
-                Index::new(self.count - 1)
+                Index::new(self.count.checked_sub(1).unwrap_or(self.count))
             }
             false => {
                 let index = *self.holes.iter().next().unwrap();

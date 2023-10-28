@@ -3,7 +3,7 @@ use std::rc::Rc;
 #[cfg(not(target_family = "wasm"))]
 use crate::workflow::native::initialize_native_window;
 use crate::{Area, DeviceContext, Sender, Visualizer, Workflow};
-use tracing::{info};
+use tracing::info;
 use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoopWindowTarget};
 use winit::window::Window;
@@ -23,15 +23,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
     }
     match event {
         Event::NewEvents(cause) => match cause {
-            StartCause::Init => {
-                #[cfg(not(target_os = "android"))]
-                {
-                    #[cfg(not(target_family = "wasm"))]
-                    initialize_native_window(event_loop_window_target, window, desktop_dimensions);
-                    visualizer.initialize(window.as_ref().unwrap());
-                    *initialized = true;
-                }
-            }
+            StartCause::Init => {}
             _ => {}
         },
         Event::WindowEvent { event, .. } => match event {
@@ -48,10 +40,7 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
                 let scale_factor = window.as_ref().unwrap().scale_factor() as f32;
                 visualizer.trigger_resize(size, scale_factor);
             }
-            WindowEvent::ScaleFactorChanged {
-                scale_factor,
-                ..
-            } => {
+            WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
                 visualizer.set_scale_factor(scale_factor as f32);
             }
             WindowEvent::Touch(touch) => {
@@ -106,6 +95,13 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
         }
         Event::Resumed => {
             info!("resuming");
+            #[cfg(not(target_os = "android"))]
+            {
+                #[cfg(not(target_family = "wasm"))]
+                initialize_native_window(event_loop_window_target, window, desktop_dimensions);
+                visualizer.initialize(window.as_ref().unwrap());
+                *initialized = true;
+            }
             #[cfg(target_os = "android")]
             {
                 if !*initialized {

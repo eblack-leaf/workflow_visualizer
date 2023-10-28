@@ -145,7 +145,8 @@ impl Visualizer {
     }
     /// Tells visualizer to send a signal of resizing to be read in systems
     pub fn trigger_resize(&mut self, size: PhysicalSize<u32>, scale_factor: f32) {
-        let resize_event = WindowResize::new((size.width, size.height).into(), scale_factor);
+        let resize_event =
+            WindowResize::new((size.width.max(4), size.height.max(4)).into(), scale_factor);
         self.job.container.send_event(resize_event);
         self.job
             .container

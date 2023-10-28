@@ -145,7 +145,11 @@ pub(crate) fn internal_render(visualizer: &mut Visualizer) {
                 Some(view) => (view, Some(&surface_texture_view)),
                 None => (&surface_texture_view, None),
             };
-            let should_store = if msaa.requested() == 1 { StoreOp::Store } else { StoreOp::Discard };
+            let should_store = if msaa.requested() == 1 {
+                StoreOp::Store
+            } else {
+                StoreOp::Discard
+            };
             let color_attachment = wgpu::RenderPassColorAttachment {
                 view: v,
                 resolve_target: rt,

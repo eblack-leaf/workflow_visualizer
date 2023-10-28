@@ -41,7 +41,7 @@ pub(crate) fn scale_path(
             scaled.push(point.to_device(scale_factor.factor()));
         }
         if !scaled.is_empty() {
-            *line_render = LineRender::new(scaled.len() - 1);
+            *line_render = LineRender::new(scaled.len().checked_sub(1).unwrap_or_default());
             *line_render_points = LineRenderPoints { points: scaled };
         }
     }
