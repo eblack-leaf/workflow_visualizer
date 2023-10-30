@@ -23,7 +23,17 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
     }
     match event {
         Event::NewEvents(cause) => match cause {
-            StartCause::Init => {}
+            StartCause::Init => {
+                #[cfg(not(target_os = "android"))]
+                {
+
+                        #[cfg(not(target_family = "wasm"))]
+                        initialize_native_window(event_loop_window_target, window, desktop_dimensions);
+                        visualizer.initialize(window.as_ref().unwrap());
+                        *initialized = true;
+
+                }
+            }
             _ => {}
         },
         Event::WindowEvent { event, .. } => match event {
@@ -95,13 +105,6 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
         }
         Event::Resumed => {
             info!("resuming");
-            #[cfg(not(target_os = "android"))]
-            {
-                #[cfg(not(target_family = "wasm"))]
-                initialize_native_window(event_loop_window_target, window, desktop_dimensions);
-                visualizer.initialize(window.as_ref().unwrap());
-                *initialized = true;
-            }
             #[cfg(target_os = "android")]
             {
                 if !*initialized {

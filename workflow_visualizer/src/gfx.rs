@@ -128,8 +128,8 @@ impl GfxSurface {
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: actual_width.max(4),
-            height: actual_height.max(4),
+            width: actual_width,
+            height: actual_height,
             present_mode: options.present_mode,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![surface_format],
