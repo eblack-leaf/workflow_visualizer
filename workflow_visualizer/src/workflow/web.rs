@@ -16,6 +16,8 @@ use crate::Workflow;
 #[cfg(target_family = "wasm")]
 use std::rc::Rc;
 #[cfg(target_family = "wasm")]
+use wasm_bindgen::JsValue;
+#[cfg(target_family = "wasm")]
 use winit::dpi::PhysicalSize;
 #[cfg(target_family = "wasm")]
 use winit::event_loop::EventLoopBuilder;
@@ -119,10 +121,13 @@ pub(crate) async fn internal_web_run<T: Workflow + 'static + Default>(
             .expect("window"),
     ));
     add_web_canvas(window.as_ref().unwrap());
-    // let _ = window
-    //     .as_ref()
-    //     .unwrap()
-    //     .request_inner_size(window_dimensions(window.as_ref().unwrap().scale_factor()));
+    let current_size = window
+        .as_ref()
+        .unwrap()
+        .request_inner_size(PhysicalSize::new(4, 4));
+    web_sys::console::info_1(&JsValue::from_str(
+        format!("current-size: {:?}", current_size).as_str(),
+    ));
     visualizer.init_gfx(window.as_ref().unwrap()).await;
     web_resizing(window.as_ref().unwrap());
     let proxy = event_loop.create_proxy();
