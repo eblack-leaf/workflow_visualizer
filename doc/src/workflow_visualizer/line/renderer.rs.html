@@ -325,7 +325,7 @@
             }],
         };
         <span class="kw">let </span>primitive_state = wgpu::PrimitiveState {
-            topology: wgpu::PrimitiveTopology::LineList,
+            topology: wgpu::PrimitiveTopology::LineStrip,
             front_face: wgpu::FrontFace::Ccw,
             ..wgpu::PrimitiveState::default()
         };

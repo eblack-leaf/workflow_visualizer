@@ -114,6 +114,8 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
 </pre></div><pre class="rust"><code><span class="comment">// #![allow(unused, dead_code)]
 </span><span class="doccomment">//! Workflow Visualizer is a lib for cross-platform declarative UI
 //! It is comprised of three major parts.
@@ -191,6 +193,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::time::{TimeDelta, TimeMarker, TimeTracker, Timer};
 <span class="kw">pub use </span><span class="kw">crate</span>::uniform::{AlignedUniform, Uniform};
 <span class="kw">pub use </span><span class="kw">crate</span>::visibility::{EnableVisibility, Visibility, VisibleSection};
+<span class="kw">pub use </span><span class="kw">crate</span>::visual_debug::SectionOutline;
 <span class="kw">pub use </span><span class="kw">crate</span>::window::WindowResize;
 <span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::workflow::AndroidInterface;
@@ -227,6 +230,7 @@
 <span class="kw">mod </span>viewport;
 <span class="kw">mod </span>virtual_keyboard;
 <span class="kw">mod </span>visibility;
+<span class="kw">mod </span>visual_debug;
 <span class="kw">mod </span>visualizer;
 <span class="kw">mod </span>window;
 <span class="kw">mod </span>workflow;

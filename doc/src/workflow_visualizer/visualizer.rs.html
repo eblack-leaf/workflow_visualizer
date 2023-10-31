@@ -487,6 +487,8 @@
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
 <a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 
@@ -521,6 +523,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::viewport::ViewportAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::virtual_keyboard::VirtualKeyboardAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::visibility::VisibilityAttachment;
+<span class="kw">use </span><span class="kw">crate</span>::visual_debug::VisualDebugAttachment;
 <span class="kw">use </span><span class="kw">crate</span>::window::WindowAttachment;
 <span class="kw">use crate</span>::{
     Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
@@ -663,6 +666,7 @@
         <span class="self">self</span>.invoke_attach::&lt;CoordinateAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ColorAttachment&gt;();
         <span class="self">self</span>.invoke_attach::&lt;ClipboardAttachment&gt;();
+        <span class="self">self</span>.invoke_attach::&lt;VisualDebugAttachment&gt;();
         <span class="self">self</span>.attach_from_queue();
         <span class="self">self</span>.setup();
         <span class="self">self</span>.render_task_manager.transparent.sort_by(
