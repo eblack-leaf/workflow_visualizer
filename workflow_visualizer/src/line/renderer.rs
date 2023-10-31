@@ -118,7 +118,7 @@ impl Render for LineRenderer {
             }],
         };
         let primitive_state = wgpu::PrimitiveState {
-            topology: wgpu::PrimitiveTopology::LineList,
+            topology: wgpu::PrimitiveTopology::LineStrip,
             front_face: wgpu::FrontFace::Ccw,
             ..wgpu::PrimitiveState::default()
         };

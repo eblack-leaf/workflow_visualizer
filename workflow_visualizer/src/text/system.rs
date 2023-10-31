@@ -65,6 +65,13 @@ pub(crate) fn place(
             max_width: Some(area.width),
             max_height: Some(area.height),
             wrap_style: wrap_style.0,
+            line_height: if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 3 {
+                0.75
+            } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
+                0.8
+            } else {
+                0.85
+            },
             ..LayoutSettings::default()
         });
         placer.0.append(
@@ -78,21 +85,22 @@ pub(crate) fn place(
             .iter()
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
-        // for (_key, glyph_position) in placement.0.iter_mut() {
-        //     let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
-        //         && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
-        //     {
-        //         8.5f32
-        //     } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
-        //         11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
-        //     } else {
-        //         0f32
-        //     };
-        //     if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE {
-        //         let factor = text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32;
-        //         glyph_position.y -= base * factor;
-        //     }
-        // }
+        for (_key, glyph_position) in placement.0.iter_mut() {
+            let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
+                && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
+            {
+                8.5f32
+            } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
+                11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
+            } else {
+                1f32
+            };
+            if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE {
+                let factor =
+                    (text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32).min(2.0);
+                glyph_position.y -= base * factor;
+            }
+        }
     }
 }
 pub(crate) fn letter_differential(

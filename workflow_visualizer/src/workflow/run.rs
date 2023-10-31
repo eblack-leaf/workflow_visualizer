@@ -26,12 +26,10 @@ pub(crate) fn internal_loop<T: Workflow + 'static>(
             StartCause::Init => {
                 #[cfg(not(target_os = "android"))]
                 {
-
-                        #[cfg(not(target_family = "wasm"))]
-                        initialize_native_window(event_loop_window_target, window, desktop_dimensions);
-                        visualizer.initialize(window.as_ref().unwrap());
-                        *initialized = true;
-
+                    #[cfg(not(target_family = "wasm"))]
+                    initialize_native_window(event_loop_window_target, window, desktop_dimensions);
+                    visualizer.initialize(window.as_ref().unwrap());
+                    *initialized = true;
                 }
             }
             _ => {}

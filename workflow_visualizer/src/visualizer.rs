@@ -32,6 +32,7 @@ use crate::time::TimerAttachment;
 use crate::viewport::ViewportAttachment;
 use crate::virtual_keyboard::VirtualKeyboardAttachment;
 use crate::visibility::VisibilityAttachment;
+use crate::visual_debug::VisualDebugAttachment;
 use crate::window::WindowAttachment;
 use crate::{
     Animate, Area, DeviceContext, GfxOptions, GfxSurface, InteractionEvent, InteractionPhase, Job,
@@ -174,6 +175,7 @@ impl Visualizer {
         self.invoke_attach::<CoordinateAttachment>();
         self.invoke_attach::<ColorAttachment>();
         self.invoke_attach::<ClipboardAttachment>();
+        self.invoke_attach::<VisualDebugAttachment>();
         self.attach_from_queue();
         self.setup();
         self.render_task_manager.transparent.sort_by(

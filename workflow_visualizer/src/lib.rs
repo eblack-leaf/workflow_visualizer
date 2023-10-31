@@ -75,6 +75,7 @@ pub use crate::theme::{Theme, ThemeDescriptor};
 pub use crate::time::{TimeDelta, TimeMarker, TimeTracker, Timer};
 pub use crate::uniform::{AlignedUniform, Uniform};
 pub use crate::visibility::{EnableVisibility, Visibility, VisibleSection};
+pub use crate::visual_debug::SectionOutline;
 pub use crate::window::WindowResize;
 #[cfg(target_os = "android")]
 pub use crate::workflow::AndroidInterface;
@@ -111,6 +112,7 @@ mod uniform;
 mod viewport;
 mod virtual_keyboard;
 mod visibility;
+mod visual_debug;
 mod visualizer;
 mod window;
 mod workflow;
