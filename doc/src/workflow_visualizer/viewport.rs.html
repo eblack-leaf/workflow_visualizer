@@ -307,7 +307,6 @@
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::coord::area::Area;
 <span class="kw">use </span><span class="kw">crate</span>::coord::layer::Layer;
 <span class="kw">use </span><span class="kw">crate</span>::coord::position::Position;
@@ -317,7 +316,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::uniform::Uniform;
 <span class="kw">use </span><span class="kw">crate</span>::visualizer::{Attach, Visualizer};
 <span class="kw">use </span><span class="kw">crate</span>::window::{gfx_resize, WindowResize};
-<span class="kw">use crate</span>::{InterfaceContext, ScaleFactor, SyncPoint, WindowAppearanceFactor};
+<span class="kw">use crate</span>::{InterfaceContext, LayerCompositor, ScaleFactor, SyncPoint, WindowAppearanceFactor};
 <span class="kw">use </span>bevy_ecs::change_detection::{Res, ResMut};
 <span class="kw">use </span>bevy_ecs::event::EventReader;
 <span class="kw">use </span>bevy_ecs::prelude::{IntoSystemConfigs, Resource};
@@ -380,8 +379,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.bind_group
     }
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(device: <span class="kw-2">&amp;</span>wgpu::Device, area: Area&lt;DeviceContext&gt;, sample_count: u32) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>depth = <span class="number">100u32</span>.into();
-        <span class="kw">let </span>cpu_viewport = CpuViewport::new(area, depth);
+        <span class="kw">let </span>cpu_viewport = CpuViewport::new(area, LayerCompositor::FAR_LAYER.into());
         <span class="kw">let </span>gpu_viewport = cpu_viewport.gpu_viewport();
         <span class="kw">let </span>uniform = Uniform::new(device, gpu_viewport);
         <span class="kw">let </span>bind_group_layout = device.create_bind_group_layout(<span class="kw-2">&amp;</span>wgpu::BindGroupLayoutDescriptor {
@@ -453,7 +451,7 @@
         sample_count: u32,
     ) {
         <span class="kw">let </span>area = Area::&lt;DeviceContext&gt;::new(width <span class="kw">as </span>f32, height <span class="kw">as </span>f32);
-        <span class="self">self</span>.cpu = CpuViewport::new(area, <span class="number">100u32</span>.into());
+        <span class="self">self</span>.cpu = CpuViewport::new(area, LayerCompositor::FAR_LAYER.into());
         <span class="self">self</span>.gpu = <span class="self">self</span>.cpu.gpu_viewport();
         <span class="self">self</span>.uniform.update(<span class="kw-2">&amp;</span>gfx_surface.queue, <span class="self">self</span>.gpu);
         <span class="self">self</span>.depth_texture =

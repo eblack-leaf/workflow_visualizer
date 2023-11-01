@@ -712,19 +712,6 @@
 <a href="#712" id="712">712</a>
 <a href="#713" id="713">713</a>
 <a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
@@ -772,6 +759,7 @@
         (
             <span class="kw-2">&amp;mut </span>Placer,
             <span class="kw-2">&amp;mut </span>Placement,
+            <span class="kw-2">&amp;mut </span>TextLineStructure,
             <span class="kw-2">&amp;</span>TextValue,
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>TextWrapStyle,
@@ -786,7 +774,9 @@
     fonts: Res&lt;MonoSpacedFont&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
-    <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, text, area, wrap_style, text_scale) <span class="kw">in </span>text_query.iter_mut() {
+    <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, <span class="kw-2">mut </span>line_structure, text, area, wrap_style, text_scale) <span class="kw">in
+        </span>text_query.iter_mut()
+    {
         <span class="kw">let </span>area = area.to_device(scale_factor.factor());
         placer.<span class="number">0</span>.reset(<span class="kw-2">&amp;</span>LayoutSettings {
             max_width: <span class="prelude-val">Some</span>(area.width),
@@ -812,23 +802,30 @@
             .iter()
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
-        <span class="kw">for </span>(_key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
-            <span class="kw">let </span>base = <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE
-                &amp;&amp; text_scale.<span class="number">0 </span>&lt;= MonoSpacedFont::FACTOR_BASE_SCALE * <span class="number">2
-            </span>{
-                <span class="number">8.5f32
-            </span>} <span class="kw">else if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE * <span class="number">2 </span>{
-                <span class="number">11.5f32 </span>* (text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / <span class="number">120f32</span>).min(<span class="number">1.0</span>)
-            } <span class="kw">else </span>{
-                <span class="number">1f32
-            </span>};
-            <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE {
-                <span class="kw">let </span>factor =
-                    (text_scale.<span class="number">0 </span><span class="kw">as </span>f32 / MonoSpacedFont::FACTOR_BASE_SCALE <span class="kw">as </span>f32).min(<span class="number">2.0</span>);
-                glyph_position.y -= base * factor;
+        <span class="comment">// TODO line structure here
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(lines) = placer.<span class="number">0</span>.lines() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(first) = lines.first() {
+                <span class="macro">print!</span>(<span class="string">&quot;{:?}&quot;</span>, first.max_ascent);
             }
         }
-    }
+        <span class="comment">// for (_key, glyph_position) in placement.0.iter_mut() {
+        //     let base = if text_scale.0 &gt; MonoSpacedFont::FACTOR_BASE_SCALE
+        //         &amp;&amp; text_scale.0 &lt;= MonoSpacedFont::FACTOR_BASE_SCALE * 2
+        //     {
+        //         8.5f32
+        //     } else if text_scale.0 &gt; MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
+        //         11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
+        //     } else {
+        //         1f32
+        //     };
+        //     if text_scale.0 &gt; MonoSpacedFont::FACTOR_BASE_SCALE {
+        //         let factor =
+        //             (text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32).min(2.0);
+        //         glyph_position.y -= base * factor;
+        //         glyph_position.y = glyph_position.y.max(1.0);
+        //     }
+        // }
+    </span>}
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>letter_differential(
     <span class="kw-2">mut </span>text_query: Query&lt;
@@ -900,8 +897,6 @@
         (
             <span class="kw-2">&amp;</span>Placement,
             <span class="kw-2">&amp;mut </span>FilteredPlacement,
-            <span class="kw-2">&amp;mut </span>TextGridPlacement,
-            <span class="kw-2">&amp;mut </span>TextLineStructure,
             <span class="kw-2">&amp;</span>VisibleSection,
             <span class="kw-2">&amp;</span>Position&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
@@ -911,24 +906,14 @@
     &gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
-    <span class="kw">for </span>(
-        placement,
-        <span class="kw-2">mut </span>filtered_placement,
-        <span class="kw-2">mut </span>grid_placement,
-        <span class="kw-2">mut </span>text_line_structure,
-        visible_section,
-        pos,
-        area,
-        text_letter_dimensions,
-    ) <span class="kw">in </span>text_query.iter_mut()
+    <span class="kw">for </span>(placement, <span class="kw-2">mut </span>filtered_placement, visible_section, pos, area, text_letter_dimensions) <span class="kw">in
+        </span>text_query.iter_mut()
     {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(v_sec) = visible_section.section {
             filtered_placement.<span class="number">0 </span>= placement.<span class="number">0</span>.clone();
-            grid_placement.<span class="number">0 </span>= HashMap::new();
             <span class="kw">let </span><span class="kw-2">mut </span>filter_queue = HashSet::new();
             <span class="kw">let </span>position = pos.to_device(scale_factor.factor());
-            <span class="comment">// let position = Position::new(position.x.floor(), position.y.floor());
-            </span><span class="kw">let </span>v_sec = v_sec.to_device(scale_factor.factor());
+            <span class="kw">let </span>v_sec = v_sec.to_device(scale_factor.factor());
             <span class="kw">for </span>(key, glyph_pos) <span class="kw">in </span>placement.<span class="number">0</span>.iter() {
                 <span class="kw">if </span>glyph_pos.parent.is_ascii_control() {
                     filter_queue.insert(<span class="kw-2">*</span>key);
@@ -938,11 +923,6 @@
                     (position.x + glyph_pos.x, position.y + glyph_pos.y),
                     (glyph_pos.width, glyph_pos.height),
                 ));
-                <span class="kw">let </span>grid_location = TextGridLocation::from_position(
-                    glyph_section.position - position,
-                    <span class="kw-2">*</span>text_letter_dimensions,
-                );
-                grid_placement.<span class="number">0</span>.insert(grid_location, <span class="kw-2">*</span>key);
                 <span class="kw">if </span>!v_sec.is_overlapping(glyph_section) {
                     filter_queue.insert(<span class="kw-2">*</span>key);
                 }
@@ -950,23 +930,17 @@
             filtered_placement
                 .<span class="number">0
                 </span>.retain(|(key, <span class="kw">_</span>)| !filter_queue.contains(key));
-            <span class="kw-2">*</span>text_line_structure = TextLineStructure::from_grid_placement(
-                <span class="kw-2">&amp;</span>grid_placement,
-                area,
-                text_letter_dimensions,
-                scale_factor.factor(),
-            );
         }
     }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>scale_change(
     <span class="kw-2">mut </span>text_query: Query&lt;(<span class="kw-2">&amp;mut </span>TextLetterDimensions, <span class="kw-2">&amp;mut </span>TextScale), Changed&lt;TextScale&gt;&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
-    fonts: Res&lt;MonoSpacedFont&gt;,
+    font: Res&lt;MonoSpacedFont&gt;,
 ) {
     <span class="kw">for </span>(<span class="kw-2">mut </span>text_letter_dimensions, <span class="kw-2">mut </span>text_scale) <span class="kw">in </span>text_query.iter_mut() {
         text_scale.<span class="number">0 </span>= (text_scale.<span class="number">0 </span><span class="kw">as </span>f32 * scale_factor.factor()) <span class="kw">as </span>u32;
-        <span class="kw">let </span>letter_dimensions = fonts.character_dimensions(text_scale.px());
+        <span class="kw">let </span>letter_dimensions = font.character_dimensions(text_scale.px());
         <span class="kw">let </span>letter_dimensions =
             Area::&lt;DeviceContext&gt;::from((letter_dimensions.width, letter_dimensions.height));
         <span class="kw-2">*</span>text_letter_dimensions = TextLetterDimensions(letter_dimensions);

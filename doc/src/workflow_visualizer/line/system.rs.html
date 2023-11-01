@@ -128,13 +128,34 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::line::line_render::LineRenderPoints;
 <span class="kw">use </span><span class="kw">crate</span>::line::renderer::{LineRenderGpu, LineRenderGroup, LineRenderer};
 <span class="kw">use </span><span class="kw">crate</span>::line::LineRender;
 <span class="kw">use </span><span class="kw">crate</span>::path::Path;
 <span class="kw">use crate</span>::{
     AlignedUniform, Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor,
-    Visibility,
+    Section, Visibility,
 };
 <span class="attr">#[cfg(not(target_family = <span class="string">&quot;wasm&quot;</span>))]
 </span><span class="kw">use </span>bevy_ecs::prelude::ResMut;
@@ -154,11 +175,32 @@
     &gt;,
 ) {
     <span class="kw">for </span>(_path, <span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area) <span class="kw">in </span>lines.iter_mut() {
-        <span class="comment">// TODO remove this and calc section of line by farthest bounds
-        </span><span class="kw-2">*</span>pos = (<span class="number">100</span>, <span class="number">100</span>).into();
-        <span class="kw-2">*</span>area = (<span class="number">100</span>, <span class="number">100</span>).into();
-        <span class="comment">// end TODO
-    </span>}
+        <span class="kw">if </span>_path.points.is_empty() {
+            <span class="kw">continue</span>;
+        }
+        <span class="kw">let </span>primer = _path.points.get(<span class="number">0</span>).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>left = primer.x;
+        <span class="kw">let </span><span class="kw-2">mut </span>right = primer.x;
+        <span class="kw">let </span><span class="kw-2">mut </span>top = primer.y;
+        <span class="kw">let </span><span class="kw-2">mut </span>bottom = primer.y;
+        <span class="kw">for </span>point <span class="kw">in </span>_path.points.iter() {
+            <span class="kw">if </span>point.x &lt; left {
+                left = point.x;
+            }
+            <span class="kw">if </span>point.x &gt; right {
+                right = point.x;
+            }
+            <span class="kw">if </span>point.y &lt; top {
+                top = point.x;
+            }
+            <span class="kw">if </span>point.y &gt; bottom {
+                bottom = point.x;
+            }
+        }
+        <span class="kw">let </span>section = Section::from_left_top_right_bottom(left, top, right, bottom);
+        <span class="kw-2">*</span>pos = section.position;
+        <span class="kw-2">*</span>area = section.area;
+    }
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>scale_path(
