@@ -574,7 +574,7 @@
                 <span class="comment">// TODO integrate this into text_section_descriptor to get correct text for bounds
                 // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 </span><span class="kw">let </span>dims = font.character_dimensions(new_scale.px());
-                <span class="kw">let </span>expected = button_area.height * MonoSpacedFont::TEXT_HEIGHT_CORRECTION;
+                <span class="kw">let </span>expected = button_area.height * <span class="number">0.95</span>;
                 <span class="kw">let </span>actual = dims.height;
                 <span class="kw">if </span>actual &lt; expected {
                     <span class="kw">let </span><span class="kw-2">mut </span>diff = expected - actual;
