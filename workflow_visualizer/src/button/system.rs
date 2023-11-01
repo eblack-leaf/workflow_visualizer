@@ -162,7 +162,7 @@ pub(crate) fn scale_change(
     mut listeners: Query<
         (
             &mut Position<InterfaceContext>,
-            &Area<InterfaceContext>,
+            &mut Area<InterfaceContext>,
             Option<&mut TextScale>,
             Option<&mut IconScale>,
             Option<&TextValue>,
@@ -196,7 +196,7 @@ pub(crate) fn scale_change(
             }
         }
         if let Some(entity) = text_entity.0 {
-            if let Ok((mut pos, area, scale, _, text_value)) = listeners.get_mut(entity) {
+            if let Ok((mut pos, mut area, scale, _, text_value)) = listeners.get_mut(entity) {
                 let new_scale = font
                     .text_section_descriptor(
                         *pos,
@@ -208,12 +208,13 @@ pub(crate) fn scale_change(
                 // TODO integrate this into text_section_descriptor to get correct text for bounds
                 // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 let dims = font.character_dimensions(new_scale.px());
-                let expected = button_area.height * 0.85;
+                let expected = button_area.height * MonoSpacedFont::TEXT_HEIGHT_CORRECTION;
                 let actual = dims.height;
                 if actual < expected {
                     let mut diff = expected - actual;
                     diff /= 2f32;
                     pos.y += diff;
+                    area.height -= diff;
                 }
             }
         }

@@ -6,6 +6,7 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::Resource;
 use bevy_ecs::prelude::{Bundle, Component, Event, Events, IntoSystemConfigs};
 use tracing::{info, trace};
+use wasm_bindgen::JsValue;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{ElementState, MouseButton};
 use winit::window::Window;

@@ -68,7 +68,7 @@ pub(crate) fn place(
             max_width: Some(area.width),
             max_height: Some(area.height),
             wrap_style: wrap_style.0,
-            line_height: 0.8,
+            line_height: MonoSpacedFont::TEXT_HEIGHT_CORRECTION,
             ..LayoutSettings::default()
         });
         placer.0.append(
@@ -83,13 +83,8 @@ pub(crate) fn place(
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
         // TODO line structure here
-        let mut diff = 0f32;
-        if let Some(lines) = placer.0.lines() {
-            if let Some(first) = lines.first() {
-                print!("{:?}", first.max_ascent);
-                diff = first.padding / 2f32;
-            }
-        }
+        let diff = (1f32 - MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+            * fonts.character_dimensions(text_scale.px()).height;
         for (_key, glyph_position) in placement.0.iter_mut() {
             glyph_position.y -= diff;
         }
