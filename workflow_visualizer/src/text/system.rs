@@ -45,6 +45,7 @@ pub(crate) fn place(
         (
             &mut Placer,
             &mut Placement,
+            &mut TextLineStructure,
             &TextValue,
             &Area<InterfaceContext>,
             &TextWrapStyle,
@@ -59,7 +60,9 @@ pub(crate) fn place(
     fonts: Res<MonoSpacedFont>,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, mut placement, text, area, wrap_style, text_scale) in text_query.iter_mut() {
+    for (mut placer, mut placement, mut line_structure, text, area, wrap_style, text_scale) in
+        text_query.iter_mut()
+    {
         let area = area.to_device(scale_factor.factor());
         placer.0.reset(&LayoutSettings {
             max_width: Some(area.width),
@@ -85,22 +88,29 @@ pub(crate) fn place(
             .iter()
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
-        for (_key, glyph_position) in placement.0.iter_mut() {
-            let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
-                && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
-            {
-                8.5f32
-            } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
-                11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
-            } else {
-                1f32
-            };
-            if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE {
-                let factor =
-                    (text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32).min(2.0);
-                glyph_position.y -= base * factor;
+        // TODO line structure here
+        if let Some(lines) = placer.0.lines() {
+            if let Some(first) = lines.first() {
+                print!("{:?}", first.max_ascent);
             }
         }
+        // for (_key, glyph_position) in placement.0.iter_mut() {
+        //     let base = if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE
+        //         && text_scale.0 <= MonoSpacedFont::FACTOR_BASE_SCALE * 2
+        //     {
+        //         8.5f32
+        //     } else if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
+        //         11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
+        //     } else {
+        //         1f32
+        //     };
+        //     if text_scale.0 > MonoSpacedFont::FACTOR_BASE_SCALE {
+        //         let factor =
+        //             (text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32).min(2.0);
+        //         glyph_position.y -= base * factor;
+        //         glyph_position.y = glyph_position.y.max(1.0);
+        //     }
+        // }
     }
 }
 pub(crate) fn letter_differential(
@@ -173,8 +183,6 @@ pub(crate) fn filter(
         (
             &Placement,
             &mut FilteredPlacement,
-            &mut TextGridPlacement,
-            &mut TextLineStructure,
             &VisibleSection,
             &Position<InterfaceContext>,
             &Area<InterfaceContext>,
@@ -184,23 +192,13 @@ pub(crate) fn filter(
     >,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (
-        placement,
-        mut filtered_placement,
-        mut grid_placement,
-        mut text_line_structure,
-        visible_section,
-        pos,
-        area,
-        text_letter_dimensions,
-    ) in text_query.iter_mut()
+    for (placement, mut filtered_placement, visible_section, pos, area, text_letter_dimensions) in
+        text_query.iter_mut()
     {
         if let Some(v_sec) = visible_section.section {
             filtered_placement.0 = placement.0.clone();
-            grid_placement.0 = HashMap::new();
             let mut filter_queue = HashSet::new();
             let position = pos.to_device(scale_factor.factor());
-            // let position = Position::new(position.x.floor(), position.y.floor());
             let v_sec = v_sec.to_device(scale_factor.factor());
             for (key, glyph_pos) in placement.0.iter() {
                 if glyph_pos.parent.is_ascii_control() {
@@ -211,11 +209,6 @@ pub(crate) fn filter(
                     (position.x + glyph_pos.x, position.y + glyph_pos.y),
                     (glyph_pos.width, glyph_pos.height),
                 ));
-                let grid_location = TextGridLocation::from_position(
-                    glyph_section.position - position,
-                    *text_letter_dimensions,
-                );
-                grid_placement.0.insert(grid_location, *key);
                 if !v_sec.is_overlapping(glyph_section) {
                     filter_queue.insert(*key);
                 }
@@ -223,23 +216,17 @@ pub(crate) fn filter(
             filtered_placement
                 .0
                 .retain(|(key, _)| !filter_queue.contains(key));
-            *text_line_structure = TextLineStructure::from_grid_placement(
-                &grid_placement,
-                area,
-                text_letter_dimensions,
-                scale_factor.factor(),
-            );
         }
     }
 }
 pub(crate) fn scale_change(
     mut text_query: Query<(&mut TextLetterDimensions, &mut TextScale), Changed<TextScale>>,
     scale_factor: Res<ScaleFactor>,
-    fonts: Res<MonoSpacedFont>,
+    font: Res<MonoSpacedFont>,
 ) {
     for (mut text_letter_dimensions, mut text_scale) in text_query.iter_mut() {
         text_scale.0 = (text_scale.0 as f32 * scale_factor.factor()) as u32;
-        let letter_dimensions = fonts.character_dimensions(text_scale.px());
+        let letter_dimensions = font.character_dimensions(text_scale.px());
         let letter_dimensions =
             Area::<DeviceContext>::from((letter_dimensions.width, letter_dimensions.height));
         *text_letter_dimensions = TextLetterDimensions(letter_dimensions);

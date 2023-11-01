@@ -41,3 +41,37 @@ where
     fn exit_action() -> Self::Action;
     fn is_exit_response(res: &Self::Response) -> bool;
 }
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum NoOpAction {
+    ExitRequest,
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum NoOpResponse {
+    ExitResponse,
+}
+#[derive(Default, Copy, Clone)]
+pub struct NoOp {}
+#[async_trait]
+impl Workflow for NoOp {
+    type Action = NoOpAction;
+    type Response = NoOpResponse;
+
+    fn handle_response(_visualizer: &mut Visualizer, _response: Self::Response) {}
+
+    async fn handle_action(_engen: Arc<Mutex<Self>>, action: Self::Action) -> Self::Response {
+        match action {
+            NoOpAction::ExitRequest => Self::Response::ExitResponse,
+        }
+    }
+
+    fn exit_action() -> Self::Action {
+        NoOpAction::ExitRequest
+    }
+
+    fn is_exit_response(res: &Self::Response) -> bool {
+        match res {
+            NoOpResponse::ExitResponse => true,
+            _ => false,
+        }
+    }
+}

@@ -7,7 +7,7 @@ use crate::gfx::{GfxSurface, GfxSurfaceConfiguration, MsaaRenderAdapter};
 use crate::uniform::Uniform;
 use crate::visualizer::{Attach, Visualizer};
 use crate::window::{gfx_resize, WindowResize};
-use crate::{InterfaceContext, ScaleFactor, SyncPoint, WindowAppearanceFactor};
+use crate::{InterfaceContext, LayerCompositor, ScaleFactor, SyncPoint, WindowAppearanceFactor};
 use bevy_ecs::change_detection::{Res, ResMut};
 use bevy_ecs::event::EventReader;
 use bevy_ecs::prelude::{IntoSystemConfigs, Resource};
@@ -70,8 +70,7 @@ impl Viewport {
         &self.bind_group
     }
     pub(crate) fn new(device: &wgpu::Device, area: Area<DeviceContext>, sample_count: u32) -> Self {
-        let depth = 100u32.into();
-        let cpu_viewport = CpuViewport::new(area, depth);
+        let cpu_viewport = CpuViewport::new(area, LayerCompositor::FAR_LAYER.into());
         let gpu_viewport = cpu_viewport.gpu_viewport();
         let uniform = Uniform::new(device, gpu_viewport);
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -143,7 +142,7 @@ impl Viewport {
         sample_count: u32,
     ) {
         let area = Area::<DeviceContext>::new(width as f32, height as f32);
-        self.cpu = CpuViewport::new(area, 100u32.into());
+        self.cpu = CpuViewport::new(area, LayerCompositor::FAR_LAYER.into());
         self.gpu = self.cpu.gpu_viewport();
         self.uniform.update(&gfx_surface.queue, self.gpu);
         self.depth_texture =

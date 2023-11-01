@@ -4,7 +4,7 @@ use crate::line::LineRender;
 use crate::path::Path;
 use crate::{
     AlignedUniform, Area, Color, GfxSurface, InterfaceContext, Layer, Position, ScaleFactor,
-    Visibility,
+    Section, Visibility,
 };
 #[cfg(not(target_family = "wasm"))]
 use bevy_ecs::prelude::ResMut;
@@ -24,10 +24,31 @@ pub(crate) fn calc_section(
     >,
 ) {
     for (_path, mut pos, mut area) in lines.iter_mut() {
-        // TODO remove this and calc section of line by farthest bounds
-        *pos = (100, 100).into();
-        *area = (100, 100).into();
-        // end TODO
+        if _path.points.is_empty() {
+            continue;
+        }
+        let primer = _path.points.get(0).unwrap();
+        let mut left = primer.x;
+        let mut right = primer.x;
+        let mut top = primer.y;
+        let mut bottom = primer.y;
+        for point in _path.points.iter() {
+            if point.x < left {
+                left = point.x;
+            }
+            if point.x > right {
+                right = point.x;
+            }
+            if point.y < top {
+                top = point.x;
+            }
+            if point.y > bottom {
+                bottom = point.x;
+            }
+        }
+        let section = Section::from_left_top_right_bottom(left, top, right, bottom);
+        *pos = section.position;
+        *area = section.area;
     }
 }
 
