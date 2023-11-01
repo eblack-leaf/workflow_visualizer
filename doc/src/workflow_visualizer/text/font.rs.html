@@ -173,7 +173,7 @@
 
 <span class="kw">impl </span>MonoSpacedFont {
     <span class="kw">pub const </span>DEFAULT_OPT_SCALE: u32 = <span class="number">80u32</span>;
-
+    <span class="kw">pub const </span>TEXT_HEIGHT_CORRECTION: f32 = <span class="number">0.85</span>;
     <span class="kw">pub const </span>FACTOR_BASE_SCALE: u32 = <span class="number">40u32</span>;
     <span class="kw">pub const </span>MAX_CHECKED_TEXT_SCALE: u32 = <span class="number">400u32</span>;
     <span class="kw">pub fn </span>jet_brains_mono&lt;T: Into&lt;TextScale&gt;&gt;(opt_scale: T) -&gt; <span class="self">Self </span>{

@@ -366,7 +366,6 @@
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>bevy_ecs::change_detection::Res;
 <span class="kw">use </span>bevy_ecs::entity::Entity;
 <span class="kw">use </span>bevy_ecs::prelude::{Added, Changed, Commands, Or, Query, RemovedComponents, With, Without};
@@ -442,9 +441,8 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(icon) = button_icon.desc.as_ref() {
             <span class="kw">let </span>entity = cmd
                 .spawn(
-                    Icon::new(<span class="kw-2">*</span>icon, <span class="number">0</span>, <span class="kw-2">*</span>layer - Layer::from(<span class="number">1</span>), <span class="kw-2">*</span>color)
-                        .extend(SectionOutline::default()),
-                )
+                    Icon::new(<span class="kw-2">*</span>icon, <span class="number">0</span>, <span class="kw-2">*</span>layer - Layer::from(<span class="number">1</span>), <span class="kw-2">*</span>color), <span class="comment">// .extend(SectionOutline::default()),
+                </span>)
                 .id();
             icon_entity.<span class="number">0</span>.replace(entity);
         }
@@ -457,9 +455,8 @@
                         <span class="number">0</span>,
                         <span class="kw-2">*</span>color,
                         TextWrapStyle::letter(),
-                    )
-                    .extend(SectionOutline::default()),
-                )
+                    ), <span class="comment">// .extend(SectionOutline::default()),
+                </span>)
                 .id(),
             );
         }
@@ -531,7 +528,7 @@
     <span class="kw-2">mut </span>listeners: Query&lt;
         (
             <span class="kw-2">&amp;mut </span>Position&lt;InterfaceContext&gt;,
-            <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
+            <span class="kw-2">&amp;mut </span>Area&lt;InterfaceContext&gt;,
             <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>TextScale&gt;,
             <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>IconScale&gt;,
             <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TextValue&gt;,
@@ -565,7 +562,7 @@
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(entity) = text_entity.<span class="number">0 </span>{
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>pos, area, scale, <span class="kw">_</span>, text_value)) = listeners.get_mut(entity) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>((<span class="kw-2">mut </span>pos, <span class="kw-2">mut </span>area, scale, <span class="kw">_</span>, text_value)) = listeners.get_mut(entity) {
                 <span class="kw">let </span>new_scale = font
                     .text_section_descriptor(
                         <span class="kw-2">*</span>pos,
@@ -577,12 +574,13 @@
                 <span class="comment">// TODO integrate this into text_section_descriptor to get correct text for bounds
                 // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 </span><span class="kw">let </span>dims = font.character_dimensions(new_scale.px());
-                <span class="kw">let </span>expected = button_area.height * <span class="number">0.85</span>;
+                <span class="kw">let </span>expected = button_area.height * MonoSpacedFont::TEXT_HEIGHT_CORRECTION;
                 <span class="kw">let </span>actual = dims.height;
                 <span class="kw">if </span>actual &lt; expected {
                     <span class="kw">let </span><span class="kw-2">mut </span>diff = expected - actual;
                     diff /= <span class="number">2f32</span>;
                     pos.y += diff;
+                    area.height -= diff;
                 }
             }
         }

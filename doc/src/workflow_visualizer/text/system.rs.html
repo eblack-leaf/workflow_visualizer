@@ -689,11 +689,6 @@
 <a href="#689" id="689">689</a>
 <a href="#690" id="690">690</a>
 <a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
-<a href="#694" id="694">694</a>
-<a href="#695" id="695">695</a>
-<a href="#696" id="696">696</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
@@ -764,7 +759,7 @@
             max_width: <span class="prelude-val">Some</span>(area.width),
             max_height: <span class="prelude-val">Some</span>(area.height),
             wrap_style: wrap_style.<span class="number">0</span>,
-            line_height: <span class="number">0.8</span>,
+            line_height: MonoSpacedFont::TEXT_HEIGHT_CORRECTION,
             ..LayoutSettings::default()
         });
         placer.<span class="number">0</span>.append(
@@ -779,13 +774,8 @@
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
         <span class="comment">// TODO line structure here
-        </span><span class="kw">let </span><span class="kw-2">mut </span>diff = <span class="number">0f32</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(lines) = placer.<span class="number">0</span>.lines() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(first) = lines.first() {
-                <span class="macro">print!</span>(<span class="string">&quot;{:?}&quot;</span>, first.max_ascent);
-                diff = first.padding / <span class="number">2f32</span>;
-            }
-        }
+        </span><span class="kw">let </span>diff = (<span class="number">1f32 </span>- MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+            * fonts.character_dimensions(text_scale.px()).height;
         <span class="kw">for </span>(_key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
             glyph_position.y -= diff;
         }
