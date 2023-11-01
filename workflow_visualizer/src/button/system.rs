@@ -73,8 +73,7 @@ pub(crate) fn spawn(
         if let Some(icon) = button_icon.desc.as_ref() {
             let entity = cmd
                 .spawn(
-                    Icon::new(*icon, 0, *layer - Layer::from(1), *color)
-                        .extend(SectionOutline::default()),
+                    Icon::new(*icon, 0, *layer - Layer::from(1), *color), // .extend(SectionOutline::default()),
                 )
                 .id();
             icon_entity.0.replace(entity);
@@ -88,8 +87,7 @@ pub(crate) fn spawn(
                         0,
                         *color,
                         TextWrapStyle::letter(),
-                    )
-                    .extend(SectionOutline::default()),
+                    ), // .extend(SectionOutline::default()),
                 )
                 .id(),
             );
