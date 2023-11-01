@@ -17,7 +17,11 @@ pub(crate) fn section_outline(
             &Area<InterfaceContext>,
             &Layer,
         ),
-        Changed<SectionOutline>,
+        Or<(
+            Changed<SectionOutline>,
+            Changed<Position<InterfaceContext>>,
+            Changed<Area<InterfaceContext>>,
+        )>,
     >,
     mut cmd: Commands,
 ) {
@@ -35,26 +39,11 @@ pub(crate) fn section_outline(
         outline.0.replace(id);
     }
 }
-pub(crate) fn changed_outline(
-    query: Query<
-        (
-            &SectionOutline,
-            &Position<InterfaceContext>,
-            &Area<InterfaceContext>,
-        ),
-        Or<(
-            Changed<Position<InterfaceContext>>,
-            Changed<Area<InterfaceContext>>,
-        )>,
-    >,
-) {
-}
 pub(crate) struct VisualDebugAttachment;
 impl Attach for VisualDebugAttachment {
     fn attach(visualizer: &mut Visualizer) {
-        visualizer.task(Visualizer::TASK_MAIN).add_systems((
-            section_outline.in_set(SyncPoint::PostSpawn),
-            changed_outline.in_set(SyncPoint::Reconfigure),
-        ));
+        visualizer
+            .task(Visualizer::TASK_MAIN)
+            .add_systems((section_outline.in_set(SyncPoint::PostSpawn),));
     }
 }

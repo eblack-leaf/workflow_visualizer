@@ -12,9 +12,9 @@ impl Attach for EntryAttachment {
         visualizer.spawn(
             Text::new(
                 5,
-                "&Dequg TetaT ete aseto acetuta oeuhtao",
+                "&Dgqu9 TetaT ete aseto acetuta oeuhtao",
                 122,
-                Color::GREY_MEDIUM,
+                Color::CYAN_DARK,
                 TextWrapStyle::letter(),
             )
             .extend(ResponsiveGridView::new(
@@ -34,8 +34,8 @@ impl Attach for EntryAttachment {
                 ButtonType::Press,
                 5,
                 Color::OFF_BLACK,
-                Color::GREY_MEDIUM,
-                ButtonText::some(TextValue("hello".to_string())),
+                Color::CYAN_DARK,
+                ButtonText::some(TextValue("99999".to_string())),
                 ButtonIcon::some(0.into()),
                 ButtonBorder::None,
             )

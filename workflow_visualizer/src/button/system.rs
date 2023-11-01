@@ -7,9 +7,10 @@ use crate::button::{ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntit
 use crate::icon::Icon;
 use crate::snap_grid::{FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView};
 use crate::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, ButtonTag, ButtonType, Color, IconScale,
-    InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, Text, TextScale,
-    TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled,
+    ActiveInteraction, Area, BackgroundColor, BorderColor, BundleExtension, ButtonTag, ButtonType,
+    Color, IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType,
+    Position, SectionOutline, Text, TextScale, TextSectionDescriptorKnown, TextValue,
+    TextWrapStyle, Toggled,
 };
 
 pub(crate) fn border_change(
@@ -71,19 +72,25 @@ pub(crate) fn spawn(
             .id();
         if let Some(icon) = button_icon.desc.as_ref() {
             let entity = cmd
-                .spawn(Icon::new(*icon, 0, *layer - Layer::from(1), *color))
+                .spawn(
+                    Icon::new(*icon, 0, *layer - Layer::from(1), *color)
+                        .extend(SectionOutline::default()),
+                )
                 .id();
             icon_entity.0.replace(entity);
         }
         if let Some(text) = button_text.desc.as_ref() {
             text_entity.0.replace(
-                cmd.spawn(Text::new(
-                    *layer - Layer::from(1),
-                    text.0.clone(),
-                    0,
-                    *color,
-                    TextWrapStyle::letter(),
-                ))
+                cmd.spawn(
+                    Text::new(
+                        *layer - Layer::from(1),
+                        text.0.clone(),
+                        0,
+                        *color,
+                        TextWrapStyle::letter(),
+                    )
+                    .extend(SectionOutline::default()),
+                )
                 .id(),
             );
         }
@@ -201,7 +208,7 @@ pub(crate) fn scale_change(
                 // TODO integrate this into text_section_descriptor to get correct text for bounds
                 // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 let dims = font.character_dimensions(new_scale.px());
-                let expected = button_area.height * 0.75;
+                let expected = button_area.height * 0.85;
                 let actual = dims.height;
                 if actual < expected {
                     let mut diff = expected - actual;
