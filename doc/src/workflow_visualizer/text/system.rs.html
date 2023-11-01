@@ -694,24 +694,6 @@
 <a href="#694" id="694">694</a>
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
-<a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
-<a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
-<a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
@@ -782,13 +764,7 @@
             max_width: <span class="prelude-val">Some</span>(area.width),
             max_height: <span class="prelude-val">Some</span>(area.height),
             wrap_style: wrap_style.<span class="number">0</span>,
-            line_height: <span class="kw">if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE * <span class="number">3 </span>{
-                <span class="number">0.75
-            </span>} <span class="kw">else if </span>text_scale.<span class="number">0 </span>&gt; MonoSpacedFont::FACTOR_BASE_SCALE * <span class="number">2 </span>{
-                <span class="number">0.8
-            </span>} <span class="kw">else </span>{
-                <span class="number">0.85
-            </span>},
+            line_height: <span class="number">0.8</span>,
             ..LayoutSettings::default()
         });
         placer.<span class="number">0</span>.append(
@@ -803,29 +779,17 @@
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
         <span class="comment">// TODO line structure here
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(lines) = placer.<span class="number">0</span>.lines() {
+        </span><span class="kw">let </span><span class="kw-2">mut </span>diff = <span class="number">0f32</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(lines) = placer.<span class="number">0</span>.lines() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(first) = lines.first() {
                 <span class="macro">print!</span>(<span class="string">&quot;{:?}&quot;</span>, first.max_ascent);
+                diff = first.padding / <span class="number">2f32</span>;
             }
         }
-        <span class="comment">// for (_key, glyph_position) in placement.0.iter_mut() {
-        //     let base = if text_scale.0 &gt; MonoSpacedFont::FACTOR_BASE_SCALE
-        //         &amp;&amp; text_scale.0 &lt;= MonoSpacedFont::FACTOR_BASE_SCALE * 2
-        //     {
-        //         8.5f32
-        //     } else if text_scale.0 &gt; MonoSpacedFont::FACTOR_BASE_SCALE * 2 {
-        //         11.5f32 * (text_scale.0 as f32 / 120f32).min(1.0)
-        //     } else {
-        //         1f32
-        //     };
-        //     if text_scale.0 &gt; MonoSpacedFont::FACTOR_BASE_SCALE {
-        //         let factor =
-        //             (text_scale.0 as f32 / MonoSpacedFont::FACTOR_BASE_SCALE as f32).min(2.0);
-        //         glyph_position.y -= base * factor;
-        //         glyph_position.y = glyph_position.y.max(1.0);
-        //     }
-        // }
-    </span>}
+        <span class="kw">for </span>(_key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
+            glyph_position.y -= diff;
+        }
+    }
 }
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>letter_differential(
     <span class="kw-2">mut </span>text_query: Query&lt;
