@@ -206,7 +206,7 @@ pub(crate) fn scale_change(
                 // TODO integrate this into text_section_descriptor to get correct text for bounds
                 // usage with pos.y = text_section_desc.top(); from font.text_section_descriptor
                 let dims = font.character_dimensions(new_scale.px());
-                let expected = button_area.height * MonoSpacedFont::TEXT_HEIGHT_CORRECTION;
+                let expected = button_area.height * 0.95;
                 let actual = dims.height;
                 if actual < expected {
                     let mut diff = expected - actual;

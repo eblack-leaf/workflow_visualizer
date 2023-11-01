@@ -26,8 +26,7 @@ impl Attach for EntryAttachment {
                     ResponsiveGridLocation::new(4.near()),
                     ResponsiveGridLocation::new(8.far()),
                 ),
-            ))
-            .extend(SectionOutline::default()),
+            )), // .extend(SectionOutline::default()),
         );
         visualizer.spawn(
             Button::new(
