@@ -107,6 +107,7 @@ pub(crate) fn place(
             line_structure
                 .0
                 .push((line.glyph_start as u32, line.glyph_end as u32));
+            line_count += 1;
         }
         let diff = (1f32 - MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
             * fonts.character_dimensions(text_scale.px()).height;
