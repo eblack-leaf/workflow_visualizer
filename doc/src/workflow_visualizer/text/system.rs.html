@@ -689,6 +689,31 @@
 <a href="#689" id="689">689</a>
 <a href="#690" id="690">690</a>
 <a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span><span class="kw">crate</span>::gfx::GfxSurface;
@@ -737,6 +762,7 @@
             <span class="kw-2">&amp;mut </span>Placer,
             <span class="kw-2">&amp;mut </span>Placement,
             <span class="kw-2">&amp;mut </span>TextLineStructure,
+            <span class="kw-2">&amp;mut </span>TextGridPlacement,
             <span class="kw-2">&amp;</span>TextValue,
             <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
             <span class="kw-2">&amp;</span>TextWrapStyle,
@@ -751,8 +777,16 @@
     fonts: Res&lt;MonoSpacedFont&gt;,
     scale_factor: Res&lt;ScaleFactor&gt;,
 ) {
-    <span class="kw">for </span>(<span class="kw-2">mut </span>placer, <span class="kw-2">mut </span>placement, <span class="kw-2">mut </span>line_structure, text, area, wrap_style, text_scale) <span class="kw">in
-        </span>text_query.iter_mut()
+    <span class="kw">for </span>(
+        <span class="kw-2">mut </span>placer,
+        <span class="kw-2">mut </span>placement,
+        <span class="kw-2">mut </span>line_structure,
+        <span class="kw-2">mut </span>grid_placement,
+        text,
+        area,
+        wrap_style,
+        text_scale,
+    ) <span class="kw">in </span>text_query.iter_mut()
     {
         <span class="kw">let </span>area = area.to_device(scale_factor.factor());
         placer.<span class="number">0</span>.reset(<span class="kw-2">&amp;</span>LayoutSettings {
@@ -773,8 +807,24 @@
             .iter()
             .map(|g| (key_factory.generate(), <span class="kw-2">*</span>g))
             .collect::&lt;Vec&lt;(Key, GlyphPosition&lt;()&gt;)&gt;&gt;();
-        <span class="comment">// TODO line structure here
-        </span><span class="kw">let </span>diff = (<span class="number">1f32 </span>- MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+        line_structure.<span class="number">0</span>.clear();
+        grid_placement.<span class="number">0</span>.clear();
+        <span class="kw">if </span>placer.<span class="number">0</span>.lines().is_none() {
+            <span class="kw">continue</span>;
+        }
+        <span class="kw">let </span><span class="kw-2">mut </span>line_count = <span class="number">0</span>;
+        key_factory = KeyFactory::new();
+        <span class="kw">for </span>line <span class="kw">in </span>placer.<span class="number">0</span>.lines().unwrap().iter() {
+            <span class="kw">for </span>x <span class="kw">in </span><span class="number">0</span>..=(line.glyph_end - line.glyph_start) {
+                <span class="kw">let </span>grid_location = TextGridLocation::new(x <span class="kw">as </span>u32, line_count);
+                <span class="kw">let </span>key = key_factory.generate();
+                grid_placement.<span class="number">0</span>.insert(grid_location, key);
+            }
+            line_structure
+                .<span class="number">0
+                </span>.push((line.glyph_start <span class="kw">as </span>u32, line.glyph_end <span class="kw">as </span>u32));
+        }
+        <span class="kw">let </span>diff = (<span class="number">1f32 </span>- MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
             * fonts.character_dimensions(text_scale.px()).height;
         <span class="kw">for </span>(_key, glyph_position) <span class="kw">in </span>placement.<span class="number">0</span>.iter_mut() {
             glyph_position.y -= diff;

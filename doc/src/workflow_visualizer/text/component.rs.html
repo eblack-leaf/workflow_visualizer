@@ -233,47 +233,14 @@
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>bevy_ecs::prelude::{Bundle, Component};
 <span class="kw">use </span>fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 <span class="kw">use crate</span>::{
-    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, NumericalContext,
-    Position, Section, Tag, VisibleSection,
+    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, MonoSpacedFont,
+    NumericalContext, Position, Section, Tag, VisibleSection,
 };
 <span class="kw">pub type </span>TextTag = Tag&lt;Text&gt;;
 <span class="doccomment">/// Entry point to spawn a Text element
@@ -319,7 +286,7 @@
             difference: Difference::new(),
             text_letter_dimensions: TextLetterDimensions(Area::default()),
             text_grid_placement: TextGridPlacement(HashMap::new()),
-            text_line_structure: TextLineStructure(<span class="macro">vec!</span>[], (<span class="number">0</span>, <span class="number">0</span>)),
+            text_line_structure: TextLineStructure::new(),
             scale: scale.into(),
             section: Section::default(),
         }
@@ -390,8 +357,10 @@
         position: Position&lt;DeviceContext&gt;,
         letter_dimensions: TextLetterDimensions,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>x = (position.x / letter_dimensions.<span class="number">0</span>.width).floor() <span class="kw">as </span>u32;
-        <span class="kw">let </span>y = (position.y / letter_dimensions.<span class="number">0</span>.height).floor() <span class="kw">as </span>u32;
+        <span class="kw">let </span>x = (position.x / letter_dimensions.<span class="number">0</span>.width * MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+            .floor() <span class="kw">as </span>u32;
+        <span class="kw">let </span>y = (position.y / letter_dimensions.<span class="number">0</span>.height * MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+            .floor() <span class="kw">as </span>u32;
         <span class="self">Self</span>::new(x, y)
     }
 }
@@ -400,46 +369,11 @@
 </span><span class="kw">pub struct </span>TextGridPlacement(<span class="kw">pub </span>HashMap&lt;TextGridLocation, Key&gt;);
 <span class="doccomment">/// Lengths of the lines present in the Text
 </span><span class="attr">#[derive(Component, Debug)]
-</span><span class="kw">pub struct </span>TextLineStructure(<span class="kw">pub </span>Vec&lt;u32&gt;, <span class="kw">pub </span>(u32, u32));
+</span><span class="kw">pub struct </span>TextLineStructure(<span class="kw">pub </span>Vec&lt;(u32, u32)&gt;);
 
 <span class="kw">impl </span>TextLineStructure {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_grid_placement(
-        grid_placement: <span class="kw-2">&amp;</span>TextGridPlacement,
-        area: <span class="kw-2">&amp;</span>Area&lt;InterfaceContext&gt;,
-        letter_dimensions: <span class="kw-2">&amp;</span>TextLetterDimensions,
-        scale_factor: f32,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>max_y = <span class="number">0</span>;
-        <span class="kw">for </span>key <span class="kw">in </span>grid_placement.<span class="number">0</span>.keys() {
-            <span class="kw">if </span>key.y &gt; max_y {
-                max_y = key.y;
-            }
-        }
-        <span class="kw">let </span><span class="kw-2">mut </span>line_counts = <span class="macro">vec!</span>[];
-        <span class="kw">for </span>_i <span class="kw">in </span><span class="number">0</span>..max_y + <span class="number">1 </span>{
-            line_counts.push(<span class="number">0</span>);
-        }
-        <span class="kw">for </span>placed <span class="kw">in </span>grid_placement.<span class="number">0</span>.keys() {
-            <span class="kw-2">*</span>line_counts.get_mut(placed.y <span class="kw">as </span>usize).unwrap() += <span class="number">1</span>;
-        }
-        <span class="kw">let </span>area = area.to_device(scale_factor);
-        <span class="kw">let </span>max_x = (area.width / letter_dimensions.<span class="number">0</span>.width).floor() <span class="kw">as </span>u32;
-        <span class="kw">let </span>max_y = (area.height / letter_dimensions.<span class="number">0</span>.height).floor() <span class="kw">as </span>u32;
-        <span class="self">Self</span>(line_counts, (max_x, max_y))
-    }
-    <span class="attr">#[allow(unused)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>horizontal_character_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.<span class="number">1
-             </span>.<span class="number">0
-            </span>.checked_sub((!<span class="self">self</span>.<span class="number">1 </span>.<span class="number">0 </span>== <span class="number">0</span>) <span class="kw">as </span>u32)
-            .unwrap_or_default()
-    }
-    <span class="attr">#[allow(unused)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>line_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.<span class="number">1
-             </span>.<span class="number">1
-            </span>.checked_sub((!<span class="self">self</span>.<span class="number">1 </span>.<span class="number">1 </span>== <span class="number">0</span>) <span class="kw">as </span>u32)
-            .unwrap_or_default()
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(<span class="macro">vec!</span>[])
     }
 }
 
