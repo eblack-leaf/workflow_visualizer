@@ -4,8 +4,8 @@ use bevy_ecs::prelude::{Bundle, Component};
 use fontdue::layout::{CoordinateSystem, GlyphPosition, Layout, WrapStyle};
 
 use crate::{
-    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, NumericalContext,
-    Position, Section, Tag, VisibleSection,
+    Area, Color, DeviceContext, EnableVisibility, InterfaceContext, Key, Layer, MonoSpacedFont,
+    NumericalContext, Position, Section, Tag, VisibleSection,
 };
 pub type TextTag = Tag<Text>;
 /// Entry point to spawn a Text element
@@ -51,7 +51,7 @@ impl Text {
             difference: Difference::new(),
             text_letter_dimensions: TextLetterDimensions(Area::default()),
             text_grid_placement: TextGridPlacement(HashMap::new()),
-            text_line_structure: TextLineStructure(vec![], (0, 0)),
+            text_line_structure: TextLineStructure::new(),
             scale: scale.into(),
             section: Section::default(),
         }
@@ -122,8 +122,10 @@ impl TextGridLocation {
         position: Position<DeviceContext>,
         letter_dimensions: TextLetterDimensions,
     ) -> Self {
-        let x = (position.x / letter_dimensions.0.width).floor() as u32;
-        let y = (position.y / letter_dimensions.0.height).floor() as u32;
+        let x = (position.x / letter_dimensions.0.width * MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+            .floor() as u32;
+        let y = (position.y / letter_dimensions.0.height * MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
+            .floor() as u32;
         Self::new(x, y)
     }
 }
@@ -132,46 +134,11 @@ impl TextGridLocation {
 pub struct TextGridPlacement(pub HashMap<TextGridLocation, Key>);
 /// Lengths of the lines present in the Text
 #[derive(Component, Debug)]
-pub struct TextLineStructure(pub Vec<u32>, pub (u32, u32));
+pub struct TextLineStructure(pub Vec<(u32, u32)>);
 
 impl TextLineStructure {
-    pub(crate) fn from_grid_placement(
-        grid_placement: &TextGridPlacement,
-        area: &Area<InterfaceContext>,
-        letter_dimensions: &TextLetterDimensions,
-        scale_factor: f32,
-    ) -> Self {
-        let mut max_y = 0;
-        for key in grid_placement.0.keys() {
-            if key.y > max_y {
-                max_y = key.y;
-            }
-        }
-        let mut line_counts = vec![];
-        for _i in 0..max_y + 1 {
-            line_counts.push(0);
-        }
-        for placed in grid_placement.0.keys() {
-            *line_counts.get_mut(placed.y as usize).unwrap() += 1;
-        }
-        let area = area.to_device(scale_factor);
-        let max_x = (area.width / letter_dimensions.0.width).floor() as u32;
-        let max_y = (area.height / letter_dimensions.0.height).floor() as u32;
-        Self(line_counts, (max_x, max_y))
-    }
-    #[allow(unused)]
-    pub(crate) fn horizontal_character_max(&self) -> u32 {
-        self.1
-             .0
-            .checked_sub((!self.1 .0 == 0) as u32)
-            .unwrap_or_default()
-    }
-    #[allow(unused)]
-    pub(crate) fn line_max(&self) -> u32 {
-        self.1
-             .1
-            .checked_sub((!self.1 .1 == 0) as u32)
-            .unwrap_or_default()
+    pub(crate) fn new() -> Self {
+        Self(vec![])
     }
 }
 

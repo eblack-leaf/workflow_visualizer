@@ -46,6 +46,7 @@ pub(crate) fn place(
             &mut Placer,
             &mut Placement,
             &mut TextLineStructure,
+            &mut TextGridPlacement,
             &TextValue,
             &Area<InterfaceContext>,
             &TextWrapStyle,
@@ -60,8 +61,16 @@ pub(crate) fn place(
     fonts: Res<MonoSpacedFont>,
     scale_factor: Res<ScaleFactor>,
 ) {
-    for (mut placer, mut placement, mut line_structure, text, area, wrap_style, text_scale) in
-        text_query.iter_mut()
+    for (
+        mut placer,
+        mut placement,
+        mut line_structure,
+        mut grid_placement,
+        text,
+        area,
+        wrap_style,
+        text_scale,
+    ) in text_query.iter_mut()
     {
         let area = area.to_device(scale_factor.factor());
         placer.0.reset(&LayoutSettings {
@@ -82,7 +91,23 @@ pub(crate) fn place(
             .iter()
             .map(|g| (key_factory.generate(), *g))
             .collect::<Vec<(Key, GlyphPosition<()>)>>();
-        // TODO line structure here
+        line_structure.0.clear();
+        grid_placement.0.clear();
+        if placer.0.lines().is_none() {
+            continue;
+        }
+        let mut line_count = 0;
+        key_factory = KeyFactory::new();
+        for line in placer.0.lines().unwrap().iter() {
+            for x in 0..=(line.glyph_end - line.glyph_start) {
+                let grid_location = TextGridLocation::new(x as u32, line_count);
+                let key = key_factory.generate();
+                grid_placement.0.insert(grid_location, key);
+            }
+            line_structure
+                .0
+                .push((line.glyph_start as u32, line.glyph_end as u32));
+        }
         let diff = (1f32 - MonoSpacedFont::TEXT_HEIGHT_CORRECTION)
             * fonts.character_dimensions(text_scale.px()).height;
         for (_key, glyph_position) in placement.0.iter_mut() {
