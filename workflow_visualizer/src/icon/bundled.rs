@@ -287,6 +287,8 @@ pub enum BundledIcon {
     ZapOff,
     ZoomIn,
     ZoomOut,
+    PaintTest,
+    PaintTest2,
 }
 
 impl BundledIcon {
@@ -366,7 +368,7 @@ impl BundledIcon {
                 include_bytes!("bundled_icons/chevrons-right.png").to_vec()
             }
             BundledIcon::ChevronsUp => include_bytes!("bundled_icons/chevrons-up.png").to_vec(),
-            BundledIcon::Chrome => include_bytes!("bundled_icons/chrome.png").to_vec(),
+            BundledIcon::Chrome =>include_bytes!("bundled_icons/chrome.png").to_vec(),
             BundledIcon::Circle => include_bytes!("bundled_icons/circle.png").to_vec(),
             BundledIcon::Clipboard => include_bytes!("bundled_icons/clipboard.png").to_vec(),
             BundledIcon::Clock => include_bytes!("bundled_icons/clock.png").to_vec(),
@@ -632,6 +634,8 @@ impl BundledIcon {
             BundledIcon::ZapOff => include_bytes!("bundled_icons/zap-off.png").to_vec(),
             BundledIcon::ZoomIn => include_bytes!("bundled_icons/zoom-in.png").to_vec(),
             BundledIcon::ZoomOut => include_bytes!("bundled_icons/zoom-out.png").to_vec(),
+            BundledIcon::PaintTest => include_bytes!("bundled_icons/paint-test.png").to_vec(),
+            BundledIcon::PaintTest2 => include_bytes!("bundled_icons/paint-test-2.png").to_vec(),
         }
     }
 }

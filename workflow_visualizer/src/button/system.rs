@@ -6,12 +6,7 @@ use crate::bundling::{Despawned, Disabled};
 use crate::button::{ButtonBorder, ButtonIcon, ButtonText, IconEntity, PanelEntity, TextEntity};
 use crate::icon::Icon;
 use crate::snap_grid::{FloatPlacementDescriptor, FloatPlacer, FloatRange, FloatView};
-use crate::{
-    ActiveInteraction, Area, BackgroundColor, BorderColor, BundleExtension, ButtonTag, ButtonType,
-    Color, IconScale, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType,
-    Position, SectionOutline, Text, TextScale, TextSectionDescriptorKnown, TextValue,
-    TextWrapStyle, Toggled,
-};
+use crate::{ActiveInteraction, Area, BackgroundColor, BorderColor, BundleExtension, ButtonTag, ButtonType, Color, IconScale, Image, ImageFade, InterfaceContext, Layer, MonoSpacedFont, Panel, PanelTag, PanelType, Position, SectionOutline, Text, TextScale, TextSectionDescriptorKnown, TextValue, TextWrapStyle, Toggled};
 
 pub(crate) fn border_change(
     buttons: Query<(&PanelEntity, &ButtonBorder), Changed<ButtonBorder>>,
@@ -68,8 +63,11 @@ pub(crate) fn spawn(
                 *layer,
                 background_color.0,
                 *color,
-            ))
+            ).extend(Disabled::default()))
             .id();
+        let image = cmd.spawn(
+            Icon::new(2, IconScale::Asymmetrical((100, 100)), *layer, background_color.0)
+        ).id();
         if let Some(icon) = button_icon.desc.as_ref() {
             let entity = cmd
                 .spawn(
@@ -92,7 +90,7 @@ pub(crate) fn spawn(
                 .id(),
             );
         }
-        panel_entity.0.replace(panel);
+        panel_entity.0.replace(image);
     }
 }
 pub(crate) fn place(
@@ -297,7 +295,10 @@ pub(crate) fn color_forward(
         if let Some(ent) = panel_ent.0 {
             if let Ok((mut listened_color, border)) = color_listeners.get_mut(ent) {
                 *listened_color = back_color.0;
-                border.unwrap().0 = *color;
+                if let Some(mut bor) = border {
+                    bor.0 = *color;
+                }
+                // border.unwrap().0 = *color;
             }
         }
         if let Some(ent) = icon_ent.0 {
